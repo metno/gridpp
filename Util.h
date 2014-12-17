@@ -7,5 +7,6 @@ class Util {
       Util();
       static void error(std::string iMessage);
       static void warning(std::string iMessage);
+      static double clock();
 };
 #endif

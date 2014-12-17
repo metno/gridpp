@@ -3,6 +3,7 @@
 #include "DataFile.h"
 #include "ParameterFile.h"
 #include "Calibration.h"
+#include "Util.h"
 int main(int argc, const char *argv[]) {
 
    // Parse command line attributes
@@ -17,6 +18,7 @@ int main(int argc, const char *argv[]) {
       std::cout << "   output        Netcdf file to write output to" << std::endl;
       return 1;
    }
+   double tStart = Util::clock();
    std::string dataFile   = argv[1];
    std::string parameterFile = argv[2];
    std::string outputFile = argv[3];
@@ -28,6 +30,11 @@ int main(int argc, const char *argv[]) {
    Calibration cal(parameters);
    cal.calibrate(input, output);
 
+   double t3 = Util::clock();
    output.write();
+   double tEnd = Util::clock();
+   std::cout << "Calibration time: " << t3 - tStart << std::endl;
+   std::cout << "Writing time: " << tEnd - t3 << std::endl;
+   std::cout << "Total time: " << tEnd - tStart << std::endl;
    return 0;
 }

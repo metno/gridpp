@@ -1,0 +1,5 @@
+Program to calibrate ensemble precipitation forecasts from ECMWF's es25 files
+
+Usage:
+   cp rawFile.nc newFile.nc
+   ./precipCal rawFile.nc parameters.txt newFile.nc

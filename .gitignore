@@ -1,3 +1,5 @@
 *~
 *.o
 *.exe
+*.nc
+gmon.out

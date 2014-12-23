@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <cmath>
 bool Util::mShowError = false;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
@@ -44,5 +45,5 @@ void Util::setShowStatus(bool flag) {
 }
 
 bool Util::isValid(float iValue) {
-   return iValue != Util::MV;
+   return !std::isnan(iValue) && !std::isinf(iValue) && iValue != Util::MV;
 }

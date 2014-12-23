@@ -27,7 +27,8 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
       cloudCals[t] = &iOutput.getEmptyField();
    }
 
-   int numInvalid = 0;
+   int numInvalidRaw = 0;
+   int numInvalidCal = 0;
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
@@ -76,35 +77,49 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
                // Calibrate
                std::vector<std::pair<float,int> > pairs(nEns);
                std::vector<float> valuesCal(nEns);
+               bool isValid = true;
                for(int e = 0; e < nEns; e++) {
                   float quantile = ((float) e+0.5)/nEns;
                   float valueCal   = getInvCdf(quantile, ensMean, ensFrac, t, parameters);
                   float valueUncal = precip[i][j][e];
+                  if(!Util::isValid(valueCal)) {
+                     isValid = false;
+                     break;
+                  }
                   valuesCal[e] = valueCal;
                   pairs[e].first = valueUncal;
                   pairs[e].second = e;
                }
-               // Sort values so that the rank of a member is the same before and after calibration
-               std::sort(pairs.begin(), pairs.end(), sort_pair_first<float,int>());
-               for(int e = 0; e < nEns; e++) {
-                  int ei = pairs[e].second;
-                  float valueCal = valuesCal[e];
-                  precipCal[i][j][ei] = valueCal;
+               if(isValid) {
+                  // Sort values so that the rank of a member is the same before and after calibration
+                  std::sort(pairs.begin(), pairs.end(), sort_pair_first<float,int>());
+                  for(int e = 0; e < nEns; e++) {
+                     int ei = pairs[e].second;
+                     float valueCal = valuesCal[e];
+                     precipCal[i][j][ei] = valueCal;
+                  }
+
+                  // Turn on clouds if needed, i.e don't allow a member to
+                  // have precip without cloud cover.
+                  for(int e = 0; e < nEns; e++) {
+                     float precip = precipCal[i][j][e];
+                     cloudCal[i][j][e]  = cloud[i][j][e];
+
+                     if(precip > 0 && cloud[i][j][e] == 0) {
+                        cloudCal[i][j][e]  = 1;
+                     }
+                  }
                }
-
-               // Turn on clouds if needed, i.e don't allow a member to
-               // have precip without cloud cover.
-               for(int e = 0; e < nEns; e++) {
-                  float precip = precipCal[i][j][e];
-                  cloudCal[i][j][e]  = cloud[i][j][e];
-
-                  if(precip > 0 && cloud[i][j][e] == 0) {
-                     cloudCal[i][j][e]  = 1;
+               else {
+                  numInvalidCal++;
+                  // Calibration produced some invalid members. Revert to the raw values.
+                  for(int e = 0; e < nEns; e++) {
+                     precipCal[i][j][e] = precip[i][j][e];
                   }
                }
             }
             else {
-               numInvalid++;
+               numInvalidRaw++;
                // One or more members are missing, don't calibrate
                for(int e = 0; e < nEns; e++) {
                   precipCal[i][j][e] = precip[i][j][e];
@@ -113,10 +128,16 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
          }
       }
    }
-   if(numInvalid > 0) {
+   if(numInvalidRaw > 0) {
       std::stringstream ss;
-      ss << "File '" << iInput.getFilename() << "' has " << numInvalid
-         << " missing ensembles, out of " << nTime * nLat * nLon;
+      ss << "File '" << iInput.getFilename() << "' has " << numInvalidRaw
+         << " missing ensembles, out of " << nTime * nLat * nLon << ".";
+      Util::warning(ss.str());
+   }
+   if(numInvalidCal > 0) {
+      std::stringstream ss;
+      ss << "Calibration produced " << numInvalidCal
+         << " invalid ensembles, out of " << nTime * nLat * nLon << ".";
       Util::warning(ss.str());
    }
 
@@ -160,6 +181,8 @@ float CalibrationPrecip::getInvCdf(float iQuantile, float iEnsMean, float iEnsFr
 
    // Check if we are in the discrete mass
    float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
+   if(!Util::isValid(P0))
+      return Util::MV;
    if(iQuantile < P0)
       return 0;
 
@@ -177,13 +200,20 @@ float CalibrationPrecip::getInvCdf(float iQuantile, float iEnsMean, float iEnsFr
 
    if(mu <= 0 || sigma <= 0)
       return Util::MV;
+   if(!Util::isValid(mu) || !Util::isValid(sigma))
+      return Util::MV;
 
    // Parameters in boost and wikipedia
    float shape = 1/(sigma*sigma); // k
    float scale = sigma*sigma*mu;  // theta
+   if(!Util::isValid(scale) || !Util::isValid(shape))
+      return Util::MV;
+
    // std::cout << mu << " " << sigma << " " << P0 << " " << shape << " " << scale << std::endl;
    boost::math::gamma_distribution<> dist(shape, scale);
    float value = boost::math::quantile(dist, quantileCont);
+   if(!Util::isValid(value))
+      return Util::MV;
    return value;
 }
 float CalibrationPrecip::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {

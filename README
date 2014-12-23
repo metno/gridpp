@@ -12,3 +12,4 @@ Notes
   the ensemble is not calibrated, and the original values are used instead.
 * Files with accumulation fields are automatically deaccumulated.
 * Negative precipitation amounts are automatically set to 0.
+* If the calibration produces invalid values (infinity, etc), the raw values are used.

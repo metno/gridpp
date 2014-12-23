@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <string.h>
 #include "DataFile.h"
 #include "ParameterFile.h"
 #include "Calibration.h"
@@ -7,16 +8,17 @@
 int main(int argc, const char *argv[]) {
 
    // Parse command line attributes
-   if(argc != 4) {
+   if(argc < 4) {
       std::cout << "Calibration of ensemble precipitation forecasts" << std::endl;
       std::cout << std::endl;
-      std::cout << "usage:  precipCalibration.exe input parameters output" << std::endl;
+      std::cout << "usage:  precipCalibration.exe input parameters output [-v]" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
-      std::cout << "   input         Netcdf file with ECMWF ensemble data" << std::endl;
-      std::cout << "   parameters    Text file with parameters" << std::endl;
+      std::cout << "   input         Netcdf file with ECMWF ensemble data." << std::endl;
+      std::cout << "   parameters    Text file with parameters." << std::endl;
       std::cout << "   output        Netcdf file to write output to. Must already exist and have \n"
                 << "                 the same dimensions as 'input'. 'output' may be the same file as 'input'." << std::endl;
+      std::cout << "   -v            Verbose. Show status messages." << std::endl;
       return 1;
    }
    double tStart = Util::clock();
@@ -24,9 +26,13 @@ int main(int argc, const char *argv[]) {
    std::string parameterFile = argv[2];
    std::string outputFile    = argv[3];
 
+   for(int i = 4; i < argc; i++) {
+      if(strcmp(argv[i],"--debug"))
+         Util::setShowStatus(true);
+   }
+
    Util::setShowError(true);
    Util::setShowWarning(true);
-   Util::setShowStatus(true);
 
    DataFile input(dataFile);
    DataFile output(outputFile);

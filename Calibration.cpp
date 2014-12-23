@@ -5,11 +5,10 @@
 #include "Util.h"
 
 Calibration::Calibration(const ParameterFile& iParameterFile):
-      mParameterFile(iParameterFile),
-      mFracThreshold(0.5) {
+      mParameterFile(iParameterFile) {
 }
 
-void Calibration::calibrate(const DataFile& iInput, DataFile& iOutput) const {
+void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) const {
    int nLat = iInput.getNumLat();
    int nLon = iInput.getNumLon();
    int nEns = iInput.getNumEns();
@@ -104,20 +103,19 @@ void Calibration::calibrate(const DataFile& iInput, DataFile& iOutput) const {
    }
 }
 
-float Calibration::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, int iTime, Parameters& iParameters) {
+float CalibrationPrecip::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, int iTime, Parameters& iParameters) {
    if(iEnsMean < 0)
       abort();
    float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
-   P0 = 0;
    if(iQuantile < P0)
       return 0;
 
-   float mua = iParameters[3];
-   float mub = iParameters[4];
-   float muc = iParameters[5];
-   float sa = iParameters[6];
-   float sb = iParameters[7];
-   float sc = iParameters[8];
+   float mua = iParameters[0];
+   float mub = iParameters[1];
+   float muc = iParameters[2];
+   float sa = iParameters[3];
+   float sb = iParameters[4];
+   float sc = iParameters[5];
 
    float quantileCont = (iQuantile-P0)/(1-P0);
    // Code to get CDF from Gamma distribution
@@ -136,14 +134,12 @@ float Calibration::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, in
    float value = boost::math::quantile(dist, quantileCont);
    return value;
 }
-float Calibration::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {
-   float a = iParameters[0];
-   float b = iParameters[1];
-   float c = iParameters[2];
+float CalibrationPrecip::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+   float a = iParameters[6];
+   float b = iParameters[7];
+   float c = iParameters[8];
    float logit = a + b * iEnsMean + c * iEnsFrac;
    float P0 = invLogit(logit);
-   // if(P0 > 0.2)
-   //    std::cout << iEnsMean << " " << iEnsFrac << " " << logit << " " << P0 << std::endl;
    return P0;
 }
 float Calibration::logit(float p) {
@@ -151,4 +147,9 @@ float Calibration::logit(float p) {
 }
 float Calibration::invLogit(float x) {
    return exp(x)/(exp(x)+1);
+}
+
+CalibrationPrecip::CalibrationPrecip(const ParameterFile& iParameterFile):
+      Calibration(iParameterFile),
+      mFracThreshold(0.5) {
 }

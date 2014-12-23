@@ -27,7 +27,7 @@ int main(int argc, const char *argv[]) {
    DataFile output(outputFile);
    ParameterFile parameters(parameterFile);
 
-   Calibration cal(parameters);
+   CalibrationPrecip cal(parameters);
    cal.calibrate(input, output);
 
    double t3 = Util::clock();

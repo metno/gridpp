@@ -6,6 +6,7 @@ class Parameters {
    public:
       Parameters(std::vector<float> iValues);
       Parameters();
+      int size() const;
       std::vector<float> getValues() const;
       float const& operator[](unsigned int i) const;
    private:

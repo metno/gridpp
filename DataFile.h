@@ -16,7 +16,7 @@ class DataFile {
       const Field& getField(Variable::Type iVariable, int iTime) const;
 
       // Schedule field to be written
-      void   addField(Field& iField, Variable::Type iVariable, int iTime);
+      void addField(Field& iField, Variable::Type iVariable, int iTime);
       void write();
 
       Field& getEmptyField(int nLat, int nLon, int nEns) const;
@@ -32,9 +32,12 @@ class DataFile {
       int getDate() const;
       //! Get the initialization time (HH)
       int getInit() const;
+      std::string getFilename() const;
       std::string getVariableName(Variable::Type iVariable) const;
       // Does this file contain the variable?
       bool hasVariable(Variable::Type iVariable) const;
+      bool hasSameDimensions(const DataFile& iOther) const;
+      std::string getDimenionString() const;
 
    private:
       void loadFields(Variable::Type iVariable) const;
@@ -51,6 +54,10 @@ class DataFile {
       std::vector<float> mLons;
       std::vector<float> mElevs;
       // Creates empty field of 0s
+
+      NcDim* getDim(std::string iDim) const;
+      NcVar* getVar(std::string iVar) const;
+      static float getMissingValue(const NcVar* iVar);
 
       int mNTime;
       int mNEns;

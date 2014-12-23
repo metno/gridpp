@@ -30,8 +30,13 @@ class CalibrationPrecip : public Calibration {
    public:
       CalibrationPrecip(const ParameterFile& iParameterFile);
       void calibrate(const DataFile& iInput, DataFile& iOutput) const;
+      //! Get probability mass at 0 mm (i.e probability of no precipitation)
       static float getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters);
+      //! Get Precipitation amount corresponding to quantile
       static float getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, int iTime, Parameters& iParameters);
+      //! Set threshold between precip/no-precip used when computing what fraction of
+      //! members have precip.
+      void setFracThreshold(float iFraction);
    private:
       static const float mMaxEnsMean = 100;
       //! What precip threshold should be used to count members with no precip?

@@ -15,21 +15,37 @@ int main(int argc, const char *argv[]) {
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Netcdf file with ECMWF ensemble data" << std::endl;
       std::cout << "   parameters    Text file with parameters" << std::endl;
-      std::cout << "   output        Netcdf file to write output to" << std::endl;
+      std::cout << "   output        Netcdf file to write output to. Must already exist and have \n"
+                << "                 the same dimensions as 'input'. 'output' may be the same file as 'input'." << std::endl;
       return 1;
    }
    double tStart = Util::clock();
-   std::string dataFile   = argv[1];
+   std::string dataFile      = argv[1];
    std::string parameterFile = argv[2];
-   std::string outputFile = argv[3];
+   std::string outputFile    = argv[3];
+
+   Util::setShowError(true);
+   Util::setShowWarning(true);
+   Util::setShowStatus(true);
 
    DataFile input(dataFile);
    DataFile output(outputFile);
    ParameterFile parameters(parameterFile);
 
+   // Checks
+   if(!input.hasSameDimensions(output)) {
+      std::stringstream ss;
+      ss << "'" << input.getFilename() << "' " << input.getDimenionString() << " does not have the same dimensions"
+         << " as '" << output.getFilename() << "' " << output.getDimenionString();
+      Util::error(ss.str());
+   }
+
+   // Calibration
    CalibrationPrecip cal(parameters);
+   cal.setFracThreshold(0.5);
    cal.calibrate(input, output);
 
+   // Output
    double t3 = Util::clock();
    output.write();
    double tEnd = Util::clock();

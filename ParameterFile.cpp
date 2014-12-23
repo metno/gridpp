@@ -33,7 +33,9 @@ ParameterFile::ParameterFile(std::string iFilename) :
          mParameters[time] = parameters;
       }
    }
-   std::cout << "Reading " << mFilename << ". Found " << mParameters.size() << " parameter sets." << std::endl;
+   std::stringstream ss;
+   ss << "Reading " << mFilename << ". Found " << mParameters.size() << " parameter sets.";
+   Util::status(ss.str());
 }
 Parameters ParameterFile::getParameters(int iTime) const {
    if(mParameters.size() == 1) {

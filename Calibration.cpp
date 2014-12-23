@@ -8,11 +8,18 @@ Calibration::Calibration(const ParameterFile& iParameterFile):
       mParameterFile(iParameterFile) {
 }
 
+CalibrationPrecip::CalibrationPrecip(const ParameterFile& iParameterFile):
+      Calibration(iParameterFile),
+      mFracThreshold(0.5) {
+}
+
 void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) const {
    int nLat = iInput.getNumLat();
    int nLon = iInput.getNumLon();
    int nEns = iInput.getNumEns();
    int nTime = iInput.getNumTime();
+
+   // Initialize calibrated fields in the output file
    std::vector<Field*> precipCals(nTime);
    std::vector<Field*> cloudCals(nTime);
    for(int t = 0; t < nTime; t++) {
@@ -20,13 +27,14 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
       cloudCals[t] = &iOutput.getEmptyField();
    }
 
+   int numInvalid = 0;
+
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters = mParameterFile.getParameters(t);
       const Field& precip = iInput.getField(Variable::Precip, t);
       const Field& cloud  = iInput.getField(Variable::Cloud, t);
 
-      // Initialize
       Field& precipCal = *precipCals[t];
       Field& cloudCal  = *cloudCals[t];
 
@@ -38,51 +46,78 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
             float ensMean = 0;
             float ensFrac = 0;
             int counter = 0;
+            bool isValid = true;
+            // Check if current ensemble for this gridpoint/time has any missing
+            // values. If so, don't calibrate the ensemble.
             for(int e = 0; e < nEns; e++) {
-               ensMean += precip[i][j][e];
-               ensFrac += (precip[i][j][e] == 0);//<= mFracThreshold);
+               float value = precip[i][j][e];
+               if(!Util::isValid(value)) {
+                  isValid = false;
+                  break;
+               }
+               ensMean += value;
+               ensFrac += (value <= mFracThreshold);
                counter++;
             }
-            ensMean = ensMean / counter;
-            ensFrac = ensFrac / counter;
+            if(isValid) {
+               ensMean = ensMean / counter;
+               ensFrac = ensFrac / counter;
 
-            // Check inputs to model
-            if(ensMean > mMaxEnsMean) {
-               ensMean = mMaxEnsMean;
+               // Limit the input to the calibration model to prevent it
+               // from creating very extreme values.
+               if(ensMean > mMaxEnsMean) {
+                  ensMean = mMaxEnsMean;
+               }
+
+               // TODO: Figure out which cloudless members to use. Ideally, if more members
+               // need precip, we should pick members that already have clouds, so that we minimize
+               // our effect on the cloud cover field.
+
+               // Calibrate
+               std::vector<std::pair<float,int> > pairs(nEns);
+               std::vector<float> valuesCal(nEns);
+               for(int e = 0; e < nEns; e++) {
+                  float quantile = ((float) e+0.5)/nEns;
+                  float valueCal   = getInvCdf(quantile, ensMean, ensFrac, t, parameters);
+                  float valueUncal = precip[i][j][e];
+                  valuesCal[e] = valueCal;
+                  pairs[e].first = valueUncal;
+                  pairs[e].second = e;
+               }
+               // Sort values so that the rank of a member is the same before and after calibration
+               std::sort(pairs.begin(), pairs.end(), sort_pair_first<float,int>());
+               for(int e = 0; e < nEns; e++) {
+                  int ei = pairs[e].second;
+                  float valueCal = valuesCal[e];
+                  precipCal[i][j][ei] = valueCal;
+               }
+
+               // Turn on clouds if needed, i.e don't allow a member to
+               // have precip without cloud cover.
+               for(int e = 0; e < nEns; e++) {
+                  float precip = precipCal[i][j][e];
+                  cloudCal[i][j][e]  = cloud[i][j][e];
+
+                  if(precip > 0 && cloud[i][j][e] == 0) {
+                     cloudCal[i][j][e]  = 1;
+                  }
+               }
             }
-
-            // TODO: Figure out which cloudless members to use
-            float p0 = getP0(ensMean, ensFrac, parameters);
-            // Calibrate
-            std::vector<std::pair<float,int> > pairs(nEns);
-            std::vector<float> valuesCal(nEns);
-            for(int e = 0; e < nEns; e++) {
-               float quantile = ((float) e+0.5)/nEns;
-               float valueCal   = getInvCdf(quantile, ensMean, ensFrac, t, parameters);
-               float valueUncal = precip[i][j][e];
-               valuesCal[e] = valueCal;
-               pairs[e].first = valueUncal;
-               pairs[e].second = e;
-            }
-            // TODO: Resort members
-            std::sort(pairs.begin(), pairs.end(), sort_pair_first<float,int>());
-            for(int e = 0; e < nEns; e++) {
-               int ei = pairs[e].second;
-               float valueCal = valuesCal[e];
-               precipCal[i][j][ei] = valueCal;
-            }
-
-            // Fix cloud cover if rain
-            for(int e = 0; e < nEns; e++) {
-               float precip = precipCal[i][j][e];
-               cloudCal[i][j][e]  = cloud[i][j][e];
-
-               if(precip > 0 && cloud[i][j][e] == 0) {
-                  cloudCal[i][j][e]  = 1;
+            else {
+               numInvalid++;
+               // One or more members are missing, don't calibrate
+               for(int e = 0; e < nEns; e++) {
+                  precipCal[i][j][e] = precip[i][j][e];
                }
             }
          }
       }
+   }
+   if(numInvalid > 0) {
+      std::stringstream ss;
+      ss << "File '" << iInput.getFilename() << "' has " << numInvalid
+         << " missing ensembles, out of " << nTime * nLat * nLon;
+      Util::warning(ss.str());
    }
 
    // Accumulate precipitation
@@ -90,7 +125,13 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
-               (*precipCals[t])[i][j][e] = (*precipCals[t])[i][j][e] + (*precipCals[t-1])[i][j][e];
+               float previous = (*precipCals[t-1])[i][j][e];
+               float current = (*precipCals[t])[i][j][e];
+               if(Util::isValid(current) && Util::isValid(previous)) {
+                  (*precipCals[t])[i][j][e] = current + previous;
+               }
+               else
+                  (*precipCals[t])[i][j][e] = Util::MV;
             }
          }
       }
@@ -104,8 +145,20 @@ void CalibrationPrecip::calibrate(const DataFile& iInput, DataFile& iOutput) con
 }
 
 float CalibrationPrecip::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, int iTime, Parameters& iParameters) {
-   if(iEnsMean < 0)
-      abort();
+   if(iQuantile == 0)
+      return 0;
+
+   if(iQuantile < 0 || iQuantile >= 1) {
+      Util::warning("Quantile must be in the interval [0,1)");
+      return Util::MV;
+   }
+   if(!Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac))
+      return Util::MV;
+
+   if(iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1 || iTime < 0)
+      return Util::MV;
+
+   // Check if we are in the discrete mass
    float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
    if(iQuantile < P0)
       return 0;
@@ -113,18 +166,17 @@ float CalibrationPrecip::getInvCdf(float iQuantile, float iEnsMean, float iEnsFr
    float mua = iParameters[0];
    float mub = iParameters[1];
    float muc = iParameters[2];
-   float sa = iParameters[3];
-   float sb = iParameters[4];
-   float sc = iParameters[5];
+   float sa  = iParameters[3];
+   float sb  = iParameters[4];
+   float sc  = iParameters[5];
 
    float quantileCont = (iQuantile-P0)/(1-P0);
-   // Code to get CDF from Gamma distribution
-   // Parameters in R:
+   // Compute parameters of distribution (in same way as done in gamlss in R)
    float mu    = exp(mua + mub * pow(iEnsMean, 1.0/3) + muc * iTime);
    float sigma = exp(sa + sb * iEnsMean + sc * iTime);
 
-   if(sigma == 0)
-      abort();
+   if(mu <= 0 || sigma <= 0)
+      return Util::MV;
 
    // Parameters in boost and wikipedia
    float shape = 1/(sigma*sigma); // k
@@ -142,6 +194,14 @@ float CalibrationPrecip::getP0(float iEnsMean, float iEnsFrac, Parameters& iPara
    float P0 = invLogit(logit);
    return P0;
 }
+void CalibrationPrecip::setFracThreshold(float iFraction) {
+   if(iFraction < 0 || iFraction > 1) {
+      std::stringstream ss;
+      ss << "CalibrationPrecip: fraction threshold (" << iFraction << ") must be between 0 and 1, inclusive.";
+      Util::error(ss.str());
+   }
+   mFracThreshold = iFraction;
+}
 float Calibration::logit(float p) {
    return log(p/(1-p));
 }
@@ -149,7 +209,3 @@ float Calibration::invLogit(float x) {
    return exp(x)/(exp(x)+1);
 }
 
-CalibrationPrecip::CalibrationPrecip(const ParameterFile& iParameterFile):
-      Calibration(iParameterFile),
-      mFracThreshold(0.5) {
-}

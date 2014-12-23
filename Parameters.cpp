@@ -20,3 +20,6 @@ float const& Parameters::operator[](unsigned int i) const {
       
    return mValues[i];
 }
+int Parameters::size() const {
+   return mValues.size();
+}

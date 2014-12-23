@@ -2,24 +2,25 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
+#include "Util.h"
 
 DataFile::DataFile(std::string iFilename) :
    mFilename(iFilename), mFile(iFilename.c_str(), NcFile::Write) {
    if(!mFile.is_valid()) {
-      std::cout << "Error: Netcdf file " << iFilename << " not valid" << std::endl;
+      Util::error("Error: Netcdf file " + iFilename + " not valid");
    }
 
    // Set dimensions
-   NcDim* dTime = mFile.get_dim("time");
-   NcDim* dEns  = mFile.get_dim("ensemble_member");
-   NcDim* dLon  = mFile.get_dim("longitude");
-   NcDim* dLat  = mFile.get_dim("latitude");
+   NcDim* dTime = getDim("time");
+   NcDim* dEns  = getDim("ensemble_member");
+   NcDim* dLon  = getDim("longitude");
+   NcDim* dLat  = getDim("latitude");
    mNTime = dTime->size();
    mNEns  = dEns->size();
    mNLat  = dLat->size();
    mNLon  = dLon->size();
 
-   std::cout << "File '" << iFilename << " 'has dimensions " << mNTime << " " << mNEns << " " << mNLat << " " << mNLon << std::endl;
+   Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
 const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
@@ -51,9 +52,14 @@ const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
                   for(int e = 0; e < mNEns; e++) {
-                     float value = acc1[lat][lon][e] - acc0[lat][lon][e];
-                     if(value < 0)
-                        value = 0;
+                     float a1 = acc1[lat][lon][e];
+                     float a0 = acc0[lat][lon][e];
+                     float value = Util::MV;
+                     if(Util::isValid(a1) && Util::isValid(a0)) {
+                         value = a1 - a0;
+                         if(value < 0)
+                            value = 0;
+                     }
                      field[lat][lon][e] = value;
                   }
                }
@@ -75,12 +81,7 @@ const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
 void DataFile::loadFields(Variable::Type iVariable) const {
    std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
-   NcError q(NcError::silent_nonfatal); 
-   NcVar* var = mFile.get_var(variable.c_str());
-   if(var == NULL) {
-      std::cout << mFilename << " does not have '" << variable << "'" << std::endl;
-      abort();
-   }
+   NcVar* var = getVar(variable);
    int nTime = mNTime;//dTime->size();
    int nEns  = mNEns; //dEns->size();
    int nLat  = mNLat; //dLat->size();
@@ -89,6 +90,7 @@ void DataFile::loadFields(Variable::Type iVariable) const {
    long count[5] = {nTime, 1, nEns, nLat, nLon};
    float* values = new float[nTime*1*nEns*nLat*nLon];
    var->get(values, count);
+   float MV = getMissingValue(var);
 
    float offset = getOffset(var);
    float scale = getScale(var);
@@ -98,7 +100,15 @@ void DataFile::loadFields(Variable::Type iVariable) const {
       for(int e = 0; e < nEns; e++) {
          for(int lat = 0; lat < nLat; lat++) {
             for(int lon = 0; lon < nLon; lon++) {
-               float value = scale*values[index] + offset;
+               float value = values[index];
+               if(Util::isValid(MV) && value == MV) {
+                  // Field has missing value indicator and the value is missing
+                  // Save values using our own internal missing value indicator
+                  value = Util::MV;
+               }
+               else {
+                  value = scale*values[index] + offset;
+               }
                field[lat][lon][e] = value;
                index++;
             }
@@ -132,17 +142,18 @@ void DataFile::write() {
       std::string variable = getVariableName(it->first);
       NcVar* var;
       if(hasVariable(it->first)) {
-         var = mFile.get_var(variable.c_str());
+         var = getVar(variable);
       }
       else {
          // Create variable
-         NcDim* dTime = mFile.get_dim("time");
-         NcDim* dSurface = mFile.get_dim("surface");
-         NcDim* dEns  = mFile.get_dim("ensemble_member");
-         NcDim* dLon  = mFile.get_dim("longitude");
-         NcDim* dLat  = mFile.get_dim("latitude");
+         NcDim* dTime    = getDim("time");
+         NcDim* dSurface = getDim("surface");
+         NcDim* dEns     = getDim("ensemble_member");
+         NcDim* dLon     = getDim("longitude");
+         NcDim* dLat     = getDim("latitude");
          var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dEns, dLat, dLon);
       }
+      float MV = getMissingValue(var); // The output file's missing value indicator
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
@@ -155,7 +166,15 @@ void DataFile::write() {
             for(int e = 0; e < mNEns; e++) {
                for(int lat = 0; lat < mNLat; lat++) {
                   for(int lon = 0; lon < mNLon; lon++) {
-                     float value = ((*field)[lat][lon][e] - offset)/scale;
+                     float value = (*field)[lat][lon][e];
+                     if(Util::isValid(MV) && !Util::isValid(value)) {
+                        // Field has missing value indicator and the value is missing
+                        // Save values using the file's missing indicator value
+                        value = MV;
+                     }
+                     else {
+                        value = ((*field)[lat][lon][e] - offset)/scale;
+                     }
                      values[index] = value;
                      index++;
                   }
@@ -233,4 +252,53 @@ float DataFile::getOffset(NcVar* iVar) const {
       offset = offsetAtt->as_float(0);
    }
    return offset;
+}
+
+bool DataFile::hasSameDimensions(const DataFile& iOther) const {
+   if(getNumLat() == iOther.getNumLat()
+         && getNumLon() == iOther.getNumLon()
+         && getNumEns() == iOther.getNumEns()
+         && getNumTime() == iOther.getNumTime())
+      return true;
+   return false;
+}
+
+std::string DataFile::getFilename() const {
+   return mFilename;
+}
+
+std::string DataFile::getDimenionString() const {
+   std::stringstream ss;
+   ss << "[" << getNumTime() << " " << getNumEns() << " " << getNumLat() << " " << getNumLon()<< "]";
+   return ss.str();
+}
+
+NcDim* DataFile::getDim(std::string iDim) const {
+   NcError q(NcError::silent_nonfatal); 
+   NcDim* dim = mFile.get_dim(iDim.c_str());
+   if(dim == NULL) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
+      Util::error(ss.str());
+   }
+   return dim;
+}
+NcVar* DataFile::getVar(std::string iVar) const {
+   NcError q(NcError::silent_nonfatal); 
+   NcVar* var = mFile.get_var(iVar.c_str());
+   if(var == NULL) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have variable '" << iVar << "'";
+      Util::error(ss.str());
+   }
+   return var;
+}
+
+float DataFile::getMissingValue(const NcVar* iVar) {
+   NcError q(NcError::silent_nonfatal); 
+   NcAtt* fillValueAtt = iVar->get_att("_FillValue");
+   if(fillValueAtt != NULL)
+      return fillValueAtt->as_float(0);
+   else
+      return Util::MV;
 }

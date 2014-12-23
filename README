@@ -1,5 +1,14 @@
-Program to calibrate ensemble precipitation forecasts from ECMWF's es25 files
+Program to calibrate ensemble precipitation forecasts from ECMWF's eps25 files
 
-Usage:
+Intended usage:
    cp rawFile.nc newFile.nc
    ./precipCal rawFile.nc parameters.txt newFile.nc
+
+Notes
+* When reading the input file, all missing values are converted to the internal missing flag indicator. When
+  writing to the output file, these missing values are written back as the missing flag indicator of the
+  output file.
+* If an ensemble has one or more missing members (where an ensemble is for a specific gridpoint and time),
+  the ensemble is not calibrated, and the original values are used instead.
+* Files with accumulation fields are automatically deaccumulated.
+* Negative precipitation amounts are automatically set to 0.

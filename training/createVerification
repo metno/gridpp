@@ -1,0 +1,31 @@
+#!/bin/csh
+set files = "test60.nc testbpe0.nc"
+set leg   = "-leg Cal,Raw"
+set thr   = "-r 0,0.2,0.5,1,5,10,20"
+set f     = "-f plots"
+set verif = "python ~/repos/comps/graphics2/verif"
+set allthr = "0.2 0.5 1 5 10 20"
+set alloffsets = "66 234"
+mkdir -p plots
+#rm plots/*.png
+
+if(1) then
+foreach offset ($alloffsets)
+   $verif $files $leg -m q10 -hist -r 0,0.001,0.201,1:10 -o $offset $f/q10_hist_${offset}h.png
+   $verif $files $leg -m q90 -hist -r 0,0.001,0.201,1:10 -o $offset $f/q90_hist_${offset}h.png
+   $verif $files $leg -m pithist  -o $offset                   $f/pithist_${offset}h.png
+   $verif $files $leg -m marginal -o $offset $thr              $f/marginal_${offset}h.png
+   $verif $files $leg -m bss      -o $offset $thr -x threshold $f/bss_${offset}h.png
+   foreach t ($allthr)
+      $verif $files $leg -m reliability -o $offset -r $t $f/reliability_${t}_${offset}h.png
+   end
+end
+endif
+
+foreach t ($allthr)
+   $verif $files $leg -m reliability       -r $t $f/reliability_${t}.png
+   $verif $files $leg -m bss               -r $t $f/bss_${t}.png
+   $verif $files $leg -m bs -type map      -r $t $f/bs_map_${t}.png
+   $verif $files $leg -m bs -type maprank  -r $t $f/bs_maprank_${t}.png
+end
+

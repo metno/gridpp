@@ -16,26 +16,20 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
-   // Initialize calibrated fields in the output file
-   std::vector<Field*> precipCals(nTime);
-   for(int t = 0; t < nTime; t++) {
-      precipCals[t] = &iFile.getEmptyField();
-   }
-
    int numInvalidRaw = 0;
    int numInvalidCal = 0;
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters = mParameterFile.getParameters(t);
-      const Field& precip = iFile.getField(Variable::Precip, t);
-
-      Field& precipCal = *precipCals[t];
+      Field& precip = iFile.getField(Variable::Precip, t);
 
       // Parallelizable
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            std::vector<float> precipRaw = precip[i][j];
+
             // Compute model variables
             float ensMean = 0;
             float ensFrac = 0;
@@ -44,7 +38,7 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
             // Check if current ensemble for this gridpoint/time has any missing
             // values. If so, don't calibrate the ensemble.
             for(int e = 0; e < nEns; e++) {
-               float value = precip[i][j][e];
+               float value = precipRaw[e];
                if(!Util::isValid(value)) {
                   isValid = false;
                   break;
@@ -69,18 +63,18 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
                for(int e = 0; e < nEns; e++) {
                   float quantile = ((float) e+0.5)/nEns;
                   float valueCal   = getInvCdf(quantile, ensMean, ensFrac, t, parameters);
-                  precipCal[i][j][e] = valueCal;
+                  precip[i][j][e] = valueCal;
                   if(!Util::isValid(valueCal))
                      isValid = false;
                }
                if(isValid) {
-                  Calibrator::shuffle(precip[i][j], precipCal[i][j]);
+                  Calibrator::shuffle(precipRaw, precip[i][j]);
                }
                else {
                   numInvalidCal++;
                   // Calibrator produced some invalid members. Revert to the raw values.
                   for(int e = 0; e < nEns; e++) {
-                     precipCal[i][j][e] = precip[i][j][e];
+                     precip[i][j][e] = precipRaw[e];
                   }
                }
             }
@@ -88,12 +82,11 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
                numInvalidRaw++;
                // One or more members are missing, don't calibrate
                for(int e = 0; e < nEns; e++) {
-                  precipCal[i][j][e] = precip[i][j][e];
+                  precip[i][j][e] = precipRaw[e];
                }
             }
          }
       }
-      iFile.addField(precipCal, Variable::Precip, t);
    }
    if(numInvalidRaw > 0) {
       std::stringstream ss;
@@ -106,11 +99,6 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
       ss << "Calibrator produced " << numInvalidCal
          << " invalid ensembles, out of " << nTime * nLat * nLon << ".";
       Util::warning(ss.str());
-   }
-
-   // Add to file
-   for(int t = 0; t < nTime; t++) {
-      iFile.addField(*precipCals[t], Variable::PrecipAcc, t);
    }
 }
 

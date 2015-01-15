@@ -34,6 +34,7 @@ int main(int argc, const char *argv[]) {
    File file(dataFile);
    ParameterFile parameters(parameterFile);
 
+   std::vector<Variable::Type> writableVariables;
    // Temperature calibration
    // CalibratorTemperature calTemp(parameters);
    // calTemp.calibrate(output);
@@ -46,9 +47,11 @@ int main(int argc, const char *argv[]) {
    // Cloud calibration
    CalibratorCloud calCloud(parameters);
    calCloud.calibrate(file);
+   writableVariables.push_back(Variable::Cloud);
 
    CalibratorAccumulate calPrecipAcc(parameters, Variable::Precip);
    calPrecipAcc.calibrate(file);
+   writableVariables.push_back(Variable::PrecipAcc);
 
    // Wind calibration
    // CalibratorWind calWind(parameters);
@@ -56,7 +59,7 @@ int main(int argc, const char *argv[]) {
 
    // Output
    double t3 = Util::clock();
-   file.write();
+   file.write(writableVariables);
    double tEnd = Util::clock();
    std::cout << "Calibrator time: " << t3 - tStart << std::endl;
    std::cout << "Writing time: " << tEnd - t3 << std::endl;

@@ -13,16 +13,13 @@ class File {
    public:
       File(std::string iFilename);
       ~File();
-      const Field& getField(Variable::Type iVariable, int iTime) const;
-
-      // Schedule field to be written
-      void addField(Field& iField, Variable::Type iVariable, int iTime);
-      void write();
+      Field& getField(Variable::Type iVariable, int iTime) const;
 
       // Add an auxillary field that user of the class can read.
-      // The field is not written when using write().
-      void addAuxField(Field& iField, Variable::Type iVariable, int iTime);
-      void addAuxFile(File& iFile);
+      void addField(Field& iField, Variable::Type iVariable, int iTime);
+
+      // Write these variables to file
+      void write(std::vector<Variable::Type> iVariables);
 
       Field& getEmptyField(int nLat, int nLon, int nEns) const;
       Field& getEmptyField() const;
@@ -47,8 +44,7 @@ class File {
    private:
       void loadFields(Variable::Type iVariable) const;
       void saveField(Field* iField, Variable::Type iVariable, int iTime) const;
-      mutable std::map<Variable::Type, std::vector<Field*> > mReadFields;  // Variable, offset
-      mutable std::map<Variable::Type, std::vector<Field*> > mWriteFields; // Variable, offset
+      mutable std::map<Variable::Type, std::vector<Field*> > mFields;  // Variable, offset
       float getScale(NcVar* iVar) const;
       float getOffset(NcVar* iVar) const;
       std::string mFilename;

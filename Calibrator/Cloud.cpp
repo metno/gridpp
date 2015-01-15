@@ -11,19 +11,11 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
-   // Initialize calibrated fields in the output file
-   std::vector<Field*> cloudCals(nTime);
-   for(int t = 0; t < nTime; t++) {
-      cloudCals[t] = &iFile.getEmptyField();
-   }
-
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters = mParameterFile.getParameters(t);
       const Field& precip = iFile.getField(mPrecipType, t);
-      const Field& cloud  = iFile.getField(mCloudType, t);
-
-      Field& cloudCal  = *cloudCals[t];
+      Field& cloud  = iFile.getField(mCloudType, t);
 
       // TODO: Figure out which cloudless members to use. Ideally, if more members
       // need precip, we should pick members that already have clouds, so that we minimize
@@ -39,19 +31,14 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
                float currPrecip = precip[i][j][e];
                float currCloud  = cloud[i][j][e];
                if(Util::isValid(currPrecip) && Util::isValid(currCloud)) {
-                  cloudCal[i][j][e]  = currCloud;
+                  cloud[i][j][e]  = currCloud;
                   // std::cout << "currPrecip = " << currPrecip << std::endl;
                   if(currPrecip > 0 && currCloud < 1) {
-                     cloudCal[i][j][e] = 1;
+                     cloud[i][j][e] = 1;
                   }
                }
             }
          }
       }
-   }
-
-   // Add to file
-   for(int t = 0; t < nTime; t++) {
-      iFile.addField(*cloudCals[t], Variable::Cloud, t);
    }
 }

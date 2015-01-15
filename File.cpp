@@ -23,25 +23,15 @@ File::File(std::string iFilename) :
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
-const Field& File::getField(Variable::Type iVariable, int iTime) const {
-   // Check if field is scheduled to be written first
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator itW = mWriteFields.find(iVariable);
-   if(itW != mWriteFields.end()) {
-      if(mWriteFields[iVariable][iTime] != NULL) {
-         if(iTime == 1)
-            std::cout << "Returning writable field for " << Variable::getTypeName(iVariable) << std::endl;
-         return *mWriteFields[iVariable][iTime];
-      }
-   }
-
+Field& File::getField(Variable::Type iVariable, int iTime) const {
    // Determine if values have been cached
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mReadFields.find(iVariable);
-   bool needsReading = it == mReadFields.end();
+   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mFields.find(iVariable);
+   bool needsReading = it == mFields.end();
    if(!needsReading) {
-      needsReading = mReadFields[iVariable][iTime] == NULL;
+      needsReading = mFields[iVariable][iTime] == NULL;
    }
    else {
-      mReadFields[iVariable].resize(mNTime);
+      mFields[iVariable].resize(mNTime);
    }
 
    if(needsReading) {
@@ -84,7 +74,7 @@ const Field& File::getField(Variable::Type iVariable, int iTime) const {
          abort();
       }
    }
-   Field* field = mReadFields[iVariable][iTime];
+   Field* field = mFields[iVariable][iTime];
    return *field;
 }
 
@@ -129,15 +119,14 @@ void File::loadFields(Variable::Type iVariable) const {
    delete[] values;
 }
 void File::saveField(Field* iField, Variable::Type iVariable, int iTime) const {
-   if(mReadFields[iVariable][iTime] != NULL)
-      delete mReadFields[iVariable][iTime];
-   mReadFields[iVariable][iTime] = iField;
+   if(mFields[iVariable][iTime] != NULL)
+      delete mFields[iVariable][iTime];
+   mFields[iVariable][iTime] = iField;
 }
 
 File::~File() {
    mFile.close();
 }
-
 
 int File::getDate() const {
    return mDate;
@@ -146,12 +135,12 @@ int File::getInit() const {
    return mInit;
 }
 
-void File::write() {
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator it;
-   for(it = mWriteFields.begin(); it != mWriteFields.end(); it++) {
-      std::string variable = getVariableName(it->first);
+void File::write(std::vector<Variable::Type> iVariables) {
+   for(int v = 0; v < iVariables.size(); v++) {
+      Variable::Type varType = iVariables[v];
+      std::string variable = getVariableName(varType);
       NcVar* var;
-      if(hasVariable(it->first)) {
+      if(hasVariable(varType)) {
          var = getVar(variable);
       }
       else {
@@ -167,8 +156,8 @@ void File::write() {
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
-         Field* field = it->second[t];
-         if(field != NULL) {
+         Field* field = &getField(varType, t);
+         if(field != NULL) { // TODO: Can't be null if coming from reference
             var->set_cur(t, 0, 0, 0, 0);
             float* values = new float[mNTime*1*mNEns*mNLat*mNLon];
 
@@ -214,12 +203,12 @@ Field& File::getEmptyField(int nLat, int nLon, int nEns) const {
 }
 
 void File::addField(Field& iField, Variable::Type iVariable, int iTime) {
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mWriteFields.find(iVariable);
-   if(it == mWriteFields.end()) {
-      mWriteFields[iVariable].resize(mNTime, NULL);
+   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mFields.find(iVariable);
+   if(it == mFields.end()) {
+      mFields[iVariable].resize(mNTime, NULL);
    }
 
-   mWriteFields[iVariable][iTime] = &iField;
+   mFields[iVariable][iTime] = &iField;
 }
 
 std::string File::getVariableName(Variable::Type iVariable) const {

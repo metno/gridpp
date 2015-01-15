@@ -1,6 +1,7 @@
 #ifndef CALIBRATOR_CLOUD_H
 #define CALIBRATOR_CLOUD_H
 #include "Calibrator.h"
+#include "../Variable.h"
 
 // Ensure that if a member has precip it also has full cloud cover
 class CalibratorCloud : public Calibrator {

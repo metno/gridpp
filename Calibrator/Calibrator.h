@@ -1,6 +1,7 @@
 #ifndef CALIBRATOR_H
 #define CALIBRATOR_H
-#include "../File.h"
+#include <vector>
+class File;
 
 //! Abstract calibration class
 class Calibrator {

@@ -1,5 +1,6 @@
 #include "Accumulate.h"
 #include "../Util.h"
+#include "../File/File.h"
 CalibratorAccumulate::CalibratorAccumulate(Variable::Type iFrom, Variable::Type iTo) :
       Calibrator(),
       mFrom(iFrom),

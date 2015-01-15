@@ -3,8 +3,8 @@
 #include <netcdf.hh>
 #include <vector>
 #include <map>
-#include "Variable.h"
 #include <boost/shared_ptr.hpp>
+#include "../Variable.h"
 
 // 3D array of data: [lat][lon][ensemble_member]
 typedef std::vector<std::vector<std::vector<float> > > Field;
@@ -16,7 +16,6 @@ class File {
       File(std::string iFilename);
       ~File();
 
-      // Accessors
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField() const;

@@ -4,7 +4,8 @@ CFLAGS  = -O3 -fopenmp
 SRC     = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
 CALSRC  = $(wildcard Calibrator/*.cpp)
-ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o)
+FILESRC = $(wildcard File/*.cpp)
+ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o) $(FILESRC:.cpp=.o)
 COREOBJS= $(filter-out Test.o,$(ALLOBJS))
 TESTOBJS= $(filter-out PrecipCal.o,$(ALLOBJS))
 IFLAGS  = -I/usr/include/ -I/usr/local/boost/include/

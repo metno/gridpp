@@ -2,7 +2,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "Util.h"
+#include "../Util.h"
 
 File::File(std::string iFilename) :
    mFilename(iFilename), mFile(iFilename.c_str(), NcFile::Write) {

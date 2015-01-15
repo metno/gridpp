@@ -1,8 +1,11 @@
 #ifndef CALIBRATOR_ZAGA_H
 #define CALIBRATOR_ZAGA_H
-#include "../File.h"
-#include "../ParameterFile.h"
 #include "Calibrator.h"
+#include "../Variable.h"
+
+class File;
+class ParameterFile;
+class Parameters;
 
 // Zero-adjusted gamma distribution, using predictors:
 // - ensemble mean

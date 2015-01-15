@@ -1,4 +1,4 @@
-Program to calibrate ensemble precipitation forecasts from ECMWF's eps25 files
+MetCal: Program to calibrate ensemble forecasts from ECMWF and AROME files
 
 Intended usage:
    cp rawFile.nc newFile.nc

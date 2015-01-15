@@ -1,10 +1,10 @@
-#include "DataFile.h"
+#include "File.h"
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
 #include "Util.h"
 
-DataFile::DataFile(std::string iFilename) :
+File::File(std::string iFilename) :
    mFilename(iFilename), mFile(iFilename.c_str(), NcFile::Write) {
    if(!mFile.is_valid()) {
       Util::error("Error: Netcdf file " + iFilename + " not valid");
@@ -23,7 +23,7 @@ DataFile::DataFile(std::string iFilename) :
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
-const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
+const Field& File::getField(Variable::Type iVariable, int iTime) const {
    // Check if field is scheduled to be written first
    std::map<Variable::Type, std::vector<Field*> >::const_iterator itW = mWriteFields.find(iVariable);
    if(itW != mWriteFields.end()) {
@@ -88,7 +88,7 @@ const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
    return *field;
 }
 
-void DataFile::loadFields(Variable::Type iVariable) const {
+void File::loadFields(Variable::Type iVariable) const {
    std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
    NcVar* var = getVar(variable);
@@ -128,25 +128,25 @@ void DataFile::loadFields(Variable::Type iVariable) const {
    }
    delete[] values;
 }
-void DataFile::saveField(Field* iField, Variable::Type iVariable, int iTime) const {
+void File::saveField(Field* iField, Variable::Type iVariable, int iTime) const {
    if(mReadFields[iVariable][iTime] != NULL)
       delete mReadFields[iVariable][iTime];
    mReadFields[iVariable][iTime] = iField;
 }
 
-DataFile::~DataFile() {
+File::~File() {
    mFile.close();
 }
 
 
-int DataFile::getDate() const {
+int File::getDate() const {
    return mDate;
 }
-int DataFile::getInit() const {
+int File::getInit() const {
    return mInit;
 }
 
-void DataFile::write() {
+void File::write() {
    std::map<Variable::Type, std::vector<Field*> >::const_iterator it;
    for(it = mWriteFields.begin(); it != mWriteFields.end(); it++) {
       std::string variable = getVariableName(it->first);
@@ -198,10 +198,10 @@ void DataFile::write() {
 }
 
 
-Field& DataFile::getEmptyField() const {
+Field& File::getEmptyField() const {
    return getEmptyField(mNLat, mNLon, mNEns);
 }
-Field& DataFile::getEmptyField(int nLat, int nLon, int nEns) const {
+Field& File::getEmptyField(int nLat, int nLon, int nEns) const {
    Field* field = new Field();
    field->resize(nLat);
    for(int i = 0; i < nLat; i++) {
@@ -213,7 +213,7 @@ Field& DataFile::getEmptyField(int nLat, int nLon, int nEns) const {
    return *field;
 }
 
-void DataFile::addField(Field& iField, Variable::Type iVariable, int iTime) {
+void File::addField(Field& iField, Variable::Type iVariable, int iTime) {
    std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mWriteFields.find(iVariable);
    if(it == mWriteFields.end()) {
       mWriteFields[iVariable].resize(mNTime, NULL);
@@ -222,7 +222,7 @@ void DataFile::addField(Field& iField, Variable::Type iVariable, int iTime) {
    mWriteFields[iVariable][iTime] = &iField;
 }
 
-std::string DataFile::getVariableName(Variable::Type iVariable) const {
+std::string File::getVariableName(Variable::Type iVariable) const {
    if(iVariable == Variable::PrecipAcc) {
       return "precipitation_amount_acc";
    }
@@ -238,14 +238,14 @@ std::string DataFile::getVariableName(Variable::Type iVariable) const {
    return "";
 }
 
-bool DataFile::hasVariable(Variable::Type iVariable) const {
+bool File::hasVariable(Variable::Type iVariable) const {
    NcError q(NcError::silent_nonfatal); 
    std::string variable = getVariableName(iVariable);
    NcVar* var = mFile.get_var(variable.c_str());
    return var != NULL;
 }
 
-float DataFile::getScale(NcVar* iVar) const {
+float File::getScale(NcVar* iVar) const {
    NcError q(NcError::silent_nonfatal); 
    NcAtt* scaleAtt = iVar->get_att("scale_factor");
    float scale  = 1;
@@ -254,7 +254,7 @@ float DataFile::getScale(NcVar* iVar) const {
    }
    return scale;
 }
-float DataFile::getOffset(NcVar* iVar) const {
+float File::getOffset(NcVar* iVar) const {
    NcError q(NcError::silent_nonfatal); 
    NcAtt* offsetAtt = iVar->get_att("add_offset");
    float offset = 0;
@@ -264,7 +264,7 @@ float DataFile::getOffset(NcVar* iVar) const {
    return offset;
 }
 
-bool DataFile::hasSameDimensions(const DataFile& iOther) const {
+bool File::hasSameDimensions(const File& iOther) const {
    if(getNumLat() == iOther.getNumLat()
          && getNumLon() == iOther.getNumLon()
          && getNumEns() == iOther.getNumEns()
@@ -273,17 +273,17 @@ bool DataFile::hasSameDimensions(const DataFile& iOther) const {
    return false;
 }
 
-std::string DataFile::getFilename() const {
+std::string File::getFilename() const {
    return mFilename;
 }
 
-std::string DataFile::getDimenionString() const {
+std::string File::getDimenionString() const {
    std::stringstream ss;
    ss << "[" << getNumTime() << " " << getNumEns() << " " << getNumLat() << " " << getNumLon()<< "]";
    return ss.str();
 }
 
-NcDim* DataFile::getDim(std::string iDim) const {
+NcDim* File::getDim(std::string iDim) const {
    NcError q(NcError::silent_nonfatal); 
    NcDim* dim = mFile.get_dim(iDim.c_str());
    if(dim == NULL) {
@@ -293,7 +293,7 @@ NcDim* DataFile::getDim(std::string iDim) const {
    }
    return dim;
 }
-NcVar* DataFile::getVar(std::string iVar) const {
+NcVar* File::getVar(std::string iVar) const {
    NcError q(NcError::silent_nonfatal); 
    NcVar* var = mFile.get_var(iVar.c_str());
    if(var == NULL) {
@@ -304,7 +304,7 @@ NcVar* DataFile::getVar(std::string iVar) const {
    return var;
 }
 
-float DataFile::getMissingValue(const NcVar* iVar) {
+float File::getMissingValue(const NcVar* iVar) {
    NcError q(NcError::silent_nonfatal); 
    NcAtt* fillValueAtt = iVar->get_att("_FillValue");
    if(fillValueAtt != NULL)

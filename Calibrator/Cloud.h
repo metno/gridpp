@@ -7,7 +7,7 @@ class CalibratorCloud : public Calibrator {
    public:
       CalibratorCloud(const ParameterFile& iParameterFile, Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);
    private:
-      void calibrateCore(DataFile& iFile) const;
+      void calibrateCore(File& iFile) const;
       Variable::Type mPrecipType;
       Variable::Type mCloudType;
 };

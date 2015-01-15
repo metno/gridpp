@@ -5,7 +5,7 @@ CalibratorCloud::CalibratorCloud(const ParameterFile& iParameterFile, Variable::
       mPrecipType(iPrecip) {
 
 }
-void CalibratorCloud::calibrateCore(DataFile& iFile) const {
+void CalibratorCloud::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

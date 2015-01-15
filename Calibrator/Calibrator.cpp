@@ -7,7 +7,7 @@
 Calibrator::Calibrator(const ParameterFile& iParameterFile):
       mParameterFile(iParameterFile) {
 }
-void Calibrator::calibrate(DataFile& iFile) const {
+void Calibrator::calibrate(File& iFile) const {
    calibrateCore(iFile);
 }
 

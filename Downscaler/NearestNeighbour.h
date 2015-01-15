@@ -6,6 +6,6 @@ class DownscalerNearestNeighbour : public Downscaler {
    public:
       DownscalerNearestNeighbour(const ParameterFile& iParameterFile);
    private:
-      void downscaleCore(const DataFile& iInput, DataFile& iOutput) const;
+      void downscaleCore(const File& iInput, File& iOutput) const;
 };
 #endif

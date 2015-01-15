@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
-#include "DataFile.h"
+#include "File.h"
 #include "ParameterFile.h"
 #include "Calibrator/Calibrator.h"
 #include "Util.h"
@@ -31,7 +31,7 @@ int main(int argc, const char *argv[]) {
    Util::setShowError(true);
    Util::setShowWarning(true);
 
-   DataFile file(dataFile);
+   File file(dataFile);
    ParameterFile parameters(parameterFile);
 
    // Temperature calibration

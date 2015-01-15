@@ -7,7 +7,7 @@ class CalibratorAccumulate : public Calibrator {
    public:
       CalibratorAccumulate(const ParameterFile& iParameterFile, Variable::Type iType);
    private:
-      void calibrateCore(DataFile& iFile) const;
+      void calibrateCore(File& iFile) const;
       Variable::Type mType;
 };
 #endif

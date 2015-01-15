@@ -1,6 +1,6 @@
 #ifndef CALIBRATOR_ZAGA_H
 #define CALIBRATOR_ZAGA_H
-#include "../DataFile.h"
+#include "../File.h"
 #include "../ParameterFile.h"
 #include "Calibrator.h"
 
@@ -19,7 +19,7 @@ class CalibratorZaga : public Calibrator {
       //! members have precip.
       void setFracThreshold(float iFraction);
    private:
-      void calibrateCore(DataFile& iFile) const;
+      void calibrateCore(File& iFile) const;
       static const float mMaxEnsMean = 100;
       //! What precip threshold should be used to count members with no precip?
       float mFracThreshold;

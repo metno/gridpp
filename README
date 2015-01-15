@@ -2,7 +2,7 @@ Program to calibrate ensemble precipitation forecasts from ECMWF's eps25 files
 
 Intended usage:
    cp rawFile.nc newFile.nc
-   ./precipCal rawFile.nc parameters.txt newFile.nc
+   ./precipCal newFile.nc parameters.txt 
 
 Notes
 * When reading the input file, all missing values are converted to the internal missing flag indicator. When

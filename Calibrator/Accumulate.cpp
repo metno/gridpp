@@ -4,7 +4,7 @@ CalibratorAccumulate::CalibratorAccumulate(const ParameterFile& iParameterFile, 
       Calibrator(iParameterFile),
       mType(iType) {
 }
-void CalibratorAccumulate::calibrateCore(DataFile& iFile) const {
+void CalibratorAccumulate::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

@@ -1,5 +1,5 @@
-#ifndef DATA_H
-#define DATA_H
+#ifndef FILE_H
+#define FILE_H
 #include <netcdf.hh>
 #include <vector>
 #include <map>
@@ -9,10 +9,10 @@
 typedef std::vector<std::vector<std::vector<float> > > Field;
 
 //! Represents a Netcdf data file
-class DataFile {
+class File {
    public:
-      DataFile(std::string iFilename);
-      ~DataFile();
+      File(std::string iFilename);
+      ~File();
       const Field& getField(Variable::Type iVariable, int iTime) const;
 
       // Schedule field to be written
@@ -22,7 +22,7 @@ class DataFile {
       // Add an auxillary field that user of the class can read.
       // The field is not written when using write().
       void addAuxField(Field& iField, Variable::Type iVariable, int iTime);
-      void addAuxFile(DataFile& iFile);
+      void addAuxFile(File& iFile);
 
       Field& getEmptyField(int nLat, int nLon, int nEns) const;
       Field& getEmptyField() const;
@@ -41,7 +41,7 @@ class DataFile {
       std::string getVariableName(Variable::Type iVariable) const;
       // Does this file contain the variable?
       bool hasVariable(Variable::Type iVariable) const;
-      bool hasSameDimensions(const DataFile& iOther) const;
+      bool hasSameDimensions(const File& iOther) const;
       std::string getDimenionString() const;
 
    private:

@@ -9,7 +9,7 @@ CalibratorZaga::CalibratorZaga(const ParameterFile& iParameterFile, Variable::Ty
       mFracThreshold(0.5) {
 }
 
-void CalibratorZaga::calibrateCore(DataFile& iFile) const {
+void CalibratorZaga::calibrateCore(File& iFile) const {
    bool doAccumulate = true;
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();

@@ -14,8 +14,8 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters = mParameterFile.getParameters(t);
-      const Field& precip = iFile.getField(mPrecipType, t);
-      Field& cloud  = iFile.getField(mCloudType, t);
+      const Field& precip = *iFile.getField(mPrecipType, t);
+      Field& cloud        = *iFile.getField(mCloudType, t);
 
       // TODO: Figure out which cloudless members to use. Ideally, if more members
       // need precip, we should pick members that already have clouds, so that we minimize

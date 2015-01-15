@@ -23,9 +23,9 @@ File::File(std::string iFilename) :
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
-Field& File::getField(Variable::Type iVariable, int iTime) const {
+FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
    // Determine if values have been cached
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mFields.find(iVariable);
+   std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    bool needsReading = it == mFields.end();
    if(!needsReading) {
       needsReading = mFields[iVariable][iTime] == NULL;
@@ -42,29 +42,29 @@ Field& File::getField(Variable::Type iVariable, int iTime) const {
       // Try to derive the field
       else if(iVariable == Variable::Precip) {
          // Deaccumulate
-         Field& field = getEmptyField();
-         saveField(&field, Variable::Precip, 0); // First offset is 0
+         FieldPtr field = getEmptyField();
+         saveField(field, Variable::Precip, 0); // First offset is 0
 
          for(int t = 1; t < mNTime; t++) {
-            Field& field = getEmptyField();
-            const Field& acc0  = getField(Variable::PrecipAcc, t-1);
-            const Field& acc1  = getField(Variable::PrecipAcc, t);
+            FieldPtr field = getEmptyField();
+            const FieldPtr acc0  = getField(Variable::PrecipAcc, t-1);
+            const FieldPtr acc1  = getField(Variable::PrecipAcc, t);
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
                   for(int e = 0; e < mNEns; e++) {
-                     float a1 = acc1[lat][lon][e];
-                     float a0 = acc0[lat][lon][e];
+                     float a1 = (*acc1)[lat][lon][e];
+                     float a0 = (*acc0)[lat][lon][e];
                      float value = Util::MV;
                      if(Util::isValid(a1) && Util::isValid(a0)) {
                          value = a1 - a0;
                          if(value < 0)
                             value = 0;
                      }
-                     field[lat][lon][e] = value;
+                     (*field)[lat][lon][e] = value;
                   }
                }
             }
-            saveField(&field, Variable::Precip, t);
+            saveField(field, Variable::Precip, t);
          }
       }
       else {
@@ -74,8 +74,8 @@ Field& File::getField(Variable::Type iVariable, int iTime) const {
          abort();
       }
    }
-   Field* field = mFields[iVariable][iTime];
-   return *field;
+   FieldPtr field = mFields[iVariable][iTime];
+   return field;
 }
 
 void File::loadFields(Variable::Type iVariable) const {
@@ -96,7 +96,7 @@ void File::loadFields(Variable::Type iVariable) const {
    float scale = getScale(var);
    int index = 0;
    for(int t = 0; t < nTime; t++) {
-      Field& field = getEmptyField(nLat, nLon, nEns);
+      FieldPtr field = getEmptyField(nLat, nLon, nEns);
       for(int e = 0; e < nEns; e++) {
          for(int lat = 0; lat < nLat; lat++) {
             for(int lon = 0; lon < nLon; lon++) {
@@ -109,18 +109,16 @@ void File::loadFields(Variable::Type iVariable) const {
                else {
                   value = scale*values[index] + offset;
                }
-               field[lat][lon][e] = value;
+               (*field)[lat][lon][e] = value;
                index++;
             }
          }
       }
-      saveField(&field, iVariable, t);
+      saveField(field, iVariable, t);
    }
    delete[] values;
 }
-void File::saveField(Field* iField, Variable::Type iVariable, int iTime) const {
-   if(mFields[iVariable][iTime] != NULL)
-      delete mFields[iVariable][iTime];
+void File::saveField(FieldPtr iField, Variable::Type iVariable, int iTime) const {
    mFields[iVariable][iTime] = iField;
 }
 
@@ -156,7 +154,7 @@ void File::write(std::vector<Variable::Type> iVariables) {
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
-         Field* field = &getField(varType, t);
+         FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
             var->set_cur(t, 0, 0, 0, 0);
             float* values = new float[mNTime*1*mNEns*mNLat*mNLon];
@@ -187,28 +185,28 @@ void File::write(std::vector<Variable::Type> iVariables) {
 }
 
 
-Field& File::getEmptyField() const {
+FieldPtr File::getEmptyField() const {
    return getEmptyField(mNLat, mNLon, mNEns);
 }
-Field& File::getEmptyField(int nLat, int nLon, int nEns) const {
-   Field* field = new Field();
+FieldPtr File::getEmptyField(int nLat, int nLon, int nEns) const {
+   FieldPtr field = FieldPtr(new Field());
    field->resize(nLat);
    for(int i = 0; i < nLat; i++) {
       (*field)[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
-         (*field)[i][j].resize(nEns,0);
+         (*field)[i][j].resize(nEns,Util::MV);
       }
    }
-   return *field;
+   return field;
 }
 
-void File::addField(Field& iField, Variable::Type iVariable, int iTime) {
-   std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mFields.find(iVariable);
+void File::addField(FieldPtr iField, Variable::Type iVariable, int iTime) {
+   std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    if(it == mFields.end()) {
-      mFields[iVariable].resize(mNTime, NULL);
+      mFields[iVariable].resize(mNTime);
    }
 
-   mFields[iVariable][iTime] = &iField;
+   mFields[iVariable][iTime] = iField;
 }
 
 std::string File::getVariableName(Variable::Type iVariable) const {

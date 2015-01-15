@@ -11,11 +11,11 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
    int nTime = iFile.getNumTime();
 
    // Get all fields
-   std::vector<Field*> fields(nTime);
-   std::vector<Field*> fieldsAcc(nTime);
+   std::vector<FieldPtr> fields(nTime);
+   std::vector<FieldPtr> fieldsAcc(nTime);
    for(int t = 0; t < nTime; t++) {
-      fields[t]    = &iFile.getField(mType, t);
-      fieldsAcc[t] = &iFile.getEmptyField();
+      fields[t]    = iFile.getField(mType, t);
+      fieldsAcc[t] = iFile.getEmptyField();
    }
 
    for(int t = 0; t < nTime; t++) {
@@ -40,6 +40,6 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
             }
          }
       }
-      iFile.addField(*fieldsAcc[t], Variable::PrecipAcc, t);
+      iFile.addField(fieldsAcc[t], Variable::PrecipAcc, t);
    }
 }

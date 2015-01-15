@@ -22,7 +22,7 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters = mParameterFile.getParameters(t);
-      Field& precip = iFile.getField(Variable::Precip, t);
+      Field& precip = *iFile.getField(Variable::Precip, t);
 
       // Parallelizable
       #pragma omp parallel for

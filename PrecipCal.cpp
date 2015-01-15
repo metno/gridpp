@@ -31,7 +31,7 @@ int main(int argc, const char *argv[]) {
    Util::setShowError(true);
    Util::setShowWarning(true);
 
-   File file(dataFile);
+   FileNetcdf file(dataFile);
    ParameterFile parameters(parameterFile);
 
    std::vector<Variable::Type> writableVariables;
@@ -51,6 +51,7 @@ int main(int argc, const char *argv[]) {
 
    CalibratorAccumulate calPrecipAcc(Variable::Precip, Variable::PrecipAcc);
    calPrecipAcc.calibrate(file);
+   writableVariables.push_back(Variable::Precip);
    writableVariables.push_back(Variable::PrecipAcc);
 
    // Wind calibration

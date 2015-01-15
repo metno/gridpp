@@ -188,5 +188,5 @@ float FileNetcdf::getMissingValue(const NcVar* iVar) {
    if(fillValueAtt != NULL)
       return fillValueAtt->as_float(0);
    else
-      return Util::MV;
+      return ncBad_float;//Util::MV;
 }

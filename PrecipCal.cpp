@@ -49,7 +49,7 @@ int main(int argc, const char *argv[]) {
    calCloud.calibrate(file);
    writableVariables.push_back(Variable::Cloud);
 
-   CalibratorAccumulate calPrecipAcc(parameters, Variable::Precip);
+   CalibratorAccumulate calPrecipAcc(parameters, Variable::Precip, Variable::PrecipAcc);
    calPrecipAcc.calibrate(file);
    writableVariables.push_back(Variable::PrecipAcc);
 

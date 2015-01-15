@@ -1,8 +1,9 @@
 #include "Accumulate.h"
 #include "../Util.h"
-CalibratorAccumulate::CalibratorAccumulate(const ParameterFile& iParameterFile, Variable::Type iType) :
+CalibratorAccumulate::CalibratorAccumulate(const ParameterFile& iParameterFile, Variable::Type iFrom, Variable::Type iTo) :
       Calibrator(iParameterFile),
-      mType(iType) {
+      mFrom(iFrom),
+      mTo(iTo) {
 }
 void CalibratorAccumulate::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
@@ -14,7 +15,7 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
    std::vector<FieldPtr> fields(nTime);
    std::vector<FieldPtr> fieldsAcc(nTime);
    for(int t = 0; t < nTime; t++) {
-      fields[t]    = iFile.getField(mType, t);
+      fields[t]    = iFile.getField(mFrom, t);
       fieldsAcc[t] = iFile.getEmptyField();
    }
 
@@ -40,6 +41,6 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
             }
          }
       }
-      iFile.addField(fieldsAcc[t], Variable::PrecipAcc, t);
+      iFile.addField(fieldsAcc[t], mTo, t);
    }
 }

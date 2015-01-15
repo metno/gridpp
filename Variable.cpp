@@ -9,6 +9,12 @@ std::string Variable::getTypeName(Type iType) {
       return "Cloud cover";
    else if(iType == T)
       return "Temperature";
+   else if(iType == U)
+      return "U-wind";
+   else if(iType == V)
+      return "V-wind";
+   else if(iType == W)
+      return "Wind speed";
    else
       return "Unknown";
 }

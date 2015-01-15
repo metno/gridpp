@@ -1,9 +1,10 @@
 CC      = g++
-CFLAGS  = -g -pg #-fprofile-arcs
-#CFLAGS  = -O3 -fopenmp
+#CFLAGS  = -g -pg #-fprofile-arcs
+CFLAGS  = -O3 -fopenmp
 SRC     = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
-ALLOBJS = $(SRC:.cpp=.o)
+CALSRC  = $(wildcard Calibrator/*.cpp)
+ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o)
 COREOBJS= $(filter-out Test.o,$(ALLOBJS))
 TESTOBJS= $(filter-out PrecipCal.o,$(ALLOBJS))
 IFLAGS  = -I/usr/include/ -I/usr/local/boost/include/
@@ -17,10 +18,14 @@ default: precipCal.exe
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
 precipCal.exe: $(COREOBJS) makefile
+	echo $(CALOBJS)
 	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) $(LIBS) -o $@
 
 test.exe: $(TESTOBJS) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(TESTOBJS) $(LIBS) -o $@
 
 clean: 
-	rm *.o gmon.out *.gcda precipCal.exe test.exe
+	rm *.o */*.o gmon.out *.gcda precipCal.exe test.exe
+
+tags:
+	cd src; ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./ ./*

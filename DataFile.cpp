@@ -24,6 +24,16 @@ DataFile::DataFile(std::string iFilename) :
 }
 
 const Field& DataFile::getField(Variable::Type iVariable, int iTime) const {
+   // Check if field is scheduled to be written first
+   std::map<Variable::Type, std::vector<Field*> >::const_iterator itW = mWriteFields.find(iVariable);
+   if(itW != mWriteFields.end()) {
+      if(mWriteFields[iVariable][iTime] != NULL) {
+         if(iTime == 1)
+            std::cout << "Returning writable field for " << Variable::getTypeName(iVariable) << std::endl;
+         return *mWriteFields[iVariable][iTime];
+      }
+   }
+
    // Determine if values have been cached
    std::map<Variable::Type, std::vector<Field*> >::const_iterator it = mReadFields.find(iVariable);
    bool needsReading = it == mReadFields.end();

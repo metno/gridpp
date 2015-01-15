@@ -19,6 +19,11 @@ class DataFile {
       void addField(Field& iField, Variable::Type iVariable, int iTime);
       void write();
 
+      // Add an auxillary field that user of the class can read.
+      // The field is not written when using write().
+      void addAuxField(Field& iField, Variable::Type iVariable, int iTime);
+      void addAuxFile(DataFile& iFile);
+
       Field& getEmptyField(int nLat, int nLon, int nEns) const;
       Field& getEmptyField() const;
 
@@ -43,7 +48,6 @@ class DataFile {
       void loadFields(Variable::Type iVariable) const;
       void saveField(Field* iField, Variable::Type iVariable, int iTime) const;
       mutable std::map<Variable::Type, std::vector<Field*> > mReadFields;  // Variable, offset
-
       mutable std::map<Variable::Type, std::vector<Field*> > mWriteFields; // Variable, offset
       float getScale(NcVar* iVar) const;
       float getOffset(NcVar* iVar) const;
@@ -58,6 +62,7 @@ class DataFile {
       NcDim* getDim(std::string iDim) const;
       NcVar* getVar(std::string iVar) const;
       static float getMissingValue(const NcVar* iVar);
+      std::vector<int> mTimes;
 
       int mNTime;
       int mNEns;

@@ -1,7 +1,7 @@
 #include "Accumulate.h"
 #include "../Util.h"
-CalibratorAccumulate::CalibratorAccumulate(const ParameterFile& iParameterFile, Variable::Type iFrom, Variable::Type iTo) :
-      Calibrator(iParameterFile),
+CalibratorAccumulate::CalibratorAccumulate(Variable::Type iFrom, Variable::Type iTo) :
+      Calibrator(),
       mFrom(iFrom),
       mTo(iTo) {
 }
@@ -20,8 +20,7 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
    }
 
    for(int t = 0; t < nTime; t++) {
-      // Parallelizable
-#pragma omp parallel for
+      #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {

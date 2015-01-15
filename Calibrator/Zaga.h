@@ -19,6 +19,7 @@ class CalibratorZaga : public Calibrator {
       //! members have precip.
       void setFracThreshold(float iFraction);
    private:
+      const ParameterFile& mParameterFile;
       void calibrateCore(File& iFile) const;
       static const float mMaxEnsMean = 100;
       //! What precip threshold should be used to count members with no precip?

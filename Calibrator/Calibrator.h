@@ -1,12 +1,11 @@
 #ifndef CALIBRATOR_H
 #define CALIBRATOR_H
 #include "../File.h"
-#include "../ParameterFile.h"
 
 //! Abstract calibration class
 class Calibrator {
    public:
-      Calibrator(const ParameterFile& iParameterFile);
+      Calibrator();
       // Calibrate one or more fields
       void calibrate(File& iFile) const;
 
@@ -17,7 +16,6 @@ class Calibrator {
       static void  shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter);
    protected:
       virtual void calibrateCore(File& iFile) const = 0;
-      const ParameterFile& mParameterFile;
       template<class T1, class T2> struct sort_pair_second {
          bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {
             return left.second < right.second;

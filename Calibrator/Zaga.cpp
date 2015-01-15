@@ -4,7 +4,8 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 CalibratorZaga::CalibratorZaga(const ParameterFile& iParameterFile, Variable::Type iMainPredictor):
-      Calibrator(iParameterFile),
+      Calibrator(),
+      mParameterFile(iParameterFile),
       mMainPredictor(iMainPredictor),
       mFracThreshold(0.5) {
 }
@@ -24,7 +25,6 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
       Parameters parameters = mParameterFile.getParameters(t);
       Field& precip = *iFile.getField(Variable::Precip, t);
 
-      // Parallelizable
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {

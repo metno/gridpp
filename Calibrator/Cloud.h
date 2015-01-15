@@ -5,7 +5,7 @@
 // Ensure that if a member has precip it also has full cloud cover
 class CalibratorCloud : public Calibrator {
    public:
-      CalibratorCloud(const ParameterFile& iParameterFile, Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);
+      CalibratorCloud(Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);
    private:
       void calibrateCore(File& iFile) const;
       Variable::Type mPrecipType;

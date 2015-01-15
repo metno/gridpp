@@ -4,8 +4,8 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 
-Calibrator::Calibrator(const ParameterFile& iParameterFile):
-      mParameterFile(iParameterFile) {
+Calibrator::Calibrator() {
+
 }
 void Calibrator::calibrate(File& iFile) const {
    calibrateCore(iFile);

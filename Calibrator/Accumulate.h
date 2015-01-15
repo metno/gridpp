@@ -5,7 +5,7 @@
 // Accumlates a certain variable
 class CalibratorAccumulate : public Calibrator {
    public:
-      CalibratorAccumulate(const ParameterFile& iParameterFile, Variable::Type iFrom, Variable::Type iTo);
+      CalibratorAccumulate(Variable::Type iFrom, Variable::Type iTo);
    private:
       void calibrateCore(File& iFile) const;
       Variable::Type mFrom;

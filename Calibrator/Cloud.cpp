@@ -1,6 +1,7 @@
 #include "Cloud.h"
 #include "../Util.h"
-CalibratorCloud::CalibratorCloud(const ParameterFile& iParameterFile, Variable::Type iPrecip, Variable::Type iCloud) : Calibrator(iParameterFile),
+CalibratorCloud::CalibratorCloud(Variable::Type iPrecip, Variable::Type iCloud) :
+      Calibrator(),
       mCloudType(iCloud),
       mPrecipType(iPrecip) {
 
@@ -13,7 +14,6 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      Parameters parameters = mParameterFile.getParameters(t);
       const Field& precip = *iFile.getField(mPrecipType, t);
       Field& cloud        = *iFile.getField(mCloudType, t);
 
@@ -21,7 +21,6 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
       // need precip, we should pick members that already have clouds, so that we minimize
       // our effect on the cloud cover field.
 
-      // Parallelizable
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {

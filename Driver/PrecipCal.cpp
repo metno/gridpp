@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
 #include <string.h>
-#include "File/File.h"
-#include "ParameterFile.h"
-#include "Calibrator/Calibrator.h"
-#include "Util.h"
+#include "../File/File.h"
+#include "../ParameterFile.h"
+#include "../Calibrator/Calibrator.h"
+#include "../Util.h"
 int main(int argc, const char *argv[]) {
 
    // Parse command line attributes
@@ -31,7 +31,7 @@ int main(int argc, const char *argv[]) {
    Util::setShowError(true);
    Util::setShowWarning(true);
 
-   FileNetcdf file(dataFile);
+   FileEc file(dataFile);
    ParameterFile parameters(parameterFile);
 
    std::vector<Variable::Type> writableVariables;

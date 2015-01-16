@@ -13,10 +13,10 @@ class ParameterFile {
       static const int mNumParameters = 8;
       std::string mFilename;
 };
-class ParameterFileRegion : public ParameterFile {
+class ParameterFileRegion {
    public:
-      ParameterFileRegion(std::string iFilename);
-      Parameters getParameters(float iLat, float iLon, int iTime) const;
+      ParameterFileRegion(std::string iFilename) {};
+      Parameters getParameters(float iLat, float iLon, int iTime) const {return Parameters();};
    private:
       std::map<int, Parameters> mParameters; // Offset, Parameters
       std::string mFilename;

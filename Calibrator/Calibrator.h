@@ -31,7 +31,7 @@ class Calibrator {
 };
 #include "Zaga.h"
 #include "Cloud.h"
-//#include "Wind.h"
+#include "Wind.h"
 #include "Temperature.h"
 #include "Accumulate.h"
 #endif

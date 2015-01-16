@@ -19,9 +19,11 @@ default: precipCal.exe
 %.o : %.cpp $(INCS)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
-precipCal.exe: $(COREOBJS) makefile
-	echo $(CALOBJS)
-	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) $(LIBS) -o $@
+precipCal.exe: $(COREOBJS) Driver/PrecipCal.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/PrecipCal.o $(LIBS) -o $@
+
+statkraft.exe: $(COREOBJS) Driver/Statkraft.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/Statkraft.o $(LIBS) -o $@
 
 test.exe: $(TESTOBJS) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(TESTOBJS) $(LIBS) -o $@

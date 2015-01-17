@@ -7,15 +7,15 @@
 FileArome::FileArome(std::string iFilename) : FileNetcdf(iFilename) {
    // Set dimensions
    NcDim* dTime = getDim("time");
-   NcDim* dLon  = getDim("y");
-   NcDim* dLat  = getDim("x");
+   NcDim* dLon  = getDim("x");
+   NcDim* dLat  = getDim("y");
    mNTime = dTime->size();
    mNLat  = dLat->size();
    mNLon  = dLon->size();
 
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
-   // mElevs = getLatLonVariable("altitude");
+   mElevs = getLatLonVariable("altitude");
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
@@ -24,13 +24,34 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
    NcVar* var = getVar(variable);
-   int nTime = mNTime;
    int nLat  = mNLat;
    int nLon  = mNLon;
 
-   long count[5] = {1, 1, nLon, nLat};
-   float* values = new float[nTime*nLat*nLon];
-   var->set_cur(iTime, 0, 0, 0);
+   int numDims = var->num_dims();
+
+   long* count;
+   if(numDims == 4) {
+      // Variable has a surface dimension
+      count = new long[4];
+      count[0] = 1;
+      count[1] = 1;
+      count[2] = nLat;
+      count[3] = nLon;
+      var->set_cur(iTime, 0, 0, 0);
+   }
+   else if(numDims == 3) {
+      count = new long[3];
+      count[0] = 1;
+      count[1] = nLat;
+      count[2] = nLon;
+      var->set_cur(iTime, 0, 0);
+   }
+   else {
+      std::stringstream ss;
+      ss << "Cannot read variable '" << variable << "' from '" << getFilename() << "'";
+      Util::error(ss.str());
+   }
+   float* values = new float[nLat*nLon];
    var->get(values, count);
    float MV = getMissingValue(var);
 
@@ -38,8 +59,8 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    float scale = getScale(var);
    int index = 0;
    FieldPtr field = getEmptyField();
-   for(int lon = 0; lon < nLon; lon++) {
-      for(int lat = 0; lat < nLat; lat++) {
+   for(int lat = 0; lat < nLat; lat++) {
+      for(int lon = 0; lon < nLon; lon++) {
          float value = values[index];
          if(Util::isValid(MV) && value == MV) {
             // Field has missing value indicator and the value is missing
@@ -54,6 +75,7 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
       }
    }
    delete[] values;
+   delete[] count;
    return field;
 }
 
@@ -72,8 +94,8 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
          // Create variable
          NcDim* dTime    = getDim("time");
          NcDim* dSurface = getDim("height0");
-         NcDim* dLon     = getDim("y");
-         NcDim* dLat     = getDim("x");
+         NcDim* dLon     = getDim("x");
+         NcDim* dLat     = getDim("y");
          var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLon, dLat);
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
@@ -82,11 +104,11 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            float* values = new float[mNTime*mNLat*mNLon];
+            float* values = new float[mNLat*mNLon];
 
             int index = 0;
-            for(int lon = 0; lon < mNLon; lon++) {
-               for(int lat = 0; lat < mNLat; lat++) {
+            for(int lat = 0; lat < mNLat; lat++) {
+               for(int lon = 0; lon < mNLon; lon++) {
                   float value = (*field)[lat][lon][0];
                   if(Util::isValid(MV) && !Util::isValid(value)) {
                      // Field has missing value indicator and the value is missing
@@ -100,8 +122,21 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                   index++;
                }
             }
-            var->set_cur(t, 0, 0, 0);
-            var->put(values, 1, 1, mNLon, mNLat);
+            int numDims = var->num_dims();
+            if(numDims == 4) {
+               var->set_cur(t, 0, 0, 0);
+               var->put(values, 1, 1, mNLat, mNLon);
+            }
+            else if(numDims == 3) {
+               var->set_cur(t, 0, 0);
+               var->put(values, 1, mNLat, mNLon);
+            }
+            else {
+               std::stringstream ss;
+               ss << "Cannot write variable '" << variable << "' from '" << getFilename() << "'";
+               Util::error(ss.str());
+            }
+            delete[] values;
          }
       }
    }
@@ -142,7 +177,7 @@ vec2 FileArome::getElevs() const {
 
 vec2 FileArome::getLatLonVariable(std::string iVar) const {
    NcVar* var = getVar(iVar);
-   long count[2] = {getNumLon(), getNumLat()};
+   long count[2] = {getNumLat(), getNumLon()};
    float* values = new float[getNumLon()*getNumLat()];
    var->get(values, count);
    vec2 grid;
@@ -150,9 +185,11 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
    for(int i = 0; i < getNumLat(); i++) {
       grid[i].resize(getNumLon());
       for(int j = 0; j < getNumLon(); j++) {
-         int index = j*getNumLat() + i;
+         int index = i*getNumLon() + j;
          grid[i][j] = values[index];
+         assert(index < getNumLon()*getNumLat());
       }
    }
+   delete[] values;
    return grid;
 }

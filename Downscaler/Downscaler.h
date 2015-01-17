@@ -1,13 +1,14 @@
 #ifndef DOWNSCALER_H
 #define DOWNSCALER_H
-#include "../File.h"
-#include "../ParameterFile.h"
+class File;
 
 class Downscaler {
    public:
-      Downscaler(const ParameterFile& iParameterFile);
+      Downscaler();
       void downscale(const File& iInput, File& iOutput) const;
    protected:
-      void downscaleCore(const File& iInput, File& iOutput) const;
+      virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
 };
+#include "NearestNeighbour.h"
+#include "Gradient.h"
 #endif

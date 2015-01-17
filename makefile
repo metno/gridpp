@@ -5,7 +5,8 @@ SRC     = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
 CALSRC  = $(wildcard Calibrator/*.cpp)
 FILESRC = $(wildcard File/*.cpp)
-ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o) $(FILESRC:.cpp=.o)
+DOWNSRC = $(wildcard Downscaler/*.cpp)
+ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o) $(FILESRC:.cpp=.o) $(DOWNSRC:.cpp=.o)
 ALLHEADERS = $(ALLOBJS:.o=.h)
 COREOBJS= $(filter-out Test.o,$(ALLOBJS))
 TESTOBJS= $(filter-out PrecipCal.o,$(ALLOBJS))
@@ -13,6 +14,8 @@ IFLAGS  = -I/usr/include/ -I/usr/local/boost/include/
 LIBS    = -lnetcdf_c++ -lgtest
 LFLAGS  = -L/usr/lib -L/usr/local/boost/lib/ -L/home/thomasn/local/lib/
 INCS    = makefile $(HEADERS)
+
+.PHONY: tags
 
 default: precipCal.exe
 
@@ -25,6 +28,9 @@ precipCal.exe: $(COREOBJS) Driver/PrecipCal.o makefile
 statkraft.exe: $(COREOBJS) Driver/Statkraft.o makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/Statkraft.o $(LIBS) -o $@
 
+nn.exe: $(COREOBJS) Driver/TestNearestNeighbours.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/TestNearestNeighbours.o $(LIBS) -o $@
+
 test.exe: $(TESTOBJS) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(TESTOBJS) $(LIBS) -o $@
 
@@ -32,4 +38,4 @@ clean:
 	rm *.o */*.o gmon.out *.gcda precipCal.exe test.exe
 
 tags:
-	cd src; ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./ ./*
+	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp

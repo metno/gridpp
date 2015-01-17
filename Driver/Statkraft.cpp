@@ -4,6 +4,7 @@
 #include "../File/File.h"
 #include "../ParameterFile.h"
 #include "../Calibrator/Calibrator.h"
+#include "../Downscaler/Downscaler.h"
 #include "../Util.h"
 int main(int argc, const char *argv[]) {
 
@@ -11,17 +12,19 @@ int main(int argc, const char *argv[]) {
    if(argc < 3) {
       std::cout << "Calibrator of ensemble precipitation forecasts" << std::endl;
       std::cout << std::endl;
-      std::cout << "usage:  statkraft.exe file parameters [-v]" << std::endl;
+      std::cout << "usage:  statkraft.exe input output parameters [-v]" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
-      std::cout << "   file          Netcdf file with ECMWF ensemble data. Data in this file is overwritten." << std::endl;
+      std::cout << "   input         Netcdf file with AROME data." << std::endl;
+      std::cout << "   output        Netcdf file with AROME data." << std::endl;
       std::cout << "   parameters    Text file with parameters." << std::endl;
       std::cout << "   -v            Verbose. Show status messages." << std::endl;
       return 1;
    }
    double tStart = Util::clock();
-   std::string dataFile      = argv[1];
-   std::string parameterFile = argv[2];
+   std::string inputFile     = argv[1];
+   std::string outputFile    = argv[2];
+   // std::string parameterFile = argv[3];
 
    for(int i = 3; i < argc; i++) {
       if(strcmp(argv[i],"--debug"))
@@ -31,21 +34,29 @@ int main(int argc, const char *argv[]) {
    Util::setShowError(true);
    Util::setShowWarning(true);
 
-   FileArome file(dataFile);
-   ParameterFileRegion parameters(parameterFile);
+   const FileArome ifile(inputFile);
+   FileArome ofile(outputFile);
+   // ParameterFileRegion parameters(parameterFile);
 
    std::vector<Variable::Type> writableVariables;
 
+   // Downscaling
+   double t3 = Util::clock();
+   DownscalerGradient downscaler(Variable::T);
+   downscaler.downscale(ifile, ofile);
+   writableVariables.push_back(Variable::T);
+
    // Wind calibration
-   CalibratorWind calWind(parameters);
-   calWind.calibrate(file);
+   // CalibratorWind calWind(parameters);
+   // calWind.calibrate(ofile);
 
    // Output
-   double t3 = Util::clock();
-   file.write(writableVariables);
+   double t4 = Util::clock();
+   ofile.write(writableVariables);
    double tEnd = Util::clock();
-   std::cout << "Calibrator time: " << t3 - tStart << std::endl;
-   std::cout << "Writing time: " << tEnd - t3 << std::endl;
+   std::cout << "Downscaler time: " << t3 - tStart << std::endl;
+   std::cout << "Calibrator time: " << t4 - tStart << std::endl;
+   std::cout << "Writing time: " << tEnd - t4 << std::endl;
    std::cout << "Total time: " << tEnd - tStart << std::endl;
    return 0;
 }

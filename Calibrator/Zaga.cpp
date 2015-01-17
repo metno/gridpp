@@ -14,7 +14,6 @@ CalibratorZaga::CalibratorZaga(const ParameterFile& iParameterFile, Variable::Ty
 }
 
 void CalibratorZaga::calibrateCore(File& iFile) const {
-   bool doAccumulate = true;
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

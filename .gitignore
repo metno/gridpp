@@ -3,3 +3,8 @@
 *.exe
 *.nc
 gmon.out
+tags
+temp/
+*/devel/
+devel/
+.*.swp

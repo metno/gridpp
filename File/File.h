@@ -7,6 +7,7 @@
 
 // 3D array of data: [lat][lon][ensemble_member]
 typedef std::vector<std::vector<std::vector<float> > > Field;
+typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 typedef boost::shared_ptr<Field> FieldPtr;
 
 //! Represents a Netcdf data file
@@ -31,6 +32,10 @@ class File {
       virtual int getNumEns() const  = 0;
       virtual int getNumTime() const = 0;
       virtual bool hasVariable(Variable::Type iVariable) const = 0;
+
+      virtual vec2 getLats() const = 0;
+      virtual vec2 getLons() const = 0;
+      virtual vec2 getElevs() const = 0;
 
       std::string getFilename() const;
 

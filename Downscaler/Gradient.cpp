@@ -5,6 +5,8 @@
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
       Downscaler(),
+      mSize(3),
+      mConstGradient(Util::MV),
       mVariable(iVariable) {
 }
 
@@ -35,45 +37,56 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             int Icenter = nearestI[i][j];
             int Jcenter = nearestJ[i][j];
             for(int e = 0; e < nEns; e++) {
-
-               // Find gradient in neighbourhood
-               float meanXY  = 0; // elev*T
-               float meanX   = 0; // elev
-               float meanY   = 0; // T
-               float meanXX  = 0; // elev*elev
-               int   counter = 0;
-               for(int ii = std::max(0, Icenter-mSize); ii <= std::min(iInput.getNumLat()-1, Icenter+mSize); ii++) {
-                  for(int jj = std::max(0, Jcenter-mSize); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSize); jj++) {
-                     float x = ielevs[ii][jj];
-                     float y = ifield[ii][jj][e];
-                     if(Util::isValid(x) && Util::isValid(y)) {
-                        meanXY += x*y;
-                        meanX  += x;
-                        meanY  += y;
-                        meanXX += x*x;
-                        counter++;
+               float gradient = 0;
+               if(!Util::isValid(mConstGradient)) {
+                  // Compute gradient from neighbourhood
+                  float meanXY  = 0; // elev*T
+                  float meanX   = 0; // elev
+                  float meanY   = 0; // T
+                  float meanXX  = 0; // elev*elev
+                  int   counter = 0;
+                  for(int ii = std::max(0, Icenter-mSize); ii <= std::min(iInput.getNumLat()-1, Icenter+mSize); ii++) {
+                     for(int jj = std::max(0, Jcenter-mSize); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSize); jj++) {
+                        float x = ielevs[ii][jj];
+                        float y = ifield[ii][jj][e];
+                        if(Util::isValid(x) && Util::isValid(y)) {
+                           meanXY += x*y;
+                           meanX  += x;
+                           meanY  += y;
+                           meanXX += x*x;
+                           counter++;
+                        }
                      }
                   }
-               }
 
-               float gradient = 0;
-               if(fabs(meanXX - meanX*meanX) != 1) {
-                  // Estimate lapse rate
-                  meanXY /= counter;
-                  meanX  /= counter;
-                  meanY  /= counter;
-                  meanXX /= counter;
-                  gradient = -(meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+                  if(fabs(meanXX - meanX*meanX) != 1) {
+                     // Estimate lapse rate
+                     meanXY /= counter;
+                     meanX  /= counter;
+                     meanY  /= counter;
+                     meanXX /= counter;
+                     gradient = -(meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+                  }
+               }
+               else {
+                  gradient = mConstGradient;
                }
 
                float currElev = oelevs[i][j];
                float nearestElev = ielevs[Icenter][Jcenter];
                float dElev = currElev - nearestElev;
-               std::cout << i << " " << j << " " << gradient << std::endl;
+               if(t == 0)
+                  std::cout << i << " " << j << " " << gradient << std::endl;
 
                ofield[i][j][e] = ifield[Icenter][Jcenter][e] + dElev * gradient;
             }
          }
       }
    }
+}
+void DownscalerGradient::setConstantGradient(float iGradient) {
+   mConstGradient = iGradient;
+}
+void DownscalerGradient::setNeighbourhoodSize(int iSize) {
+   mSize = iSize;
 }

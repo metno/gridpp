@@ -119,6 +119,16 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
                break;
             }
             else {
+               assert(I >= 0);
+               assert(J >= 0);
+               assert(ilons.size() > I);
+               assert(ilons[I].size() > J);
+               assert(olons.size() > i);
+               assert(olons[i].size() > j);
+               assert(ilats.size() > I);
+               assert(ilats[I].size() > J);
+               assert(olats.size() > i);
+               assert(olats[i].size() > j);
                if(ilons[I][J] < olons[i][j])
                   J++;
                else

@@ -43,6 +43,7 @@ int main(int argc, const char *argv[]) {
    // Downscaling
    double t3 = Util::clock();
    DownscalerGradient downscaler(Variable::T);
+   downscaler.setConstantGradient(-0.008);
    downscaler.downscale(ifile, ofile);
    writableVariables.push_back(Variable::T);
 

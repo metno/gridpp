@@ -16,6 +16,11 @@ FileArome::FileArome(std::string iFilename) : FileNetcdf(iFilename) {
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
    mElevs = getLatLonVariable("altitude");
+   NcVar* vDate = getVar("time");
+   float* dates = new float[mNTime];
+   vDate->get(dates, mNTime);
+   mDate = Util::getDate(dates[0]);
+   delete[] dates;
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
@@ -92,11 +97,19 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       }
       else {
          // Create variable
-         NcDim* dTime    = getDim("time");
-         NcDim* dSurface = getDim("height0");
-         NcDim* dLon     = getDim("x");
-         NcDim* dLat     = getDim("y");
-         var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLon, dLat);
+         if(0) {
+            NcDim* dTime    = getDim("time");
+            NcDim* dSurface = getDim("height0");
+            NcDim* dLon     = getDim("x");
+            NcDim* dLat     = getDim("y");
+            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLon, dLat);
+         }
+         else {
+            NcDim* dTime    = getDim("time");
+            NcDim* dLon     = getDim("x");
+            NcDim* dLat     = getDim("y");
+            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dLon, dLat);
+         }
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
       for(int t = 0; t < mNTime; t++) {
@@ -162,6 +175,14 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::V) {
       return "y_wind_10m";
    }
+   else if(iVariable == Variable::W) {
+      // TODO: Correct name?
+      return "windspeed_10m";
+   }
+   else {
+      // TODO:
+      abort();
+   }
    return "";
 }
 
@@ -192,4 +213,7 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
    }
    delete[] values;
    return grid;
+}
+int FileArome::getDate() const {
+   return mDate;
 }

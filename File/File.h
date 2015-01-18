@@ -41,6 +41,7 @@ class File {
 
       bool hasSameDimensions(const File& iOther) const;
       std::string getDimenionString() const;
+      void initNewVariable(Variable::Type iVariable);
    private:
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;

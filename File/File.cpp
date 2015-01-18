@@ -53,6 +53,28 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
             addField(field, Variable::Precip, t);
          }
       }
+      else if(iVariable == Variable::W) {
+         if(hasVariable(Variable::U) && hasVariable(Variable::V)) {
+            for(int t = 0; t < getNumTime(); t++) {
+               FieldPtr windSpeed = getEmptyField();
+               const FieldPtr u = getField(Variable::U, t);
+               const FieldPtr v = getField(Variable::V, t);
+               for(int lat = 0; lat < getNumLat(); lat++) {
+                  for(int lon = 0; lon < getNumLon(); lon++) {
+                     for(int e = 0; e < getNumEns(); e++) {
+                        float currU = (*u)[lat][lon][e];
+                        float currV = (*v)[lat][lon][e];
+                        (*windSpeed)[lat][lon][e] = sqrt(currU*currU + currV*currV);
+                     }
+                  }
+               }
+               addField(windSpeed, Variable::W, t);
+            }
+         }
+         else {
+            Util::error("Cannot derive wind speed from variables in file");
+         }
+      }
       else {
          std::string variableType = Variable::getTypeName(iVariable);
          std::cout << variableType << " not available in file." << std::endl;
@@ -114,3 +136,8 @@ std::string File::getFilename() const {
    return mFilename;
 }
 
+void File::initNewVariable(Variable::Type iVariable) {
+   for(int t = 0; t < getNumTime(); t++) {
+      addField(getEmptyField(), iVariable, t);
+   }
+}

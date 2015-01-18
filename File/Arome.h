@@ -23,6 +23,7 @@ class FileArome : public FileNetcdf {
       vec2 getLats() const;
       vec2 getLons() const;
       vec2 getElevs() const;
+      int  getDate() const;
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
@@ -36,5 +37,6 @@ class FileArome : public FileNetcdf {
       int mNTime;
       int mNLat;
       int mNLon;
+      int mDate;
 };
 #endif

@@ -5,7 +5,7 @@
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
       Downscaler(),
-      mSize(3),
+      mRadius(3),
       mConstGradient(Util::MV),
       mVariable(iVariable) {
 }
@@ -45,8 +45,8 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   float meanY   = 0; // T
                   float meanXX  = 0; // elev*elev
                   int   counter = 0;
-                  for(int ii = std::max(0, Icenter-mSize); ii <= std::min(iInput.getNumLat()-1, Icenter+mSize); ii++) {
-                     for(int jj = std::max(0, Jcenter-mSize); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSize); jj++) {
+                  for(int ii = std::max(0, Icenter-mRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mRadius); ii++) {
+                     for(int jj = std::max(0, Jcenter-mRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mRadius); jj++) {
                         float x = ielevs[ii][jj];
                         float y = ifield[ii][jj][e];
                         if(Util::isValid(x) && Util::isValid(y)) {
@@ -75,8 +75,8 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                float currElev = oelevs[i][j];
                float nearestElev = ielevs[Icenter][Jcenter];
                float dElev = currElev - nearestElev;
-               if(t == 0)
-                  std::cout << i << " " << j << " " << gradient << std::endl;
+               // if(t == 0)
+               //    std::cout << i << " " << j << " " << gradient << std::endl;
 
                ofield[i][j][e] = ifield[Icenter][Jcenter][e] + dElev * gradient;
             }
@@ -87,6 +87,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
 void DownscalerGradient::setConstantGradient(float iGradient) {
    mConstGradient = iGradient;
 }
-void DownscalerGradient::setNeighbourhoodSize(int iSize) {
-   mSize = iSize;
+void DownscalerGradient::setNeighbourhoodRadius(int iNumPoints) {
+   mRadius = iNumPoints;
 }

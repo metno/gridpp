@@ -6,6 +6,7 @@
 #include "../Calibrator/Calibrator.h"
 #include "../Downscaler/Downscaler.h"
 #include "../Util.h"
+float getGradient(int iDate);
 int main(int argc, const char *argv[]) {
 
    // Parse command line attributes
@@ -24,7 +25,7 @@ int main(int argc, const char *argv[]) {
    double tStart = Util::clock();
    std::string inputFile     = argv[1];
    std::string outputFile    = argv[2];
-   // std::string parameterFile = argv[3];
+   std::string WparameterFilename = "test.txt";//argv[3];
 
    for(int i = 3; i < argc; i++) {
       if(strcmp(argv[i],"--debug"))
@@ -35,29 +36,82 @@ int main(int argc, const char *argv[]) {
    Util::setShowWarning(true);
 
    const FileArome ifile(inputFile);
+   int date = ifile.getDate();
    FileArome ofile(outputFile);
-   // ParameterFileRegion parameters(parameterFile);
 
    std::vector<Variable::Type> writableVariables;
 
+   /////////////////
+   // Temperature //
+   /////////////////
    // Downscaling
-   double t3 = Util::clock();
-   DownscalerGradient downscaler(Variable::T);
-   downscaler.setConstantGradient(-0.008);
-   downscaler.downscale(ifile, ofile);
+   double tt0 = Util::clock();
+   float gradient = getGradient(date);
+   std::cout << "Temperature gradient: " << gradient << " " << date << std::endl;
+   DownscalerGradient Tdownscaler(Variable::T);
+   Tdownscaler.setConstantGradient(gradient);
+   Tdownscaler.downscale(ifile, ofile);
    writableVariables.push_back(Variable::T);
+   double tt1 = Util::clock();
 
-   // Wind calibration
-   // CalibratorWind calWind(parameters);
-   // calWind.calibrate(ofile);
+   //////////
+   // Wind //
+   //////////
+   // TODO: Can you use the gradient approach on U and V separately?
+   double tw0 = Util::clock();
+   ofile.initNewVariable(Variable::U);
+   ofile.initNewVariable(Variable::V);
+   DownscalerGradient Udownscaler(Variable::U);
+   Udownscaler.setNeighbourhoodRadius(7);
+   Udownscaler.downscale(ifile, ofile);
+   DownscalerGradient Vdownscaler(Variable::V);
+   Vdownscaler.setNeighbourhoodRadius(7);
+   Vdownscaler.downscale(ifile, ofile);
+
+   if(0) {
+      ParameterFileRegion Wparameters(WparameterFilename);
+      CalibratorWind Wcalibrator(Wparameters);
+      Wcalibrator.calibrate(ofile);
+   }
+   writableVariables.push_back(Variable::U);
+   writableVariables.push_back(Variable::V);
+   double tw1 = Util::clock();
+
+   ////////////
+   // Precip //
+   ////////////
+   double tp0 = Util::clock();
+   ofile.initNewVariable(Variable::PrecipAcc);
+   DownscalerGradient Pdownscaler(Variable::Precip);
+   Pdownscaler.setNeighbourhoodRadius(7);
+   Pdownscaler.downscale(ifile, ofile);
+
+   CalibratorAccumulate Paccumulate(Variable::Precip, Variable::PrecipAcc);
+   Paccumulate.calibrate(ofile);
+   writableVariables.push_back(Variable::Precip);
+   writableVariables.push_back(Variable::PrecipAcc);
+   double tp1 = Util::clock();
 
    // Output
    double t4 = Util::clock();
    ofile.write(writableVariables);
    double tEnd = Util::clock();
-   std::cout << "Downscaler time: " << t3 - tStart << std::endl;
-   std::cout << "Calibrator time: " << t4 - tStart << std::endl;
-   std::cout << "Writing time: " << tEnd - t4 << std::endl;
-   std::cout << "Total time: " << tEnd - tStart << std::endl;
+   std::cout << "Temperature time: " << tt1 - tt0 << std::endl;
+   std::cout << "Wind time:        " << tw1 - tw0 << std::endl;
+   std::cout << "Precip time:      " << tp1 - tp0 << std::endl;
+   std::cout << "Writing time:     " << tEnd - t4 << std::endl;
+   std::cout << "Total time:       " << tEnd - tStart << std::endl;
    return 0;
+}
+
+float getGradient(int iDate) {
+   int month = (iDate % 10000) / 100;
+   if(month <= 3 || month > 9) {
+      // Winter
+      return -0.007;
+   }
+   else {
+      // Summer
+      return -0.006;
+   }
 }

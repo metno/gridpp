@@ -26,6 +26,7 @@ class Util {
       static float rad2deg(float rad);
       static float pi;
       static double radiusEarth;
+      static int getDate(time_t iUnixTime);
    private:
       static bool mShowError;
       static bool mShowWarning;

@@ -1,6 +1,6 @@
 CC      = g++
-#CFLAGS  = -g -pg #-fprofile-arcs
-CFLAGS  = -O3 -fopenmp
+CFLAGS  = -g -pg #-fprofile-arcs
+#CFLAGS  = -O3 -fopenmp
 SRC     = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
 CALSRC  = $(wildcard Calibrator/*.cpp)

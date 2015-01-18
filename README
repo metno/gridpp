@@ -13,3 +13,22 @@ Notes
 * Files with accumulation fields are automatically deaccumulated.
 * Negative precipitation amounts are automatically set to 0.
 * If the calibration produces invalid values (infinity, etc), the raw values are used.
+
+Intended usage:
+./statkraft.exe\
+      /opdata/arome2_5/AROME_MetCoOp_00_DEF.nc
+      outputfile.nc
+
+./metcoop.exe\
+      /opdata/arome2_5/AROME_MetCoOp_00_DEF.nc
+      outputfile.nc\
+      parametersW.txt
+
+./eceps.exe\
+      eps25_lqqt_2015011600Z.nc\
+      outputfile.nc\
+      aromeClimateT.nc\
+      aromeClimateW.nc\
+      parametersT.txt\
+      parametersW.txt\
+      parametersP.txt

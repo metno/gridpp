@@ -50,8 +50,8 @@ void DownscalerNearestNeighbour::getNearestNeighbour(const File& iFrom, const Fi
       iI[i].resize(nLon, 0);
       iJ[i].resize(nLon, 0);
       for(int j = 0; j < nLon; j++) {
-         if(j % 10 == 0)
-            std::cout << i << " " << j << std::endl;
+         // if(j % 10 == 0)
+         //    std::cout << i << " " << j << std::endl;
          float minDist = Util::MV;
          int I = 0;
          int J = 0;
@@ -90,8 +90,8 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
       iI[i].resize(nLon, 0);
       iJ[i].resize(nLon, 0);
       for(int j = 0; j < nLon; j++) {
-         if(j % 10 == 0)
-            std::cout << i << " " << j << std::endl;
+         // if(j % 10 == 0)
+         //    std::cout << i << " " << j << std::endl;
          int counter = 0;
          while(true) {
             // std::cout << "   " << ilats[I][J] << " " << ilons[I][J] << std::endl;

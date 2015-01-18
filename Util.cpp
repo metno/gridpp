@@ -5,6 +5,9 @@
 #include <cmath>
 #include <math.h>
 #include <assert.h>
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <boost/date_time/date_duration.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 bool Util::mShowError = false;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
@@ -75,4 +78,11 @@ float Util::deg2rad(float deg) {
 }
 float Util::rad2deg(float rad) {
    return (rad * 180 / Util::pi);
+}
+int Util::getDate(time_t iUnixTime) {
+   boost::gregorian::date epoch(1970,1,1);
+   boost::gregorian::date_duration diff(iUnixTime/86400);
+   boost::gregorian::date newDate = epoch + diff;
+
+   return newDate.year() * 10000 + newDate.month() * 100 + newDate.day();
 }

@@ -10,7 +10,7 @@
 //! Represents a Netcdf data file
 class FileArome : public FileNetcdf {
    public:
-      FileArome(std::string iFilename);
+      FileArome(std::string iFilename, bool iReadOnly=false);
       ~FileArome();
 
       // Dimension sizes

@@ -10,7 +10,7 @@
 //! Represents a Netcdf data file
 class FileEc : public FileNetcdf {
    public:
-      FileEc(std::string iFilename);
+      FileEc(std::string iFilename, bool iReadOnly=false);
       ~FileEc();
 
       // Dimension sizes

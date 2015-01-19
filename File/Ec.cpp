@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileEc::FileEc(std::string iFilename) : FileNetcdf(iFilename) {
+FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
    // Set dimensions
    NcDim* dTime = getDim("time");
    NcDim* dEns  = getDim("ensemble_member");

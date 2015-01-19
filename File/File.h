@@ -42,13 +42,14 @@ class File {
       bool hasSameDimensions(const File& iOther) const;
       std::string getDimenionString() const;
       void initNewVariable(Variable::Type iVariable);
-   private:
+   protected:
+      std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
       FieldPtr getEmptyField(int nLat, int nLon, int nEns) const;
-      std::string mFilename;
-
+   private:
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
 };
 #include "Netcdf.h"
+#include "Fake.h"
 #endif

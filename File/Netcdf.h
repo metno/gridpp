@@ -10,7 +10,7 @@
 //! Represents a Netcdf data file
 class FileNetcdf : public File {
    public:
-      FileNetcdf(std::string iFilename);
+      FileNetcdf(std::string iFilename, bool iReadOnly=false);
       ~FileNetcdf();
 
       // Does this file contain the variable?

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileArome::FileArome(std::string iFilename) : FileNetcdf(iFilename) {
+FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
    // Set dimensions
    NcDim* dTime = getDim("time");
    NcDim* dLon  = getDim("x");
@@ -102,13 +102,13 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
             NcDim* dSurface = getDim("height0");
             NcDim* dLon     = getDim("x");
             NcDim* dLat     = getDim("y");
-            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLon, dLat);
+            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLat, dLon);
          }
          else {
             NcDim* dTime    = getDim("time");
             NcDim* dLon     = getDim("x");
             NcDim* dLat     = getDim("y");
-            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dLon, dLat);
+            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dLat, dLon);
          }
       }
       float MV = getMissingValue(var); // The output file's missing value indicator

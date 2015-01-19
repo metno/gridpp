@@ -11,4 +11,5 @@ class Downscaler {
 };
 #include "NearestNeighbour.h"
 #include "Gradient.h"
+#include "Smart.h"
 #endif

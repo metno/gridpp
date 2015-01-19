@@ -8,7 +8,9 @@
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/date_duration.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
-bool Util::mShowError = false;
+#include <execinfo.h>
+#include <signal.h>
+bool Util::mShowError = true;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
 float Util::MV = -999;
@@ -20,6 +22,10 @@ Util::Util() {
 void Util::error(std::string iMessage) {
    if(mShowError)
       std::cout << "ERROR:   " << iMessage << std::endl;
+   void *array[10];
+   size_t size = backtrace(array, 10);
+   std::cout << "Stack trace:" << std::endl;
+   backtrace_symbols_fd(array, size, 2);
    abort();
 }
 void Util::warning(std::string iMessage) {
@@ -85,4 +91,25 @@ int Util::getDate(time_t iUnixTime) {
    boost::gregorian::date newDate = epoch + diff;
 
    return newDate.year() * 10000 + newDate.month() * 100 + newDate.day();
+}
+int Util::getCurrentDate() {
+    boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+    return today.year()*10000 + today.month()*100 + today.day();
+}
+
+int Util::calcDate(int iDate, int iAddHours) {
+   int year  = floor(iDate / 10000);
+   int month = floor(iDate % 10000)/100;
+   int day   = floor(iDate % 100);
+
+   int offDay = floor((iAddHours)/24);
+
+   boost::gregorian::date currDate(year, month, day);
+   boost::gregorian::date_duration diff(offDay);
+   boost::gregorian::date newDate = currDate + diff; 
+   int newYear  = newDate.year();
+   int newMonth = newDate.month();
+   int newDay   = newDate.day();
+   int returnDate = newYear * 10000 + newMonth * 100 + newDay;
+   return returnDate;
 }

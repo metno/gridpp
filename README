@@ -1,4 +1,5 @@
-MetCal: Program to calibrate ensemble forecasts from ECMWF and AROME files
+Framework for post-processing gridded forecasts
+Program to calibrate ensemble forecasts from ECMWF and AROME files
 
 Intended usage:
    cp rawFile.nc newFile.nc
@@ -32,3 +33,18 @@ Intended usage:
       parametersT.txt\
       parametersW.txt\
       parametersP.txt
+
+Software structure
+   File: Any object implementing data with x (lat), y (lon), time, and ensemble dimensions.
+   Calibrator: Any function that alters variables in a file
+   Downscaler: Any function that 
+
+--------
+| File |
+| T    |
+--------
+
+---------------
+| Read | Write|
+|      | T    |
+---------------

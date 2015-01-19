@@ -1,5 +1,5 @@
 CC      = g++
-CFLAGS  = -g -pg #-fprofile-arcs
+CFLAGS  = -g -pg -rdynamic #-fprofile-arcs
 #CFLAGS  = -O3 -fopenmp
 SRC     = $(wildcard *.cpp)
 HEADERS = $(wildcard *.h)
@@ -9,7 +9,8 @@ DOWNSRC = $(wildcard Downscaler/*.cpp)
 ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o) $(FILESRC:.cpp=.o) $(DOWNSRC:.cpp=.o)
 ALLHEADERS = $(ALLOBJS:.o=.h)
 COREOBJS= $(filter-out Test.o,$(ALLOBJS))
-TESTOBJS= $(filter-out PrecipCal.o,$(ALLOBJS))
+TESTS   = $(wildcard Testing/*.cpp)
+TESTEXE = $(TESTS:.cpp=.exe)
 IFLAGS  = -I/usr/include/ -I/usr/local/boost/include/
 LIBS    = -lnetcdf_c++ -lgtest
 LFLAGS  = -L/usr/lib -L/usr/local/boost/lib/ -L/home/thomasn/local/lib/
@@ -34,8 +35,13 @@ nn.exe: $(COREOBJS) Driver/TestNearestNeighbours.o makefile
 test.exe: $(TESTOBJS) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(TESTOBJS) $(LIBS) -o $@
 
+test: $(TESTEXE)
+
+Testing/%.exe: Testing/%.cpp $(INCS) $(COREOBJS)
+	$(CC) $(CFLAGS) $(COREOBJS) $< $(LFLAGS) -lgtest $(LIBS) -o $@
+
 clean: 
-	rm *.o */*.o gmon.out *.gcda precipCal.exe test.exe
+	rm *.o */*.o gmon.out *.gcda precipCal.exe test.exe Testing/*.exe Testing/*.o
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp

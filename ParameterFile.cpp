@@ -53,3 +53,7 @@ Parameters ParameterFile::getParameters(int iTime) const {
       return it->second;
    }
 }
+
+void ParameterFile::setParameters(Parameters iParameters, int iTime) {
+   mParameters[iTime] = iParameters;
+}

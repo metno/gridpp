@@ -5,7 +5,7 @@
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
       Downscaler(),
-      mRadius(3),
+      mSearchRadius(3),
       mConstGradient(Util::MV),
       mVariable(iVariable) {
 }
@@ -45,8 +45,8 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   float meanY   = 0; // T
                   float meanXX  = 0; // elev*elev
                   int   counter = 0;
-                  for(int ii = std::max(0, Icenter-mRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-mRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mRadius); jj++) {
+                  for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
+                     for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
                         float x = ielevs[ii][jj];
                         float y = ifield[ii][jj][e];
                         if(Util::isValid(x) && Util::isValid(y)) {
@@ -87,6 +87,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
 void DownscalerGradient::setConstantGradient(float iGradient) {
    mConstGradient = iGradient;
 }
-void DownscalerGradient::setNeighbourhoodRadius(int iNumPoints) {
-   mRadius = iNumPoints;
+void DownscalerGradient::setSearchRadius(int iNumPoints) {
+   mSearchRadius = iNumPoints;
 }

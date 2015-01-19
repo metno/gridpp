@@ -11,13 +11,13 @@ class DownscalerGradient : public Downscaler {
       //! Do not compute the gradient but set it to a fixed amount. Positive rate means
       //! increasing with elevation. The units are per meters.
       void setConstantGradient(float iGradient);
-      //! Calculate gradient in a neighbour hood of points within +- iNumPoints
+      //! Calculate gradient in a neighbourhood of points within +- iNumPoints
       //! in each direction.
-      void setNeighbourhoodRadius(int iNumPoints);
+      void setSearchRadius(int iNumPoints);
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
       Variable::Type mVariable;
-      int mRadius;
+      int mSearchRadius;
       float mConstGradient;
 };
 #endif

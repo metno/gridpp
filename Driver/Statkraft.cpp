@@ -35,7 +35,7 @@ int main(int argc, const char *argv[]) {
    Util::setShowError(true);
    Util::setShowWarning(true);
 
-   const FileArome ifile(inputFile);
+   const FileArome ifile(inputFile, true);
    int date = ifile.getDate();
    FileArome ofile(outputFile);
 
@@ -44,6 +44,7 @@ int main(int argc, const char *argv[]) {
    /////////////////
    // Temperature //
    /////////////////
+#if 1
    // Downscaling
    double tt0 = Util::clock();
    float gradient = getGradient(date);
@@ -53,6 +54,7 @@ int main(int argc, const char *argv[]) {
    Tdownscaler.downscale(ifile, ofile);
    writableVariables.push_back(Variable::T);
    double tt1 = Util::clock();
+   std::cout << "Temperature time: " << tt1 - tt0 << std::endl;
 
    //////////
    // Wind //
@@ -62,10 +64,10 @@ int main(int argc, const char *argv[]) {
    ofile.initNewVariable(Variable::U);
    ofile.initNewVariable(Variable::V);
    DownscalerGradient Udownscaler(Variable::U);
-   Udownscaler.setNeighbourhoodRadius(7);
+   Udownscaler.setSearchRadius(7);
    Udownscaler.downscale(ifile, ofile);
    DownscalerGradient Vdownscaler(Variable::V);
-   Vdownscaler.setNeighbourhoodRadius(7);
+   Vdownscaler.setSearchRadius(7);
    Vdownscaler.downscale(ifile, ofile);
 
    if(0) {
@@ -76,14 +78,17 @@ int main(int argc, const char *argv[]) {
    writableVariables.push_back(Variable::U);
    writableVariables.push_back(Variable::V);
    double tw1 = Util::clock();
+   std::cout << "Wind time:        " << tw1 - tw0 << std::endl;
+#endif
 
    ////////////
    // Precip //
    ////////////
    double tp0 = Util::clock();
    ofile.initNewVariable(Variable::PrecipAcc);
-   DownscalerGradient Pdownscaler(Variable::Precip);
-   Pdownscaler.setNeighbourhoodRadius(7);
+   DownscalerSmart Pdownscaler(Variable::Precip);
+   Pdownscaler.setSearchRadius(5);
+   Pdownscaler.setNumSmart(5);
    Pdownscaler.downscale(ifile, ofile);
 
    CalibratorAccumulate Paccumulate(Variable::Precip, Variable::PrecipAcc);
@@ -91,14 +96,12 @@ int main(int argc, const char *argv[]) {
    writableVariables.push_back(Variable::Precip);
    writableVariables.push_back(Variable::PrecipAcc);
    double tp1 = Util::clock();
+   std::cout << "Precip time:      " << tp1 - tp0 << std::endl;
 
    // Output
    double t4 = Util::clock();
    ofile.write(writableVariables);
    double tEnd = Util::clock();
-   std::cout << "Temperature time: " << tt1 - tt0 << std::endl;
-   std::cout << "Wind time:        " << tw1 - tw0 << std::endl;
-   std::cout << "Precip time:      " << tp1 - tp0 << std::endl;
    std::cout << "Writing time:     " << tEnd - t4 << std::endl;
    std::cout << "Total time:       " << tEnd - tStart << std::endl;
    return 0;

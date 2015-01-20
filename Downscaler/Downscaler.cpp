@@ -8,12 +8,21 @@ void Downscaler::downscale(const File& iInput, File& iOutput) const {
    downscaleCore(iInput, iOutput);
 }
 
-Downscaler* Downscaler::getScheme(std::string iType, Variable::Type iVariable, std::string iOptions) {
+Downscaler* Downscaler::getScheme(std::string iType, Variable::Type iVariable, Options& iOptions) {
    if(iType == "nearestneighbour") {
       return new DownscalerNearestNeighbour(iVariable);
    }
    else if(iType == "gradient") {
-      return new DownscalerGradient(iVariable);
+      DownscalerGradient* d = new DownscalerGradient(iVariable);
+      float constantGradient = Util::MV;
+      if(iOptions.getValue("constantGradient", constantGradient)) {
+         d->setConstantGradient(constantGradient);
+      }
+      float searchRadius = Util::MV;
+      if(iOptions.getValue("searchRadius", searchRadius)) {
+         d->setSearchRadius(searchRadius);
+      }
+      return d;
    }
    else if(iType == "smart") {
       return new DownscalerSmart(iVariable);

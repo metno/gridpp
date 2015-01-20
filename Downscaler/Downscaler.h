@@ -1,13 +1,17 @@
 #ifndef DOWNSCALER_H
 #define DOWNSCALER_H
+#include <string>
+#include "../Variable.h"
 class File;
 
 class Downscaler {
    public:
-      Downscaler();
+      Downscaler(Variable::Type iVariable);
       void downscale(const File& iInput, File& iOutput) const;
+      static Downscaler* getScheme(std::string iType, Variable::Type iVariable, std::string iOptions);
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
+      Variable::Type mVariable;
 };
 #include "NearestNeighbour.h"
 #include "Gradient.h"

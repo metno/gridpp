@@ -4,8 +4,7 @@
 #include <math.h>
 
 DownscalerNearestNeighbour::DownscalerNearestNeighbour(Variable::Type iVariable) :
-      Downscaler(),
-      mVariable(iVariable) {
+      Downscaler(iVariable) {
 }
 
 void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput) const {

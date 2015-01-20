@@ -16,7 +16,6 @@ class DownscalerGradient : public Downscaler {
       void setSearchRadius(int iNumPoints);
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      Variable::Type mVariable;
       int mSearchRadius;
       float mConstGradient;
 };

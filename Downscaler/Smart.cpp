@@ -4,10 +4,9 @@
 #include <math.h>
 
 DownscalerSmart::DownscalerSmart(Variable::Type iVariable) :
-      Downscaler(),
+      Downscaler(iVariable),
       mSearchRadius(3),
-      mNumSmart(5),
-      mVariable(iVariable) {
+      mNumSmart(5) {
 }
 
 void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
@@ -120,7 +119,10 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
 
          std::sort(elevDiff.begin(), elevDiff.end(), Util::sort_pair_second<int,float>());
 
-         std::cout << "Smart neighbours for " << i << " " << j << " " << oelev << std::endl;
+         std::stringstream ss;
+         ss << "Smart neighbours for " << i << " " << j << " " << oelev;
+         Util::status(ss.str());
+
          iI[i][j].resize(iNumSmart, Util::MV);
          iJ[i][j].resize(iNumSmart, Util::MV);
          // Use nearest neighbour if all fails
@@ -134,7 +136,9 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
                   int index = elevDiff[n].first;
                   iI[i][j][n] = Ilookup[index];
                   iJ[i][j][n] = Jlookup[index];
-                  std::cout << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second << std::endl;
+                  std::stringstream ss;
+                  ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
+                  Util::status(ss.str());
                }
             }
          }

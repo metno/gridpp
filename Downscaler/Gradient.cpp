@@ -4,10 +4,9 @@
 #include <math.h>
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
-      Downscaler(),
+      Downscaler(iVariable),
       mSearchRadius(3),
-      mConstGradient(Util::MV),
-      mVariable(iVariable) {
+      mConstGradient(Util::MV) {
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {

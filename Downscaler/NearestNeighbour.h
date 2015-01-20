@@ -13,6 +13,5 @@ class DownscalerNearestNeighbour : public Downscaler {
       static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      Variable::Type mVariable;
 };
 #endif

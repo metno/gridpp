@@ -15,6 +15,33 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    mNLat  = dLat->size();
    mNLon  = dLon->size();
 
+   // Retrieve lat/lon/elev
+   long countLat = getNumLat();
+   long countLon = getNumLon();
+   long countElev[3] = {1,getNumLat(), getNumLon()};
+   float* lats = new float[getNumLat()];
+   float* lons = new float[getNumLon()];
+   float* elevs = new float[getNumLat()*getNumLon()];
+   NcVar* vLat = getVar("latitude");
+   NcVar* vLon = getVar("longitude");
+   NcVar* vElev = getVar("altitude");
+   vLat->get(lats, countLat);
+   vLon->get(lons, countLon);
+   vElev->get(elevs, countElev);
+   mLats.resize(getNumLat());
+   mLons.resize(getNumLat());
+   mElevs.resize(getNumLat());
+   for(int i = 0; i < getNumLat(); i++) {
+      mLats[i].resize(getNumLon());
+      mLons[i].resize(getNumLon());
+      mElevs[i].resize(getNumLon());
+      for(int j = 0; j < getNumLon(); j++) {
+         mLats[i][j] = lats[i];
+         mLons[i][j] = lons[i];
+         mElevs[i][j] = elevs[i*getNumLon()+j];
+      }
+   }
+
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
@@ -129,8 +156,37 @@ bool FileEc::isValid(std::string iFilename) {
    bool status = false;
    NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
    if(file.is_valid()) {
+      status = hasDim(file, "time") && hasDim(file, "ensemble_member") && hasDim(file, "longitude") && hasDim(file, "latitude") &&
+               hasVar(file, "latitude") && hasVar(file, "longitude");
       file.close();
-      status = true;
    }
    return status;
+}
+
+vec2 FileEc::getLats() const {
+   return mLats;
+}
+vec2 FileEc::getLons() const {
+   return mLons;
+}
+vec2 FileEc::getElevs() const {
+   return mElevs;
+}
+vec2 FileEc::getLatLonVariable(std::string iVar) const {
+   NcVar* var = getVar(iVar);
+   long count[2] = {getNumLat(), getNumLon()};
+   float* values = new float[getNumLon()*getNumLat()];
+   var->get(values, count);
+   vec2 grid;
+   grid.resize(getNumLat());
+   for(int i = 0; i < getNumLat(); i++) {
+      grid[i].resize(getNumLon());
+      for(int j = 0; j < getNumLon(); j++) {
+         int index = i*getNumLon() + j;
+         grid[i][j] = values[index];
+         assert(index < getNumLon()*getNumLat());
+      }
+   }
+   delete[] values;
+   return grid;
 }

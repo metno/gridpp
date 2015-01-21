@@ -18,20 +18,22 @@ class FileEc : public FileNetcdf {
       int getNumEns() const {return mNEns;};
       int getNumTime() const {return mNTime;};
 
-      vec2 getLats() const {};
-      vec2 getLons() const {};
-      vec2 getElevs() const {};
+      vec2 getLats() const;
+      vec2 getLons() const;
+      vec2 getElevs() const;
 
       std::string getVariableName(Variable::Type iVariable) const;
       static bool isValid(std::string iFilename);
+      std::string name() const {return "Ec";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
-      std::vector<float> mLats;
-      std::vector<float> mLons;
-      std::vector<float> mElevs;
+      vec2 mLats;
+      vec2 mLons;
+      vec2 mElevs;
 
       std::vector<int> mTimes;
+      vec2 getLatLonVariable(std::string iVariable) const;
 
       int mNTime;
       int mNEns;

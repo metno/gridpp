@@ -27,16 +27,18 @@ namespace {
 
    TEST_F(SetupTest, test1) {
       std::vector<std::string> args;
+      args.push_back("input");
+      args.push_back("output");
       args.push_back("-v");
       args.push_back("T");
       args.push_back("-c");
       args.push_back("zaga");
+      args.push_back("parameters=parameters.txt");
       args.push_back("-c");
       args.push_back("accumulate");
       args.push_back("-d");
       args.push_back("smart");
-      args.push_back("searchRadius");
-      args.push_back("11");
+      args.push_back("searchRadius=11");
 
       MetSetup setup;
       MetSetup::getSetup(args, setup);

@@ -28,7 +28,8 @@ class Util {
       static double radiusEarth;
       static int getDate(time_t iUnixTime);
       static int getCurrentDate();
-      static int calcDate(int iDate, int iAddHours);
+      static int calcDate(int iDate, float iAddHours);
+      // Sorts from smallest to largest
       template<class T1, class T2> struct sort_pair_second {
          bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {
             return left.second < right.second;

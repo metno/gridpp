@@ -97,7 +97,7 @@ int Util::getCurrentDate() {
     return today.year()*10000 + today.month()*100 + today.day();
 }
 
-int Util::calcDate(int iDate, int iAddHours) {
+int Util::calcDate(int iDate, float iAddHours) {
    int year  = floor(iDate / 10000);
    int month = floor(iDate % 10000)/100;
    int day   = floor(iDate % 100);

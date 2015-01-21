@@ -19,8 +19,8 @@ int main(int argc, const char *argv[]) {
       std::cout << "usage:  postprocess.exe input output [-v var [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
-      std::cout << "   input         Netcdf file with AROME data." << std::endl;
-      std::cout << "   output        Netcdf file with AROME data." << std::endl;
+      std::cout << "   input         Input file with NetCDF data." << std::endl;
+      std::cout << "   output        Output file with NetCDF data. Must contain lat/lon information." << std::endl;
       std::cout << "   -v var        Variable." << std::endl;
       std::cout << "   -d downscaler One of the downscalers below." << std::endl;
       std::cout << "   -c calibrator One of the calibrators below." << std::endl;
@@ -39,11 +39,12 @@ int main(int argc, const char *argv[]) {
       std::cout << CalibratorZaga::description();
       std::cout << CalibratorCloud::description();
       std::cout << CalibratorAccumulate::description();
+      std::cout << CalibratorSmooth::description();
       return 1;
    }
    Util::setShowError(true);
    Util::setShowWarning(true);
-   Util::setShowStatus(true);
+   Util::setShowStatus(false);
 
    // Retrieve setup
    Setup setup;
@@ -55,6 +56,8 @@ int main(int argc, const char *argv[]) {
    if(!success) {
       Util::error("Could not configure setup");
    }
+   std::cout << "Input type:  " << setup.inputFile->name() << std::endl;
+   std::cout << "Output type: " << setup.outputFile->name() << std::endl;
 
    // Post-process file
    std::vector<Variable::Type> variables;

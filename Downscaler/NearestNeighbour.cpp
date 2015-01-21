@@ -200,6 +200,6 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
 
 std::string DownscalerNearestNeighbour::description() {
    std::stringstream ss;
-   ss << "   -d nearestNeighbour" << std::endl;
+   ss << "   -d nearestNeighbour          Uses the nearest gridpoint in curved distance" << std::endl;
    return ss.str();
 }

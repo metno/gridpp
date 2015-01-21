@@ -92,8 +92,11 @@ void DownscalerGradient::setSearchRadius(int iNumPoints) {
 
 std::string DownscalerGradient::description() {
    std::stringstream ss;
-   ss << "   -d gradient" << std::endl;
-   ss << "      constantGradient=undef    Fix gradient to this value" << std::endl;
-   ss << "      searchRadius=3            Compute gradient within this radius (gridpoints)" << std::endl;
+   ss << "   -d gradient                  Adjusts the nearest neighbour based on the elevation difference" << std::endl;
+   ss << "                                to the output gridpoint." << std::endl;
+   ss << "      constantGradient=undef    Fix gradient to this value. If unspecified, computes the gradient" << std::endl;
+   ss << "                                by linear regression of points in a neighbourhood." << std::endl;
+   ss << "      searchRadius=3            Compute gradient in a neighbourhood box of points within +- radius" << std::endl;
+   ss << "                                in both east-west and north-south direction." << std::endl;
    return ss.str();
 }

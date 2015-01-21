@@ -6,17 +6,17 @@ std::string Variable::getTypeName(Type iType) {
    if(iType == Precip)
       return "Precip";
    else if(iType == PrecipAcc)
-      return "Accumulated precip";
+      return "PrecipAcc";
    else if(iType == Cloud)
-      return "Cloud cover";
+      return "Cloud";
    else if(iType == T)
-      return "Temperature";
+      return "T";
    else if(iType == U)
-      return "U-wind";
+      return "U";
    else if(iType == V)
-      return "V-wind";
+      return "V";
    else if(iType == W)
-      return "Wind speed";
+      return "W";
    else
       return "Unknown";
 }
@@ -37,7 +37,7 @@ Variable::Type Variable::getType(std::string iName) {
    else if(iName == "W")
       return W;
    else
-      Util::error("Undefined variable type");
+      Util::error("Undefined variable type: " + iName);
 }
 
 std::string Variable::description() {

@@ -1,11 +1,11 @@
 CC      = g++
-CFLAGS  = -g -pg -rdynamic #-fprofile-arcs
-#CFLAGS  = -O3 -fopenmp
-SRC     = $(wildcard *.cpp)
-HEADERS = $(wildcard *.h)
-CALSRC  = $(wildcard Calibrator/*.cpp)
-FILESRC = $(wildcard File/*.cpp)
-DOWNSRC = $(wildcard Downscaler/*.cpp)
+#CFLAGS  = -g -pg -rdynamic #-fprofile-arcs
+CFLAGS  = -O3 -fopenmp
+SRC     = $(wildcard src/*.cpp)
+HEADERS = $(wildcard src/*.h)
+CALSRC  = $(wildcard src/Calibrator/*.cpp)
+FILESRC = $(wildcard src/File/*.cpp)
+DOWNSRC = $(wildcard src/Downscaler/*.cpp)
 ALLOBJS = $(SRC:.cpp=.o) $(CALSRC:.cpp=.o) $(FILESRC:.cpp=.o) $(DOWNSRC:.cpp=.o)
 ALLHEADERS = $(ALLOBJS:.o=.h)
 COREOBJS= $(filter-out Test.o,$(ALLOBJS))
@@ -16,32 +16,29 @@ LIBS    = -lnetcdf_c++ -lgtest
 LFLAGS  = -L/usr/lib -L/usr/local/boost/lib/ -L/home/thomasn/local/lib/
 INCS    = makefile $(HEADERS)
 
-.PHONY: tags
+.PHONY: tags count
 
 default: precipCal.exe
 
 %.o : %.cpp $(INCS)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
-precipCal.exe: $(COREOBJS) Driver/PrecipCal.o makefile
-	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/PrecipCal.o $(LIBS) -o $@
+postprocess.exe: $(COREOBJS) src/Driver/PostProcess.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) src/Driver/PostProcess.o $(LIBS) -o $@
 
-statkraft.exe: $(COREOBJS) Driver/Statkraft.o makefile
-	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/Statkraft.o $(LIBS) -o $@
-
-postprocess.exe: $(COREOBJS) Driver/PostProcess.o makefile
-	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/PostProcess.o $(LIBS) -o $@
-
-nn.exe: $(COREOBJS) Driver/TestNearestNeighbours.o makefile
-	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/TestNearestNeighbours.o $(LIBS) -o $@
+nn.exe: $(COREOBJS) src/Driver/TestNearestNeighbours.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) src/Driver/TestNearestNeighbours.o $(LIBS) -o $@
 
 test.exe: $(TESTOBJS) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(TESTOBJS) $(LIBS) -o $@
 
 test: $(TESTEXE)
 
-Testing/%.exe: Testing/%.cpp $(INCS) $(COREOBJS)
+testing/%.exe: src/Testing/%.cpp $(INCS) $(COREOBJS)
 	$(CC) $(CFLAGS) $(COREOBJS) $< $(LFLAGS) -lgtest $(LIBS) -o $@
+
+count:
+	@wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
 
 clean: 
 	rm *.o */*.o gmon.out *.gcda precipCal.exe test.exe Testing/*.exe Testing/*.o

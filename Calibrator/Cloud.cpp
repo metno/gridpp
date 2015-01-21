@@ -42,3 +42,8 @@ void CalibratorCloud::calibrateCore(File& iFile) const {
       }
    }
 }
+std::string CalibratorCloud::description() {
+   std::stringstream ss;
+   ss << "   -c cloud" << std::endl;
+   return ss.str();
+}

@@ -1,5 +1,6 @@
 #include "Variable.h"
 #include "Util.h"
+#include <sstream>
 
 std::string Variable::getTypeName(Type iType) {
    if(iType == Precip)
@@ -37,4 +38,15 @@ Variable::Type Variable::getType(std::string iName) {
       return W;
    else
       Util::error("Undefined variable type");
+}
+
+std::string Variable::description() {
+   std::stringstream ss;
+   ss << "   -v T                         Temperature" << std::endl;
+   ss << "   -v Precip                    Hourly precip" << std::endl;
+   ss << "   -v W                         Wind speed" << std::endl;
+   ss << "   -v U                         U-wind" << std::endl;
+   ss << "   -v V                         V-wind" << std::endl;
+   ss << "   -v Cloud                     Cloud cover" << std::endl;
+   return ss.str();
 }

@@ -6,7 +6,7 @@
 #include "../File/File.h"
 #include "../ParameterFile.h"
 #include "../Parameters.h"
-CalibratorZaga::CalibratorZaga(const ParameterFile& iParameterFile, Variable::Type iMainPredictor):
+CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor):
       Calibrator(),
       mParameterFile(iParameterFile),
       mMainPredictor(iMainPredictor),
@@ -24,7 +24,7 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      Parameters parameters = mParameterFile.getParameters(t);
+      Parameters parameters = mParameterFile->getParameters(t);
       Field& precip = *iFile.getField(Variable::Precip, t);
 
       #pragma omp parallel for
@@ -175,4 +175,12 @@ void CalibratorZaga::setFracThreshold(float iFraction) {
       Util::error(ss.str());
    }
    mFracThreshold = iFraction;
+}
+
+std::string CalibratorZaga::description() {
+   std::stringstream ss;
+   ss << "   -c zaga                      Zero-adjusted gamma distribution" << std::endl;
+   ss << "      parameters=undef          Required. Read parameters from this file" << std::endl;
+   ss << "      fracThreshold=0.5         Threshold (mm) defining precip/no-precip" << std::endl;
+   return ss.str();
 }

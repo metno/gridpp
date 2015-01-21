@@ -11,7 +11,6 @@
 class FileEc : public FileNetcdf {
    public:
       FileEc(std::string iFilename, bool iReadOnly=false);
-      ~FileEc();
 
       // Dimension sizes
       int getNumLat() const {return mNLat;};
@@ -19,7 +18,12 @@ class FileEc : public FileNetcdf {
       int getNumEns() const {return mNEns;};
       int getNumTime() const {return mNTime;};
 
+      vec2 getLats() const {};
+      vec2 getLons() const {};
+      vec2 getElevs() const {};
+
       std::string getVariableName(Variable::Type iVariable) const;
+      static bool isValid(std::string iFilename);
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;

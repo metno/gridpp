@@ -6,10 +6,11 @@
 // Accumlates a certain variable
 class CalibratorAccumulate : public Calibrator {
    public:
-      CalibratorAccumulate(Variable::Type iFrom, Variable::Type iTo);
+      CalibratorAccumulate(Variable::Type iVariable);
+      static std::string description();
+      std::string name() const {return "Accumulate";};
    private:
       void calibrateCore(File& iFile) const;
-      Variable::Type mFrom;
-      Variable::Type mTo;
+      Variable::Type mVariable;
 };
 #endif

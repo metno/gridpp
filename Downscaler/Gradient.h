@@ -14,6 +14,8 @@ class DownscalerGradient : public Downscaler {
       //! Calculate gradient in a neighbourhood of points within +- iNumPoints
       //! in each direction.
       void setSearchRadius(int iNumPoints);
+      static std::string description();
+      std::string name() const {return "gradient";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
       int mSearchRadius;

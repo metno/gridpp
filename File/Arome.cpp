@@ -217,3 +217,13 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
 int FileArome::getDate() const {
    return mDate;
 }
+
+bool FileArome::isValid(std::string iFilename) {
+   bool status = false;
+   NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
+   if(file.is_valid()) {
+      file.close();
+      status = true;
+   }
+   return status;
+}

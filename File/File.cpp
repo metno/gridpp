@@ -7,6 +7,19 @@
 
 File::File(std::string iFilename) : mFilename(iFilename) {}
 
+File* File::getScheme(std::string iFilename) {
+   File* file;
+   // TODO:
+   // Autodetect type based on content
+   if(FileArome::isValid(iFilename)) {
+      file = new FileArome(iFilename);
+   }
+   else if(FileEc::isValid(iFilename)) {
+      file = new FileEc(iFilename);
+   }
+   return file;
+}
+
 FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
    // Determine if values have been cached
    std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
@@ -137,7 +150,9 @@ std::string File::getFilename() const {
 }
 
 void File::initNewVariable(Variable::Type iVariable) {
-   for(int t = 0; t < getNumTime(); t++) {
-      addField(getEmptyField(), iVariable, t);
+   if(!hasVariable(iVariable)) {
+      for(int t = 0; t < getNumTime(); t++) {
+         addField(getEmptyField(), iVariable, t);
+      }
    }
 }

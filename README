@@ -48,3 +48,6 @@ Software structure
 | Read | Write|
 |      | T    |
 ---------------
+
+Potential universal driver
+./postprocess.exe <inputFile> <outputFile> -v variable -d downscaler -c calibrator -v variable2 -downscaler -c calibrator

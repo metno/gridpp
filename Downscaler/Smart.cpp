@@ -153,3 +153,15 @@ int DownscalerSmart::getNumSearchPoints() const {
 int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
    return (iSearchRadius*2+1)*(iSearchRadius*2+1);
 }
+
+int  DownscalerSmart::getSearchRadius() const {
+   return mSearchRadius;
+}
+
+std::string DownscalerSmart::description() {
+   std::stringstream ss;
+   ss << "   -d smart" << std::endl;
+   ss << "      searchRadius=3            Search for smart neighbours within this radius (gridpoints)" << std::endl;
+   ss << "      numSmart=5                Average this many smart neighbours" << std::endl;
+   return ss.str();
+}

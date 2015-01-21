@@ -7,17 +7,7 @@
 #include "../Downscaler/Downscaler.h"
 #include "../Util.h"
 #include "../Options.h"
-struct VariableConfiguration {
-   Variable::Type variable;
-   Downscaler* downscaler;
-   std::vector<Calibrator*> calibrators;
-};
-struct Setup {
-   File* inputFile;
-   File* outputFile;
-   std::vector<VariableConfiguration> variableConfigurations;
-};
-bool getSetup(int argc, const char *argv[], Setup& iSetup);
+#include "../Setup.h"
 
 int main(int argc, const char *argv[]) {
    double start = Util::clock();
@@ -26,22 +16,42 @@ int main(int argc, const char *argv[]) {
    if(argc < 3) {
       std::cout << "Post-processes gridded forecasts" << std::endl;
       std::cout << std::endl;
-      std::cout << "usage:  postprocess.exe input output [-v var [-d downscaler [-dp dParFile]] [-c calibrator [-cp cParFile]]*]+" << std::endl;
+      std::cout << "usage:  postprocess.exe input output [-v var [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Netcdf file with AROME data." << std::endl;
       std::cout << "   output        Netcdf file with AROME data." << std::endl;
-      std::cout << "   parameters    Text file with parameters." << std::endl;
-      std::cout << "   -v            Verbose. Show status messages." << std::endl;
+      std::cout << "   -v var        Variable." << std::endl;
+      std::cout << "   -d downscaler One of the downscalers below." << std::endl;
+      std::cout << "   -c calibrator One of the calibrators below." << std::endl;
+      std::cout << "   options       Options of the form key=value" << std::endl;
+
+      std::cout << std::endl;
+      std::cout << "Variables:" << std::endl;
+      std::cout << Variable::description();
+      std::cout << std::endl;
+      std::cout << "Downscalers with options (and default values):" << std::endl;
+      std::cout << DownscalerNearestNeighbour::description();
+      std::cout << DownscalerGradient::description();
+      std::cout << DownscalerSmart::description();
+      std::cout << std::endl;
+      std::cout << "Calibrators with options (and default values):" << std::endl;
+      std::cout << CalibratorZaga::description();
+      std::cout << CalibratorCloud::description();
+      std::cout << CalibratorAccumulate::description();
       return 1;
    }
    Util::setShowError(true);
    Util::setShowWarning(true);
-   Util::setShowStatus(false);
+   Util::setShowStatus(true);
 
    // Retrieve setup
    Setup setup;
-   bool success = getSetup(argc, argv, setup);//ifile, ofile, variables, downscalers, calibrators);
+   std::vector<std::string> args;
+   for(int i = 1; i < argc; i++) {
+      args.push_back(argv[i]);
+   }
+   bool success = Setup::getSetup(args, setup);
    if(!success) {
       Util::error("Could not configure setup");
    }
@@ -53,15 +63,20 @@ int main(int argc, const char *argv[]) {
       VariableConfiguration varconf = setup.variableConfigurations[v];
       Variable::Type variable = varconf.variable;
       variables.push_back(variable);
+      setup.outputFile->initNewVariable(variable);
+
+      std::cout << "Processing " << Variable::getTypeName(variable) << std::endl;
 
       // Downscale
+      std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;
       varconf.downscaler->downscale(*setup.inputFile, *setup.outputFile);
       for(int c = 0; c < varconf.calibrators.size(); c++) {
          // Calibrate
+         std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
          varconf.calibrators[c]->calibrate(*setup.outputFile);
       }
       double e = Util::clock();
-      std::cout << "Processing " << Variable::getTypeName(variable) << ": " << e-s << " seconds" << std::endl;
+      std::cout << "   " << e-s << " seconds" << std::endl;
    }
 
    // Write to output
@@ -70,152 +85,4 @@ int main(int argc, const char *argv[]) {
    double e = Util::clock();
    std::cout << "Writing file: " << e-s << " seconds" << std::endl;
    std::cout << "Total time:   " << e-start << " seconds" << std::endl;
-}
-
-bool getSetup(std::vector<std::string> argv, Setup& iSetup) {
-   // Implement a finite state machine
-   enum State {START = 0, VAR = 1, NEWVAR = 2, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
-   State state = START;
-   Variable::Type variable;
-   Options dOptions;
-   Options cOptions;
-   int index = 0;
-   std::string downscaler = "nearestneighbour";
-   std::string calibrator = "";
-   std::vector<Calibrator*> calibrators;
-   while(true) {
-      if(state == START) {
-         if(argv[index] == "-v") {
-            state = VAR;
-            index++;
-         }
-         else {
-            state = ERROR;
-         }
-      }
-      else if(state == VAR) {
-         variable = Variable::getType(argv[index]);
-         index++;
-         if(argv.size() == index) {
-            state = END;
-         }
-         else if(argv[index] == "-d") {
-            state = DOWN;
-         }
-         else if(argv[index] == "-c") {
-            state = CAL;
-         }
-         else {
-            state = ERROR;
-         }
-         index++;
-      }
-      else if(state = NEWVAR) {
-         Downscaler* d = Downscaler::getScheme(downscaler, variable, dOptions);
-         VariableConfiguration varconf;
-         varconf.variable = variable;
-         varconf.downscaler = d;
-         varconf.calibrators = calibrators;
-
-         // Reset to defaults
-         downscaler = "nearestneighbour";
-         dOptions.clear();
-         calibrators.clear();
-
-         if(argv.size() < index) {
-            state = END;
-         }
-         else {
-            state = VAR;
-         }
-      }
-      else if(state == DOWN) {
-         downscaler = argv[index];
-         index++;
-         if(argv[index] == "-c") {
-            state = CAL;
-         }
-         else if(argv[index] == "-v") {
-            state = NEWVAR;
-            index++;
-         }
-         else if(argv.size() < index) {
-            state = NEWVAR;
-         }
-         else {
-            state = DOWNOPT;
-         }
-      }
-      else if(state == DOWNOPT) {
-         if(argv[index] == "-c") {
-            state = CAL;
-         }
-         else if(argv[index] == "-v") {
-            state = NEWVAR;
-            index++;
-         }
-         else if(argv.size() < index) {
-            state = NEWVAR;
-         }
-         else {
-            // Process downscaler options
-            if(argv.size() < index+1) {
-               dOptions.addOption(argv[index], argv[index+1]);
-               index++;
-               index++;
-            }
-            else {
-               state = ERROR;
-            }
-         }
-      }
-      else if(state == CAL) {
-         calibrator = argv[index];
-         index++;
-         if(argv[index] == "-v") {
-            state = NEWVAR;
-            index++;
-         }
-         else if(argv[index] == "-c") {
-            state = NEWCAL;
-            index++;
-         }
-         else {
-            state = CALOPT;
-         }
-      }
-      else if(state == CALOPT) {
-         if(argv[index] == "-v") {
-            state = NEWVAR;
-         }
-         else if(argv[index] ==  "-c") {
-            state = NEWCAL;
-         }
-         else {
-            // Process calibrator options
-            if(argv.size() < index+1) {
-               cOptions.addOption(argv[index], argv[index+1]);
-               index++;
-               index++;
-            }
-            else {
-               state = ERROR;
-            }
-         }
-      }
-      else if(state == NEWCAL) {
-         Calibrator* c = Calibrator::getScheme(calibrator, variable, cOptions);
-         calibrators.push_back(c);
-
-         // Reset
-         calibrator = "";
-         cOptions.clear();
-      }
-      else if(state == END) {
-         break;
-      }
-      else if(state == ERROR) {
-         Util::error("error in FSM");
-      }
-   }
 }

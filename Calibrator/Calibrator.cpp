@@ -3,9 +3,53 @@
 #include <math.h>
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
+#include "../Options.h"
 
 Calibrator::Calibrator() {
 
+}
+Calibrator* Calibrator::getScheme(std::string iType, Options& iOptions) {
+
+   if(iType == "zaga") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("Calibrator 'zaga' needs parameters");
+      }
+
+      ParameterFile* parFile = new ParameterFile(parFilename);
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'zaga' needs variable");
+      }
+      CalibratorZaga* c = new CalibratorZaga(parFile, Variable::getType(variable));
+
+      // Optional settings
+      float fracThreshold;
+      if(iOptions.getValue("fracThreshold", fracThreshold)) {
+         c->setFracThreshold(fracThreshold);
+      }
+      return c;
+   }
+   else if(iType == "cloud") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'cloud' needs variable");
+      }
+      CalibratorCloud* c = new CalibratorCloud(Variable::Precip, Variable::getType(variable));
+      return c;
+   }
+   else if(iType == "accumulate") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'accumulate' needs variable");
+      }
+      CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
+      return c;
+   }
+   else {
+      Util::error("Could not instantiate calibrator of type '" + iType + "'");
+      return NULL;
+   }
 }
 void Calibrator::calibrate(File& iFile) const {
    calibrateCore(iFile);

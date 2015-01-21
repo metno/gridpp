@@ -89,3 +89,11 @@ void DownscalerGradient::setConstantGradient(float iGradient) {
 void DownscalerGradient::setSearchRadius(int iNumPoints) {
    mSearchRadius = iNumPoints;
 }
+
+std::string DownscalerGradient::description() {
+   std::stringstream ss;
+   ss << "   -d gradient" << std::endl;
+   ss << "      constantGradient=undef    Fix gradient to this value" << std::endl;
+   ss << "      searchRadius=3            Compute gradient within this radius (gridpoints)" << std::endl;
+   return ss.str();
+}

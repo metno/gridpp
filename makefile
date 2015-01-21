@@ -29,6 +29,9 @@ precipCal.exe: $(COREOBJS) Driver/PrecipCal.o makefile
 statkraft.exe: $(COREOBJS) Driver/Statkraft.o makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/Statkraft.o $(LIBS) -o $@
 
+postprocess.exe: $(COREOBJS) Driver/PostProcess.o makefile
+	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/PostProcess.o $(LIBS) -o $@
+
 nn.exe: $(COREOBJS) Driver/TestNearestNeighbours.o makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(COREOBJS) Driver/TestNearestNeighbours.o $(LIBS) -o $@
 

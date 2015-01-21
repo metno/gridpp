@@ -24,6 +24,7 @@ class FileArome : public FileNetcdf {
       vec2 getLons() const;
       vec2 getElevs() const;
       int  getDate() const;
+      static bool isValid(std::string iFilename);
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;

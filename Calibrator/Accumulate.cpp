@@ -1,10 +1,9 @@
 #include "Accumulate.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorAccumulate::CalibratorAccumulate(Variable::Type iFrom, Variable::Type iTo) :
+CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable) :
       Calibrator(),
-      mFrom(iFrom),
-      mTo(iTo) {
+      mVariable(iVariable) {
 }
 void CalibratorAccumulate::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
@@ -16,7 +15,7 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
    std::vector<FieldPtr> fields(nTime);
    std::vector<FieldPtr> fieldsAcc(nTime);
    for(int t = 0; t < nTime; t++) {
-      fields[t]    = iFile.getField(mFrom, t);
+      fields[t]    = iFile.getField(mVariable, t);
       fieldsAcc[t] = iFile.getEmptyField();
    }
 
@@ -41,6 +40,19 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
             }
          }
       }
-      iFile.addField(fieldsAcc[t], mTo, t);
+
+      Variable::Type variableAcc;
+      if(mVariable == Variable::Precip) {
+         variableAcc = Variable::PrecipAcc;
+      }
+      else {
+         Util::error("Cannot accumulate " + Variable::getTypeName(mVariable));
+      }
+      iFile.addField(fieldsAcc[t], variableAcc, t);
    }
+}
+std::string CalibratorAccumulate::description() {
+   std::stringstream ss;
+   ss << "   -c accumulate" << std::endl;
+   return ss.str();
 }

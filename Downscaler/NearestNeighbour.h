@@ -11,6 +11,8 @@ class DownscalerNearestNeighbour : public Downscaler {
       static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
       // Faster method: Assume lats/lons are sorted
       static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
+      static std::string description();
+      std::string name() const {return "nearestNeighbour";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
 };

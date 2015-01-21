@@ -15,6 +15,7 @@ class File {
    public:
       File(std::string iFilename);
       ~File();
+      static File* getScheme(std::string iFilename);
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
       //! Get a new field initialized with missing values

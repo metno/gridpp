@@ -9,6 +9,7 @@ class ParameterFile {
       ParameterFile(std::string iFilename);
       Parameters getParameters(int iTime) const;
       void       setParameters(Parameters iParameters, int iTime);
+      int        getSize() const;
    private:
       std::map<int, Parameters> mParameters; // Offset, Parameters
       static const int mNumParameters = 8;

@@ -7,6 +7,8 @@
 class CalibratorCloud : public Calibrator {
    public:
       CalibratorCloud(Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);
+      static std::string description();
+      std::string name() const {return "Cloud";};
    private:
       void calibrateCore(File& iFile) const;
       Variable::Type mPrecipType;

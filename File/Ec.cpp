@@ -58,9 +58,6 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
    return field;
 }
 
-FileEc::~FileEc() {
-}
-
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
@@ -128,3 +125,12 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
    return "";
 }
 
+bool FileEc::isValid(std::string iFilename) {
+   bool status = false;
+   NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
+   if(file.is_valid()) {
+      file.close();
+      status = true;
+   }
+   return status;
+}

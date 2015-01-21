@@ -28,8 +28,9 @@ int main(int argc, const char *argv[]) {
    std::string WparameterFilename = "test.txt";//argv[3];
 
    for(int i = 3; i < argc; i++) {
-      if(strcmp(argv[i],"--debug"))
+      if(!strcmp(argv[i],"-v")) {
          Util::setShowStatus(true);
+      }
    }
 
    Util::setShowError(true);
@@ -44,7 +45,7 @@ int main(int argc, const char *argv[]) {
    /////////////////
    // Temperature //
    /////////////////
-#if 1
+#if 0
    // Downscaling
    double tt0 = Util::clock();
    float gradient = getGradient(date);
@@ -87,7 +88,8 @@ int main(int argc, const char *argv[]) {
    double tp0 = Util::clock();
    ofile.initNewVariable(Variable::PrecipAcc);
    DownscalerSmart Pdownscaler(Variable::Precip);
-   Pdownscaler.setSearchRadius(5);
+   // DownscalerNearestNeighbour Pdownscaler(Variable::Precip);
+   Pdownscaler.setSearchRadius(3);
    Pdownscaler.setNumSmart(5);
    Pdownscaler.downscale(ifile, ofile);
 

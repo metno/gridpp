@@ -163,3 +163,9 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
       }
    }
 }
+
+std::string DownscalerNearestNeighbour::description() {
+   std::stringstream ss;
+   ss << "   -d nearestNeighbour" << std::endl;
+   return ss.str();
+}

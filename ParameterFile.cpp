@@ -2,10 +2,11 @@
 #include <fstream>
 #include <sstream>
 #include "Util.h"
+#include <assert.h>
 
 ParameterFile::ParameterFile(std::string iFilename) : 
       mFilename(iFilename) {
-   std::ifstream ifs(iFilename.c_str(), std::ifstream::in);
+   std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
    if(!ifs.good()) {
       Util::error("Parameter file '" + iFilename + "' does not exist");
    }
@@ -33,9 +34,12 @@ ParameterFile::ParameterFile(std::string iFilename) :
          mParameters[time] = parameters;
       }
    }
+   ifs.close();
    std::stringstream ss;
-   ss << "Reading " << mFilename << ". Found " << mParameters.size() << " parameter sets.";
+   ss << "Reading " << mFilename << ". Found " << getSize() << " parameter sets.";
    Util::status(ss.str());
+
+   Parameters par = getParameters(0);
 }
 Parameters ParameterFile::getParameters(int iTime) const {
    if(mParameters.size() == 1) {
@@ -56,4 +60,8 @@ Parameters ParameterFile::getParameters(int iTime) const {
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
    mParameters[iTime] = iParameters;
+}
+
+int ParameterFile::getSize() const {
+   return mParameters.size();
 }

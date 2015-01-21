@@ -11,6 +11,10 @@ Parameters::Parameters() {
 
 }
 
+std::vector<float> Parameters::getValues() const {
+   return mValues;
+}
+
 float const& Parameters::operator[](unsigned int i) const {
    if(i >= mValues.size()) {
       std::stringstream ss;

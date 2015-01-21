@@ -23,6 +23,10 @@ class FileNetcdf : public File {
 
       NcDim* getDim(std::string iDim) const;
       NcVar* getVar(std::string iVar) const;
+      bool   hasDim(std::string iDim) const;
+      bool   hasVar(std::string iVar) const;
+      static bool   hasDim(const NcFile& iFile, std::string iDim);
+      static bool   hasVar(const NcFile& iFile, std::string iVar);
       static float getMissingValue(const NcVar* iVar);
 };
 #include "Ec.h"

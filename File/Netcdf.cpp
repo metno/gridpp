@@ -63,6 +63,24 @@ NcVar* FileNetcdf::getVar(std::string iVar) const {
    return var;
 }
 
+bool FileNetcdf::hasDim(std::string iDim) const {
+   return hasDim(mFile, iDim);
+}
+bool FileNetcdf::hasVar(std::string iVar) const {
+   return hasVar(mFile, iVar);
+}
+
+bool FileNetcdf::hasDim(const NcFile& iFile, std::string iDim) {
+   NcError q(NcError::silent_nonfatal); 
+   NcDim* dim = iFile.get_dim(iDim.c_str());
+   return dim != NULL;
+}
+bool FileNetcdf::hasVar(const NcFile& iFile, std::string iVar) {
+   NcError q(NcError::silent_nonfatal); 
+   NcVar* var = iFile.get_var(iVar.c_str());
+   return var != NULL;
+}
+
 float FileNetcdf::getMissingValue(const NcVar* iVar) {
    NcError q(NcError::silent_nonfatal); 
    NcAtt* fillValueAtt = iVar->get_att("_FillValue");

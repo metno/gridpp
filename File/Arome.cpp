@@ -222,8 +222,9 @@ bool FileArome::isValid(std::string iFilename) {
    bool status = false;
    NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
    if(file.is_valid()) {
-      file.close();
-      status = true;
+      status = hasDim(file, "time") && hasDim(file, "x") && hasDim(file, "y") &&
+               hasVar(file, "latitude") && hasVar(file, "longitude");
    }
+   file.close();
    return status;
 }

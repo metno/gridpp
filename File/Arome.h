@@ -24,7 +24,9 @@ class FileArome : public FileNetcdf {
       vec2 getLons() const;
       vec2 getElevs() const;
       int  getDate() const;
+      // Is the file readable in this format?
       static bool isValid(std::string iFilename);
+      std::string name() const {return "Arome";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;

@@ -44,6 +44,23 @@ void DownscalerNearestNeighbour::getNearestNeighbour(const File& iFrom, const Fi
 
    iI.resize(nLat);
    iJ.resize(nLat);
+
+   // Check if the grid is the same
+   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+      if(ilats == olats && ilons == olons) {
+         for(int i = 0; i < nLat; i++) {
+            iI[i].resize(nLon, 0);
+            iJ[i].resize(nLon, 0);
+            for(int j = 0; j < nLon; j++) {
+               iI[i][j] = i;
+               iJ[i][j] = j;
+            }
+         }
+      }
+      std::cout << "Grids are identical, short cut in finding nearest neighbours" << std::endl;
+      return;
+   }
+
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
       iI[i].resize(nLon, 0);
@@ -82,6 +99,23 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
 
    iI.resize(nLat);
    iJ.resize(nLat);
+
+   // Check if the grid is the same
+   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+      if(ilats == olats && ilons == olons) {
+         for(int i = 0; i < nLat; i++) {
+            iI[i].resize(nLon, 0);
+            iJ[i].resize(nLon, 0);
+            for(int j = 0; j < nLon; j++) {
+               iI[i][j] = i;
+               iJ[i][j] = j;
+            }
+         }
+      }
+      std::cout << "Grids are identical, short cut in finding nearest neighbours" << std::endl;
+      return;
+   }
+
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
       int I = 0;

@@ -83,7 +83,7 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
    if(isValid) {
       std::vector<float> afterCopy = iAfter;
       // Sort values so that the rank of a member is the same before and after calibration
-      std::sort(pairs.begin(), pairs.end(), sort_pair_first<float,int>());
+      std::sort(pairs.begin(), pairs.end(), Util::sort_pair_first<float,int>());
       for(int e = 0; e < N; e++) {
          int ei = pairs[e].second;
          float valueCal = afterCopy[e];

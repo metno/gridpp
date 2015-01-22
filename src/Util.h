@@ -29,6 +29,9 @@ class Util {
       static int getDate(time_t iUnixTime);
       static int getCurrentDate();
       static int calcDate(int iDate, float iAddHours);
+      static std::vector<std::string> split(std::string iString);
+      static float logit(float p);
+      static float invLogit(float x);
       // Sorts from smallest to largest
       template<class T1, class T2> struct sort_pair_second {
          bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {

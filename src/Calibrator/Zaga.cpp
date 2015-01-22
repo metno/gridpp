@@ -165,7 +165,7 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParamet
    float c = iParameters[6];
    float d = iParameters[7];
    float logit = a + b * iEnsMean + c * iEnsFrac + d * pow(iEnsMean, 1.0/3);
-   float P0 = invLogit(logit);
+   float P0 = Util::invLogit(logit);
    return P0;
 }
 void CalibratorZaga::setFracThreshold(float iFraction) {

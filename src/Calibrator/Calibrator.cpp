@@ -91,10 +91,3 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
       }
    }
 }
-
-float Calibrator::logit(float p) {
-   return log(p/(1-p));
-}
-float Calibrator::invLogit(float x) {
-   return exp(x)/(exp(x)+1);
-}

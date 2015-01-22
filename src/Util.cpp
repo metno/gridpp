@@ -21,7 +21,7 @@ Util::Util() {
 }
 void Util::error(std::string iMessage) {
    if(mShowError)
-      std::cout << "ERROR:   " << iMessage << std::endl;
+      std::cout << "Error: " << iMessage << std::endl;
    void *array[10];
    size_t size = backtrace(array, 10);
    std::cout << "Stack trace:" << std::endl;
@@ -30,11 +30,11 @@ void Util::error(std::string iMessage) {
 }
 void Util::warning(std::string iMessage) {
    if(mShowWarning)
-      std::cout << "WARNING: " << iMessage << std::endl;
+      std::cout << "Warning: " << iMessage << std::endl;
 }
 void Util::status(std::string iMessage) {
    if(mShowStatus)
-      std::cout << "STATUS:  " << iMessage << std::endl;
+      std::cout << "Status: " << iMessage << std::endl;
 }
 
 double Util::clock() {
@@ -112,4 +112,20 @@ int Util::calcDate(int iDate, float iAddHours) {
    int newDay   = newDate.day();
    int returnDate = newYear * 10000 + newMonth * 100 + newDay;
    return returnDate;
+}
+
+std::vector<std::string> Util::split(std::string iString) {
+   std::vector<std::string> strings;
+   std::stringstream ss(iString);
+   std::string currString;
+   while(ss >> currString) {
+      strings.push_back(currString);
+   }
+   return strings;
+}
+float Util::logit(float p) {
+   return log(p/(1-p));
+}
+float Util::invLogit(float x) {
+   return exp(x)/(exp(x)+1);
 }

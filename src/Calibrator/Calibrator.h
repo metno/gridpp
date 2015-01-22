@@ -13,9 +13,6 @@ class Calibrator {
       void calibrate(File& iFile) const;
       static Calibrator* getScheme(std::string iType, Options& iOptions);
 
-      // Helper function
-      static float logit(float p);
-      static float invLogit(float x);
       // Ensure that ensemble members in iAfter are in the same order as in iBefore
       static void  shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter);
       virtual std::string name() const = 0;

@@ -75,6 +75,48 @@ namespace {
       EXPECT_EQ(20141231, Util::calcDate(20150101, -24));
       EXPECT_EQ(20141230, Util::calcDate(20150101, -24.01));
    }
+   TEST_F(UtilTest, split) {
+      std::string s = "test 1 2 3";
+      std::vector<std::string> strings = Util::split(s);
+      ASSERT_EQ(4, strings.size());
+      EXPECT_EQ("test", strings[0]);
+      EXPECT_EQ("1", strings[1]);
+      EXPECT_EQ("2", strings[2]);
+      EXPECT_EQ("3", strings[3]);
+   }
+   TEST_F(UtilTest, splitEmpty) {
+      std::string s = "";
+      std::vector<std::string> strings = Util::split(s);
+      EXPECT_EQ(0, strings.size());
+   }
+   TEST_F(UtilTest, splitEmptyExtraSpace) {
+      std::string s = "     ";
+      std::vector<std::string> strings = Util::split(s);
+      EXPECT_EQ(0, strings.size());
+   }
+   TEST_F(UtilTest, splitExtraSpace) {
+      std::string s = "  test  1 ";
+      std::vector<std::string> strings = Util::split(s);
+      ASSERT_EQ(2, strings.size());
+      EXPECT_EQ("test", strings[0]);
+      EXPECT_EQ("1", strings[1]);
+   }
+   TEST_F(UtilTest, logit) {
+      const float p[] = {0.2,0.9};
+      const float exp[] = {-1.386294, 2.197225};
+      for(int i = 0; i < sizeof(p)/sizeof(float); i++) {
+         float ans = Util::logit(p[i]);
+         EXPECT_FLOAT_EQ(exp[i], ans);
+      }
+   }
+   TEST_F(UtilTest, invlogit) {
+      const float x[] = {-2, 3};
+      const float exp[] = {0.1192029, 0.9525741};
+      for(int i = 0; i < sizeof(x)/sizeof(float); i++) {
+         float ans = Util::invLogit(x[i]);
+         EXPECT_FLOAT_EQ(exp[i], ans);
+      }
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

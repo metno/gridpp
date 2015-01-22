@@ -3,9 +3,9 @@
 #include "Calibrator/Calibrator.h"
 #include "Downscaler/Downscaler.h"
 
-bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
-   iSetup.inputFile  = File::getScheme(argv[0]);
-   iSetup.outputFile = File::getScheme(argv[1]);
+Setup::Setup(std::vector<std::string> argv) {
+   inputFile  = File::getScheme(argv[0]);
+   outputFile = File::getScheme(argv[1]);
 
    // Implement a finite state machine
    enum State {START = 0, VAR = 1, NEWVAR = 2, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
@@ -16,12 +16,13 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
    Options dOptions;
    Options cOptions;
    int index = 2;
+   std::string errorMessage = "";
 
    if(argv.size() == 2) {
-      return false;
+      return;
    }
 
-   std::string downscaler = "nearestNeighbour";
+   std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
    std::vector<Calibrator*> calibrators;
    while(true) {
@@ -34,12 +35,14 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
             index++;
          }
          else {
+            errorMessage = "No variables defined";
             state = ERROR;
          }
       }
       else if(state == VAR) {
          if(argv.size() <= index) {
             // -v but nothing after it
+            errorMessage = "No variable after '-v'";
             state = ERROR;
          }
          else {
@@ -60,21 +63,34 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
                index++;
             }
             else {
+               errorMessage = "No recognized option after '-v var'";
                state = ERROR;
             }
          }
       }
       else if(state == NEWVAR) {
-         dOptions.addOption("variable", Variable::getTypeName(variable));
-         Downscaler* d = Downscaler::getScheme(downscaler, variable, dOptions);
-         VariableConfiguration varconf;
-         varconf.variable = variable;
-         varconf.downscaler = d;
-         varconf.calibrators = calibrators;
-         iSetup.variableConfigurations.push_back(varconf);
+         // Check that we haven't added the variable before
+         bool alreadyExists = false;
+         for(int i = 0; i < variableConfigurations.size(); i++) {
+            if(variableConfigurations[i].variable == variable)
+               alreadyExists = true;
+         }
+
+         if(!alreadyExists) {
+            dOptions.addOption("variable", Variable::getTypeName(variable));
+            Downscaler* d = Downscaler::getScheme(downscaler, variable, dOptions);
+            VariableConfiguration varconf;
+            varconf.variable = variable;
+            varconf.downscaler = d;
+            varconf.calibrators = calibrators;
+            variableConfigurations.push_back(varconf);
+         }
+         else {
+            Util::warning("Variable '" + Variable::getTypeName(variable) + "' already read. Using first instance.");
+         }
 
          // Reset to defaults
-         downscaler = "nearestNeighbour";
+         downscaler = defaultDownscaler();
          dOptions.clear();
          calibrators.clear();
 
@@ -89,6 +105,7 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
       else if(state == DOWN) {
          if(argv.size() <= index) {
             // -d but nothing after it
+            errorMessage = "No downscaler after '-d'";
             state = ERROR;
          }
          else {
@@ -103,6 +120,11 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
             }
             else if(argv[index] == "-v") {
                state = NEWVAR;
+            }
+            else if(argv[index] == "-d") {
+               // Two downscalers defined for one variable
+               state = DOWN;
+               index++;
             }
             else {
                state = DOWNOPT;
@@ -122,26 +144,15 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
          }
          else {
             // Process downscaler options
-            if(argv.size() > index) {
-               dOptions.addOption(argv[index]);
-               index++;
-            }
-            /*
-            if(argv.size() > index+1) {
-               dOptions.addOption(argv[index], argv[index+1]);
-               index++;
-               index++;
-            }
-            */
-            else {
-               state = ERROR;
-            }
+            dOptions.addOption(argv[index]);
+            index++;
          }
       }
       else if(state == CAL) {
          if(argv.size() <= index) {
             // -c but nothing after it
             state = ERROR;
+            errorMessage = "No calibrator after '-c'";
          }
          else {
             calibrator = argv[index];
@@ -173,18 +184,18 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
          else if(argv[index] == "-v") {
             state = NEWCAL;
          }
+         else if(argv[index] == "-d") {
+            state = NEWCAL;
+         }
          else {
             // Process calibrator options
-            if(argv.size() > index) {
-               cOptions.addOption(argv[index]);
-               index++;
-            }
-            else {
-               state = ERROR;
-            }
+            cOptions.addOption(argv[index]);
+            index++;
          }
       }
       else if(state == NEWCAL) {
+         // We do not need to check that the same calibrator has been added for this variable
+         // since this is perfectly fine (e.g. smoothing twice).
          cOptions.addOption("variable", Variable::getTypeName(variable));
          Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
          calibrators.push_back(c);
@@ -208,6 +219,7 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
          }
          else {
             state = ERROR;
+            errorMessage = "No recognized option after '-c calibrator'";
          }
       }
       else if(state == END) {
@@ -215,9 +227,21 @@ bool Setup::getSetup(std::vector<std::string> argv, Setup& iSetup) {
       }
       else if(state == ERROR) {
          std::stringstream ss;
-         ss << "Finite state machine entered error state. Previous state: " << prevState;
+         ss << "Could not understand command line arguments: " << errorMessage << ".";
          Util::error(ss.str());
       }
    }
-   return true;
+}
+Setup::~Setup() {
+   delete inputFile;
+   delete outputFile;
+   for(int i = 0; i < variableConfigurations.size(); i++) {
+      delete variableConfigurations[i].downscaler;
+      for(int c = 0; c < variableConfigurations[i].calibrators.size(); c++) {
+         delete variableConfigurations[i].calibrators[c];
+      }
+   }
+}
+std::string Setup::defaultDownscaler() {
+   return "nearestNeighbour";
 }

@@ -17,6 +17,8 @@ class Setup {
       File* inputFile;
       File* outputFile;
       std::vector<VariableConfiguration> variableConfigurations;
-      static bool getSetup(std::vector<std::string> argv, Setup& iSetup);
+      Setup(std::vector<std::string> argv);
+      ~Setup();
+      static std::string defaultDownscaler();
 };
 #endif

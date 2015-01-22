@@ -21,10 +21,16 @@ int main(int argc, const char *argv[]) {
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Input file with NetCDF data." << std::endl;
       std::cout << "   output        Output file with NetCDF data. Must contain lat/lon information." << std::endl;
-      std::cout << "   -v var        Variable." << std::endl;
+      std::cout << "   -v var        One of the variables below." << std::endl;
       std::cout << "   -d downscaler One of the downscalers below." << std::endl;
       std::cout << "   -c calibrator One of the calibrators below." << std::endl;
       std::cout << "   options       Options of the form key=value" << std::endl;
+      std::cout << std::endl;
+      std::cout << "Notes:" << std::endl;
+      std::cout << "   - At least one variable must be specified." << std::endl;
+      std::cout << "   - If multiple downscalers are specified for one variable, the last is used." << std::endl;
+      std::cout << "   - If the same variable is specified multiple times, the first definition is used." << std::endl;
+      std::cout << "   - Multiple identical calibrators are allowed for a single variable." << std::endl;
 
       std::cout << std::endl;
       std::cout << "Variables:" << std::endl;
@@ -47,15 +53,11 @@ int main(int argc, const char *argv[]) {
    Util::setShowStatus(false);
 
    // Retrieve setup
-   Setup setup;
    std::vector<std::string> args;
    for(int i = 1; i < argc; i++) {
       args.push_back(argv[i]);
    }
-   bool success = Setup::getSetup(args, setup);
-   if(!success) {
-      Util::error("Could not configure setup");
-   }
+   Setup setup(args);
    std::cout << "Input type:  " << setup.inputFile->name() << std::endl;
    std::cout << "Output type: " << setup.outputFile->name() << std::endl;
 

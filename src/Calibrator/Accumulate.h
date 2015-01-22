@@ -8,7 +8,7 @@ class CalibratorAccumulate : public Calibrator {
    public:
       CalibratorAccumulate(Variable::Type iVariable);
       static std::string description();
-      std::string name() const {return "Accumulate";};
+      std::string name() const {return "accumulate";};
    private:
       void calibrateCore(File& iFile) const;
       Variable::Type mVariable;

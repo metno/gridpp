@@ -23,7 +23,7 @@ class CalibratorZaga : public Calibrator {
       void setFracThreshold(float iFraction);
 
       static std::string description();
-      std::string name() const {return "Zaga";};
+      std::string name() const {return "zaga";};
    private:
       const ParameterFile* mParameterFile;
       void calibrateCore(File& iFile) const;

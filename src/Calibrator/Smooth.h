@@ -11,7 +11,7 @@ class CalibratorSmooth : public Calibrator {
    public:
       CalibratorSmooth(Variable::Type iMainPredictor);
       static std::string description();
-      std::string name() const {return "Smooth";};
+      std::string name() const {return "smooth";};
       void setSmoothRadius(int iNumPoints);
    private:
       void calibrateCore(File& iFile) const;

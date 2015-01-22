@@ -4,7 +4,7 @@
 #include "../Variable.h"
 #include "../Util.h"
 typedef std::vector<std::vector<int> > vec2Int;
-typedef std::vector<std::vector<std::vector<int> > > vec3Int;
+typedef std::vector<std::vector<std::vector<int> > > vec3Int; // lat, lon, neighbour index
 class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable

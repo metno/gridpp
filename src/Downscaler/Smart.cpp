@@ -91,7 +91,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
       for(int j = 0; j < nLon; j++) {
          int Ic = Icenter[i][j];
          int Jc = Jcenter[i][j];
-         float oelev = ielevs[i][j];
+         float oelev = oelevs[i][j];
 
          // Compute elevation differences on the stencil surrounding the current point
          std::vector<std::pair<int, float> > elevDiff; // elevation difference of points in stencil

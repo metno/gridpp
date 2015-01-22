@@ -49,7 +49,7 @@ namespace {
       const Field before = *file.getField(Variable::Precip, 0);
 
       // Set up parameters
-      ParameterFile parFile("Testing/files/parameters.txt");
+      ParameterFile parFile("testing/files/parameters.txt");
       std::vector<float> parValues(8, 0);
       parValues[0] = 0;
       parValues[1] = 1;
@@ -61,7 +61,7 @@ namespace {
       parValues[7] = 0;
       Parameters par(parValues);
       parFile.setParameters(par, 0);
-      CalibratorZaga cal(parFile, Variable::Precip);
+      CalibratorZaga cal(&parFile, Variable::Precip);
       test(cal, file, 12, 1, 4, 2, 3, 1);
    }
 

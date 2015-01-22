@@ -3,8 +3,7 @@
 
 make test
 
-set programs = `ls Testing/*.exe`
+set programs = `ls testing/*.exe`
 foreach program ($programs)
-   echo $program
    ./$program
 end

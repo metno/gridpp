@@ -5,6 +5,7 @@ Program to calibrate ensemble forecasts from ECMWF and AROME files
 
 Basic principles:
 * If the calibration goes terrible, revert to the raw values
+* When methods read parameters, they should fail early
 
 Notes
 * When reading the input file, all missing values are converted to the internal missing flag indicator. When

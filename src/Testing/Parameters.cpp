@@ -35,6 +35,16 @@ namespace {
       EXPECT_FLOAT_EQ(3.154, values2[0]);
       EXPECT_FLOAT_EQ(2, values2[1]);
    }
+   TEST_F(ParametersTest, access2) {
+      std::vector<float> values(3);
+      values[0] = 2;
+      values[1] = 3.3;
+      values[2] = 0;
+      Parameters par(values);
+      EXPECT_FLOAT_EQ(2, par[0]);
+      EXPECT_FLOAT_EQ(3.3, par[1]);
+      EXPECT_FLOAT_EQ(0, par[2]);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

@@ -6,7 +6,7 @@ namespace {
    class FileAromeTest : public ::testing::Test {
       protected:
          FileAromeTest() {
-            mFilenameSmall = "Testing/files/arome_small.nc";
+            mFilenameSmall = "testing/files/arome_small.nc";
          }
          virtual ~FileAromeTest() {
          }

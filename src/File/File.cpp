@@ -17,6 +17,10 @@ File* File::getScheme(std::string iFilename) {
    else if(FileEc::isValid(iFilename)) {
       file = new FileEc(iFilename);
    }
+   else {
+      Util::error("Could not find suitable parser for '" + iFilename + "'");
+      return NULL;
+   }
    return file;
 }
 

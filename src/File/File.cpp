@@ -18,8 +18,8 @@ File* File::getScheme(std::string iFilename) {
       file = new FileEc(iFilename);
    }
    else {
-      Util::error("Could not find suitable parser for '" + iFilename + "'");
-      return NULL;
+      Util::warning("Could not find suitable parser for '" + iFilename + "'");
+      return new FileFake(3,3,1,1);
    }
    return file;
 }

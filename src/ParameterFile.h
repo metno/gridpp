@@ -12,7 +12,6 @@ class ParameterFile {
       int        getSize() const;
    private:
       std::map<int, Parameters> mParameters; // Offset, Parameters
-      static const int mNumParameters = 8;
       std::string mFilename;
 };
 class ParameterFileRegion {

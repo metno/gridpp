@@ -10,6 +10,7 @@ ParameterFile::ParameterFile(std::string iFilename) :
    if(!ifs.good()) {
       Util::error("Parameter file '" + iFilename + "' does not exist");
    }
+   int currSize = Util::MV;
    while(ifs.good()) {
       char line[10000];
       ifs.getline(line, 10000, '\n');
@@ -24,10 +25,10 @@ ParameterFile::ParameterFile(std::string iFilename) :
             ss >> value;
             values.push_back(value);
          }
-         if(values.size() != mNumParameters) {
+         if(Util::isValid(currSize) && values.size() != currSize) {
             std::stringstream ss;
-            ss << "Parameter file '" + iFilename + "' is corrupt." << std::endl;
-            ss << "The line '" << line << "' does not have " << mNumParameters + 1 << " columns.";
+            ss << "Parameter file '" + iFilename + "' is corrupt, because it does not have the same"
+               << " number of oclumns on each line" << std::endl;
             Util::error(ss.str());
          }
          Parameters parameters(values);

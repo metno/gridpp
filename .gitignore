@@ -8,5 +8,5 @@ temp/
 */devel/
 devel/
 .*.swp
-data/
+data
 coverage.*

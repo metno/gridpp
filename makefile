@@ -23,7 +23,7 @@ TESTS0  	= $(patsubst src/Testing%,testing%,$(TESTSRC))
 TESTS   	= $(TESTS0:.cpp=.exe)
 INCS    	= makefile $(HEADERS)
 
-.PHONY: tags count coverage
+.PHONY: tags count coverage doxygen
 
 default: $(EXE)
 
@@ -51,6 +51,9 @@ clean:
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
+
+doxygen:
+	doxygen doxygen/config
 
 coverage: coverage/index.html $(INCS) $(OBS)
 

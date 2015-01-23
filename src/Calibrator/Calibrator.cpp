@@ -8,9 +8,9 @@
 Calibrator::Calibrator() {
 
 }
-Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
+Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
-   if(iType == "zaga") {
+   if(iName == "zaga") {
       std::string parFilename;
       if(!iOptions.getValue("parameters", parFilename)) {
          Util::error("Calibrator 'zaga' needs parameters");
@@ -30,7 +30,7 @@ Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
       }
       return c;
    }
-   else if(iType == "cloud") {
+   else if(iName == "cloud") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'cloud' needs variable");
@@ -38,7 +38,7 @@ Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
       CalibratorCloud* c = new CalibratorCloud(Variable::Precip, Variable::getType(variable));
       return c;
    }
-   else if(iType == "accumulate") {
+   else if(iName == "accumulate") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'accumulate' needs variable");
@@ -46,7 +46,7 @@ Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
       return c;
    }
-   else if(iType == "smooth") {
+   else if(iName == "smooth") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'smooth' needs variable");
@@ -59,7 +59,7 @@ Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
       return c;
    }
    else {
-      Util::error("Could not instantiate calibrator of type '" + iType + "'");
+      Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
    }
 }

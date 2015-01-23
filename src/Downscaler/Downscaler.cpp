@@ -8,11 +8,11 @@ void Downscaler::downscale(const File& iInput, File& iOutput) const {
    downscaleCore(iInput, iOutput);
 }
 
-Downscaler* Downscaler::getScheme(std::string iType, Variable::Type iVariable, Options& iOptions) {
-   if(iType == "nearestNeighbour") {
+Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, Options& iOptions) {
+   if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iVariable);
    }
-   else if(iType == "gradient") {
+   else if(iName == "gradient") {
       DownscalerGradient* d = new DownscalerGradient(iVariable);
       float constantGradient = Util::MV;
       if(iOptions.getValue("constantGradient", constantGradient)) {
@@ -24,7 +24,7 @@ Downscaler* Downscaler::getScheme(std::string iType, Variable::Type iVariable, O
       }
       return d;
    }
-   else if(iType == "smart") {
+   else if(iName == "smart") {
       DownscalerSmart* d = new DownscalerSmart(iVariable);
       float searchRadius = Util::MV;
       if(iOptions.getValue("searchRadius", searchRadius)) {
@@ -33,7 +33,7 @@ Downscaler* Downscaler::getScheme(std::string iType, Variable::Type iVariable, O
       return d;
    }
    else {
-      Util::error("Could not instantiate downscaler of type '" + iType + "'");
+      Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;
    }
 }

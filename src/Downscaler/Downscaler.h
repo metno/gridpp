@@ -9,7 +9,7 @@ class Downscaler {
    public:
       Downscaler(Variable::Type iVariable);
       void downscale(const File& iInput, File& iOutput) const;
-      static Downscaler* getScheme(std::string iType, Variable::Type iVariable, Options& iOptions);
+      static Downscaler* getScheme(std::string iName, Variable::Type iVariable, Options& iOptions);
       virtual std::string name() const = 0;
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;

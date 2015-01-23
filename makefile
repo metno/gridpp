@@ -55,12 +55,7 @@ tags:
 doxygen:
 	doxygen doxygen/config
 
-coverage: coverage/index.html $(INCS) $(OBS)
-
-coverage/index.html: coverage.info
-	genhtml -o ./coverage/ coverage.info
-
-coverage.info:
+coverage:
 	rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
 	make test
 	lcov -b . -c -i -d . -o coverage.init
@@ -69,6 +64,7 @@ coverage.info:
 	lcov -a coverage.init -a coverage.run -o coverage.total
 	lcov -e coverage.total "`pwd`/*" -o coverage.total.filtered
 	lcov -r coverage.total.filtered "`pwd`/*Testing*" -o coverage.info
+	genhtml -o ./coverage/ coverage.info
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC)

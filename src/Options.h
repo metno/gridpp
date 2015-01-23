@@ -4,6 +4,8 @@
 #include <vector>
 #include <sstream>
 
+typedef std::pair<std::string,std::string> KeyValue;  // key, value
+
 //! Container class for key-value pairs.
 //! Empty (i.e. "") keys or values are not allowed
 class Options {
@@ -37,9 +39,11 @@ class Options {
       //! @param iValue places the value in this variable. If key does not exist, this is unchanged
       //! @return true if key is found, false otherwise
       template <class T> bool getValue(std::string iKey, T& iValue) const {
-         for(int i = 0; i < mKeys.size(); i++) {
-            if(mKeys[i] == iKey) {
-               std::stringstream ss (mValues[i]);
+         for(int i = 0; i < mPairs.size(); i++) {
+            std::string key = mPairs[i].first;
+            std::string value = mPairs[i].second;
+            if(key == iKey) {
+               std::stringstream ss(value);
                ss >> iValue;
                return true;
             }
@@ -60,7 +64,6 @@ class Options {
    protected:
       //! Parse a string with a single option "key=value"
       void addOption(std::string iOptionString);
-      std::vector<std::string> mKeys;
-      std::vector<std::string> mValues;
+      std::vector<KeyValue> mPairs;
 };
 #endif

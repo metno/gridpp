@@ -6,14 +6,14 @@ void Options::addOption(std::string iKey, std::string iValue) {
       return;
 
    // Overwrite existing value if key already exists
-   for(int i = 0; i < mKeys.size(); i++) {
-      if(mKeys[i] == iKey) {
-         mValues[i] = iValue;
+   for(int i = 0; i < mPairs.size(); i++) {
+      std::string key = mPairs[i].first;
+      if(key == iKey) {
+         mPairs[i].second = iValue;
          return;
       }
    }
-   mKeys.push_back(iKey);
-   mValues.push_back(iValue);
+   mPairs.push_back(KeyValue(iKey, iValue));
 }
 
 void Options::addOptions(std::string iOptionString) {
@@ -23,8 +23,7 @@ void Options::addOptions(std::string iOptionString) {
    }
 }
 void Options::clear() {
-   mKeys.clear();
-   mValues.clear();
+   mPairs.clear();
 }
 
 Options::Options(std::string iOptionString) {

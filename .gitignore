@@ -9,3 +9,5 @@ temp/
 devel/
 .*.swp
 data/
+build/
+coverage.*

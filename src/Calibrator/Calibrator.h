@@ -11,9 +11,11 @@ class Calibrator {
       Calibrator();
       // Calibrate one or more fields
       void calibrate(File& iFile) const;
-      static Calibrator* getScheme(std::string iType, Options& iOptions);
+      static Calibrator* getScheme(std::string iType, const Options& iOptions);
 
       // Ensure that ensemble members in iAfter are in the same order as in iBefore
+      // If missing values are encountered in iBefore or iAfter, then iAfter is left unchanged
+      // If the sizes are different, then iAfter is left unchanged
       static void  shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter);
       virtual std::string name() const = 0;
    protected:
@@ -22,7 +24,7 @@ class Calibrator {
 };
 #include "Zaga.h"
 #include "Cloud.h"
-#include "Wind.h"
+// #include "Wind.h"
 #include "Temperature.h"
 #include "Accumulate.h"
 #include "Smooth.h"

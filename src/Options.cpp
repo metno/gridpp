@@ -1,4 +1,5 @@
 #include "Options.h"
+#include "Util.h"
 
 void Options::addOption(std::string iKey, std::string iValue) {
    if(iKey == "" || iValue == "")
@@ -17,14 +18,24 @@ void Options::addOption(std::string iKey, std::string iValue) {
 
 void Options::addOption(std::string iOptionString) {
    int nextEqual = iOptionString.find('=');
-   if(nextEqual < 0)
+   if(nextEqual < 0) {
       return;
-   std::string key   = iOptionString.substr(0, nextEqual);
-   std::string value = iOptionString.substr(nextEqual+1);
+   }
+   else {
+      std::string key   = iOptionString.substr(0, nextEqual);
+      std::string value = iOptionString.substr(nextEqual+1);
 
-   addOption(key, value);
+      addOption(key, value);
+   }
 }
 void Options::clear() {
    mKeys.clear();
    mValues.clear();
+}
+
+Options::Options(std::string iOptionString) {
+   std::vector<std::string> options = Util::split(iOptionString);
+   for(int i = 0; i < options.size(); i++) {
+      addOption(options[i]);
+   }
 }

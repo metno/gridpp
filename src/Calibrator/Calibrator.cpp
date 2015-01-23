@@ -8,7 +8,7 @@
 Calibrator::Calibrator() {
 
 }
-Calibrator* Calibrator::getScheme(std::string iType, Options& iOptions) {
+Calibrator* Calibrator::getScheme(std::string iType, const Options& iOptions) {
 
    if(iType == "zaga") {
       std::string parFilename;
@@ -68,26 +68,28 @@ void Calibrator::calibrate(File& iFile) const {
 }
 
 void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter) {
-   assert(iBefore.size() == iAfter.size());
+   if(iBefore.size() != iAfter.size()) {
+      return;
+   }
+   if(iBefore.size() == 0)
+      return;
+
    int N = iBefore.size();
    std::vector<std::pair<float,int> > pairs(N);
-   bool isValid = true;
    for(int e = 0; e < N; e++) {
-      if(!Util::isValid(iBefore[e])) {
-         isValid = false;
-         break;
+      if(!Util::isValid(iBefore[e]) || !Util::isValid(iAfter[e])) {
+         return;
       }
       pairs[e].first = iBefore[e];
       pairs[e].second = e;
    }
-   if(isValid) {
-      std::vector<float> afterCopy = iAfter;
-      // Sort values so that the rank of a member is the same before and after calibration
-      std::sort(pairs.begin(), pairs.end(), Util::sort_pair_first<float,int>());
-      for(int e = 0; e < N; e++) {
-         int ei = pairs[e].second;
-         float valueCal = afterCopy[e];
-         iAfter[ei] = valueCal;
-      }
+   std::vector<float> afterCopy = iAfter;
+   // Sort values so that the rank of a member is the same before and after calibration
+   std::sort(pairs.begin(), pairs.end(), Util::sort_pair_first<float,int>());
+   std::sort(afterCopy.begin(), afterCopy.end());
+   for(int e = 0; e < N; e++) {
+      int ei = pairs[e].second;
+      float valueCal = afterCopy[e];
+      iAfter[ei] = valueCal;
    }
 }

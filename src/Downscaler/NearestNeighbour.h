@@ -8,6 +8,7 @@ class DownscalerNearestNeighbour : public Downscaler {
    public:
       DownscalerNearestNeighbour(Variable::Type iVariable);
       // Slow method: Check every combination
+      // Return Util::MV when it cannot find a neighbour
       static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
       // Faster method: Assume lats/lons are sorted
       static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);

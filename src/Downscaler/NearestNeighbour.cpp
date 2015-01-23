@@ -27,7 +27,10 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
             int I = nearestI[i][j];
             int J = nearestJ[i][j];
             for(int e = 0; e < nEns; e++) {
-               ofield[i][j][e] = ifield[I][J][e];
+               if(Util::isValid(I) && Util::isValid(J))
+                  ofield[i][j][e] = ifield[I][J][e];
+               else
+                  ofield[i][j][e] = Util::MV;
             }
          }
       }
@@ -57,7 +60,7 @@ void DownscalerNearestNeighbour::getNearestNeighbour(const File& iFrom, const Fi
             }
          }
       }
-      std::cout << "Grids are identical, short cut in finding nearest neighbours" << std::endl;
+      Util::status("Grids are identical, short cut in finding nearest neighbours");
       return;
    }
 
@@ -156,9 +159,11 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
             }
          }
       }
-      std::cout << "Grids are identical, short cut in finding nearest neighbours" << std::endl;
+      Util::status("Grids are identical, short cut in finding nearest neighbours");
       return;
    }
+
+   float tol = 0.2;
 
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
@@ -170,9 +175,11 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
          // if(j % 10 == 0)
          //    std::cout << i << " " << j << std::endl;
          int counter = 0;
+         float currLat = olats[i][j];
+         float currLon = olons[i][j];
          while(true) {
             // std::cout << "   " << ilats[I][J] << " " << ilons[I][J] << std::endl;
-            if(fabs(ilons[I][J] - olons[i][j]) < 0.02 && fabs(ilats[I][J] - olats[i][j]) < 0.02) {
+            if(fabs(ilons[I][J] - currLon) < tol && fabs(ilats[I][J] - currLat) < tol) {
                int startI = std::max(0, I-10);
                int startJ = std::max(0, J-10);
                int endI   = std::min(iFrom.getNumLat()-1, I+10);
@@ -206,13 +213,13 @@ void DownscalerNearestNeighbour::getNearestNeighbourFast(const File& iFrom, cons
                assert(ilats[I].size() > J);
                assert(olats.size() > i);
                assert(olats[i].size() > j);
-               if(ilons[I][J] < olons[i][j])
+               if(ilons[I][J] < currLon-tol)
                   J++;
-               else
+               else if(ilons[I][J] > currLon+tol)
                   J--;
-               if(ilats[I][J] < olats[i][j])
+               if(ilats[I][J] < currLat-tol)
                   I++;
-               else
+               else if(ilats[I][J] < currLat+tol)
                   I--;
                I = std::min(iFrom.getNumLat()-1, std::max(0, I));
                J = std::min(iFrom.getNumLon()-1, std::max(0, J));

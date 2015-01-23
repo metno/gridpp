@@ -10,22 +10,23 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <execinfo.h>
 #include <signal.h>
+extern "C" void __gcov_flush();
 bool Util::mShowError = true;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
 float Util::MV = -999;
 float Util::pi  = 3.14159265;
 double Util::radiusEarth = 6.378137e6;
-Util::Util() {
 
-}
 void Util::error(std::string iMessage) {
-   if(mShowError)
+   if(mShowError) {
       std::cout << "Error: " << iMessage << std::endl;
-   void *array[10];
-   size_t size = backtrace(array, 10);
-   std::cout << "Stack trace:" << std::endl;
-   backtrace_symbols_fd(array, size, 2);
+      void *array[10];
+      size_t size = backtrace(array, 10);
+      std::cout << "Stack trace:" << std::endl;
+      backtrace_symbols_fd(array, size, 2);
+   }
+   __gcov_flush();
    abort();
 }
 void Util::warning(std::string iMessage) {
@@ -124,8 +125,12 @@ std::vector<std::string> Util::split(std::string iString) {
    return strings;
 }
 float Util::logit(float p) {
+   if(!Util::isValid(p) || p <= 0 || p >= 1)
+      return Util::MV;
    return log(p/(1-p));
 }
 float Util::invLogit(float x) {
+   if(!Util::isValid(x))
+      return Util::MV;
    return exp(x)/(exp(x)+1);
 }

@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <math.h>
 #include <gtest/gtest.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 namespace {
    class UtilTest : public ::testing::Test {
@@ -31,6 +33,15 @@ namespace {
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(90,10,-90,10));
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(0,0,0,180));
       EXPECT_FLOAT_EQ(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75));
+   }
+   TEST_F(UtilTest, getDistanceInvalid) {
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,-84.75,-101.75));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,Util::MV,-84.75,-101.75));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,5.25,Util::MV,-101.75));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,5.25,-84.75,Util::MV));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,Util::MV,-101.75));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,Util::MV,Util::MV,Util::MV));
+      EXPECT_FLOAT_EQ(Util::MV, Util::getDistance((float) 1/0,5.25,-84.75,-101.75));
    }
    TEST_F(UtilTest, sortFirst) {
       typedef std::pair<int,int> pair;
@@ -108,6 +119,10 @@ namespace {
          float ans = Util::logit(p[i]);
          EXPECT_FLOAT_EQ(exp[i], ans);
       }
+      EXPECT_FLOAT_EQ(Util::MV, Util::logit((float) 1/0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::logit(-1));
+      EXPECT_FLOAT_EQ(Util::MV, Util::logit(0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::logit(1));
    }
    TEST_F(UtilTest, invlogit) {
       const float x[] = {-2, 3};
@@ -116,6 +131,28 @@ namespace {
          float ans = Util::invLogit(x[i]);
          EXPECT_FLOAT_EQ(exp[i], ans);
       }
+      EXPECT_FLOAT_EQ(Util::MV, Util::invLogit((float) 1/0));
+   }
+   TEST_F(UtilTest, error) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(Util::error("test"), ".*");
+   }
+   TEST_F(UtilTest, warning) {
+      Util::setShowWarning(false);
+      Util::warning("test");
+   }
+   TEST_F(UtilTest, status) {
+      Util::setShowStatus(false);
+      Util::status("test");
+   }
+   TEST_F(UtilTest, clock) {
+      double sleepmicros = 10000;
+      double sleepsec    = sleepmicros/1e6;
+      double s = Util::clock();
+      usleep(sleepmicros);
+      double e = Util::clock();
+      EXPECT_NEAR(sleepsec, e-s, sleepsec/100);
    }
 }
 int main(int argc, char **argv) {

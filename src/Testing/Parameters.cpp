@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <math.h>
 #include <gtest/gtest.h>
+#include "../Util.h"
 
 namespace {
    class ParametersTest : public ::testing::Test {
@@ -44,6 +45,21 @@ namespace {
       EXPECT_FLOAT_EQ(2, par[0]);
       EXPECT_FLOAT_EQ(3.3, par[1]);
       EXPECT_FLOAT_EQ(0, par[2]);
+   }
+   TEST_F(ParametersTest, invalidAccess) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      std::vector<float> values(3);
+      values[0] = 2;
+      values[1] = 3.3;
+      values[2] = 0;
+      Parameters par(values);
+
+      EXPECT_DEATH(par[-1], ".*");
+      EXPECT_DEATH(par[Util::MV], ".*");
+      EXPECT_DEATH(par[3], ".*");
+      EXPECT_DEATH(par[100], ".*");
+
    }
 }
 int main(int argc, char **argv) {

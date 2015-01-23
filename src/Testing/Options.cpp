@@ -122,6 +122,25 @@ namespace {
       EXPECT_TRUE(status);
       EXPECT_EQ(2, value);
    }
+   TEST_F(OptionsTest, constructor) {
+      Options options("test=3 test=2");
+
+      float value = 19;
+      bool status = options.getValue("test", value);
+      EXPECT_TRUE(status);
+      EXPECT_EQ(2, value);
+      status = options.getValue("new", value);
+      EXPECT_FALSE(status);
+      EXPECT_EQ(2, value);
+   }
+   TEST_F(OptionsTest, constructorEmpty) {
+      Options options("");
+
+      float value = 19;
+      bool status = options.getValue("test", value);
+      EXPECT_FALSE(status);
+      EXPECT_EQ(19, value);
+   }
    
 }
 int main(int argc, char **argv) {

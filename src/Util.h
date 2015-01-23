@@ -6,7 +6,6 @@
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 class Util {
    public:
-      Util();
       //! Aborts the program with an error message
       static void error(std::string iMessage);
       static void warning(std::string iMessage);

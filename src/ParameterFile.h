@@ -14,6 +14,7 @@ class ParameterFile {
       std::map<int, Parameters> mParameters; // Offset, Parameters
       std::string mFilename;
 };
+/*
 class ParameterFileRegion {
    public:
       ParameterFileRegion(std::string iFilename) {};
@@ -22,4 +23,5 @@ class ParameterFileRegion {
       std::map<int, Parameters> mParameters; // Offset, Parameters
       std::string mFilename;
 };
+*/
 #endif

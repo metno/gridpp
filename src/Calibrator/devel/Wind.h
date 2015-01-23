@@ -7,9 +7,10 @@ class CalibratorWind : public Calibrator {
    public:
       CalibratorWind(const ParameterFileRegion& iParameterFileRegion);
    private:
-      void calibrateCore(const DataFile& iInput, DataFile& iOutput) const;
+      void calibrateCore(File& iFile) const;
       static float getDir(float iU, float iV);
       static float getSpeed(float iU, float iV);
-      float calibrate(float iSpeed, float iDir, const Parameters& iParameters) const;
+      float calibrateLocal(float iSpeed, float iDir, const Parameters& iParameters) const;
+      ParameterFileRegion mParameterFile;
 };
 #endif

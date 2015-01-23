@@ -61,6 +61,15 @@ namespace {
       MetSetup setup4(Util::split("input output -v T -d smart -c smooth smooth"));
       MetSetup setup5(Util::split("input output -v T -d smart -c smooth smooth -v Precip -d smart"));
       MetSetup setup6(Util::split("input output -v T -d nearestNeighbour -d smart -c smooth accumulate smooth -v Precip -d smart"));
+      MetSetup setup7(Util::split("input output -v T -d nearestNeighbour -v Precip -d smart"));
+      MetSetup setup8(Util::split("input output -v T -d smart numSmart=2 -c smooth -v Precip -d smart"));
+      MetSetup setup9(Util::split("input output -v T -d smart numSmart=2 -v Precip -d smart"));
+   }
+   TEST(SetupTest, shouldBeInValid) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      EXPECT_DEATH(MetSetup setup1(Util::split("input output")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("input output -v")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("input output -v -d smart")), ".*");
    }
 }
 int main(int argc, char **argv) {

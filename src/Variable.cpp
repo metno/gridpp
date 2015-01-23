@@ -50,3 +50,14 @@ std::string Variable::description() {
    ss << "   -v Cloud                     Cloud cover" << std::endl;
    return ss.str();
 }
+
+std::vector<Variable::Type> Variable::getAllVariables() {
+   std::vector<Type> variables;
+   variables.push_back(Variable::T);
+   variables.push_back(Variable::PrecipAcc);
+   variables.push_back(Variable::W);
+   variables.push_back(Variable::U);
+   variables.push_back(Variable::V);
+   variables.push_back(Variable::Cloud);
+   return variables;
+}

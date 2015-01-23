@@ -19,10 +19,16 @@ ParameterFile::ParameterFile(std::string iFilename) :
          // Loop over each value
          std::vector<float> values;
          int time;
-         ss >> time;
+         bool status = ss >> time;
+         if(!status) {
+            Util::error("Could not read time from file '" + mFilename + "'");
+         }
          while(ss.good()) {
             float value;
-            ss >> value;
+            bool status  = ss >> value;
+            if(!status) {
+               Util::error("Could not read value from file '" + mFilename + "'");
+            }
             values.push_back(value);
          }
          if(Util::isValid(currSize) && values.size() != currSize) {

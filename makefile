@@ -52,12 +52,14 @@ clean:
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
 
-coverage: coverage/index.html $(INCS)
+coverage: coverage/index.html $(INCS) $(OBS)
 
 coverage/index.html: coverage.info
 	genhtml -o ./coverage/ coverage.info
 
-coverage.info: clean test
+coverage.info:
+	rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
+	make test
 	lcov -b . -c -i -d . -o coverage.init
 	csh runAllTests.csh
 	lcov -b . -c -d . -o coverage.run

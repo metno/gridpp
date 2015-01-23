@@ -16,7 +16,7 @@ std::vector<float> Parameters::getValues() const {
 }
 
 float const& Parameters::operator[](unsigned int i) const {
-   if(i >= mValues.size()) {
+   if(i >= mValues.size() || i < 0) {
       std::stringstream ss;
       ss << "Attempted to access element " << i << " in parameter array of length " << mValues.size() << std::endl;
       Util::error(ss.str());

@@ -2,7 +2,6 @@
 #include "../File/File.h"
 #include "../Downscaler/Downscaler.h"
 #include <gtest/gtest.h>
-#include <boost/assign/list_of.hpp>
 
 namespace {
    class TestDownscalerNearestNeighbour : public ::testing::Test {
@@ -44,7 +43,7 @@ namespace {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
       setLatLon(from, (float[]) {50,55,60}, (float[]){0,10});
-      setLatLon(to,   (float[]) {40, 54},   (float[]){-1,9});
+      setLatLon(to,   (float[]) {40, 54.99},   (float[]){-1,9.99});
 
       vec2Int I, J, If, Jf;
       DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
@@ -117,6 +116,83 @@ namespace {
       EXPECT_EQ(0, J[1][0]);
       EXPECT_EQ(Util::MV, I[1][1]);
       EXPECT_EQ(Util::MV, J[1][1]);
+   }
+   TEST_F(TestDownscalerNearestNeighbour, identicalGrid) {
+      int nLat = 3;
+      int nLon = 4;
+      FileFake from(nLat,nLon,1,1);
+      FileFake to(nLat,nLon,1,1);
+      setLatLon(from, (float[]) {50,55,60}, (float[]){0,3,5,10});
+      setLatLon(to,   (float[]) {50,55,60}, (float[]){0,3,5,10});
+
+      vec2Int I, J, If, Jf;
+      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
+      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      EXPECT_EQ(I, If);
+      EXPECT_EQ(J, Jf);
+
+      ASSERT_EQ(nLat, I.size());
+      ASSERT_EQ(nLon, I[0].size());
+
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            EXPECT_EQ(i, I[i][j]);
+            EXPECT_EQ(j, J[i][j]);
+         }
+      }
+   }
+   TEST_F(TestDownscalerNearestNeighbour, unsortedGrid) {
+      FileFake from(3,2,1,1);
+      FileFake to(2,2,1,1);
+      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
+      setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
+
+      vec2Int I, J, If, Jf;
+      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
+      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      EXPECT_EQ(I, If);
+      EXPECT_EQ(J, Jf);
+
+      ASSERT_EQ(2, I.size());
+      ASSERT_EQ(2, I[0].size());
+
+      EXPECT_EQ(2, I[0][0]);
+      EXPECT_EQ(1, J[0][0]);
+      EXPECT_EQ(2, I[0][0]);
+      EXPECT_EQ(0, J[0][1]);
+      EXPECT_EQ(1, I[1][0]);
+      EXPECT_EQ(1, J[1][0]);
+      EXPECT_EQ(1, I[1][0]);
+      EXPECT_EQ(0, J[1][1]);
+   }
+   TEST_F(TestDownscalerNearestNeighbour, description) {
+      DownscalerNearestNeighbour::description();
+   }
+   TEST_F(TestDownscalerNearestNeighbour, downscale) {
+      DownscalerNearestNeighbour d(Variable::T);
+      FileFake from(3,2,1,1);
+      FileFake to(2,2,1,1);
+      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
+      setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
+      d.downscale(from, to);
+      const Field& fromT = *from.getField(Variable::T, 0);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      EXPECT_FLOAT_EQ(fromT[2][1][0], toT[0][0][0]);
+      EXPECT_FLOAT_EQ(fromT[2][0][0], toT[0][1][0]);
+      EXPECT_FLOAT_EQ(fromT[1][1][0], toT[1][0][0]);
+      EXPECT_FLOAT_EQ(fromT[1][0][0], toT[1][1][0]);
+   }
+   TEST_F(TestDownscalerNearestNeighbour, valid) {
+      DownscalerNearestNeighbour d(Variable::T);
+      FileFake from(0,0,1,1);
+      FileFake to(2,2,1,1);
+      d.downscale(from, to);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      for(int i = 0; i < to.getNumLat(); i++) {
+         for(int j = 0; j < to.getNumLon(); j++) {
+            EXPECT_FLOAT_EQ(Util::MV, toT[i][j][0]);
+         }
+      }
    }
 }
 int main(int argc, char **argv) {

@@ -29,6 +29,14 @@ namespace {
       Parameters par = file.getParameters(0);
       ASSERT_EQ(0, par.size());
    }
+   TEST(ParameterFile, invalidFiles) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(ParameterFile("testing/files/parametersUnevenRows.txt"), ".*");
+      EXPECT_DEATH(ParameterFile("testing/files/parametersDoesntExist.txt"), ".*");
+      EXPECT_DEATH(ParameterFile("testing/files/parametersInvalidTime.txt"), ".*");
+      EXPECT_DEATH(ParameterFile("testing/files/parametersInvalidEntries.txt"), ".*");
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

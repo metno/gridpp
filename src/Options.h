@@ -8,6 +8,7 @@
 // Empty (i.e. "") keys or values are not allowed
 class Options {
    public:
+      Options(std::string iOptionString="");
       // Neither iKey nor iValue can be ""
       void addOption(std::string iKey, std::string iValue);
       // iOptionString is of the format: "key=value"
@@ -24,7 +25,7 @@ class Options {
       void clear();
       // Returns true if key is found and stores in iValue. If not found,
       // iValue is unchanged.
-      template <class T> bool getValue(std::string iKey, T& iValue) {
+      template <class T> bool getValue(std::string iKey, T& iValue) const {
          for(int i = 0; i < mKeys.size(); i++) {
             if(mKeys[i] == iKey) {
                std::stringstream ss (mValues[i]);

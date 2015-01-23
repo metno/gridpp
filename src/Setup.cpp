@@ -144,7 +144,7 @@ Setup::Setup(std::vector<std::string> argv) {
          }
          else {
             // Process downscaler options
-            dOptions.addOption(argv[index]);
+            dOptions.addOptions(argv[index]);
             index++;
          }
       }
@@ -189,7 +189,7 @@ Setup::Setup(std::vector<std::string> argv) {
          }
          else {
             // Process calibrator options
-            cOptions.addOption(argv[index]);
+            cOptions.addOptions(argv[index]);
             index++;
          }
       }

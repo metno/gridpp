@@ -41,7 +41,7 @@ namespace {
    }
    TEST_F(OptionsTest, emptyValueEqualSign) {
       Options options;
-      options.addOption("test=");
+      options.addOptions("test=");
       std::string value = "new";
       bool status = options.getValue("test", value);
       EXPECT_FALSE(status);
@@ -81,7 +81,7 @@ namespace {
    }
    TEST_F(OptionsTest, addOptionEqualSign) {
       Options options;
-      options.addOption("test=before");
+      options.addOptions("test=before");
 
       std::string value = "";
       bool status = options.getValue("test", value);
@@ -94,8 +94,8 @@ namespace {
    }
    TEST_F(OptionsTest, clear) {
       Options options;
-      options.addOption("test=before");
-      options.addOption("other=some");
+      options.addOptions("test=before");
+      options.addOptions("other=some");
 
       options.clear();
       std::string value = "something";
@@ -103,7 +103,7 @@ namespace {
       EXPECT_FALSE(status);
       EXPECT_EQ("something", value);
 
-      options.addOption("new=value");
+      options.addOptions("new=value");
       status = options.getValue("new", value);
       EXPECT_TRUE(status);
       EXPECT_EQ("value", value);
@@ -114,8 +114,8 @@ namespace {
    }
    TEST_F(OptionsTest, overwrite) {
       Options options;
-      options.addOption("test=before");
-      options.addOption("test=2");
+      options.addOptions("test=before");
+      options.addOptions("test=2");
 
       float value = 3;
       bool status = options.getValue("test", value);

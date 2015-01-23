@@ -16,6 +16,21 @@ void Options::addOption(std::string iKey, std::string iValue) {
    mValues.push_back(iValue);
 }
 
+void Options::addOptions(std::string iOptionString) {
+   std::vector<std::string> options = Util::split(iOptionString);
+   for(int i = 0; i < options.size(); i++) {
+      addOption(options[i]);
+   }
+}
+void Options::clear() {
+   mKeys.clear();
+   mValues.clear();
+}
+
+Options::Options(std::string iOptionString) {
+   addOptions(iOptionString);
+}
+
 void Options::addOption(std::string iOptionString) {
    int nextEqual = iOptionString.find('=');
    if(nextEqual < 0) {
@@ -26,16 +41,5 @@ void Options::addOption(std::string iOptionString) {
       std::string value = iOptionString.substr(nextEqual+1);
 
       addOption(key, value);
-   }
-}
-void Options::clear() {
-   mKeys.clear();
-   mValues.clear();
-}
-
-Options::Options(std::string iOptionString) {
-   std::vector<std::string> options = Util::split(iOptionString);
-   for(int i = 0; i < options.size(); i++) {
-      addOption(options[i]);
    }
 }

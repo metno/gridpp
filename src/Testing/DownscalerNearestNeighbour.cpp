@@ -63,36 +63,6 @@ namespace {
       EXPECT_EQ(1, I[1][1]);
       EXPECT_EQ(1, J[1][1]);
    }
-   TEST_F(TestDownscalerNearestNeighbour, emptyFrom) {
-      FileFake from(0,0,1,1);
-      FileFake to(1,1,1,1);
-      setLatLon(to,   (float[]) {40},   (float[]){9});
-
-      vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
-      EXPECT_EQ(I, If);
-      EXPECT_EQ(J, Jf);
-
-      ASSERT_EQ(1, I.size());
-      ASSERT_EQ(1, I[0].size());
-
-      EXPECT_EQ(Util::MV, I[0][0]);
-      EXPECT_EQ(Util::MV, J[0][0]);
-   }
-   TEST_F(TestDownscalerNearestNeighbour, emptyTo) {
-      FileFake from(3,2,1,1);
-      FileFake to(0,0,1,1);
-      setLatLon(from, (float[]) {50,55,60}, (float[]){0,10});
-
-      vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
-      EXPECT_EQ(I, If);
-      EXPECT_EQ(J, Jf);
-
-      ASSERT_EQ(0, I.size());
-   }
    TEST_F(TestDownscalerNearestNeighbour, missingLatLon) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
@@ -181,18 +151,6 @@ namespace {
       EXPECT_FLOAT_EQ(fromT[2][0][0], toT[0][1][0]);
       EXPECT_FLOAT_EQ(fromT[1][1][0], toT[1][0][0]);
       EXPECT_FLOAT_EQ(fromT[1][0][0], toT[1][1][0]);
-   }
-   TEST_F(TestDownscalerNearestNeighbour, valid) {
-      DownscalerNearestNeighbour d(Variable::T);
-      FileFake from(0,0,1,1);
-      FileFake to(2,2,1,1);
-      d.downscale(from, to);
-      const Field& toT   = *to.getField(Variable::T, 0);
-      for(int i = 0; i < to.getNumLat(); i++) {
-         for(int j = 0; j < to.getNumLon(); j++) {
-            EXPECT_FLOAT_EQ(Util::MV, toT[i][j][0]);
-         }
-      }
    }
    TEST_F(TestDownscalerNearestNeighbour, 10x10) {
       DownscalerNearestNeighbour d(Variable::T);

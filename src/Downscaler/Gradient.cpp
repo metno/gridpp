@@ -64,7 +64,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      meanX  /= counter;
                      meanY  /= counter;
                      meanXX /= counter;
-                     gradient = -(meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+                     gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
                   }
                }
                else {
@@ -84,10 +84,27 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    }
 }
 void DownscalerGradient::setConstantGradient(float iGradient) {
+   if(!Util::isValid(iGradient)) {
+      std::stringstream ss;
+      ss << "DownscalerGradient: constant gradient must be a valid number";
+      Util::error(ss.str());
+   }
    mConstGradient = iGradient;
 }
+float DownscalerGradient::getConstantGradient() const {
+   return mConstGradient;
+}
 void DownscalerGradient::setSearchRadius(int iNumPoints) {
+   if(!Util::isValid(iNumPoints) || iNumPoints <= 0) {
+      std::stringstream ss;
+      ss << "DownscalerGradient: search radius must be >= 1";
+      Util::error(ss.str());
+   }
    mSearchRadius = iNumPoints;
+}
+
+int DownscalerGradient::getSearchRadius() const {
+   return mSearchRadius;
 }
 
 std::string DownscalerGradient::description() {

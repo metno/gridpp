@@ -35,6 +35,7 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    int numDims = var->num_dims();
 
    long* count;
+   long totalCount = nLat*nLon;
    if(numDims == 4) {
       // Variable has a surface dimension
       count = new long[4];
@@ -67,7 +68,8 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    for(int lat = 0; lat < nLat; lat++) {
       for(int lon = 0; lon < nLon; lon++) {
          float value = values[index];
-         if(Util::isValid(MV) && value == MV) {
+         assert(index < totalCount);
+         if(value == MV) {
             // Field has missing value indicator and the value is missing
             // Save values using our own internal missing value indicator
             value = Util::MV;
@@ -112,6 +114,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
          }
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
+      setMissingValue(var, MV);
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
@@ -123,7 +126,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
                   float value = (*field)[lat][lon][0];
-                  if(Util::isValid(MV) && !Util::isValid(value)) {
+                  if(!Util::isValid(value)) {
                      // Field has missing value indicator and the value is missing
                      // Save values using the file's missing indicator value
                      value = MV;
@@ -198,6 +201,7 @@ vec2 FileArome::getElevs() const {
 
 vec2 FileArome::getLatLonVariable(std::string iVar) const {
    NcVar* var = getVar(iVar);
+   float MV = getMissingValue(var);
    long count[2] = {getNumLat(), getNumLon()};
    float* values = new float[getNumLon()*getNumLat()];
    var->get(values, count);
@@ -207,7 +211,10 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
       grid[i].resize(getNumLon());
       for(int j = 0; j < getNumLon(); j++) {
          int index = i*getNumLon() + j;
-         grid[i][j] = values[index];
+         float value = values[index];
+         if(values[index] == MV)
+            value = Util::MV;
+         grid[i][j] = value;
          assert(index < getNumLon()*getNumLat());
       }
    }

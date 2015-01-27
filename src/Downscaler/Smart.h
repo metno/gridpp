@@ -11,6 +11,7 @@ class DownscalerSmart : public Downscaler {
       DownscalerSmart(Variable::Type iVariable);
       //! Use this many smart neighbours
       void setNumSmart(int iNumSmart);
+      int getNumSmart() const;
       //! Search for smart neighbours within a neighbourhood of points within +- iNumPoints
       //! in each direction.
       void setSearchRadius(int iNumPoints);
@@ -18,6 +19,7 @@ class DownscalerSmart : public Downscaler {
       static std::string description();
       std::string name() const {return "smart";};
 
+      //! Method may return fewer than num smart neighbours
       static void getSmartNeighbours(const File& iFrom, const File& iTo, int iSearchRadius, int iNumSmart, vec3Int& iI, vec3Int& iJ);
              void getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const;
       static int getNumSearchPoints(int iSearchRadius) ;

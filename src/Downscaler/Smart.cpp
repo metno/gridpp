@@ -59,9 +59,19 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
    }
 }
 void DownscalerSmart::setNumSmart(int iNumSmart) {
+   if(!Util::isValid(iNumSmart) || iNumSmart <= 0) {
+      std::stringstream ss;
+      ss << "DownscalerSmart: number of smart neighbours must be >= 1";
+      Util::error(ss.str());
+   }
    mNumSmart = iNumSmart;
 }
 void DownscalerSmart::setSearchRadius(int iNumPoints) {
+   if(!Util::isValid(iNumPoints) || iNumPoints < 0) {
+      std::stringstream ss;
+      ss << "DownscalerSmart: search radius must be >= 0";
+      Util::error(ss.str());
+   }
    mSearchRadius = iNumPoints;
 }
 void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const {
@@ -123,23 +133,23 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
          ss << "Smart neighbours for " << i << " " << j << " " << oelev;
          Util::status(ss.str());
 
-         iI[i][j].resize(iNumSmart, Util::MV);
-         iJ[i][j].resize(iNumSmart, Util::MV);
          // Use nearest neighbour if all fails
          if(elevDiff.size() == 0) {
-            iI[i][j][0] = Ic;
-            iJ[i][j][0] = Jc;
+            iI[i][j].push_back(Ic);
+            iJ[i][j].push_back(Jc);
          }
          else {
-            for(int n = 0; n < iNumSmart; n++) {
-               if(elevDiff.size() > n) {
-                  int index = elevDiff[n].first;
-                  iI[i][j][n] = Ilookup[index];
-                  iJ[i][j][n] = Jlookup[index];
-                  std::stringstream ss;
-                  ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
-                  Util::status(ss.str());
-               }
+            int N = std::min((int) elevDiff.size(), iNumSmart);
+            iI[i][j].resize(N, Util::MV);
+            iJ[i][j].resize(N, Util::MV);
+
+            for(int n = 0; n < N; n++) {
+               int index = elevDiff[n].first;
+               iI[i][j][n] = Ilookup[index];
+               iJ[i][j][n] = Jlookup[index];
+               std::stringstream ss;
+               ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
+               Util::status(ss.str());
             }
          }
       }
@@ -156,6 +166,9 @@ int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
 
 int  DownscalerSmart::getSearchRadius() const {
    return mSearchRadius;
+}
+int DownscalerSmart::getNumSmart() const {
+   return mNumSmart;
 }
 
 std::string DownscalerSmart::description() {

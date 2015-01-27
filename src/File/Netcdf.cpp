@@ -89,3 +89,9 @@ float FileNetcdf::getMissingValue(const NcVar* iVar) {
    else
       return ncBad_float;//Util::MV;
 }
+void FileNetcdf::setMissingValue(NcVar* iVar, float iValue) {
+   NcError q(NcError::silent_nonfatal); 
+   // NcAtt* fillValueAtt = iVar->get_att("_FillValue");
+   // fillValueAtt->remove();
+   iVar->add_att("_FillValue", iValue);
+}

@@ -28,6 +28,7 @@ class FileNetcdf : public File {
       static bool   hasDim(const NcFile& iFile, std::string iDim);
       static bool   hasVar(const NcFile& iFile, std::string iVar);
       static float getMissingValue(const NcVar* iVar);
+      static void  setMissingValue(NcVar* iVar, float iValue);
 };
 #include "Ec.h"
 #include "Arome.h"

@@ -194,9 +194,9 @@ namespace {
          }
       }
    }
-   TEST_F(TestDownscalerNearestNeighbour, 5x5) {
+   TEST_F(TestDownscalerNearestNeighbour, 10x10) {
       DownscalerNearestNeighbour d(Variable::T);
-      FileArome from("testing/files/5x5.nc");
+      FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(2,2,1,1);
       setLatLon(to,   (float[]) {5,11},    (float[]){2,3});

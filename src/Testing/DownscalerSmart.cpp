@@ -66,11 +66,11 @@ namespace {
       EXPECT_EQ(1, I[0][0][1]);
       EXPECT_EQ(0, J[0][0][1]);
    }
-   TEST_F(TestDownscalerSmart, 5x5) {
+   TEST_F(TestDownscalerSmart, 10x10) {
       DownscalerSmart d(Variable::T);
       d.setSearchRadius(3);
       d.setNumSmart(2);
-      FileArome from("testing/files/5x5.nc");
+      FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(1,4,1,1);
       // Case 1: West boundary outside domain

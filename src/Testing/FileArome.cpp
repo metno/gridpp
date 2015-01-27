@@ -7,10 +7,10 @@ namespace {
    class FileAromeTest : public ::testing::Test {
    };
 
-   TEST_F(FileAromeTest, 5x5) {
+   TEST_F(FileAromeTest, 10x10) {
       {
-         FileArome from("testing/files/5x5.nc");
-         FileArome to("testing/files/5x5_copy.nc");
+         FileArome from("testing/files/10x10.nc");
+         FileArome to("testing/files/10x10_copy.nc");
          EXPECT_TRUE(from.hasVariable(Variable::T));
          DownscalerNearestNeighbour d(Variable::T);
          std::vector<Variable::Type> variables;
@@ -20,16 +20,16 @@ namespace {
          to.write(variables);
       }
       // Nearest neighbour should give the same values
-      FileArome f1("testing/files/5x5.nc");
-      FileArome f2("testing/files/5x5_copy.nc");
+      FileArome f1("testing/files/10x10.nc");
+      FileArome f2("testing/files/10x10_copy.nc");
       FieldPtr p1 = f1.getField(Variable::T, 0);
       FieldPtr p2 = f2.getField(Variable::T, 0);
       EXPECT_EQ(*p1, *p2);
    }
-   TEST_F(FileAromeTest, 5x5_smart) {
+   TEST_F(FileAromeTest, 10x10_smart) {
       {
-         FileArome from("testing/files/5x5.nc");
-         FileArome to("testing/files/5x5_copy.nc");
+         FileArome from("testing/files/10x10.nc");
+         FileArome to("testing/files/10x10_copy.nc");
          EXPECT_TRUE(from.hasVariable(Variable::T));
          DownscalerSmart d(Variable::T);
          std::vector<Variable::Type> variables;
@@ -39,8 +39,8 @@ namespace {
          to.write(variables);
       }
       // Smart downscaler should give different values
-      FileArome f1("testing/files/5x5.nc");
-      FileArome f2("testing/files/5x5_copy.nc");
+      FileArome f1("testing/files/10x10.nc");
+      FileArome f2("testing/files/10x10_copy.nc");
       FieldPtr p1 = f1.getField(Variable::T, 0);
       FieldPtr p2 = f2.getField(Variable::T, 0);
       EXPECT_NE(*p1, *p2);

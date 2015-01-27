@@ -46,10 +46,10 @@ namespace {
       protected:
    };
 
-   TEST_F(TestDownscalerGradient, 5x5) {
+   TEST_F(TestDownscalerGradient, 10x10) {
       DownscalerGradient d(Variable::T);
       d.setSearchRadius(1);
-      FileArome from("testing/files/5x5.nc");
+      FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(1,4,1,1);
       setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
@@ -78,7 +78,7 @@ namespace {
    TEST_F(TestDownscalerGradient, constantGradient) {
       DownscalerGradient d(Variable::T);
       d.setSearchRadius(1);
-      FileArome from("testing/files/5x5.nc");
+      FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(1,4,1,1);
       setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});

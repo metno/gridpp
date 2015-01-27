@@ -16,8 +16,8 @@ namespace {
          virtual void TearDown() {
          }
    };
-   TEST_F(TestCalibratorSmooth, 5x5_doubleSmooth) {
-      FileArome from("testing/files/5x5.nc");
+   TEST_F(TestCalibratorSmooth, 10x10_doubleSmooth) {
+      FileArome from("testing/files/10x10.nc");
       CalibratorSmooth cal = CalibratorSmooth(Variable::T);
       cal.setSmoothRadius(1);
 
@@ -36,8 +36,8 @@ namespace {
       EXPECT_FLOAT_EQ(304.73114, (*after)[5][2][0]);
       EXPECT_FLOAT_EQ(305.35556, (*after)[5][9][0]);
    }
-   TEST_F(TestCalibratorSmooth, 5x5_missingValues) {
-      FileArome from("testing/files/5x5.nc");
+   TEST_F(TestCalibratorSmooth, 10x10_missingValues) {
+      FileArome from("testing/files/10x10.nc");
       CalibratorSmooth cal = CalibratorSmooth(Variable::T);
       cal.setSmoothRadius(1);
       FieldPtr field = from.getField(Variable::T, 0);

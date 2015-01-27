@@ -1,6 +1,12 @@
+DEBUG    = 0
 CC      	= g++
-CFLAGS  	= -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage
-#CFLAGS  = -O3 -fopenmp
+CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
+CFLAGS_O = -O3 -fopenmp
+ifeq ($(DEBUG), 1)
+CFLAGS=$(CFLAGS_D) 
+else
+CFLAGS=$(CFLAGS_O)
+endif
 SRCDIR   = src/
 BUILDDIR = build
 IFLAGS  	= -I/usr/include/ -I/usr/local/boost/include/
@@ -32,6 +38,9 @@ $(BUILDDIR):
 
 $(BUILDDIR)/%.o : src/%.cpp $(INCS)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.E : src/%.cpp $(INCS)
+	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@ -E
 
 postprocess.exe: $(OBJ) $(DRVOBJ) makefile
 	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) $(DRVOBJ) $(LIBS) -o $@

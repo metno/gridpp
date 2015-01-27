@@ -10,7 +10,9 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <execinfo.h>
 #include <signal.h>
+#ifdef DEBUG
 extern "C" void __gcov_flush();
+#endif
 bool Util::mShowError = true;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
@@ -26,7 +28,9 @@ void Util::error(std::string iMessage) {
       std::cout << "Stack trace:" << std::endl;
       backtrace_symbols_fd(array, size, 2);
    }
+#ifdef DEBUG
    __gcov_flush();
+#endif
    abort();
 }
 void Util::warning(std::string iMessage) {

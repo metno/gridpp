@@ -24,7 +24,7 @@ class FileEc : public FileNetcdf {
 
       std::string getVariableName(Variable::Type iVariable) const;
       static bool isValid(std::string iFilename);
-      std::string name() const {return "Ec";};
+      std::string name() const {return "ec";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;

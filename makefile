@@ -56,8 +56,7 @@ doxygen:
 	doxygen doxygen/config
 
 coverage:
-	rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
-	make test
+	#rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
 	lcov -b . -c -i -d . -o coverage.init
 	csh runAllTests.csh
 	lcov -b . -c -d . -o coverage.run

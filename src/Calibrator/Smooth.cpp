@@ -5,41 +5,32 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include "../Downscaler/Downscaler.h"
-CalibratorSmooth::CalibratorSmooth(Variable::Type iMainPredictor):
+CalibratorSmooth::CalibratorSmooth(Variable::Type iVariable):
       Calibrator(),
       mSmoothRadius(3),
-      mMainPredictor(iMainPredictor) {
+      mVariable(iVariable) {
 }
 
-void CalibratorSmooth::calibrateCore(File& iFile) const {
+bool CalibratorSmooth::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
-   int numInvalidRaw = 0;
-   int numInvalidCal = 0;
-
-   // Get nearest neighbour
-   vec2Int nearestI, nearestJ;
-   DownscalerNearestNeighbour::getNearestNeighbourFast(iFile, iFile, nearestI, nearestJ);
-
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      Field& precip = *iFile.getField(Variable::Precip, t);
+      Field& precip = *iFile.getField(mVariable, t);
       Field precipRaw = precip;
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            int Icenter = nearestI[i][j];
-            int Jcenter = nearestJ[i][j];
 
             for(int e = 0; e < nEns; e++) {
                float total = 0;
                int count = 0;
-               for(int ii = std::max(0, Icenter-mSmoothRadius); ii <= std::min(nLat-1, Icenter+mSmoothRadius); ii++) {
-                  for(int jj = std::max(0, Jcenter-mSmoothRadius); jj <= std::min(nLon-1, Jcenter+mSmoothRadius); jj++) {
+               for(int ii = std::max(0, i-mSmoothRadius); ii <= std::min(nLat-1, i+mSmoothRadius); ii++) {
+                  for(int jj = std::max(0, j-mSmoothRadius); jj <= std::min(nLon-1, j+mSmoothRadius); jj++) {
                      float value = precipRaw[ii][jj][e];
                      if(Util::isValid(value)) {
                         total += value;
@@ -60,12 +51,21 @@ void CalibratorSmooth::calibrateCore(File& iFile) const {
          }
       }
    }
+   return true;
 }
 
 void CalibratorSmooth::setSmoothRadius(int iNumPoints) {
+   if(!Util::isValid(iNumPoints) || iNumPoints < 1) {
+      std::stringstream ss;
+      ss << "CalibratorSmooth: Smoothing radius must be >= 1";
+      Util::error(ss.str());
+   }
    mSmoothRadius = iNumPoints;
 }
 
+int CalibratorSmooth::getSmoothRadius() const {
+   return mSmoothRadius;
+}
 std::string CalibratorSmooth::description() {
    std::stringstream ss;
    ss << "   -c smooth                    Smooth the ensemble by averaging spatially, using a neighbourhood." << std::endl;

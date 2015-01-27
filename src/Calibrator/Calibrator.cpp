@@ -63,8 +63,8 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       return NULL;
    }
 }
-void Calibrator::calibrate(File& iFile) const {
-   calibrateCore(iFile);
+bool Calibrator::calibrate(File& iFile) const {
+   return calibrateCore(iFile);
 }
 
 void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter) {

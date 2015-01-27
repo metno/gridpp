@@ -55,6 +55,7 @@ namespace {
       EXPECT_EQ("zaga",       setup.variableConfigurations[1].calibrators[0]->name());
    }
    TEST(SetupTest, shouldBeValid) {
+      MetSetup setup0(Util::split("input output"));
       MetSetup setup1(Util::split("input output -v T -d smart"));
       MetSetup setup2(Util::split("input output -v T -c smooth -d smart"));
       MetSetup setup3(Util::split("input output -v T -d smart -c smooth"));
@@ -67,7 +68,7 @@ namespace {
    }
    TEST(SetupTest, shouldBeInValid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      EXPECT_DEATH(MetSetup setup1(Util::split("input output")), ".*");
+      Util::setShowError(false);
       EXPECT_DEATH(MetSetup setup2(Util::split("input output -v")), ".*");
       EXPECT_DEATH(MetSetup setup2(Util::split("input output -v -d smart")), ".*");
    }

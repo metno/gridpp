@@ -5,7 +5,7 @@ CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable) :
       Calibrator(),
       mVariable(iVariable) {
 }
-void CalibratorAccumulate::calibrateCore(File& iFile) const {
+bool CalibratorAccumulate::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -50,6 +50,7 @@ void CalibratorAccumulate::calibrateCore(File& iFile) const {
       }
       iFile.addField(fieldsAcc[t], variableAcc, t);
    }
+   return true;
 }
 std::string CalibratorAccumulate::description() {
    std::stringstream ss;

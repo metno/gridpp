@@ -8,7 +8,7 @@ void Downscaler::downscale(const File& iInput, File& iOutput) const {
    downscaleCore(iInput, iOutput);
 }
 
-Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, Options& iOptions) {
+Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions) {
    if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iVariable);
    }
@@ -29,6 +29,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, O
       float searchRadius = Util::MV;
       if(iOptions.getValue("searchRadius", searchRadius)) {
          d->setSearchRadius(searchRadius);
+      }
+      float numSmart = Util::MV;
+      if(iOptions.getValue("numSmart", numSmart)) {
+         d->setNumSmart(numSmart);
       }
       return d;
    }

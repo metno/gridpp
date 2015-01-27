@@ -9,8 +9,9 @@ class Options;
 class Calibrator {
    public:
       Calibrator();
-      //! Calibrate one or more fields in iFile
-      void calibrate(File& iFile) const;
+      //! \brief Calibrate one or more fields in iFile
+      //! @return true if calibration was successful, false otherwise
+      bool calibrate(File& iFile) const;
 
       //! Instantiates a calibrator with name iName
       static Calibrator* getScheme(std::string iName, const Options& iOptions);
@@ -23,7 +24,7 @@ class Calibrator {
       //! Returns the name of this calibrator
       virtual std::string name() const = 0;
    protected:
-      virtual void calibrateCore(File& iFile) const = 0;
+      virtual bool calibrateCore(File& iFile) const = 0;
    private:
 };
 #include "Zaga.h"

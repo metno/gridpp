@@ -1,7 +1,7 @@
 #!/bin/csh
 # Test suite
 
-make test
+# make test
 
 set programs = `ls testing/*.exe`
 foreach program ($programs)

@@ -21,7 +21,7 @@ class FileFake : public File {
 
       // Does this file contain the variable?
       bool hasVariable(Variable::Type iVariable) const {return true;};
-      std::string name() const {return "Fake";};
+      std::string name() const {return "fake";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables) {abort();};
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;

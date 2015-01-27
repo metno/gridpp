@@ -5,7 +5,7 @@
 class CalibratorTemperature : public Calibrator {
    public:
       CalibratorTemperature(const ParameterFile& iParameterFile);
-      void calibrateCore(const File& iInput, File& iOutput) const;
+      bool calibrateCore(const File& iInput, File& iOutput) const;
 
 };
 #endif

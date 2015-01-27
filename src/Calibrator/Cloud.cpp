@@ -7,7 +7,7 @@ CalibratorCloud::CalibratorCloud(Variable::Type iPrecip, Variable::Type iCloud) 
       mPrecipType(iPrecip) {
 
 }
-void CalibratorCloud::calibrateCore(File& iFile) const {
+bool CalibratorCloud::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

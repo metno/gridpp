@@ -108,9 +108,10 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryZaga) {
       Calibrator* c;
-      c = Calibrator::getScheme("zaga", Options("variable=T parameters=parameters.txt"));
+      c = Calibrator::getScheme("zaga", Options("variable=T parameters=parameters.txt fracThreshold=0.9"));
       EXPECT_TRUE(c);
       EXPECT_EQ("zaga", c->name());
+      EXPECT_FLOAT_EQ(0.9, ((CalibratorZaga*) c)->getFracThreshold());
       delete c;
    }
    TEST_F(TestCalibrator, factorySmooth) {

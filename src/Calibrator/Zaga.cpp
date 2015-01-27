@@ -13,7 +13,7 @@ CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Ty
       mFracThreshold(0.5) {
 }
 
-void CalibratorZaga::calibrateCore(File& iFile) const {
+bool CalibratorZaga::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -64,7 +64,7 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
                std::vector<float> valuesCal(nEns);
                for(int e = 0; e < nEns; e++) {
                   float quantile = ((float) e+0.5)/nEns;
-                  float valueCal   = getInvCdf(quantile, ensMean, ensFrac, t, parameters);
+                  float valueCal   = getInvCdf(quantile, ensMean, ensFrac, parameters);
                   precip[i][j][e] = valueCal;
                   if(!Util::isValid(valueCal))
                      isValid = false;
@@ -102,12 +102,10 @@ void CalibratorZaga::calibrateCore(File& iFile) const {
          << " invalid ensembles, out of " << nTime * nLat * nLon << ".";
       Util::warning(ss.str());
    }
+   return true;
 }
 
-float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, int iTime, Parameters& iParameters) {
-   if(iQuantile == 0)
-      return 0;
-
+float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, Parameters& iParameters) {
    if(iQuantile < 0 || iQuantile >= 1) {
       Util::warning("Quantile must be in the interval [0,1)");
       return Util::MV;
@@ -115,7 +113,7 @@ float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac,
    if(!Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac))
       return Util::MV;
 
-   if(iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1 || iTime < 0)
+   if(iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1)
       return Util::MV;
 
    // Check that parameters are valid
@@ -123,6 +121,9 @@ float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac,
       if(!Util::isValid(iParameters[i]))
          return Util::MV;
    }
+
+   if(iQuantile == 0)
+      return 0;
 
    // Check if we are in the discrete mass
    float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
@@ -160,6 +161,13 @@ float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac,
    return value;
 }
 float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+   if(!Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac) || iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1)
+      return Util::MV;
+   // Check that parameters are valid
+   for(int i =0; i < iParameters.size(); i++) {
+      if(!Util::isValid(iParameters[i]))
+         return Util::MV;
+   }
    float a = iParameters[4];
    float b = iParameters[5];
    float c = iParameters[6];
@@ -169,9 +177,9 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParamet
    return P0;
 }
 void CalibratorZaga::setFracThreshold(float iFraction) {
-   if(iFraction < 0 || iFraction > 1) {
+   if(!Util::isValid(iFraction) || iFraction < 0) {
       std::stringstream ss;
-      ss << "CalibratorZaga: fraction threshold (" << iFraction << ") must be between 0 and 1, inclusive.";
+      ss << "CalibratorZaga: fraction threshold (" << iFraction << ") must be 0 or greater.";
       Util::error(ss.str());
    }
    mFracThreshold = iFraction;

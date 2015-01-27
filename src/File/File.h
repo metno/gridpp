@@ -4,6 +4,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "../Variable.h"
+#include "../Util.h"
 
 // 3D array of data: [lat][lon][ensemble_member]
 typedef std::vector<std::vector<std::vector<float> > > Field;
@@ -19,7 +20,7 @@ class File {
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
       //! Get a new field initialized with missing values
-      FieldPtr getEmptyField() const;
+      FieldPtr getEmptyField(float iFillValue=Util::MV) const;
 
       // Add a field to the file, overwriting existing ones (if available)
       void addField(FieldPtr iField, Variable::Type iVariable, int iTime) const;
@@ -48,7 +49,7 @@ class File {
       std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
-      FieldPtr getEmptyField(int nLat, int nLon, int nEns) const;
+      FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
    private:
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
 };

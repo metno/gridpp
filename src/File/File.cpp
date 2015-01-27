@@ -70,6 +70,33 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
             addField(field, Variable::Precip, t);
          }
       }
+      else if(iVariable == Variable::PrecipAcc) {
+         // Accumulate
+         FieldPtr prevAccum = getEmptyField(0);
+         addField(prevAccum, Variable::PrecipAcc, 0); // First offset is 0
+
+         for(int t = 1; t < getNumTime(); t++) {
+            FieldPtr currAccum = getEmptyField();
+            const FieldPtr currPrecip  = getField(Variable::Precip, t);
+            for(int lat = 0; lat < getNumLat(); lat++) {
+               for(int lon = 0; lon < getNumLon(); lon++) {
+                  for(int e = 0; e < getNumEns(); e++) {
+                     float a = (*prevAccum)[lat][lon][e];
+                     float p = (*currPrecip)[lat][lon][e];
+                     float value = Util::MV;
+                     if(Util::isValid(a) && Util::isValid(p)) {
+                         value = a + p;
+                         if(value < 0)
+                            value = 0;
+                     }
+                     (*currAccum)[lat][lon][e] = value;
+                     prevAccum = currAccum;
+                  }
+               }
+            }
+            addField(currAccum, Variable::PrecipAcc, t);
+         }
+      }
       else if(iVariable == Variable::W) {
          if(hasVariable(Variable::U) && hasVariable(Variable::V)) {
             for(int t = 0; t < getNumTime(); t++) {
@@ -110,16 +137,16 @@ void File::write(std::vector<Variable::Type> iVariables) {
 }
 
 
-FieldPtr File::getEmptyField() const {
-   return getEmptyField(getNumLat(), getNumLon(), getNumEns());
+FieldPtr File::getEmptyField(float iFillValue) const {
+   return getEmptyField(getNumLat(), getNumLon(), getNumEns(), iFillValue);
 }
-FieldPtr File::getEmptyField(int nLat, int nLon, int nEns) const {
+FieldPtr File::getEmptyField(int nLat, int nLon, int nEns, float iFillValue) const {
    FieldPtr field = FieldPtr(new Field());
    field->resize(nLat);
    for(int i = 0; i < nLat; i++) {
       (*field)[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
-         (*field)[i][j].resize(nEns,Util::MV);
+         (*field)[i][j].resize(nEns,iFillValue);
       }
    }
    return field;

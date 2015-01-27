@@ -9,13 +9,14 @@ class Parameters;
 
 class CalibratorSmooth : public Calibrator {
    public:
-      CalibratorSmooth(Variable::Type iMainPredictor);
+      CalibratorSmooth(Variable::Type iVariable);
       static std::string description();
       std::string name() const {return "smooth";};
       void setSmoothRadius(int iNumPoints);
+      int  getSmoothRadius() const;
    private:
-      void calibrateCore(File& iFile) const;
-      Variable::Type mMainPredictor;
+      bool calibrateCore(File& iFile) const;
+      Variable::Type mVariable;
       int mSmoothRadius;
 };
 #endif

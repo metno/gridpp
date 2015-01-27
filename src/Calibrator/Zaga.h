@@ -31,7 +31,7 @@ class CalibratorZaga : public Calibrator {
    private:
       const ParameterFile* mParameterFile;
       bool calibrateCore(File& iFile) const;
-      static const float mMaxEnsMean = 100;
+      static const float mMaxEnsMean;
       //! What precip threshold should be used to count members with no precip?
       float mFracThreshold;
       Variable::Type mMainPredictor;

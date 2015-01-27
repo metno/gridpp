@@ -9,6 +9,7 @@ class Options;
 class Calibrator {
    public:
       Calibrator();
+      virtual ~Calibrator() {};
       //! \brief Calibrate one or more fields in iFile
       //! @return true if calibration was successful, false otherwise
       bool calibrate(File& iFile) const;

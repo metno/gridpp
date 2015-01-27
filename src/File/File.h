@@ -15,7 +15,7 @@ typedef boost::shared_ptr<Field> FieldPtr;
 class File {
    public:
       File(std::string iFilename);
-      ~File();
+      virtual ~File();
       static File* getScheme(std::string iFilename);
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;

@@ -6,6 +6,7 @@
 #include "../File/File.h"
 #include "../ParameterFile.h"
 #include "../Parameters.h"
+const float CalibratorZaga::mMaxEnsMean = 100;
 CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor):
       Calibrator(),
       mParameterFile(iParameterFile),

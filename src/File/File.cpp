@@ -37,7 +37,7 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
 
    if(needsReading) {
       // Load non-derived variable from file
-      if(hasVariable(iVariable)) {
+      if(hasVariableCore(iVariable)) {
          for(int t = 0; t < getNumTime(); t++) {
             mFields[iVariable][t] = getFieldCore(iVariable, t);
          }
@@ -98,7 +98,7 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
          }
       }
       else if(iVariable == Variable::W) {
-         if(hasVariable(Variable::U) && hasVariable(Variable::V)) {
+         if(hasVariableCore(Variable::U) && hasVariableCore(Variable::V)) {
             for(int t = 0; t < getNumTime(); t++) {
                FieldPtr windSpeed = getEmptyField();
                const FieldPtr u = getField(Variable::U, t);
@@ -186,4 +186,23 @@ void File::initNewVariable(Variable::Type iVariable) {
          addField(getEmptyField(), iVariable, t);
       }
    }
+}
+bool File::hasVariable(Variable::Type iVariable) const {
+   bool status = hasVariableCore(iVariable);
+   if(status)
+      return true;
+// Check if field is derivable
+   if(iVariable == Variable::Precip) {
+      return hasVariableCore(Variable::PrecipAcc);
+   }
+   else if(iVariable == Variable::PrecipAcc) {
+      return hasVariableCore(Variable::Precip);
+   }
+   else if(iVariable == Variable::W) {
+      return hasVariableCore(Variable::V) && hasVariableCore(Variable::U);
+   }
+   
+   // Check if field has been initialized
+   std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
+   return it != mFields.end();
 }

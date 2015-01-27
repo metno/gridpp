@@ -14,7 +14,7 @@ class FileNetcdf : public File {
       ~FileNetcdf();
 
       // Does this file contain the variable?
-      bool hasVariable(Variable::Type iVariable) const;
+      bool hasVariableCore(Variable::Type iVariable) const;
       virtual std::string getVariableName(Variable::Type iVariable) const = 0;
    protected:
       float getScale(NcVar* iVar) const;

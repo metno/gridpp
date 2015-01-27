@@ -33,7 +33,9 @@ class File {
       virtual int getNumLon() const  = 0;
       virtual int getNumEns() const  = 0;
       virtual int getNumTime() const = 0;
-      virtual bool hasVariable(Variable::Type iVariable) const = 0;
+
+      //! Does this file provide the variable (deriving it if necessary)?
+      bool hasVariable(Variable::Type iVariable) const;
 
       virtual vec2 getLats() const = 0;
       virtual vec2 getLons() const = 0;
@@ -49,6 +51,8 @@ class File {
       std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
+      //! Can the subclass provide this variable?
+      virtual bool hasVariableCore(Variable::Type iVariable) const = 0;
       FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
    private:
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset

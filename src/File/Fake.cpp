@@ -66,3 +66,6 @@ bool FileFake::setElevs(vec2 iElevs) {
    mElevs = iElevs;
    return true;
 }
+void FileFake::writeCore(std::vector<Variable::Type> iVariables) {
+   Util::warning("Cannot write file using the 'Fake' format");
+}

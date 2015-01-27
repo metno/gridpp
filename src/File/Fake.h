@@ -19,12 +19,11 @@ class FileFake : public File {
       bool setLons(vec2 iLons);
       bool setElevs(vec2 iElevs);
 
-      // Does this file contain the variable?
-      bool hasVariable(Variable::Type iVariable) const {return true;};
       std::string name() const {return "fake";};
    protected:
-      void writeCore(std::vector<Variable::Type> iVariables) {abort();};
+      void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
+      bool hasVariableCore(Variable::Type iVariable) const {return true;};
       vec2 mLats;
       vec2 mLons;
       vec2 mElevs;

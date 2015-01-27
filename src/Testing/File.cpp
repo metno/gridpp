@@ -30,8 +30,9 @@ namespace {
       FieldPtr p2 = f2.getField(Variable::T, 0);
       EXPECT_NE(*p1, *p2);
    }
-   TEST_F(FileTest, deriveVariables) {
+   TEST_F(FileTest, hasVariable) {
       FileArome from("testing/files/10x10.nc");
+      EXPECT_TRUE(from.hasVariable(Variable::PrecipAcc)); // Derivable
       EXPECT_TRUE(from.hasVariable(Variable::Precip));
       FieldPtr precip = from.getField(Variable::Precip, 0);
       FieldPtr precipAcc = from.getField(Variable::PrecipAcc, 0);
@@ -54,6 +55,21 @@ namespace {
       EXPECT_TRUE(f1.hasVariable(Variable::U));
       FieldPtr field = f1.getField(Variable::U, 0);
    }
+   /*
+   TEST_F(FileTest, deriveVariables) {
+      FileFake file(3, 3, 1, 2);
+      ASSERT_TRUE(file.hasVariable(Variable::Precip));
+      FieldPtr p0 = file.getField(Variable::Precip, 0);
+      FieldPtr p1 = file.getField(Variable::Precip, 1);
+      (*p0)[1][1][0] = 3.1;
+      (*p0)[1][1][0] = 2.4;
+
+      FieldPtr acc0 = file.getField(Variable::PrecipAcc, 0);
+      FieldPtr acc1 = file.getField(Variable::PrecipAcc, 1);
+      EXPECT_FLOAT_EQ(0, (*acc0)[1][1][0]);
+      EXPECT_FLOAT_EQ(5.5, (*acc1)[1][1][0]);
+   }
+   */
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

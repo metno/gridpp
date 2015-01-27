@@ -154,6 +154,10 @@ namespace {
       double e = Util::clock();
       EXPECT_NEAR(sleepsec, e-s, sleepsec/100);
    }
+   TEST_F(UtilTest, getCurrentDate) {
+      int date = Util::getCurrentDate();
+      EXPECT_LT(2000000, date);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

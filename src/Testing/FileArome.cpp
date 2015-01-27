@@ -45,6 +45,13 @@ namespace {
       FieldPtr p2 = f2.getField(Variable::T, 0);
       EXPECT_NE(*p1, *p2);
    }
+   TEST_F(FileAromeTest, variables) {
+      FileArome file("testing/files/10x10.nc");
+      std::vector<Variable::Type> variables = Variable::getAllVariables();
+      for(int i = 0; i < variables.size(); i++) {
+         std::string var = file.getVariableName(variables[i]);
+      }
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

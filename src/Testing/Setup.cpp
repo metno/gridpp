@@ -42,12 +42,13 @@ namespace {
    TEST(SetupTest, complicated) {
       MetSetup setup(Util::split("input output -v T -d nearestNeighbour -d smart -c smooth -c accumulate -c smooth -v Precip -c zaga parameters=parameters.txt -d gradient"));
       ASSERT_EQ(2,            setup.variableConfigurations.size());
-      EXPECT_EQ(Variable::T,  setup.variableConfigurations[0].variable);
-      EXPECT_EQ("smart",      setup.variableConfigurations[0].downscaler->name());
-      ASSERT_EQ(3,            setup.variableConfigurations[0].calibrators.size());
-      EXPECT_EQ("smooth",     setup.variableConfigurations[0].calibrators[0]->name());
-      EXPECT_EQ("accumulate", setup.variableConfigurations[0].calibrators[1]->name());
-      EXPECT_EQ("smooth",     setup.variableConfigurations[0].calibrators[2]->name());
+      VariableConfiguration varconf = setup.variableConfigurations[0];
+      EXPECT_EQ(Variable::T,  varconf.variable);
+      EXPECT_EQ("smart",      varconf.downscaler->name());
+      ASSERT_EQ(3,            varconf.calibrators.size());
+      EXPECT_EQ("smooth",     varconf.calibrators[0]->name());
+      EXPECT_EQ("accumulate", varconf.calibrators[1]->name());
+      EXPECT_EQ("smooth",     varconf.calibrators[2]->name());
 
       EXPECT_EQ(Variable::Precip, setup.variableConfigurations[1].variable);
       EXPECT_EQ("gradient",   setup.variableConfigurations[1].downscaler->name());
@@ -71,6 +72,18 @@ namespace {
       Util::setShowError(false);
       EXPECT_DEATH(MetSetup setup2(Util::split("input output -v")), ".*");
       EXPECT_DEATH(MetSetup setup2(Util::split("input output -v -d smart")), ".*");
+   }
+   TEST(SetupTest, defaultDownscaler) {
+      std::string downscaler = Setup::defaultDownscaler();
+      EXPECT_NE("", downscaler);
+   }
+   TEST(SetupTest, variableConfiguration) {
+      VariableConfiguration varconf;
+   }
+   TEST(SetupTest, destructor) {
+      {
+         MetSetup setup(Util::split("input output -v T -d smart numSmart=2 -v Precip -d smart"));
+      }
    }
 }
 int main(int argc, char **argv) {

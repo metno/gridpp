@@ -23,7 +23,7 @@ class FileFake : public File {
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
-      bool hasVariableCore(Variable::Type iVariable) const {return true;};
+      bool hasVariableCore(Variable::Type iVariable) const;
       vec2 mLats;
       vec2 mLons;
       vec2 mElevs;

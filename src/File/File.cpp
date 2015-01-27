@@ -90,11 +90,11 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                             value = 0;
                      }
                      (*currAccum)[lat][lon][e] = value;
-                     prevAccum = currAccum;
                   }
                }
             }
             addField(currAccum, Variable::PrecipAcc, t);
+            prevAccum = currAccum;
          }
       }
       else if(iVariable == Variable::W) {

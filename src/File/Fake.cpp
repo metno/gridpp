@@ -1,6 +1,18 @@
 #include "Fake.h"
 FileFake::FileFake(int nLat, int nLon, int nEns, int nTime) :
       File(""), mNLat(nLat), mNLon(nLon), mNEns(nEns), mNTime(nTime) {
+   if(!Util::isValid(mNLat) || mNLat <= 0) {
+      Util::error("FileFake: Invalid number of latitudes");
+   }
+   if(!Util::isValid(mNLon) || mNLon <= 0) {
+      Util::error("FileFake: Invalid number of longitudes");
+   }
+   if(!Util::isValid(mNEns) || mNEns <= 0) {
+      Util::error("FileFake: Invalid number of ensemble members");
+   }
+   if(!Util::isValid(mNTime) || mNTime <= 0) {
+      Util::error("FileFake: Invalid number of times");
+   }
    mLats.resize(getNumLat());
    for(int i = 0; i < getNumLat(); i++) {
       mLats[i].resize(getNumLon());
@@ -68,4 +80,11 @@ bool FileFake::setElevs(vec2 iElevs) {
 }
 void FileFake::writeCore(std::vector<Variable::Type> iVariables) {
    Util::warning("Cannot write file using the 'Fake' format");
+}
+
+bool FileFake::hasVariableCore(Variable::Type iVariable) const {
+   if(iVariable == Variable::PrecipAcc)
+      return false;
+   else
+      return true;
 }

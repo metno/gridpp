@@ -8,7 +8,8 @@ class Parameters {
       Parameters();
       int size() const;
       std::vector<float> getValues() const;
-      float const& operator[](unsigned int i) const;
+            float & operator[](unsigned int i);
+      const float & operator[](unsigned int i) const;
    private:
       std::vector<float> mValues;
 };

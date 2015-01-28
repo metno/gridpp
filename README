@@ -1,28 +1,54 @@
-Framework for post-processing gridded forecasts
+Gridded post-processor
+======================
 
-./postprocess.exe <inputFile> <outputFile> -v variable -d downscaler -c calibrator -v variable2 -downscaler -c calibrator
+Program post-processes an AROME or ECMWF NetCDF file placing the results
+in a new file, possible on a different grid.
 
-Basic principles:
-* If the calibration goes terrible, revert to the raw values
-* When methods read parameters, they should fail early
+Interpolation between grids is done using one of several downscalers. Further
+calibration is done using one or more calibrators.
+
+Installation Instructions
+-------------------------
+1) Ensure the following libraries are installed:
+* Boost libraries
+* Netcdf c++ library
+* (Optional) Google test library (if developing new code)
+2) Edit CC, CFLAGS_O, IFLAGS, and LFLAGS in makefile
+3) Run 'make'
+
+Running the program
+-------------------
+To see program options, run:
+./postprocess.exe
+To test the program on a fake dataset, run:
+./postprocess.exe testing/files/10x10.nc testing/files/10x10_copy.nc -v T\
+       -d gradient -v Precip -d smart numSmart=3 searchRadius=3
+ncview testing/files/10x10_copy.nc
+
+Running on multiple cores
+-------------------------
+To run using 8 threads:
+export OMP_NUM_THREADS=8
+./postprocess.exe ...
 
 Notes
-* When reading the input file, all missing values are converted to the internal missing flag indicator. When
-  writing to the output file, these missing values are written back as the missing flag indicator of the
-  output file.
-* If an ensemble has one or more missing members (where an ensemble is for a specific gridpoint and time),
-  the ensemble is not calibrated, and the original values are used instead.
+-----
+* If the calibration goes terrible, revert to the raw values
+* When reading the input file, all missing values are converted to the internal
+  missing flag indicator. When writing to the output file, these missing values
+  are written back as the missing flag indicator of the output file.
+* If an ensemble has one or more missing members (where an ensemble is for a
+  specific gridpoint and time), the ensemble is not calibrated, and the original
+  values are used instead.
 * Files with accumulation fields are automatically deaccumulated.
 * Negative precipitation amounts are automatically set to 0.
-* If the calibration produces invalid values (infinity, etc), the raw values are used.
+* If the calibration produces invalid values (infinity, etc), the raw values are
+  used.
 * Do not allow operations on raw fields that have been derived to something else.
 
-Software structure
-   File: Any object implementing data with x (lat), y (lon), time, and ensemble dimensions.
-   Calibrator: Any function that alters variables in a file
-   Downscaler: Any function that 
-
 Testing of code
+---------------
 * Unit tests are placed in src/Testing/, one file for each class that is tested.
 * Convenient input files for testing are located in testing/files/
-* New downscalers and calibrators should produce valid results for testing/files/5x5.nc
+* New downscalers and calibrators should produce valid results for the special
+  test file 'testing/files/10x10.nc'.

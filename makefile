@@ -1,17 +1,21 @@
-DEBUG    = 1
 CC      	= g++
 CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
 CFLAGS_O = -O3 -fopenmp
+IFLAGS  	= -I/usr/include/
+LIBS_D   = -lnetcdf_c++ -lgtest
+LIBS_O   = -lnetcdf_c++
+LFLAGS   = -L/usr/lib
+DEBUG    = 0  # Set to 1 to compile with debug flags, otherwise compile with optimization
+
 ifeq ($(DEBUG), 1)
 CFLAGS=$(CFLAGS_D) 
+LIBS=$(LIBS_D)
 else
 CFLAGS=$(CFLAGS_O)
+LIBS=$(LIBS_O)
 endif
 SRCDIR   = src/
 BUILDDIR = build
-IFLAGS  	= -I/usr/include/ -I/usr/local/boost/include/
-LIBS    	= -lnetcdf_c++ -lgtest
-LFLAGS  	= -L/usr/lib -L/usr/local/boost/lib/ -L/home/thomasn/local/lib/
 EXE     	= postprocess.exe
 
 CORESRC 	= $(wildcard src/*.cpp)
@@ -54,7 +58,7 @@ count:
 	@wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
 
 clean: 
-	rm -rf build/*.o build/*/*.o gmon.out $(EXE) testing/*.exe\
+	rm -rf build/*.o build/*/*.o build/*.E build/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*.gcda build/*.gcno build/*/*.gcda build/*/*.gcno\
 		coverage/* coverage.* 
 

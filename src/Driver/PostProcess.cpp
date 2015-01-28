@@ -40,12 +40,14 @@ int main(int argc, const char *argv[]) {
       std::cout << DownscalerNearestNeighbour::description();
       std::cout << DownscalerGradient::description();
       std::cout << DownscalerSmart::description();
+      std::cout << DownscalerBypass::description();
       std::cout << std::endl;
       std::cout << "Calibrators with options (and default values):" << std::endl;
       std::cout << CalibratorZaga::description();
       std::cout << CalibratorCloud::description();
       std::cout << CalibratorAccumulate::description();
       std::cout << CalibratorSmooth::description();
+      std::cout << CalibratorPhase::description();
       return 1;
    }
    Util::setShowError(true);

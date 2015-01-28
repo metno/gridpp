@@ -41,6 +41,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       }
       return d;
    }
+   else if(iName == "bypass") {
+      DownscalerBypass* d = new DownscalerBypass(iVariable);
+      return d;
+   }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;

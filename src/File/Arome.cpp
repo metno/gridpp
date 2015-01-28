@@ -182,6 +182,19 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
       // TODO: Correct name?
       return "windspeed_10m";
    }
+   else if(iVariable == Variable::RH) {
+      return "relative_humidity_2m";
+   }
+   else if(iVariable == Variable::Phase) {
+      // TODO: Correct name?
+      return "phase";
+   }
+   else if(iVariable == Variable::P) {
+      return "surface_air_pressure";
+   }
+   else if(iVariable == Variable::Fake) {
+      return "fake";
+   }
    else {
       // TODO:
       abort();

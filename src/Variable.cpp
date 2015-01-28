@@ -17,6 +17,14 @@ std::string Variable::getTypeName(Type iType) {
       return "V";
    else if(iType == W)
       return "W";
+   else if(iType == RH)
+      return "RH";
+   else if(iType == Phase)
+      return "Phase";
+   else if(iType == P)
+      return "P";
+   else if(iType == Fake)
+      return "Fake";
    else
       return "Unknown";
 }
@@ -36,6 +44,14 @@ Variable::Type Variable::getType(std::string iName) {
       return V;
    else if(iName == "W")
       return W;
+   else if(iName == "RH")
+      return RH;
+   else if(iName == "Phase")
+      return Phase;
+   else if(iName == "P")
+      return P;
+   else if(iName == "Fake")
+      return Fake;
    else
       Util::error("Undefined variable type: " + iName);
 }
@@ -48,6 +64,9 @@ std::string Variable::description() {
    ss << "   -v U                         U-wind" << std::endl;
    ss << "   -v V                         V-wind" << std::endl;
    ss << "   -v Cloud                     Cloud cover" << std::endl;
+   ss << "   -v RH                        Relative humidity" << std::endl;
+   ss << "   -v Phase                     Precipitation phase (0 none, 1 rain, 2 sleet, 3 snow)" << std::endl;
+   ss << "   -v P                         Pressure" << std::endl;
    return ss.str();
 }
 
@@ -59,5 +78,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::U);
    variables.push_back(Variable::V);
    variables.push_back(Variable::Cloud);
+   variables.push_back(Variable::RH);
+   variables.push_back(Variable::Phase);
+   variables.push_back(Variable::P);
    return variables;
 }

@@ -156,9 +156,10 @@ namespace {
       DownscalerNearestNeighbour d(Variable::T);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(2,2,1,1);
+      FileFake to(2,2,1,from.getNumTime());
       setLatLon(to,   (float[]) {5,11},    (float[]){2,3});
-      d.downscale(from, to);
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
       ASSERT_EQ(2, toT.size());
       ASSERT_EQ(2, toT[0].size());

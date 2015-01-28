@@ -58,6 +58,16 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       }
       return c;
    }
+   else if(iName == "phase") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("Calibrator 'phase' needs parameters");
+      }
+
+      ParameterFile* parFile = new ParameterFile(parFilename);
+      CalibratorPhase* c = new CalibratorPhase(parFile);
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;

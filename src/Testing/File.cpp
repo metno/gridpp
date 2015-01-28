@@ -50,10 +50,10 @@ namespace {
    }
    TEST_F(FileTest, initNewVariable) {
       FileArome f1("testing/files/10x10.nc");
-      EXPECT_FALSE(f1.hasVariable(Variable::U));
-      f1.initNewVariable(Variable::U);
-      EXPECT_TRUE(f1.hasVariable(Variable::U));
-      FieldPtr field = f1.getField(Variable::U, 0);
+      EXPECT_FALSE(f1.hasVariable(Variable::Fake));
+      f1.initNewVariable(Variable::Fake);
+      EXPECT_TRUE(f1.hasVariable(Variable::Fake));
+      FieldPtr field = f1.getField(Variable::Fake, 0);
    }
    TEST_F(FileTest, deriveVariables) {
       FileFake file(3, 3, 1, 3);
@@ -92,6 +92,15 @@ namespace {
       EXPECT_FLOAT_EQ(0,        (*acc0)[0][0][0]);
       EXPECT_FLOAT_EQ(4.6,      (*acc1)[0][0][0]);
       EXPECT_FLOAT_EQ(10.7,     (*acc2)[0][0][0]);
+   }
+   TEST_F(FileTest, getFieldInvalidTime) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      FileFake f0(3, 3, 1, 3);
+      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
+      FileArome f1("testing/files/10x10.nc");
+      EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
    }
    TEST_F(FileTest, factoryFake) {
       File* f = File::getScheme("fake");

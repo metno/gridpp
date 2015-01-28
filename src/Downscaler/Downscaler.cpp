@@ -1,11 +1,16 @@
 #include "Downscaler.h"
+#include "../File/File.h"
 
 Downscaler::Downscaler(Variable::Type iVariable) :
       mVariable(iVariable) {
 }
 
-void Downscaler::downscale(const File& iInput, File& iOutput) const {
+bool Downscaler::downscale(const File& iInput, File& iOutput) const {
+   if(iInput.getNumTime() != iOutput.getNumTime())
+      return false;
+
    downscaleCore(iInput, iOutput);
+   return true;
 }
 
 Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions) {

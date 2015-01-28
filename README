@@ -1,5 +1,4 @@
 Framework for post-processing gridded forecasts
-Program to calibrate ensemble forecasts from ECMWF and AROME files
 
 ./postprocess.exe <inputFile> <outputFile> -v variable -d downscaler -c calibrator -v variable2 -downscaler -c calibrator
 
@@ -16,8 +15,14 @@ Notes
 * Files with accumulation fields are automatically deaccumulated.
 * Negative precipitation amounts are automatically set to 0.
 * If the calibration produces invalid values (infinity, etc), the raw values are used.
+* Do not allow operations on raw fields that have been derived to something else.
 
 Software structure
    File: Any object implementing data with x (lat), y (lon), time, and ensemble dimensions.
    Calibrator: Any function that alters variables in a file
    Downscaler: Any function that 
+
+Testing of code
+* Unit tests are placed in src/Testing/, one file for each class that is tested.
+* Convenient input files for testing are located in testing/files/
+* New downscalers and calibrators should produce valid results for testing/files/5x5.nc

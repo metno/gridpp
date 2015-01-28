@@ -25,6 +25,7 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    NcVar* vLat = getVar("latitude");
    NcVar* vLon = getVar("longitude");
    NcVar* vElev = getVar("altitude");
+   // TODO: Check for missing values. Probably should make a function like in FileArome.
    vLat->get(lats, countLat);
    vLon->get(lons, countLon);
    vElev->get(elevs, countElev);

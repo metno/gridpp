@@ -94,7 +94,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
       NcVar* var;
-      if(hasVariable(varType)) {
+      if(hasVariableCore(varType)) {
          var = getVar(variable);
       }
       else {

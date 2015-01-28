@@ -1,4 +1,4 @@
-DEBUG    = 0
+DEBUG    = 1
 CC      	= g++
 CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
 CFLAGS_O = -O3 -fopenmp

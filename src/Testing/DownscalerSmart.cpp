@@ -72,12 +72,13 @@ namespace {
       d.setNumSmart(2);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,1);
+      FileFake to(1,4,1,from.getNumTime());
       // Case 1: West boundary outside domain
       // Case 2: Within domain
       // Case 3/4: Nearest neighbour is on the boundary, so only the western half is used
       setLatLonElev(to, (float[]) {5}, (float[]){2,3,12,20}, (float[]){120, 80, 600, 600});
-      d.downscale(from, to);
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
       ASSERT_EQ(1, toT.size());
       ASSERT_EQ(4, toT[0].size());

@@ -51,9 +51,10 @@ namespace {
       d.setSearchRadius(1);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,1);
+      FileFake to(1,4,1,from.getNumTime());
       setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
-      d.downscale(from, to);
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
       ASSERT_EQ(1, toT.size());
       ASSERT_EQ(4, toT[0].size());
@@ -75,14 +76,18 @@ namespace {
       EXPECT_FLOAT_EQ(306.53052, toT2[0][2][0]);
       EXPECT_FLOAT_EQ(299.53052, toT2[0][3][0]);
    }
+   TEST_F(TestDownscalerGradient, missingValues) {
+
+   }
    TEST_F(TestDownscalerGradient, constantGradient) {
       DownscalerGradient d(Variable::T);
       d.setSearchRadius(1);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,1);
+      FileFake to(1,4,1,from.getNumTime());
       setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
-      d.downscale(from, to);
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
       ASSERT_EQ(1, toT.size());
       ASSERT_EQ(4, toT[0].size());

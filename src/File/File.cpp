@@ -29,6 +29,13 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
    std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    bool needsReading = it == mFields.end();
    if(!needsReading) {
+      if(mFields[iVariable].size() <= iTime) {
+         std::stringstream ss;
+         ss << "Attempted to access variable '" << Variable::getTypeName(iVariable) << "' for time " << iTime
+            << " in file '" << getFilename() << "'";
+         Util::error(ss.str());
+      }
+
       needsReading = mFields[iVariable][iTime] == NULL;
    }
    else {
@@ -121,9 +128,15 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
       }
       else {
          std::string variableType = Variable::getTypeName(iVariable);
-         std::cout << variableType << " not available in file." << std::endl;
+         std::cout << variableType << " not available in '" << getFilename() << "'" << std::endl;
          abort();
       }
+   }
+   if(mFields[iVariable].size() <= iTime) {
+      std::stringstream ss;
+      ss << "Attempted to access variable '" << Variable::getTypeName(iVariable) << "' for time " << iTime
+         << " in file '" << getFilename() << "'";
+      Util::error(ss.str());
    }
    FieldPtr field = mFields[iVariable][iTime];
    return field;

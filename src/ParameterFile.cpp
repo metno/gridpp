@@ -5,12 +5,13 @@
 #include <assert.h>
 
 ParameterFile::ParameterFile(std::string iFilename) : 
-      mFilename(iFilename) {
+      mFilename(iFilename),
+      mNumParameters(Util::MV) {
    std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
    if(!ifs.good()) {
       Util::error("Parameter file '" + iFilename + "' does not exist");
    }
-   int currSize = Util::MV;
+   mNumParameters = Util::MV;
    while(ifs.good()) {
       char line[10000];
       ifs.getline(line, 10000, '\n');
@@ -31,10 +32,12 @@ ParameterFile::ParameterFile(std::string iFilename) :
             }
             values.push_back(value);
          }
-         if(Util::isValid(currSize) && values.size() != currSize) {
+         if(mNumParameters == Util::MV)
+            mNumParameters = values.size();
+         else if(values.size() != mNumParameters) {
             std::stringstream ss;
             ss << "Parameter file '" + iFilename + "' is corrupt, because it does not have the same"
-               << " number of oclumns on each line" << std::endl;
+               << " number of columns on each line" << std::endl;
             Util::error(ss.str());
          }
          Parameters parameters(values);
@@ -45,6 +48,8 @@ ParameterFile::ParameterFile(std::string iFilename) :
    std::stringstream ss;
    ss << "Reading " << mFilename << ". Found " << getSize() << " parameter sets.";
    Util::status(ss.str());
+   if(!Util::isValid(mNumParameters))
+      mNumParameters = 0;
 
    Parameters par = getParameters(0);
 }
@@ -71,4 +76,12 @@ void ParameterFile::setParameters(Parameters iParameters, int iTime) {
 
 int ParameterFile::getSize() const {
    return mParameters.size();
+}
+
+int ParameterFile::getNumParameters() const {
+   return mNumParameters;
+}
+
+std::string ParameterFile::getFilename() const {
+   return mFilename;
 }

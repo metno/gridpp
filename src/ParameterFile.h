@@ -10,9 +10,12 @@ class ParameterFile {
       Parameters getParameters(int iTime) const;
       void       setParameters(Parameters iParameters, int iTime);
       int        getSize() const;
+      int        getNumParameters() const;
+      std::string getFilename() const;
    private:
       std::map<int, Parameters> mParameters; // Offset, Parameters
       std::string mFilename;
+      int mNumParameters;
 };
 /*
 class ParameterFileRegion {

@@ -1,11 +1,20 @@
 Gridded post-processor
 ======================
 
-Program post-processes an AROME or ECMWF NetCDF file placing the results
-in a new file, possible on a different grid.
+The program post-processes an AROME or ECMWF NetCDF file by using various
+downscaling and calibration methods. Post-processed forecasts are placed in a
+second Netcdf file, which has the desired output grid.
 
-Interpolation between grids is done using one of several downscalers. Further
-calibration is done using one or more calibrators.
+To convert between the two grids, a downscaling method is used. Currently
+implemented methods are:
+* nearest neighbour
+* elevation gradient
+* smart neighbours (nearest grid points at the same elevation)
+
+Calibrators include:
+* spatial smoothing
+* ensemble calibration of precipitation using zero-adjusted Gamma distribution
+* calculation of precipitation phase, using wetbulb temperature
 
 Installation Instructions
 -------------------------
@@ -18,12 +27,21 @@ Installation Instructions
 
 Running the program
 -------------------
-To see program options, run:
+* To see program options, run:
 ./postprocess.exe
-To test the program on a fake dataset, run:
+* To test the program on a fake dataset, run:
 ./postprocess.exe testing/files/10x10.nc testing/files/10x10_copy.nc -v T\
        -d gradient -v Precip -d smart numSmart=3 searchRadius=3
 ncview testing/files/10x10_copy.nc
+
+Example
+-------
+To test the program on a real operational AROME file, follow these steps:
+1) Make a copy of a file to post-process:
+cp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc
+2) Create a smoothed precipitation field in localcopy.nc:
+./postprocess.exe /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101\
+      localcopy.nc -v Precip -c smooth smoothRadius=10
 
 Running on multiple cores
 -------------------------
@@ -31,23 +49,25 @@ To run using 8 threads:
 export OMP_NUM_THREADS=8
 ./postprocess.exe ...
 
-Notes
------
-* If the calibration goes terrible, revert to the raw values
-* When reading the input file, all missing values are converted to the internal
-  missing flag indicator. When writing to the output file, these missing values
-  are written back as the missing flag indicator of the output file.
-* If an ensemble has one or more missing members (where an ensemble is for a
-  specific gridpoint and time), the ensemble is not calibrated, and the original
-  values are used instead.
-* Files with accumulation fields are automatically deaccumulated.
-* Negative precipitation amounts are automatically set to 0.
-* If the calibration produces invalid values (infinity, etc), the raw values are
-  used.
-* Do not allow operations on raw fields that have been derived to something else.
+Minimizing memory usage
+-----------------------
+Run the program in sequence for each variable:
+./postprocess.exe input output -v T ...
+./postprocess.exe input output -v Precip ...
+./postprocess.exe input output -v RH ...
+
+Adding new code
+---------------
+* Add a new downscaling scheme by creating a new file in ./src/Downscaler/.
+  Inherit from the Downscaler abstract base class (./src/Dowscaler/Downscaler.h)
+   and implement any pure virtual functions.
+* Instantiate the class in getScheme() in ./src/Downscaler/Downscaler.cpp.
+* Use a similar procedure for adding a new calibrator, or new file type.
 
 Testing of code
 ---------------
+* Set DEBUG to 1 in makefile, and run make test
+* Execute runAllTests.csh
 * Unit tests are placed in src/Testing/, one file for each class that is tested.
 * Convenient input files for testing are located in testing/files/
 * New downscalers and calibrators should produce valid results for the special

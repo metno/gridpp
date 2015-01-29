@@ -1,33 +1,38 @@
+# Change these to suit your system
 CC      	= g++
-CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
-CFLAGS_O = -O3 -fopenmp
 IFLAGS  	= -I/usr/include/
-LIBS_D   = -lnetcdf_c++ -lgtest
-LIBS_O   = -lnetcdf_c++
 LFLAGS   = -L/usr/lib
-DEBUG    = 0  # Set to 1 to compile with debug flags, otherwise compile with optimization
 
-ifeq ($(DEBUG), 1)
-CFLAGS=$(CFLAGS_D) 
-LIBS=$(LIBS_D)
-else
-CFLAGS=$(CFLAGS_O)
-LIBS=$(LIBS_O)
-endif
+# Flags for optimized compilation
+CFLAGS_O = -O3 -fopenmp
+LIBS_O   = -lnetcdf_c++
+
+# Flags for debug compilation
+CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
+LIBS_D   = -lnetcdf_c++ -lgtest
+
+
+# Don't change below here
 SRCDIR   = src/
 BUILDDIR = build
-EXE     	= postprocess.exe
+BUILDDIR_O = build/opt
+BUILDDIR_D = build/debug
+EXE_O    = postprocess.exe
+EXE_D    = postprocess_debug.exe
 
 CORESRC 	= $(wildcard src/*.cpp)
 CALSRC  	= $(wildcard src/Calibrator/*.cpp)
 FILESRC 	= $(wildcard src/File/*.cpp)
 DOWNSRC 	= $(wildcard src/Downscaler/*.cpp)
 DRVSRC  	= src/Driver/PostProcess.cpp
-DRVOBJ  	= $(BUILDDIR)/Driver/PostProcess.o
+DRVOBJ_O = $(BUILDDIR_O)/Driver/PostProcess.o
+DRVOBJ_D	= $(BUILDDIR_D)/Driver/PostProcess.o
 SRC     	= $(CORESRC) $(CALSRC) $(FILESRC) $(DOWNSRC)
 HEADERS 	= $(SRC:.cpp=.h)
-OBJ0    	= $(patsubst src/%,$(BUILDDIR)/%,$(SRC))
-OBJ     	= $(OBJ0:.cpp=.o)
+OBJ0_O   = $(patsubst src/%,$(BUILDDIR_O)/%,$(SRC))
+OBJ0_D  	= $(patsubst src/%,$(BUILDDIR_D)/%,$(SRC))
+OBJ_O   	= $(OBJ0_O:.cpp=.o)
+OBJ_D   	= $(OBJ0_D:.cpp=.o)
 TESTSRC 	= $(wildcard src/Testing/*.cpp)
 TESTS0  	= $(patsubst src/Testing%,testing%,$(TESTSRC))
 TESTS   	= $(TESTS0:.cpp=.exe)
@@ -35,31 +40,39 @@ INCS    	= makefile $(HEADERS)
 
 .PHONY: tags count coverage doxygen
 
-default: $(EXE)
+default: $(EXE_O)
+
+debug: $(EXE_D)
 
 $(BUILDDIR):
 	@mkdir build build/Calibrator build/Downscaler build/File build/Driver build/Testing
 
-$(BUILDDIR)/%.o : src/%.cpp $(INCS)
-	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
+$(BUILDDIR_O)/%.o : src/%.cpp $(INCS)
+	$(CC) $(CFLAGS_O) $(IFLAGS) -c $< -o $@
 
-$(BUILDDIR)/%.E : src/%.cpp $(INCS)
-	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@ -E
+$(BUILDDIR_D)/%.o : src/%.cpp $(INCS)
+	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@
 
-postprocess.exe: $(OBJ) $(DRVOBJ) makefile
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) $(DRVOBJ) $(LIBS) -o $@
+$(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
+	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
+
+postprocess.exe: $(OBJ_O) $(DRVOBJ_O) makefile
+	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
+
+postprocess_debug.exe: $(OBJ_D) $(DRVOBJ_D) makefile
+	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 test: $(TESTS)
 
-testing/%.exe: $(BUILDDIR)/Testing/%.o $(INCS) $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) $< $(LFLAGS) -lgtest $(LIBS) -o $@
+testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D)
+	$(CC) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
 
 count:
 	@wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
 
 clean: 
-	rm -rf build/*.o build/*/*.o build/*.E build/*/*.E gmon.out $(EXE) testing/*.exe\
-		*.gcno build/*.gcda build/*.gcno build/*/*.gcda build/*/*.gcno\
+	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
+		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
 		coverage/* coverage.* 
 
 tags:

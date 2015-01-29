@@ -4,8 +4,8 @@
 #include "Downscaler/Downscaler.h"
 
 Setup::Setup(std::vector<std::string> argv) {
-   inputFile  = File::getScheme(argv[0]);
-   outputFile = File::getScheme(argv[1]);
+   inputFile  = File::getScheme(argv[0], true);
+   outputFile = File::getScheme(argv[1], false);
 
    // Implement a finite state machine
    enum State {START = 0, VAR = 1, NEWVAR = 2, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};

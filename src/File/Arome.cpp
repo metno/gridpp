@@ -114,7 +114,6 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
          }
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
-      setMissingValue(var, MV);
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
@@ -155,6 +154,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
             delete[] values;
          }
       }
+      setMissingValue(var, MV);
    }
 }
 

@@ -7,15 +7,15 @@
 
 File::File(std::string iFilename) : mFilename(iFilename) {}
 
-File* File::getScheme(std::string iFilename) {
+File* File::getScheme(std::string iFilename, bool iReadOnly) {
    File* file;
    // TODO:
    // Autodetect type based on content
    if(FileArome::isValid(iFilename)) {
-      file = new FileArome(iFilename);
+      file = new FileArome(iFilename, iReadOnly);
    }
    else if(FileEc::isValid(iFilename)) {
-      file = new FileEc(iFilename);
+      file = new FileEc(iFilename, iReadOnly);
    }
    else {
       Util::warning("Could not find suitable parser for '" + iFilename + "'");
@@ -218,4 +218,16 @@ bool File::hasVariable(Variable::Type iVariable) const {
    // Check if field has been initialized
    std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    return it != mFields.end();
+}
+void File::clear() {
+   mFields.clear();
+}
+
+long File::getCacheSize() const {
+   long size = 0;
+   std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it;
+   for(it = mFields.begin(); it != mFields.end(); it++) {
+      size += it->second.size() * getNumLat()*getNumLon()*getNumEns()*sizeof(float);
+   }
+   return size;
 }

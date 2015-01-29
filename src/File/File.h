@@ -16,7 +16,7 @@ class File {
    public:
       File(std::string iFilename);
       virtual ~File();
-      static File* getScheme(std::string iFilename);
+      static File* getScheme(std::string iFilename, bool iReadOnly=false);
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
       //! Get a new field initialized with missing values
@@ -47,6 +47,11 @@ class File {
       std::string getDimenionString() const;
       void initNewVariable(Variable::Type iVariable);
       virtual std::string name() const = 0;
+      //! Clear the retrieved/computed fields stored in cache
+      void clear();
+      //! How many bytes of retrieved/computed  data are stored in cache?
+      //! @return Number of bytes
+      long getCacheSize() const;
    protected:
       std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;

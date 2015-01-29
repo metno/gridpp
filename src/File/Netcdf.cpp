@@ -6,9 +6,9 @@
 
 FileNetcdf::FileNetcdf(std::string iFilename, bool iReadOnly) :
       File(iFilename), 
-      mFile(NcFile(iFilename.c_str(), iReadOnly ? NcFile::ReadOnly : NcFile::Write)) {
+      mFile(NcFile(mFilename.c_str(), iReadOnly ? NcFile::ReadOnly : NcFile::Write)) {
    if(!mFile.is_valid()) {
-      Util::error("Error: Netcdf file " + iFilename + " not valid");
+      Util::error("Error: Netcdf file " + mFilename + " not valid");
    }
 }
 
@@ -87,11 +87,14 @@ float FileNetcdf::getMissingValue(const NcVar* iVar) {
    if(fillValueAtt != NULL)
       return fillValueAtt->as_float(0);
    else
-      return ncBad_float;//Util::MV;
+      return ncBad_float;
 }
 void FileNetcdf::setMissingValue(NcVar* iVar, float iValue) {
-   NcError q(NcError::silent_nonfatal); 
-   // NcAtt* fillValueAtt = iVar->get_att("_FillValue");
-   // fillValueAtt->remove();
-   iVar->add_att("_FillValue", iValue);
+   // TODO: Mysterious errors can occur if the existing file was written
+   // using an older HDF5 implementation, and the variable has 8 or more
+   // attributes already. For more information, see "Corruption Problem
+   // In HDF5 1.8.0 through HDF5 1.8.4" on
+   // http://www.hdfgroup.org/HDF5/release/known_problems/index.html
+   if(iValue != ncBad_float)
+      iVar->add_att("_FillValue", iValue);
 }

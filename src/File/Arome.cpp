@@ -151,6 +151,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                ss << "Cannot write variable '" << variable << "' from '" << getFilename() << "'";
                Util::error(ss.str());
             }
+            addAttribute(var, "coordinates", "longitude latitude");
             delete[] values;
          }
       }

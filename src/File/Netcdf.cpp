@@ -98,3 +98,7 @@ void FileNetcdf::setMissingValue(NcVar* iVar, float iValue) {
    if(iValue != ncBad_float)
       iVar->add_att("_FillValue", iValue);
 }
+
+void FileNetcdf::addAttribute(NcVar* iVar, std::string iName, std::string iValue) {
+   iVar->add_att(iName.c_str(), iValue.c_str());
+}

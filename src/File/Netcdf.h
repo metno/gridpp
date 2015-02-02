@@ -29,6 +29,7 @@ class FileNetcdf : public File {
       static bool   hasVar(const NcFile& iFile, std::string iVar);
       static float getMissingValue(const NcVar* iVar);
       static void  setMissingValue(NcVar* iVar, float iValue);
+      void   addAttribute(NcVar* iVar, std::string iName, std::string iValue);
 };
 #include "Ec.h"
 #include "Arome.h"

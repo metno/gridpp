@@ -80,12 +80,12 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.size());
-      ASSERT_EQ(4, toT[0].size());
-      EXPECT_FLOAT_EQ(303,   toT[0][0][0]);
-      EXPECT_FLOAT_EQ(304.5, toT[0][1][0]);
-      EXPECT_FLOAT_EQ(305.5, toT[0][2][0]);
-      EXPECT_FLOAT_EQ(305.5,   toT[0][3][0]);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
+      EXPECT_FLOAT_EQ(303,   toT(0,0,0));
+      EXPECT_FLOAT_EQ(304.5, toT(0,1,0));
+      EXPECT_FLOAT_EQ(305.5, toT(0,2,0));
+      EXPECT_FLOAT_EQ(305.5,   toT(0,3,0));
       vec3Int I, J;
       d.getSmartNeighbours(from, to, I, J);
       EXPECT_EQ(4, I[0][2][0]);

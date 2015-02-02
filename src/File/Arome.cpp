@@ -77,7 +77,7 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
          else {
             value = scale*values[index] + offset;
          }
-         (*field)[lat][lon][0] = value;
+         (*field)(lat,lon,0) = value;
          index++;
       }
    }
@@ -124,14 +124,14 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
             int index = 0;
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
-                  float value = (*field)[lat][lon][0];
+                  float value = (*field)(lat,lon,0);
                   if(!Util::isValid(value)) {
                      // Field has missing value indicator and the value is missing
                      // Save values using the file's missing indicator value
                      value = MV;
                   }
                   else {
-                     value = ((*field)[lat][lon][0] - offset)/scale;
+                     value = ((*field)(lat,lon,0) - offset)/scale;
                   }
                   values[index] = value;
                   index++;

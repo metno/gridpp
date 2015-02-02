@@ -36,8 +36,8 @@ namespace {
       EXPECT_TRUE(from.hasVariable(Variable::Precip));
       FieldPtr precip = from.getField(Variable::Precip, 0);
       FieldPtr precipAcc = from.getField(Variable::PrecipAcc, 0);
-      EXPECT_FLOAT_EQ(0.911191, (*precip)[5][5][0]);
-      EXPECT_FLOAT_EQ(0,        (*precipAcc)[5][5][0]);
+      EXPECT_FLOAT_EQ(0.911191, (*precip)(5,5,0));
+      EXPECT_FLOAT_EQ(0,        (*precipAcc)(5,5,0));
    }
    TEST_F(FileTest, hasSameDimensions) {
       FileArome f1("testing/files/10x10.nc");
@@ -61,37 +61,37 @@ namespace {
       FieldPtr p0 = file.getField(Variable::Precip, 0);
       FieldPtr p1 = file.getField(Variable::Precip, 1);
       FieldPtr p2 = file.getField(Variable::Precip, 2);
-      (*p0)[1][1][0] = 7.4;
-      (*p1)[1][1][0] = 3.1;
-      (*p2)[1][1][0] = 2.4;
+      (*p0)(1,1,0) = 7.4;
+      (*p1)(1,1,0) = 3.1;
+      (*p2)(1,1,0) = 2.4;
 
-      (*p0)[1][2][0] = 2.9;
-      (*p1)[1][2][0] = Util::MV;
-      (*p2)[1][2][0] = 6.1;
+      (*p0)(1,2,0) = 2.9;
+      (*p1)(1,2,0) = Util::MV;
+      (*p2)(1,2,0) = 6.1;
 
-      (*p0)[0][2][0] = Util::MV;
-      (*p1)[0][2][0] = Util::MV;
-      (*p2)[0][2][0] = 6.1;
+      (*p0)(0,2,0) = Util::MV;
+      (*p1)(0,2,0) = Util::MV;
+      (*p2)(0,2,0) = 6.1;
 
-      (*p0)[0][0][0] = Util::MV;
-      (*p1)[0][0][0] = 4.6;
-      (*p2)[0][0][0] = 6.1;
+      (*p0)(0,0,0) = Util::MV;
+      (*p1)(0,0,0) = 4.6;
+      (*p2)(0,0,0) = 6.1;
 
       FieldPtr acc0 = file.getField(Variable::PrecipAcc, 0);
       FieldPtr acc1 = file.getField(Variable::PrecipAcc, 1);
       FieldPtr acc2 = file.getField(Variable::PrecipAcc, 2);
-      EXPECT_FLOAT_EQ(0,        (*acc0)[1][1][0]);
-      EXPECT_FLOAT_EQ(3.1,      (*acc1)[1][1][0]);
-      EXPECT_FLOAT_EQ(5.5,      (*acc2)[1][1][0]);
-      EXPECT_FLOAT_EQ(0,        (*acc0)[1][2][0]);
-      EXPECT_FLOAT_EQ(Util::MV, (*acc1)[1][2][0]);
-      EXPECT_FLOAT_EQ(Util::MV, (*acc2)[1][2][0]);
-      EXPECT_FLOAT_EQ(0,        (*acc0)[0][2][0]);
-      EXPECT_FLOAT_EQ(Util::MV, (*acc1)[0][2][0]);
-      EXPECT_FLOAT_EQ(Util::MV, (*acc2)[0][2][0]);
-      EXPECT_FLOAT_EQ(0,        (*acc0)[0][0][0]);
-      EXPECT_FLOAT_EQ(4.6,      (*acc1)[0][0][0]);
-      EXPECT_FLOAT_EQ(10.7,     (*acc2)[0][0][0]);
+      EXPECT_FLOAT_EQ(0,        (*acc0)(1,1,0));
+      EXPECT_FLOAT_EQ(3.1,      (*acc1)(1,1,0));
+      EXPECT_FLOAT_EQ(5.5,      (*acc2)(1,1,0));
+      EXPECT_FLOAT_EQ(0,        (*acc0)(1,2,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*acc1)(1,2,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*acc2)(1,2,0));
+      EXPECT_FLOAT_EQ(0,        (*acc0)(0,2,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*acc1)(0,2,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*acc2)(0,2,0));
+      EXPECT_FLOAT_EQ(0,        (*acc0)(0,0,0));
+      EXPECT_FLOAT_EQ(4.6,      (*acc1)(0,0,0));
+      EXPECT_FLOAT_EQ(10.7,     (*acc2)(0,0,0));
    }
    TEST_F(FileTest, getFieldInvalidTime) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

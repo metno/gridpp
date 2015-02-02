@@ -62,15 +62,15 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
             for(int lat = 0; lat < getNumLat(); lat++) {
                for(int lon = 0; lon < getNumLon(); lon++) {
                   for(int e = 0; e < getNumEns(); e++) {
-                     float a1 = (*acc1)[lat][lon][e];
-                     float a0 = (*acc0)[lat][lon][e];
+                     float a1 = (*acc1)(lat,lon,e);
+                     float a0 = (*acc0)(lat,lon,e);
                      float value = Util::MV;
                      if(Util::isValid(a1) && Util::isValid(a0)) {
                          value = a1 - a0;
                          if(value < 0)
                             value = 0;
                      }
-                     (*field)[lat][lon][e] = value;
+                     (*field)(lat,lon,e) = value;
                   }
                }
             }
@@ -88,15 +88,15 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
             for(int lat = 0; lat < getNumLat(); lat++) {
                for(int lon = 0; lon < getNumLon(); lon++) {
                   for(int e = 0; e < getNumEns(); e++) {
-                     float a = (*prevAccum)[lat][lon][e];
-                     float p = (*currPrecip)[lat][lon][e];
+                     float a = (*prevAccum)(lat,lon,e);
+                     float p = (*currPrecip)(lat,lon,e);
                      float value = Util::MV;
                      if(Util::isValid(a) && Util::isValid(p)) {
                          value = a + p;
                          if(value < 0)
                             value = 0;
                      }
-                     (*currAccum)[lat][lon][e] = value;
+                     (*currAccum)(lat,lon,e) = value;
                   }
                }
             }
@@ -113,9 +113,9 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                for(int lat = 0; lat < getNumLat(); lat++) {
                   for(int lon = 0; lon < getNumLon(); lon++) {
                      for(int e = 0; e < getNumEns(); e++) {
-                        float currU = (*u)[lat][lon][e];
-                        float currV = (*v)[lat][lon][e];
-                        (*windSpeed)[lat][lon][e] = sqrt(currU*currU + currV*currV);
+                        float currU = (*u)(lat,lon,e);
+                        float currV = (*v)(lat,lon,e);
+                        (*windSpeed)(lat,lon,e) = sqrt(currU*currU + currV*currV);
                      }
                   }
                }
@@ -147,6 +147,7 @@ File::~File() {
 
 void File::write(std::vector<Variable::Type> iVariables) {
    writeCore(iVariables);
+   // mCache.clear();
 }
 
 
@@ -154,14 +155,7 @@ FieldPtr File::getEmptyField(float iFillValue) const {
    return getEmptyField(getNumLat(), getNumLon(), getNumEns(), iFillValue);
 }
 FieldPtr File::getEmptyField(int nLat, int nLon, int nEns, float iFillValue) const {
-   FieldPtr field = FieldPtr(new Field());
-   field->resize(nLat);
-   for(int i = 0; i < nLat; i++) {
-      (*field)[i].resize(nLon);
-      for(int j = 0; j < nLon; j++) {
-         (*field)[i][j].resize(nEns,iFillValue);
-      }
-   }
+   FieldPtr field = FieldPtr(new Field(nLat, nLon, nEns, iFillValue));
    return field;
 }
 

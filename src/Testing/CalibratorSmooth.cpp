@@ -23,37 +23,37 @@ namespace {
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
-      ASSERT_EQ(10, (*after).size());
-      ASSERT_EQ(10, (*after)[0].size());
-      ASSERT_EQ(1,  (*after)[0][0].size());
+      ASSERT_EQ(10, after->getNumLat());
+      ASSERT_EQ(10, after->getNumLon());
+      ASSERT_EQ(1,  after->getNumEns());
 
-      EXPECT_FLOAT_EQ(304.6667, (*after)[5][2][0]);
-      EXPECT_FLOAT_EQ(306.1667, (*after)[5][9][0]);
-      EXPECT_FLOAT_EQ(308.25,   (*after)[0][9][0]);
+      EXPECT_FLOAT_EQ(304.6667, (*after)(5,2,0));
+      EXPECT_FLOAT_EQ(306.1667, (*after)(5,9,0));
+      EXPECT_FLOAT_EQ(308.25,   (*after)(0,9,0));
 
       cal.setSmoothRadius(2);
       cal.calibrate(from);
-      EXPECT_FLOAT_EQ(304.73114, (*after)[5][2][0]);
-      EXPECT_FLOAT_EQ(305.35556, (*after)[5][9][0]);
+      EXPECT_FLOAT_EQ(304.73114, (*after)(5,2,0));
+      EXPECT_FLOAT_EQ(305.35556, (*after)(5,9,0));
    }
    TEST_F(TestCalibratorSmooth, 10x10_missingValues) {
       FileArome from("testing/files/10x10.nc");
       CalibratorSmooth cal = CalibratorSmooth(Variable::T);
       cal.setSmoothRadius(1);
       FieldPtr field = from.getField(Variable::T, 0);
-      (*field)[4][1][0] = Util::MV;
-      (*field)[4][2][0] = Util::MV;
-      (*field)[4][3][0] = Util::MV;
-      (*field)[5][1][0] = Util::MV;
-      (*field)[5][2][0] = Util::MV;
-      (*field)[5][3][0] = Util::MV;
-      (*field)[6][1][0] = Util::MV;
-      (*field)[6][2][0] = Util::MV;
-      (*field)[6][3][0] = Util::MV;
+      (*field)(4,1,0) = Util::MV;
+      (*field)(4,2,0) = Util::MV;
+      (*field)(4,3,0) = Util::MV;
+      (*field)(5,1,0) = Util::MV;
+      (*field)(5,2,0) = Util::MV;
+      (*field)(5,3,0) = Util::MV;
+      (*field)(6,1,0) = Util::MV;
+      (*field)(6,2,0) = Util::MV;
+      (*field)(6,3,0) = Util::MV;
 
       cal.calibrate(from);
-      EXPECT_FLOAT_EQ(Util::MV, (*field)[5][2][0]);
-      EXPECT_FLOAT_EQ(304.6667, (*field)[5][1][0]);
+      EXPECT_FLOAT_EQ(Util::MV, (*field)(5,2,0));
+      EXPECT_FLOAT_EQ(304.6667, (*field)(5,1,0));
    }
    TEST_F(TestCalibratorSmooth, setGetSmoothingRadius) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

@@ -44,7 +44,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                float nearestElev = ielevs[Icenter][Jcenter];
                if(!Util::isValid(currElev) || !Util::isValid(nearestElev)) {
                   // Can't adjust if we don't have an elevation, use nearest neighbour
-                  ofield[i][j][e] = ifield[Icenter][Jcenter][e];
+                  ofield(i,j,e) = ifield(Icenter,Jcenter,e);
                }
                else {
                   float dElev = currElev - nearestElev;
@@ -61,7 +61,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                            assert(ii < ielevs.size());
                            assert(jj < ielevs[ii].size());
                            float x = ielevs[ii][jj];
-                           float y = ifield[ii][jj][e];
+                           float y = ifield(ii,jj,e);
                            if(Util::isValid(x) && Util::isValid(y)) {
                               meanXY += x*y;
                               meanX  += x;
@@ -90,7 +90,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   else {
                      gradient = mConstGradient;
                   }
-                  ofield[i][j][e] = ifield[Icenter][Jcenter][e] + dElev * gradient;
+                  ofield(i,j,e) = ifield(Icenter,Jcenter,e) + dElev * gradient;
                }
             }
          }

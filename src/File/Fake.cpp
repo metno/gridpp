@@ -43,7 +43,7 @@ FieldPtr FileFake::getFieldCore(Variable::Type iVariable, int iTime) const {
    for(int i = 0; i < getNumLat(); i++) {
       for(int j = 0; j < getNumLon(); j++) {
          for(int e = 0; e < getNumEns(); e++) {
-            (*field)[i][j][e] = i + j + e;
+            (*field)(i,j,e) = i + j + e;
          }
       }
    }

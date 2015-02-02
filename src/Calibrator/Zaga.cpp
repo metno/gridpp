@@ -31,7 +31,7 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            std::vector<float> precipRaw = precip[i][j];
+            std::vector<float> precipRaw = precip(i,j);
 
             // Compute model variables
             float ensMean = 0;
@@ -66,18 +66,22 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
                for(int e = 0; e < nEns; e++) {
                   float quantile = ((float) e+0.5)/nEns;
                   float valueCal   = getInvCdf(quantile, ensMean, ensFrac, parameters);
-                  precip[i][j][e] = valueCal;
+                  precip(i,j,e) = valueCal;
                   if(!Util::isValid(valueCal))
                      isValid = false;
                }
                if(isValid) {
-                  Calibrator::shuffle(precipRaw, precip[i][j]);
+                  std::vector<float> precipCal = precip(i,j);
+                  Calibrator::shuffle(precipRaw, precipCal);
+                  for(int e = 0; e < nEns; e++) {
+                     precip(i,j,e) = precipCal[e];
+                  }
                }
                else {
                   numInvalidCal++;
                   // Calibrator produced some invalid members. Revert to the raw values.
                   for(int e = 0; e < nEns; e++) {
-                     precip[i][j][e] = precipRaw[e];
+                     precip(i,j,e) = precipRaw[e];
                   }
                }
             }
@@ -85,7 +89,7 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
                numInvalidRaw++;
                // One or more members are missing, don't calibrate
                for(int e = 0; e < nEns; e++) {
-                  precip[i][j][e] = precipRaw[e];
+                  precip(i,j,e) = precipRaw[e];
                }
             }
          }

@@ -46,19 +46,19 @@ namespace {
       // RH     0.95925
       // P      98334 pa
       // Precip 1.38 mm
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseRain, (*phase)[2][5][0]);
+      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseRain, (*phase)(2,5,0));
 
-      (*temp)[2][5][0] = 270;
+      (*temp)(2,5,0) = 270;
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)[2][5][0]);
+      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(2,5,0));
 
-      (*temp)[2][5][0] = 274;
+      (*temp)(2,5,0) = 274;
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)[2][5][0]);
+      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)(2,5,0));
 
-      (*precip)[2][5][0] = 0;
+      (*precip)(2,5,0) = 0;
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseNone, (*phase)[2][5][0]);
+      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseNone, (*phase)(2,5,0));
    }
    TEST_F(TestCalibratorPhase, missingParameters) {
       FileArome file("testing/files/10x10.nc");
@@ -70,7 +70,7 @@ namespace {
       for(int i = 0; i < file.getNumLat(); i++) {
          for(int j = 0; j < file.getNumLon(); j++) {
             for(int e = 0; e < file.getNumEns(); e++) {
-               EXPECT_FLOAT_EQ(Util::MV, (*phase)[i][j][e]);
+               EXPECT_FLOAT_EQ(Util::MV, (*phase)(i,j,e));
             }
          }
       }

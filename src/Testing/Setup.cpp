@@ -7,7 +7,7 @@ typedef Setup MetSetup;
 namespace {
 
    TEST(SetupTest, test1) {
-      MetSetup setup(Util::split("input output -v T -c zaga parameters=parameters.txt -c accumulate -d smart searchRadius=11"));
+      MetSetup setup(Util::split("input output -v T -c zaga parameters=testing/files/parameters.txt -c accumulate -d smart searchRadius=11"));
       EXPECT_EQ(1,           setup.variableConfigurations.size());
       EXPECT_EQ(2,           setup.variableConfigurations[0].calibrators.size());
       EXPECT_EQ(Variable::T, setup.variableConfigurations[0].variable);
@@ -40,7 +40,7 @@ namespace {
       EXPECT_EQ("nearestNeighbour", setup.variableConfigurations[0].downscaler->name());
    }
    TEST(SetupTest, complicated) {
-      MetSetup setup(Util::split("input output -v T -d nearestNeighbour -d smart -c smooth -c accumulate -c smooth -v Precip -c zaga parameters=parameters.txt -d gradient"));
+      MetSetup setup(Util::split("input output -v T -d nearestNeighbour -d smart -c smooth -c accumulate -c smooth -v Precip -c zaga parameters=testing/files/parameters.txt -d gradient"));
       ASSERT_EQ(2,            setup.variableConfigurations.size());
       VariableConfiguration varconf = setup.variableConfigurations[0];
       EXPECT_EQ(Variable::T,  varconf.variable);

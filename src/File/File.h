@@ -5,11 +5,10 @@
 #include <boost/shared_ptr.hpp>
 #include "../Variable.h"
 #include "../Util.h"
+#include "../Field.h"
 
 // 3D array of data: [lat][lon][ensemble_member]
-typedef std::vector<std::vector<std::vector<float> > > Field;
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
-typedef boost::shared_ptr<Field> FieldPtr;
 
 //! Represents a Netcdf data file
 class File {

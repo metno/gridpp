@@ -25,16 +25,16 @@ bool CalibratorAccumulate::calibrateCore(File& iFile) const {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
                if(t == 0) {
-                  (*fieldsAcc[t])[i][j][e] = 0;
+                  (*fieldsAcc[t])(i,j,e) = 0;
                }
                else {
-                  float previous = (*fieldsAcc[t-1])[i][j][e];
-                  float current  = (*fields[t])[i][j][e];
+                  float previous = (*fieldsAcc[t-1])(i,j,e);
+                  float current  = (*fields[t])(i,j,e);
                   if(Util::isValid(current) && Util::isValid(previous)) {
-                     (*fieldsAcc[t])[i][j][e] = current + previous;
+                     (*fieldsAcc[t])(i,j,e) = current + previous;
                   }
                   else {
-                     (*fieldsAcc[t])[i][j][e] = Util::MV;
+                     (*fieldsAcc[t])(i,j,e) = Util::MV;
                   }
                }
             }

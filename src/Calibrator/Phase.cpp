@@ -34,25 +34,25 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
-               float currPrecip   = precip[i][j][e];
-               float currTemp     = temp[i][j][e];
-               float currPressure = pressure[i][j][e];
-               float currRh       = rh[i][j][e];
+               float currPrecip   = precip(i,j,e);
+               float currTemp     = temp(i,j,e);
+               float currPressure = pressure(i,j,e);
+               float currRh       = rh(i,j,e);
                if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold) && Util::isValid(currPrecip) && Util::isValid(currTemp) && Util::isValid(currPressure) && Util::isValid(currRh)) {
                   float currWetbulb = getWetbulb(currTemp, currPressure, currRh);
                   if(currPrecip == 0)
-                     phase[i][j][e]  = CalibratorPhase::PhaseNone;
+                     phase(i,j,e)  = CalibratorPhase::PhaseNone;
                   else if(!Util::isValid(currWetbulb))
-                     phase[i][j][e]  = Util::MV;
+                     phase(i,j,e)  = Util::MV;
                   else if(currWetbulb <= snowSleetThreshold)
-                     phase[i][j][e]  = CalibratorPhase::PhaseSnow;
+                     phase(i,j,e)  = CalibratorPhase::PhaseSnow;
                   else if(currWetbulb <= sleetRainThreshold)
-                     phase[i][j][e]  = CalibratorPhase::PhaseSleet;
+                     phase(i,j,e)  = CalibratorPhase::PhaseSleet;
                   else
-                     phase[i][j][e]  = CalibratorPhase::PhaseRain;
+                     phase(i,j,e)  = CalibratorPhase::PhaseRain;
                }
                else {
-                  phase[i][j][e] = Util::MV;
+                  phase(i,j,e) = Util::MV;
                }
             }
          }

@@ -17,15 +17,15 @@ namespace {
          }
          void test(CalibratorZaga& cal, File& file, float i0, float i1, float i2, float e0, float e1, float e2) {
             FieldPtr field  = file.getField(Variable::Precip, 0);
-            (*field)[0][0][0] = i0;
-            (*field)[0][0][1] = i1;
-            (*field)[0][0][2] = i2;
+            (*field)(0,0,0) = i0;
+            (*field)(0,0,1) = i1;
+            (*field)(0,0,2) = i2;
             cal.calibrate(file);
             const FieldPtr after  = file.getField(Variable::Precip, 0);
 
-            EXPECT_FLOAT_EQ(e0, (*after)[0][0][0]);
-            EXPECT_FLOAT_EQ(e1, (*after)[0][0][1]);
-            EXPECT_FLOAT_EQ(e2, (*after)[0][0][2]);
+            EXPECT_FLOAT_EQ(e0, (*after)(0,0,0));
+            EXPECT_FLOAT_EQ(e1, (*after)(0,0,1));
+            EXPECT_FLOAT_EQ(e2, (*after)(0,0,2));
          }
          void testP0(float ensMean, float ensFrac, float par4, float par5, float par6, float par7, float expected) {
             std::vector<float> parValues(8, 0);

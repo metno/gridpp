@@ -28,9 +28,9 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
             int J = nearestJ[i][j];
             for(int e = 0; e < nEns; e++) {
                if(Util::isValid(I) && Util::isValid(J))
-                  ofield[i][j][e] = ifield[I][J][e];
+                  ofield(i,j,e) = ifield(I,J,e);
                else
-                  ofield[i][j][e] = Util::MV;
+                  ofield(i,j,e) = Util::MV;
             }
          }
       }

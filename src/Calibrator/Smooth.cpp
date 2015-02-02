@@ -31,7 +31,7 @@ bool CalibratorSmooth::calibrateCore(File& iFile) const {
                int count = 0;
                for(int ii = std::max(0, i-mSmoothRadius); ii <= std::min(nLat-1, i+mSmoothRadius); ii++) {
                   for(int jj = std::max(0, j-mSmoothRadius); jj <= std::min(nLon-1, j+mSmoothRadius); jj++) {
-                     float value = precipRaw[ii][jj][e];
+                     float value = precipRaw(ii,jj,e);
                      if(Util::isValid(value)) {
                         total += value;
                         count++;
@@ -39,13 +39,13 @@ bool CalibratorSmooth::calibrateCore(File& iFile) const {
                   }
                }
                if(count > 0) {
-                  precip[i][j][e] = total / count;
+                  precip(i,j,e) = total / count;
                }
                else {
-                  precip[i][j][e] = Util::MV;
-                  std::stringstream ss;
-                  ss << "No precip value computed for [" << t << "," << i << "," << j << "," << e << "]";
-                  Util::warning(ss.str());
+                  precip(i,j,e) = Util::MV;
+                  // std::stringstream ss;
+                  // ss << "No precip value computed for [" << t << "," << i << "," << j << "," << e << "]";
+                  // Util::warning(ss.str());
                }
             }
          }

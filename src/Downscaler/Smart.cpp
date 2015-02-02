@@ -41,7 +41,7 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
                   int jj = nearestJ[i][j][n];
 
                   if(Util::isValid(ii) && Util::isValid(jj)) {
-                     float value = ifield[ii][jj][e];
+                     float value = ifield(ii,jj,e);
                      if(Util::isValid(value)) {
                         total += value;
                         count++;
@@ -49,9 +49,9 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
                   }
                }
                if(count > 0)
-                  ofield[i][j][e] = total/count;
+                  ofield(i,j,e) = total/count;
                else
-                  ofield[i][j][e] = Util::MV;
+                  ofield(i,j,e) = Util::MV;
                // ofield[i][j][e] = nearestI[i][j][0];
             }
          }

@@ -147,10 +147,10 @@ namespace {
       d.downscale(from, to);
       const Field& fromT = *from.getField(Variable::T, 0);
       const Field& toT   = *to.getField(Variable::T, 0);
-      EXPECT_FLOAT_EQ(fromT[2][1][0], toT[0][0][0]);
-      EXPECT_FLOAT_EQ(fromT[2][0][0], toT[0][1][0]);
-      EXPECT_FLOAT_EQ(fromT[1][1][0], toT[1][0][0]);
-      EXPECT_FLOAT_EQ(fromT[1][0][0], toT[1][1][0]);
+      EXPECT_FLOAT_EQ(fromT(2,1,0), toT(0,0,0));
+      EXPECT_FLOAT_EQ(fromT(2,0,0), toT(0,1,0));
+      EXPECT_FLOAT_EQ(fromT(1,1,0), toT(1,0,0));
+      EXPECT_FLOAT_EQ(fromT(1,0,0), toT(1,1,0));
    }
    TEST_F(TestDownscalerNearestNeighbour, 10x10) {
       DownscalerNearestNeighbour d(Variable::T);
@@ -161,17 +161,17 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(2, toT.size());
-      ASSERT_EQ(2, toT[0].size());
-      EXPECT_FLOAT_EQ(301, toT[0][0][0]);
-      EXPECT_FLOAT_EQ(302, toT[0][1][0]);
-      EXPECT_FLOAT_EQ(309, toT[1][0][0]);
-      EXPECT_FLOAT_EQ(301, toT[1][1][0]);
+      ASSERT_EQ(2, toT.getNumLat());
+      ASSERT_EQ(2, toT.getNumLon());
+      EXPECT_FLOAT_EQ(301, toT(0,0,0));
+      EXPECT_FLOAT_EQ(302, toT(0,1,0));
+      EXPECT_FLOAT_EQ(309, toT(1,0,0));
+      EXPECT_FLOAT_EQ(301, toT(1,1,0));
       vec2Int I, J;
       d.getNearestNeighbour(from, to, I, J);
       EXPECT_EQ(9, I[1][1]);
       EXPECT_EQ(3, J[1][1]);
-      EXPECT_FLOAT_EQ(301, fromT[9][3][0]);
+      EXPECT_FLOAT_EQ(301, fromT(9,3,0));
    }
 }
 int main(int argc, char **argv) {

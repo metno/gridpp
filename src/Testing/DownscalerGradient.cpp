@@ -56,25 +56,25 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.size());
-      ASSERT_EQ(4, toT[0].size());
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
       // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(301.31491, toT[0][0][0]); // 301 - 0.00797 * (120-160)
-      EXPECT_FLOAT_EQ(290.34964, toT[0][1][0]);
-      EXPECT_FLOAT_EQ(301.29544, toT[0][2][0]); // 301 - 0.01068 * (600-346)
-      EXPECT_FLOAT_EQ(308.77686, toT[0][3][0]);
+      EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-160)
+      EXPECT_FLOAT_EQ(290.34964, toT(0,1,0));
+      EXPECT_FLOAT_EQ(301.29544, toT(0,2,0)); // 301 - 0.01068 * (600-346)
+      EXPECT_FLOAT_EQ(308.77686, toT(0,3,0));
 
       // Fix the gradient
       d.setConstantGradient(0.01);
       d.downscale(from, to);
       const Field& toT2  = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT2.size());
-      ASSERT_EQ(4, toT2[0].size());
+      ASSERT_EQ(1, toT2.getNumLat());
+      ASSERT_EQ(4, toT2.getNumLon());
       // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(300.60367, toT2[0][0][0]);
-      EXPECT_FLOAT_EQ(314.40369, toT2[0][1][0]);
-      EXPECT_FLOAT_EQ(306.53052, toT2[0][2][0]);
-      EXPECT_FLOAT_EQ(299.53052, toT2[0][3][0]);
+      EXPECT_FLOAT_EQ(300.60367, toT2(0,0,0));
+      EXPECT_FLOAT_EQ(314.40369, toT2(0,1,0));
+      EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
+      EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
    }
    TEST_F(TestDownscalerGradient, missingValues) {
 
@@ -89,13 +89,13 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.size());
-      ASSERT_EQ(4, toT[0].size());
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
       // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(301.31491, toT[0][0][0]);
-      EXPECT_FLOAT_EQ(290.34964,  toT[0][1][0]);
-      EXPECT_FLOAT_EQ(301.29544,  toT[0][2][0]);
-      EXPECT_FLOAT_EQ(308.77686,  toT[0][3][0]);
+      EXPECT_FLOAT_EQ(301.31491, toT(0,0,0));
+      EXPECT_FLOAT_EQ(290.34964,  toT(0,1,0));
+      EXPECT_FLOAT_EQ(301.29544,  toT(0,2,0));
+      EXPECT_FLOAT_EQ(308.77686,  toT(0,3,0));
    }
    TEST_F(TestDownscalerGradient, setGetSearchRadius) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

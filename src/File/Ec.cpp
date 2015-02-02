@@ -77,7 +77,7 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
             else {
                value = scale*values[index] + offset;
             }
-            (*field)[lat][lon][e] = value;
+            (*field)(lat,lon,e) = value;
             index++;
          }
       }
@@ -116,14 +116,14 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
             for(int e = 0; e < mNEns; e++) {
                for(int lat = 0; lat < mNLat; lat++) {
                   for(int lon = 0; lon < mNLon; lon++) {
-                     float value = (*field)[lat][lon][e];
+                     float value = (*field)(lat,lon,e);
                      if(Util::isValid(MV) && !Util::isValid(value)) {
                         // Field has missing value indicator and the value is missing
                         // Save values using the file's missing indicator value
                         value = MV;
                      }
                      else {
-                        value = ((*field)[lat][lon][e] - offset)/scale;
+                        value = ((*field)(lat,lon,e) - offset)/scale;
                      }
                      values[index] = value;
                      index++;

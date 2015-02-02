@@ -28,19 +28,20 @@ bool CalibratorCloud::calibrateCore(File& iFile) const {
             // Turn on clouds if needed, i.e don't allow a member to
             // have precip without cloud cover.
             for(int e = 0; e < nEns; e++) {
-               float currPrecip = precip[i][j][e];
-               float currCloud  = cloud[i][j][e];
+               float currPrecip = precip(i,j,e);
+               float currCloud  = cloud(i,j,e);
                if(Util::isValid(currPrecip) && Util::isValid(currCloud)) {
-                  cloud[i][j][e]  = currCloud;
+                  cloud(i,j,e)  = currCloud;
                   // std::cout << "currPrecip = " << currPrecip << std::endl;
                   if(currPrecip > 0 && currCloud < 1) {
-                     cloud[i][j][e] = 1;
+                     cloud(i,j,e) = 1;
                   }
                }
             }
          }
       }
    }
+   return true;
 }
 std::string CalibratorCloud::description() {
    std::stringstream ss;

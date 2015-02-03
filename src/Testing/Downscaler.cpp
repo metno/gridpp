@@ -19,11 +19,14 @@ namespace {
       EXPECT_EQ(5, ((DownscalerGradient*) d2)->getSearchRadius());
       EXPECT_FLOAT_EQ(0.04, ((DownscalerGradient*) d2)->getConstantGradient());
    }
-   TEST_F(TestDownscaler, inalid) {
+   TEST_F(TestDownscaler, inValid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", Variable::T, Options("searchRadius=5")), ".*");
       EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", Variable::T, Options()), ".*");
+   }
+   TEST_F(TestDownscaler, cache) {
+
    }
 }
 int main(int argc, char **argv) {

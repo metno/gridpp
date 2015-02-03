@@ -46,8 +46,9 @@ namespace {
       setLatLon(to,   (float[]) {40, 54.99},   (float[]){-1,9.99});
 
       vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      DownscalerNearestNeighbour d(Variable::Precip);
+      d.getNearestNeighbour(from, to, I, J);
+      d.getNearestNeighbourFast(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -70,8 +71,9 @@ namespace {
       setLatLon(to,   (float[]) {40, 54},   (float[]){-1,Util::MV});
 
       vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      DownscalerNearestNeighbour d(Variable::Precip);
+      d.getNearestNeighbour(from, to, I, J);
+      d.getNearestNeighbourFast(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -96,8 +98,9 @@ namespace {
       setLatLon(to,   (float[]) {50,55,60}, (float[]){0,3,5,10});
 
       vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      DownscalerNearestNeighbour d(Variable::Precip);
+      d.getNearestNeighbour(from, to, I, J);
+      d.getNearestNeighbourFast(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -118,8 +121,10 @@ namespace {
       setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
 
       vec2Int I, J, If, Jf;
-      DownscalerNearestNeighbour::getNearestNeighbour(from, to, I, J);
-      DownscalerNearestNeighbour::getNearestNeighbourFast(from, to, If, Jf);
+      DownscalerNearestNeighbour d(Variable::Precip);
+      std::cout << d.getCacheSize() << std::endl;
+      d.getNearestNeighbour(from, to, I, J);
+      d.getNearestNeighbour(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 

@@ -75,10 +75,6 @@ void DownscalerSmart::setSearchRadius(int iNumPoints) {
    mSearchRadius = iNumPoints;
 }
 void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const {
-   getSmartNeighbours(iFrom, iTo, mSearchRadius, mNumSmart, iI, iJ);
-}
-
-void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int iSearchRadius, int iNumSmart, vec3Int& iI, vec3Int& iJ) {
    vec2 ilats  = iFrom.getLats();
    vec2 ilons  = iFrom.getLons();
    vec2 ielevs = iFrom.getElevs();
@@ -87,10 +83,10 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
    vec2 oelevs = iTo.getElevs();
    int nLon    = iTo.getNumLon();
    int nLat    = iTo.getNumLat();
-   int numSearch = getNumSearchPoints(iSearchRadius);
+   int numSearch = getNumSearchPoints(mSearchRadius);
 
    vec2Int Icenter, Jcenter;
-   DownscalerNearestNeighbour::getNearestNeighbourFast(iFrom, iTo, Icenter, Jcenter);
+   getNearestNeighbourFast(iFrom, iTo, Icenter, Jcenter);
 
    iI.resize(nLat);
    iJ.resize(nLat);
@@ -114,8 +110,8 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
          Jlookup.reserve(numSearch);
 
          int index = 0;
-         for(int ii = std::max(0, Ic-iSearchRadius); ii <= std::min(iFrom.getNumLat()-1, Ic+iSearchRadius); ii++) {
-            for(int jj = std::max(0, Jc-iSearchRadius); jj <= std::min(iFrom.getNumLon()-1, Jc+iSearchRadius); jj++) {
+         for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumLat()-1, Ic+mSearchRadius); ii++) {
+            for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumLon()-1, Jc+mSearchRadius); jj++) {
                float ielev = ielevs[ii][jj];
                float diff = 1e10;
                if(Util::isValid(ielev) && Util::isValid(oelev))
@@ -139,7 +135,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, int
             iJ[i][j].push_back(Jc);
          }
          else {
-            int N = std::min((int) elevDiff.size(), iNumSmart);
+            int N = std::min((int) elevDiff.size(), mNumSmart);
             iI[i][j].resize(N, Util::MV);
             iJ[i][j].resize(N, Util::MV);
 

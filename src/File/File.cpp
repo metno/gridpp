@@ -5,7 +5,11 @@
 #include <sstream>
 #include "../Util.h"
 
-File::File(std::string iFilename) : mFilename(iFilename) {}
+File::File(std::string iFilename) :
+      mFilename(iFilename),
+      mTag(boost::uuids::random_generator()()) {
+      
+}
 
 File* File::getScheme(std::string iFilename, bool iReadOnly) {
    File* file;
@@ -224,4 +228,8 @@ long File::getCacheSize() const {
       size += it->second.size() * getNumLat()*getNumLon()*getNumEns()*sizeof(float);
    }
    return size;
+}
+
+boost::uuids::uuid File::getUniqueTag() const {
+   return mTag;
 }

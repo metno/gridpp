@@ -278,11 +278,11 @@ void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec
 }
 
 bool Downscaler::isCached(const File& iFrom, const File& iTo) const {
-   std::map<const File*, std::map<const File*, std::pair<vec2Int, vec2Int> > >::const_iterator it = mNeighbourCache.find(&iFrom);
+   std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > >::const_iterator it = mNeighbourCache.find(iFrom.getUniqueTag());
    if(it == mNeighbourCache.end()) {
       return false;
    }
-   std::map<const File*, std::pair<vec2Int, vec2Int> >::const_iterator it2 = it->second.find(&iTo);
+   std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> >::const_iterator it2 = it->second.find(iTo.getUniqueTag());
    if(it2 == it->second.end()) {
       return false;
    }
@@ -291,12 +291,12 @@ bool Downscaler::isCached(const File& iFrom, const File& iTo) const {
 
 void Downscaler::addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ) const {
    std::pair<vec2Int, vec2Int> pair(iI, iJ);
-   mNeighbourCache[&iFrom][&iTo] = pair;
+   mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()] = pair;
 }
 bool Downscaler::getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const {
    if(!isCached(iFrom, iTo))
       return false;
-   iI = mNeighbourCache[&iFrom][&iTo].first;
-   iJ = mNeighbourCache[&iFrom][&iTo].second;
+   iI = mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()].first;
+   iJ = mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()].second;
    return true;
 }

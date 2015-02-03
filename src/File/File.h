@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include "../Variable.h"
 #include "../Util.h"
 #include "../Field.h"
@@ -51,6 +53,8 @@ class File {
       //! How many bytes of retrieved/computed  data are stored in cache?
       //! @return Number of bytes
       long getCacheSize() const;
+
+      boost::uuids::uuid getUniqueTag() const;
    protected:
       std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
@@ -60,6 +64,7 @@ class File {
       FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
    private:
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
+      mutable boost::uuids::uuid mTag;
 };
 #include "Netcdf.h"
 #include "Fake.h"

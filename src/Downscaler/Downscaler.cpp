@@ -1,4 +1,5 @@
 #include "Downscaler.h"
+#include <cmath>
 #include "../File/File.h"
 
 std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;

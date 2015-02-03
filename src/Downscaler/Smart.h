@@ -20,8 +20,7 @@ class DownscalerSmart : public Downscaler {
       std::string name() const {return "smart";};
 
       //! Method may return fewer than num smart neighbours
-      static void getSmartNeighbours(const File& iFrom, const File& iTo, int iSearchRadius, int iNumSmart, vec3Int& iI, vec3Int& iJ);
-             void getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const;
+      void getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const;
       static int getNumSearchPoints(int iSearchRadius) ;
              int getNumSearchPoints() const;
    private:

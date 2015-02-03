@@ -1,6 +1,10 @@
 #include "Fake.h"
 FileFake::FileFake(int nLat, int nLon, int nEns, int nTime) :
-      File(""), mNLat(nLat), mNLon(nLon), mNEns(nEns), mNTime(nTime) {
+      File("") {
+   mNLat = nLat;
+   mNLon = nLon;
+   mNEns = nEns;
+   mNTime = nTime;
    if(!Util::isValid(mNLat) || mNLat <= 0) {
       Util::error("FileFake: Invalid number of latitudes");
    }
@@ -48,35 +52,6 @@ FieldPtr FileFake::getFieldCore(Variable::Type iVariable, int iTime) const {
       }
    }
    return field;
-}
-
-vec2 FileFake::getLats() const {
-   return mLats;
-}
-vec2 FileFake::getLons() const {
-   return mLons;
-}
-vec2 FileFake::getElevs() const {
-   return mElevs;
-}
-
-bool FileFake::setLats(vec2 iLats) {
-   if(iLats.size() != mNLat || iLats[0].size() != mNLon)
-      return false;
-   mLats = iLats;
-   return true;
-}
-bool FileFake::setLons(vec2 iLons) {
-   if(iLons.size() != mNLat || iLons[0].size() != mNLon)
-      return false;
-   mLons = iLons;
-   return true;
-}
-bool FileFake::setElevs(vec2 iElevs) {
-   if(iElevs.size() != mNLat || iElevs[0].size() != mNLon)
-      return false;
-   mElevs = iElevs;
-   return true;
 }
 void FileFake::writeCore(std::vector<Variable::Type> iVariables) {
    Util::warning("Cannot write file using the 'Fake' format");

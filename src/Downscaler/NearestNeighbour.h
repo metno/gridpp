@@ -1,17 +1,13 @@
 #ifndef DOWNSCALER_NEAREST_NEIGHBOUR_H
 #define DOWNSCALER_NEAREST_NEIGHBOUR_H
+#include <map>
 #include "Downscaler.h"
 #include "../Variable.h"
 #include "../Util.h"
-typedef std::vector<std::vector<int> > vec2Int;
+class File;
 class DownscalerNearestNeighbour : public Downscaler {
    public:
       DownscalerNearestNeighbour(Variable::Type iVariable);
-      // Slow method: Check every combination
-      // Return Util::MV when it cannot find a neighbour
-      static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-      // Faster method: Assume lats/lons are sorted
-      static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
       static std::string description();
       std::string name() const {return "nearestNeighbour";};
    private:

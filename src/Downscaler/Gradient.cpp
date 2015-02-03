@@ -26,7 +26,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
-   DownscalerNearestNeighbour::getNearestNeighbourFast(iInput, iOutput, nearestI, nearestJ);
+   getNearestNeighbourFast(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mVariable, t);

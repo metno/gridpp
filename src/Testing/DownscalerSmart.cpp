@@ -51,11 +51,12 @@ namespace {
       FileFake to(1,1,1,1);
       setLatLonElev(from, (float[]) {50,55,60}, (float[]){0,10}, (float[]){3, 15, 6, 30, 20, 11});
       setLatLonElev(to,   (float[]) {54},   (float[]){9}, (float[]){10});
-      int searchRadius = 10; // Search the whole grid
-      int numSmart = 2;
 
       vec3Int I, J;
-      DownscalerSmart::getSmartNeighbours(from, to, searchRadius, numSmart, I, J);
+      DownscalerSmart d(Variable::Precip);
+      d.setSearchRadius(10); // Search the whole grid
+      d.setNumSmart(2);
+      d.getSmartNeighbours(from, to, I, J);
 
       ASSERT_EQ(1, I.size());
       ASSERT_EQ(1, I[0].size());
@@ -99,7 +100,12 @@ namespace {
       FileFake to(1,4,1,1);
       setLatLonElev(to, (float[]) {5.5}, (float[]){2,4, 10,20}, (float[]){120, 80, 600, 600});
       vec3Int I, J;
-      DownscalerSmart::getSmartNeighbours(from, to, 1, 20, I, J);
+
+      DownscalerSmart d(Variable::Precip);
+      d.setSearchRadius(1);
+      d.setNumSmart(20);
+      d.getSmartNeighbours(from, to, I, J);
+
       ASSERT_EQ(1, I.size());
       ASSERT_EQ(1, J.size());
       ASSERT_EQ(4, I[0].size());

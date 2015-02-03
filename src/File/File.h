@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include "../Variable.h"
 #include "../Util.h"
 #include "../Field.h"
@@ -28,17 +30,19 @@ class File {
       void write(std::vector<Variable::Type> iVariables);
 
       // Dimension sizes
-      virtual int getNumLat() const  = 0;
-      virtual int getNumLon() const  = 0;
-      virtual int getNumEns() const  = 0;
-      virtual int getNumTime() const = 0;
+      int getNumLat() const;
+      int getNumLon() const;
+      int getNumEns() const;
+      int getNumTime() const;
+      vec2 getLats() const;
+      vec2 getLons() const;
+      vec2 getElevs() const;
+      bool setLats(vec2 iLats);
+      bool setLons(vec2 iLons);
+      bool setElevs(vec2 iElevs);
 
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(Variable::Type iVariable) const;
-
-      virtual vec2 getLats() const = 0;
-      virtual vec2 getLons() const = 0;
-      virtual vec2 getElevs() const = 0;
 
       std::string getFilename() const;
 
@@ -51,15 +55,28 @@ class File {
       //! How many bytes of retrieved/computed  data are stored in cache?
       //! @return Number of bytes
       long getCacheSize() const;
+
+      boost::uuids::uuid getUniqueTag() const;
    protected:
-      std::string mFilename;
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
       //! Can the subclass provide this variable?
       virtual bool hasVariableCore(Variable::Type iVariable) const = 0;
-      FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
+
+      // Subclasses must fill these fields in the constructor:
+      vec2 mLats;
+      vec2 mLons;
+      vec2 mElevs;
+      int mNTime;
+      int mNLat;
+      int mNLon;
+      int mNEns;
    private:
+      std::string mFilename;
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
+      mutable boost::uuids::uuid mTag;
+      void createNewTag() const;
+      FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
 };
 #include "Netcdf.h"
 #include "Fake.h"

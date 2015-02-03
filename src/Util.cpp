@@ -79,7 +79,9 @@ float Util::getDistance(float lat1, float lon1, float lat2, float lon2) {
    double lat2r = deg2rad(lat2);
    double lon1r = deg2rad(lon1);
    double lon2r = deg2rad(lon2);
-   double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r) + cos(lat1r) * sin(lon1r) *cos(lat2r)*sin(lon2r) + sin(lat1r)*sin(lat2r);
+   double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
+                + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
+                + sin(lat1r)*sin(lat2r);
    double dist = acos(ratio)*radiusEarth;
    return (float) dist;
 }

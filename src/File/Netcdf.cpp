@@ -6,9 +6,9 @@
 
 FileNetcdf::FileNetcdf(std::string iFilename, bool iReadOnly) :
       File(iFilename), 
-      mFile(NcFile(mFilename.c_str(), iReadOnly ? NcFile::ReadOnly : NcFile::Write)) {
+      mFile(NcFile(getFilename().c_str(), iReadOnly ? NcFile::ReadOnly : NcFile::Write)) {
    if(!mFile.is_valid()) {
-      Util::error("Error: Netcdf file " + mFilename + " not valid");
+      Util::error("Error: Netcdf file " + getFilename() + " not valid");
    }
 }
 

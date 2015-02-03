@@ -163,16 +163,6 @@ bool FileEc::isValid(std::string iFilename) {
    }
    return status;
 }
-
-vec2 FileEc::getLats() const {
-   return mLats;
-}
-vec2 FileEc::getLons() const {
-   return mLons;
-}
-vec2 FileEc::getElevs() const {
-   return mElevs;
-}
 vec2 FileEc::getLatLonVariable(std::string iVar) const {
    NcVar* var = getVar(iVar);
    long count[2] = {getNumLat(), getNumLon()};

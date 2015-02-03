@@ -18,9 +18,9 @@ class Downscaler {
 
       // Slow method: Check every combination
       // Return Util::MV when it cannot find a neighbour
-      void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const;
+      static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
       // Faster method: Assume lats/lons are sorted
-      void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const;
+      static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
 
       int getCacheSize() {return mNeighbourCache.size();};
    protected:
@@ -29,10 +29,10 @@ class Downscaler {
 
       // Cache calls to nearest neighbour
       //! Is the nearest neighbours in @param iFrom for each point in @param iTo already computed?
-      bool isCached(const File& iFrom, const File& iTo) const;
-      void addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ) const;
-      bool getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const;
-      mutable std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
+      static bool isCached(const File& iFrom, const File& iTo);
+      static void addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ);
+      static bool getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
+      static std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
 };
 #include "NearestNeighbour.h"
 #include "Gradient.h"

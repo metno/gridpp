@@ -1,6 +1,8 @@
 #include "Downscaler.h"
 #include "../File/File.h"
 
+std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
+
 Downscaler::Downscaler(Variable::Type iVariable) :
       mVariable(iVariable) {
 }
@@ -51,7 +53,7 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    }
 }
 
-void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const {
+void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    if(isCached(iFrom, iTo)) {
        getFromCache(iFrom, iTo, iI, iJ);
        return;
@@ -113,7 +115,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
    addToCache(iFrom, iTo, iI, iJ);
 }
 
-void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const {
+void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    if(iTo.getNumLat() == 0 || iTo.getNumLon() == 0) {
       return;
    }
@@ -277,7 +279,7 @@ void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec
    addToCache(iFrom, iTo, iI, iJ);
 }
 
-bool Downscaler::isCached(const File& iFrom, const File& iTo) const {
+bool Downscaler::isCached(const File& iFrom, const File& iTo) {
    std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > >::const_iterator it = mNeighbourCache.find(iFrom.getUniqueTag());
    if(it == mNeighbourCache.end()) {
       return false;
@@ -289,11 +291,11 @@ bool Downscaler::isCached(const File& iFrom, const File& iTo) const {
    return true;
 }
 
-void Downscaler::addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ) const {
+void Downscaler::addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ) {
    std::pair<vec2Int, vec2Int> pair(iI, iJ);
    mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()] = pair;
 }
-bool Downscaler::getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) const {
+bool Downscaler::getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    if(!isCached(iFrom, iTo))
       return false;
    iI = mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()].first;

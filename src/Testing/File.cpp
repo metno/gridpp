@@ -102,6 +102,15 @@ namespace {
       FileArome f1("testing/files/10x10.nc");
       EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
    }
+   TEST_F(FileTest, getFieldInvalidTimePreviouslyRead) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      FileFake f0(3, 3, 1, 3);
+      f0.getField(Variable::T, 1);
+      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
+      EXPECT_DEATH(f0.getField(Variable::T, 100), ".*");
+   }
    TEST_F(FileTest, factoryFake) {
       File* f = File::getScheme("fake");
       EXPECT_EQ("fake", f->name());

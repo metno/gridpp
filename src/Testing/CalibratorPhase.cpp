@@ -88,7 +88,7 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(Util::MV, 30000, 1));
       EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, Util::MV, 1));
       EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, 30000, Util::MV));
-      EXPECT_FLOAT_EQ(Util::MV,    CalibratorPhase::getWetbulb(270, 100000, 0)); // No humidity
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, 100000, 0)); // No humidity
    }
    TEST_F(TestCalibratorPhase, description) {
       CalibratorPhase::description();

@@ -12,6 +12,7 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
    mNTime = dTime->size();
    mNLat  = dLat->size();
    mNLon  = dLon->size();
+   mNEns  = 1;
 
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
@@ -202,17 +203,6 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    }
    return "";
 }
-
-vec2 FileArome::getLats() const {
-   return mLats;
-}
-vec2 FileArome::getLons() const {
-   return mLons;
-}
-vec2 FileArome::getElevs() const {
-   return mElevs;
-}
-
 vec2 FileArome::getLatLonVariable(std::string iVar) const {
    NcVar* var = getVar(iVar);
    float MV = getMissingValue(var);

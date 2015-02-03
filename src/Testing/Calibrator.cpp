@@ -121,6 +121,13 @@ namespace {
       EXPECT_EQ("smooth", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryPhase) {
+      Calibrator* c;
+      c = Calibrator::getScheme("phase", Options("variable=Precip parameters=testing/files/parametersPhase.txt"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("phase", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));

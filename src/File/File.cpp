@@ -6,9 +6,8 @@
 #include "../Util.h"
 
 File::File(std::string iFilename) :
-      mFilename(iFilename),
-      mTag(boost::uuids::random_generator()()) {
-      
+      mFilename(iFilename) {
+   createNewTag();
 }
 
 File* File::getScheme(std::string iFilename, bool iReadOnly) {
@@ -232,4 +231,50 @@ long File::getCacheSize() const {
 
 boost::uuids::uuid File::getUniqueTag() const {
    return mTag;
+}
+bool File::setLats(vec2 iLats) {
+   if(iLats.size() != mNLat || iLats[0].size() != mNLon)
+      return false;
+   if(mLats != iLats)
+      createNewTag();
+   mLats = iLats;
+   return true;
+}
+bool File::setLons(vec2 iLons) {
+   if(iLons.size() != mNLat || iLons[0].size() != mNLon)
+      return false;
+   if(mLons != iLons)
+      createNewTag();
+   mLons = iLons;
+   return true;
+}
+bool File::setElevs(vec2 iElevs) {
+   if(iElevs.size() != mNLat || iElevs[0].size() != mNLon)
+      return false;
+   mElevs = iElevs;
+   return true;
+}
+vec2 File::getLats() const {
+   return mLats;
+}
+vec2 File::getLons() const {
+   return mLons;
+}
+vec2 File::getElevs() const {
+   return mElevs;
+}
+int File::getNumLat() const {
+   return mNLat;
+}
+int File::getNumLon() const {
+   return mNLon;
+}
+int File::getNumEns() const {
+   return mNEns;
+}
+int File::getNumTime() const {
+   return mNTime;
+}
+void File::createNewTag() const {
+   mTag = boost::uuids::random_generator()();
 }

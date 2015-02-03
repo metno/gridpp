@@ -48,6 +48,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       DownscalerBypass* d = new DownscalerBypass(iVariable);
       return d;
    }
+   else if(iName == "pressure") {
+      DownscalerPressure* d = new DownscalerPressure(iVariable);
+      return d;
+   }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;

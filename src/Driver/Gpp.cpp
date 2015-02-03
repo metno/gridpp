@@ -40,6 +40,7 @@ int main(int argc, const char *argv[]) {
       std::cout << DownscalerNearestNeighbour::description();
       std::cout << DownscalerGradient::description();
       std::cout << DownscalerSmart::description();
+      std::cout << DownscalerPressure::description();
       std::cout << DownscalerBypass::description();
       std::cout << std::endl;
       std::cout << "Calibrators with options (and default values):" << std::endl;

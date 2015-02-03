@@ -36,4 +36,5 @@ class Downscaler {
 #include "Gradient.h"
 #include "Smart.h"
 #include "Bypass.h"
+#include "Pressure.h"
 #endif

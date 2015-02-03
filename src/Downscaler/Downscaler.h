@@ -21,12 +21,10 @@ class Downscaler {
       static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
       // Faster method: Assume lats/lons are sorted
       static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-
-      int getCacheSize() {return mNeighbourCache.size();};
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
       Variable::Type mVariable;
-
+   private:
       // Cache calls to nearest neighbour
       //! Is the nearest neighbours in @param iFrom for each point in @param iTo already computed?
       static bool isCached(const File& iFrom, const File& iTo);

@@ -17,16 +17,16 @@ SRCDIR   = src/
 BUILDDIR = build
 BUILDDIR_O = build/opt
 BUILDDIR_D = build/debug
-EXE_O    = postprocess.exe
-EXE_D    = postprocess_debug.exe
+EXE_O    = gpp.exe
+EXE_D    = gpp_debug.exe
 
 CORESRC 	= $(wildcard src/*.cpp)
 CALSRC  	= $(wildcard src/Calibrator/*.cpp)
 FILESRC 	= $(wildcard src/File/*.cpp)
 DOWNSRC 	= $(wildcard src/Downscaler/*.cpp)
-DRVSRC  	= src/Driver/PostProcess.cpp
-DRVOBJ_O = $(BUILDDIR_O)/Driver/PostProcess.o
-DRVOBJ_D	= $(BUILDDIR_D)/Driver/PostProcess.o
+DRVSRC  	= src/Driver/Gpp.cpp
+DRVOBJ_O = $(BUILDDIR_O)/Driver/Gpp.o
+DRVOBJ_D	= $(BUILDDIR_D)/Driver/Gpp.o
 SRC     	= $(CORESRC) $(CALSRC) $(FILESRC) $(DOWNSRC)
 HEADERS 	= $(SRC:.cpp=.h)
 OBJ0_O   = $(patsubst src/%,$(BUILDDIR_O)/%,$(SRC))
@@ -56,10 +56,10 @@ $(BUILDDIR_D)/%.o : src/%.cpp $(INCS)
 $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
 	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
 
-postprocess.exe: $(OBJ_O) $(DRVOBJ_O) makefile
+gpp.exe: $(OBJ_O) $(DRVOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
-postprocess_debug.exe: $(OBJ_D) $(DRVOBJ_D) makefile
+gpp_debug.exe: $(OBJ_D) $(DRVOBJ_D) makefile
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 test: $(TESTS)

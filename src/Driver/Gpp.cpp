@@ -57,7 +57,7 @@ int main(int argc, const char *argv[]) {
    // Retrieve setup
    std::vector<std::string> args;
    for(int i = 1; i < argc; i++) {
-      args.push_back(argv[i]);
+      args.push_back(std::string(argv[i]));
    }
    Setup setup(args);
    std::cout << "Input type:  " << setup.inputFile->name() << std::endl;
@@ -84,6 +84,9 @@ int main(int argc, const char *argv[]) {
       }
       double e = Util::clock();
       std::cout << "   " << e-s << " seconds" << std::endl;
+      std::cout << "Current mem usage input: " << setup.inputFile->getCacheSize() / 1e6<< std::endl;
+      std::cout << "Current mem usage output: " << setup.outputFile->getCacheSize() / 1e6<< std::endl;
+      // setup.inputFile->clear();
    }
 
    // Write to output

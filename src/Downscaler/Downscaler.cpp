@@ -30,6 +30,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       if(iOptions.getValue("searchRadius", searchRadius)) {
          d->setSearchRadius(searchRadius);
       }
+      float minElevDiff = Util::MV;
+      if(iOptions.getValue("minElevDiff", minElevDiff)) {
+         d->setMinElevDiff(minElevDiff);
+      }
       return d;
    }
    else if(iName == "smart") {

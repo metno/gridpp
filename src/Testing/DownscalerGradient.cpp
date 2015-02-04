@@ -76,6 +76,38 @@ namespace {
       EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
       EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
    }
+   TEST_F(TestDownscalerGradient, 10x10minElevDiff) {
+      DownscalerGradient d(Variable::T);
+      d.setSearchRadius(1);
+      d.setMinElevDiff(1500);
+      FileArome from("testing/files/10x10.nc");
+      const Field& fromT  = *from.getField(Variable::T, 0);
+      FileFake to(1,4,1,from.getNumTime());
+      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
+      // T = T(nn) + gradient * (elev - elev(nn))
+      EXPECT_FLOAT_EQ(301, toT(0,0,0));
+      EXPECT_FLOAT_EQ(301, toT(0,1,0));
+      EXPECT_FLOAT_EQ(304, toT(0,2,0));
+      EXPECT_FLOAT_EQ(304, toT(0,3,0));
+
+      // Fix the gradient
+      // This should not be affected by the minElevDiff
+      d.setConstantGradient(0.01);
+      d.downscale(from, to);
+      const Field& toT2  = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT2.getNumLat());
+      ASSERT_EQ(4, toT2.getNumLon());
+      // T = T(nn) + gradient * (elev - elev(nn))
+      EXPECT_FLOAT_EQ(300.60367, toT2(0,0,0));
+      EXPECT_FLOAT_EQ(314.40369, toT2(0,1,0));
+      EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
+      EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
+   }
    TEST_F(TestDownscalerGradient, missingValues) {
 
    }
@@ -124,6 +156,16 @@ namespace {
 
       // Invalid values
       EXPECT_DEATH(d.setConstantGradient(Util::MV), ".*");
+   }
+   TEST_F(TestDownscalerGradient, setGetMinElevDiff) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      DownscalerGradient d(Variable::Precip);
+      // Check that default is valid
+      EXPECT_GE(d.getMinElevDiff(), 0);
+      d.setMinElevDiff(213.1);
+      EXPECT_FLOAT_EQ(213.1, d.getMinElevDiff());
    }
    TEST_F(TestDownscalerGradient, description) {
       DownscalerGradient::description();

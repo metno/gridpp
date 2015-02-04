@@ -8,7 +8,8 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
       mSearchRadius(3),
       mMinGradient(-10),
       mMaxGradient(10),
-      mConstGradient(Util::MV) {
+      mConstGradient(Util::MV),
+      mMinElevDiff(30) {
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -50,12 +51,19 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   float dElev = currElev - nearestElev;
                   float gradient = 0;
                   if(!Util::isValid(mConstGradient)) {
-                     // Compute gradient from neighbourhood
+                     /* Compute the model's gradient:
+                        The gradient is computed by using linear regression on forecast ~ elevation
+                        using all forecasts within a neighbourhood. To produce stable results, there
+                        is a requirement that the elevation within the neighbourhood has a large
+                        range (see mMinElevDiff).
+                     */
                      float meanXY  = 0; // elev*T
                      float meanX   = 0; // elev
                      float meanY   = 0; // T
                      float meanXX  = 0; // elev*elev
                      int   counter = 0;
+                     float min = Util::MV;
+                     float max = Util::MV;
                      for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
                         for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
                            assert(ii < ielevs.size());
@@ -68,10 +76,23 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                               meanY  += y;
                               meanXX += x*x;
                               counter++;
+                              // Found a new min
+                              if(!Util::isValid(min) || x < min)
+                                 min = x;
+                              // Found a new max
+                              if(!Util::isValid(max) || x > max)
+                                 max = x;
                            }
                         }
                      }
-                     if(counter > 0 && meanXX != meanX*meanX) {
+                     // Compute elevation difference within neighbourhood
+                     float elevDiff = Util::MV;
+                     if(Util::isValid(min) && Util::isValid(max)) {
+                        assert(max >= min);
+                        elevDiff = max - min;
+                     }
+
+                     if(counter > 0 && elevDiff >= mMinElevDiff && meanXX != meanX*meanX) {
                         // Estimate lapse rate
                         meanXY /= counter;
                         meanX  /= counter;
@@ -120,6 +141,12 @@ void DownscalerGradient::setSearchRadius(int iNumPoints) {
 int DownscalerGradient::getSearchRadius() const {
    return mSearchRadius;
 }
+void DownscalerGradient::setMinElevDiff(float iMinElevDiff) {
+   mMinElevDiff = iMinElevDiff;
+}
+float DownscalerGradient::getMinElevDiff() const {
+   return mMinElevDiff;
+}
 
 std::string DownscalerGradient::description() {
    std::stringstream ss;
@@ -129,5 +156,7 @@ std::string DownscalerGradient::description() {
    ss << "                                by linear regression of points in a neighbourhood." << std::endl;
    ss << "      searchRadius=3            Compute gradient in a neighbourhood box of points within +- radius" << std::endl;
    ss << "                                in both east-west and north-south direction." << std::endl;
+   ss << "      minElevDiff=30            Minimum elevation range (in meters) required within the neighbourhood" << std::endl;
+   ss << "                                to compute gradient. Use nearest neighbour otherwise." << std::endl;
    return ss.str();
 }

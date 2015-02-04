@@ -20,6 +20,8 @@ class DownscalerGradient : public Downscaler {
       //! in each direction.
       void setSearchRadius(int iNumPoints);
       int  getSearchRadius() const;
+      void  setMinElevDiff(float iMinElevDiff);
+      float getMinElevDiff() const;
       static std::string description();
       std::string name() const {return "gradient";};
       float mMinGradient;
@@ -28,5 +30,6 @@ class DownscalerGradient : public Downscaler {
       void downscaleCore(const File& iInput, File& iOutput) const;
       int mSearchRadius;
       float mConstGradient;
+      float mMinElevDiff; // Minimum elevation difference within neighbourhood to use gradient
 };
 #endif

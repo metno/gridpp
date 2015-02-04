@@ -16,8 +16,12 @@ class CalibratorPhase : public Calibrator {
       //! @param iRelativeHumidity Relative humidity (out of 1)
       //! @return Wetbulb temperature in K
       static float getWetbulb(float iTemperature, float iPressure, float iRelativeHumidity);
+
+      float getMinPrecip() const;
+      void  setMinPrecip(float iMinPrecip);
    private:
       bool calibrateCore(File& iFile) const;
       const ParameterFile* mParameterFile;
+      float mMinPrecip;
 };
 #endif

@@ -123,9 +123,10 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryPhase) {
       Calibrator* c;
-      c = Calibrator::getScheme("phase", Options("variable=Precip parameters=testing/files/parametersPhase.txt"));
+      c = Calibrator::getScheme("phase", Options("variable=Precip parameters=testing/files/parametersPhase.txt minPrecip=0.771"));
       EXPECT_TRUE(c);
       EXPECT_EQ("phase", c->name());
+      EXPECT_FLOAT_EQ(0.771, ((CalibratorPhase*) c)->getMinPrecip());
       delete c;
    }
    TEST_F(TestCalibrator, factoryValid) {

@@ -5,7 +5,8 @@
 #include "../ParameterFile.h"
 CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile) :
       Calibrator(),
-      mParameterFile(iParameterFile) {
+      mParameterFile(iParameterFile),
+      mMinPrecip(0.2) {
 
    if(iParameterFile->getNumParameters() != 2) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
@@ -39,9 +40,11 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
                float currTemp     = temp(i,j,e);
                float currPressure = pressure(i,j,e);
                float currRh       = rh(i,j,e);
-               if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold) && Util::isValid(currPrecip) && Util::isValid(currTemp) && Util::isValid(currPressure) && Util::isValid(currRh)) {
+               if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold)
+                     && Util::isValid(currPrecip) && Util::isValid(currTemp)
+                     && Util::isValid(currPressure) && Util::isValid(currRh)) {
                   float currWetbulb = getWetbulb(currTemp, currPressure, currRh);
-                  if(currPrecip == 0)
+                  if(currPrecip <= mMinPrecip)
                      phase(i,j,e)  = CalibratorPhase::PhaseNone;
                   else if(!Util::isValid(currWetbulb))
                      phase(i,j,e)  = Util::MV;
@@ -61,11 +64,19 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
    }
    return true;
 }
+
+float CalibratorPhase::getMinPrecip() const {
+   return mMinPrecip;
+}
+void  CalibratorPhase::setMinPrecip(float iMinPrecip) {
+   mMinPrecip = iMinPrecip;
+}
+
 std::string CalibratorPhase::description() {
    std::stringstream ss;
    ss << "   -c phase                     Compute precipitation phase based on wetbulb temperature, with" << std::endl;
    ss << "                                values encoded by:" << std::endl;
-   ss << "                                * 0 = no precipitation (Precip == 0)" << std::endl;
+   ss << "                                * 0 = no precipitation (Precip < minPrecip)" << std::endl;
    ss << "                                * 1 = rain (b < Tw)" << std::endl;
    ss << "                                * 2 = sleet (a < Tw <= b)" << std::endl;
    ss << "                                * 3 = snow (Tw < a" << std::endl;
@@ -76,6 +87,7 @@ std::string CalibratorPhase::description() {
    ss << "                                offsetN a b" << std::endl;
    ss << "                                If the file only has a single line, then the same set of parameters" << std::endl;
    ss << "                                are used for all offsets.                                          " << std::endl;
+   ss << "      minPrecip=0.2             Minimum precip (in mm) needed to be considered as precipitation." << std::endl;
    return ss.str();
 }
 float CalibratorPhase::getWetbulb(float iTemperature, float iPressure, float iRelativeHumidity) {

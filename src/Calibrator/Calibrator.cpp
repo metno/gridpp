@@ -64,9 +64,13 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("parameters", parFilename)) {
          Util::error("Calibrator 'phase' needs parameters");
       }
-
       ParameterFile* parFile = new ParameterFile(parFilename);
       CalibratorPhase* c = new CalibratorPhase(parFile);
+      float minPrecip;
+      if(iOptions.getValue("minPrecip", minPrecip)) {
+         c->setMinPrecip(minPrecip);
+      }
+
       return c;
    }
    else {

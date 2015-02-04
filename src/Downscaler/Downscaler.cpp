@@ -42,6 +42,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       if(iOptions.getValue("numSmart", numSmart)) {
          d->setNumSmart(numSmart);
       }
+      float minElevDiff = Util::MV;
+      if(iOptions.getValue("minElevDiff", minElevDiff)) {
+         d->setMinElevDiff(minElevDiff);
+      }
       return d;
    }
    else if(iName == "bypass") {

@@ -16,6 +16,8 @@ class DownscalerSmart : public Downscaler {
       //! in each direction.
       void setSearchRadius(int iNumPoints);
       int  getSearchRadius() const;
+      void setMinElevDiff(float iMinElevDiff);
+      float getMinElevDiff();
       static std::string description();
       std::string name() const {return "smart";};
 
@@ -27,5 +29,6 @@ class DownscalerSmart : public Downscaler {
       void downscaleCore(const File& iInput, File& iOutput) const;
       int mSearchRadius;
       int mNumSmart;
+      float mMinElevDiff;
 };
 #endif

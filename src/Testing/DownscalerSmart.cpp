@@ -101,6 +101,71 @@ namespace {
       EXPECT_EQ(5, I[0][4][0]);
       EXPECT_EQ(2, J[0][4][0]);
    }
+   TEST_F(TestDownscalerSmart, 10x10minElevDiff) {
+      DownscalerSmart d(Variable::T);
+      d.setSearchRadius(3);
+      d.setNumSmart(2);
+      d.setMinElevDiff(109);
+      FileArome from("testing/files/10x10.nc");
+      const Field& fromT  = *from.getField(Variable::T, 0);
+      FileFake to(1,3,1,from.getNumTime());
+      setLatLonElev(to, (float[]) {5}, (float[]){2,2,2}, (float[]){120, 50, Util::MV});
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(3, toT.getNumLon());
+      EXPECT_FLOAT_EQ(301, toT(0,0,0)); // Nearest neighbour
+      EXPECT_FLOAT_EQ(304, toT(0,1,0));
+      EXPECT_FLOAT_EQ(301, toT(0,2,0)); // Nearest neighbour
+      vec3Int I, J;
+      d.getSmartNeighbours(from, to, I, J);
+      ASSERT_EQ(2, I[0][1].size());
+      ASSERT_EQ(2, J[0][1].size());
+      EXPECT_EQ(4, I[0][1][0]);
+      EXPECT_EQ(5, J[0][1][0]);
+      EXPECT_EQ(2, I[0][1][1]);
+      EXPECT_EQ(4, J[0][1][1]);
+
+      // All nearest neighbours
+      d.setMinElevDiff(1200);
+      status = d.downscale(from, to);
+      EXPECT_TRUE(status);
+      EXPECT_FLOAT_EQ(301, toT(0,0,0));
+      EXPECT_FLOAT_EQ(301, toT(0,1,0));
+      EXPECT_FLOAT_EQ(301, toT(0,2,0));
+   }
+   TEST_F(TestDownscalerSmart, minElevDiff) {
+      FileFake from(3,2,1,1);
+      FileFake to(1,1,1,1);
+      setLatLonElev(from, (float[]) {50,55,60}, (float[]){0,10}, (float[]){3, 15, 6, 30, 20, 11});
+      setLatLonElev(to,   (float[]) {55},       (float[]){10},   (float[]){22.3});
+
+      DownscalerSmart d(Variable::T);
+      d.setSearchRadius(3);
+      d.setNumSmart(2);
+      vec3Int I, J;
+
+      // Use nearest neighbour (at 30m)
+      d.setMinElevDiff(7.701);
+      d.getSmartNeighbours(from, to, I, J);
+      ASSERT_EQ(1, I.size());
+      ASSERT_EQ(1, I[0].size());
+      ASSERT_EQ(1, I[0][0].size());
+      EXPECT_FLOAT_EQ(1, I[0][0][0]);
+      EXPECT_FLOAT_EQ(1, J[0][0][0]);
+
+      // Use best neighbours (at 20m and 15m)
+      d.setMinElevDiff(7.6999);
+      d.getSmartNeighbours(from, to, I, J);
+      ASSERT_EQ(1, I[0].size());
+      ASSERT_EQ(2, I[0][0].size());
+      EXPECT_FLOAT_EQ(2, I[0][0][0]);
+      EXPECT_FLOAT_EQ(0, J[0][0][0]);
+      EXPECT_FLOAT_EQ(0, I[0][0][1]);
+      EXPECT_FLOAT_EQ(1, J[0][0][1]);
+
+   }
    TEST_F(TestDownscalerSmart, fewerPointsThanSmart) {
       FileFake from(5,3,1,1);
       setLatLonElev(from, (float[]) {4,5,6,7,8}, (float[]){5,10,15}, (float[]){70,50,20,80,60,70,50,40,30,20,10,40,50,30,60});

@@ -27,6 +27,7 @@ namespace {
       EXPECT_EQ(*p1, *p2);
    }
    TEST_F(FileAromeTest, 10x10_smart) {
+      // Smart downscaler should give different values
       {
          FileArome from("testing/files/10x10.nc");
          FileArome to("testing/files/10x10_copy.nc");
@@ -38,7 +39,6 @@ namespace {
 
          to.write(variables);
       }
-      // Smart downscaler should give different values
       FileArome f1("testing/files/10x10.nc");
       FileArome f2("testing/files/10x10_copy.nc");
       FieldPtr p1 = f1.getField(Variable::T, 0);

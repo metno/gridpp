@@ -6,7 +6,8 @@
 DownscalerSmart::DownscalerSmart(Variable::Type iVariable) :
       Downscaler(iVariable),
       mSearchRadius(3),
-      mNumSmart(5) {
+      mNumSmart(5),
+      mMinElevDiff(Util::MV) {
 }
 
 void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
@@ -100,8 +101,12 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
          int Ic = Icenter[i][j];
          int Jc = Jcenter[i][j];
          float oelev = oelevs[i][j];
-         if(!Util::isValid(oelev)) {
-            // No elevation information available, use nearest neighbour
+         float nnElev = ielevs[Ic][Jc];
+         bool isWithinMinElev = Util::isValid(oelev) && Util::isValid(nnElev) && Util::isValid(mMinElevDiff) && 
+                                fabs(oelev - nnElev) <= mMinElevDiff;
+         if(!Util::isValid(oelev) || isWithinMinElev) {
+            // No elevation information available or within minimum elevation difference:
+            // Use nearest neighbour.
             iI[i][j].push_back(Ic);
             iJ[i][j].push_back(Jc);
          }
@@ -174,6 +179,12 @@ int  DownscalerSmart::getSearchRadius() const {
 int DownscalerSmart::getNumSmart() const {
    return mNumSmart;
 }
+void DownscalerSmart::setMinElevDiff(float iMinElevDiff) {
+   mMinElevDiff = iMinElevDiff;
+}
+float DownscalerSmart::getMinElevDiff() {
+   return mMinElevDiff;
+}
 
 std::string DownscalerSmart::description() {
    std::stringstream ss;
@@ -182,5 +193,7 @@ std::string DownscalerSmart::description() {
    ss << "                                nearest neighbour." << std::endl;
    ss << "      searchRadius=3            Search for smart neighbours within this radius (gridpoints)" << std::endl;
    ss << "      numSmart=5                Average this many smart neighbours" << std::endl;
+   ss << "      minElevDiff=-999          Use the nearest neighbour if its elevation difference (in meters)" << std::endl;
+   ss << "                                is less or equal to this. Use -999 to turn this feature off." << std::endl;
    return ss.str();
 }

@@ -43,10 +43,11 @@ namespace {
 
    TEST_F(TestDownscaler, validDownscalers) {
       Downscaler* d0 = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
-      Downscaler* d1 = Downscaler::getScheme("smart", Variable::T, Options("searchRadius=3 numSmart=2"));
+      Downscaler* d1 = Downscaler::getScheme("smart", Variable::T, Options("searchRadius=3 numSmart=2 minElevDiff=400"));
       Downscaler* d2 = Downscaler::getScheme("gradient", Variable::T, Options("searchRadius=5 constantGradient=0.04"));
       EXPECT_EQ(3, ((DownscalerSmart*) d1)->getSearchRadius());
       EXPECT_EQ(2, ((DownscalerSmart*) d1)->getNumSmart());
+      EXPECT_EQ(400, ((DownscalerSmart*) d1)->getMinElevDiff());
       EXPECT_EQ(5, ((DownscalerGradient*) d2)->getSearchRadius());
       EXPECT_FLOAT_EQ(0.04, ((DownscalerGradient*) d2)->getConstantGradient());
    }

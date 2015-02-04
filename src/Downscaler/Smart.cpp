@@ -36,7 +36,9 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
             for(int e = 0; e < nEns; e++) {
                float total = 0;
                int   count = 0;
-               for(int n = 0; n < mNumSmart; n++) {
+               int N = nearestI[i][j].size();
+               assert(nearestI[i][j].size() == nearestJ[i][j].size());
+               for(int n = 0; n < N; n++) {
                   int ii = nearestI[i][j][n];
                   int jj = nearestJ[i][j][n];
 
@@ -98,54 +100,60 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
          int Ic = Icenter[i][j];
          int Jc = Jcenter[i][j];
          float oelev = oelevs[i][j];
-
-         // Compute elevation differences on the stencil surrounding the current point
-         std::vector<std::pair<int, float> > elevDiff; // elevation difference of points in stencil
-                                                       // but placed in 1D array, to simplify sort
-         elevDiff.reserve(numSearch);
-         // Keep track of which I/J corresponds to indices in elevDiff
-         std::vector<int> Ilookup;
-         std::vector<int> Jlookup;
-         Ilookup.reserve(numSearch);
-         Jlookup.reserve(numSearch);
-
-         int index = 0;
-         for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumLat()-1, Ic+mSearchRadius); ii++) {
-            for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumLon()-1, Jc+mSearchRadius); jj++) {
-               float ielev = ielevs[ii][jj];
-               float diff = 1e10;
-               if(Util::isValid(ielev) && Util::isValid(oelev))
-                  diff = abs(ielev - oelev);
-               elevDiff.push_back(std::pair<int, float>(index, diff));
-               Ilookup.push_back(ii);
-               Jlookup.push_back(jj);
-               index++;
-            }
-         }
-
-         std::sort(elevDiff.begin(), elevDiff.end(), Util::sort_pair_second<int,float>());
-
-         std::stringstream ss;
-         ss << "Smart neighbours for " << i << " " << j << " " << oelev;
-         Util::status(ss.str());
-
-         // Use nearest neighbour if all fails
-         if(elevDiff.size() == 0) {
+         if(!Util::isValid(oelev)) {
+            // No elevation information available, use nearest neighbour
             iI[i][j].push_back(Ic);
             iJ[i][j].push_back(Jc);
          }
          else {
-            int N = std::min((int) elevDiff.size(), mNumSmart);
-            iI[i][j].resize(N, Util::MV);
-            iJ[i][j].resize(N, Util::MV);
+            // Compute elevation differences on the stencil surrounding the current point
+            std::vector<std::pair<int, float> > elevDiff; // elevation difference of points in stencil
+                                                          // but placed in 1D array, to simplify sort
+            elevDiff.reserve(numSearch);
+            // Keep track of which I/J corresponds to indices in elevDiff
+            std::vector<int> Ilookup;
+            std::vector<int> Jlookup;
+            Ilookup.reserve(numSearch);
+            Jlookup.reserve(numSearch);
 
-            for(int n = 0; n < N; n++) {
-               int index = elevDiff[n].first;
-               iI[i][j][n] = Ilookup[index];
-               iJ[i][j][n] = Jlookup[index];
-               std::stringstream ss;
-               ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
-               Util::status(ss.str());
+            int index = 0;
+            for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumLat()-1, Ic+mSearchRadius); ii++) {
+               for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumLon()-1, Jc+mSearchRadius); jj++) {
+                  float ielev = ielevs[ii][jj];
+                  float diff = 1e10;
+                  if(Util::isValid(ielev) && Util::isValid(oelev))
+                     diff = abs(ielev - oelev);
+                  elevDiff.push_back(std::pair<int, float>(index, diff));
+                  Ilookup.push_back(ii);
+                  Jlookup.push_back(jj);
+                  index++;
+               }
+            }
+
+            std::sort(elevDiff.begin(), elevDiff.end(), Util::sort_pair_second<int,float>());
+
+            std::stringstream ss;
+            ss << "Smart neighbours for " << i << " " << j << " " << oelev;
+            Util::status(ss.str());
+
+            // Use nearest neighbour if all fails
+            if(elevDiff.size() == 0) {
+               iI[i][j].push_back(Ic);
+               iJ[i][j].push_back(Jc);
+            }
+            else {
+               int N = std::min((int) elevDiff.size(), mNumSmart);
+               iI[i][j].resize(N, Util::MV);
+               iJ[i][j].resize(N, Util::MV);
+
+               for(int n = 0; n < N; n++) {
+                  int index = elevDiff[n].first;
+                  iI[i][j][n] = Ilookup[index];
+                  iJ[i][j][n] = Jlookup[index];
+                  std::stringstream ss;
+                  ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
+                  Util::status(ss.str());
+               }
             }
          }
       }
@@ -169,7 +177,9 @@ int DownscalerSmart::getNumSmart() const {
 
 std::string DownscalerSmart::description() {
    std::stringstream ss;
-   ss << "   -d smart" << std::endl;
+   ss << "   -d smart                     Use nearby neighbours that are at a similar elevation to the lookup" << std::endl;
+   ss << "                                point. If the lookup point has missing elevation, use the" << std::endl;
+   ss << "                                nearest neighbour." << std::endl;
    ss << "      searchRadius=3            Search for smart neighbours within this radius (gridpoints)" << std::endl;
    ss << "      numSmart=5                Average this many smart neighbours" << std::endl;
    return ss.str();

@@ -73,26 +73,33 @@ namespace {
       d.setNumSmart(2);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,from.getNumTime());
+      FileFake to(1,5,1,from.getNumTime());
       // Case 1: West boundary outside domain
       // Case 2: Within domain
       // Case 3/4: Nearest neighbour is on the boundary, so only the western half is used
-      setLatLonElev(to, (float[]) {5}, (float[]){2,3,12,20}, (float[]){120, 80, 600, 600});
+      // Case 5: Elevation is missing, so use the nearest neighbour
+      setLatLonElev(to, (float[]) {5}, (float[]){2,3,12,20,2}, (float[]){120, 80, 600, 600, Util::MV});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
       ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(4, toT.getNumLon());
+      ASSERT_EQ(5, toT.getNumLon());
       EXPECT_FLOAT_EQ(303,   toT(0,0,0));
       EXPECT_FLOAT_EQ(304.5, toT(0,1,0));
       EXPECT_FLOAT_EQ(305.5, toT(0,2,0));
-      EXPECT_FLOAT_EQ(305.5,   toT(0,3,0));
+      EXPECT_FLOAT_EQ(305.5, toT(0,3,0));
+      EXPECT_FLOAT_EQ(301,   toT(0,4,0));
       vec3Int I, J;
       d.getSmartNeighbours(from, to, I, J);
       EXPECT_EQ(4, I[0][2][0]);
       EXPECT_EQ(9, J[0][2][0]);
       EXPECT_EQ(3, I[0][2][1]);
       EXPECT_EQ(8, J[0][2][1]);
+
+      ASSERT_EQ(1, I[0][4].size());
+      ASSERT_EQ(1, J[0][4].size());
+      EXPECT_EQ(5, I[0][4][0]);
+      EXPECT_EQ(2, J[0][4][0]);
    }
    TEST_F(TestDownscalerSmart, fewerPointsThanSmart) {
       FileFake from(5,3,1,1);

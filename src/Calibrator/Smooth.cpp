@@ -4,7 +4,6 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-#include "../Downscaler/Downscaler.h"
 CalibratorSmooth::CalibratorSmooth(Variable::Type iVariable):
       Calibrator(),
       mSmoothRadius(3),

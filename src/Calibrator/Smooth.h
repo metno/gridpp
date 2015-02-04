@@ -3,7 +3,6 @@
 #include "Calibrator.h"
 #include "../Variable.h"
 
-class File;
 class ParameterFile;
 class Parameters;
 

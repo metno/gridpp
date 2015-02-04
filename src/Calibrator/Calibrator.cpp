@@ -4,6 +4,7 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../Options.h"
+#include "../ParameterFile.h"
 
 Calibrator::Calibrator() {
 

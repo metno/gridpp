@@ -1,7 +1,7 @@
 #ifndef CALIBRATOR_PHASE_H
 #define CALIBRATOR_PHASE_H
 #include "Calibrator.h"
-#include "../Variable.h"
+class ParameterFile;
 
 // Ensure that if a member has precip it also has full cloud cover
 class CalibratorPhase : public Calibrator {

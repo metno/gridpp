@@ -19,9 +19,12 @@ class CalibratorPhase : public Calibrator {
 
       float getMinPrecip() const;
       void  setMinPrecip(float iMinPrecip);
+      void  setUseWetbulb(bool iUseWetbulb);
+      bool  getUseWetbulb();
    private:
       bool calibrateCore(File& iFile) const;
       const ParameterFile* mParameterFile;
       float mMinPrecip;
+      bool mUseWetbulb;
 };
 #endif

@@ -6,8 +6,8 @@
 CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile) :
       Calibrator(),
       mParameterFile(iParameterFile),
-      mMinPrecip(0.2) {
-
+      mMinPrecip(0.2),
+      mUseWetbulb(1) {
    if(iParameterFile->getNumParameters() != 2) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
    }
@@ -26,37 +26,48 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
       const Parameters& par = mParameterFile->getParameters(t);
       float snowSleetThreshold = par[0];
       float sleetRainThreshold = par[1];
-      const Field& precip   = *iFile.getField(Variable::Precip, t);
-      const Field& temp     = *iFile.getField(Variable::T, t);
-      const Field& pressure = *iFile.getField(Variable::P, t);
-      const Field& rh       = *iFile.getField(Variable::RH, t);
-      Field& phase          = *iFile.getField(Variable::Phase, t);
+      const FieldPtr temp = iFile.getField(Variable::T, t);
+      const FieldPtr precip = iFile.getField(Variable::Precip, t);
+      FieldPtr phase = iFile.getField(Variable::Phase, t);
+      FieldPtr pressure;
+      FieldPtr rh;
+      if(mUseWetbulb) {
+         // Only load these fields if they are to be used, to save memory
+         pressure = iFile.getField(Variable::P, t);
+         rh       = iFile.getField(Variable::RH, t);
+      }
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
-               float currPrecip   = precip(i,j,e);
-               float currTemp     = temp(i,j,e);
-               float currPressure = pressure(i,j,e);
-               float currRh       = rh(i,j,e);
-               if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold)
-                     && Util::isValid(currPrecip) && Util::isValid(currTemp)
-                     && Util::isValid(currPressure) && Util::isValid(currRh)) {
-                  float currWetbulb = getWetbulb(currTemp, currPressure, currRh);
+               float currDryTemp  = (*temp)(i,j,e);
+               float currTemp     = currDryTemp;
+               float currPrecip   = (*precip)(i,j,e);
+               if(mUseWetbulb) {
+                  float currPressure = (*pressure)(i,j,e);
+                  float currRh       = (*rh)(i,j,e);
+                  float currWetbulb  = getWetbulb(currDryTemp, currPressure, currRh);
+                  if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold)
+                        && Util::isValid(currPrecip)   && Util::isValid(currDryTemp)
+                        && Util::isValid(currPressure) && Util::isValid(currRh)) {
+                     currTemp = currWetbulb;
+                  }
+               }
+               if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold) && Util::isValid(currTemp)) {
                   if(currPrecip <= mMinPrecip)
-                     phase(i,j,e)  = CalibratorPhase::PhaseNone;
-                  else if(!Util::isValid(currWetbulb))
-                     phase(i,j,e)  = Util::MV;
-                  else if(currWetbulb <= snowSleetThreshold)
-                     phase(i,j,e)  = CalibratorPhase::PhaseSnow;
-                  else if(currWetbulb <= sleetRainThreshold)
-                     phase(i,j,e)  = CalibratorPhase::PhaseSleet;
+                     (*phase)(i,j,e)  = CalibratorPhase::PhaseNone;
+                  else if(!Util::isValid(currTemp))
+                     (*phase)(i,j,e)  = Util::MV;
+                  else if(currTemp <= snowSleetThreshold)
+                     (*phase)(i,j,e)  = CalibratorPhase::PhaseSnow;
+                  else if(currTemp <= sleetRainThreshold)
+                     (*phase)(i,j,e)  = CalibratorPhase::PhaseSleet;
                   else
-                     phase(i,j,e)  = CalibratorPhase::PhaseRain;
+                     (*phase)(i,j,e)  = CalibratorPhase::PhaseRain;
                }
                else {
-                  phase(i,j,e) = Util::MV;
+                  (*phase)(i,j,e) = Util::MV;
                }
             }
          }
@@ -68,25 +79,35 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
 float CalibratorPhase::getMinPrecip() const {
    return mMinPrecip;
 }
-void  CalibratorPhase::setMinPrecip(float iMinPrecip) {
+void CalibratorPhase::setMinPrecip(float iMinPrecip) {
    mMinPrecip = iMinPrecip;
+}
+void CalibratorPhase::setUseWetbulb(bool iUseWetbulb) {
+   mUseWetbulb = iUseWetbulb;
+}
+bool CalibratorPhase::getUseWetbulb() {
+   return mUseWetbulb;
 }
 
 std::string CalibratorPhase::description() {
    std::stringstream ss;
-   ss << "   -c phase                     Compute precipitation phase based on wetbulb temperature, with" << std::endl;
+   ss << "   -c phase                     Compute precipitation phase based on temperature, with" << std::endl;
    ss << "                                values encoded by:" << std::endl;
    ss << "                                * 0 = no precipitation (Precip < minPrecip)" << std::endl;
-   ss << "                                * 1 = rain (b < Tw)" << std::endl;
-   ss << "                                * 2 = sleet (a < Tw <= b)" << std::endl;
-   ss << "                                * 3 = snow (Tw < a" << std::endl;
-   ss << "                                Precip amount, temperature, relative humidity, and pressure must be available" << std::endl;
+   ss << "                                * 1 = rain (b < T)" << std::endl;
+   ss << "                                * 2 = sleet (a < T <= b)" << std::endl;
+   ss << "                                * 3 = snow (T < a" << std::endl;
+   ss << "                                T can be either regular temperature or wetbulb temperature." << std::endl;
+   ss << "                                Precip, and Temperature must be available to determine phase. If" << std::endl;
+   ss << "                                using wetbulb, then relative humidity and pressure must also be available." << std::endl;
    ss << "      parameters=required       Read parameters from this text file. The file format is:" << std::endl;
    ss << "                                offset0 a b" << std::endl;
    ss << "                                    ...    " << std::endl;
    ss << "                                offsetN a b" << std::endl;
    ss << "                                If the file only has a single line, then the same set of parameters" << std::endl;
    ss << "                                are used for all offsets.                                          " << std::endl;
+   ss << "      useWetbulb=1              If 1 use the wetbulb temperature to determine phase. If 0 use regular" << std::endl;
+   ss << "                                temperature." << std::endl;
    ss << "      minPrecip=0.2             Minimum precip (in mm) needed to be considered as precipitation." << std::endl;
    return ss.str();
 }

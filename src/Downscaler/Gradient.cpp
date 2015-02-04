@@ -25,6 +25,9 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    vec2 olons  = iOutput.getLons();
    vec2 oelevs = iOutput.getElevs();
 
+   float minAllowed = Variable::getMin(mVariable);
+   float maxAllowed = Variable::getMax(mVariable);
+
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbourFast(iInput, iOutput, nearestI, nearestJ);
@@ -56,6 +59,10 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                         using all forecasts within a neighbourhood. To produce stable results, there
                         is a requirement that the elevation within the neighbourhood has a large
                         range (see mMinElevDiff).
+
+                        For bounded variables (e.g. wind speed), the gradient approach could cause
+                        forecasts to go outside its domain (e.g. negative winds). If this occurs,
+                        the nearest neighbour is used.
                      */
                      float meanXY  = 0; // elev*T
                      float meanX   = 0; // elev
@@ -92,7 +99,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                         elevDiff = max - min;
                      }
 
-                     if(counter > 0 && elevDiff >= mMinElevDiff && meanXX != meanX*meanX) {
+                     if(counter > 0 && Util::isValid(elevDiff) && elevDiff >= mMinElevDiff && meanXX != meanX*meanX) {
                         // Estimate lapse rate
                         meanXY /= counter;
                         meanX  /= counter;
@@ -103,15 +110,18 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      // Safety check
                      if(!Util::isValid(gradient))
                         gradient = 0;
-                     if(gradient > mMaxGradient)
-                        gradient = mMaxGradient;
-                     if(gradient < mMinGradient)
-                        gradient = mMinGradient;
                   }
                   else {
                      gradient = mConstGradient;
                   }
-                  ofield(i,j,e) = ifield(Icenter,Jcenter,e) + dElev * gradient;
+                  float value = ifield(Icenter,Jcenter,e) + dElev * gradient;
+                  if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
+                     // Use nearest neighbour if we the gradient put us outside the bounds of the variable
+                     ofield(i,j,e) = (ifield)(Icenter, Jcenter, e);
+                  }
+                  else {
+                     ofield(i,j,e)  = value;
+                  }
                }
             }
          }
@@ -151,7 +161,9 @@ float DownscalerGradient::getMinElevDiff() const {
 std::string DownscalerGradient::description() {
    std::stringstream ss;
    ss << "   -d gradient                  Adjusts the nearest neighbour based on the elevation difference" << std::endl;
-   ss << "                                to the output gridpoint." << std::endl;
+   ss << "                                to the output gridpoint. If the gradient puts the forecast outside" << std::endl;
+   ss << "                                to domain of the variable (e.g. negative precipitation) then the " << std::endl;
+   ss << "                                nearest neighbour is used." << std::endl;
    ss << "      constantGradient=undef    Fix gradient to this value. If unspecified, computes the gradient" << std::endl;
    ss << "                                by linear regression of points in a neighbourhood." << std::endl;
    ss << "      searchRadius=3            Compute gradient in a neighbourhood box of points within +- radius" << std::endl;

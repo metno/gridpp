@@ -108,6 +108,34 @@ namespace {
       EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
       EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
    }
+   TEST_F(TestDownscalerGradient, 10x10negativeTemperatures) {
+      DownscalerGradient d(Variable::T);
+      d.setSearchRadius(1);
+      d.setMinElevDiff(0);
+      FileArome from("testing/files/10x10.nc");
+      const Field& fromT  = *from.getField(Variable::T, 0);
+      FileFake to(1,3,1,from.getNumTime());
+      setLatLonElev(to, (float[]) {5}, (float[]){2,2,2}, (float[]){100000, 10000, 0});
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(3, toT.getNumLon());
+      // Gradient = -0.00797
+      EXPECT_FLOAT_EQ(301,   toT(0,0,0)); // nearest neighbour
+      EXPECT_FLOAT_EQ(222.80988, toT(0,1,0));
+      EXPECT_FLOAT_EQ(302.2684, toT(0,2,0));
+
+      // Fix the gradient
+      d.setConstantGradient(-0.1);
+      d.downscale(from, to);
+      const Field& toT2  = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT2.getNumLat());
+      ASSERT_EQ(3, toT2.getNumLon());
+      EXPECT_FLOAT_EQ(301, toT2(0,0,0)); // nearest neighbour
+      EXPECT_FLOAT_EQ(301, toT2(0,1,0)); // nearest neighbour
+      EXPECT_FLOAT_EQ(316.96323, toT2(0,2,0));
+   }
    TEST_F(TestDownscalerGradient, missingValues) {
 
    }

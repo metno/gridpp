@@ -83,3 +83,52 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::P);
    return variables;
 }
+
+float Variable::getMin(Type iType) {
+   switch(iType) {
+      case T:
+         return 0;
+      case PrecipAcc:
+         return 0;
+      case W:
+         return 0;
+      case U:
+         return Util::MV;
+      case V:
+         return Util::MV;
+      case Cloud:
+         return 0;
+      case RH:
+         return 0;
+      case Phase:
+         return 0;
+      case P:
+         return 0;
+      default:
+         return Util::MV;
+   }
+}
+float Variable::getMax(Type iType) {
+   switch(iType) {
+      case T:
+         return Util::MV;
+      case PrecipAcc:
+         return Util::MV;
+      case W:
+         return Util::MV;
+      case U:
+         return Util::MV;
+      case V:
+         return Util::MV;
+      case Cloud:
+         return 1;
+      case RH:
+         return 1.1;
+      case Phase:
+         return 3;
+      case P:
+         return Util::MV;
+      default:
+         return Util::MV;
+   }
+}

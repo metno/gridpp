@@ -8,11 +8,12 @@ Setup::Setup(std::vector<std::string> argv) {
    outputFile = File::getScheme(argv[1], false);
 
    // Implement a finite state machine
-   enum State {START = 0, VAR = 1, NEWVAR = 2, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
+   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
    State state = START;
    State prevState = START;
 
    Variable::Type variable;
+   Options vOptions;
    Options dOptions;
    Options cOptions;
    int index = 2;
@@ -63,9 +64,29 @@ Setup::Setup(std::vector<std::string> argv) {
                index++;
             }
             else {
-               errorMessage = "No recognized option after '-v var'";
-               state = ERROR;
+               state = VAROPT;
             }
+         }
+      }
+      else if(state == VAROPT) {
+         if(argv.size() <= index) {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-d") {
+            state = DOWN;
+            index++;
+         }
+         else if(argv[index] == "-c") {
+            state = CAL;
+            index++;
+         }
+         else if(argv[index] == "-v") {
+            state = NEWVAR;
+         }
+         else {
+            // Process variable options
+            vOptions.addOptions(argv[index]);
+            index++;
          }
       }
       else if(state == NEWVAR) {
@@ -83,6 +104,7 @@ Setup::Setup(std::vector<std::string> argv) {
             varconf.variable = variable;
             varconf.downscaler = d;
             varconf.calibrators = calibrators;
+            varconf.variableOptions = vOptions;
             variableConfigurations.push_back(varconf);
          }
          else {
@@ -90,6 +112,7 @@ Setup::Setup(std::vector<std::string> argv) {
          }
 
          // Reset to defaults
+         vOptions.clear();
          downscaler = defaultDownscaler();
          dOptions.clear();
          calibrators.clear();

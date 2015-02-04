@@ -16,7 +16,7 @@ int main(int argc, const char *argv[]) {
    if(argc < 3) {
       std::cout << "Post-processes gridded forecasts" << std::endl;
       std::cout << std::endl;
-      std::cout << "usage:  postprocess.exe input output [-v var [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
+      std::cout << "usage:  postprocess.exe input output [-v var [options]* [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Input file with NetCDF data." << std::endl;
@@ -35,6 +35,9 @@ int main(int argc, const char *argv[]) {
       std::cout << std::endl;
       std::cout << "Variables:" << std::endl;
       std::cout << Variable::description();
+      std::cout << std::endl;
+      std::cout << "Variable options (with defaults):" << std::endl;
+      std::cout << "   write=1                      Set to 0 to prevent the variable to be written to output" << std::endl;
       std::cout << std::endl;
       std::cout << "Downscalers with options (and default values):" << std::endl;
       std::cout << DownscalerNearestNeighbour::description();
@@ -65,12 +68,17 @@ int main(int argc, const char *argv[]) {
    std::cout << "Output type: " << setup.outputFile->name() << std::endl;
 
    // Post-process file
-   std::vector<Variable::Type> variables;
+   std::vector<Variable::Type> writeVariables;
    for(int v = 0; v < setup.variableConfigurations.size(); v++) {
       double s = Util::clock();
       VariableConfiguration varconf = setup.variableConfigurations[v];
       Variable::Type variable = varconf.variable;
-      variables.push_back(variable);
+
+      bool write = 1;
+      varconf.variableOptions.getValue("write", write);
+      if(write) {
+         writeVariables.push_back(variable);
+      }
       setup.outputFile->initNewVariable(variable);
 
       std::cout << "Processing " << Variable::getTypeName(variable) << std::endl;
@@ -92,7 +100,7 @@ int main(int argc, const char *argv[]) {
 
    // Write to output
    double s = Util::clock();
-   setup.outputFile->write(variables);
+   setup.outputFile->write(writeVariables);
    double e = Util::clock();
    std::cout << "Writing file: " << e-s << " seconds" << std::endl;
    std::cout << "Total time:   " << e-start << " seconds" << std::endl;

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "Variable.h"
+#include "Options.h"
 class File;
 class Calibrator;
 class Downscaler;
@@ -11,6 +12,7 @@ struct VariableConfiguration {
    Variable::Type variable;
    Downscaler* downscaler;
    std::vector<Calibrator*> calibrators;
+   Options variableOptions;
 };
 class Setup {
    public:

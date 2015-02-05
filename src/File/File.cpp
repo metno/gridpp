@@ -6,7 +6,8 @@
 #include "../Util.h"
 
 File::File(std::string iFilename) :
-      mFilename(iFilename) {
+      mFilename(iFilename),
+      mReferenceTime(Util::MV) {
    createNewTag();
 }
 
@@ -277,4 +278,22 @@ int File::getNumTime() const {
 }
 void File::createNewTag() const {
    mTag = boost::uuids::random_generator()();
+}
+void File::setReferenceTime(double iTime) {
+   mReferenceTime = iTime;
+}
+double File::getReferenceTime() const {
+   return mReferenceTime;
+}
+void File::setTimes(std::vector<double> iTimes) {
+   if(iTimes.size() != getNumTime()) {
+      std::stringstream ss;
+      ss << "Setting times array in '" << getFilename() << "' with " << iTimes.size()
+         << " elements when the time dimension is " << getNumTime();
+      Util::warning(ss.str());
+   }
+   mTimes = iTimes;
+}
+std::vector<double> File::getTimes() const {
+   return mTimes;
 }

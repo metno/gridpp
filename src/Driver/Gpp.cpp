@@ -66,6 +66,8 @@ int main(int argc, const char *argv[]) {
    Setup setup(args);
    std::cout << "Input type:  " << setup.inputFile->name() << std::endl;
    std::cout << "Output type: " << setup.outputFile->name() << std::endl;
+   setup.outputFile->setTimes(setup.inputFile->getTimes());
+   setup.outputFile->setReferenceTime(setup.inputFile->getReferenceTime());
 
    // Post-process file
    std::vector<Variable::Type> writeVariables;

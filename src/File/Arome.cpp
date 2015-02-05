@@ -17,11 +17,25 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
    mElevs = getLatLonVariable("altitude");
-   NcVar* vDate = getVar("time");
-   float* dates = new float[mNTime];
-   vDate->get(dates, mNTime);
-   mDate = Util::getDate(dates[0]);
-   delete[] dates;
+
+   if(hasVar("time")) {
+      NcVar* vTime = getVar("time");
+      double* times = new double[mNTime];
+      vTime->get(times , mNTime);
+      setTimes(std::vector<double>(times, times+mNTime));
+      delete[] times;
+   }
+   else {
+      std::vector<double> times;
+      times.resize(getNumTime(), Util::MV);
+      setTimes(times);
+   }
+
+   if(hasVar("forecast_reference_time")) {
+      NcVar* vReferenceTime = getVar("forecast_reference_time");
+      double referenceTime = getReferenceTime();
+      vReferenceTime->get(&referenceTime, 1);
+   }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
@@ -91,6 +105,8 @@ FileArome::~FileArome() {
 }
 
 void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
+   writeTimes();
+   writeReferenceTime();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);

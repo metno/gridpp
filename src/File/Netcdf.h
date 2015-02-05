@@ -30,6 +30,8 @@ class FileNetcdf : public File {
       static float getMissingValue(const NcVar* iVar);
       static void  setMissingValue(NcVar* iVar, float iValue);
       void   addAttribute(NcVar* iVar, std::string iName, std::string iValue);
+      void writeTimes();
+      void writeReferenceTime();
 };
 #include "Ec.h"
 #include "Arome.h"

@@ -56,7 +56,19 @@ class File {
       //! @return Number of bytes
       long getCacheSize() const;
 
+      //! Returns a tag that uniquely identifies the latitude/longitude grid
+      //! If the grid changes, a new tag is issued. Two files with the same grid
+      //! will not have the same unique tag.
       boost::uuids::uuid getUniqueTag() const;
+
+      //! Set the time that the file is issued
+      //! @ param iTime The number of seconds since 1970-01-01 00:00:00 +00:00
+      void setReferenceTime(double iTime);
+      double getReferenceTime() const;
+      //! Set the times of the timesteps in the file
+      //! @ param iTimes vector of number of seconds since 1970-01-01 00:00:00 +00:00
+      void setTimes(std::vector<double> iTimes);
+      std::vector<double> getTimes() const;
    protected:
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
@@ -77,6 +89,8 @@ class File {
       mutable boost::uuids::uuid mTag;
       void createNewTag() const;
       FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
+      double mReferenceTime;
+      std::vector<double> mTimes;
 };
 #include "Netcdf.h"
 #include "Fake.h"

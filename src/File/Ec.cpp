@@ -87,6 +87,8 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
 }
 
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
+   writeTimes();
+   writeReferenceTime();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);

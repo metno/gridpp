@@ -111,6 +111,27 @@ namespace {
       EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
       EXPECT_DEATH(f0.getField(Variable::T, 100), ".*");
    }
+   TEST_F(FileTest, setgetTimes) {
+      FileFake f0(3, 3, 1, 3);
+      std::vector<double> setTimes(3,0);
+      setTimes[0] = 3.123;
+      setTimes[1] = 4.624;
+      setTimes[2] = 5;
+      f0.setTimes(setTimes);
+
+      std::vector<double> getTimes = f0.getTimes();
+      EXPECT_EQ(3, getTimes.size());
+      EXPECT_DOUBLE_EQ(3.123, getTimes[0]);
+      EXPECT_DOUBLE_EQ(4.624, getTimes[1]);
+      EXPECT_DOUBLE_EQ(5,     getTimes[2]);
+   }
+   TEST_F(FileTest, setgetReferenceTime) {
+      FileFake f0(3, 3, 1, 3);
+      f0.setReferenceTime(4.1123);
+
+      double referenceTime = f0.getReferenceTime();
+      EXPECT_DOUBLE_EQ(4.1123, referenceTime);
+   }
    TEST_F(FileTest, factoryFake) {
       File* f = File::getScheme("fake");
       EXPECT_EQ("fake", f->name());

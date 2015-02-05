@@ -102,3 +102,40 @@ void FileNetcdf::setMissingValue(NcVar* iVar, float iValue) {
 void FileNetcdf::addAttribute(NcVar* iVar, std::string iName, std::string iValue) {
    iVar->add_att(iName.c_str(), iValue.c_str());
 }
+
+void FileNetcdf::writeTimes() {
+   std::vector<double> times = getTimes();
+   if(times.size() != getNumTime()) {
+      std::stringstream ss;
+      ss << "The times specified for NetCDF file '" << getFilename() << "' has " << times.size()
+         << " elements, but the time dimension is " << getNumTime() << ". Putting missing values.";
+      Util::warning(ss.str());
+      times = std::vector<double>(getNumTime(), Util::MV);
+   }
+
+   // Convert missing
+   for(int i = 0; i < times.size(); i++) {
+      if(!Util::isValid(times[i]))
+         times[i] = ncBad_double;
+   }
+   if(!hasVar("time")) {
+      NcDim* dTime    = getDim("time");
+      mFile.add_var("time", ncDouble, dTime);
+   }
+   NcVar* vTime = getVar("time");
+   double timesArr[getNumTime()];
+   for(int t = 0; t < getNumTime(); t++) {
+      timesArr[t] = times[t];
+   }
+   vTime->put(timesArr, getNumTime());
+}
+void FileNetcdf::writeReferenceTime() {
+   if(!hasVar("forecast_reference_time")) {
+      mFile.add_var("forecast_reference_time", ncDouble);
+   }
+   NcVar* vTime = getVar("forecast_reference_time");
+   double referenceTime = getReferenceTime();
+   if(!Util::isValid(referenceTime))
+      referenceTime = ncBad_double;
+   vTime->put(&referenceTime, 1);
+}

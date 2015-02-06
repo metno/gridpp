@@ -50,6 +50,7 @@ int main(int argc, const char *argv[]) {
       std::cout << CalibratorZaga::description();
       std::cout << CalibratorCloud::description();
       std::cout << CalibratorAccumulate::description();
+      std::cout << CalibratorWindDirection::description();
       std::cout << CalibratorSmooth::description();
       std::cout << CalibratorPhase::description();
       return 1;

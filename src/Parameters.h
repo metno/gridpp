@@ -14,6 +14,9 @@ class Parameters {
       int size() const;
       std::vector<float> getValues() const;
 
+      //! Are all parameters in set valid numbers?
+      bool isValid() const;
+
       //! Access the i'th parameter
             float & operator[](unsigned int i);
       const float & operator[](unsigned int i) const;

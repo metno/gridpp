@@ -77,6 +77,21 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "windDirection") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("Calibrator 'zaga' needs parameters");
+      }
+
+      ParameterFile* parFile = new ParameterFile(parFilename);
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'zaga' needs variable");
+      }
+      CalibratorWindDirection* c = new CalibratorWindDirection(parFile, Variable::getType(variable));
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;

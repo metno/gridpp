@@ -35,3 +35,11 @@ const float & Parameters::operator[](unsigned int i) const {
 int Parameters::size() const {
    return mValues.size();
 }
+
+bool Parameters::isValid() const {
+   for(int i = 0; i < mValues.size(); i++) {
+      if(!Util::isValid(mValues[i]))
+         return false;
+   }
+   return true;
+}

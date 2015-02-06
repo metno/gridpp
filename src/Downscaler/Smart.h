@@ -5,6 +5,8 @@
 #include "../Util.h"
 typedef std::vector<std::vector<int> > vec2Int;
 typedef std::vector<std::vector<std::vector<int> > > vec3Int; // lat, lon, neighbour index
+
+//! Downscale using neighbours at similar elevation
 class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable

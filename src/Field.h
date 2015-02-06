@@ -4,7 +4,7 @@
 #include <vector>
 #include "Util.h"
 
-//! /brief Encapsulates gridded data in 3 dimensions: latitude, longitude, ensemble member.
+//! Encapsulates gridded data in 3 dimensions: latitude, longitude, ensemble member.
 //! Latitude generally represents the north-south direction and longitude the east-west, but the
 //! grid does not necessarily need to follow a lat/lon grid. Any 2D grid will do.
 // TODO: Rename latitude to x and longitude to y, as this is more generally correct.

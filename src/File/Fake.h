@@ -2,10 +2,10 @@
 #define FILE_FAKE_H
 #include "File.h"
 
+//! A file type giving fake data, useful for testing
 class FileFake : public File {
    public:
       FileFake(int nLat=10, int nLon=10, int nEns=2, int nTime=10);
-
       std::string name() const {return "fake";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);

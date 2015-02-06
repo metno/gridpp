@@ -19,10 +19,9 @@ struct VariableConfiguration {
    Options variableOptions;
 };
 
-//! Represents what and how the post-processing should be done including which
-//! input file to post-process, which output file to place the results in,
-//! which variables to post-process, and what post-processing methods to invoke
-//! on each variable.
+//! Represents what and how the post-processing should be done. Includes which input file to
+//! post-process, which output file to place the results in, which variables to post-process,
+//! and what post-processing methods to invoke on each variable.
 class Setup {
    public:
       File* inputFile;

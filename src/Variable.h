@@ -3,22 +3,23 @@
 #include <iostream>
 #include <vector>
 
-// Represents a meteorological variable
+//! Represents a meteorological variable and its metadata
 class Variable {
    public:
+      //! Variable types
       enum Type {
-         Precip = 0,       // Hourly amount ending at the specified time
+         Precip    = 0,    // Hourly amount ending at the specified time
          PrecipAcc = 1,    // Accumulated ending at the specified time
-         Cloud = 10,       // Cloud cover (between 0 and 1)
-         T = 20,           // 2m temperature (K)
-         U = 30,           // 10m U-wind (m/s)
-         V = 40,           // 10m V-wind (m/s)
-         W = 50,           // 10m windspeed (m/s)
-         WD = 55,          // Wind direction (degrees, from north 0)
-         RH = 60,          // Reliative humidity (%)
-         Phase = 70,       // Precip phase
-         P = 80,           // Surface pressure (pa)
-         Fake = 90         // Fake variable used for testing
+         Cloud     = 10,   // Cloud cover (between 0 and 1)
+         T         = 20,   // 2m temperature (K)
+         U         = 30,   // 10m U-wind (m/s)
+         V         = 40,   // 10m V-wind (m/s)
+         W         = 50,   // 10m windspeed (m/s)
+         WD        = 55,   // Wind direction (degrees, from north 0)
+         RH        = 60,   // Reliative humidity (%)
+         Phase     = 70,   // Precip phase
+         P         = 80,   // Surface pressure (pa)
+         Fake      = 90    // Fake variable used for testing
       };
 
       //! Convert type to string

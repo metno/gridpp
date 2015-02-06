@@ -6,6 +6,7 @@
 class ParameterFile;
 class Parameters;
 
+//! Smooths a field by averaging across a neighbourhood
 class CalibratorSmooth : public Calibrator {
    public:
       CalibratorSmooth(Variable::Type iVariable);

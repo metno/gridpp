@@ -6,10 +6,10 @@
 class ParameterFile;
 class Parameters;
 
-// Zero-adjusted gamma distribution, using predictors:
-// - ensemble mean
-// - ensemble fraction
-// Designed for precip
+//! Ensemble calibration using zero-adjusted gamma distribution. Its predictors are:
+//! - ensemble mean
+//! - ensemble fraction
+//! Designed for precip
 class CalibratorZaga : public Calibrator {
    public:
       CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor);

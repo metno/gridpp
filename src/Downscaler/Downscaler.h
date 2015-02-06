@@ -8,6 +8,7 @@
 class File;
 typedef std::vector<std::vector<int> > vec2Int;
 
+//! Converts fields from one grid to another
 class Downscaler {
    public:
       Downscaler(Variable::Type iVariable);

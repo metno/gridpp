@@ -3,7 +3,7 @@
 #include "Calibrator.h"
 #include "../Variable.h"
 
-// Ensure that if a member has precip it also has full cloud cover
+//! Ensures that if a member has precip it also has full cloud cover
 class CalibratorCloud : public Calibrator {
    public:
       CalibratorCloud(Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);

@@ -4,6 +4,8 @@
 #include "../Variable.h"
 #include "../Util.h"
 typedef std::vector<std::vector<int> > vec2Int;
+
+//! Skip the downscaling stage
 class DownscalerBypass : public Downscaler {
    public:
       DownscalerBypass(Variable::Type iVariable);

@@ -12,7 +12,7 @@
 // 3D array of data: [lat][lon][ensemble_member]
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 
-//! Represents a Netcdf data file
+//! Represents a data file containing spatial and temporal data initialized at one particular time
 class File {
    public:
       File(std::string iFilename);
@@ -20,10 +20,11 @@ class File {
       static File* getScheme(std::string iFilename, bool iReadOnly=false);
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
+
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
 
-      // Add a field to the file, overwriting existing ones (if available)
+      // Add a field to the file, overwriting existing ones (if necessary)
       void addField(FieldPtr iField, Variable::Type iVariable, int iTime) const;
 
       // Write these variables to file

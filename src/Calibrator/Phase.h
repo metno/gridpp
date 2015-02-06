@@ -3,7 +3,7 @@
 #include "Calibrator.h"
 class ParameterFile;
 
-// Ensure that if a member has precip it also has full cloud cover
+//! Creates a precipitation-phase field
 class CalibratorPhase : public Calibrator {
    public:
       CalibratorPhase(const ParameterFile* iParameterFile);

@@ -4,7 +4,10 @@
 #include <vector>
 #include "Util.h"
 
-//! Encapsulates gridded data in 3 dimensions: latitude, longitude, ensemble member
+//! /brief Encapsulates gridded data in 3 dimensions: latitude, longitude, ensemble member.
+//! Latitude generally represents the north-south direction and longitude the east-west, but the
+//! grid does not necessarily need to follow a lat/lon grid. Any 2D grid will do.
+// TODO: Rename latitude to x and longitude to y, as this is more generally correct.
 class Field {
    public:
       //! Initialize 3D field
@@ -13,6 +16,7 @@ class Field {
       //! @param nLon number of ensemble members
       //! @param iFillValue initialize all values in field with this
       Field(int nLat, int nLon, int nEns, float iFillValue=Util::MV);
+
       //! Access to data
       //! @param i latitude index
       //! @param j longitude index
@@ -20,15 +24,28 @@ class Field {
       //! @return data at specified coordinate
       float      & operator()(unsigned int i, unsigned int j, unsigned int k);
       float const& operator()(unsigned int i, unsigned int j, unsigned int k) const;
+
+      //! Access to an ensemble for a specific grid point
+      //! @param i latitude index
+      //! @param j longitude index
+      //! @return ensemble of values
       std::vector<float> operator()(unsigned int i, unsigned int j) const;
+
       //! Are all values (for all lat/lon/ens) in fields identical?
       bool operator==(const Field& iField) const;
       bool operator!=(const Field& iField) const;
+
+      //! Number of gridpoints in the latitude direction
       int getNumLat() const;
+
+      //! Number of gridpoints in the longitude direction
       int getNumLon() const;
+
+      //! Number of ensemble members
       int getNumEns() const;
-   protected:
-      //! Data values. Index for ensemble changes fastest.
+
+   private:
+      //! Data values stored in a flat array. Index for ensemble changes fastest.
       std::vector<float> mValues;
       int mNLat;
       int mNLon;

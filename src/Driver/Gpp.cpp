@@ -49,6 +49,7 @@ int main(int argc, const char *argv[]) {
       std::cout << "Calibrators with options (and default values):" << std::endl;
       std::cout << CalibratorZaga::description();
       std::cout << CalibratorCloud::description();
+      std::cout << CalibratorAccumulate::description();
       std::cout << CalibratorWindDirection::description();
       std::cout << CalibratorSmooth::description();
       std::cout << CalibratorPhase::description();

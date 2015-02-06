@@ -39,7 +39,6 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       CalibratorCloud* c = new CalibratorCloud(Variable::Precip, Variable::getType(variable));
       return c;
    }
-   /*
    else if(iName == "accumulate") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
@@ -48,7 +47,6 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
       return c;
    }
-   */
    else if(iName == "smooth") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {

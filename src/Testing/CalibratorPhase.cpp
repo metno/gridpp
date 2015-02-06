@@ -61,7 +61,7 @@ namespace {
       // RH     0.95925
       // P      98334 pa
       // Precip 1.38 mm
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseRain, (*phase)(2,5,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseRain, (*phase)(2,5,0));
    }
    TEST_F(TestCalibratorPhase, phases) {
       FileFake file(1,1,1,1);
@@ -70,19 +70,19 @@ namespace {
       CalibratorPhase cal = getCalibrator(&parFile);
       setValues(file, 5, 270, 0.95, 101325);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
 
       setValues(file, 5, 274, 0.98, 101325);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSleet, (*phase)(0,0,0));
 
       setValues(file, 0, 274, 0.5, 101325);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseNone, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseNone, (*phase)(0,0,0));
 
       setValues(file, 5, 275, 0.5, 101325);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, useWetbulb) {
       FileFake file(1,1,1,1);
@@ -93,19 +93,19 @@ namespace {
 
       cal.setUseWetbulb(false);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseRain, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseRain, (*phase)(0,0,0));
 
       cal.setUseWetbulb(true);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
 
       setValues(file, 5, 274, 0.5, 101325);
       cal.setUseWetbulb(false);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSleet, (*phase)(0,0,0));
       cal.setUseWetbulb(true);
       cal.calibrate(file);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
+      EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, missingParameters) {
       FileArome file("testing/files/10x10.nc");

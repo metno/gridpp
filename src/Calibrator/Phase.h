@@ -9,7 +9,6 @@ class CalibratorPhase : public Calibrator {
       CalibratorPhase(const ParameterFile* iParameterFile);
       static std::string description();
       std::string name() const {return "phase";};
-      enum Phase {PhaseNone = 0, PhaseRain = 1, PhaseSleet = 2, PhaseSnow = 3};
       //! Compute wetbulb temperature
       //! @param iTemperature Temperature in K
       //! @param iPressure Pressure in pa

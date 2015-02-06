@@ -56,15 +56,15 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
                }
                if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold) && Util::isValid(currTemp)) {
                   if(currPrecip <= mMinPrecip)
-                     (*phase)(i,j,e)  = CalibratorPhase::PhaseNone;
+                     (*phase)(i,j,e)  = Variable::PhaseNone;
                   else if(!Util::isValid(currTemp))
                      (*phase)(i,j,e)  = Util::MV;
                   else if(currTemp <= snowSleetThreshold)
-                     (*phase)(i,j,e)  = CalibratorPhase::PhaseSnow;
+                     (*phase)(i,j,e)  = Variable::PhaseSnow;
                   else if(currTemp <= sleetRainThreshold)
-                     (*phase)(i,j,e)  = CalibratorPhase::PhaseSleet;
+                     (*phase)(i,j,e)  = Variable::PhaseSleet;
                   else
-                     (*phase)(i,j,e)  = CalibratorPhase::PhaseRain;
+                     (*phase)(i,j,e)  = Variable::PhaseRain;
                }
                else {
                   (*phase)(i,j,e) = Util::MV;

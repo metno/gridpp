@@ -19,6 +19,7 @@ class Variable {
          P = 80,           // Surface pressure (pa)
          Fake = 90         // Fake variable used for testing
       };
+
       //! Convert type to string
       static std::string getTypeName(Type iType);
 
@@ -36,5 +37,13 @@ class Variable {
 
       //! Vector of all defined variables
       static std::vector<Type> getAllVariables();
+
+      //! Precipitation phase
+      enum Phase {
+         PhaseNone  = 0,
+         PhaseRain  = 1,
+         PhaseSleet = 2,
+         PhaseSnow  = 3
+      };
 };
 #endif

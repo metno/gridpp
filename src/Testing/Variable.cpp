@@ -18,6 +18,15 @@ namespace {
          EXPECT_EQ(variables[i], vartype);
       }
    }
+   TEST(VariableTest, attributes) {
+      std::vector<Variable::Type> variables = Variable::getAllVariables();
+      for(int i = 0; i < variables.size(); i++) {
+         float min = Variable::getMin(variables[i]);
+         float max = Variable::getMax(variables[i]);
+         std::string units = Variable::getUnits(variables[i]);
+         std::string standardNames = Variable::getStandardName(variables[i]);
+      }
+   }
    TEST(VariableTest, description) {
       Variable::description();
    }

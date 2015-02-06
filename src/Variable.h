@@ -34,6 +34,12 @@ class Variable {
       //! Convert string to type
       static Type getType(std::string iName);
 
+      //! Returns the units of the variable
+      static std::string getUnits(Type iType);
+
+      //! Returns the NetcdfCF standard name
+      static std::string getStandardName(Type iType);
+
       //! Description of all defined variables
       static std::string description();
 

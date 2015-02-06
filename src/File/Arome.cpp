@@ -169,6 +169,8 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                Util::error(ss.str());
             }
             addAttribute(var, "coordinates", "longitude latitude");
+            addAttribute(var, "units", Variable::getUnits(varType));
+            addAttribute(var, "standard_name", Variable::getStandardName(varType));
             delete[] values;
          }
       }

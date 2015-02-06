@@ -64,6 +64,7 @@ std::string Variable::description() {
    std::stringstream ss;
    ss << "   -v T                         Temperature" << std::endl;
    ss << "   -v Precip                    Hourly precip" << std::endl;
+   ss << "   -v PrecipAcc                 Accumulated precip" << std::endl;
    ss << "   -v W                         Wind speed" << std::endl;
    ss << "   -v WD                        Wind direction" << std::endl;
    ss << "   -v U                         U-wind" << std::endl;
@@ -79,6 +80,7 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    std::vector<Type> variables;
    variables.push_back(Variable::T);
    variables.push_back(Variable::PrecipAcc);
+   variables.push_back(Variable::Precip);
    variables.push_back(Variable::W);
    variables.push_back(Variable::WD);
    variables.push_back(Variable::U);
@@ -95,6 +97,8 @@ float Variable::getMin(Type iType) {
       case T:
          return 0;
       case PrecipAcc:
+         return 0;
+      case Precip:
          return 0;
       case W:
          return 0;
@@ -117,10 +121,13 @@ float Variable::getMin(Type iType) {
    }
 }
 float Variable::getMax(Type iType) {
+
    switch(iType) {
       case T:
          return Util::MV;
       case PrecipAcc:
+         return Util::MV;
+      case Precip:
          return Util::MV;
       case W:
          return Util::MV;
@@ -140,5 +147,63 @@ float Variable::getMax(Type iType) {
          return Util::MV;
       default:
          return Util::MV;
+   }
+}
+std::string Variable::getUnits(Type iType) {
+   switch(iType) {
+      case T:
+         return "K";
+      case PrecipAcc:
+         return "kg/m^2";
+      case Precip:
+         return "kg/m^2";
+      case W:
+         return "m/s";
+      case WD:
+         return "degrees";
+      case U:
+         return "m/s";
+      case V:
+         return "m/s";
+      case Cloud:
+         return "1";
+      case RH:
+         return "%";
+      case Phase:
+         return "phase";
+      case P:
+         return "pa";
+      default:
+         return "no_units";
+   }
+}
+std::string Variable::getStandardName(Type iType) {
+   switch(iType) {
+      case T:
+         return "air_temperature";
+      case PrecipAcc:
+         return "precipitation_amount_acc";
+      case Precip:
+         return "precipitation_amount";
+      case W:
+         return "wind_speed";
+      case WD:
+         return "wind_from_direction";
+      case U:
+         // TODO: Is this correct?
+         return "eastward_wind";
+      case V:
+         // TODO: Is this correct?
+         return "northward_wind";
+      case Cloud:
+         return "cloud_area_fraction";
+      case RH:
+         return "relative_humidity";
+      case Phase:
+         return "phase";
+      case P:
+         return "surface_air_pressure";
+      default:
+         return "no_units";
    }
 }

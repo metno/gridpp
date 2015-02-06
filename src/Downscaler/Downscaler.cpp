@@ -155,6 +155,25 @@ void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec
    int nLon = iTo.getNumLon();
    int nLat = iTo.getNumLat();
 
+   iI.resize(nLat);
+   iJ.resize(nLat);
+
+   // Check if the grid is the same
+   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+      if(ilats == olats && ilons == olons) {
+         for(int i = 0; i < nLat; i++) {
+            iI[i].resize(nLon, 0);
+            iJ[i].resize(nLon, 0);
+            for(int j = 0; j < nLon; j++) {
+               iI[i][j] = i;
+               iJ[i][j] = j;
+            }
+         }
+      }
+      Util::status("Grids are identical, short cut in finding nearest neighbours");
+      return;
+   }
+
    // Check if grid has missing points
    bool hasMissing = false;
    for(int ii = 0; ii < iFrom.getNumLat(); ii++) {
@@ -184,25 +203,6 @@ void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec
       ss << "Lats/lons are not sorted, using a slower method to find nearest neighbours";
       Util::warning(ss.str());
       return getNearestNeighbour(iFrom, iTo, iI, iJ);
-   }
-
-   iI.resize(nLat);
-   iJ.resize(nLat);
-
-   // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
-      if(ilats == olats && ilons == olons) {
-         for(int i = 0; i < nLat; i++) {
-            iI[i].resize(nLon, 0);
-            iJ[i].resize(nLon, 0);
-            for(int j = 0; j < nLon; j++) {
-               iI[i][j] = i;
-               iJ[i][j] = j;
-            }
-         }
-      }
-      Util::status("Grids are identical, short cut in finding nearest neighbours");
-      return;
    }
 
    float tol = 0.2;

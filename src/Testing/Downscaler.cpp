@@ -135,6 +135,52 @@ namespace {
          }
       }
    }
+   TEST_F(TestDownscaler, notIdenticalGridDiffLon) {
+      int nLat = 1;
+      int nLon = 5;
+      FileFake from(nLat,nLon,1,1);
+      FileFake to(nLat,nLon,1,1);
+      setLatLon(from, (float[]) {1}, (float[]){0,1,2,3,4});
+      setLatLon(to,   (float[]) {1}, (float[]){0,2,2.5,3,4});
+
+      vec2Int I, J, If, Jf;
+      Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      EXPECT_EQ(I, If);
+      EXPECT_EQ(J, Jf);
+
+      ASSERT_EQ(nLat, I.size());
+      ASSERT_EQ(nLon, I[0].size());
+
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            EXPECT_EQ(i, I[i][j]);
+         }
+      }
+   }
+   TEST_F(TestDownscaler, notIdenticalGridDiffLat) {
+      int nLat = 5;
+      int nLon = 1;
+      FileFake from(nLat,nLon,1,1);
+      FileFake to(nLat,nLon,1,1);
+      setLatLon(from, (float[]) {0,1,2,3,4}, (float[]){1});
+      setLatLon(to,   (float[]) {0,2,2.5,3,4}, (float[]){1});
+
+      vec2Int I, J, If, Jf;
+      Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      EXPECT_EQ(I, If);
+      EXPECT_EQ(J, Jf);
+
+      ASSERT_EQ(nLat, I.size());
+      ASSERT_EQ(nLon, I[0].size());
+
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            EXPECT_EQ(j, J[i][j]);
+         }
+      }
+   }
    TEST_F(TestDownscaler, unsortedGrid) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);

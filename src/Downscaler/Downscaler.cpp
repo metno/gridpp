@@ -93,10 +93,10 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
                iJ[i][j] = j;
             }
          }
+         Util::status("Grids are identical, short cut in finding nearest neighbours");
+         addToCache(iFrom, iTo, iI, iJ);
+         return;
       }
-      Util::status("Grids are identical, short cut in finding nearest neighbours");
-      addToCache(iFrom, iTo, iI, iJ);
-      return;
    }
 
    #pragma omp parallel for

@@ -8,22 +8,22 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    // Set dimensions
    NcDim* dTime = getDim("time");
    NcDim* dEns  = getDim("ensemble_member");
-   NcDim* dLon  = getDim("longitude");
-   NcDim* dLat  = getDim("latitude");
+   NcDim* dLon  = getDim("x");
+   NcDim* dLat  = getDim("y");
    mNTime = dTime->size();
    mNEns  = dEns->size();
    mNLat  = dLat->size();
    mNLon  = dLon->size();
 
    // Retrieve lat/lon/elev
-   long countLat = getNumLat();
-   long countLon = getNumLon();
+   long countLat[3] = {getNumLat(), getNumLon()};
+   long countLon[3] = {getNumLat(), getNumLon()};
    long countElev[3] = {1,getNumLat(), getNumLon()};
-   float* lats = new float[getNumLat()];
-   float* lons = new float[getNumLon()];
+   float* lats = new float[getNumLat()*getNumLon()];
+   float* lons = new float[getNumLon()*getNumLon()];
    float* elevs = new float[getNumLat()*getNumLon()];
-   NcVar* vLat = getVar("latitude");
-   NcVar* vLon = getVar("longitude");
+   NcVar* vLat = getVar("lat");
+   NcVar* vLon = getVar("lon");
    NcVar* vElev = getVar("altitude");
    // TODO: Check for missing values. Probably should make a function like in FileArome.
    vLat->get(lats, countLat);
@@ -41,6 +41,25 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
          mLons[i][j] = lons[i];
          mElevs[i][j] = elevs[i*getNumLon()+j];
       }
+   }
+
+   if(hasVar("time")) {
+      NcVar* vTime = getVar("time");
+      double* times = new double[mNTime];
+      vTime->get(times , mNTime);
+      setTimes(std::vector<double>(times, times+mNTime));
+      delete[] times;
+   }
+   else {
+      std::vector<double> times;
+      times.resize(getNumTime(), Util::MV);
+      setTimes(times);
+   }
+
+   if(hasVar("forecast_reference_time")) {
+      NcVar* vReferenceTime = getVar("forecast_reference_time");
+      double referenceTime = getReferenceTime();
+      vReferenceTime->get(&referenceTime, 1);
    }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
@@ -93,7 +112,7 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
       NcVar* var;
-      if(hasVariable(varType)) {
+      if(hasVariableCore(varType)) {
          var = getVar(variable);
       }
       else {
@@ -101,8 +120,8 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
          NcDim* dTime    = getDim("time");
          NcDim* dSurface = getDim("surface");
          NcDim* dEns     = getDim("ensemble_member");
-         NcDim* dLon     = getDim("longitude");
-         NcDim* dLat     = getDim("latitude");
+         NcDim* dLon     = getDim("x");
+         NcDim* dLat     = getDim("y");
          var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dEns, dLat, dLon);
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
@@ -132,7 +151,16 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
                   }
                }
             }
-            var->put(values, 1, 1, mNEns, mNLat, mNLon);
+            if(var->num_dims() == 5) {
+               var->put(values, 1, 1, mNEns, mNLat, mNLon);
+               addAttribute(var, "coordinates", "longitude latitude");
+               addAttribute(var, "units", Variable::getUnits(varType));
+               addAttribute(var, "standard_name", Variable::getStandardName(varType));
+            }
+            else {
+               Util::warning("Cannot write " + variable + " to '" + getFilename() +
+                             "' because it does not have 5 dimensions");
+            }
          }
       }
    }
@@ -147,10 +175,19 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
       return "cloud_area_fraction";
    }
    else if(iVariable == Variable::T) {
-      return "t";
+      return "air_temperature_2m";
    }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
+   }
+   else if(iVariable == Variable::U) {
+      return "x_wind_10m";
+   }
+   else if(iVariable == Variable::V) {
+      return "y_wind_10m";
+   }
+   else if(iVariable == Variable::RH) {
+      return "relative_humidity_2m";
    }
    return "";
 }
@@ -159,8 +196,8 @@ bool FileEc::isValid(std::string iFilename) {
    bool status = false;
    NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
    if(file.is_valid()) {
-      status = hasDim(file, "time") && hasDim(file, "ensemble_member") && hasDim(file, "longitude") && hasDim(file, "latitude") &&
-               hasVar(file, "latitude") && hasVar(file, "longitude");
+      status = hasDim(file, "time") && hasDim(file, "ensemble_member") && hasDim(file, "x") && hasDim(file, "y") &&
+               hasVar(file, "lat") && hasVar(file, "lon");
       file.close();
    }
    return status;

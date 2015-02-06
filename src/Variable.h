@@ -14,6 +14,7 @@ class Variable {
          U = 30,           // 10m U-wind (m/s)
          V = 40,           // 10m V-wind (m/s)
          W = 50,           // 10m windspeed (m/s)
+         WD = 55,          // Wind direction (degrees, from north 0)
          RH = 60,          // Reliative humidity (%)
          Phase = 70,       // Precip phase
          P = 80,           // Surface pressure (pa)

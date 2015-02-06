@@ -200,6 +200,10 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
       // TODO: Correct name?
       return "windspeed_10m";
    }
+   else if(iVariable == Variable::WD) {
+      // TODO: Correct name?
+      return "winddirection_10m";
+   }
    else if(iVariable == Variable::RH) {
       return "relative_humidity_2m";
    }
@@ -215,7 +219,7 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    }
    else {
       // TODO:
-      abort();
+      Util::error("Variable '" + Variable::getTypeName(iVariable) + "' not defined for FileArome");
    }
    return "";
 }

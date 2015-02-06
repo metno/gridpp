@@ -17,6 +17,8 @@ std::string Variable::getTypeName(Type iType) {
       return "V";
    else if(iType == W)
       return "W";
+   else if(iType == WD)
+      return "WD";
    else if(iType == RH)
       return "RH";
    else if(iType == Phase)
@@ -44,6 +46,8 @@ Variable::Type Variable::getType(std::string iName) {
       return V;
    else if(iName == "W")
       return W;
+   else if(iName == "WD")
+      return WD;
    else if(iName == "RH")
       return RH;
    else if(iName == "Phase")
@@ -61,6 +65,7 @@ std::string Variable::description() {
    ss << "   -v T                         Temperature" << std::endl;
    ss << "   -v Precip                    Hourly precip" << std::endl;
    ss << "   -v W                         Wind speed" << std::endl;
+   ss << "   -v WD                        Wind direction" << std::endl;
    ss << "   -v U                         U-wind" << std::endl;
    ss << "   -v V                         V-wind" << std::endl;
    ss << "   -v Cloud                     Cloud cover" << std::endl;
@@ -75,6 +80,7 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::T);
    variables.push_back(Variable::PrecipAcc);
    variables.push_back(Variable::W);
+   variables.push_back(Variable::WD);
    variables.push_back(Variable::U);
    variables.push_back(Variable::V);
    variables.push_back(Variable::Cloud);
@@ -91,6 +97,8 @@ float Variable::getMin(Type iType) {
       case PrecipAcc:
          return 0;
       case W:
+         return 0;
+      case WD:
          return 0;
       case U:
          return Util::MV;
@@ -116,6 +124,8 @@ float Variable::getMax(Type iType) {
          return Util::MV;
       case W:
          return Util::MV;
+      case WD:
+         return 360;
       case U:
          return Util::MV;
       case V:

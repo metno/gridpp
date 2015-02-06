@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <sstream>
+#include <cmath>
 #include "../Util.h"
 
 File::File(std::string iFilename) :
@@ -130,6 +131,31 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
             Util::error("Cannot derive wind speed from variables in file");
          }
       }
+      else if(iVariable == Variable::WD) {
+         if(hasVariableCore(Variable::U) && hasVariableCore(Variable::V)) {
+            for(int t = 0; t < getNumTime(); t++) {
+               FieldPtr windDir = getEmptyField();
+               const FieldPtr u = getField(Variable::U, t);
+               const FieldPtr v = getField(Variable::V, t);
+               for(int lat = 0; lat < getNumLat(); lat++) {
+                  for(int lon = 0; lon < getNumLon(); lon++) {
+                     for(int e = 0; e < getNumEns(); e++) {
+                        float currU = (*u)(lat,lon,e);
+                        float currV = (*v)(lat,lon,e);
+                        float dir = std::atan2(-currU,-currV) * 180 / Util::pi;
+                        if(dir < 0)
+                           dir += 360;
+                        (*windDir)(lat,lon,e) = dir;
+                     }
+                  }
+               }
+               addField(windDir, Variable::WD, t);
+            }
+         }
+         else {
+            Util::error("Cannot derive wind speed from variables in file");
+         }
+      }
       else {
          std::string variableType = Variable::getTypeName(iVariable);
          std::cout << variableType << " not available in '" << getFilename() << "'" << std::endl;
@@ -210,6 +236,9 @@ bool File::hasVariable(Variable::Type iVariable) const {
       return hasVariableCore(Variable::Precip);
    }
    else if(iVariable == Variable::W) {
+      return hasVariableCore(Variable::V) && hasVariableCore(Variable::U);
+   }
+   else if(iVariable == Variable::WD) {
       return hasVariableCore(Variable::V) && hasVariableCore(Variable::U);
    }
    

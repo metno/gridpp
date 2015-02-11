@@ -128,6 +128,9 @@ void FileNetcdf::writeTimes() {
       timesArr[t] = times[t];
    }
    vTime->put(timesArr, getNumTime());
+   addAttribute(vTime, "long_name", "time");
+   addAttribute(vTime, "standard_name", "time");
+   addAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }
 void FileNetcdf::writeReferenceTime() {
    if(!hasVar("forecast_reference_time")) {
@@ -138,4 +141,6 @@ void FileNetcdf::writeReferenceTime() {
    if(!Util::isValid(referenceTime))
       referenceTime = ncBad_double;
    vTime->put(&referenceTime, 1);
+   addAttribute(vTime, "standard_name", "forecast_reference_time");
+   addAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }

@@ -108,7 +108,8 @@ std::string CalibratorPhase::description() {
    ss << "                                * 3 = snow (T < a" << std::endl;
    ss << "                                T can be either regular temperature or wetbulb temperature." << std::endl;
    ss << "                                Precip, and Temperature must be available to determine phase. If" << std::endl;
-   ss << "                                using wetbulb, then relative humidity and pressure must also be available." << std::endl;
+   ss << "                                using wetbulb, then relative humidity must also be available." << std::endl;
+   ss << "                                Pressure is currently not needed because a standard atmosphere is used." << std::endl;
    ss << "      parameters=required       Read parameters from this text file. The file format is:" << std::endl;
    ss << "                                offset0 a b" << std::endl;
    ss << "                                    ...    " << std::endl;

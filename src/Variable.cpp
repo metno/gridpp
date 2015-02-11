@@ -170,7 +170,7 @@ std::string Variable::getUnits(Type iType) {
       case RH:
          return "%";
       case Phase:
-         return "phase";
+         return "";
       case P:
          return "pa";
       default:
@@ -200,7 +200,7 @@ std::string Variable::getStandardName(Type iType) {
       case RH:
          return "relative_humidity";
       case Phase:
-         return "phase";
+         return "";
       case P:
          return "surface_air_pressure";
       default:

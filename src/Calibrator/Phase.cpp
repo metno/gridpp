@@ -3,10 +3,12 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include "../ParameterFile.h"
+#include "../Downscaler/Pressure.h"
 CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile) :
       Calibrator(),
       mParameterFile(iParameterFile),
       mMinPrecip(0.2),
+      mEstimatePressure(true),
       mUseWetbulb(1) {
    if(iParameterFile->getNumParameters() != 2) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
@@ -19,6 +21,7 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    iFile.initNewVariable(Variable::Phase);
+   vec2 elevs = iFile.getElevs();
 
 
    // Loop over offsets
@@ -33,19 +36,25 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
       FieldPtr rh;
       if(mUseWetbulb) {
          // Only load these fields if they are to be used, to save memory
-         pressure = iFile.getField(Variable::P, t);
-         rh       = iFile.getField(Variable::RH, t);
+         rh = iFile.getField(Variable::RH, t);
+         if(!mEstimatePressure)
+            pressure = iFile.getField(Variable::P, t);
       }
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            float currElev = elevs[i][j];
             for(int e = 0; e < nEns; e++) {
                float currDryTemp  = (*temp)(i,j,e);
                float currTemp     = currDryTemp;
                float currPrecip   = (*precip)(i,j,e);
                if(mUseWetbulb) {
-                  float currPressure = (*pressure)(i,j,e);
+                  float currPressure;
+                  if(mEstimatePressure)
+                     currPressure = DownscalerPressure::calcPressure(0, 101325, currElev);
+                  else
+                     currPressure = (*pressure)(i,j,e);
                   float currRh       = (*rh)(i,j,e);
                   float currWetbulb  = getWetbulb(currDryTemp, currPressure, currRh);
                   if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold)

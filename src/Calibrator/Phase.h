@@ -25,5 +25,8 @@ class CalibratorPhase : public Calibrator {
       const ParameterFile* mParameterFile;
       float mMinPrecip;
       bool mUseWetbulb;
+      //! If true compute pressure based on standard atmosphere (instead of using forecasted data)
+      //! This is likely a good enough approximation when computing wetbulb temperature and saves memory.
+      bool mEstimatePressure;
 };
 #endif

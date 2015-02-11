@@ -61,6 +61,15 @@ namespace {
       EXPECT_FLOAT_EQ(294.83279, toT(0,2,0)); // 304 347m->600m
       EXPECT_FLOAT_EQ(320.89322, toT(0,3,0)); // 304 347m->-100m
    }
+   TEST_F(TestDownscalerPressure, calcPressure) {
+      EXPECT_FLOAT_EQ(101325, DownscalerPressure::calcPressure(0, 101325, 0));
+      EXPECT_FLOAT_EQ(89777.391, DownscalerPressure::calcPressure(0, 101325, 1000));
+      EXPECT_FLOAT_EQ(67504.562, DownscalerPressure::calcPressure(300, 70000, 600));
+
+      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(Util::MV, 101325, 89874.6));
+      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(0, Util::MV, 89874.6));
+      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(0, 101325, Util::MV));
+   }
    TEST_F(TestDownscalerPressure, description) {
       DownscalerPressure::description();
    }

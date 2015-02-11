@@ -44,8 +44,9 @@ void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const 
                   ofield(i,j,e) = ifield(Icenter,Jcenter,e);
                }
                else {
-                  float dElev = currElev - nearestElev;
-                  ofield(i,j,e) = ifield(Icenter,Jcenter,e) * exp(mConstant * (dElev));
+                  float nearestPressure = ifield(Icenter,Jcenter,e);
+                  float currPressure = calcPressure(nearestElev, nearestPressure, currElev);
+                  ofield(i,j,e) = currPressure;
                }
             }
          }
@@ -57,4 +58,14 @@ std::string DownscalerPressure::description() {
    ss << "   -d pressure                  Adjusts the pressure of the nearest neighbour based on the" << std::endl
       << "                                elevation difference and a standard atmosphere." << std::endl;
    return ss.str();
+}
+
+float DownscalerPressure::calcPressure(float iElev0, float iPressure0, float iElev1) {
+   if(Util::isValid(iElev0) && Util::isValid(iPressure0) && Util::isValid(iElev1)) {
+      float dElev = iElev1 - iElev0;
+      return iPressure0 * exp(mConstant * (dElev));
+   }
+   else {
+      return Util::MV;
+   }
 }

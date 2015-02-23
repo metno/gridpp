@@ -132,9 +132,9 @@ namespace {
       double referenceTime = f0.getReferenceTime();
       EXPECT_DOUBLE_EQ(4.1123, referenceTime);
    }
-   TEST_F(FileTest, factoryFake) {
-      File* f = File::getScheme("fake");
-      EXPECT_EQ("fake", f->name());
+   TEST_F(FileTest, factoryMissing) {
+      File* f = File::getScheme("missingfilename");
+      EXPECT_EQ(NULL, f);
    }
 }
 int main(int argc, char **argv) {

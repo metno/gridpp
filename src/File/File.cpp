@@ -22,9 +22,13 @@ File* File::getScheme(std::string iFilename, bool iReadOnly) {
    else if(FileEc::isValid(iFilename)) {
       file = new FileEc(iFilename, iReadOnly);
    }
+   else if(!Util::exists(iFilename)) {
+      Util::warning("File '" + iFilename + " does not exist");
+      return NULL;
+   }
    else {
       Util::warning("Could not find suitable parser for '" + iFilename + "'");
-      return new FileFake(3,3,1,1);
+      return NULL;
    }
    return file;
 }

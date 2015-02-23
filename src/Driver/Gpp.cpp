@@ -20,7 +20,8 @@ int main(int argc, const char *argv[]) {
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Input file with NetCDF data." << std::endl;
-      std::cout << "   output        Output file with NetCDF data. Must contain lat/lon information." << std::endl;
+      std::cout << "   output        Output file with NetCDF data. File must already exist. Must" << std::endl;
+      std::cout << "                 contain lat/lon information." << std::endl;
       std::cout << "   -v var        One of the variables below." << std::endl;
       std::cout << "   -d downscaler One of the downscalers below." << std::endl;
       std::cout << "   -c calibrator One of the calibrators below." << std::endl;

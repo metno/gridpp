@@ -7,6 +7,13 @@ Setup::Setup(std::vector<std::string> argv) {
    inputFile  = File::getScheme(argv[0], true);
    outputFile = File::getScheme(argv[1], false);
 
+   if(inputFile == NULL) {
+      Util::error("File '" + argv[0] + " must be a valid file");
+   }
+   if(outputFile == NULL) {
+      Util::error("File '" + argv[1] + " must be a valid file");
+   }
+
    // Implement a finite state machine
    enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
    State state = START;

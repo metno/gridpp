@@ -34,6 +34,9 @@ class Util {
       //! @return false if iValue equals Util::MV or is +-inf or nan. Returns true otherwise.
       static bool isValid(float iValue);
 
+      //! Checks if the file exists
+      static bool exists(const std::string& iFilename);
+
       //! \brief Computes the geographical distance between two locations
       //! @param lat1 Latitude in degrees of point 1
       //! @param lon1 Longitude in degrees of point 1

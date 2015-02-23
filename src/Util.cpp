@@ -10,6 +10,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <execinfo.h>
 #include <signal.h>
+#include <fstream>
 #ifdef DEBUG
 extern "C" void __gcov_flush();
 #endif
@@ -64,6 +65,11 @@ void Util::setShowStatus(bool flag) {
 
 bool Util::isValid(float iValue) {
    return !std::isnan(iValue) && !std::isinf(iValue) && iValue != Util::MV;
+}
+
+bool Util::exists(const std::string& iFilename) {
+   std::ifstream infile(iFilename.c_str());
+   return infile.good();
 }
 
 float Util::getDistance(float lat1, float lon1, float lat2, float lon2) {

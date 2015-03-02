@@ -22,7 +22,7 @@ float const& Field::operator()(unsigned int i, unsigned int j, unsigned int k) c
 int Field::getIndex(unsigned int i, unsigned int j, unsigned int k) const {
    if(i >= mNLat || j >= mNLon || k >= mNEns)
       Util::error("Cannot access element");
-   return k + j*mNEns + i*mNLon;
+   return k + j*mNEns + i*mNLon*mNEns;
 }
 
 std::vector<float> Field::operator()(unsigned int i, unsigned int j) const {

@@ -52,6 +52,10 @@ namespace {
          std::string var = file.getVariableName(variables[i]);
       }
    }
+   TEST_F(FileAromeTest, validFiles) {
+      FileArome file1("testing/files/validArome1.nc");
+      FileArome file2("testing/files/validArome2.nc");
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

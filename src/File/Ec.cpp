@@ -8,40 +8,20 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    // Set dimensions
    NcDim* dTime = getDim("time");
    NcDim* dEns  = getDim("ensemble_member");
-   NcDim* dLon  = getDim("x");
-   NcDim* dLat  = getDim("y");
+   NcDim* dLon  = getLonDim();
+   NcDim* dLat  = getLatDim();
    mNTime = dTime->size();
    mNEns  = dEns->size();
    mNLat  = dLat->size();
    mNLon  = dLon->size();
 
    // Retrieve lat/lon/elev
-   long countLat[3] = {getNumLat(), getNumLon()};
-   long countLon[3] = {getNumLat(), getNumLon()};
-   long countElev[3] = {1,getNumLat(), getNumLon()};
-   float* lats = new float[getNumLat()*getNumLon()];
-   float* lons = new float[getNumLon()*getNumLon()];
-   float* elevs = new float[getNumLat()*getNumLon()];
-   NcVar* vLat = getVar("lat");
-   NcVar* vLon = getVar("lon");
+   NcVar* vLat = getLatVar();
+   NcVar* vLon = getLonVar();
    NcVar* vElev = getVar("altitude");
-   // TODO: Check for missing values. Probably should make a function like in FileArome.
-   vLat->get(lats, countLat);
-   vLon->get(lons, countLon);
-   vElev->get(elevs, countElev);
-   mLats.resize(getNumLat());
-   mLons.resize(getNumLat());
-   mElevs.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mLats[i].resize(getNumLon());
-      mLons[i].resize(getNumLon());
-      mElevs[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         mLats[i][j] = lats[i];
-         mLons[i][j] = lons[i];
-         mElevs[i][j] = elevs[i*getNumLon()+j];
-      }
-   }
+   mLats  = getGridValues(vLat);
+   mLons  = getGridValues(vLon);
+   mElevs = getGridValues(vElev);
 
    if(hasVar("time")) {
       NcVar* vTime = getVar("time");
@@ -120,8 +100,8 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
          NcDim* dTime    = getDim("time");
          NcDim* dSurface = getDim("surface");
          NcDim* dEns     = getDim("ensemble_member");
-         NcDim* dLon     = getDim("x");
-         NcDim* dLat     = getDim("y");
+         NcDim* dLon     = getLonDim();
+         NcDim* dLat     = getLatDim();
          var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dEns, dLat, dLon);
       }
       float MV = getMissingValue(var); // The output file's missing value indicator
@@ -193,30 +173,136 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
 }
 
 bool FileEc::isValid(std::string iFilename) {
-   bool status = false;
+   bool isValid = false;
    NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
    if(file.is_valid()) {
-      status = hasDim(file, "time") && hasDim(file, "ensemble_member") && hasDim(file, "x") && hasDim(file, "y") &&
-               hasVar(file, "lat") && hasVar(file, "lon");
+      isValid = hasDim(file, "time") &&
+               (hasVar(file, "lat") || hasVar(file, "latitude")) &&
+               (hasVar(file, "lon") || hasVar(file, "longitude")) &&
+               hasDim(file, "ensemble_member") &&
+               (hasDim(file, "lat") || hasDim(file, "latitude")  || hasDim(file, "y")) &&
+               (hasDim(file, "lon") || hasDim(file, "longitude") || hasDim(file, "x"));
       file.close();
    }
-   return status;
+   return isValid;
 }
-vec2 FileEc::getLatLonVariable(std::string iVar) const {
-   NcVar* var = getVar(iVar);
-   long count[2] = {getNumLat(), getNumLon()};
-   float* values = new float[getNumLon()*getNumLat()];
-   var->get(values, count);
+vec2 FileEc::getGridValues(NcVar* iVar) const {
+   // Initialize values
    vec2 grid;
    grid.resize(getNumLat());
    for(int i = 0; i < getNumLat(); i++) {
-      grid[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         int index = i*getNumLon() + j;
-         grid[i][j] = values[index];
-         assert(index < getNumLon()*getNumLat());
-      }
+      grid[i].resize(getNumLon(), Util::MV);
    }
-   delete[] values;
+
+   // We have a lat/lon grid, where lat/lons are only provided along the pertinent dimension
+   // Values are assumed to be constant across the other dimension.
+   if(iVar->num_dims() == 1) {
+      long size = iVar->get_dim(0)->size();
+      long count[1] = {size};
+      float* values = new float[size];
+      iVar->get(values, count);
+      // Latitude variable
+      if(iVar->get_dim(0) == getLatDim()) {
+         for(int i = 0; i < getNumLat(); i++) {
+            for(int j = 0; j < getNumLon(); j++) {
+               grid[i][j] = values[i];
+            }
+         }
+      }
+      // Longitude variable
+      else if(iVar->get_dim(0) == getLonDim()) {
+         for(int i = 0; i < getNumLat(); i++) {
+            for(int j = 0; j < getNumLon(); j++) {
+               grid[i][j] = values[j];
+            }
+         }
+      }
+      else {
+         std::stringstream ss;
+         ss << "Variable " << iVar->name() << " does not have lat or lon dimension";
+         Util::error(ss.str());
+      }
+      delete[] values;
+   }
+   // We have a projected grid, where lat and lons are provided for each grid point
+   else {
+      int N = iVar->num_dims();
+      long count[N];
+      int size = 1;
+      int indexLat = Util::MV;
+      int indexLon = Util::MV;
+      for(int i = 0; i < N; i++) {
+         if(iVar->get_dim(i) == getLatDim()) {
+            count[i] = getNumLat();
+            size *= count[i];
+            indexLat = i;
+         }
+         else if(iVar->get_dim(i) == getLonDim()) {
+            count[i] = getNumLon();
+            size *= count[i];
+            indexLon = i;
+         }
+         else {
+            count[i] = 1;
+         }
+      }
+      if(!Util::isValid(indexLat) || !Util::isValid(indexLon)) {
+         std::stringstream ss;
+         ss << "Variable " << iVar->name() << " does not have lat and/or lon dimensions";
+         Util::error(ss.str());
+      }
+      float* values = new float[size];
+      iVar->get(values, count);
+      for(int i = 0; i < getNumLat(); i++) {
+         for(int j = 0; j < getNumLon(); j++) {
+            // Latitude dimension is ordered first
+            if(indexLat < indexLon) {
+               grid[i][j] = values[i*getNumLon() + j];
+            }
+            // Longitude dimension is ordered first
+            else {
+               grid[i][j] = values[j*getNumLat() + i];
+            }
+         }
+      }
+      delete[] values;
+   }
    return grid;
+}
+
+NcDim* FileEc::getLatDim() const {
+   NcDim* dLat;
+   if(hasDim("y"))
+      dLat = getDim("y");
+   else if(hasDim("latitude"))
+      dLat = getDim("latitude");
+   else
+      dLat = getDim("lat");
+   return dLat;
+}
+NcDim* FileEc::getLonDim() const {
+   NcDim* dLon;
+   if(hasDim("x"))
+      dLon = getDim("x");
+   else if(hasDim("longitude"))
+      dLon = getDim("longitude");
+   else
+      dLon = getDim("lon");
+   return dLon;
+}
+NcVar* FileEc::getLatVar() const {
+   NcVar* vLat;
+   if(hasVar("latitude"))
+      vLat = getVar("latitude");
+   else
+      vLat = getVar("lat");
+   return vLat;
+}
+NcVar* FileEc::getLonVar() const {
+   NcVar* vLon;
+   if(hasVar("longitude"))
+      vLon = getVar("longitude");
+   else
+      vLon = getVar("lon");
+   return vLon;
 }

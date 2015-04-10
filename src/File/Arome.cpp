@@ -256,6 +256,7 @@ bool FileArome::isValid(std::string iFilename) {
    NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
    if(file.is_valid()) {
       status = hasDim(file, "time") && hasDim(file, "x") && hasDim(file, "y") &&
+               !hasDim(file, "ensemble_member") &&
                hasVar(file, "latitude") && hasVar(file, "longitude");
    }
    file.close();

@@ -1,6 +1,7 @@
 *~
 *.o
-*.exe
+gridpp
+gridpp_debug
 *.nc
 gmon.out
 tags

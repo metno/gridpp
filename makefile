@@ -17,8 +17,8 @@ SRCDIR   = src/
 BUILDDIR = build
 BUILDDIR_O = build/opt
 BUILDDIR_D = build/debug
-EXE_O    = gpp.exe
-EXE_D    = gpp_debug.exe
+EXE_O    = gridpp
+EXE_D    = gridpp_debug
 
 CORESRC 	= $(wildcard src/*.cpp)
 CALSRC  	= $(wildcard src/Calibrator/*.cpp)
@@ -56,10 +56,10 @@ $(BUILDDIR_D)/%.o : src/%.cpp $(INCS)
 $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
 	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
 
-gpp.exe: $(OBJ_O) $(DRVOBJ_O) makefile
+gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
-gpp_debug.exe: $(OBJ_D) $(DRVOBJ_D) makefile
+gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 test: $(TESTS)
@@ -77,6 +77,9 @@ clean:
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
+
+install:
+	install gridpp /usr/bin/gridpp
 
 doxygen:
 	doxygen doxygen/config

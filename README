@@ -28,9 +28,9 @@ Installation Instructions
 Running the program
 -------------------
 * To see program options, run:
-./postprocess.exe
+./gridpp
 * To test the program on a fake dataset, run:
-./postprocess.exe testing/files/10x10.nc testing/files/10x10_copy.nc -v T\
+./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc -v T\
        -d gradient -v Precip -d smart numSmart=3 searchRadius=3
 ncview testing/files/10x10_copy.nc
 
@@ -40,21 +40,21 @@ To test the program on a real operational AROME file, follow these steps:
 1) Make a copy of a file to post-process:
 cp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc
 2) Create a smoothed precipitation field in localcopy.nc:
-./postprocess.exe /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101\
+./gridpp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101\
       localcopy.nc -v Precip -c smooth smoothRadius=10
 
 Running on multiple cores
 -------------------------
 To run using 8 threads:
 export OMP_NUM_THREADS=8
-./postprocess.exe ...
+./gridpp ...
 
 Minimizing memory usage
 -----------------------
 Run the program in sequence for each variable:
-./postprocess.exe input output -v T ...
-./postprocess.exe input output -v Precip ...
-./postprocess.exe input output -v RH ...
+./gridpp input output -v T ...
+./gridpp input output -v Precip ...
+./gridpp input output -v RH ...
 
 Adding new code
 ---------------

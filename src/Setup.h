@@ -28,8 +28,10 @@ class Setup {
       File* inputFile;
       File* outputFile;
       std::vector<VariableConfiguration> variableConfigurations;
-      Setup(std::vector<std::string> argv);
+      Setup(const std::vector<std::string>& argv);
       ~Setup();
       static std::string defaultDownscaler();
+   private:
+      bool mIdenticalIOFiles;
 };
 #endif

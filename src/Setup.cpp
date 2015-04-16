@@ -3,15 +3,27 @@
 #include "Calibrator/Calibrator.h"
 #include "Downscaler/Downscaler.h"
 
-Setup::Setup(std::vector<std::string> argv) {
-   inputFile  = File::getScheme(argv[0], true);
-   outputFile = File::getScheme(argv[1], false);
+Setup::Setup(const std::vector<std::string>& argv) :
+      mIdenticalIOFiles(false) {
+   outputFile  = File::getScheme(argv[1], false);
+   if(outputFile == NULL) {
+      Util::error("File '" + argv[1] + " must be a valid file");
+   }
+
+   // In some cases, it is not possible to open the same file first as readonly and then writeable
+   // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember
+   // to not free the memory of both files.
+   if(argv[0] == argv[1]) {
+      std::cout << "Identical files" << std::endl;
+      inputFile = outputFile;
+      mIdenticalIOFiles = true;
+   }
+   else {
+      inputFile = File::getScheme(argv[0], true);
+   }
 
    if(inputFile == NULL) {
       Util::error("File '" + argv[0] + " must be a valid file");
-   }
-   if(outputFile == NULL) {
-      Util::error("File '" + argv[1] + " must be a valid file");
    }
 
    // Implement a finite state machine
@@ -263,8 +275,9 @@ Setup::Setup(std::vector<std::string> argv) {
    }
 }
 Setup::~Setup() {
-   delete inputFile;
    delete outputFile;
+   if(!mIdenticalIOFiles)
+      delete inputFile;
    for(int i = 0; i < variableConfigurations.size(); i++) {
       delete variableConfigurations[i].downscaler;
       for(int c = 0; c < variableConfigurations[i].calibrators.size(); c++) {

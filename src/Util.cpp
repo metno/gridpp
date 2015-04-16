@@ -11,6 +11,8 @@
 #include <execinfo.h>
 #include <signal.h>
 #include <fstream>
+#include <istream>
+#include <iomanip>
 #ifdef DEBUG
 extern "C" void __gcov_flush();
 #endif
@@ -110,6 +112,15 @@ int Util::getCurrentDate() {
     return today.year()*10000 + today.month()*100 + today.day();
 }
 
+std::string Util::getCurrentDateString() {
+    boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(4) << today.year() << "-"
+       << std::setfill('0') << std::setw(2) << today.month() << "-"
+       << std::setfill('0') << std::setw(2) << today.day();
+    return ss.str();
+}
+
 int Util::calcDate(int iDate, float iAddHours) {
    int year  = floor(iDate / 10000);
    int month = floor(iDate % 10000)/100;
@@ -145,4 +156,17 @@ float Util::invLogit(float x) {
    if(!Util::isValid(x))
       return Util::MV;
    return exp(x)/(exp(x)+1);
+}
+
+bool Util::copy(std::string iFrom, std::string iTo) {
+   std::ifstream source(iFrom.c_str(), std::ios::binary);
+   std::ofstream dest(iTo.c_str(), std::ios::binary);
+   if(!source.good() || !dest.good())
+      return false;
+
+   dest << source.rdbuf();
+
+   source.close();
+   dest.close();
+   return true;
 }

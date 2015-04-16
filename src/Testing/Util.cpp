@@ -1,4 +1,7 @@
 #include "../Util.h"
+#include "../File/Arome.h"
+#include "../Variable.h"
+#include "../Calibrator/Calibrator.h"
 #include <algorithm>
 #include <math.h>
 #include <gtest/gtest.h>
@@ -157,6 +160,48 @@ namespace {
    TEST_F(UtilTest, getCurrentDate) {
       int date = Util::getCurrentDate();
       EXPECT_LT(2000000, date);
+   }
+   TEST_F(UtilTest, getCurrentDateString) {
+      std::string date = Util::getCurrentDateString();
+      EXPECT_EQ(10, date.size());
+   }
+   TEST_F(UtilTest, copy) {
+      // Check that copying a file works. Do this by modifying a file, and then overwritiing
+      // it with known contents.
+      bool status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      EXPECT_TRUE(status);
+      // Change 10x10_copy.nc
+      CalibratorSmooth smooth(Variable::T);
+      FileArome f1("testing/files/10x10.nc");
+      FileArome f2("testing/files/10x10_copy.nc");
+      FieldPtr field1 = f1.getField(Variable::T, 0);
+      FieldPtr field2 = f2.getField(Variable::T, 0);
+      EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
+      smooth.calibrate(f2);
+      // Values should be different now
+      EXPECT_NE((*field2)(1,1,0), (*field1)(1,1,0));
+      std::vector<Variable::Type> vars(1,Variable::T);
+      f2.write(vars);
+
+      // Use copy. Values should be the same afterwards
+      status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      EXPECT_TRUE(status);
+      FileArome f3("testing/files/10x10_copy.nc");
+      FieldPtr field3 = f3.getField(Variable::T, 0);
+      EXPECT_EQ(f1.getNumLat(), f2.getNumLat());
+      EXPECT_EQ(f1.getNumLon(), f2.getNumLon());
+      EXPECT_EQ(f1.getNumEns(), f2.getNumEns());
+      EXPECT_EQ((*field3)(1,1,0), (*field1)(1,1,0));
+   }
+   TEST_F(UtilTest, copyInvalid) {
+      bool status = Util::copy("testing/filesDoesNotExist/file1", "testing/filesDoesNotExist/file1");
+      EXPECT_FALSE(status);
+      status = Util::copy("testing/files/10x10.nc", "testing/filesDoesNotExist/file1");
+      EXPECT_FALSE(status);
+      status = Util::copy("testing/filesDoesNotExist/file1", "testing/files/10x10_copy.nc");
+      EXPECT_FALSE(status);
+      status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      EXPECT_TRUE(status);
    }
 }
 int main(int argc, char **argv) {

@@ -64,6 +64,9 @@ class Util {
       
       //! \brief Get the current date in YYYYMMDD format
       static int getCurrentDate();
+
+      //! \brief Get the current date in YYYY-MM-DD format
+      static std::string getCurrentDateString();
       
       //! \brief Calculates new date by adding hours to an existing date
       //! @param iDate Date in format YYYYMMDD
@@ -90,6 +93,9 @@ class Util {
             return left.first < right.first;
          }
       };
+
+      //! Copy the file with filename iFrom to filename iTo
+      static bool copy(std::string iFrom, std::string iTo);
      
       //! \brief Comparator class for sorting pairs using the second entry.
       //! Sorts from smallest to largest

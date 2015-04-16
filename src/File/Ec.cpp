@@ -88,6 +88,7 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
    writeTimes();
    writeReferenceTime();
+   writeGlobalAttributes();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -133,9 +134,9 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
             }
             if(var->num_dims() == 5) {
                var->put(values, 1, 1, mNEns, mNLat, mNLon);
-               addAttribute(var, "coordinates", "longitude latitude");
-               addAttribute(var, "units", Variable::getUnits(varType));
-               addAttribute(var, "standard_name", Variable::getStandardName(varType));
+               setAttribute(var, "coordinates", "longitude latitude");
+               setAttribute(var, "units", Variable::getUnits(varType));
+               setAttribute(var, "standard_name", Variable::getStandardName(varType));
             }
             else {
                Util::warning("Cannot write " + variable + " to '" + getFilename() +

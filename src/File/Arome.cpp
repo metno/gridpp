@@ -107,6 +107,7 @@ FileArome::~FileArome() {
 void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
    writeTimes();
    writeReferenceTime();
+   writeGlobalAttributes();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -168,9 +169,9 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                ss << "Cannot write variable '" << variable << "' from '" << getFilename() << "'";
                Util::error(ss.str());
             }
-            addAttribute(var, "coordinates", "longitude latitude");
-            addAttribute(var, "units", Variable::getUnits(varType));
-            addAttribute(var, "standard_name", Variable::getStandardName(varType));
+            setAttribute(var, "coordinates", "longitude latitude");
+            setAttribute(var, "units", Variable::getUnits(varType));
+            setAttribute(var, "standard_name", Variable::getStandardName(varType));
             delete[] values;
          }
       }

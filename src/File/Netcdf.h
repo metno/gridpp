@@ -16,6 +16,10 @@ class FileNetcdf : public File {
       // Does this file contain the variable?
       bool hasVariableCore(Variable::Type iVariable) const;
       virtual std::string getVariableName(Variable::Type iVariable) const = 0;
+      //! Add attribute to a variable (overwrite if existing)
+      void setAttribute(NcVar* iVar, std::string iName, std::string iValue);
+      //! Add global attribute to file (overwrite if existing)
+      void setGlobalAttribute(std::string iName, std::string iValue);
    protected:
       float getScale(NcVar* iVar) const;
       float getOffset(NcVar* iVar) const;
@@ -29,9 +33,9 @@ class FileNetcdf : public File {
       static bool   hasVar(const NcFile& iFile, std::string iVar);
       static float getMissingValue(const NcVar* iVar);
       static void  setMissingValue(NcVar* iVar, float iValue);
-      void   addAttribute(NcVar* iVar, std::string iName, std::string iValue);
       void writeTimes();
       void writeReferenceTime();
+      void writeGlobalAttributes();
 };
 #include "Ec.h"
 #include "Arome.h"

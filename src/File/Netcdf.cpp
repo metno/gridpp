@@ -99,8 +99,22 @@ void FileNetcdf::setMissingValue(NcVar* iVar, float iValue) {
       iVar->add_att("_FillValue", iValue);
 }
 
-void FileNetcdf::addAttribute(NcVar* iVar, std::string iName, std::string iValue) {
+void FileNetcdf::setAttribute(NcVar* iVar, std::string iName, std::string iValue) {
+   NcError q(NcError::silent_nonfatal); 
+   NcAtt* att = iVar->get_att(iName.c_str());
+   if(att != NULL) {
+      att->remove();
+   }
    iVar->add_att(iName.c_str(), iValue.c_str());
+}
+
+void FileNetcdf::setGlobalAttribute(std::string iName, std::string iValue) {
+   NcError q(NcError::silent_nonfatal); 
+   NcAtt* att = mFile.get_att(iName.c_str());
+   if(att != NULL) {
+      att->remove();
+   }
+   mFile.add_att(iName.c_str(), iValue.c_str());
 }
 
 void FileNetcdf::writeTimes() {
@@ -128,9 +142,9 @@ void FileNetcdf::writeTimes() {
       timesArr[t] = times[t];
    }
    vTime->put(timesArr, getNumTime());
-   addAttribute(vTime, "long_name", "time");
-   addAttribute(vTime, "standard_name", "time");
-   addAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+   setAttribute(vTime, "long_name", "time");
+   setAttribute(vTime, "standard_name", "time");
+   setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }
 void FileNetcdf::writeReferenceTime() {
    if(!hasVar("forecast_reference_time")) {
@@ -141,6 +155,12 @@ void FileNetcdf::writeReferenceTime() {
    if(!Util::isValid(referenceTime))
       referenceTime = ncBad_double;
    vTime->put(&referenceTime, 1);
-   addAttribute(vTime, "standard_name", "forecast_reference_time");
-   addAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+   setAttribute(vTime, "standard_name", "forecast_reference_time");
+   setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+}
+void FileNetcdf::writeGlobalAttributes() {
+   setGlobalAttribute("Conventions", "CF-1.0");
+   std::stringstream ss;
+   ss << Util::getCurrentDateString() << ": creation by gridpp";
+   setGlobalAttribute("history", ss.str());
 }

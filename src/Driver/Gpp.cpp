@@ -54,7 +54,7 @@ int main(int argc, const char *argv[]) {
       std::cout << CalibratorWindDirection::description();
       std::cout << CalibratorSmooth::description();
       std::cout << CalibratorPhase::description();
-      return 1;
+      return 0;
    }
    Util::setShowError(true);
    Util::setShowWarning(true);
@@ -108,4 +108,6 @@ int main(int argc, const char *argv[]) {
    double e = Util::clock();
    std::cout << "Writing file: " << e-s << " seconds" << std::endl;
    std::cout << "Total time:   " << e-start << " seconds" << std::endl;
+
+   return 0;
 }

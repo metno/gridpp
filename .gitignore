@@ -11,3 +11,4 @@ devel/
 .*.swp
 data
 coverage.*
+debian/gridpp*

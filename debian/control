@@ -1,0 +1,14 @@
+Source: gridpp
+Maintainer: Thomas Nipen <thomasn@met.no>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9), libnetcdf-dev (>= 4.1.1-6)
+
+Package: gridpp
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Gridded post-processor
+ The program post-processes an AROME or ECMWF NetCDF file by using various
+ downscaling and calibration methods. Post-processed forecasts are placed in a
+ second Netcdf file, which has the desired output grid.

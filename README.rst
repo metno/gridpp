@@ -119,3 +119,18 @@ Testing of code
 * Convenient input files for testing are located in testing/files/
 * New downscalers and calibrators should produce valid results for the special
   test file 'testing/files/10x10.nc'.
+
+Copyright and license
+---------------------
+Copyright (C) 2015 MET Norway. Gridded post-processor is licensed under `GPL
+version 2 <https://github.com/metno/gridpp/blob/master/LICENSE>`_ or (at
+your option) any later version.
+
+Contact
+-------
+| MET Norway
+| Postboks 43 Blindern
+| NO-0313 OSLO
+|
+| Website: http://met.no/
+| E-mail: `post@met.no <mailto:post@met.no>`_

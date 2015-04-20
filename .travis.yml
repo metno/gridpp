@@ -9,6 +9,6 @@ before_install:
 
 script: make test
 
-after_success: ./runAllTests.csh
+after_success: ./runAllTests.sh
 
 os: linux

@@ -9,7 +9,7 @@ LIBS_O   = -lnetcdf_c++
 
 # Flags for debug compilation
 CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
-LIBS_D   = -lnetcdf_c++ -lgtest
+LIBS_D   = -lnetcdf_c++ -L build/gtest -lgtest
 
 
 # Don't change below here
@@ -41,7 +41,7 @@ TESTS0  	= $(patsubst src/Testing%,testing%,$(TESTSRC))
 TESTS   	= $(TESTS0:.cpp=.exe)
 INCS    	= makefile $(HEADERS)
 
-.PHONY: tags count coverage doxygen
+.PHONY: tags count coverage doxygen check
 
 default: $(EXE_O)
 
@@ -62,12 +62,12 @@ $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
 gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
-gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile
+gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
-test: $(TESTS)
+test: gtest $(TESTS)
 
-testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D)
+testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
 	$(CC) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
 
 count:
@@ -76,7 +76,7 @@ count:
 clean: 
 	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
-		coverage/* coverage.* 
+		coverage/* coverage.* build/gtest
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
@@ -87,7 +87,7 @@ install:
 doxygen:
 	doxygen doxygen/config
 
-coverage:
+coverage: test
 	#rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
 	lcov -b . -c -i -d . -o coverage.init
 	./runAllTests.sh
@@ -99,3 +99,11 @@ coverage:
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC)
+
+gtest: build/gtest/libgtest.a
+
+build/gtest/libgtest.a: /usr/src/gtest
+	mkdir -p build/gtest
+	cd build/gtest && cmake /usr/src/gtest && cmake --build .
+
+check: coverage

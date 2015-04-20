@@ -114,7 +114,7 @@ Adding new code
 Testing of code
 ---------------
 * Set DEBUG to 1 in makefile, and run make test
-* Execute runAllTests.csh
+* Execute runAllTests.sh
 * Unit tests are placed in src/Testing/, one file for each class that is tested.
 * Convenient input files for testing are located in testing/files/
 * New downscalers and calibrators should produce valid results for the special

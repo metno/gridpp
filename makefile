@@ -90,7 +90,7 @@ doxygen:
 coverage:
 	#rm -f build/*.gcno build/*.gcda build/*/*.gcno build/*/*.gcda
 	lcov -b . -c -i -d . -o coverage.init
-	csh runAllTests.csh
+	./runAllTests.sh
 	lcov -b . -c -d . -o coverage.run
 	lcov -a coverage.init -a coverage.run -o coverage.total
 	lcov -e coverage.total "`pwd`/*" -o coverage.total.filtered

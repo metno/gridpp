@@ -20,6 +20,9 @@ BUILDDIR_D = build/debug
 EXE_O    = gridpp
 EXE_D    = gridpp_debug
 
+PREFIX = $(DESTDIR)/usr
+BINDIR = $(PREFIX)/bin
+
 CORESRC 	= $(wildcard src/*.cpp)
 CALSRC  	= $(wildcard src/Calibrator/*.cpp)
 FILESRC 	= $(wildcard src/File/*.cpp)
@@ -79,7 +82,7 @@ tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
 
 install:
-	install gridpp /usr/bin/gridpp
+	install -D gridpp $(BINDIR)/gridpp
 
 doxygen:
 	doxygen doxygen/config

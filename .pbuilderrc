@@ -84,13 +84,12 @@ else
     echo "Unknown distribution: $DIST"
     exit 1
 fi
-OTHERMIRROR="deb file:///var/cache/archive $DIST/"
 
 # ccache
 export CCACHE_DIR="/var/cache/pbuilder/ccache/$DIST"
 export PATH="/usr/lib/ccache:${PATH}"
-mkdir -p "${CCACHE_DIR}" /var/cache/archive
-chown -R 1234:root "${CCACHE_DIR}" /var/cache/archive
+mkdir -p "${CCACHE_DIR}"
+chown -R 1234:root "${CCACHE_DIR}"
 chmod 755 "${CCACHE_DIR}"
 EXTRAPACKAGES=ccache
-BINDMOUNTS="${CCACHE_DIR} /var/cache/archive"
+BINDMOUNTS="${CCACHE_DIR}"

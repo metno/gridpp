@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/metno/gridpp
 
 Package: gridpp
 Architecture: amd64
-Depends: libnetcdf, libboost
+Depends: libnetcdf6
 Description: Gridded post-processor
  The program post-processes an AROME or ECMWF NetCDF file by using various
  downscaling and calibration methods. Post-processed forecasts are placed in a

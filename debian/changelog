@@ -1,3 +1,9 @@
+gridpp (0.1.2-2) precise; urgency=low
+
+  * Adjust runtime dependencies
+
+ -- Christian Skarby <christian.skarby@met.no>  Tue, 21 Apr 2015 08:51:59 +0200
+
 gridpp (0.1.2) precise; urgency=low
 
   * Initial release

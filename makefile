@@ -41,7 +41,7 @@ TESTS0  	= $(patsubst src/Testing%,testing%,$(TESTSRC))
 TESTS   	= $(TESTS0:.cpp=.exe)
 INCS    	= makefile $(HEADERS)
 
-.PHONY: tags count coverage doxygen check
+.PHONY: tags count coverage doxygen test
 
 default: $(EXE_O)
 
@@ -66,6 +66,7 @@ gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 test: gtest $(TESTS)
+	./runAllTests.sh
 
 testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
 	$(CC) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
@@ -76,7 +77,7 @@ count:
 clean: 
 	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
-		coverage/* coverage.* build/gtest
+		coverage/* coverage.* build/gtest gridpp
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
@@ -105,5 +106,3 @@ gtest: build/gtest/libgtest.a
 build/gtest/libgtest.a: /usr/src/gtest
 	mkdir -p build/gtest
 	cd build/gtest && cmake /usr/src/gtest && cmake --build .
-
-check: coverage

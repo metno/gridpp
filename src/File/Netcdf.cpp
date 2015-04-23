@@ -117,6 +117,45 @@ void FileNetcdf::setGlobalAttribute(std::string iName, std::string iValue) {
    mFile.add_att(iName.c_str(), iValue.c_str());
 }
 
+void FileNetcdf::appendGlobalAttribute(std::string iName, std::string iValue) {
+   NcError q(NcError::silent_nonfatal);
+   NcAtt* att = mFile.get_att(iName.c_str());
+   if(att == NULL) {
+      setGlobalAttribute(iName, iValue);
+   }
+   else {
+      NcValues* values = att->values();
+      std::stringstream ss;
+      ss << values->as_string(0) << "\n" << iValue;
+      setGlobalAttribute(iName, ss.str());
+   }
+}
+
+void FileNetcdf::prependGlobalAttribute(std::string iName, std::string iValue) {
+   NcError q(NcError::silent_nonfatal);
+   NcAtt* att = mFile.get_att(iName.c_str());
+   if(att == NULL) {
+      setGlobalAttribute(iName, iValue);
+   }
+   else {
+      NcValues* values = att->values();
+      std::stringstream ss;
+      ss << iValue << "\n" << values->as_string(0);
+      setGlobalAttribute(iName, ss.str());
+   }
+}
+
+std::string FileNetcdf::getGlobalAttribute(std::string iName) {
+   NcError q(NcError::silent_nonfatal); 
+   NcAtt* att = mFile.get_att(iName.c_str());
+   if(att == NULL) {
+      return "";
+   }
+   else {
+      return att->values()->as_string(0);
+   }
+}
+
 void FileNetcdf::writeTimes() {
    std::vector<double> times = getTimes();
    if(times.size() != getNumTime()) {
@@ -159,8 +198,9 @@ void FileNetcdf::writeReferenceTime() {
    setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }
 void FileNetcdf::writeGlobalAttributes() {
-   setGlobalAttribute("Conventions", "CF-1.0");
+   if(getGlobalAttribute("Conventions") != "")
+      setGlobalAttribute("Conventions", "CF-1.0");
    std::stringstream ss;
-   ss << Util::getCurrentDateString() << ": creation by gridpp";
-   setGlobalAttribute("history", ss.str());
+   ss << Util::getCurrentTimeStamp() << ": post-processing by gridpp";
+   prependGlobalAttribute("history", ss.str());
 }

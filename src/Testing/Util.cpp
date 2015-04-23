@@ -162,8 +162,8 @@ namespace {
       EXPECT_LT(2000000, date);
    }
    TEST_F(UtilTest, getCurrentDateString) {
-      std::string date = Util::getCurrentDateString();
-      EXPECT_EQ(10, date.size());
+      std::string date = Util::getCurrentTimeStamp();
+      EXPECT_EQ(19, date.size());
    }
    TEST_F(UtilTest, copy) {
       // Check that copying a file works. Do this by modifying a file, and then overwritiing

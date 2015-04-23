@@ -14,7 +14,6 @@ Setup::Setup(const std::vector<std::string>& argv) :
    // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember
    // to not free the memory of both files.
    if(argv[0] == argv[1]) {
-      std::cout << "Identical files" << std::endl;
       inputFile = outputFile;
       mIdenticalIOFiles = true;
    }

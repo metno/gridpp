@@ -20,6 +20,12 @@ class FileNetcdf : public File {
       void setAttribute(NcVar* iVar, std::string iName, std::string iValue);
       //! Add global attribute to file (overwrite if existing)
       void setGlobalAttribute(std::string iName, std::string iValue);
+      //! Add global attribute to file (append to attribute if existing)
+      void appendGlobalAttribute(std::string iName, std::string iValue);
+      //! Add global attribute to file (prepend to attribute if existing)
+      void prependGlobalAttribute(std::string iName, std::string iValue);
+      //! Get global string attribute. Returns "" if non-existant.
+      std::string getGlobalAttribute(std::string iName);
    protected:
       float getScale(NcVar* iVar) const;
       float getOffset(NcVar* iVar) const;

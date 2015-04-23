@@ -65,8 +65,8 @@ class Util {
       //! \brief Get the current date in YYYYMMDD format
       static int getCurrentDate();
 
-      //! \brief Get the current date in YYYY-MM-DD format
-      static std::string getCurrentDateString();
+      //! \brief Get the current date in YYYY-MM-DD HH:MM:SS format
+      static std::string getCurrentTimeStamp();
       
       //! \brief Calculates new date by adding hours to an existing date
       //! @param iDate Date in format YYYYMMDD

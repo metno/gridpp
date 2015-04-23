@@ -8,6 +8,7 @@
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/date_duration.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <execinfo.h>
 #include <signal.h>
 #include <fstream>
@@ -112,12 +113,16 @@ int Util::getCurrentDate() {
     return today.year()*10000 + today.month()*100 + today.day();
 }
 
-std::string Util::getCurrentDateString() {
-    boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+std::string Util::getCurrentTimeStamp() {
+    // boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+    boost::posix_time::ptime today = boost::posix_time::second_clock::local_time();
     std::stringstream ss;
-    ss << std::setfill('0') << std::setw(4) << today.year() << "-"
-       << std::setfill('0') << std::setw(2) << today.month() << "-"
-       << std::setfill('0') << std::setw(2) << today.day();
+    ss << std::setfill('0') << std::setw(4) << today.date().year() << "-"
+       << std::setfill('0') << std::setw(2) << today.date().month() << "-"
+       << std::setfill('0') << std::setw(2) << today.date().day() << " "
+       << std::setfill('0') << std::setw(2) << today.time_of_day().hours() << ":"
+       << std::setfill('0') << std::setw(2) << today.time_of_day().minutes() << ":"
+       << std::setfill('0') << std::setw(2) << today.time_of_day().seconds();
     return ss.str();
 }
 

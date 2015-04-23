@@ -16,7 +16,7 @@ int main(int argc, const char *argv[]) {
    if(argc < 3) {
       std::cout << "Post-processes gridded forecasts" << std::endl;
       std::cout << std::endl;
-      std::cout << "usage:  postprocess.exe input output [-v var [options]* [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
+      std::cout << "usage:  gridpp input output [-v var [options]* [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
       std::cout << std::endl;
       std::cout << "Arguments:" << std::endl;
       std::cout << "   input         Input file with NetCDF data." << std::endl;

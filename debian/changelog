@@ -1,3 +1,9 @@
+gridpp (0.1.5) precise; urgency=low
+
+  * Fixes bug in setting reference time
+
+ -- Thomas Nils Nipen <thomasn@pc4423.pc.met.no>  Tue, 28 Apr 2015 13:54:59 +0200
+
 gridpp (0.1.4) precise; urgency=low
 
   * Appends to "history" attribute

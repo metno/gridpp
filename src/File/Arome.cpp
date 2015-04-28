@@ -35,6 +35,7 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
       NcVar* vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
       vReferenceTime->get(&referenceTime, 1);
+      setReferenceTime(referenceTime);
    }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());

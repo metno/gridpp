@@ -203,6 +203,10 @@ namespace {
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
    }
+   TEST_F(UtilTest, gridppVersion) {
+      std::string version = Util::gridppVersion();
+      EXPECT_NE("", version);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

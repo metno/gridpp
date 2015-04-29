@@ -55,6 +55,8 @@ class Util {
       static float rad2deg(float rad);
 
       static float pi;
+
+      static std::string gridppVersion();
       
       //! Radius of the earth in meters
       static double radiusEarth;

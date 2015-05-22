@@ -5,24 +5,53 @@
 
 Setup::Setup(const std::vector<std::string>& argv) :
       mIdenticalIOFiles(false) {
-   outputFile  = File::getScheme(argv[1], false);
+
+   std::string inputFilename = "";
+   std::string outputFilename = "";
+
+   // Process input/output filenames and options
+   int index = 0;
+   while(index < argv.size()) {
+      std::string arg = argv[index];
+      if(inputFilename == "") {
+         inputFilename = arg;
+      }
+      else if(outputFilename == "") {
+         if(Util::hasChar(arg, '=')) {
+            inputOptions.addOptions(arg);
+         }
+         else {
+            outputFilename = arg;
+         }
+      }
+      else {
+         if(Util::hasChar(arg, '=')) {
+            outputOptions.addOptions(arg);
+         }
+         else {
+            break;
+         }
+      }
+      index++;
+   }
+   outputFile  = File::getScheme(outputFilename, outputOptions, false);
    if(outputFile == NULL) {
-      Util::error("File '" + argv[1] + " must be a valid file");
+      Util::error("File '" + outputFilename + " must be a valid file");
    }
 
    // In some cases, it is not possible to open the same file first as readonly and then writeable
    // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember
    // to not free the memory of both files.
-   if(argv[0] == argv[1]) {
+   if(inputFilename == outputFilename) {
       inputFile = outputFile;
       mIdenticalIOFiles = true;
    }
    else {
-      inputFile = File::getScheme(argv[0], true);
+      inputFile = File::getScheme(inputFilename, inputOptions, true);
    }
 
    if(inputFile == NULL) {
-      Util::error("File '" + argv[0] + " must be a valid file");
+      Util::error("File '" + inputFilename + " must be a valid file");
    }
 
    // Implement a finite state machine
@@ -34,12 +63,7 @@ Setup::Setup(const std::vector<std::string>& argv) :
    Options vOptions;
    Options dOptions;
    Options cOptions;
-   int index = 2;
    std::string errorMessage = "";
-
-   if(argv.size() == 2) {
-      return;
-   }
 
    std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
@@ -49,7 +73,7 @@ Setup::Setup(const std::vector<std::string>& argv) :
       if(state != ERROR)
          prevState = state;
       if(state == START) {
-         if(argv[index] == "-v") {
+         if(index < argv.size() && argv[index] == "-v") {
             state = VAR;
             index++;
          }

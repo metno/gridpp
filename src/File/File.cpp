@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cmath>
 #include "../Util.h"
+#include "../Options.h"
 
 File::File(std::string iFilename) :
       mFilename(iFilename),
@@ -12,7 +13,7 @@ File::File(std::string iFilename) :
    createNewTag();
 }
 
-File* File::getScheme(std::string iFilename, bool iReadOnly) {
+File* File::getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly) {
    File* file;
    // TODO:
    // Autodetect type based on content

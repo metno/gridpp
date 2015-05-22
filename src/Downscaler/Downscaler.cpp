@@ -34,6 +34,9 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       if(iOptions.getValue("minElevDiff", minElevDiff)) {
          d->setMinElevDiff(minElevDiff);
       }
+      bool logTransform;
+      if(iOptions.getValue("logTransform", logTransform))
+         d->setLogTransform(logTransform);
       return d;
    }
    else if(iName == "smart") {

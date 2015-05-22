@@ -76,6 +76,33 @@ namespace {
       EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
       EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
    }
+   // Check that logTransform works
+   TEST_F(TestDownscalerGradient, 10x10log) {
+      DownscalerGradient d(Variable::T);
+      d.setSearchRadius(1);
+      d.setLogTransform(true);
+      FileArome from("testing/files/10x10.nc");
+      const Field& fromT  = *from.getField(Variable::T, 0);
+      FileFake to(1,4,1,from.getNumTime());
+      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
+      bool status = d.downscale(from, to);
+      EXPECT_TRUE(status);
+      const Field& toT   = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
+      // T = T(nn) * exp(gradient * (elev - elev(nn)))
+      EXPECT_FLOAT_EQ(301.30985, toT(0,0,0)); // 301 * exp(-2.59620e-5 * (120-159.63))
+
+      // Fix the gradient
+      d.setConstantGradient(-0.01);
+      d.setLogTransform(true);
+      d.downscale(from, to);
+      const Field& toT2  = *to.getField(Variable::T, 0);
+      ASSERT_EQ(1, toT2.getNumLat());
+      ASSERT_EQ(4, toT2.getNumLon());
+      // T = T(nn) * exp(gradient * (elev - elev(nn)))
+      EXPECT_FLOAT_EQ(447.3916, toT2(0,0,0));
+   }
    TEST_F(TestDownscalerGradient, 10x10minElevDiff) {
       DownscalerGradient d(Variable::T);
       d.setSearchRadius(1);

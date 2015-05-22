@@ -8,6 +8,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable) :
       mSearchRadius(3),
       mMinGradient(-10),
       mMaxGradient(10),
+      mLogTransform(false),
       mConstGradient(Util::MV),
       mMinElevDiff(30) {
 }
@@ -77,6 +78,9 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                            assert(jj < ielevs[ii].size());
                            float x = ielevs[ii][jj];
                            float y = ifield(ii,jj,e);
+                           if(mLogTransform) {
+                              y = log(y);
+                           }
                            if(Util::isValid(x) && Util::isValid(y)) {
                               meanXY += x*y;
                               meanX  += x;
@@ -114,9 +118,15 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   else {
                      gradient = mConstGradient;
                   }
-                  float value = ifield(Icenter,Jcenter,e) + dElev * gradient;
+                  float value = Util::MV;
+                  if(mLogTransform) {
+                     value = ifield(Icenter,Jcenter,e) * exp(gradient * dElev);
+                  }
+                  else {
+                     value = ifield(Icenter,Jcenter,e) + dElev * gradient;
+                  }
                   if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
-                     // Use nearest neighbour if we the gradient put us outside the bounds of the variable
+                     // Use nearest neighbour if the gradient put us outside the bounds of the variable
                      ofield(i,j,e) = (ifield)(Icenter, Jcenter, e);
                   }
                   else {
@@ -158,17 +168,27 @@ float DownscalerGradient::getMinElevDiff() const {
    return mMinElevDiff;
 }
 
+void DownscalerGradient::setLogTransform(float iLogTransform) {
+   mLogTransform = iLogTransform;
+}
+bool DownscalerGradient::getLogTransform() const {
+   return mLogTransform;
+}
 std::string DownscalerGradient::description() {
    std::stringstream ss;
    ss << "   -d gradient                  Adjusts the nearest neighbour based on the elevation difference" << std::endl;
-   ss << "                                to the output gridpoint. If the gradient puts the forecast outside" << std::endl;
-   ss << "                                to domain of the variable (e.g. negative precipitation) then the " << std::endl;
-   ss << "                                nearest neighbour is used." << std::endl;
+   ss << "                                to the output gridpoint: T = T(nn) + gradient * dElev. If the" << std::endl;
+   ss << "                                gradient puts the forecast outside the domain of the variable" << std::endl;
+   ss << "                                (e.g. negative precipitation) then thenearest neighbour is used." << std::endl;
    ss << "      constantGradient=undef    Fix gradient to this value. If unspecified, computes the gradient" << std::endl;
    ss << "                                by linear regression of points in a neighbourhood." << std::endl;
    ss << "      searchRadius=3            Compute gradient in a neighbourhood box of points within +- radius" << std::endl;
    ss << "                                in both east-west and north-south direction." << std::endl;
    ss << "      minElevDiff=30            Minimum elevation range (in meters) required within the neighbourhood" << std::endl;
    ss << "                                to compute gradient. Use nearest neighbour otherwise." << std::endl;
+   ss << "      logTransform=0            Should the variable be log-transformed first? I.e should a linear" << std::endl;
+   ss << "                                gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev)." << std::endl;
+   ss << "                                Useful for pressure variables. Can be used together with constantGradient." << std::endl;
    return ss.str();
 }
+

@@ -7,6 +7,8 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! Adjust the value of the nearest neighbour (nn), based on the gradient in a neighbourhood
 //! surrounding the nearest neighbour, and the elevation difference to the lookup point (p):
 //! T(p) = T(nn) + gradient*(elev(p) - elev(nn))
+//! If the variable is log transformed, then use:
+//! T(p) = T(nn) * exp(gradient*(elev(p) - elev(nn)))
 //! Uses nearest neighbour when the lookup location does not have an elevation
 class DownscalerGradient : public Downscaler {
    public:
@@ -22,6 +24,8 @@ class DownscalerGradient : public Downscaler {
       int  getSearchRadius() const;
       void  setMinElevDiff(float iMinElevDiff);
       float getMinElevDiff() const;
+      void  setLogTransform(float iLogTransform);
+      bool  getLogTransform() const;
       static std::string description();
       std::string name() const {return "gradient";};
       float mMinGradient;
@@ -31,5 +35,6 @@ class DownscalerGradient : public Downscaler {
       int mSearchRadius;
       float mConstGradient;
       float mMinElevDiff; // Minimum elevation difference within neighbourhood to use gradient
+      bool mLogTransform;
 };
 #endif

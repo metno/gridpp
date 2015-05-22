@@ -26,6 +26,16 @@ void Options::clear() {
    mPairs.clear();
 }
 
+std::string Options::toString() const {
+   std::stringstream ss;
+   for(int i = 0; i < mPairs.size(); i++) {
+      if(i != 0)
+         ss << " ";
+      ss << mPairs[i].first << "=" << mPairs[i].second;
+   }
+   return ss.str();
+}
+
 Options::Options(std::string iOptionString) {
    addOptions(iOptionString);
 }

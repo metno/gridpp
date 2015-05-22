@@ -141,7 +141,24 @@ namespace {
       EXPECT_FALSE(status);
       EXPECT_EQ(19, value);
    }
-   
+   TEST_F(OptionsTest, toString) {
+      Options options("test=0   q=4");
+      std::string s = options.toString();
+      EXPECT_LT(0, s.size());
+
+      Options copyOptions(s);
+      int i = -1;
+      copyOptions.getValue("test", i);
+      EXPECT_EQ(0, i);
+      copyOptions.getValue("q", i);
+      EXPECT_EQ(4, i);
+
+      options.addOptions("f=3");
+      s = options.toString();
+      copyOptions = Options(s);
+      copyOptions.getValue("f", i);
+      EXPECT_EQ(3, i);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

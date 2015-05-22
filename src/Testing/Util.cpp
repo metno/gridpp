@@ -203,6 +203,23 @@ namespace {
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
    }
+   TEST_F(UtilTest, hasChar) {
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", 't'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", ' '));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '2'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '&'));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", ','));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", 'q'));
+
+      EXPECT_FALSE(Util::hasChar("", 'q'));
+      EXPECT_FALSE(Util::hasChar("", ' '));
+
+      EXPECT_TRUE(Util::hasChar("test\nq2", '2'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", 't'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", '\n'));
+      EXPECT_FALSE(Util::hasChar("test\nq2", ' '));
+      EXPECT_FALSE(Util::hasChar("test\nq2", '3'));
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

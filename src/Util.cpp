@@ -163,6 +163,10 @@ float Util::invLogit(float x) {
    return exp(x)/(exp(x)+1);
 }
 
+bool Util::hasChar(std::string iString, char iChar) {
+   return iString.find(iChar) != std::string::npos;
+}
+
 bool Util::copy(std::string iFrom, std::string iTo) {
    std::ifstream source(iFrom.c_str(), std::ios::binary);
    std::ofstream dest(iTo.c_str(), std::ios::binary);

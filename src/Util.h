@@ -85,6 +85,9 @@ class Util {
       //! \brief Computes the inverse logit of x
       //! @return x A value on the interval (0,1)
       static float invLogit(float x);
+
+      //! Returns true if iString contains one or more of iChar
+      static bool hasChar(std::string iString, char iChar);
       
       //! \brief Comparator class for sorting pairs using the first entry.
       //! Sorts from smallest to largest

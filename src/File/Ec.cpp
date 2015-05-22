@@ -168,6 +168,9 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::V) {
       return "y_wind_10m";
    }
+   else if(iVariable == Variable::MSLP) {
+      return "sea_level_pressure";
+   }
    else if(iVariable == Variable::RH) {
       return "relative_humidity_2m";
    }

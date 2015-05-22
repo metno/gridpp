@@ -25,6 +25,10 @@ std::string Variable::getTypeName(Type iType) {
       return "Phase";
    else if(iType == P)
       return "P";
+   else if(iType == MSLP)
+      return "MSLP";
+   else if(iType == QNH)
+      return "QNH";
    else if(iType == Fake)
       return "Fake";
    else
@@ -54,6 +58,10 @@ Variable::Type Variable::getType(std::string iName) {
       return Phase;
    else if(iName == "P")
       return P;
+   else if(iName == "MSLP")
+      return MSLP;
+   else if(iName == "QNH")
+      return QNH;
    else if(iName == "Fake")
       return Fake;
    else
@@ -73,6 +81,8 @@ std::string Variable::description() {
    ss << "   -v RH                        Relative humidity" << std::endl;
    ss << "   -v Phase                     Precipitation phase (0 none, 1 rain, 2 sleet, 3 snow)" << std::endl;
    ss << "   -v P                         Pressure" << std::endl;
+   ss << "   -v MSLP                      Mean sea-level pressure" << std::endl;
+   ss << "   -v QNH                       Pressure reduced to sea-level using standard atmosphere (ICAO)" << std::endl;
    return ss.str();
 }
 
@@ -89,6 +99,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::RH);
    variables.push_back(Variable::Phase);
    variables.push_back(Variable::P);
+   variables.push_back(Variable::MSLP);
+   variables.push_back(Variable::QNH);
    return variables;
 }
 
@@ -115,6 +127,10 @@ float Variable::getMin(Type iType) {
       case Phase:
          return 0;
       case P:
+         return 0;
+      case MSLP:
+         return 0;
+      case QNH:
          return 0;
       default:
          return Util::MV;
@@ -145,6 +161,10 @@ float Variable::getMax(Type iType) {
          return 3;
       case P:
          return Util::MV;
+      case MSLP:
+         return Util::MV;
+      case QNH:
+         return Util::MV;
       default:
          return Util::MV;
    }
@@ -172,6 +192,10 @@ std::string Variable::getUnits(Type iType) {
       case Phase:
          return "";
       case P:
+         return "pa";
+      case MSLP:
+         return "pa";
+      case QNH:
          return "pa";
       default:
          return "no_units";
@@ -203,6 +227,11 @@ std::string Variable::getStandardName(Type iType) {
          return "";
       case P:
          return "surface_air_pressure";
+      case MSLP:
+         return "air_pressure_at_sea_level";
+      case QNH:
+         // TODO: What is the standard name for QNH?
+         return "air_pressure_at_sea_level_qnh";
       default:
          return "no_units";
    }

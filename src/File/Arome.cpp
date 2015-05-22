@@ -218,6 +218,13 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::P) {
       return "surface_air_pressure";
    }
+   else if(iVariable == Variable::MSLP) {
+      return "air_pressure_at_sea_level";
+   }
+   else if(iVariable == Variable::QNH) {
+      // TODO: What name to use?
+      return "qnh";
+   }
    else if(iVariable == Variable::Fake) {
       return "fake";
    }

@@ -34,6 +34,7 @@ class Calibrator {
 #include "Temperature.h"
 #include "Accumulate.h"
 #include "Smooth.h"
+#include "Qnh.h"
 #include "Phase.h"
 #include "WindDirection.h"
 #endif

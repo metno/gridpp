@@ -311,3 +311,8 @@ NcVar* FileEc::getLonVar() const {
       vLon = getVar("lon");
    return vLon;
 }
+std::string FileEc::description() {
+   std::stringstream ss;
+   ss << "   type=ec                      ECMWF ensemble file" << std::endl;
+   return ss.str();
+}

@@ -288,3 +288,9 @@ bool FileArome::isValid(std::string iFilename) {
    file.close();
    return status;
 }
+
+std::string FileArome::description() {
+   std::stringstream ss;
+   ss << "   type=arome                   AROME file" << std::endl;
+   return ss.str();
+}

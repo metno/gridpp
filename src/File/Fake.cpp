@@ -63,3 +63,8 @@ bool FileFake::hasVariableCore(Variable::Type iVariable) const {
    else
       return true;
 }
+std::string FileFake::description() {
+   std::stringstream ss;
+   ss << "   type=fake                    Fake file" << std::endl;
+   return ss.str();
+}

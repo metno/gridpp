@@ -6,6 +6,7 @@
 class FileFake : public File {
    public:
       FileFake(int nLat=10, int nLon=10, int nEns=2, int nTime=10);
+      static std::string description();
       std::string name() const {return "fake";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);

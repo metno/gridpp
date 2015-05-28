@@ -45,6 +45,9 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    else if(type == "ec") {
       file = new FileEc(iFilename, iReadOnly);
    }
+   else if(type == "point") {
+      file = new FilePoint(iFilename, iOptions);
+   }
    else {
       Util::error("Could not understand file type " + type);
    }

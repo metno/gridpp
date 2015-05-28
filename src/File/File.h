@@ -99,4 +99,5 @@ class File {
 };
 #include "Netcdf.h"
 #include "Fake.h"
+#include "Point.h"
 #endif

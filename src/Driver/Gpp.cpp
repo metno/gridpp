@@ -38,6 +38,7 @@ int main(int argc, const char *argv[]) {
       std::cout << "   I/O types are autodetected, but can be specified using:" << std::endl;
       std::cout << FileArome::description();
       std::cout << FileEc::description();
+      std::cout << FilePoint::description();
       std::cout << std::endl;
       std::cout << "Variables:" << std::endl;
       std::cout << Variable::description();

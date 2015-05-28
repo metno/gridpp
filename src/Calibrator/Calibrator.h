@@ -36,5 +36,6 @@ class Calibrator {
 #include "Smooth.h"
 #include "Qnh.h"
 #include "Phase.h"
+#include "Regression.h"
 #include "WindDirection.h"
 #endif

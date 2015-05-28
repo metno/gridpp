@@ -61,6 +61,7 @@ int main(int argc, const char *argv[]) {
       std::cout << CalibratorWindDirection::description();
       std::cout << CalibratorSmooth::description();
       std::cout << CalibratorPhase::description();
+      std::cout << CalibratorRegression::description();
       return 0;
    }
    Util::setShowError(true);

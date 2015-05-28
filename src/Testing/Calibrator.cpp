@@ -130,6 +130,20 @@ namespace {
       EXPECT_FALSE(((CalibratorPhase*) c)->getUseWetbulb());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryRegression) {
+      Calibrator* c;
+      c = Calibrator::getScheme("regression", Options("variable=Precip parameters=testing/files/regression1order.txt"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("regression", c->name());
+      delete c;
+   }
+   TEST_F(TestCalibrator, factoryQnh) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qnh", Options("variable=Precip"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qnh", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));

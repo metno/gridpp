@@ -37,6 +37,10 @@ namespace {
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(0,0,0,180));
       EXPECT_FLOAT_EQ(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75));
    }
+   TEST_F(UtilTest, getDate) {
+      EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
+      EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));
+   }
    TEST_F(UtilTest, getDistanceInvalid) {
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,-84.75,-101.75));
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,Util::MV,-84.75,-101.75));

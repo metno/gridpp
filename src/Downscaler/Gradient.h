@@ -13,28 +13,24 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerGradient : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradient(Variable::Type iVariable);
-      //! Do not compute the gradient but set it to a fixed amount. Positive rate means
-      //! increasing with elevation. The units are per meters.
-      void setConstantGradient(float iGradient);
+      DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
       float getConstantGradient() const;
-      //! Calculate gradient in a neighbourhood of points within +- iNumPoints
-      //! in each direction.
-      void setSearchRadius(int iNumPoints);
-      int  getSearchRadius() const;
-      void  setMinElevDiff(float iMinElevDiff);
+      int   getSearchRadius() const;
       float getMinElevDiff() const;
-      void  setLogTransform(float iLogTransform);
       bool  getLogTransform() const;
+      float getMinGradient() const;
+      float getMaxGradient() const;
+      float getDefaultGradient() const;
       static std::string description();
       std::string name() const {return "gradient";};
-      float mMinGradient;
-      float mMaxGradient;
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int mSearchRadius;
-      float mConstGradient;
+      int   mSearchRadius;
+      float mConstantGradient;
       float mMinElevDiff; // Minimum elevation difference within neighbourhood to use gradient
-      bool mLogTransform;
+      bool  mLogTransform;
+      float mMinGradient;
+      float mMaxGradient;
+      float mDefaultGradient;
 };
 #endif

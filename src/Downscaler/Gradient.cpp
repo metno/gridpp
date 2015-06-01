@@ -118,7 +118,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      // Use model gradient if:
                      // 1) sufficient elevation difference in neighbourhood
                      // 2) regression parameters are stable enough
-                     std::cout << elevDiff << " " << mMinElevDiff << std::endl;
                      if(counter > 0 && Util::isValid(elevDiff) && elevDiff >= mMinElevDiff && meanXX != meanX*meanX) {
                         // Estimate lapse rate
                         meanXY /= counter;
@@ -141,7 +140,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
                         gradient = mMaxGradient;
 
-                     std::cout << counter << " " << gradient << std::endl;
                   }
                   float value = Util::MV;
                   if(mLogTransform) {

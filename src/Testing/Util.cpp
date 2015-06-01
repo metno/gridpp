@@ -37,6 +37,10 @@ namespace {
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(0,0,0,180));
       EXPECT_FLOAT_EQ(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75));
    }
+   TEST_F(UtilTest, getDate) {
+      EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
+      EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));
+   }
    TEST_F(UtilTest, getDistanceInvalid) {
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,-84.75,-101.75));
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,Util::MV,-84.75,-101.75));
@@ -202,6 +206,30 @@ namespace {
       EXPECT_FALSE(status);
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
+   }
+   TEST_F(UtilTest, hasChar) {
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", 't'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", ' '));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '2'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '&'));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", ','));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", 'q'));
+
+      EXPECT_FALSE(Util::hasChar("", 'q'));
+      EXPECT_FALSE(Util::hasChar("", ' '));
+
+      EXPECT_TRUE(Util::hasChar("test\nq2", '2'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", 't'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", '\n'));
+      EXPECT_FALSE(Util::hasChar("test\nq2", ' '));
+      EXPECT_FALSE(Util::hasChar("test\nq2", '3'));
+   }
+   TEST_F(UtilTest, formatDescription) {
+      EXPECT_EQ("test      ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 0));
+      EXPECT_EQ("  test    ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 2));
+      // Invalid input should not throw an error
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 5, 2); // Too narrow message
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
    }
 }
 int main(int argc, char **argv) {

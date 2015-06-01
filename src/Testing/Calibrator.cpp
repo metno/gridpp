@@ -130,10 +130,37 @@ namespace {
       EXPECT_FALSE(((CalibratorPhase*) c)->getUseWetbulb());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryRegression) {
+      Calibrator* c;
+      c = Calibrator::getScheme("regression", Options("variable=Precip parameters=testing/files/regression1order.txt"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("regression", c->name());
+      delete c;
+   }
+   TEST_F(TestCalibrator, factoryQnh) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qnh", Options("variable=Precip"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qnh", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("smooth", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
+   }
+   TEST_F(TestCalibrator, factoryInvalid) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("parameters=testing/files/parameters.txt")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("variable=T")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("cloud", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("smooth", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("phase", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("variable=T")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("parameters=testing/files/regression1order.txt")), ".*");
    }
 }
 int main(int argc, char **argv) {

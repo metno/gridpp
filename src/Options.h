@@ -10,7 +10,7 @@
 class Options {
    public:
       //! Creates container
-      // @param iOptionString options with format: "key1=value1 key2=value2..."
+      //! @param iOptionString options with format: "key1=value1 key2=value2..."
       Options(std::string iOptionString="");
 
       //! \brief Adds key and value to container
@@ -33,6 +33,11 @@ class Options {
 
       //! Remove all key-value pairs from container
       void clear();
+
+      //! String representation of all options in with format: "key1=value1 key2=value2...".
+      //! Can be used to reconstruct the object by passing into the constructor.
+      //! Order of options is not specified.
+      std::string toString() const;
 
       //! \brief Find value corresponding to key
       //! @param iKey find this key

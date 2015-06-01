@@ -67,7 +67,7 @@ namespace {
       EXPECT_EQ(0, doWrite);
    }
    TEST(SetupTest, variableOptionsMultiple) {
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -v P write=0 -v RH -v U test=2 -d smart -v V -v Precip new=2.1"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -v P write=0 -v RH -v U test=2 -d smart -v V -v Precip new=2.1 -c smooth"));
       ASSERT_EQ(6,            setup.variableConfigurations.size());
       VariableConfiguration varconf = setup.variableConfigurations[0];
 
@@ -112,9 +112,10 @@ namespace {
       ASSERT_TRUE(vOptions.getValue("new", value));
       EXPECT_FLOAT_EQ(2.1, value);
       EXPECT_FALSE(vOptions.getValue("-v", value));
+      EXPECT_EQ(1, varconf.calibrators.size());
+      EXPECT_EQ("smooth", varconf.calibrators[0]->name());
    }
    TEST(SetupTest, shouldBeValid) {
-      MetSetup setup0(Util::split("testing/files/10x10.nc testing/files/10x10.nc"));
       MetSetup setup1(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart"));
       MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -c smooth -d smart"));
       MetSetup setup3(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart -c smooth"));
@@ -124,12 +125,30 @@ namespace {
       MetSetup setup7(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d nearestNeighbour -v Precip -d smart"));
       MetSetup setup8(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart numSmart=2 -c smooth -v Precip -d smart"));
       MetSetup setup9(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart numSmart=2 -v Precip -d smart"));
+      MetSetup setup10(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d smart numSmart=2 -v Precip -d smart"));
    }
    TEST(SetupTest, shouldBeInValid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
+      // No variables
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc")), ".*");
       EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v")), ".*");
       EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v -d smart")), ".*");
+      // Too many files (should have max two files)
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v -d smart testing/files/10x10.nc")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc testing/files/10x10.nc -v -d smart testing/files/10x10.nc")), ".*");
+      // Invalid input file
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/weoihwoiedoiwe10x10.nc testing/files/10x10.nc -v -d smart testing/files/10x10.nc")), ".*");
+      // Invalid output file
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/weoihwoiedoiwe10x10.nc -v -d smart testing/files/10x10.nc")), ".*");
+      // Nothing after downscaler
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -d")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -d -c smooth")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c smooth -d")), ".*");
+      // Nothing after calibrator
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -d nearest -c")), ".*");
+      EXPECT_DEATH(MetSetup setup2(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c -d nearest")), ".*");
    }
    TEST(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();
@@ -142,6 +161,18 @@ namespace {
       {
          MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart numSmart=2 -v Precip -d smart"));
       }
+   }
+   TEST(SetupTest, inputoutputOptions) {
+      MetSetup setup0(Util::split("testing/files/10x10.nc option1=1 testing/files/10x10.nc option2=2 -v T write=1 -d smart numSmart=2"));
+      int i;
+      EXPECT_TRUE(setup0.inputOptions.getValue("option1", i));
+      EXPECT_FALSE(setup0.inputOptions.getValue("option2", i));
+      EXPECT_FALSE(setup0.inputOptions.getValue("write", i));
+      EXPECT_EQ(1, i);
+      EXPECT_TRUE(setup0.outputOptions.getValue("option2", i));
+      EXPECT_FALSE(setup0.outputOptions.getValue("option1", i));
+      EXPECT_FALSE(setup0.outputOptions.getValue("write", i));
+      EXPECT_EQ(2, i);
    }
 }
 int main(int argc, char **argv) {

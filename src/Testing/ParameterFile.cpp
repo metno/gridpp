@@ -37,6 +37,13 @@ namespace {
       EXPECT_DEATH(ParameterFile("testing/files/parametersInvalidTime.txt"), ".*");
       EXPECT_DEATH(ParameterFile("testing/files/parametersInvalidEntries.txt"), ".*");
    }
+   TEST(ParameterFile, invalidTime) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      ParameterFile file("testing/files/parametersMultipleTime.txt");
+      EXPECT_DEATH(file.getParameters(1100), ".*");
+      EXPECT_DEATH(file.getParameters(-1), ".*");
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

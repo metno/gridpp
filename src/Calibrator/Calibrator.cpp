@@ -92,6 +92,26 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "qnh") {
+      CalibratorQnh* c = new CalibratorQnh();
+
+      return c;
+   }
+   else if(iName == "regression") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("Calibrator 'regression' needs parameters");
+      }
+
+      ParameterFile* parFile = new ParameterFile(parFilename);
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'regression' needs variable");
+      }
+      CalibratorRegression* c = new CalibratorRegression(parFile, Variable::getType(variable));
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;

@@ -41,6 +41,6 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
 
 std::string DownscalerNearestNeighbour::description() {
    std::stringstream ss;
-   ss << "   -d nearestNeighbour          Uses the nearest gridpoint in curved distance" << std::endl;
+   ss << Util::formatDescription("-d nearestNeighbour", "Uses the nearest gridpoint in curved distance") << std::endl;
    return ss.str();
 }

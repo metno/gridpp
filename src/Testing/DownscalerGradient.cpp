@@ -7,6 +7,15 @@
 namespace {
    class TestDownscalerGradient : public ::testing::Test {
       public:
+         void SetUp() {
+            mFrom = new FileArome("testing/files/10x10.nc");
+            mTo   = new FileFake(1,4,1,mFrom->getNumTime());
+            setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
+         }
+         void TearDown() {
+            delete mFrom;
+            delete mTo;
+         }
          vec2 makeVec2(int nLat, int nLon, const std::vector<float>& values) {
             vec2 grid;
             grid.resize(nLat);
@@ -44,156 +53,200 @@ namespace {
             iFile.setElevs(elev);
          };
       protected:
+         FileArome* mFrom;
+         FileFake* mTo;
    };
 
    TEST_F(TestDownscalerGradient, 10x10) {
-      DownscalerGradient d(Variable::T);
-      d.setSearchRadius(1);
-      FileArome from("testing/files/10x10.nc");
-      const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
-      bool status = d.downscale(from, to);
-      EXPECT_TRUE(status);
-      const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(4, toT.getNumLon());
-      // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-160)
-      EXPECT_FLOAT_EQ(290.34964, toT(0,1,0));
-      EXPECT_FLOAT_EQ(301.29544, toT(0,2,0)); // 301 - 0.01068 * (600-346)
-      EXPECT_FLOAT_EQ(308.77686, toT(0,3,0));
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) + gradient * (elev - elev(nn))
+         EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-160)
+         EXPECT_FLOAT_EQ(290.34964, toT(0,1,0));
+         EXPECT_FLOAT_EQ(301.29544, toT(0,2,0)); // 301 - 0.01068 * (600-346)
+         EXPECT_FLOAT_EQ(308.77686, toT(0,3,0));
+      }
 
       // Fix the gradient
-      d.setConstantGradient(0.01);
-      d.downscale(from, to);
-      const Field& toT2  = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT2.getNumLat());
-      ASSERT_EQ(4, toT2.getNumLon());
-      // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(300.60367, toT2(0,0,0));
-      EXPECT_FLOAT_EQ(314.40369, toT2(0,1,0));
-      EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
-      EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 constantGradient=0.01"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) + gradient * (elev - elev(nn))
+         EXPECT_FLOAT_EQ(300.60367, toT(0,0,0));
+         EXPECT_FLOAT_EQ(314.40369, toT(0,1,0));
+         EXPECT_FLOAT_EQ(306.53052, toT(0,2,0));
+         EXPECT_FLOAT_EQ(299.53052, toT(0,3,0));
+      }
+   }
+   // Check that logTransform works
+   TEST_F(TestDownscalerGradient, 10x10log) {
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 logTransform=1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) * exp(gradient * (elev - elev(nn)))
+         EXPECT_FLOAT_EQ(301.30985, toT(0,0,0)); // 301 * exp(-2.59620e-5 * (120-159.63))
+      }
+
+      // Fix the gradient
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 logTransform=1 constantGradient=-0.01"));
+         d.downscale(*mFrom, *mTo);
+         const Field& toT  = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) * exp(gradient * (elev - elev(nn)))
+         EXPECT_FLOAT_EQ(447.3916, toT(0,0,0));
+      }
    }
    TEST_F(TestDownscalerGradient, 10x10minElevDiff) {
-      DownscalerGradient d(Variable::T);
-      d.setSearchRadius(1);
-      d.setMinElevDiff(1500);
-      FileArome from("testing/files/10x10.nc");
-      const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
-      bool status = d.downscale(from, to);
-      EXPECT_TRUE(status);
-      const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(4, toT.getNumLon());
-      // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(301, toT(0,0,0));
-      EXPECT_FLOAT_EQ(301, toT(0,1,0));
-      EXPECT_FLOAT_EQ(304, toT(0,2,0));
-      EXPECT_FLOAT_EQ(304, toT(0,3,0));
+      {
+         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=1500"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) + gradient * (elev - elev(nn))
+         EXPECT_FLOAT_EQ(301, toT(0,0,0));
+         EXPECT_FLOAT_EQ(301, toT(0,1,0));
+         EXPECT_FLOAT_EQ(304, toT(0,2,0));
+         EXPECT_FLOAT_EQ(304, toT(0,3,0));
+      }
 
       // Fix the gradient
       // This should not be affected by the minElevDiff
-      d.setConstantGradient(0.01);
-      d.downscale(from, to);
-      const Field& toT2  = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT2.getNumLat());
-      ASSERT_EQ(4, toT2.getNumLon());
-      // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(300.60367, toT2(0,0,0));
-      EXPECT_FLOAT_EQ(314.40369, toT2(0,1,0));
-      EXPECT_FLOAT_EQ(306.53052, toT2(0,2,0));
-      EXPECT_FLOAT_EQ(299.53052, toT2(0,3,0));
+      {
+         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=1500 constantGradient=0.01"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // T = T(nn) + gradient * (elev - elev(nn))
+         EXPECT_FLOAT_EQ(300.60367, toT(0,0,0));
+         EXPECT_FLOAT_EQ(314.40369, toT(0,1,0));
+         EXPECT_FLOAT_EQ(306.53052, toT(0,2,0));
+         EXPECT_FLOAT_EQ(299.53052, toT(0,3,0));
+      }
    }
    TEST_F(TestDownscalerGradient, 10x10negativeTemperatures) {
-      DownscalerGradient d(Variable::T);
-      d.setSearchRadius(1);
-      d.setMinElevDiff(0);
-      FileArome from("testing/files/10x10.nc");
-      const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,3,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,2}, (float[]){100000, 10000, 0});
-      bool status = d.downscale(from, to);
-      EXPECT_TRUE(status);
-      const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(3, toT.getNumLon());
-      // Gradient = -0.00797
-      EXPECT_FLOAT_EQ(301,   toT(0,0,0)); // nearest neighbour
-      EXPECT_FLOAT_EQ(222.80988, toT(0,1,0));
-      EXPECT_FLOAT_EQ(302.2684, toT(0,2,0));
+      setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,2}, (float[]){100000, 10000, 0});
+      {
+         // When the gradient goes outside the domain of the variable, use nearest neightbour
+         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // Gradient = -0.00797
+         EXPECT_FLOAT_EQ(301,   toT(0,0,0)); // nearest neighbour
+         EXPECT_FLOAT_EQ(222.80988, toT(0,1,0));
+         EXPECT_FLOAT_EQ(302.2684, toT(0,2,0));
+      }
 
       // Fix the gradient
-      d.setConstantGradient(-0.1);
-      d.downscale(from, to);
-      const Field& toT2  = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT2.getNumLat());
-      ASSERT_EQ(3, toT2.getNumLon());
-      EXPECT_FLOAT_EQ(301, toT2(0,0,0)); // nearest neighbour
-      EXPECT_FLOAT_EQ(301, toT2(0,1,0)); // nearest neighbour
-      EXPECT_FLOAT_EQ(316.96323, toT2(0,2,0));
+      {
+         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0 constantGradient=-0.1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         EXPECT_FLOAT_EQ(301, toT(0,0,0)); // nearest neighbour
+         EXPECT_FLOAT_EQ(301, toT(0,1,0)); // nearest neighbour
+         EXPECT_FLOAT_EQ(316.96323, toT(0,2,0));
+      }
+   }
+   TEST_F(TestDownscalerGradient, minGradient) {
+      DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=-0.01"));
+      bool status = d.downscale(*mFrom, *mTo);
+      EXPECT_TRUE(status);
+      const Field& toT   = *mTo->getField(Variable::T, 0);
+      ASSERT_EQ(1, toT.getNumLat());
+      ASSERT_EQ(4, toT.getNumLon());
+      // Gradient within range:
+      EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-159.6324)
+      // Gradient is too negative (-0.01068):
+      EXPECT_FLOAT_EQ(301.4695,  toT(0,2,0)); // 304 - 0.01 * (600-346.9477)
+   }
+   TEST_F(TestDownscalerGradient, minmaxGradient) {
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=-0.01 maxGradient=-0.008"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // Gradient too large (-0.00797):
+         EXPECT_FLOAT_EQ(301.3171, toT(0,0,0)); // 301 - 0.008 * (120-159.6324)
+         // Gradient is too negative (-0.01068):
+         EXPECT_FLOAT_EQ(301.4695,  toT(0,2,0)); // 304 - 0.01 * (600-346.9477)
+      }
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=0.001 logTransform=1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // Gradient too low (-2.59620e-5)
+         EXPECT_FLOAT_EQ(289.3039, toT(0,0,0)); // 301 * exp(0.001 * (120-159.6324))
+      }
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=1 maxGradient=-0.01 logTransform=1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         ASSERT_EQ(1, toT.getNumLat());
+         ASSERT_EQ(4, toT.getNumLon());
+         // Gradient too high (-2.59620e-5)
+         EXPECT_FLOAT_EQ(447.3916, toT(0,0,0)); // 301 * exp(-0.01 * (120-159.63))
+      }
+   }
+   TEST_F(TestDownscalerGradient, defaultGradient) {
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=0 defaultGradient=0.1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         EXPECT_FLOAT_EQ(297.0368, toT(0,0,0)); // 301 + 0.1 * (120-159.6324)
+         EXPECT_FLOAT_EQ(329.3052,  toT(0,2,0)); // 304 + 0.1 * (600-346.9477)
+      }
+      {
+         DownscalerGradient d(Variable::T, Options("searchRadius=0 defaultGradient=-0.1"));
+         bool status = d.downscale(*mFrom, *mTo);
+         EXPECT_TRUE(status);
+         const Field& toT   = *mTo->getField(Variable::T, 0);
+         EXPECT_FLOAT_EQ(304.9632, toT(0,0,0)); // 301 - 0.1 * (120-159.6324)
+         EXPECT_FLOAT_EQ(278.6948,  toT(0,2,0)); // 304 - 0.1 * (600-346.9477)
+      }
+   }
+   TEST_F(TestDownscalerGradient, options) {
+      DownscalerGradient d(Variable::T, Options("searchRadius=3 defaultGradient=0.1 constantGradient=0.3 minGradient=0 maxGradient=0.2 logTransform=1 minElevDiff=1500"));
+      EXPECT_FLOAT_EQ(3, d.getSearchRadius());
+      EXPECT_FLOAT_EQ(0.1, d.getDefaultGradient());
+      EXPECT_FLOAT_EQ(0.3, d.getConstantGradient());
+      EXPECT_FLOAT_EQ(0, d.getMinGradient());
+      EXPECT_FLOAT_EQ(0.2, d.getMaxGradient());
+      EXPECT_FLOAT_EQ(1, d.getLogTransform());
+      EXPECT_FLOAT_EQ(1500, d.getMinElevDiff());
    }
    TEST_F(TestDownscalerGradient, missingValues) {
 
-   }
-   TEST_F(TestDownscalerGradient, constantGradient) {
-      DownscalerGradient d(Variable::T);
-      d.setSearchRadius(1);
-      FileArome from("testing/files/10x10.nc");
-      const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,4,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
-      bool status = d.downscale(from, to);
-      EXPECT_TRUE(status);
-      const Field& toT   = *to.getField(Variable::T, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(4, toT.getNumLon());
-      // T = T(nn) + gradient * (elev - elev(nn))
-      EXPECT_FLOAT_EQ(301.31491, toT(0,0,0));
-      EXPECT_FLOAT_EQ(290.34964,  toT(0,1,0));
-      EXPECT_FLOAT_EQ(301.29544,  toT(0,2,0));
-      EXPECT_FLOAT_EQ(308.77686,  toT(0,3,0));
-   }
-   TEST_F(TestDownscalerGradient, setGetSearchRadius) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-
-      DownscalerGradient d(Variable::Precip);
-      // Check that default is valid
-      EXPECT_GE(d.getSearchRadius(), 0);
-      d.setSearchRadius(5);
-      EXPECT_FLOAT_EQ(5, d.getSearchRadius());
-
-      // Invalid values
-      EXPECT_DEATH(d.setSearchRadius(-1), ".*");
-      EXPECT_DEATH(d.setSearchRadius(0), ".*");
-      EXPECT_DEATH(d.setSearchRadius(Util::MV), ".*");
-   }
-   TEST_F(TestDownscalerGradient, setGetConstantGradient) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-
-      DownscalerGradient d(Variable::Precip);
-      d.setConstantGradient(5);
-      EXPECT_FLOAT_EQ(5, d.getConstantGradient());
-      d.setConstantGradient(1);
-      EXPECT_FLOAT_EQ(1, d.getConstantGradient());
-
-      // Invalid values
-      EXPECT_DEATH(d.setConstantGradient(Util::MV), ".*");
-   }
-   TEST_F(TestDownscalerGradient, setGetMinElevDiff) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-
-      DownscalerGradient d(Variable::Precip);
-      // Check that default is valid
-      EXPECT_GE(d.getMinElevDiff(), 0);
-      d.setMinElevDiff(213.1);
-      EXPECT_FLOAT_EQ(213.1, d.getMinElevDiff());
    }
    TEST_F(TestDownscalerGradient, description) {
       DownscalerGradient::description();

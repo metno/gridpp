@@ -9,6 +9,8 @@
 #include "../Util.h"
 #include "../Field.h"
 
+class Options;
+
 // 3D array of data: [lat][lon][ensemble_member]
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 
@@ -19,7 +21,7 @@ class File {
       virtual ~File();
 
       //! Insantiates a file. Returns null if file does not exist or cannot be parsed.
-      static File* getScheme(std::string iFilename, bool iReadOnly=false);
+      static File* getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
 
       FieldPtr getField(Variable::Type iVariable, int iTime) const;
 
@@ -97,4 +99,5 @@ class File {
 };
 #include "Netcdf.h"
 #include "Fake.h"
+#include "Point.h"
 #endif

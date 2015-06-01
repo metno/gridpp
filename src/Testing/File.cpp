@@ -8,7 +8,7 @@ namespace {
    };
 
    TEST_F(FileTest, 10x10) {
-      File* file = File::getScheme("testing/files/10x10.nc");
+      File* file = File::getScheme("testing/files/10x10.nc", Options());
       EXPECT_EQ("arome", ((FileArome*)file)->name());
    }
    TEST_F(FileTest, 10x10_smart) {
@@ -133,7 +133,7 @@ namespace {
       EXPECT_DOUBLE_EQ(4.1123, referenceTime);
    }
    TEST_F(FileTest, factoryMissing) {
-      File* f = File::getScheme("missingfilename");
+      File* f = File::getScheme("missingfilename", Options());
       EXPECT_EQ(NULL, f);
    }
 }

@@ -7,29 +7,30 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! Adjust the value of the nearest neighbour (nn), based on the gradient in a neighbourhood
 //! surrounding the nearest neighbour, and the elevation difference to the lookup point (p):
 //! T(p) = T(nn) + gradient*(elev(p) - elev(nn))
+//! If the variable is log transformed, then use:
+//! T(p) = T(nn) * exp(gradient*(elev(p) - elev(nn)))
 //! Uses nearest neighbour when the lookup location does not have an elevation
 class DownscalerGradient : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradient(Variable::Type iVariable);
-      //! Do not compute the gradient but set it to a fixed amount. Positive rate means
-      //! increasing with elevation. The units are per meters.
-      void setConstantGradient(float iGradient);
+      DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
       float getConstantGradient() const;
-      //! Calculate gradient in a neighbourhood of points within +- iNumPoints
-      //! in each direction.
-      void setSearchRadius(int iNumPoints);
-      int  getSearchRadius() const;
-      void  setMinElevDiff(float iMinElevDiff);
+      int   getSearchRadius() const;
       float getMinElevDiff() const;
+      bool  getLogTransform() const;
+      float getMinGradient() const;
+      float getMaxGradient() const;
+      float getDefaultGradient() const;
       static std::string description();
       std::string name() const {return "gradient";};
-      float mMinGradient;
-      float mMaxGradient;
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int mSearchRadius;
-      float mConstGradient;
+      int   mSearchRadius;
+      float mConstantGradient;
       float mMinElevDiff; // Minimum elevation difference within neighbourhood to use gradient
+      bool  mLogTransform;
+      float mMinGradient;
+      float mMaxGradient;
+      float mDefaultGradient;
 };
 #endif

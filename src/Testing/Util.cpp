@@ -231,6 +231,10 @@ namespace {
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 5, 2); // Too narrow message
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
    }
+   TEST_F(UtilTest, gridppVersion) {
+      std::string version = Util::gridppVersion();
+      EXPECT_NE("", version);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

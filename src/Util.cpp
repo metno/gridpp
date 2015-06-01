@@ -1,4 +1,5 @@
 #include "Util.h"
+#include "Version.h"
 #include <iostream>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -100,6 +101,9 @@ float Util::deg2rad(float deg) {
 }
 float Util::rad2deg(float rad) {
    return (rad * 180 / Util::pi);
+}
+std::string Util::gridppVersion() {
+   return GRIDPP_VERSION;
 }
 int Util::getDate(time_t iUnixTime) {
    boost::gregorian::date epoch(1970,1,1);

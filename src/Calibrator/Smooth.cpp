@@ -67,8 +67,7 @@ int CalibratorSmooth::getSmoothRadius() const {
 }
 std::string CalibratorSmooth::description() {
    std::stringstream ss;
-   ss << "   -c smooth                    Smooth the ensemble by averaging spatially, using a neighbourhood." << std::endl;
-   ss << "      smoothRadius=3            Average gridpoints within a neighbourhood box of points within" << std::endl;
-   ss << "                                +- radius in both east-west and north-south direction." << std::endl;
+   ss << Util::formatDescription("-c smooth", "Smooth the ensemble by averaging spatially, using a neighbourhood.") << std::endl;
+   ss << Util::formatDescription("   smoothRadius=3", "Average gridpoints within a neighbourhood box of points within +- radius in both east-west and north-south direction.") << std::endl;
    return ss.str();
 }

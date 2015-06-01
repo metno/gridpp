@@ -77,25 +77,29 @@ FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
 void FilePoint::writeCore(std::vector<Variable::Type> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
+   if(iVariables.size() == 0) {
+      Util::warning("No variables to write");
+      return;
+   }
    for(int i = 0; i < getNumTime(); i++) {
       ofs.precision(0);
       FieldPtr field = getField(iVariables[0], i);
-      ofs << (long) getTimes()[i];
-      ofs.precision(2);
-      ofs << std::fixed << " " << (*field)(0,0,0);
-      ofs << std::endl;
+      if(field != NULL) {
+         ofs << (long) getTimes()[i];
+         ofs.precision(2);
+         ofs << std::fixed << " " << (*field)(0,0,0);
+         ofs << std::endl;
+      }
    }
    ofs.close();
 }
 
 std::string FilePoint::description() {
    std::stringstream ss;
-   ss << "   type=point                   Point file for one location. Each row is a time, " << std::endl;
-   ss << "                                when the first column is the UNIX time and the second" << std::endl;
-   ss << "                                the forecast value." << std::endl;
-   ss << "      lat=required              Latitude (in degrees, north is positive)" << std::endl;
-   ss << "      lon=required              Longitude (in degrees, east is positive)" << std::endl;
-   ss << "      elev=required             Elevation (in meters)" << std::endl;
-   ss << "      time=undef                Number of times. Required if the file does not exist." << std::endl;
+   ss << Util::formatDescription("type=point", "Point file for one location. Each row is a time when the first column is the UNIX time and the second the forecast value.") << std::endl;
+   ss << Util::formatDescription("   lat=required", "Latitude (in degrees, north is positive)") << std::endl;
+   ss << Util::formatDescription("   lon=required", "Longitude (in degrees, east is positive)") << std::endl;
+   ss << Util::formatDescription("   elev=required", "Elevation (in meters)") << std::endl;
+   ss << Util::formatDescription("   time=undef", "Number of times. Required if the file does not exist.") << std::endl;
    return ss.str();
 }

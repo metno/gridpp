@@ -12,7 +12,6 @@ void DownscalerBypass::downscaleCore(const File& iInput, File& iOutput) const {
 
 std::string DownscalerBypass::description() {
    std::stringstream ss;
-   ss << "   -d bypass                    No downscaling is done, but useful if the variable is derived" << std::endl;
-   ss << "                                by a calibrator." << std::endl;
+   ss << Util::formatDescription("-d bypass", "No downscaling is done, but useful if the variable is derived by a calibrator.") << std::endl;
    return ss.str();
 }

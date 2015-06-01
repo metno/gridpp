@@ -53,13 +53,11 @@ bool CalibratorRegression::calibrateCore(File& iFile) const {
 
 std::string CalibratorRegression::description() {
    std::stringstream ss;
-   ss << "   -c regression                Applies polynomial regression equation to forecasts:" << std::endl;
-   ss << "                                newForecast = a + b * forecast + c * forecast^2 ... " << std::endl;
-   ss << "      parameters=required       Read parameters from this text file. The file format is:" << std::endl;
-   ss << "                                offset0 a b c ..." << std::endl;
-   ss << "                                    ...    " << std::endl;
-   ss << "                                offsetN a b c ..." << std::endl;
-   ss << "                                If the file only has a single line, then the same set of parameters" << std::endl;
-   ss << "                                are used for all offsets.                                          " << std::endl;
+   ss << Util::formatDescription("-c regression", "Applies polynomial regression equation to forecasts: newForecast = a + b * forecast + c * forecast^2 ... ") << std::endl;
+   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
+   ss << Util::formatDescription("", "offset0 a b c ...") << std::endl;
+   ss << Util::formatDescription("", "...") << std::endl;
+   ss << Util::formatDescription("", "offsetN a b c ...") << std::endl;
+   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
    return ss.str();
 }

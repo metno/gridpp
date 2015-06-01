@@ -224,6 +224,13 @@ namespace {
       EXPECT_FALSE(Util::hasChar("test\nq2", ' '));
       EXPECT_FALSE(Util::hasChar("test\nq2", '3'));
    }
+   TEST_F(UtilTest, formatDescription) {
+      EXPECT_EQ("test      ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 0));
+      EXPECT_EQ("  test    ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 2));
+      // Invalid input should not throw an error
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 5, 2); // Too narrow message
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

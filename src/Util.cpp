@@ -179,3 +179,48 @@ bool Util::copy(std::string iFrom, std::string iTo) {
    dest.close();
    return true;
 }
+
+std::string Util::formatDescription(std::string iTitle, std::string iMessage, int iTitleLength, int iMaxLength, int iTitleIndent) {
+   // Invalid input
+   if(iTitleLength >= iMaxLength ) {
+      std::stringstream ss;
+      ss << "Cannot format description: " << iTitle << ": " << iMessage << std::endl;
+      Util::warning(ss.str());
+      std::stringstream ss2;
+      ss2 << iTitle << " " << iMessage;
+      return ss2.str();
+   }
+
+   std::vector<std::string> words = Util::split(iMessage);
+   std::stringstream ss;
+   std::stringstream curr;
+   // Indent title
+   for(int i = 0; i < iTitleIndent; i++)
+      curr << " ";
+   curr  << iTitle;
+   int N = iTitleLength-curr.str().length();
+   // Pad the remainder of the title with spaces
+   for(int k = 0; k < N; k++) {
+      curr << " ";
+   }
+
+   for(int i = 0; i < words.size(); i++) {
+      std::string word = words[i];
+      int currLength = curr.str().length();
+      if(currLength + word.length() > iMaxLength) {
+         // Create a new line
+         ss << curr.str();
+         ss << std::endl;
+         curr.str("");
+         // Indent to the beginning of the message
+         for(int k = 0; k < iTitleLength; k++)
+            curr << " ";
+      }
+      else if(i != 0) {
+         curr << " ";
+      }
+      curr << word;
+   }
+   ss << curr.str();
+   return ss.str();
+}

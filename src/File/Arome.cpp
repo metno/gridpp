@@ -291,6 +291,6 @@ bool FileArome::isValid(std::string iFilename) {
 
 std::string FileArome::description() {
    std::stringstream ss;
-   ss << "   type=arome                   AROME file" << std::endl;
+   ss << Util::formatDescription("type=arome", "AROME file") << std::endl;
    return ss.str();
 }

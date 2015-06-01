@@ -88,6 +88,10 @@ class Util {
 
       //! Returns true if iString contains one or more of iChar
       static bool hasChar(std::string iString, char iChar);
+
+      //! Create a formatted string useful for outputing descriptions of methods. Places the title
+      //! on the left side and the message on the right, with automatic line wrapping.
+      static std::string formatDescription(std::string iTitle, std::string iMessage, int iTitleLength=32, int iMaxLength=100, int iTitleIndent=3);
       
       //! \brief Comparator class for sorting pairs using the first entry.
       //! Sorts from smallest to largest

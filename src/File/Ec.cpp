@@ -313,6 +313,6 @@ NcVar* FileEc::getLonVar() const {
 }
 std::string FileEc::description() {
    std::stringstream ss;
-   ss << "   type=ec                      ECMWF ensemble file" << std::endl;
+   ss << Util::formatDescription("type=ec", "ECMWF ensemble file") << std::endl;
    return ss.str();
 }

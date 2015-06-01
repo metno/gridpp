@@ -38,8 +38,7 @@ bool CalibratorQnh::calibrateCore(File& iFile) const {
 }
 std::string CalibratorQnh::description() {
    std::stringstream ss;
-   ss << "   -c qnh                       Adjusts the surface pressure down to sea-level based on a standard" << std::endl
-      << "                                atmosphere (ICAO) producing the QNH variable." << std::endl;
+   ss << Util::formatDescription("-c qnh", "Adjusts the surface pressure down to sea-level based on a standard atmosphere (ICAO) producing the QNH variable.") << std::endl;
    return ss.str();
 }
 float CalibratorQnh::calcQnh(float iElev, float iPressure) {

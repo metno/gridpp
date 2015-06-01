@@ -100,25 +100,19 @@ bool CalibratorPhase::getUseWetbulb() {
 
 std::string CalibratorPhase::description() {
    std::stringstream ss;
-   ss << "   -c phase                     Compute precipitation phase based on temperature, with" << std::endl;
-   ss << "                                values encoded by:" << std::endl;
-   ss << "                                * 0 = no precipitation (Precip < minPrecip)" << std::endl;
-   ss << "                                * 1 = rain (b < T)" << std::endl;
-   ss << "                                * 2 = sleet (a < T <= b)" << std::endl;
-   ss << "                                * 3 = snow (T < a" << std::endl;
-   ss << "                                T can be either regular temperature or wetbulb temperature." << std::endl;
-   ss << "                                Precip, and Temperature must be available to determine phase. If" << std::endl;
-   ss << "                                using wetbulb, then relative humidity must also be available." << std::endl;
-   ss << "                                Pressure is currently not needed because a standard atmosphere is used." << std::endl;
-   ss << "      parameters=required       Read parameters from this text file. The file format is:" << std::endl;
-   ss << "                                offset0 a b" << std::endl;
-   ss << "                                    ...    " << std::endl;
-   ss << "                                offsetN a b" << std::endl;
-   ss << "                                If the file only has a single line, then the same set of parameters" << std::endl;
-   ss << "                                are used for all offsets.                                          " << std::endl;
-   ss << "      useWetbulb=1              If 1 use the wetbulb temperature to determine phase. If 0 use regular" << std::endl;
-   ss << "                                temperature." << std::endl;
-   ss << "      minPrecip=0.2             Minimum precip (in mm) needed to be considered as precipitation." << std::endl;
+   ss << Util::formatDescription("-c phase", "Compute precipitation phase based on temperature, with values encoded by:") << std::endl;
+   ss << Util::formatDescription("", "* 0 = no precipitation (Precip < minPrecip)") << std::endl;
+   ss << Util::formatDescription("", "* 1 = rain (b < T)") << std::endl;
+   ss << Util::formatDescription("", "* 2 = sleet (a < T <= b)") << std::endl;
+   ss << Util::formatDescription("", "* 3 = snow (T < a)") << std::endl;
+   ss << Util::formatDescription("", "T can be either regular temperature or wetbulb temperature. Precip, and Temperature must be available to determine phase. If using wetbulb, then relative humidity must also be available. Pressure is currently not needed because a standard atmosphere is used.") << std::endl;
+   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
+   ss << Util::formatDescription("", "offset0 a b") << std::endl;
+   ss << Util::formatDescription("", "...") << std::endl;
+   ss << Util::formatDescription("", "offsetN a b") << std::endl;
+   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("   useWetbulb=1", "If 1 use the wetbulb temperature to determine phase. If 0 use regular temperature.") << std::endl;
+   ss << Util::formatDescription("   minPrecip=0.2", "Minimum precip (in mm) needed to be considered as precipitation.") << std::endl;
    return ss.str();
 }
 float CalibratorPhase::getWetbulb(float iTemperature, float iPressure, float iRelativeHumidity) {

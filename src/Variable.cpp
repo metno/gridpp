@@ -70,19 +70,19 @@ Variable::Type Variable::getType(std::string iName) {
 
 std::string Variable::description() {
    std::stringstream ss;
-   ss << "   -v T                         Temperature" << std::endl;
-   ss << "   -v Precip                    Hourly precip" << std::endl;
-   ss << "   -v PrecipAcc                 Accumulated precip" << std::endl;
-   ss << "   -v W                         Wind speed" << std::endl;
-   ss << "   -v WD                        Wind direction" << std::endl;
-   ss << "   -v U                         U-wind" << std::endl;
-   ss << "   -v V                         V-wind" << std::endl;
-   ss << "   -v Cloud                     Cloud cover" << std::endl;
-   ss << "   -v RH                        Relative humidity" << std::endl;
-   ss << "   -v Phase                     Precipitation phase (0 none, 1 rain, 2 sleet, 3 snow)" << std::endl;
-   ss << "   -v P                         Pressure" << std::endl;
-   ss << "   -v MSLP                      Mean sea-level pressure" << std::endl;
-   ss << "   -v QNH                       Pressure reduced to sea-level using standard atmosphere (ICAO)" << std::endl;
+   ss << Util::formatDescription("-v T", "Temperature") << std::endl;
+   ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;
+   ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
+   ss << Util::formatDescription("-v W", "Wind speed") << std::endl;
+   ss << Util::formatDescription("-v WD", "Wind direction") << std::endl;
+   ss << Util::formatDescription("-v U", "U-wind") << std::endl;
+   ss << Util::formatDescription("-v V", "V-wind") << std::endl;
+   ss << Util::formatDescription("-v Cloud", "Cloud cover") << std::endl;
+   ss << Util::formatDescription("-v RH", "Relative humidity") << std::endl;
+   ss << Util::formatDescription("-v Phase", "Precipitation phase (0 none, 1 rain, 2 sleet, 3 snow)") << std::endl;
+   ss << Util::formatDescription("-v P", "Pressure") << std::endl;
+   ss << Util::formatDescription("-v MSLP", "Mean sea-level pressure") << std::endl;
+   ss << Util::formatDescription("-v QNH", "Pressure reduced to sea-level using standard atmosphere (ICAO)") << std::endl;
    return ss.str();
 }
 

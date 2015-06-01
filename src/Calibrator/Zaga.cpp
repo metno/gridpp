@@ -192,21 +192,16 @@ void CalibratorZaga::setFracThreshold(float iFraction) {
 
 std::string CalibratorZaga::description() {
    std::stringstream ss;
-   ss << "   -c zaga                      Calibrates an ensemble using a zero-adjusted gamma distribution," << std::endl;
-   ss << "                                suitable for parameters like precip and precip. The distribution" << std::endl;
-   ss << "                                has three parameters:" << std::endl;
-   ss << "                                * mean  = exp(a + b * ensmean^(1/3)" << std::endl;
-   ss << "                                * sigma = exp(c + d * ensmean" << std::endl;
-   ss << "                                * logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)" << std::endl;
-   ss << "                                where ensmean is the ensemble mean, and ensfrac is the fraction" << std::endl;
-   ss << "                                of members above a certain threshold (use fracThreshold option)." << std::endl;
-   ss << "      parameters=required       Read parameters from this text file. The file format is:" << std::endl;
-   ss << "                                offset0 a b c d e f g h" << std::endl;
-   ss << "                                           ...         " << std::endl;
-   ss << "                                offsetN a b c d e f g h" << std::endl;
-   ss << "                                If the file only has a single line, then the same set of parameters" << std::endl;
-   ss << "                                are used for all offsets.                                          " << std::endl;
-   ss << "      fracThreshold=0.5         Threshold defining precip/no-precip boundary when computing fraction" << std::endl;
-   ss << "                                of members with precip." << std::endl;
+   ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precip and precip. The distribution has three parameters:") << std::endl;
+   ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
+   ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
+   ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;
+   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option).") << std::endl;
+   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
+   ss << Util::formatDescription("", "offset0 a b c d e f g h") << std::endl;
+   ss << Util::formatDescription("", "...") << std::endl;
+   ss << Util::formatDescription("", "offsetN a b c d e f g h") << std::endl;
+   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
    return ss.str();
 }

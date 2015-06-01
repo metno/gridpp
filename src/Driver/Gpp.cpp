@@ -44,7 +44,7 @@ int main(int argc, const char *argv[]) {
       std::cout << Variable::description();
       std::cout << std::endl;
       std::cout << "Variable options (and default values):" << std::endl;
-      std::cout << "   write=1                      Set to 0 to prevent the variable to be written to output" << std::endl;
+      std::cout << Util::formatDescription("write=1", "Set to 0 to prevent the variable to be written to output") << std::endl;
       std::cout << std::endl;
       std::cout << "Downscalers with options (and default values):" << std::endl;
       std::cout << DownscalerNearestNeighbour::description();

@@ -13,17 +13,23 @@ implemented methods are:
 
 * nearest neighbour
 
-* elevation gradient
+* elevation gradient (interpolation to new elevations using gradients)
 
 * smart neighbours (nearest grid points at the same elevation)
 
+* pressure (interpolation to new elevations using a standard atmosphere)
+
 Calibrators include:
 
-* spatial smoothing
+* spatial smoothing (average within a neighbourhood)
 
 * ensemble calibration of precipitation using zero-adjusted Gamma distribution
 
+* polynomial regression of any order
+
 * calculation of precipitation phase, using wetbulb temperature
+
+* calculation of QNH from surface pressure
 
 
 
@@ -100,25 +106,6 @@ Run the program in sequence for each variable:
    ./gridpp input output -v RH ...
 
 
-
-Adding new code
----------------
-* Add a new downscaling scheme by creating a new file in ./src/Downscaler/.
-  Inherit from the Downscaler abstract base class (./src/Dowscaler/Downscaler.h)
-  and implement any pure virtual functions.
-* Instantiate the class in getScheme() in ./src/Downscaler/Downscaler.cpp.
-* Use a similar procedure for adding a new calibrator, or new file type.
-
-
-
-Testing of code
----------------
-* Set DEBUG to 1 in makefile, and run make test
-* Execute runAllTests.sh
-* Unit tests are placed in src/Testing/, one file for each class that is tested.
-* Convenient input files for testing are located in testing/files/
-* New downscalers and calibrators should produce valid results for the special
-  test file 'testing/files/10x10.nc'.
 
 Copyright and license
 ---------------------

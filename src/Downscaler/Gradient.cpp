@@ -11,7 +11,8 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mLogTransform(false),
       mConstantGradient(Util::MV),
       mDefaultGradient(0),
-      mMinElevDiff(30) {
+      mMinElevDiff(30),
+      mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
    iOptions.getValue("maxGradient", mMaxGradient);
@@ -126,10 +127,11 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                         meanXX /= counter;
                         gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
                      }
-                     else {
+                     else if(!mHasIssuedWarningUnstable) {
                         std::stringstream ss;
-                        ss << "DownscalerGradient cannot compute gradient. Unstable regression. Reverting to default gradient.";
+                        ss << "DownscalerGradient cannot compute gradient (unstable regression). Reverting to default gradient. Warning issued only once.";
                         Util::warning(ss.str());
+                        mHasIssuedWarningUnstable = true;
                      }
                      // Safety check
                      if(!Util::isValid(gradient))

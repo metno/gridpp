@@ -32,5 +32,6 @@ class DownscalerGradient : public Downscaler {
       float mMinGradient;
       float mMaxGradient;
       float mDefaultGradient;
+      mutable bool mHasIssuedWarningUnstable;
 };
 #endif

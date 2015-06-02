@@ -10,6 +10,7 @@ class Variable {
       enum Type {
          Precip    = 0,    // Hourly amount ending at the specified time
          PrecipAcc = 1,    // Accumulated ending at the specified time
+         Pop       = 2,    // Probability of precipitation
          Cloud     = 10,   // Cloud cover (between 0 and 1)
          T         = 20,   // 2m temperature (K)
          U         = 30,   // 10m U-wind (m/s)

@@ -7,6 +7,8 @@ std::string Variable::getTypeName(Type iType) {
       return "Precip";
    else if(iType == PrecipAcc)
       return "PrecipAcc";
+   else if(iType == Pop)
+      return "Pop";
    else if(iType == Cloud)
       return "Cloud";
    else if(iType == T)
@@ -40,6 +42,8 @@ Variable::Type Variable::getType(std::string iName) {
       return Precip;
    else if(iName == "PrecipAcc")
       return PrecipAcc;
+   else if(iName == "Pop")
+      return Pop;
    else if(iName == "Cloud")
       return Cloud;
    else if(iName == "T")
@@ -73,6 +77,7 @@ std::string Variable::description() {
    ss << Util::formatDescription("-v T", "Temperature") << std::endl;
    ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;
    ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
+   ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
    ss << Util::formatDescription("-v W", "Wind speed") << std::endl;
    ss << Util::formatDescription("-v WD", "Wind direction") << std::endl;
    ss << Util::formatDescription("-v U", "U-wind") << std::endl;
@@ -90,6 +95,7 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    std::vector<Type> variables;
    variables.push_back(Variable::T);
    variables.push_back(Variable::PrecipAcc);
+   variables.push_back(Variable::Pop);
    variables.push_back(Variable::Precip);
    variables.push_back(Variable::W);
    variables.push_back(Variable::WD);
@@ -108,9 +114,11 @@ float Variable::getMin(Type iType) {
    switch(iType) {
       case T:
          return 0;
+      case Precip:
+         return 0;
       case PrecipAcc:
          return 0;
-      case Precip:
+      case Pop:
          return 0;
       case W:
          return 0;
@@ -141,10 +149,12 @@ float Variable::getMax(Type iType) {
    switch(iType) {
       case T:
          return Util::MV;
-      case PrecipAcc:
-         return Util::MV;
       case Precip:
          return Util::MV;
+      case PrecipAcc:
+         return Util::MV;
+      case Pop:
+         return 1;
       case W:
          return Util::MV;
       case WD:
@@ -173,10 +183,12 @@ std::string Variable::getUnits(Type iType) {
    switch(iType) {
       case T:
          return "K";
-      case PrecipAcc:
-         return "kg/m^2";
       case Precip:
          return "kg/m^2";
+      case PrecipAcc:
+         return "kg/m^2";
+      case Pop:
+         return "1";
       case W:
          return "m/s";
       case WD:
@@ -188,7 +200,7 @@ std::string Variable::getUnits(Type iType) {
       case Cloud:
          return "1";
       case RH:
-         return "%";
+         return "1";
       case Phase:
          return "";
       case P:
@@ -205,9 +217,11 @@ std::string Variable::getStandardName(Type iType) {
    switch(iType) {
       case T:
          return "air_temperature";
+      case Precip:
+         return "precipitation_amount";
       case PrecipAcc:
          return "precipitation_amount_acc";
-      case Precip:
+      case Pop:
          return "precipitation_amount";
       case W:
          return "wind_speed";

@@ -22,13 +22,8 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'zaga' needs variable");
       }
-      CalibratorZaga* c = new CalibratorZaga(parFile, Variable::getType(variable));
+      CalibratorZaga* c = new CalibratorZaga(parFile, Variable::getType(variable), iOptions);
 
-      // Optional settings
-      float fracThreshold;
-      if(iOptions.getValue("fracThreshold", fracThreshold)) {
-         c->setFracThreshold(fracThreshold);
-      }
       return c;
    }
    else if(iName == "cloud") {

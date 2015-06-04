@@ -6,12 +6,28 @@
 #include "../File/File.h"
 #include "../ParameterFile.h"
 #include "../Parameters.h"
-const float CalibratorZaga::mMaxEnsMean = 100;
-CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor):
+CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions):
       Calibrator(),
       mParameterFile(iParameterFile),
       mMainPredictor(iMainPredictor),
-      mFracThreshold(0.5) {
+      mFracThreshold(0.5),
+      mOutputPop(false),
+      mNeighbourhoodSize(0),
+      mPopThreshold(0.5),
+      mMaxEnsMean(100) {
+   iOptions.getValue("fracThreshold", mFracThreshold);
+   iOptions.getValue("outputPop", mOutputPop);
+   iOptions.getValue("neighbourhoodSize", mNeighbourhoodSize);
+   iOptions.getValue("popThreshold", mPopThreshold);
+   iOptions.getValue("maxEnsMean", mMaxEnsMean);
+   if(!Util::isValid(mMaxEnsMean) || mMaxEnsMean <= 0) {
+      Util::error("CalibratorZaga maxEnsMean must be > 0");
+   }
+   if(mNeighbourhoodSize < 0) {
+      std::stringstream ss;
+      ss << "CalibratorZaga neighbourhoodSize (" << mNeighbourhoodSize << ") must be >= 0";
+      Util::error(ss.str());
+   }
 }
 
 bool CalibratorZaga::calibrateCore(File& iFile) const {
@@ -28,6 +44,11 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
       Parameters parameters = mParameterFile->getParameters(t);
       Field& precip = *iFile.getField(Variable::Precip, t);
 
+      FieldPtr pop;
+      if(mOutputPop) {
+         pop = iFile.getField(Variable::Pop, t);
+      }
+
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -41,14 +62,28 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
             // Check if current ensemble for this gridpoint/time has any missing
             // values. If so, don't calibrate the ensemble.
             for(int e = 0; e < nEns; e++) {
-               float value = precipRaw[e];
-               if(!Util::isValid(value)) {
-                  isValid = false;
-                  break;
+               if(mNeighbourhoodSize == 0) {
+                  float value = precip(i,j,e);
+                  if(!Util::isValid(value)) {
+                     isValid = false;
+                     break;
+                  }
+                  ensMean += value;
+                  ensFrac += (value <= mFracThreshold);
+                  counter++;
                }
-               ensMean += value;
-               ensFrac += (value <= mFracThreshold);
-               counter++;
+               else {
+                  for(int ii = std::max(0, i-mNeighbourhoodSize); ii <= std::min(nLat-1, i+mNeighbourhoodSize); ii++) {
+                     for(int jj = std::max(0, j-mNeighbourhoodSize); jj <= std::min(nLon-1, j+mNeighbourhoodSize); jj++) {
+                        float value = precip(ii,jj,e);
+                        if(Util::isValid(value)) {
+                           ensMean += value;
+                           ensFrac += (value <= mFracThreshold);
+                           counter++;
+                        }
+                     }
+                  }
+               }
             }
             if(isValid) {
                ensMean = ensMean / counter;
@@ -56,32 +91,43 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
 
                // Limit the input to the calibration model to prevent it
                // from creating very extreme values.
-               if(ensMean > mMaxEnsMean) {
+               if(Util::isValid(mMaxEnsMean) && ensMean > mMaxEnsMean) {
                   ensMean = mMaxEnsMean;
                }
 
-               // Calibrate
-               std::vector<std::pair<float,int> > pairs(nEns);
-               std::vector<float> valuesCal(nEns);
-               for(int e = 0; e < nEns; e++) {
-                  float quantile = ((float) e+0.5)/nEns;
-                  float valueCal   = getInvCdf(quantile, ensMean, ensFrac, parameters);
-                  precip(i,j,e) = valueCal;
-                  if(!Util::isValid(valueCal))
-                     isValid = false;
-               }
-               if(isValid) {
-                  std::vector<float> precipCal = precip(i,j);
-                  Calibrator::shuffle(precipRaw, precipCal);
+               if(mOutputPop) {
                   for(int e = 0; e < nEns; e++) {
-                     precip(i,j,e) = precipCal[e];
+                     float cdf = getCdf(mPopThreshold, ensMean, ensFrac, parameters);
+                     if(Util::isValid(cdf))
+                        (*pop)(i,j,e) = 1 - cdf;
+                     else
+                        (*pop)(i,j,e) = Util::MV;
                   }
                }
                else {
-                  numInvalidCal++;
-                  // Calibrator produced some invalid members. Revert to the raw values.
+                  // Calibrate
+                  std::vector<std::pair<float,int> > pairs(nEns);
+                  std::vector<float> valuesCal(nEns);
                   for(int e = 0; e < nEns; e++) {
-                     precip(i,j,e) = precipRaw[e];
+                     float quantile = ((float) e+0.5)/nEns;
+                     float valueCal   = getInvCdf(quantile, ensMean, ensFrac, parameters);
+                     precip(i,j,e) = valueCal;
+                     if(!Util::isValid(valueCal))
+                        isValid = false;
+                  }
+                  if(isValid) {
+                     std::vector<float> precipCal = precip(i,j);
+                     Calibrator::shuffle(precipRaw, precipCal);
+                     for(int e = 0; e < nEns; e++) {
+                        precip(i,j,e) = precipCal[e];
+                     }
+                  }
+                  else {
+                     numInvalidCal++;
+                     // Calibrator produced some invalid members. Revert to the raw values.
+                     for(int e = 0; e < nEns; e++) {
+                        precip(i,j,e) = precipRaw[e];
+                     }
                   }
                }
             }
@@ -165,6 +211,59 @@ float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac,
       return Util::MV;
    return value;
 }
+float CalibratorZaga::getCdf(float iThreshold, float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+   if(!Util::isValid(iThreshold) || !Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac))
+      return Util::MV;
+
+   if(iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1)
+      return Util::MV;
+
+   if(iThreshold < 0)
+      return 0;
+
+   // Check that parameters are valid
+   for(int i =0; i < iParameters.size(); i++) {
+      if(!Util::isValid(iParameters[i]))
+         return Util::MV;
+   }
+
+   // Check if we are in the discrete mass
+   float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
+   if(!Util::isValid(P0))
+      return Util::MV;
+   if(iThreshold == 0)
+      return P0;
+
+   float mua = iParameters[0];
+   float mub = iParameters[1];
+   float sa  = iParameters[2];
+   float sb  = iParameters[3];
+
+   // Compute parameters of distribution (in same way as done in gamlss in R)
+   float mu    = exp(mua + mub * pow(iEnsMean, 1.0/3));
+   float sigma = exp(sa + sb * iEnsMean);
+
+   if(mu <= 0 || sigma <= 0)
+      return Util::MV;
+   if(!Util::isValid(mu) || !Util::isValid(sigma))
+      return Util::MV;
+
+   // Parameters in boost and wikipedia
+   float shape = 1/(sigma*sigma); // k
+   float scale = sigma*sigma*mu;  // theta
+   if(!Util::isValid(scale) || !Util::isValid(shape))
+      return Util::MV;
+
+   // std::cout << mu << " " << sigma << " " << P0 << " " << shape << " " << scale << std::endl;
+   boost::math::gamma_distribution<> dist(shape, scale);
+   float contCdf = boost::math::cdf(dist, iThreshold) ;
+   float cdf = P0 + (1 - P0)*contCdf;
+   if(!Util::isValid(cdf))
+      return Util::MV;
+   assert(cdf <= 1);
+   assert(cdf >= 0);
+   return cdf;
+}
 float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {
    if(!Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac) || iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1)
       return Util::MV;
@@ -181,14 +280,6 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParamet
    float P0 = Util::invLogit(logit);
    return P0;
 }
-void CalibratorZaga::setFracThreshold(float iFraction) {
-   if(!Util::isValid(iFraction) || iFraction < 0) {
-      std::stringstream ss;
-      ss << "CalibratorZaga: fraction threshold (" << iFraction << ") must be 0 or greater.";
-      Util::error(ss.str());
-   }
-   mFracThreshold = iFraction;
-}
 
 std::string CalibratorZaga::description() {
    std::stringstream ss;
@@ -203,5 +294,9 @@ std::string CalibratorZaga::description() {
    ss << Util::formatDescription("", "offsetN a b c d e f g h") << std::endl;
    ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
    ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
+   ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
+   ss << Util::formatDescription("   outputPop=0", "Should probability of precip be written to the Pop field?") << std::endl;
+   ss << Util::formatDescription("   popThreshold=0.5", "If Pop is written, what threshold should be used?") << std::endl;
+   ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution to yield very high values.") << std::endl;
    return ss.str();
 }

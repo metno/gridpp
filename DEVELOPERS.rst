@@ -36,6 +36,11 @@ Debugging
 gridpp can be compiled with debugging symbols by executing make gridpp_debug. The executable gridpp_debug can
 then be used by a debugger such as gdb.
 
+Parallelization
+---------------
+Add openMP directives where it makes sense to parallelize. Ensure that any data retrival calls (e.g.
+calls to File::getField) are made before the directives otherwise a runtime error occurs.
+
 Testing of code
 ---------------
 All test code is placed in src/Testing. Use one file for each class. To test your newly added class

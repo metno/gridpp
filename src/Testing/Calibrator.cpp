@@ -107,12 +107,30 @@ namespace {
       EXPECT_TRUE(vec2[3]==1 || vec2[3]==2);
    }
    TEST_F(TestCalibrator, factoryZaga) {
-      Calibrator* c;
-      c = Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt fracThreshold=0.9"));
-      EXPECT_TRUE(c);
-      EXPECT_EQ("zaga", c->name());
-      EXPECT_FLOAT_EQ(0.9, ((CalibratorZaga*) c)->getFracThreshold());
-      delete c;
+      {
+         Calibrator* c;
+         c = Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt popThreshold=0.24 outputPop=1 fracThreshold=0.34 neighbourhoodSize=24 maxEnsMean=90"));
+         EXPECT_TRUE(c);
+         EXPECT_EQ("zaga", c->name());
+         EXPECT_FLOAT_EQ(0.24, ((CalibratorZaga*) c)->getPopThreshold());
+         EXPECT_TRUE(          ((CalibratorZaga*) c)->getOutputPop());
+         EXPECT_FLOAT_EQ(0.34, ((CalibratorZaga*) c)->getFracThreshold());
+         EXPECT_EQ(24,         ((CalibratorZaga*) c)->getNeighbourhoodSize());
+         EXPECT_FLOAT_EQ(90,          ((CalibratorZaga*) c)->getMaxEnsMean());
+         delete c;
+      }
+      {
+         Calibrator* c;
+         c = Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt popThreshold=-0.12 outputPop=0 fracThreshold=-0.92 neighbourhoodSize=6 maxEnsMean=40"));
+         EXPECT_TRUE(c);
+         EXPECT_EQ("zaga", c->name());
+         EXPECT_FLOAT_EQ(-0.12, ((CalibratorZaga*) c)->getPopThreshold());
+         EXPECT_FALSE(          ((CalibratorZaga*) c)->getOutputPop());
+         EXPECT_FLOAT_EQ(-0.92, ((CalibratorZaga*) c)->getFracThreshold());
+         EXPECT_EQ(6,           ((CalibratorZaga*) c)->getNeighbourhoodSize());
+         EXPECT_FLOAT_EQ(40,          ((CalibratorZaga*) c)->getMaxEnsMean());
+         delete c;
+      }
    }
    TEST_F(TestCalibrator, factoryNeighbourhood) {
       Calibrator* c;

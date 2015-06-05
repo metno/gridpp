@@ -48,6 +48,9 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    else if(type == "point") {
       file = new FilePoint(iFilename, iOptions);
    }
+   else if(type == "norcomQnh") {
+      file = new FileNorcomQnh(iFilename, iOptions);
+   }
    else {
       Util::error("Could not understand file type " + type);
    }

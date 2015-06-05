@@ -100,4 +100,5 @@ class File {
 #include "Netcdf.h"
 #include "Fake.h"
 #include "Point.h"
+#include "NorcomQnh.h"
 #endif

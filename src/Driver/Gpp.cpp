@@ -38,6 +38,7 @@ void writeUsage() {
    std::cout << FileArome::description();
    std::cout << FileEc::description();
    std::cout << FilePoint::description();
+   std::cout << FileNorcomQnh::description();
    std::cout << std::endl;
    std::cout << "Variables:" << std::endl;
    std::cout << Variable::description();

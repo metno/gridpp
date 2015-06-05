@@ -55,6 +55,36 @@ class Options {
          }
          return false;
       };
+
+      //! \brief Find vector values corresponding to key
+      //! @param iKey find this key
+      //! @param iValues places the values in this variable (variable cleared first). If key does
+      //! not exist, the vector is empty.
+      //! @return true if key is found, false otherwise
+      template <class T> bool getValues(std::string iKey, std::vector<T>& iValues) const {
+         iValues.clear();
+         for(int i = 0; i < mPairs.size(); i++) {
+            // Attributes are organized as follows:
+            // option=value1,value2,value3...
+            std::string key   = mPairs[i].first;
+            if(key == iKey) {
+               std::string values = mPairs[i].second;
+               std::stringstream ss(values);
+               // Parse collection of attributes separated by commas
+               while(ss) {
+                  std::string betweenComma;
+                  if(!getline(ss, betweenComma, ','))
+                     break; // We're at the end of the line
+                  std::stringstream ss2(betweenComma);
+                  T value;
+                  ss2 >> value;
+                  iValues.push_back(value);
+               }
+               return true;
+            }
+         }
+         return false;
+      };
    private:
       //! Parse a string with a single option "key=value"
       void addOption(std::string iOptionString);

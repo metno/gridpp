@@ -112,14 +112,47 @@ int Util::getDate(time_t iUnixTime) {
 
    return newDate.year() * 10000 + newDate.month() * 100 + newDate.day();
 }
+int Util::getTime(time_t iUnixTime) {
+   int numSeconds = iUnixTime % 86400;
+   int hh = numSeconds / 3600;
+   int mm = (numSeconds / 60) % 60;
+   int ss = numSeconds % 60;
+
+   return hh * 10000 + mm*100 + ss;
+}
+time_t Util::getUnixTime(int iDate, int iTime) {
+   int year  = iDate / 10000;
+   int month = (iDate / 100) % 100;
+   int day   = iDate % 100;
+   int hh  = iTime / 10000;
+   int mm = (iTime / 100) % 100;
+   int ss   = iTime % 100;
+   int numSeconds = hh*3600 + mm*60 + ss;
+
+   boost::gregorian::date time(year, month, day);
+   boost::gregorian::date epoch(1970,1,1);
+   boost::gregorian::date_duration diff = time - epoch;
+   time_t days = diff.days();
+   time_t unixTime = days*86400 + ((time_t) numSeconds);
+
+   return unixTime;
+}
 int Util::getCurrentDate() {
-    boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+    boost::gregorian::date today = boost::gregorian::day_clock::universal_day();
     return today.year()*10000 + today.month()*100 + today.day();
 }
 
+int Util::getCurrentTime() {
+    boost::posix_time::ptime today = boost::posix_time::second_clock::universal_time();
+    return today.time_of_day().hours()*10000 + today.time_of_day().minutes()*100 + today.time_of_day().seconds();
+}
+time_t Util::getCurrentUnixTime() {
+   return time(NULL);
+}
+
 std::string Util::getCurrentTimeStamp() {
-    // boost::gregorian::date today = boost::gregorian::day_clock::local_day();
-    boost::posix_time::ptime today = boost::posix_time::second_clock::local_time();
+    // boost::gregorian::date today = boost::gregorian::day_clock::universal_day();
+    boost::posix_time::ptime today = boost::posix_time::second_clock::universal_time();
     std::stringstream ss;
     ss << std::setfill('0') << std::setw(4) << today.date().year() << "-"
        << std::setfill('0') << std::setw(2) << today.date().month() << "-"

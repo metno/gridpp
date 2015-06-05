@@ -63,9 +63,23 @@ class Util {
       
       //! \brief Convert unix timestamp to YYYYMMDD format
       static int getDate(time_t iUnixTime);
+
+      //! \brief Convert unix timestamp to HHMMSS format
+      static int getTime(time_t iUnixTime);
       
-      //! \brief Get the current date in YYYYMMDD format
+      //! \brief Get the current unix time (UTC)
+      //! @param iDate in YYYYMMDD format
+      //! @param iTime in HHMMSS format (can be negative to subtract time)
+      static time_t getUnixTime(int iDate, int iTime);
+
+      //! \brief Get the current date in YYYYMMDD format (UTC)
       static int getCurrentDate();
+
+      //! \brief Get the current date in HHMMSS format (UTC)
+      static int getCurrentTime();
+
+      //! \brief Get the current date/time in unix time (UTC)
+      static time_t getCurrentUnixTime();
 
       //! \brief Get the current date in YYYY-MM-DD HH:MM:SS format
       static std::string getCurrentTimeStamp();

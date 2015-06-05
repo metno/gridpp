@@ -17,6 +17,19 @@ namespace {
       EXPECT_FALSE(status);
       EXPECT_FLOAT_EQ(441, value);
    }
+   TEST_F(OptionsTest, addOptionInt) {
+      Options options;
+      options.addOption("key",1);
+      int value = -1;
+      bool status = options.getValue("key", value);
+      EXPECT_TRUE(status);
+      EXPECT_EQ(1, value);
+
+      value = -1;
+      status = options.getValue("", value);
+      EXPECT_FALSE(status);
+      EXPECT_EQ(-1, value);
+   }
    TEST_F(OptionsTest, emptyKey) {
       // Empty keys are not allowed
       Options options;
@@ -158,6 +171,41 @@ namespace {
       copyOptions = Options(s);
       copyOptions.getValue("f", i);
       EXPECT_EQ(3, i);
+   }
+   TEST_F(OptionsTest, getValues) {
+      Options options("test=1,2,3");
+      std::vector<float> values;
+      options.getValues("test", values);
+      ASSERT_EQ(3, values.size());
+      EXPECT_FLOAT_EQ(1, values[0]);
+      EXPECT_FLOAT_EQ(2, values[1]);
+      EXPECT_FLOAT_EQ(3, values[2]);
+
+      options = Options("test=3,1,2 new=4");
+      options.getValues("test", values);
+      ASSERT_EQ(3, values.size());
+      EXPECT_FLOAT_EQ(3, values[0]);
+      EXPECT_FLOAT_EQ(1, values[1]);
+      EXPECT_FLOAT_EQ(2, values[2]);
+      options.getValues("new", values);
+      ASSERT_EQ(1, values.size());
+      EXPECT_FLOAT_EQ(4, values[0]);
+   }
+   TEST_F(OptionsTest, getValuesString) {
+      Options options("test=1,2,3");
+      std::vector<std::string> values;
+      options.getValues("test", values);
+      ASSERT_EQ(3, values.size());
+
+      options = Options("test=3,1,2 new=4");
+      options.getValues("test", values);
+      ASSERT_EQ(3, values.size());
+      EXPECT_EQ("3", values[0]);
+      EXPECT_EQ("1", values[1]);
+      EXPECT_EQ("2", values[2]);
+      options.getValues("new", values);
+      ASSERT_EQ(1, values.size());
+      EXPECT_EQ("4", values[0]);
    }
 }
 int main(int argc, char **argv) {

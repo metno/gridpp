@@ -37,10 +37,6 @@ namespace {
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(0,0,0,180));
       EXPECT_FLOAT_EQ(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75));
    }
-   TEST_F(UtilTest, getDate) {
-      EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
-      EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));
-   }
    TEST_F(UtilTest, getDistanceInvalid) {
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,-84.75,-101.75));
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(60.5,Util::MV,-84.75,-101.75));
@@ -161,9 +157,31 @@ namespace {
       double e = Util::clock();
       EXPECT_NEAR(sleepsec, e-s, sleepsec/20);
    }
+   TEST_F(UtilTest, getDate) {
+      EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
+      EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));
+   }
+   TEST_F(UtilTest, getTime) {
+      EXPECT_FLOAT_EQ(122915, Util::getTime(1432816155));
+      EXPECT_FLOAT_EQ(153251, Util::getTime(971623971));
+   }
+   TEST_F(UtilTest, getUnixTime) {
+      EXPECT_FLOAT_EQ(1432816155, Util::getUnixTime(20150528, 122915));
+      EXPECT_FLOAT_EQ(971623971,  Util::getUnixTime(20001015, 153251));
+      EXPECT_FLOAT_EQ(1432771190, Util::getUnixTime(20150528, -600));
+   }
    TEST_F(UtilTest, getCurrentDate) {
       int date = Util::getCurrentDate();
-      EXPECT_LT(2000000, date);
+      EXPECT_GT(date, 20000000);
+      EXPECT_LT(date, 99999999);
+   }
+   TEST_F(UtilTest, getCurrentTime) {
+      EXPECT_GE(Util::getCurrentTime(), 0);
+      EXPECT_LT(Util::getCurrentTime(), 240000);
+   }
+   TEST_F(UtilTest, getCurrentUnixTime) {
+      // A rough check that we are after 2000/01/01 00:00:00
+      EXPECT_GT(Util::getCurrentUnixTime(), 946684800);
    }
    TEST_F(UtilTest, getCurrentDateString) {
       std::string date = Util::getCurrentTimeStamp();

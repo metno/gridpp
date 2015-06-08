@@ -149,14 +149,6 @@ namespace {
       Util::setShowStatus(false);
       Util::status("test");
    }
-   TEST_F(UtilTest, clock) {
-      double sleepmicros = 50000;
-      double sleepsec    = sleepmicros/1e6;
-      double s = Util::clock();
-      usleep(sleepmicros);
-      double e = Util::clock();
-      EXPECT_NEAR(sleepsec, e-s, sleepsec/20);
-   }
    TEST_F(UtilTest, getDate) {
       EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
       EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));

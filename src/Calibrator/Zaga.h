@@ -41,5 +41,6 @@ class CalibratorZaga : public Calibrator {
       int  mNeighbourhoodSize;
       float mPopThreshold;
       float mMaxEnsMean;
+      bool m6h;
 };
 #endif

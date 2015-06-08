@@ -214,6 +214,9 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::Pop) {
       return "precipitation_amount_prob_low";
    }
+   else if(iVariable == Variable::Pop6h) {
+      return "precipitation_amount_prob_low_6h";
+   }
    else if(iVariable == Variable::U) {
       return "x_wind_10m";
    }

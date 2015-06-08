@@ -215,6 +215,35 @@ namespace {
       // 0.1306302
       EXPECT_FLOAT_EQ(0.13062906, (*pop)(0,0,0));
    }
+   TEST_F(TestCalibratorZaga, outputPop6h) {
+      // Set up file
+      FileFake file(2, 2, 1, 6);
+      // Set up calibrator
+      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      // In the neighbourhood around point (0,0):
+      // Frac(precip <= 0.4) = 0.75 mean = 0.2
+      for(int t = 0; t < 6; t++) {
+         FieldPtr precip  = file.getField(Variable::Precip, t);
+         (*precip)(0,0,0) = 0.1/6;
+         (*precip)(0,1,0) = 0;
+         (*precip)(1,0,0) = 0.5/6;
+         (*precip)(1,1,0) = 0.2/6;
+      }
+      CalibratorZaga cal(&parFile, Variable::Precip, Options("outputPop=1 neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5 6h=1"));
+      cal.calibrate(file);
+      FieldPtr pop  = file.getField(Variable::Pop6h, 5);
+      // mu    = exp(-1.1 + 1.4 * (0.2)^0.33333) = 0.754824
+      // sigma = exp(0.05 + -0.05 * 0.2) = 1.040811
+      // nu    = inv.logit(2.03 -0.05*0.2 + 0.82 * 0.75 -2.71*(0.2)^0.33333) = 0.7408083
+      // Compute 1-CDF at 0.5 mm using R:
+      // require(gamlss)
+      // require(boot)
+      // 1-pZAGA(0.5, 0.754824, 1.040811, 0.7408083)
+      // 0.1306302
+      EXPECT_FLOAT_EQ(0.13062906, (*pop)(0,0,0));
+      pop  = file.getField(Variable::Pop6h, 0);
+      EXPECT_FLOAT_EQ(Util::MV, (*pop)(0,0,0));
+   }
    TEST_F(TestCalibratorZaga, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

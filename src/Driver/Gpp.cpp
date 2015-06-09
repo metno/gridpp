@@ -59,7 +59,7 @@ void writeUsage() {
    std::cout << CalibratorQnh::description();
    std::cout << CalibratorAccumulate::description();
    std::cout << CalibratorWindDirection::description();
-   std::cout << CalibratorSmooth::description();
+   std::cout << CalibratorNeighbourhood::description();
    std::cout << CalibratorPhase::description();
    std::cout << CalibratorRegression::description();
 }

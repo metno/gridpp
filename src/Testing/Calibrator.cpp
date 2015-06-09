@@ -114,11 +114,11 @@ namespace {
       EXPECT_FLOAT_EQ(0.9, ((CalibratorZaga*) c)->getFracThreshold());
       delete c;
    }
-   TEST_F(TestCalibrator, factorySmooth) {
+   TEST_F(TestCalibrator, factoryNeighbourhood) {
       Calibrator* c;
-      c = Calibrator::getScheme("smooth", Options("variable=Precip smoothRadius=3"));
+      c = Calibrator::getScheme("neighbourhood", Options("variable=Precip radius=3"));
       EXPECT_TRUE(c);
-      EXPECT_EQ("smooth", c->name());
+      EXPECT_EQ("neighbourhood", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryPhase) {
@@ -147,7 +147,7 @@ namespace {
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
-      Calibrator::getScheme("smooth", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
+      Calibrator::getScheme("neighbourhood", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
    }
    TEST_F(TestCalibrator, factoryInvalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -156,7 +156,7 @@ namespace {
       EXPECT_DEATH(Calibrator::getScheme("zaga", Options("parameters=testing/files/parameters.txt")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("zaga", Options("variable=T")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("cloud", Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("smooth", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("neighbourhood", Options("radius=-2")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("phase", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("variable=T")), ".*");

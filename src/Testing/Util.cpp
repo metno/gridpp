@@ -185,13 +185,13 @@ namespace {
       bool status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
       // Change 10x10_copy.nc
-      CalibratorSmooth smooth(Variable::T);
+      CalibratorNeighbourhood neighbourhood(Variable::T, Options(""));
       FileArome f1("testing/files/10x10.nc");
       FileArome f2("testing/files/10x10_copy.nc");
       FieldPtr field1 = f1.getField(Variable::T, 0);
       FieldPtr field2 = f2.getField(Variable::T, 0);
       EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
-      smooth.calibrate(f2);
+      neighbourhood.calibrate(f2);
       // Values should be different now
       EXPECT_NE((*field2)(1,1,0), (*field1)(1,1,0));
       std::vector<Variable::Type> vars(1,Variable::T);

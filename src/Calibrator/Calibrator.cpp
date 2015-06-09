@@ -47,16 +47,12 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
       return c;
    }
-   else if(iName == "smooth") {
+   else if(iName == "neighbourhood") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'smooth' needs variable");
+         Util::error("Calibrator 'neighbourhood' needs variable");
       }
-      CalibratorSmooth* c = new CalibratorSmooth(Variable::getType(variable));
-      int smoothRadius;
-      if(iOptions.getValue("smoothRadius", smoothRadius)) {
-         c->setSmoothRadius(smoothRadius);
-      }
+      CalibratorNeighbourhood* c = new CalibratorNeighbourhood(Variable::getType(variable), iOptions);
       return c;
    }
    else if(iName == "phase") {

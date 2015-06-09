@@ -33,7 +33,7 @@ class Calibrator {
 // #include "Wind.h"
 #include "Temperature.h"
 #include "Accumulate.h"
-#include "Smooth.h"
+#include "Neighbourhood.h"
 #include "Qnh.h"
 #include "Phase.h"
 #include "Regression.h"

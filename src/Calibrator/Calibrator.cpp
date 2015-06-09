@@ -88,6 +88,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "qc") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'qc' needs variable");
+      }
+      CalibratorQc* c = new CalibratorQc(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else if(iName == "qnh") {
       CalibratorQnh* c = new CalibratorQnh();
 

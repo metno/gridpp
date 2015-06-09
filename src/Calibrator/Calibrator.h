@@ -34,6 +34,7 @@ class Calibrator {
 #include "Temperature.h"
 #include "Accumulate.h"
 #include "Neighbourhood.h"
+#include "Qc.h"
 #include "Qnh.h"
 #include "Phase.h"
 #include "Regression.h"

@@ -121,6 +121,13 @@ namespace {
       EXPECT_EQ("neighbourhood", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryQc) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qc", Options("variable=Precip m3"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qc", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryPhase) {
       Calibrator* c;
       c = Calibrator::getScheme("phase", Options("variable=Precip parameters=testing/files/parametersPhase.txt minPrecip=0.771 useWetbulb=0"));

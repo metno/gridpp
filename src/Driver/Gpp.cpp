@@ -56,6 +56,7 @@ void writeUsage() {
    std::cout << "Calibrators with options (and default values):" << std::endl;
    std::cout << CalibratorZaga::description();
    std::cout << CalibratorCloud::description();
+   std::cout << CalibratorQc::description();
    std::cout << CalibratorQnh::description();
    std::cout << CalibratorAccumulate::description();
    std::cout << CalibratorWindDirection::description();

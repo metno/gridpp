@@ -169,6 +169,13 @@ namespace {
       EXPECT_EQ("qnh", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryWindow) {
+      Calibrator* c;
+      c = Calibrator::getScheme("window", Options("variable=Precip radius=2 operator=quantile quantile=0.5"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("window", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
@@ -186,6 +193,8 @@ namespace {
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("variable=T")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("parameters=testing/files/regression1order.txt")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("qc", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("window", Options("")), ".*");
    }
 }
 int main(int argc, char **argv) {

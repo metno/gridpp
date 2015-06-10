@@ -249,6 +249,8 @@ namespace {
       Util::setShowError(false);
       ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("neighbourhoodSize=-1")), ".*");
+      EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("maxEnsMean=-1")), ".*");
+      EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("maxEnsMean=-999")), ".*");
    }
    TEST_F(TestCalibratorZaga, valid) {
       ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);

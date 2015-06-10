@@ -15,21 +15,6 @@ namespace {
          }
          virtual void TearDown() {
          }
-         std::vector<float> getHood(float v1, float v2, float v3) {
-            std::vector<float> hood;
-            hood.push_back(v1);
-            hood.push_back(v2);
-            hood.push_back(v3);
-            return hood;
-         }
-         std::vector<float> getHood(float v1, float v2, float v3, float v4) {
-            std::vector<float> hood;
-            hood.push_back(v1);
-            hood.push_back(v2);
-            hood.push_back(v3);
-            hood.push_back(v4);
-            return hood;
-         }
    };
    TEST_F(TestCalibratorNeighbourhood, 10x10_double) {
       FileArome from("testing/files/10x10.nc");
@@ -143,65 +128,6 @@ namespace {
       EXPECT_FLOAT_EQ(306.8, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(310,   (*after)(5,9,0));
       EXPECT_FLOAT_EQ(316.1, (*after)(0,9,0));
-   }
-   TEST_F(TestCalibratorNeighbourhood, compute) {
-      FileArome from("testing/files/10x10.nc");
-
-      // Odd-sized neighbourhood
-      std::vector<float> hood = getHood(3,0,2);
-      EXPECT_FLOAT_EQ(2, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(0, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(3, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(1.6666666, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(1.247219, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // Even-sized neighbourhood
-      hood = getHood(4,2,0,3);
-      EXPECT_FLOAT_EQ(2.5, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(0, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(4, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(2.25, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(1.47902, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // Missing value
-      hood = getHood(0,Util::MV,-4,2);
-      EXPECT_FLOAT_EQ(0, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(-4, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(2, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(-0.6666666, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(2.494438, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // All same values
-      hood = getHood(1,1,1,1);
-      EXPECT_FLOAT_EQ(1, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(1, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(1, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(1, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(0, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // Small variance, large mean
-      hood = getHood(28123.49,28123.48,28123.49);
-      EXPECT_FLOAT_EQ(28123.49, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(28123.48, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(28123.49, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(28123.48666667, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(0.0046035596, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // All missing
-      hood = getHood(Util::MV,Util::MV,Util::MV);
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
-
-      // Empty
-      hood = std::vector<float>();
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorMean));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorNeighbourhood::compute(hood, CalibratorNeighbourhood::OperatorStd));
    }
    TEST_F(TestCalibratorNeighbourhood, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

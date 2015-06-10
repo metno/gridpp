@@ -5,6 +5,7 @@
 #include "../Util.h"
 #include "../Options.h"
 #include "../ParameterFile.h"
+#include "../File/File.h"
 
 Calibrator::Calibrator() {
 
@@ -80,6 +81,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
          Util::error("Calibrator 'zaga' needs variable");
       }
       CalibratorWindDirection* c = new CalibratorWindDirection(parFile, Variable::getType(variable));
+
+      return c;
+   }
+   else if(iName == "window") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'window' needs variable");
+      }
+      CalibratorWindow* c = new CalibratorWindow(Variable::getType(variable), iOptions);
 
       return c;
    }

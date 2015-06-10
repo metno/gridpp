@@ -261,3 +261,85 @@ std::string Util::formatDescription(std::string iTitle, std::string iMessage, in
    ss << curr.str();
    return ss.str();
 }
+
+float Util::applyOperator(const std::vector<float>& iArray, Util::OperatorType iOperator, float iQuantile) {
+   // Initialize to missing
+   float value = Util::MV;
+   if(iOperator == Util::OperatorMean) {
+      float total = 0;
+      int count = 0;
+      for(int n = 0; n < iArray.size(); n++) {
+         if(Util::isValid(iArray[n])) {
+            total += iArray[n];
+            count++;
+         }
+      }
+      if(count > 0) {
+         value = total / count;
+      }
+   }
+   else if(iOperator == Util::OperatorStd) {
+      // STD = sqrt(E[X^2] - E[X]^2)
+      // The above formula is unstable when the variance is small and the mean is large.
+      // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
+      // the resulting calculation of VAR(X-K) is stable. Set K to the first non-missing value.
+      float total  = 0;
+      float total2 = 0;
+      float K = Util::MV;
+      int count = 0;
+      for(int n = 0; n < iArray.size(); n++) {
+         if(Util::isValid(iArray[n])) {
+            if(!Util::isValid(K))
+               K = iArray[n];
+            assert(Util::isValid(K));
+
+            total  += iArray[n] - K;
+            total2 += (iArray[n] - K)*(iArray[n] - K);
+            count++;
+         }
+      }
+      if(count > 0) {
+         float mean  = total / count;
+         float mean2 = total2 / count;
+         float var   = mean2 - mean*mean;
+         if(var < 0) {
+            // This should never happen
+            var = 0;
+            Util::warning("CalibratorNeighbourhood: Problems computing std, unstable result. Setting value to 0");
+         }
+         float std = sqrt(var);
+         value = std;
+      }
+   }
+   else if(iOperator == Util::OperatorQuantile) {
+      // Remove missing
+      std::vector<float> cleanHood;
+      cleanHood.reserve(iArray.size());
+      for(int i = 0; i < iArray.size(); i++) {
+         if(Util::isValid(iArray[i]))
+            cleanHood.push_back(iArray[i]);
+      }
+      int N = cleanHood.size();
+      if(N > 0) {
+         std::sort(cleanHood.begin(), cleanHood.end());
+         int lowerIndex = floor(iQuantile * (N-1));
+         int upperIndex = ceil(iQuantile * (N-1));
+         float lowerQuantile = (float) lowerIndex / (N-1);
+         float upperQuantile = (float) upperIndex / (N-1);
+         float lowerValue = cleanHood[lowerIndex];
+         float upperValue = cleanHood[upperIndex];
+         if(lowerIndex == upperIndex) {
+            value = lowerValue;
+         }
+         else {
+            assert(upperQuantile > lowerQuantile);
+            assert(iQuantile >= lowerQuantile);
+            float f = (iQuantile - lowerQuantile)/(upperQuantile - lowerQuantile);
+            assert(f >= 0);
+            assert(f <= 1);
+            value   = lowerValue + (upperValue - lowerValue) * f;
+         }
+      }
+   }
+   return value;
+}

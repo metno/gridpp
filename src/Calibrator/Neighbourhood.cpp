@@ -8,37 +8,37 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
       Calibrator(),
       mRadius(3),
       mVariable(iVariable),
-      mOperator(OperatorMean),
+      mOperator(Util::OperatorMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
    if(mRadius < 0) {
       std::stringstream ss;
-      ss << "CalibratorSmooth: Smoothing radius (" << mRadius << ") must be >= 1";
+      ss << "CalibratorNeighbourhood: 'radius' (" << mRadius << ") must be >= 0";
       Util::error(ss.str());
    }
 
    std::string op;
    if(iOptions.getValue("operator", op)) {
       if(op == "mean") {
-         mOperator = OperatorMean;
+         mOperator = Util::OperatorMean;
       }
       else if(op == "min") {
-         mOperator = OperatorQuantile;
+         mOperator = Util::OperatorQuantile;
          mQuantile = 0;
       }
       else if(op == "max") {
-         mOperator = OperatorQuantile;
+         mOperator = Util::OperatorQuantile;
          mQuantile = 1;
       }
       else if(op == "median") {
-         mOperator = OperatorQuantile;
+         mOperator = Util::OperatorQuantile;
          mQuantile = 0.5;
       }
       else if(op == "std") {
-         mOperator = OperatorStd;
+         mOperator = Util::OperatorStd;
       }
       else if(op == "quantile"){
-         mOperator = OperatorQuantile;
+         mOperator = Util::OperatorQuantile;
          if(!iOptions.getValue("quantile", mQuantile)) {
             Util::error("CalibratorNeighbourhood: option 'quantile' is required");
          }
@@ -85,7 +85,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile) const {
                   }
                }
                assert(index == Ni*Nj);
-               precip(i,j,e) = compute(neighbourhood, mOperator, mQuantile);
+               precip(i,j,e) = Util::applyOperator(neighbourhood, mOperator, mQuantile);
             }
          }
       }
@@ -104,85 +104,4 @@ std::string CalibratorNeighbourhood::description() {
    ss << Util::formatDescription("   operator=mean", "What operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
    ss << Util::formatDescription("   quantile=undef", "If operator=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    return ss.str();
-}
-float CalibratorNeighbourhood::compute(const std::vector<float>& neighbourhood, OperatorType iOperator, float iQuantile) {
-   // Initialize to missing
-   float value = Util::MV;
-   if(iOperator == OperatorMean) {
-      float total = 0;
-      int count = 0;
-      for(int n = 0; n < neighbourhood.size(); n++) {
-         if(Util::isValid(neighbourhood[n])) {
-            total += neighbourhood[n];
-            count++;
-         }
-      }
-      if(count > 0) {
-         value = total / count;
-      }
-   }
-   else if(iOperator == OperatorStd) {
-      // STD = sqrt(E[X^2] - E[X]^2)
-      // The above formula is unstable when the variance is small and the mean is large.
-      // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the neighbourhood
-      // the resulting calculation of VAR(X-K) is stable. Set K to the first non-missing value.
-      float total  = 0;
-      float total2 = 0;
-      float K = Util::MV;
-      int count = 0;
-      for(int n = 0; n < neighbourhood.size(); n++) {
-         if(Util::isValid(neighbourhood[n])) {
-            if(!Util::isValid(K))
-               K = neighbourhood[n];
-            assert(Util::isValid(K));
-
-            total  += neighbourhood[n] - K;
-            total2 += (neighbourhood[n] - K)*(neighbourhood[n] - K);
-            count++;
-         }
-      }
-      if(count > 0) {
-         float mean  = total / count;
-         float mean2 = total2 / count;
-         float var   = mean2 - mean*mean;
-         if(var < 0) {
-            // This should never happen
-            var = 0;
-            Util::warning("CalibratorNeighbourhood: Problems computing std, unstable result. Setting value to 0");
-         }
-         float std = sqrt(var);
-         value = std;
-      }
-   }
-   else if(iOperator == OperatorQuantile) {
-      // Remove missing
-      std::vector<float> cleanHood;
-      cleanHood.reserve(neighbourhood.size());
-      for(int i = 0; i < neighbourhood.size(); i++) {
-         if(Util::isValid(neighbourhood[i]))
-            cleanHood.push_back(neighbourhood[i]);
-      }
-      int N = cleanHood.size();
-      if(N > 0) {
-         std::sort(cleanHood.begin(), cleanHood.end());
-         int lowerIndex = floor(iQuantile * (N-1));
-         int upperIndex = ceil(iQuantile * (N-1));
-         float lowerQuantile = (float) lowerIndex / (N-1);
-         float upperQuantile = (float) upperIndex / (N-1);
-         float lowerValue = cleanHood[lowerIndex];
-         float upperValue = cleanHood[upperIndex];
-         if(lowerIndex == upperIndex) {
-            value = lowerValue;
-         }
-         else {
-            assert(upperQuantile > lowerQuantile);
-            assert(iQuantile >= lowerQuantile);
-            float f = (iQuantile - lowerQuantile)/(upperQuantile - lowerQuantile);
-            assert(f >= 0);
-            assert(f <= 1);
-            value   = lowerValue + (upperValue - lowerValue) * f;
-         }
-      }
-   }
-   return value;
 }

@@ -11,6 +11,21 @@
 namespace {
    class UtilTest : public ::testing::Test {
       protected:
+         std::vector<float> getHood(float v1, float v2, float v3) {
+            std::vector<float> hood;
+            hood.push_back(v1);
+            hood.push_back(v2);
+            hood.push_back(v3);
+            return hood;
+         }
+         std::vector<float> getHood(float v1, float v2, float v3, float v4) {
+            std::vector<float> hood;
+            hood.push_back(v1);
+            hood.push_back(v2);
+            hood.push_back(v3);
+            hood.push_back(v4);
+            return hood;
+         }
    };
 
    TEST_F(UtilTest, isValid) {
@@ -240,6 +255,65 @@ namespace {
       // Invalid input should not throw an error
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 5, 2); // Too narrow message
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
+   }
+   TEST_F(UtilTest, compute) {
+      FileArome from("testing/files/10x10.nc");
+
+      // Odd-sized neighbourhood
+      std::vector<float> hood = getHood(3,0,2);
+      EXPECT_FLOAT_EQ(2, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(3, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(1.6666666, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(1.247219, Util::applyOperator(hood, Util::OperatorStd));
+
+      // Even-sized neighbourhood
+      hood = getHood(4,2,0,3);
+      EXPECT_FLOAT_EQ(2.5, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(4, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(2.25, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(1.47902, Util::applyOperator(hood, Util::OperatorStd));
+
+      // Missing value
+      hood = getHood(0,Util::MV,-4,2);
+      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(-4, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(2, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(-0.6666666, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(2.494438, Util::applyOperator(hood, Util::OperatorStd));
+
+      // All same values
+      hood = getHood(1,1,1,1);
+      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorStd));
+
+      // Small variance, large mean
+      hood = getHood(28123.49,28123.48,28123.49);
+      EXPECT_FLOAT_EQ(28123.49, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(28123.48, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(28123.49, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(28123.48666667, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(0.0046035596, Util::applyOperator(hood, Util::OperatorStd));
+
+      // All missing
+      hood = getHood(Util::MV,Util::MV,Util::MV);
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorStd));
+
+      // Empty
+      hood = std::vector<float>();
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 1));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorMean));
+      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorStd));
    }
    TEST_F(UtilTest, gridppVersion) {
       std::string version = Util::gridppVersion();

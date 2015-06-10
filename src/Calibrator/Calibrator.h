@@ -39,4 +39,5 @@ class Calibrator {
 #include "Phase.h"
 #include "Regression.h"
 #include "WindDirection.h"
+#include "Window.h"
 #endif

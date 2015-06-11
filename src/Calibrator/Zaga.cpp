@@ -46,9 +46,6 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
       timeWindow = 6;
    }
 
-   int numInvalidRaw = 0;
-   int numInvalidCal = 0;
-
    std::vector<FieldPtr> precips;
    for(int t = 0; t < nTime; t++) {
       precips.push_back(iFile.getField(Variable::Precip, t));
@@ -56,6 +53,9 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
+      int numInvalidRaw = 0;
+      int numInvalidCal = 0;
+
       Parameters parameters = mParameterFile->getParameters(t);
 
       // Load the POP output field, if needed
@@ -64,7 +64,7 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
          pop = iFile.getField(popVariable, t);
       }
 
-      #pragma omp parallel for
+      #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             // for Pop6h, the first few hours are undefined, since we cannot do a 6h accumulation
@@ -159,7 +159,6 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
                         }
                      }
                      else {
-                        numInvalidCal++;
                         // Calibrator produced some invalid members. Revert to the raw values.
                         for(int e = 0; e < nEns; e++) {
                            precip(i,j,e) = precipRaw[e];
@@ -168,7 +167,6 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
                   }
                }
                else {
-                  numInvalidRaw++;
                   // One or more members are missing, don't calibrate
                   for(int e = 0; e < nEns; e++) {
                      precip(i,j,e) = precipRaw[e];
@@ -177,18 +175,18 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
             }
          }
       }
-   }
-   if(numInvalidRaw > 0) {
-      std::stringstream ss;
-      ss << "File '" << iFile.getFilename() << "' has " << numInvalidRaw
-         << " missing ensembles, out of " << nTime * nLat * nLon << ".";
-      Util::warning(ss.str());
-   }
-   if(numInvalidCal > 0) {
-      std::stringstream ss;
-      ss << "Calibrator produced " << numInvalidCal
-         << " invalid ensembles, out of " << nTime * nLat * nLon << ".";
-      Util::warning(ss.str());
+      if(numInvalidRaw > 0) {
+         std::stringstream ss;
+         ss << "File '" << iFile.getFilename() << "' missing " << numInvalidRaw
+            << "/" << nLat * nLon << " ensembles for timestep " << t << ".";
+         Util::warning(ss.str());
+      }
+      if(numInvalidCal > 0) {
+         std::stringstream ss;
+         ss << "Calibrator produces '" << numInvalidRaw
+            << "/" << nLat * nLon << " invalid ensembles for timestep " << t << ".";
+         Util::warning(ss.str());
+      }
    }
    return true;
 }

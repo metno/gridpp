@@ -40,7 +40,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'accumulate' needs variable");
       }
-      CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
+      CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable), iOptions);
       return c;
    }
    else if(iName == "neighbourhood") {

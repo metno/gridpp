@@ -136,6 +136,25 @@ namespace {
       File* f = File::getScheme("missingfilename", Options());
       EXPECT_EQ(NULL, f);
    }
+   TEST_F(FileTest, deaccumulate) {
+      // Create accumulation field
+      FileArome from("testing/files/1x1.nc");
+      Variable::Type var = Variable::Precip;
+
+      // Accumulated    0, 3, 4, 4, 5.5,  10, _,12,12,20
+      // Deaccumulated  _, 3, 1, 0, 1.5, 4.5, _, _, 0, 8
+
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(var, 0))(0,0,0));
+      EXPECT_FLOAT_EQ(3, (*from.getField(var, 1))(0,0,0));
+      EXPECT_FLOAT_EQ(1, (*from.getField(var, 2))(0,0,0));
+      EXPECT_FLOAT_EQ(0, (*from.getField(var, 3))(0,0,0));
+      EXPECT_FLOAT_EQ(1.5, (*from.getField(var, 4))(0,0,0));
+      EXPECT_FLOAT_EQ(4.5, (*from.getField(var, 5))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(var, 6))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(var, 7))(0,0,0));
+      EXPECT_FLOAT_EQ(0, (*from.getField(var, 8))(0,0,0));
+      EXPECT_FLOAT_EQ(8, (*from.getField(var, 9))(0,0,0));
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

@@ -104,7 +104,7 @@ void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
    // Write one line for each station
    for(int j = 0; j < mLats[0].size(); j++) {
       std::string locationName = mNames[j];
-      ofs << " ST MIN QNH ";
+      ofs << "EST MIN QNH ";
       ofs << std::setfill(' ') << std::setw(maxNameSize) << std::left << locationName << ": ";
 
       // Find minimum

@@ -119,14 +119,14 @@ class Util {
       //! on the left side and the message on the right, with automatic line wrapping.
       static std::string formatDescription(std::string iTitle, std::string iMessage, int iTitleLength=32, int iMaxLength=100, int iTitleIndent=3);
 
-      enum OperatorType {
-         OperatorMean      = 0,
-         OperatorStd       = 30,
-         OperatorQuantile  = 40
+      enum StatType {
+         StatTypeMean      = 0,
+         StatTypeStd       = 30,
+         StatTypeQuantile  = 40
       };
 
       //! Applies statistics operator to array. Missing values are ignored.
-      static float applyOperator(const std::vector<float>& iArray, Util::OperatorType iOperator, float iQuantile=Util::MV);
+      static float calculateStat(const std::vector<float>& iArray, Util::StatType iStatType, float iQuantile=Util::MV);
       
       //! \brief Comparator class for sorting pairs using the first entry.
       //! Sorts from smallest to largest

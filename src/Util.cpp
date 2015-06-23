@@ -276,10 +276,10 @@ std::string Util::formatDescription(std::string iTitle, std::string iMessage, in
    return ss.str();
 }
 
-float Util::applyOperator(const std::vector<float>& iArray, Util::OperatorType iOperator, float iQuantile) {
+float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStatType, float iQuantile) {
    // Initialize to missing
    float value = Util::MV;
-   if(iOperator == Util::OperatorMean) {
+   if(iStatType == Util::StatTypeMean) {
       float total = 0;
       int count = 0;
       for(int n = 0; n < iArray.size(); n++) {
@@ -292,7 +292,7 @@ float Util::applyOperator(const std::vector<float>& iArray, Util::OperatorType i
          value = total / count;
       }
    }
-   else if(iOperator == Util::OperatorStd) {
+   else if(iStatType == Util::StatTypeStd) {
       // STD = sqrt(E[X^2] - E[X]^2)
       // The above formula is unstable when the variance is small and the mean is large.
       // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
@@ -325,7 +325,7 @@ float Util::applyOperator(const std::vector<float>& iArray, Util::OperatorType i
          value = std;
       }
    }
-   else if(iOperator == Util::OperatorQuantile) {
+   else if(iStatType == Util::StatTypeQuantile) {
       // Remove missing
       std::vector<float> cleanHood;
       cleanHood.reserve(iArray.size());

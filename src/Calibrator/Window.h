@@ -3,7 +3,7 @@
 #include "Calibrator.h"
 #include "../Variable.h"
 
-// Applies an operator to values within a temporal window
+// Applies a statistical operator to values within a temporal window
 class CalibratorWindow : public Calibrator {
    public:
       CalibratorWindow(Variable::Type iVariable, const Options& iOptions);
@@ -13,7 +13,7 @@ class CalibratorWindow : public Calibrator {
       bool calibrateCore(File& iFile) const;
       Variable::Type mVariable;
       int mRadius;
-      Util::OperatorType mOperator;
+      Util::StatType mStatType;
       float mQuantile;
 };
 #endif

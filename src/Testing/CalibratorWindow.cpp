@@ -18,7 +18,7 @@ namespace {
    };
    TEST_F(TestCalibratorWindow, radius0) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=0 operator=mean"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=0 stat=mean"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(23, (*from.getField(Variable::T, 0))(0,0,0));
@@ -34,7 +34,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, radius2) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=mean"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=mean"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(19.333333, (*from.getField(Variable::T, 0))(0,0,0));
@@ -50,7 +50,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, min) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=min"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=min"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(15, (*from.getField(Variable::T, 0))(0,0,0));
@@ -66,7 +66,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, max) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=max"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=max"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(23, (*from.getField(Variable::T, 0))(0,0,0));
@@ -82,7 +82,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, std) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=std"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=std"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(3.299832,  (*from.getField(Variable::T, 0))(0,0,0));
@@ -93,7 +93,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, quantile) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=quantile quantile=0.5"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=quantile quantile=0.5"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(20,   (*from.getField(Variable::T, 0))(0,0,0));
@@ -104,7 +104,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, median) {
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 operator=median"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=median"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(20,   (*from.getField(Variable::T, 0))(0,0,0));
@@ -116,7 +116,7 @@ namespace {
    TEST_F(TestCalibratorWindow, radius100) {
       // A large radius forces all values to be the same
       FileArome from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=100 operator=mean"));
+      CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=100 stat=mean"));
       cal.calibrate(from);
 
       for(int t = 0; t < 10; t++) {
@@ -127,19 +127,19 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("operator=invalidOperator")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("stat=invalidStatType")), ".*");
 
       // Negative radius
       EXPECT_DEATH(CalibratorWindow(Variable::T, Options("radius=-1")), ".*");
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("radius=-1 operator=quantile")), ".*");
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("radius=-1 operator=quantile quantile=0.5")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("radius=-1 stat=quantile")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("radius=-1 stat=quantile quantile=0.5")), ".*");
 
       // Missing quantile
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("operator=quantile")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("stat=quantile")), ".*");
       // Invalid quantile
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("operator=quantile quantile=-0.1")), ".*");
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("operator=quantile quantile=1.1")), ".*");
-      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("operator=quantile quantile=-999")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("stat=quantile quantile=-0.1")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("stat=quantile quantile=1.1")), ".*");
+      EXPECT_DEATH(CalibratorWindow(Variable::T, Options("stat=quantile quantile=-999")), ".*");
    }
    TEST_F(TestCalibratorWindow, description) {
       CalibratorWindow::description();

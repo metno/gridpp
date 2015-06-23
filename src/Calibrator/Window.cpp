@@ -5,7 +5,7 @@ CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOpt
       Calibrator(),
       mRadius(3),
       mVariable(iVariable),
-      mOperator(Util::OperatorMean),
+      mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
    if(mRadius < 0) {
@@ -15,27 +15,27 @@ CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOpt
    }
 
    std::string op;
-   if(iOptions.getValue("operator", op)) {
+   if(iOptions.getValue("stat", op)) {
       if(op == "mean") {
-         mOperator = Util::OperatorMean;
+         mStatType = Util::StatTypeMean;
       }
       else if(op == "min") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 0;
       }
       else if(op == "max") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 1;
       }
       else if(op == "median") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 0.5;
       }
       else if(op == "std") {
-         mOperator = Util::OperatorStd;
+         mStatType = Util::StatTypeStd;
       }
       else if(op == "quantile"){
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          if(!iOptions.getValue("quantile", mQuantile)) {
             Util::error("CalibratorWindow: option 'quantile' is required");
          }
@@ -44,7 +44,7 @@ CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOpt
          }
       }
       else {
-         Util::error("CalibratorWindow: Unrecognized value for 'operator'");
+         Util::error("CalibratorWindow: Unrecognized value for 'stat'");
       }
    }
 }
@@ -75,7 +75,7 @@ bool CalibratorWindow::calibrateCore(File& iFile) const {
                   window[index] = curr;
                   index++;
                }
-               (*fields[t])(i,j,e) = Util::applyOperator(window, mOperator, mQuantile);
+               (*fields[t])(i,j,e) = Util::calculateStat(window, mStatType, mQuantile);
             }
          }
       }
@@ -88,9 +88,9 @@ bool CalibratorWindow::calibrateCore(File& iFile) const {
 
 std::string CalibratorWindow::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c window","Applies an operator to values within a temporal window. Any missing values are ignored when computing the statistic.") << std::endl;
+   ss << Util::formatDescription("-c window","Applies a statistical operator to values within a temporal window. Any missing values are ignored when computing the statistic.") << std::endl;
    ss << Util::formatDescription("   radius=required", "Define the window as all offsets within +- radius (must be 0 or greater). The unit is in number of time indices in the file.") << std::endl;
-   ss << Util::formatDescription("   operator=mean", "What operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
-   ss << Util::formatDescription("   quantile=undef", "If operator=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+   ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    return ss.str();
 }

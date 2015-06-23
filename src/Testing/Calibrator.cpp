@@ -171,7 +171,7 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryWindow) {
       Calibrator* c;
-      c = Calibrator::getScheme("window", Options("variable=Precip radius=2 operator=quantile quantile=0.5"));
+      c = Calibrator::getScheme("window", Options("variable=Precip radius=2 stat=quantile quantile=0.5"));
       EXPECT_TRUE(c);
       EXPECT_EQ("window", c->name());
       delete c;

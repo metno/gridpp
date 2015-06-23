@@ -7,7 +7,7 @@
 class ParameterFile;
 class Parameters;
 
-//! Applies an operator to a neighbourhood
+//! Applies a statistical operator to a neighbourhood
 class CalibratorNeighbourhood : public Calibrator {
    public:
       CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions);
@@ -18,7 +18,7 @@ class CalibratorNeighbourhood : public Calibrator {
       bool calibrateCore(File& iFile) const;
       Variable::Type mVariable;
       int mRadius;
-      Util::OperatorType mOperator;
+      Util::StatType mStatType;
       float mQuantile;
 };
 #endif

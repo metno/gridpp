@@ -174,8 +174,11 @@ bool CalibratorKriging::calibrateCore(File& iFile) const {
                   // The matrix is symmetric, so only compute one of the halves
                   for(int jj = ii+1; jj < N; jj++) {
                      Location jloc = validLocations[jj];
+                     // Improve conditioning of matrix when you have two or more stations
+                     // that are very close
+                     float factor = 0.414 / 0.5;
+                     float R = calcWeight(iloc, jloc)*factor;
                      // Store the number in both halves
-                     float R = calcWeight(iloc, jloc);
                      matrix[ii][jj] = R;
                      matrix[jj][ii] = R;
                   }

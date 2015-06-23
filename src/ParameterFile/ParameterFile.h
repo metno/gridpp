@@ -1,8 +1,9 @@
-#ifndef PARAMETERFILE_H
-#define PARAMETERFILE_H
+#ifndef PARAMETER_FILE_H
+#define PARAMETER_FILE_H
 #include <iostream>
 #include <map>
-#include "Parameters.h"
+#include "../Parameters.h"
+#include "../Location.h"
 
 //! Represents a collection of parameters, one set for each forecast time
 //! Parameters are read from a specified text file with the following format:
@@ -37,14 +38,5 @@ class ParameterFile {
       std::string mFilename;
       int mNumParameters;
 };
-/*
-class ParameterFileRegion {
-   public:
-      ParameterFileRegion(std::string iFilename) {};
-      Parameters getParameters(float iLat, float iLon, int iTime) const {return Parameters();};
-   private:
-      std::map<int, Parameters> mParameters; // Offset, Parameters
-      std::string mFilename;
-};
-*/
+#include "ParameterFileSpatial.h"
 #endif

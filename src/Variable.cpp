@@ -113,6 +113,7 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::P);
    variables.push_back(Variable::MSLP);
    variables.push_back(Variable::QNH);
+   // Do not include Variable::NONE;
    return variables;
 }
 

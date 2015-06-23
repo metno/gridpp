@@ -2,6 +2,7 @@
 #define UTIL_H
 #include <string>
 #include <vector>
+#include <set>
 
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 
@@ -37,13 +38,15 @@ class Util {
       //! Checks if the file exists
       static bool exists(const std::string& iFilename);
 
-      //! \brief Computes the geographical distance between two locations
+      //! \brief Computes the geographical distance between two locations, assuming a spherical earth.
       //! @param lat1 Latitude in degrees of point 1
       //! @param lon1 Longitude in degrees of point 1
       //! @param lat2 Latitude in degrees of point 2
       //! @param lon2 Longitude in degrees of point 2
+      //! @param approx Should an approximation be used? If true, assumes a flat earth in the
+      //!               vicinity of the two points. Computes the result much faster.
       //! @return Distance in meters
-      static float getDistance(float lat1, float lon1, float lat2, float lon2);
+      static float getDistance(float lat1, float lon1, float lat2, float lon2, bool approx=false);
 
       //! Returns the current unix time in seconds
       static double clock();
@@ -102,6 +105,13 @@ class Util {
       //! @return x A value on the interval (0,1)
       static float invLogit(float x);
 
+      template <class T> static std::vector<T> combine(const std::vector<T>& i1, const std::vector<T>& i2) {
+         std::set<T> allValues(i1.begin(), i1.end());
+         for(int i = 0; i < i2.size(); i++) {
+            allValues.insert(i2[i]);
+         }
+         return std::vector<T>(allValues.begin(), allValues.end());
+      };
       //! Returns true if iString contains one or more of iChar
       static bool hasChar(std::string iString, char iChar);
 
@@ -125,6 +135,11 @@ class Util {
             return left.first < right.first;
          }
       };
+
+      //! Computes the matrix inverse
+      //! If any elements in iMatrix is missing, then all elements in the inverse will be missing.
+      //! If the matrix is not invertable, then all elements in the inverse will be missing.
+      static vec2 inverse(const vec2 iMatrix);
 
       //! Copy the file with filename iFrom to filename iTo
       static bool copy(std::string iFrom, std::string iTo);

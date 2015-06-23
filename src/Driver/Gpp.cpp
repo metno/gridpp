@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include "../File/File.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Calibrator/Calibrator.h"
 #include "../Downscaler/Downscaler.h"
 #include "../Util.h"
@@ -63,6 +63,7 @@ void writeUsage() {
    std::cout << CalibratorNeighbourhood::description();
    std::cout << CalibratorPhase::description();
    std::cout << CalibratorRegression::description();
+   std::cout << CalibratorKriging::description();
 }
 
 int main(int argc, const char *argv[]) {

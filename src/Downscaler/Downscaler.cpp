@@ -93,23 +93,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
       iJ[i].resize(nLon, Util::MV);
       for(int j = 0; j < nLon; j++) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
-            float minDist = Util::MV;
-            int I = Util::MV;
-            int J = Util::MV;
-            for(int ii = 0; ii < iFrom.getNumLat(); ii++) {
-               for(int jj = 0; jj < iFrom.getNumLon(); jj++) {
-                  if(Util::isValid(ilats[ii][jj]) && Util::isValid(ilons[ii][jj])) {
-                     float currDist = Util::getDistance(olats[i][j], olons[i][j], ilats[ii][jj], ilons[ii][jj]);
-                     if(!Util::isValid(minDist) || currDist < minDist) {
-                        I = ii;
-                        J = jj;
-                        minDist = currDist;
-                     }
-                  }
-               }
-            }
-            iI[i][j] = I;
-            iJ[i][j] = J;
+            getNearestNeighbour(iFrom, olons[i][j], olats[i][j], iI[i][j], iJ[i][j]);
          }
       }
    }
@@ -302,4 +286,28 @@ bool Downscaler::getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, v
    iI = mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()].first;
    iJ = mNeighbourCache[iFrom.getUniqueTag()][iTo.getUniqueTag()].second;
    return true;
+}
+
+void Downscaler::getNearestNeighbour(const File& iFrom, float iLon, float iLat, int& iI, int &iJ) {
+   vec2 ilats = iFrom.getLats();
+   vec2 ilons = iFrom.getLons();
+
+   iI = Util::MV;
+   iJ = Util::MV;
+
+   if(Util::isValid(iLat) && Util::isValid(iLon)) {
+      float minDist = Util::MV;
+      for(int i = 0; i < ilats.size(); i++) {
+         for(int j = 0; j < ilats[0].size(); j++) {
+            if(Util::isValid(ilats[i][j]) && Util::isValid(ilons[i][j])) {
+               float currDist = Util::getDistance(ilats[i][j], ilons[i][j], iLat, iLon);
+               if(!Util::isValid(minDist) || currDist < minDist) {
+                  iI = i;
+                  iJ = j;
+                  minDist = currDist;
+               }
+            }
+         }
+      }
+   }
 }

@@ -2,7 +2,7 @@
 #include <cmath>
 #include "../Util.h"
 #include "../File/File.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile) :
       Calibrator(),

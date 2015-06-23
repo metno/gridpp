@@ -176,6 +176,13 @@ namespace {
       EXPECT_EQ("window", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryKriging) {
+      Calibrator* c;
+      c = Calibrator::getScheme("kriging", Options("variable=Precip radius=100 maxElevDiff=100 efoldDist=2 parameters=testing/files/kalmanOutput.txt fileType=metnoKalman"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("kriging", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));

@@ -2,13 +2,14 @@
 CC      	= g++
 IFLAGS  	= -I/usr/include/
 LFLAGS   = -L/usr/lib
+CFLAGS   = -Wall -Wno-reorder -Wno-sign-compare
 
 # Flags for optimized compilation
-CFLAGS_O = -O3 -fopenmp
+CFLAGS_O = -O3 -fopenmp $(CFLAGS)
 LIBS_O   = -lnetcdf_c++
 
 # Flags for debug compilation
-CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
+CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
 LIBS_D   = -lnetcdf_c++ -L build/gtest -lgtest
 
 
@@ -27,10 +28,14 @@ CORESRC 	= $(wildcard src/*.cpp)
 CALSRC  	= $(wildcard src/Calibrator/*.cpp)
 FILESRC 	= $(wildcard src/File/*.cpp)
 DOWNSRC 	= $(wildcard src/Downscaler/*.cpp)
+PARSRC 	= $(wildcard src/ParameterFile/*.cpp)
 DRVSRC  	= src/Driver/Gpp.cpp
-DRVOBJ_O = $(BUILDDIR_O)/Driver/Gpp.o
+DRVOBJ_O	= $(BUILDDIR_O)/Driver/Gpp.o
 DRVOBJ_D	= $(BUILDDIR_D)/Driver/Gpp.o
-SRC     	= $(CORESRC) $(CALSRC) $(FILESRC) $(DOWNSRC)
+KFSRC  	= src/Driver/Kf.cpp
+KFOBJ_O	= $(BUILDDIR_O)/Driver/Kf.o
+KFOBJ_D	= $(BUILDDIR_D)/Driver/Kf.o
+SRC     	= $(CORESRC) $(CALSRC) $(FILESRC) $(DOWNSRC) $(PARSRC)
 HEADERS 	= $(SRC:.cpp=.h)
 OBJ0_O   = $(patsubst src/%,$(BUILDDIR_O)/%,$(SRC))
 OBJ0_D  	= $(patsubst src/%,$(BUILDDIR_D)/%,$(SRC))
@@ -48,7 +53,7 @@ default: $(EXE_O)
 debug: $(EXE_D)
 
 $(BUILDDIR):
-	@mkdir build build/Calibrator build/Downscaler build/File build/Driver build/Testing
+	@mkdir build build/Calibrator build/Downscaler build/File build/ParameterFile build/Driver build/Testing
 
 $(BUILDDIR_O)/%.o : src/%.cpp $(INCS)
 	$(CC) $(CFLAGS_O) $(IFLAGS) -c $< -o $@
@@ -62,8 +67,14 @@ $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
 gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
+kalmanFilter: $(OBJ_O) $(KFOBJ_O) makefile
+	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(KFOBJ_O) $(LIBS_O) -o $@
+
 gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
+
+kalmanFilter_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
+	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(KFOBJ_D) $(LIBS_D) -o $@
 
 test: gtest $(TESTS)
 	./runAllTests.sh

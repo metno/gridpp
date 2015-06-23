@@ -4,7 +4,7 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
 CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions):
       Calibrator(),

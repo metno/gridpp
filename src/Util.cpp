@@ -15,6 +15,12 @@
 #include <fstream>
 #include <istream>
 #include <iomanip>
+
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+#include <boost/numeric/ublas/io.hpp>
 #ifdef DEBUG
 extern "C" void __gcov_flush();
 #endif
@@ -76,7 +82,7 @@ bool Util::exists(const std::string& iFilename) {
    return infile.good();
 }
 
-float Util::getDistance(float lat1, float lon1, float lat2, float lon2) {
+float Util::getDistance(float lat1, float lon1, float lat2, float lon2, bool approx) {
    if(!Util::isValid(lat1) || !Util::isValid(lat2) ||
       !Util::isValid(lon1) || !Util::isValid(lon2)) {
       return Util::MV;
@@ -85,15 +91,23 @@ float Util::getDistance(float lat1, float lon1, float lat2, float lon2) {
 
    if(lat1 == lat2 && lon1 == lon2)
       return 0;
+
    double lat1r = deg2rad(lat1);
    double lat2r = deg2rad(lat2);
    double lon1r = deg2rad(lon1);
    double lon2r = deg2rad(lon2);
-   double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
-                + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
-                + sin(lat1r)*sin(lat2r);
-   double dist = acos(ratio)*radiusEarth;
-   return (float) dist;
+   if(approx) {
+      float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
+      float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
+      return radiusEarth*sqrt(dx2+dy2);
+   }
+   else {
+      double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
+                   + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
+                   + sin(lat1r)*sin(lat2r);
+      double dist = acos(ratio)*radiusEarth;
+      return (float) dist;
+   }
 }
 
 float Util::deg2rad(float deg) {
@@ -342,4 +356,70 @@ float Util::applyOperator(const std::vector<float>& iArray, Util::OperatorType i
       }
    }
    return value;
+}
+
+vec2 Util::inverse(const vec2 iMatrix) {
+   int N = iMatrix.size();
+   if(N == 0) {
+      return vec2();
+   }
+
+   boost::numeric::ublas::matrix<float> inverseMatrix(N,N);
+
+   // Convert to matrix
+   boost::numeric::ublas::matrix<float> matrix(N,N);
+   for(int i = 0; i < N; i++) {
+      for(int j = 0; j < N; j++) {
+         float value = iMatrix[i][j];
+         if(!Util::isValid(value)) {
+            vec2 matrixVec;
+            matrixVec.resize(N);
+            // Create a missing matrix
+            for(int ii = 0; ii < N; ii++) {
+               matrixVec[ii].resize(N, Util::MV);
+            }
+            return matrixVec;
+         }
+         assert(iMatrix[i].size() > j);
+         matrix(i,j) = iMatrix[i][j];
+      }
+   }
+
+   // Taken from https://gist.github.com/2464434
+   using namespace boost::numeric::ublas;
+   typedef permutation_matrix<std::size_t> pmatrix; 
+
+   // create a permutation matrix for the LU-factorization
+   pmatrix pm(matrix.size1());
+
+   // perform LU-factorization
+   int res = lu_factorize(matrix,pm);
+
+   if( res != 0 ) {
+      Util::warning("Could not compute inverse, unstable.");
+      vec2 matrixVec;
+      matrixVec.resize(N);
+      // Create a missing matrix
+      for(int ii = 0; ii < N; ii++) {
+         matrixVec[ii].resize(N, Util::MV);
+      }
+      return matrixVec;
+   }
+
+   // Initialize to identity matrix
+   inverseMatrix.assign(identity_matrix<float>(matrix.size1()));
+
+   // Compute the inverse
+   lu_substitute(matrix, pm, inverseMatrix);
+
+   // Convert to vec2
+   vec2 inverseVec;
+   inverseVec.resize(N);
+   for(int i = 0; i < N; i++) {
+      inverseVec[i].resize(N);
+      for(int j = 0; j < N; j++) {
+         inverseVec[i][j] = inverseMatrix(i,j);
+      }
+   }
+   return inverseVec;
 }

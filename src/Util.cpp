@@ -423,3 +423,73 @@ vec2 Util::inverse(const vec2 iMatrix) {
    }
    return inverseVec;
 }
+
+float Util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
+   float y = Util::MV;
+
+   if(x > iX[iX.size()-1])
+      return iY[iX.size()-1];
+   if(x < iX[0])
+      return iY[0];
+
+   int i0   = Util::getLowerIndex(x, iX);
+   int i1   = Util::getUpperIndex(x, iX);
+   assert(Util::isValid(i0));
+   assert(i0 >= 0);
+   assert(Util::isValid(i1));
+   assert(i1 < iX.size());
+   float x0 = iX[i0];
+   float x1 = iX[i1];
+   float y0 = iY[i0];
+   float y1 = iY[i1];
+
+   if(x0 == x1)
+      y = (y0+y1)/2;
+   else {
+      assert(x1 >= x0);
+      y = y0 + (y1 - y0) * (x - x0)/(x1 - x0);
+   }
+
+   return y;
+
+}
+
+int Util::getLowerIndex(float iX, const std::vector<float>& iValues) {
+   int index = Util::MV;
+   for(int i = 0; i < (int) iValues.size(); i++) {
+      float currValue = iValues[i];
+      if(Util::isValid(currValue)) {
+         if(currValue < iX) {
+            index = i;
+         }
+         else if(currValue == iX) {
+            index = i;
+            break;
+         }
+         else if(currValue > iX) {
+            break;
+         }
+      }
+   }
+   return index;
+}
+
+int Util::getUpperIndex(float iX, const std::vector<float>& iValues) {
+   int index = Util::MV;
+   for(int i = iValues.size()-1; i >= 0; i--) {
+      float currValue = iValues[i];
+      if(Util::isValid(currValue)) {
+         if(currValue > iX) {
+            index = i;
+         }
+         else if(currValue == iX) {
+            index = i;
+            break;
+         }
+         else if(currValue < iX) {
+            break;
+         }
+      }
+   }
+   return index;
+}

@@ -146,6 +146,20 @@ class Util {
       //! If the matrix is not invertable, then all elements in the inverse will be missing.
       static vec2 inverse(const vec2 iMatrix);
 
+      static float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
+
+      // Array operations
+      //! Note: iValues must be sorted
+      //! Finds index into array pointing to the largest element smaller than or equal to iX.
+      //! In case of a tie, return the index of the last tied elements. When the search value equals
+      //! multiple values, the first element is returned. 
+      static int getLowerIndex(float iX, const std::vector<float>&  iValues);
+      //! Note: iValues must be sorted
+      //! Finds index into array pointing to the smallest element greater than or equal to iX.
+      //! In case of a tie, return the index of the first tied elements. When the search value equals
+      //! multiple values, the last element is returned.
+      static int getUpperIndex(float iX, const std::vector<float>& iValues);
+
       //! Copy the file with filename iFrom to filename iTo
       static bool copy(std::string iFrom, std::string iTo);
      

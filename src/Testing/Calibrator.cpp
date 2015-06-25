@@ -183,6 +183,13 @@ namespace {
       EXPECT_EQ("kriging", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryQq) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qq", Options("variable=Precip parameters=testing/files/parametersQq.txt"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qq", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));

@@ -116,6 +116,21 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "qq") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("CalibratorQq: 'parameters' missing");
+      }
+      ParameterFile* parFile = new ParameterFile(parFilename);
+
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'regression' needs variable");
+      }
+      CalibratorQq* c = new CalibratorQq(parFile, Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else if(iName == "regression") {
       std::string parFilename;
       if(!iOptions.getValue("parameters", parFilename)) {

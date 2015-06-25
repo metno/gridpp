@@ -17,11 +17,22 @@ class Downscaler {
       static Downscaler* getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions);
       virtual std::string name() const = 0;
 
-      // Slow method: Check every combination
-      // Return Util::MV when it cannot find a neighbour
+      //! Create a nearest-neighbour map. For each grid point in iTo, find the index into the grid
+      //! in iFrom of the nearest neighbour. Uses a brute force method by checking every
+      //! neighbour.
+      //! @param iI I-indices of nearest point. Set to Util::MV if no nearest neighbour.
+      //! @param iJ J-indices of nearest point. Set to Util::MV if no nearest neighbour.
       static void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-      // Faster method: Assume lats/lons are sorted
+
+      //! A faster version of getNearestNeighbour, which assuming that latitudes and longitudes in
+      //! iFrom are sorted. Defaults to the slow method if lats/lons are not sorted.
       static void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
+
+      //! Find the index into the lat/lon arrays in iFrom that is nearest to the point
+      //! defined by iLon,iLat
+      //! @param iI I-index of nearest point. Set to Util::MV if no nearest neighbour.
+      //! @param iJ J-index of nearest point. Set to Util::MV if no nearest neighbour.
+      static void getNearestNeighbour(const File& iFrom, float iLon, float iLat, int& iI, int &iJ);
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
       Variable::Type mVariable;

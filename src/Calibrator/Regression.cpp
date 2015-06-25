@@ -2,7 +2,7 @@
 #include <cmath>
 #include "../Util.h"
 #include "../File/File.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 CalibratorRegression::CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable) :
       Calibrator(),

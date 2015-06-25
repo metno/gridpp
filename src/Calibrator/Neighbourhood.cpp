@@ -8,7 +8,7 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
       Calibrator(),
       mRadius(3),
       mVariable(iVariable),
-      mOperator(Util::OperatorMean),
+      mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
    if(mRadius < 0) {
@@ -18,27 +18,27 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
    }
 
    std::string op;
-   if(iOptions.getValue("operator", op)) {
+   if(iOptions.getValue("stat", op)) {
       if(op == "mean") {
-         mOperator = Util::OperatorMean;
+         mStatType = Util::StatTypeMean;
       }
       else if(op == "min") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 0;
       }
       else if(op == "max") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 1;
       }
       else if(op == "median") {
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          mQuantile = 0.5;
       }
       else if(op == "std") {
-         mOperator = Util::OperatorStd;
+         mStatType = Util::StatTypeStd;
       }
       else if(op == "quantile"){
-         mOperator = Util::OperatorQuantile;
+         mStatType = Util::StatTypeQuantile;
          if(!iOptions.getValue("quantile", mQuantile)) {
             Util::error("CalibratorNeighbourhood: option 'quantile' is required");
          }
@@ -47,7 +47,7 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
          }
       }
       else {
-         Util::error("CalibratorNeighbourhood: Unrecognized value for 'operator'");
+         Util::error("CalibratorNeighbourhood: Unrecognized value for 'stat'");
       }
    }
 }
@@ -85,7 +85,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile) const {
                   }
                }
                assert(index == Ni*Nj);
-               precip(i,j,e) = Util::applyOperator(neighbourhood, mOperator, mQuantile);
+               precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
             }
          }
       }
@@ -99,9 +99,9 @@ int CalibratorNeighbourhood::getRadius() const {
 
 std::string CalibratorNeighbourhood::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c neighbourhood", "Applies an operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;
+   ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;
    ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction.") << std::endl;
-   ss << Util::formatDescription("   operator=mean", "What operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
-   ss << Util::formatDescription("   quantile=undef", "If operator=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+   ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    return ss.str();
 }

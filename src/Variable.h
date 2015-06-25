@@ -23,7 +23,8 @@ class Variable {
          P         = 80,   // Surface pressure (pa)
          MSLP      = 85,   // Mean sea-level pressure (pa)
          QNH       = 88,   // Pressure reduced to sea-level using standard atmosphere (ICAO) (pa)
-         Fake      = 90    // Fake variable used for testing
+         Fake      = 90,   // Fake variable used for testing
+         None      = -999  // Non-existant variable
       };
 
       //! Convert type to string

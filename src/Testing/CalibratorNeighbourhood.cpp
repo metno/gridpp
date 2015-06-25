@@ -1,6 +1,6 @@
 #include "../File/Fake.h"
 #include "../Util.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Calibrator/Neighbourhood.h"
 #include <gtest/gtest.h>
 
@@ -65,7 +65,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, mean) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=mean"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=mean"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -76,7 +76,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, min) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=min"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=min"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -87,7 +87,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, max) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=max"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=max"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -98,7 +98,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, std) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=std"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=std"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -109,7 +109,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, median) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=median"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=median"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -120,7 +120,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, quantile) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 operator=quantile quantile=0.9"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=quantile quantile=0.9"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -133,19 +133,19 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("operator=invalidOperator")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("stat=invalidStatType")), ".*");
 
       // Negative radius
       EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("radius=-1")), ".*");
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("radius=-1 operator=quantile")), ".*");
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("radius=-1 operator=quantile quantile=0.5")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("radius=-1 stat=quantile")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("radius=-1 stat=quantile quantile=0.5")), ".*");
 
       // Missing quantile
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("operator=quantile")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("stat=quantile")), ".*");
       // Invalid quantile
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("operator=quantile quantile=-0.1")), ".*");
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("operator=quantile quantile=1.1")), ".*");
-      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("operator=quantile quantile=-999")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("stat=quantile quantile=-0.1")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("stat=quantile quantile=1.1")), ".*");
+      EXPECT_DEATH(CalibratorNeighbourhood(Variable::T, Options("stat=quantile quantile=-999")), ".*");
    }
    TEST_F(TestCalibratorNeighbourhood, description) {
       CalibratorNeighbourhood::description();

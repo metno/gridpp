@@ -1,6 +1,6 @@
 #include "../File/Fake.h"
 #include "../Util.h"
-#include "../ParameterFile.h"
+#include "../ParameterFile/ParameterFile.h"
 #include "../Calibrator/Qc.h"
 #include <gtest/gtest.h>
 

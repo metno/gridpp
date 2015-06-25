@@ -26,6 +26,39 @@ namespace {
             hood.push_back(v4);
             return hood;
          }
+         // a00 a01
+         // a10 a11
+         vec2 get2x2Matrix(float a00, float a01, float a10, float a11) {
+            vec2 matrix;
+            matrix.resize(2);
+            matrix[0].resize(2);
+            matrix[1].resize(2);
+            matrix[0][0] = a00;
+            matrix[1][0] = a10;
+            matrix[0][1] = a01;
+            matrix[1][1] = a11;
+            return matrix;
+         }
+         // a00 a01 a02
+         // a10 a11 a12
+         // a20 a21 a22
+         vec2 get3x3Matrix(float a00, float a01, float a02, float a10, float a11, float a12, float a20, float a21, float a22) {
+            vec2 matrix;
+            matrix.resize(3);
+            matrix[0].resize(3);
+            matrix[1].resize(3);
+            matrix[2].resize(3);
+            matrix[0][0] = a00;
+            matrix[1][0] = a10;
+            matrix[2][0] = a20;
+            matrix[0][1] = a01;
+            matrix[1][1] = a11;
+            matrix[2][1] = a21;
+            matrix[0][2] = a02;
+            matrix[1][2] = a12;
+            matrix[2][2] = a22;
+            return matrix;
+         }
    };
 
    TEST_F(UtilTest, isValid) {
@@ -51,6 +84,14 @@ namespace {
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(90,10,-90,10));
       EXPECT_FLOAT_EQ(20037508, Util::getDistance(0,0,0,180));
       EXPECT_FLOAT_EQ(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75));
+      EXPECT_FLOAT_EQ(124080.79, Util::getDistance(60,10,61,11));
+   }
+   TEST_F(UtilTest, getDistance_approx) {
+      EXPECT_FLOAT_EQ(0, Util::getDistance(60,10,60,10, true));
+      EXPECT_NEAR(20037508, Util::getDistance(90,10,-90,10, true), 100);
+      EXPECT_NEAR(20037508, Util::getDistance(0,0,0,180, true), 100);
+      // EXPECT_NEAR(16879114, Util::getDistance(60.5,5.25,-84.75,-101.75, true), 100);
+      EXPECT_NEAR(124084.21, Util::getDistance(60,10,61,11, true), 100);
    }
    TEST_F(UtilTest, getDistanceInvalid) {
       EXPECT_FLOAT_EQ(Util::MV, Util::getDistance(Util::MV,5.25,-84.75,-101.75));
@@ -261,59 +302,138 @@ namespace {
 
       // Odd-sized neighbourhood
       std::vector<float> hood = getHood(3,0,2);
-      EXPECT_FLOAT_EQ(2, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(3, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(1.6666666, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(1.247219, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(2, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(0, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(3, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(1.6666666, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(1.247219, Util::calculateStat(hood, Util::StatTypeStd));
 
       // Even-sized neighbourhood
       hood = getHood(4,2,0,3);
-      EXPECT_FLOAT_EQ(2.5, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(4, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(2.25, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(1.47902, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(2.5, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(0, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(4, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(2.25, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(1.47902, Util::calculateStat(hood, Util::StatTypeStd));
 
       // Missing value
       hood = getHood(0,Util::MV,-4,2);
-      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(-4, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(2, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(-0.6666666, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(2.494438, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(0, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(-4, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(2, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(-0.6666666, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(2.494438, Util::calculateStat(hood, Util::StatTypeStd));
 
       // All same values
       hood = getHood(1,1,1,1);
-      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(1, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(0, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(1, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(1, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(1, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(1, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(0, Util::calculateStat(hood, Util::StatTypeStd));
 
       // Small variance, large mean
       hood = getHood(28123.49,28123.48,28123.49);
-      EXPECT_FLOAT_EQ(28123.49, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(28123.48, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(28123.49, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(28123.48666667, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(0.0046035596, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(28123.49, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(28123.48, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(28123.49, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(28123.48666667, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(0.0046035596, Util::calculateStat(hood, Util::StatTypeStd));
 
       // All missing
       hood = getHood(Util::MV,Util::MV,Util::MV);
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeStd));
 
       // Empty
       hood = std::vector<float>();
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0.5));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 0));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorQuantile, 1));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorMean));
-      EXPECT_FLOAT_EQ(Util::MV, Util::applyOperator(hood, Util::OperatorStd));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 0.5));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 0));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeQuantile, 1));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeMean));
+      EXPECT_FLOAT_EQ(Util::MV, Util::calculateStat(hood, Util::StatTypeStd));
+   }
+   TEST_F(UtilTest, inverse) {
+      // Inverse of identity matrix
+      {
+         vec2 matrix = get2x2Matrix(1,0,0,1);
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(2, inverse.size());
+         ASSERT_EQ(2, inverse[0].size());
+         EXPECT_FLOAT_EQ(1, inverse[0][0]);
+         EXPECT_FLOAT_EQ(0, inverse[0][1]);
+         EXPECT_FLOAT_EQ(0, inverse[1][0]);
+         EXPECT_FLOAT_EQ(1, inverse[1][1]);
+      }
+      // Inverse of a complicated matrix
+      {
+         vec2 matrix = get2x2Matrix(0.2,3.1,-0.2,4.1);
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(2, inverse.size());
+         ASSERT_EQ(2, inverse[0].size());
+         EXPECT_FLOAT_EQ(2.84722222, inverse[0][0]);
+         EXPECT_FLOAT_EQ(-2.15277778, inverse[0][1]);
+         EXPECT_FLOAT_EQ(0.13888889, inverse[1][0]);
+         EXPECT_FLOAT_EQ(0.13888889, inverse[1][1]);
+      }
+      // Inverse of a 1x1 matrix
+      {
+         vec2 matrix;
+         matrix.resize(1);
+         matrix[0].resize(1);
+         matrix[0][0] = -2.3;
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(1, inverse.size());
+         ASSERT_EQ(1, inverse[0].size());
+         EXPECT_FLOAT_EQ(-0.4347826, inverse[0][0]);
+      }
+      // Empty matrix
+      {
+         vec2 matrix;
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(0, inverse.size());
+      }
+      // With missing values
+      {
+         vec2 matrix = get2x2Matrix(0.2,Util::MV,-0.2,4.1);
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(2, inverse.size());
+         ASSERT_EQ(2, inverse[0].size());
+         EXPECT_FLOAT_EQ(Util::MV, inverse[0][0]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[0][1]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[1][0]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[1][1]);
+      }
+      // Unstable matrix
+      {
+         vec2 matrix = get2x2Matrix(0,0,0,0);
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(2, inverse.size());
+         ASSERT_EQ(2, inverse[0].size());
+         EXPECT_FLOAT_EQ(Util::MV, inverse[0][0]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[0][1]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[1][0]);
+         EXPECT_FLOAT_EQ(Util::MV, inverse[1][1]);
+      }
+      // 3x3
+      {
+         vec2 matrix = get3x3Matrix(1,0,0.2,0,1,0.2,0.2,0.2,1);
+         vec2 inverse = Util::inverse(matrix);
+         ASSERT_EQ(3, inverse.size());
+         ASSERT_EQ(3, inverse[0].size());
+         EXPECT_FLOAT_EQ(1.04347826, inverse[0][0]);
+         EXPECT_FLOAT_EQ(0.04347826, inverse[0][1]);
+         EXPECT_FLOAT_EQ(-0.2173913, inverse[0][2]);
+         EXPECT_FLOAT_EQ(0.04347826, inverse[1][0]);
+         EXPECT_FLOAT_EQ(1.04347826, inverse[1][1]);
+         EXPECT_FLOAT_EQ(-0.2173913, inverse[1][2]);
+         EXPECT_FLOAT_EQ(-0.21739130, inverse[2][0]);
+         EXPECT_FLOAT_EQ(-0.21739130, inverse[2][1]);
+         EXPECT_FLOAT_EQ(1.0869565, inverse[2][2]);
+      }
    }
    TEST_F(UtilTest, gridppVersion) {
       std::string version = Util::gridppVersion();

@@ -125,6 +125,11 @@ class Util {
          StatTypeQuantile  = 40
       };
 
+      enum Operator {
+         OperatorAdditive       = 0,
+         OperatorMultiplicative = 10,
+      };
+
       //! Applies statistics operator to array. Missing values are ignored.
       static float calculateStat(const std::vector<float>& iArray, Util::StatType iStatType, float iQuantile=Util::MV);
       

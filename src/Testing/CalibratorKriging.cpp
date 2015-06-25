@@ -141,6 +141,8 @@ namespace {
       CalibratorKriging(Variable::T, Options("efoldDist=0 parameters=testing/files/parametersKriging.txt"));
       CalibratorKriging(Variable::T, Options("efoldDist=0 parameters=testing/files/parametersKriging.txt fileType=simple"));
       CalibratorKriging(Variable::T, Options("efoldDist=0 parameters=testing/files/kalmanOutput.txt fileType=metnoKalman"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 parameters=testing/files/kalmanOutput.txt fileType=metnoKalman operator=additive"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 parameters=testing/files/kalmanOutput.txt fileType=metnoKalman operator=multiplicative"));
    }
    TEST_F(TestCalibratorKriging, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -154,6 +156,9 @@ namespace {
 
       // Invalid fileType
       EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=100 efoldDist=2 parameters=testing/files/parametersKriging.txt fileType=234n2380")), ".*");
+
+      // Invalid operator
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=100 efoldDist=2 parameters=testing/files/parametersKriging.txt operator=nonvalidOperator")), ".*");
    }
    TEST_F(TestCalibratorKriging, description) {
       CalibratorKriging::description();

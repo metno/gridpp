@@ -31,5 +31,6 @@ class CalibratorKriging : public Calibrator {
       float mUpperThreshold;
       Type mKrigingType;
       bool mUseApproxDistance;
+      Util::Operator mOperator;
 };
 #endif

@@ -14,6 +14,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       mLowerThreshold(Util::MV),
       mUpperThreshold(Util::MV),
       mRadius(5),
+      mOperator(Util::OperatorAdditive),
       // Use an approximation when calculating distances between points?
       mUseApproxDistance(true),
       mKrigingType(TypeCressman) {
@@ -54,6 +55,19 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       }
       else {
          Util::error("CalibratorKriging: 'type' not recognized");
+      }
+   }
+
+   std::string op;
+   if(iOptions.getValue("operator", op)) {
+      if(op == "additive") {
+         mOperator = Util::OperatorAdditive;
+      }
+      else if(op == "multiplicative") {
+         mOperator = Util::OperatorMultiplicative;
+      }
+      else {
+         Util::error("CalibratorKriging: 'oeprator' not recognized");
       }
    }
 
@@ -222,7 +236,14 @@ bool CalibratorKriging::calibrateCore(File& iFile) const {
                      }
 
                      if(turnOn) {
-                        (*field)(i,j,e) += finalBias;
+                        if(mOperator == Util::OperatorAdditive) {
+                           (*field)(i,j,e) += finalBias;
+                        }
+                        else if(mOperator == Util::OperatorMultiplicative) {
+                           // TODO: How do we ensure that the matrix is positive definite in this
+                           // case?
+                           (*field)(i,j,e) *= finalBias;
+                        }
                      }
                   }
                }
@@ -270,5 +291,6 @@ std::string CalibratorKriging::description() {
    ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
    ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
    ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
+   ss << Util::formatDescription("   operator=additive","How should the bias be applied to the raw forecast? One of 'additive', 'multiplicative'.") << std::endl;
    return ss.str();
 }

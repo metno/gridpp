@@ -6,6 +6,7 @@
 class Parameters {
    public:
       Parameters(std::vector<float> iValues);
+      Parameters(float iValue);
 
       //! Initialize an empty set of size 0
       Parameters();

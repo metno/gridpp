@@ -23,7 +23,7 @@ class CalibratorKriging : public Calibrator {
       float mRadius;
       float mMaxElevDiff;
       float mEfoldDist;
-      const ParameterFileSpatial* mParameterFile;
+      const ParameterFile* mParameterFile;
       std::string name() const {return "kriging";};
       File* mPrevious;
       Variable::Type mAuxVariable;

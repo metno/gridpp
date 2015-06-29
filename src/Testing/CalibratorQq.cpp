@@ -27,47 +27,65 @@ namespace {
             parValues[7] = a8;
             return Parameters (parValues);
          }
-         ParameterFile getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8) {
-            ParameterFile parFile("testing/files/parameters.txt");
-            parFile.setParameters(getParameters(a1, a2, a3, a4, a5, a6, a7, a8), 0);
+         ParameterFileSimple getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8) {
+            ParameterFileSimple parFile(getParameters(a1, a2, a3, a4, a5, a6, a7, a8));
             return parFile;
          }
    };
    TEST_F(TestCalibratorQq, 1to1) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(250,250,260,300,290,303,300,315);
+      ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=1to1"));
 
       cal.calibrate(from);
 
       FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after1 = from.getField(Variable::T, 1);
       EXPECT_FLOAT_EQ(270, (*after)(5,2,0));      // 301 (row,col)
       EXPECT_FLOAT_EQ(290.8333, (*after)(5,9,0)); // 304
       EXPECT_FLOAT_EQ(305, (*after)(0,9,0));      // 320 // Outside
+
+      EXPECT_FLOAT_EQ(244.1962, (*after1)(5,5,0)); // 284.1962 // Outside
    }
    TEST_F(TestCalibratorQq, meanSlope) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(250,250,260,300,290,303,300,315);
+      ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=meanSlope"));
 
       cal.calibrate(from);
 
       FieldPtr after = from.getField(Variable::T, 0);
-      EXPECT_FLOAT_EQ(303.8462, (*after)(0,9,0));
+      FieldPtr after1 = from.getField(Variable::T, 1);
+      EXPECT_FLOAT_EQ(310, (*after)(0,9,0)); // mean slope = 50/25
+      EXPECT_FLOAT_EQ(238.3924, (*after1)(5,5,0)); // 250 - slope*(5.8038)
    }
    TEST_F(TestCalibratorQq, nearestSlope) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(250,250,260,300,290,303,300,315);
+      ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=nearestSlope"));
 
       cal.calibrate(from);
 
       FieldPtr after = from.getField(Variable::T, 0);
-      EXPECT_FLOAT_EQ(304.16666667, (*after)(0,9,0));
+      FieldPtr after1 = from.getField(Variable::T, 1);
+      EXPECT_FLOAT_EQ(304.16666667, (*after)(0,9,0)); 
+      EXPECT_FLOAT_EQ(244.1962, (*after1)(5,5,0)); // nearest slope = 1
+   }
+   TEST_F(TestCalibratorQq, zero) {
+      FileArome from("testing/files/10x10.nc");
+      ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
+      CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=zero"));
+
+      cal.calibrate(from);
+
+      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after1 = from.getField(Variable::T, 1);
+      EXPECT_FLOAT_EQ(300, (*after)(0,9,0));
+      EXPECT_FLOAT_EQ(250, (*after1)(5,5,0));
    }
    TEST_F(TestCalibratorQq, twoEqual) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(250,250,270,301,280,301,320,320);
+      ParameterFileSimple parFile = getParameterFile(250,290,270,301,280,301,320,320);
       CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=1to1"));
 
       cal.calibrate(from);
@@ -77,7 +95,7 @@ namespace {
    }
    TEST_F(TestCalibratorQq, twoEqualObs) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(250,250,280,300,290,302,320,320);
+      ParameterFileSimple parFile = getParameterFile(250,290,280,300,290,302,320,320);
       CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=1to1"));
 
       cal.calibrate(from);
@@ -85,8 +103,38 @@ namespace {
       FieldPtr after = from.getField(Variable::T, 0);
       EXPECT_FLOAT_EQ(285, (*after)(5,2,0)); // raw = 301
    }
+   TEST_F(TestCalibratorQq, missingValues) {
+      FileArome from("testing/files/10x10.nc");
+      ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
+      CalibratorQq cal(&parFile, Variable::T ,Options("extrapolation=1to1"));
+
+      FieldPtr field = from.getField(Variable::T, 0);
+      (*field)(5,5,0) = Util::MV;
+      cal.calibrate(from);
+
+      // Can't calibrate
+      EXPECT_FLOAT_EQ(Util::MV, (*field)(5,5,0));
+      // Unaffected by other missing values
+      EXPECT_FLOAT_EQ(270, (*field)(5,2,0));
+   }
+   TEST_F(TestCalibratorQq, unevenNumberOfParameters) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      std::vector<float> parValues;
+      parValues.resize(7,3.2);
+      ParameterFileSimple parFile(parValues);
+
+      EXPECT_DEATH(CalibratorQq(&parFile, Variable::T ,Options("extrapolation=1to1")), ".*");
+   }
+   TEST_F(TestCalibratorQq, invalidConstruction) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      ParameterFileSimple parFile = getParameterFile(250,250,280,300,290,302,320,320);
+      // Invalid extrapolation
+      EXPECT_DEATH(CalibratorQq(&parFile, Variable::T ,Options("extrapolation=92090j0f923")), ".*");
+   }
    TEST_F(TestCalibratorQq, description) {
-      CalibratorQc::description();
+      CalibratorQq::description();
    }
 }
 int main(int argc, char **argv) {

@@ -34,17 +34,15 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
    if(mRadius < 0) {
       Util::error("CalibratorKriging: 'radius' must be >= 0");
    }
-   std::string fileType = "simple";
+   std::string fileType = "text";
    iOptions.getValue("fileType", fileType);
-   if(fileType == "simple") {
-      mParameterFile = new ParameterFileSpatialSimple(parfilename);
+   mParameterFile = ParameterFile::getScheme(fileType, parfilename);
+   if(!mParameterFile->isLocationDependent()) {
+      std::stringstream ss;
+      ss << "Kriging requires a parameter file with spatial information";
+      Util::error(ss.str());
    }
-   else if(fileType == "metnoKalman") {
-      mParameterFile = new ParameterFileMetnoKalman(parfilename);
-   }
-   else {
-      Util::error("CalibratorKriging: 'fileType' not recognized");
-   }
+
    std::string type;
    if(iOptions.getValue("type", type)) {
       if(type == "cressman") {
@@ -284,7 +282,7 @@ std::string CalibratorKriging::description() {
    ss << Util::formatDescription("", "offset0 lat lon elev bias") << std::endl;
    ss << Util::formatDescription("","...         ") << std::endl;
    ss << Util::formatDescription("","offsetN lat lon elev bias") << std::endl;
-   ss << Util::formatDescription("   fileType=simple","What file type is the parameters in? One of 'simple' and 'metnoKalman'.") << std::endl;
+   ss << Util::formatDescription("   fileType=text",ParameterFile::getDescription()) << std::endl;
    ss << Util::formatDescription("   radius=30000","How far away (in meters) should bias be spread to? Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   efoldDist=30000","Bias is reduced to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   maxElevDiff=100","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0.") << std::endl;

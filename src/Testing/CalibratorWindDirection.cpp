@@ -30,9 +30,8 @@ namespace {
             parValues[8] = a9;
             return Parameters (parValues);
          }
-         ParameterFile getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8, float a9) {
-            ParameterFile parFile("testing/files/parametersWindDirection.txt");
-            parFile.setParameters(getParameters(a1, a2, a3, a4, a5, a6, a7, a8, a9), 0);
+         ParameterFileSimple getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8, float a9) {
+            ParameterFileSimple parFile(getParameters(a1, a2, a3, a4, a5, a6, a7, a8, a9));
             return parFile;
          }
          CalibratorWindDirection getCalibrator(ParameterFile* parFile) {
@@ -43,7 +42,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      ParameterFile parFile = getParameterFile(1,0,0,0,0,0,0,0,0);
+      ParameterFileSimple parFile = getParameterFile(1,0,0,0,0,0,0,0,0);
       CalibratorWindDirection cal = getCalibrator(&parFile);
       Parameters par = parFile.getParameters(0);
 
@@ -78,7 +77,7 @@ namespace {
       Util::setShowError(false);
 
       // Test that getFactor does not give negative values
-      ParameterFile parFile = getParameterFile(1,2,3,0,0,0,0,0,0);
+      ParameterFileSimple parFile = getParameterFile(1,2,3,0,0,0,0,0,0);
       CalibratorWindDirection cal = getCalibrator(&parFile);
       Parameters par = parFile.getParameters(0);
       for(int dir = 0; dir <= 360; dir = dir + 15) {

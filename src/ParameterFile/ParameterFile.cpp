@@ -6,84 +6,143 @@
 #include <set>
 #include <fstream>
 
-ParameterFile::ParameterFile(std::string iFilename) : 
-      mFilename(iFilename),
-      mNumParameters(Util::MV) {
-   std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
-   if(!ifs.good()) {
-      Util::error("Parameter file '" + iFilename + "' does not exist");
-   }
-   mNumParameters = Util::MV;
-   while(ifs.good()) {
-      char line[10000];
-      ifs.getline(line, 10000, '\n');
-      if(ifs.good() && line[0] != '#') {
-         std::stringstream ss(line);
-         // Loop over each value
-         std::vector<float> values;
-         int time;
-         bool status = ss >> time;
-         if(!status) {
-            Util::error("Could not read time from file '" + mFilename + "'");
-         }
-         while(ss.good()) {
-            float value;
-            bool status  = ss >> value;
-            if(!status) {
-               Util::error("Could not read value from file '" + mFilename + "'");
-            }
-            values.push_back(value);
-         }
-         if(mNumParameters == Util::MV)
-            mNumParameters = values.size();
-         else if(values.size() != mNumParameters) {
-            std::stringstream ss;
-            ss << "Parameter file '" + iFilename + "' is corrupt, because it does not have the same"
-               << " number of columns on each line" << std::endl;
-            Util::error(ss.str());
-         }
-         Parameters parameters(values);
-         mParameters[time] = parameters;
-      }
-   }
-   ifs.close();
-   std::stringstream ss;
-   ss << "Reading " << mFilename << ". Found " << getSize() << " parameter sets.";
-   Util::status(ss.str());
-   if(!Util::isValid(mNumParameters))
-      mNumParameters = 0;
+ParameterFile::ParameterFile(std::string iFilename) : mFilename(iFilename) {
 
-   Parameters par = getParameters(0);
 }
-Parameters ParameterFile::getParameters(int iTime) const {
-   if(mParameters.size() == 1) {
-      // Assume only one set of parameters for all hours
-      std::map<int, Parameters>::const_iterator it = mParameters.begin();
-      return it->second;
+
+ParameterFile* ParameterFile::getScheme(std::string iFilename, const Options& iOptions) {
+   std::string name;
+   if(ParameterFileMetnoKalman::isValid(iFilename)) {
+      name = "metnoKalman";
+   }
+   else if(ParameterFileText::isValid(iFilename)) {
+      name = "text";
    }
    else {
-      std::map<int, Parameters>::const_iterator it = mParameters.find(iTime);
+      Util::error("Could not determine type for parameter file '" + iFilename + "'");
+   }
+   return getScheme(name, iFilename, iOptions);
+}
+
+ParameterFile* ParameterFile::getScheme(std::string iName, std::string iFilename, const Options& iOptions) {
+   ParameterFile* p;
+   if(iName == "metnoKalman") {
+      p = new ParameterFileMetnoKalman(iFilename);
+   }
+   else if(iName == "text") {
+      p = new ParameterFileText(iFilename);
+   }
+   else if(iName == "textSpatial") {
+      p = new ParameterFileText(iFilename, true);
+   }
+   else {
+      Util::error("Could not determine type for parameter file '" + iFilename + "'");
+   }
+   return p;
+}
+
+Parameters ParameterFile::getParameters(int iTime) const {
+   // Find the right location to use
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   if(mParameters.size() == 1) {
+      // One set of parameters for all locations
+       it = mParameters.begin();
+   }
+
+   // Find the right time to use
+   std::map<int,Parameters> timeParameters = it->second;
+   if(timeParameters.size() == 1) {
+      // One set of parameters for all times
+      return timeParameters.begin()->second;
+   }
+   else if(it->second.find(iTime) != it->second.end()) {
+      return timeParameters[iTime];
+   }
+   else {
+      std::stringstream ss;
+      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
+      Util::error(ss.str());
+   }
+}
+Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) const {
+   // Find the right location to use
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   if(mParameters.size() == 1) {
+      // One set of parameters for all locations
+       it = mParameters.begin();
+   }
+   else {
+      it = mParameters.find(iLocation);
+      // Nearest neighbour
+      // TODO
       if(it == mParameters.end()) {
-         std::stringstream ss;
-         ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
-         Util::error(ss.str());
       }
-      return it->second;
+   }
+
+   // Find the right time to use
+   std::map<int,Parameters> timeParameters = it->second;
+   if(timeParameters.size() == 1) {
+      // One set of parameters for all times
+      return timeParameters.begin()->second;
+   }
+   else if(it->second.find(iTime) != it->second.end()) {
+      return timeParameters[iTime];
+   }
+   else {
+      std::stringstream ss;
+      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
+      Util::error(ss.str());
    }
 }
 
+void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {
+   mParameters[iLocation][iTime] = iParameters;
+}
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
-   mParameters[iTime] = iParameters;
-}
-
-int ParameterFile::getSize() const {
-   return mParameters.size();
-}
-
-int ParameterFile::getNumParameters() const {
-   return mNumParameters;
+   std::map<Location, std::map<int,Parameters> >::iterator it = mParameters.begin();
+   it->second[iTime] = iParameters;
 }
 
 std::string ParameterFile::getFilename() const {
    return mFilename;
+}
+
+std::vector<Location> ParameterFile::getLocations() const {
+   std::vector<Location> locations;
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      locations.push_back(it->first);
+   }
+   return locations;
+}
+
+bool ParameterFile::isLocationDependent() const {
+   return mParameters.size() > 1;
+}
+// TODO
+bool ParameterFile::isTimeDependent() const {
+   return true;
+}
+
+int ParameterFile::getNumParameters() const {
+   int size = Util::MV;
+
+   std::vector<Location> locations;
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      std::map<int, Parameters>::const_iterator it2;
+      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+         int currSize = it2->second.size();
+         if(Util::isValid(size) && currSize != currSize)
+            return Util::MV;
+         size = currSize;
+      }
+   }
+   return size;
+}
+
+std::string ParameterFile::getDescription() {
+   std::stringstream ss;
+   ss << "What file type is the parameters in? One of 'text', 'textSpatial, and 'metnoKalman'.";
+   return ss.str();
 }

@@ -1,0 +1,149 @@
+#include "Text.h"
+#include <fstream>
+#include <sstream>
+#include "../Util.h"
+#include <assert.h>
+#include <set>
+#include <fstream>
+#include <algorithm>
+
+ParameterFileText::ParameterFileText(std::string iFilename, bool iIsSpatial) : ParameterFile(iFilename),
+      mIsSpatial(iIsSpatial) {
+   std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
+   if(!ifs.good()) {
+      Util::error("Parameter file '" + iFilename + "' does not exist");
+   }
+   mNumParameters = Util::MV;
+   int counter = 0;
+   std::set<int> times;
+   while(ifs.good()) {
+      char line[10000];
+      ifs.getline(line, 10000, '\n');
+      if(ifs.good() && line[0] != '#') {
+         std::stringstream ss(line);
+         // Loop over each value
+         std::vector<float> values;
+         int time;
+         bool status = ss >> time;
+         if(!status) {
+            Util::error("Could not read time from file '" + mFilename + "'");
+         }
+         times.insert(time);
+
+         Location location(Util::MV, Util::MV, Util::MV);
+         if(mIsSpatial) {
+            float lat;
+            status = ss >> lat;
+            if(!status) {
+               Util::error("Could not read lat from file '" + mFilename + "'");
+            }
+
+            float lon;
+            status = ss >> lon;
+            if(!status) {
+               Util::error("Could not read lon from file '" + mFilename + "'");
+            }
+
+            float elev;
+            status = ss >> elev;
+            if(!status) {
+               Util::error("Could not read elev from file '" + mFilename + "'");
+            }
+            location = Location(lat, lon, elev);
+         }
+
+         while(ss.good()) {
+            float value;
+            bool status  = ss >> value;
+            if(!status) {
+               Util::error("Could not read value from file '" + mFilename + "'");
+            }
+            values.push_back(value);
+         }
+         if(mNumParameters == Util::MV)
+            mNumParameters = values.size();
+         else if(values.size() != mNumParameters) {
+            std::stringstream ss;
+            ss << "Parameter file '" + iFilename + "' is corrupt, because it does not have the same"
+               << " number of columns on each line" << std::endl;
+            Util::error(ss.str());
+         }
+         Parameters parameters(values);
+         mParameters[location][time] = parameters;
+         counter++;
+      }
+   }
+   ifs.close();
+   mTimes = std::vector<int>(times.begin(), times.end());
+   std::sort(mTimes.begin(), mTimes.end());
+
+   // Ensure all locations have parameters for all times
+   // Inserting empty parameter sets where there are none
+   std::map<Location, std::map<int, Parameters> >::iterator it;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      std::map<int, Parameters>::const_iterator it2;
+      for(int t = 0; t < mTimes.size(); t++) {
+         if(it->second.find(t) == it->second.end()) {
+            it->second[t] = Parameters();
+         }
+      }
+   }
+   std::stringstream ss;
+   ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
+   Util::status(ss.str());
+   if(!Util::isValid(mNumParameters))
+      mNumParameters = 0;
+}
+
+std::vector<int> ParameterFileText::getTimes() const {
+   return mTimes;
+}
+
+bool ParameterFileText::isFixedSize() const {
+   return true;
+}
+
+bool ParameterFileText::isValid(std::string iFilename) {
+   // TODO
+   return true;
+}
+
+int ParameterFileText::getNumParameters() const {
+   return mNumParameters;
+}
+
+void ParameterFileText::write(const std::string& iFilename) const {
+   std::string filename = iFilename;
+   if(iFilename == "") {
+      filename = mFilename;
+   }
+   std::ofstream ofs(filename.c_str(), std::ios_base::out);
+   if(!ofs.good()) {
+      Util::error("Cannot write spatial parameters to " + filename);
+   }
+
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   // Loop over times
+   ofs << "# time lat lon elev parameters" << std::endl;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      std::map<int, Parameters>::const_iterator it2;
+      // Loop over locations
+      const Location& location = it->first;
+      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+         int time = it2->first;
+         const Parameters& parameters = it2->second;
+         if(parameters.size() != 0) {
+            ofs << time;
+            if(mIsSpatial) {
+               ofs << " " << location.lat() << " " << location.lon() << " " << location.elev();
+            }
+            // Loop over parameter values
+            for(int i = 0; i < parameters.size(); i++) {
+               ofs << " " << parameters[i];
+            }
+            ofs << std::endl;
+         }
+      }
+   }
+   ofs.close();
+}

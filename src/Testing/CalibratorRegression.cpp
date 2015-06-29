@@ -15,11 +15,14 @@ namespace {
          }
          virtual void TearDown() {
          }
+         std::vector<float> getVector(float iArray[]) {
+            return std::vector<float>(iArray, iArray + sizeof(iArray)/sizeof(float));
+         }
    };
    // Constant correction to 0.3
    TEST_F(TestCalibratorRegression, 10x10_0order) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile par("testing/files/regression0order.txt");
+      ParameterFileText par("testing/files/regression0order.txt");
       CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
 
       cal.calibrate(from);
@@ -34,7 +37,7 @@ namespace {
    }
    TEST_F(TestCalibratorRegression, 10x10_1order) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile par("testing/files/regression1order.txt");
+      ParameterFileText par("testing/files/regression1order.txt");
       CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
 
       cal.calibrate(from);
@@ -49,7 +52,7 @@ namespace {
    }
    TEST_F(TestCalibratorRegression, 10x10_2order) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile par("testing/files/regression2order.txt");
+      ParameterFileText par("testing/files/regression2order.txt");
       CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
 
       cal.calibrate(from);
@@ -64,7 +67,7 @@ namespace {
    }
    TEST_F(TestCalibratorRegression, missing_parameters) {
       FileArome from("testing/files/10x10.nc");
-      ParameterFile par("testing/files/regressionMissing.txt");
+      ParameterFileText par("testing/files/regressionMissing.txt");
       CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
 
       cal.calibrate(from);
@@ -81,7 +84,7 @@ namespace {
    TEST_F(TestCalibratorRegression, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFile par1("testing/files/regressionInvalid1.txt");
+      ParameterFileText par1("testing/files/regressionInvalid1.txt");
       EXPECT_DEATH(CalibratorRegression cal = CalibratorRegression(&par1, Variable::T), ".*");
    }
    TEST_F(TestCalibratorRegression, description) {

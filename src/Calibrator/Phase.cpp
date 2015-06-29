@@ -19,6 +19,8 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
+   vec2 lats = iFile.getLats();
+   vec2 lons = iFile.getLons();
    int nTime = iFile.getNumTime();
    iFile.initNewVariable(Variable::Phase);
    vec2 elevs = iFile.getElevs();
@@ -26,7 +28,9 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      const Parameters& par = mParameterFile->getParameters(t);
+      Parameters par;
+      if(!mParameterFile->isLocationDependent())
+         par = mParameterFile->getParameters(t);
       float snowSleetThreshold = par[0];
       float sleetRainThreshold = par[1];
       const FieldPtr temp = iFile.getField(Variable::T, t);
@@ -45,6 +49,8 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             float currElev = elevs[i][j];
+            if(mParameterFile->isLocationDependent())
+               par = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], currElev));
             for(int e = 0; e < nEns; e++) {
                float currDryTemp  = (*temp)(i,j,e);
                float currTemp     = currDryTemp;

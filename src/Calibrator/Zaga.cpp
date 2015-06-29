@@ -37,6 +37,9 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
+   vec2 lats = iFile.getLats();
+   vec2 lons = iFile.getLons();
+   vec2 elevs = iFile.getElevs();
    Variable::Type popVariable = Variable::Pop;
    int startTime = 0;
    int timeWindow = 1;
@@ -56,7 +59,9 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
       int numInvalidRaw = 0;
       int numInvalidCal = 0;
 
-      Parameters parameters = mParameterFile->getParameters(t);
+      Parameters parameters;
+      if(!mParameterFile->isLocationDependent())
+         parameters = mParameterFile->getParameters(t);
 
       // Load the POP output field, if needed
       FieldPtr pop;
@@ -67,6 +72,9 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
       #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            if(mParameterFile->isLocationDependent())
+               parameters = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+
             // for Pop6h, the first few hours are undefined, since we cannot do a 6h accumulation
             if(mOutputPop && t < startTime) {
                for(int e = 0; e < nEns; e++) {

@@ -1,4 +1,4 @@
-#include "ParameterFile.h"
+#include "MetnoKalman.h"
 #include <fstream>
 #include <sstream>
 #include "../Util.h"
@@ -6,10 +6,9 @@
 #include <set>
 #include <fstream>
 
-ParameterFileMetnoKalman::ParameterFileMetnoKalman(std::string iFilename) : 
-      mFilename(iFilename),
+ParameterFileMetnoKalman::ParameterFileMetnoKalman(std::string iFilename) : ParameterFile(iFilename),
       mLocalMV(-99999) {
-   std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
+   std::ifstream ifs(iFilename.c_str(), std::ifstream::in);
    int coeffFreq = 3; // How often are the coefficients for? In time steps.
 
    if(!ifs.good()) {
@@ -90,9 +89,8 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(std::string iFilename) :
          }
          Location location(lat,lon,elev);
          // Values are for every 3 (coeffFreq) hours. Interpolate between so we get values every hour
-         std::vector<float> allValues(coeffFreq*(numTimes-1)+1, Util::MV);
          for(int i = 0; i < values.size(); i++) {
-            allValues[i*coeffFreq]   = values[i];
+            mParameters[location][i*coeffFreq] = Parameters(values[i]);
             mTimes.push_back(i*coeffFreq);
             // Fill in the gaps
             if(i < values.size() - 1) {
@@ -100,62 +98,47 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(std::string iFilename) :
                   float a = 1 - ((float) k)/coeffFreq;
                   float b = 1 - a;
                   if(Util::isValid(values[i]) && Util::isValid(values[i+1])) {
-                     allValues[i*coeffFreq+k] = (a*values[i]+b*values[i+1]);
+                     mParameters[location][i*coeffFreq+k] = Parameters(a*values[i]+b*values[i+1]);
+                  }
+                  else {
+                     mParameters[location][i*coeffFreq+k] = Parameters(Util::MV);
                   }
                   mTimes.push_back(i*coeffFreq+k);
-                  // allValues[i*3+1] = (values[i]*2+values[i+1]*1)/3;
-                  // allValues[i*3+2] = (values[i]*1+values[i+1]*2)/3;
-                  // mTimes.push_back(i*3+1);
-                  // mTimes.push_back(i*3+2);
                }
             }
          }
-         mParameters[location] = allValues;
       }
    }
    ifs.close();
-}
-
-Parameters ParameterFileMetnoKalman::getParameters(int iTime, const Location& iLocation) const {
-   std::map<Location, std::vector<float> >::const_iterator it = mParameters.find(iLocation);
-   if(it == mParameters.end())
-      return Parameters();
-   if(it->second.size() <= iTime) {
-      std::stringstream ss;
-      ss << "ParameterFileMetnoKalman: Retriving parameters for time " << iTime << ".";
-      Util::error(ss.str());
-   }
-   float value = it->second[iTime];
-   std::vector<float> param(1, value);
-   return Parameters(param);
-}
-
-std::vector<Location> ParameterFileMetnoKalman::getLocations() const {
-   std::vector<Location> locations;
-   std::map<Location, std::vector<float> >::const_iterator it;
-   for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      locations.push_back(it->first);
-   }
-   return locations;
 }
 
 std::vector<int> ParameterFileMetnoKalman::getTimes() const {
    return mTimes;
 }
 
-std::string ParameterFileMetnoKalman::getFilename() const {
-   return mFilename;
-}
+bool ParameterFileMetnoKalman::isValid(std::string iFilename) {
+   std::ifstream ifs(iFilename.c_str(), std::ifstream::in);
+   if(!ifs.good()) {
+      return false;
+   }
 
-void ParameterFileMetnoKalman::setParameters(float iValue, int iTime, const Location& iLocation) {
-   std::map<Location, std::vector<float> >::iterator it = mParameters.find(iLocation);
-   if(iTime > mTimes[mTimes.size()-1]) {
-      std::stringstream ss;
-      ss << "ParameterFileMetnoKalman: Could not write parameters to time " << iTime;
-      Util::error(ss.str());
+   char line[10000];
+   ifs.getline(line, 10000, '\n'); // Header line
+   std::stringstream ss(line);
+   int value;
+   std::vector<int> values;
+   while(ss >> value) {
+      values.push_back(value);
    }
-   if(it == mParameters.end()) {
-      mParameters[iLocation].resize(mTimes.size(), Util::MV);
+   if(values.size() != 4)
+      return false;
+
+   values.clear();
+   ifs.getline(line, 10000, '\n'); // Header line
+   while(ss >> value) {
+      values.push_back(value);
    }
-   mParameters[iLocation][iTime] = iValue;
+   if(values.size() != 2)
+      return false;
+   return true;
 }

@@ -18,7 +18,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
          Util::error("Calibrator 'zaga' needs parameters");
       }
 
-      ParameterFile* parFile = new ParameterFile(parFilename);
+      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'zaga' needs variable");
@@ -56,7 +56,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("parameters", parFilename)) {
          Util::error("Calibrator 'phase' needs parameters");
       }
-      ParameterFile* parFile = new ParameterFile(parFilename);
+      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       CalibratorPhase* c = new CalibratorPhase(parFile);
       float minPrecip;
       if(iOptions.getValue("minPrecip", minPrecip)) {
@@ -75,7 +75,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
          Util::error("Calibrator 'zaga' needs parameters");
       }
 
-      ParameterFile* parFile = new ParameterFile(parFilename);
+      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'zaga' needs variable");
@@ -121,7 +121,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("parameters", parFilename)) {
          Util::error("CalibratorQq: 'parameters' missing");
       }
-      ParameterFile* parFile = new ParameterFile(parFilename);
+      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
 
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
@@ -137,7 +137,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
          Util::error("Calibrator 'regression' needs parameters");
       }
 
-      ParameterFile* parFile = new ParameterFile(parFilename);
+      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");

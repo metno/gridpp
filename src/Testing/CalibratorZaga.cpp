@@ -53,9 +53,8 @@ namespace {
             parValues[7] = a8;
             return Parameters (parValues);
          }
-         ParameterFile getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8) {
-            ParameterFile parFile("testing/files/parameters.txt");
-            parFile.setParameters(getParameters(a1, a2, a3, a4, a5, a6, a7, a8), 0);
+         ParameterFileSimple getParameterFile(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8) {
+            ParameterFileSimple parFile(getParameters(a1, a2, a3, a4, a5, a6, a7, a8));
             return parFile;
          }
          CalibratorZaga getCalibrator(ParameterFile* parFile, const Options& iOptions=Options("")) {
@@ -67,7 +66,7 @@ namespace {
       // Set up file
       FileFake file(1, 1, 3, 1);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(&parFile, Options("fracThreshold=0.5"));
 
       // High precip case: mean = 5.667 frac(x <= 0.5) = 0
@@ -82,7 +81,7 @@ namespace {
       // Set up file
       FileFake file(1, 1, 3, 1);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(&parFile, Options("fracThreshold=0.5 maxEnsMean=4"));
       // High precip case: Mean is at capped at 4mm
       test(cal, file, 12, 1, 4, 5.0678229, 0.50604898, 2.1251636);
@@ -93,7 +92,7 @@ namespace {
       // Set up file
       FileFake file(1, 1, 3, 1);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(&parFile, Options("fracThreshold=0.5"));
 
       test(cal, file, Util::MV, 0.5, 0.5, Util::MV,0.5,0.5);
@@ -103,7 +102,7 @@ namespace {
       // Set up file
       FileFake file(1, 1, 3, 1);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
       CalibratorZaga cal = getCalibrator(&parFile, Options("fracThreshold=0.5"));
 
       test(cal, file, 12, 0.5, 0.5, 12,0.5,0.5);
@@ -124,7 +123,7 @@ namespace {
       }
    }
    TEST_F(TestCalibratorZaga, getFracThreshold) {
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
       CalibratorZaga cal = getCalibrator(&parFile);
       // Check that default is valid
       EXPECT_GE(cal.getFracThreshold(), 0);
@@ -194,7 +193,7 @@ namespace {
       // Set up file
       FileFake file(2, 2, 1, 1);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       FieldPtr precip  = file.getField(Variable::Precip, 0);
       // In the neighbourhood around point (0,0):
       // Frac(precip <= 0.4) = 0.75 mean = 0.2
@@ -219,7 +218,7 @@ namespace {
       // Set up file
       FileFake file(2, 2, 1, 6);
       // Set up calibrator
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       // In the neighbourhood around point (0,0):
       // Frac(precip <= 0.4) = 0.75 mean = 0.2
       for(int t = 0; t < 6; t++) {
@@ -247,13 +246,13 @@ namespace {
    TEST_F(TestCalibratorZaga, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("neighbourhoodSize=-1")), ".*");
       EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("maxEnsMean=-1")), ".*");
       EXPECT_DEATH(CalibratorZaga(&parFile, Variable::Precip, Options("maxEnsMean=-999")), ".*");
    }
    TEST_F(TestCalibratorZaga, valid) {
-      ParameterFile parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       // Negative thresholds is fine
       CalibratorZaga(&parFile, Variable::Precip, Options("fracThreshold=-1"));
       CalibratorZaga(&parFile, Variable::Precip, Options("popThreshold=-1"));

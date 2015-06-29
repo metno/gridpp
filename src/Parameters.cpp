@@ -7,6 +7,9 @@
 Parameters::Parameters(std::vector<float> iValues) : mValues(iValues) {
 
 }
+Parameters::Parameters(float iValue) {
+   mValues = std::vector<float>(1, iValue);
+}
 Parameters::Parameters() {
 
 }

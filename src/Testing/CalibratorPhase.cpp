@@ -21,9 +21,11 @@ namespace {
             parValues[1] = a2;
             return Parameters (parValues);
          }
-         ParameterFile getParameterFile(float a1, float a2) {
-            ParameterFile parFile("testing/files/parametersPhase.txt");
-            parFile.setParameters(getParameters(a1, a2), 0);
+         ParameterFileSimple getParameterFile(float a1, float a2) {
+            std::vector<float> values;
+            values.push_back(a1);
+            values.push_back(a2);
+            ParameterFileSimple parFile(values);
             return parFile;
          }
          CalibratorPhase getCalibrator(ParameterFile* parFile) {
@@ -43,7 +45,7 @@ namespace {
 
    TEST_F(TestCalibratorPhase, 10x10) {
       FileArome file("testing/files/10x10.nc");
-      ParameterFile parFile = ParameterFile("testing/files/parametersPhase.txt");
+      ParameterFileText parFile("testing/files/parametersPhase.txt");
       Parameters parameters = parFile.getParameters(0);
       ASSERT_EQ(2, parameters.size());
       EXPECT_FLOAT_EQ(273.7, parameters[0]);
@@ -66,7 +68,7 @@ namespace {
    TEST_F(TestCalibratorPhase, phases) {
       FileFake file(1,1,1,1);
       FieldPtr phase = file.getField(Variable::Phase, 0);
-      ParameterFile parFile = getParameterFile(273.7,274.7);
+      ParameterFileSimple parFile = getParameterFile(273.7,274.7);
       CalibratorPhase cal = getCalibrator(&parFile);
       setValues(file, 5, 270, 0.95, 101325);
       cal.calibrate(file);
@@ -87,7 +89,7 @@ namespace {
    TEST_F(TestCalibratorPhase, useWetbulb) {
       FileFake file(1,1,1,1);
       FieldPtr phase = file.getField(Variable::Phase, 0);
-      ParameterFile parFile = getParameterFile(273.7,274.7);
+      ParameterFileSimple parFile = getParameterFile(273.7,274.7);
       CalibratorPhase cal = getCalibrator(&parFile);
       setValues(file, 5, 275, 0.5, 101325);
 
@@ -109,7 +111,7 @@ namespace {
    }
    TEST_F(TestCalibratorPhase, missingParameters) {
       FileArome file("testing/files/10x10.nc");
-      ParameterFile parFile = getParameterFile(Util::MV,1.5);
+      ParameterFileSimple parFile = getParameterFile(Util::MV,1.5);
       CalibratorPhase cal = getCalibrator(&parFile);
 
       cal.calibrate(file);

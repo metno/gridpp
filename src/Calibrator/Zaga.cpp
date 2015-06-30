@@ -7,8 +7,7 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
 CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions):
-      Calibrator(),
-      mParameterFile(iParameterFile),
+      Calibrator(iParameterFile),
       mMainPredictor(iMainPredictor),
       mFracThreshold(0.5),
       mOutputPop(false),
@@ -16,6 +15,10 @@ CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Ty
       mPopThreshold(0.5),
       mMaxEnsMean(100),
       m6h(false) {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'zaga' needs parameters");
+   }
+
    iOptions.getValue("fracThreshold", mFracThreshold);
    iOptions.getValue("outputPop", mOutputPop);
    iOptions.getValue("neighbourhoodSize", mNeighbourhoodSize);
@@ -333,12 +336,7 @@ std::string CalibratorZaga::description() {
    ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
    ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
    ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;
-   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option).") << std::endl;
-   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
-   ss << Util::formatDescription("", "offset0 a b c d e f g h") << std::endl;
-   ss << Util::formatDescription("", "...") << std::endl;
-   ss << Util::formatDescription("", "offsetN a b c d e f g h") << std::endl;
-   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option). The parameter set must contain 8 columns with the values [a b c d e f g h].") << std::endl;
    ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
    ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
    ss << Util::formatDescription("   outputPop=0", "Should probability of precip be written to the POP field?") << std::endl;

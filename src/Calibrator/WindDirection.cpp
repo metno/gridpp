@@ -7,10 +7,8 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
 CalibratorWindDirection::CalibratorWindDirection(const ParameterFile* iParameterFile, Variable::Type iVariable):
-      Calibrator(),
-      mVariable(iVariable),
-      mParameterFile(iParameterFile) {
-
+      Calibrator(iParameterFile),
+      mVariable(iVariable) {
    if(mParameterFile->getNumParameters() != 9) {
       Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
    }
@@ -55,11 +53,7 @@ std::string CalibratorWindDirection::description() {
    ss << Util::formatDescription("-c windDirection", "Multiply a variable by a factor based on the wind-direction:") << std::endl;
    ss << "                                factor = a + b*sin(dir)   + c*cos(dir)   + d*sin(2*dir) + e*cos(2*dir)" << std::endl;
    ss << "                                           + f*sin(3*dir) + g*cos(3*dir) + h*sin(4*dir) + i*cos(4*dir)" << std::endl;
-   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
-   ss << Util::formatDescription("", "offset0 a b c d e f g h i") << std::endl;
-   ss << Util::formatDescription("", "...") << std::endl;
-   ss << Util::formatDescription("", "offsetN a b c d e f g h i") << std::endl;
-   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("", "A parameter file is required, with the values [a b c d e f g h i].") << std::endl;
    return ss.str();
 }
 

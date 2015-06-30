@@ -1,6 +1,9 @@
 #include "Options.h"
 #include "Util.h"
 
+Options::Options() {
+
+}
 void Options::addOption(std::string iKey, std::string iValue) {
    if(iKey == "" || iValue == "")
       return;

@@ -5,7 +5,7 @@
 
 namespace {
    TEST(ParameterFileMetnoKalman, default) {
-      ParameterFileMetnoKalman file("testing/files/kalmanOutput.txt");
+      ParameterFileMetnoKalman file(Options("file=testing/files/kalmanOutput.txt"));
       std::vector<Location> locations = file.getLocations();
       ASSERT_EQ(805, locations.size());
       Location locFirst = Location(70.9394,-8.6690,10);
@@ -37,7 +37,7 @@ namespace {
       EXPECT_FLOAT_EQ(-1.05, par[0]);
    }
    TEST(ParameterFileMetnoKalman, emptyFile) {
-      ParameterFileMetnoKalman file("testing/files/89h9382he9823he92.txt");
+      ParameterFileMetnoKalman file(Options("file=testing/files/89h9382he9823he92.txt"));
       std::vector<Location> locations = file.getLocations();
       EXPECT_EQ(0, locations.size());
    }

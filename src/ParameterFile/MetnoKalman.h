@@ -7,13 +7,14 @@
 #include "../Location.h"
 class ParameterFileMetnoKalman : public ParameterFile {
    public:
-      ParameterFileMetnoKalman(std::string iFilename);
+      ParameterFileMetnoKalman(const Options& iOptions);
 
       bool isFixedSize() const {return true;};
       std::vector<int> getTimes() const;
 
       static bool isValid(std::string iFilename);
-
+      std::string name() const {return "metnoKalman";};
+      static std::string description();
    private:
       std::vector<int> mTimes;
       float mLocalMV;

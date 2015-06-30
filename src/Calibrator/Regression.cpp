@@ -5,9 +5,8 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 CalibratorRegression::CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable) :
-      Calibrator(),
-      mVariable(iVariable),
-      mParameterFile(iParameterFile) {
+      Calibrator(iParameterFile),
+      mVariable(iVariable) {
    if(iParameterFile->getNumParameters() == 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one datacolumns");
    }
@@ -59,11 +58,6 @@ bool CalibratorRegression::calibrateCore(File& iFile) const {
 
 std::string CalibratorRegression::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c regression", "Applies polynomial regression equation to forecasts: newForecast = a + b * forecast + c * forecast^2 ... ") << std::endl;
-   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
-   ss << Util::formatDescription("", "offset0 a b c ...") << std::endl;
-   ss << Util::formatDescription("", "...") << std::endl;
-   ss << Util::formatDescription("", "offsetN a b c ...") << std::endl;
-   ss << Util::formatDescription("", "If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("-c regression", "Applies polynomial regression equation to forecasts: newForecast = a + b * forecast + c * forecast^2 ... . A parameter file is required with the values [a b c ... ]") << std::endl;
    return ss.str();
 }

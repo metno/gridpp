@@ -6,9 +6,9 @@
 #include <set>
 #include <fstream>
 
-ParameterFileMetnoKalman::ParameterFileMetnoKalman(std::string iFilename) : ParameterFile(iFilename),
+ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : ParameterFile(iOptions),
       mLocalMV(-99999) {
-   std::ifstream ifs(iFilename.c_str(), std::ifstream::in);
+   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    int coeffFreq = 3; // How often are the coefficients for? In time steps.
 
    if(!ifs.good()) {
@@ -141,4 +141,11 @@ bool ParameterFileMetnoKalman::isValid(std::string iFilename) {
    if(values.size() != 2)
       return false;
    return true;
+}
+
+std::string ParameterFileMetnoKalman::description() {
+   std::stringstream ss;
+   ss << Util::formatDescription("-p metnoKalman", "Metno's internal format for kalman filter corrections.") << std::endl;
+   ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   return ss.str();
 }

@@ -20,6 +20,5 @@ class CalibratorWindDirection : public Calibrator {
    private:
       bool calibrateCore(File& iFile) const;
       Variable::Type mVariable;
-      const ParameterFile* mParameterFile;
 };
 #endif

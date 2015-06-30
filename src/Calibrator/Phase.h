@@ -22,7 +22,6 @@ class CalibratorPhase : public Calibrator {
       bool  getUseWetbulb();
    private:
       bool calibrateCore(File& iFile) const;
-      const ParameterFile* mParameterFile;
       float mMinPrecip;
       bool mUseWetbulb;
       //! If true compute pressure based on standard atmosphere (instead of using forecasted data)

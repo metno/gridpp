@@ -18,7 +18,7 @@
 class ParameterFileText : public ParameterFile {
    public:
       //! Read parameters from this file
-      ParameterFileText(std::string iFilename, bool iIsSpatial=false);
+      ParameterFileText(const Options& iOptions, bool iIsSpatial=false);
 
       bool isFixedSize() const;
 
@@ -29,6 +29,8 @@ class ParameterFileText : public ParameterFile {
       //! Write parameter file to disk
       //! @param iFilename Write to this filename. If empty, write to the file that was read from.
       void write(const std::string& iFilename="") const;
+      static std::string description();
+      std::string name() const {return "text";};
    private:
       int mNumParameters;
       bool mIsSpatial;

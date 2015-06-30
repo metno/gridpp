@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(),
+      Calibrator(NULL),
       mRadius(3),
       mVariable(iVariable),
       mStatType(Util::StatTypeMean),

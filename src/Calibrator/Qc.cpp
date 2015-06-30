@@ -5,7 +5,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorQc::CalibratorQc(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(),
+      Calibrator(NULL),
       mVariable(iVariable),
       mMin(Util::MV),
       mMax(Util::MV) {

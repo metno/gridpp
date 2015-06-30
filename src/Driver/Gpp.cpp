@@ -12,7 +12,7 @@
 void writeUsage() {
    std::cout << "Post-processes gridded forecasts" << std::endl;
    std::cout << std::endl;
-   std::cout << "usage:  gridpp input output [-v var [options]* [-d downscaler [options]*]] [-c calibrator [options]*]]*]+" << std::endl;
+   std::cout << "usage:  gridpp input [options] output [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+" << std::endl;
    std::cout << "        gridpp [--version]" << std::endl;
    std::cout << "        gridpp [--help]" << std::endl;
    std::cout << std::endl;
@@ -23,6 +23,7 @@ void writeUsage() {
    std::cout << "   -v var        One of the variables below." << std::endl;
    std::cout << "   -d downscaler One of the downscalers below." << std::endl;
    std::cout << "   -c calibrator One of the calibrators below." << std::endl;
+   std::cout << "   -p parameters One of the parameter formats below." << std::endl;
    std::cout << "   options       Options of the form key=value" << std::endl;
    std::cout << "   --version     Print the program's version" << std::endl;
    std::cout << "   --help        Print usage information" << std::endl;
@@ -32,6 +33,7 @@ void writeUsage() {
    std::cout << "   - If multiple downscalers are specified for one variable, the last is used." << std::endl;
    std::cout << "   - If the same variable is specified multiple times, the first definition is used." << std::endl;
    std::cout << "   - Multiple identical calibrators are allowed for a single variable." << std::endl;
+   std::cout << "   - Only one parameter format can be specified for given a downscaler or calibrator." << std::endl;
    std::cout << std::endl;
    std::cout << "Inputs/Outputs:" << std::endl;
    std::cout << "   I/O types are autodetected, but can be specified using:" << std::endl;
@@ -65,6 +67,10 @@ void writeUsage() {
    std::cout << CalibratorPhase::description();
    std::cout << CalibratorRegression::description();
    std::cout << CalibratorKriging::description();
+   std::cout << std::endl;
+   std::cout << "Parameter formats with Options (and default values)" << std::endl;
+   std::cout << ParameterFileText::description();
+   std::cout << ParameterFileMetnoKalman::description();
 }
 
 int main(int argc, const char *argv[]) {

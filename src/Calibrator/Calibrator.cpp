@@ -7,23 +7,17 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../File/File.h"
 
-Calibrator::Calibrator() {
+Calibrator::Calibrator(const ParameterFile* iParameterFile) : mParameterFile(iParameterFile) {
 
 }
-Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
+Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParameterFile, const Options& iOptions) {
 
    if(iName == "zaga") {
-      std::string parFilename;
-      if(!iOptions.getValue("parameters", parFilename)) {
-         Util::error("Calibrator 'zaga' needs parameters");
-      }
-
-      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'zaga' needs variable");
       }
-      CalibratorZaga* c = new CalibratorZaga(parFile, Variable::getType(variable), iOptions);
+      CalibratorZaga* c = new CalibratorZaga(iParameterFile, Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -52,12 +46,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       return c;
    }
    else if(iName == "phase") {
-      std::string parFilename;
-      if(!iOptions.getValue("parameters", parFilename)) {
-         Util::error("Calibrator 'phase' needs parameters");
-      }
-      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
-      CalibratorPhase* c = new CalibratorPhase(parFile);
+      CalibratorPhase* c = new CalibratorPhase(iParameterFile);
       float minPrecip;
       if(iOptions.getValue("minPrecip", minPrecip)) {
          c->setMinPrecip(minPrecip);
@@ -70,17 +59,11 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       return c;
    }
    else if(iName == "windDirection") {
-      std::string parFilename;
-      if(!iOptions.getValue("parameters", parFilename)) {
-         Util::error("Calibrator 'zaga' needs parameters");
-      }
-
-      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'zaga' needs variable");
+         Util::error("Calibrator 'windDirection' needs variable");
       }
-      CalibratorWindDirection* c = new CalibratorWindDirection(parFile, Variable::getType(variable));
+      CalibratorWindDirection* c = new CalibratorWindDirection(iParameterFile, Variable::getType(variable));
 
       return c;
    }
@@ -89,7 +72,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'kriging' needs variable");
       }
-      CalibratorKriging* c = new CalibratorKriging(Variable::getType(variable), iOptions);
+      CalibratorKriging* c = new CalibratorKriging(Variable::getType(variable), iParameterFile, iOptions);
 
       return c;
    }
@@ -117,32 +100,20 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       return c;
    }
    else if(iName == "qq") {
-      std::string parFilename;
-      if(!iOptions.getValue("parameters", parFilename)) {
-         Util::error("CalibratorQq: 'parameters' missing");
-      }
-      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
-
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");
       }
-      CalibratorQq* c = new CalibratorQq(parFile, Variable::getType(variable), iOptions);
+      CalibratorQq* c = new CalibratorQq(iParameterFile, Variable::getType(variable), iOptions);
 
       return c;
    }
    else if(iName == "regression") {
-      std::string parFilename;
-      if(!iOptions.getValue("parameters", parFilename)) {
-         Util::error("Calibrator 'regression' needs parameters");
-      }
-
-      ParameterFile* parFile = ParameterFile::getScheme(parFilename);
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");
       }
-      CalibratorRegression* c = new CalibratorRegression(parFile, Variable::getType(variable));
+      CalibratorRegression* c = new CalibratorRegression(iParameterFile, Variable::getType(variable));
 
       return c;
    }
@@ -180,4 +151,8 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
       float valueCal = afterCopy[e];
       iAfter[ei] = valueCal;
    }
+}
+
+const ParameterFile* Calibrator::getParameterFile() {
+   return mParameterFile;
 }

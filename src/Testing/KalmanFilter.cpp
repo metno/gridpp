@@ -7,7 +7,7 @@
 namespace {
    TEST(KalmanFilter, default) {
       KalmanFilter kf(Variable::T, 0.1);
-      ParameterFileText  data("testing/files/sampleObsFcst.txt", true);
+      ParameterFileText  data(Options("file=testing/files/sampleObsFcst.txt"), true);
    }
 }
 int main(int argc, char **argv) {

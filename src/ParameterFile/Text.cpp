@@ -7,11 +7,11 @@
 #include <fstream>
 #include <algorithm>
 
-ParameterFileText::ParameterFileText(std::string iFilename, bool iIsSpatial) : ParameterFile(iFilename),
+ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsSpatial) : ParameterFile(iOptions),
       mIsSpatial(iIsSpatial) {
-   std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
+   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    if(!ifs.good()) {
-      Util::error("Parameter file '" + iFilename + "' does not exist");
+      Util::error("Parameter file '" + getFilename() + "' does not exist");
    }
    mNumParameters = Util::MV;
    int counter = 0;
@@ -64,7 +64,7 @@ ParameterFileText::ParameterFileText(std::string iFilename, bool iIsSpatial) : P
             mNumParameters = values.size();
          else if(values.size() != mNumParameters) {
             std::stringstream ss;
-            ss << "Parameter file '" + iFilename + "' is corrupt, because it does not have the same"
+            ss << "Parameter file '" + getFilename() + "' is corrupt, because it does not have the same"
                << " number of columns on each line" << std::endl;
             Util::error(ss.str());
          }
@@ -146,4 +146,21 @@ void ParameterFileText::write(const std::string& iFilename) const {
       }
    }
    ofs.close();
+}
+std::string ParameterFileText::description() {
+   std::stringstream ss;
+   ss << Util::formatDescription("-p text", "Simple ascii text file with space separated entries. Each line represents one lead time, and each column one parameter.") << std::endl;
+   ss << Util::formatDescription("", "offset1 a b ... N") << std::endl;
+   ss << Util::formatDescription("", "...") << std::endl;
+   ss << Util::formatDescription("", "offsetM a b ... N") << std::endl;
+   ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   ss << Util::formatDescription("   spatial=0", "Does this file contain spatial information? If yes, then the each line represents a leadtime and location (order of lines is not important):") << std::endl;
+   ss << Util::formatDescription("", "offset1 lat1 lon1 elev1 a b ... N") << std::endl;
+   ss << Util::formatDescription("", "                ...") << std::endl;
+   ss << Util::formatDescription("", "offsetM lat1 lon1 elev1 a b ... N") << std::endl;
+   ss << Util::formatDescription("", "                ...") << std::endl;
+   ss << Util::formatDescription("", "offset1 latP lonP elevP a b ... N") << std::endl;
+   ss << Util::formatDescription("", "                ...") << std::endl;
+   ss << Util::formatDescription("", "offsetM latP lonP elevP a b ... N") << std::endl;
+   return ss.str();
 }

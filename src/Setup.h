@@ -7,6 +7,7 @@
 class File;
 class Calibrator;
 class Downscaler;
+class ParameterFile;
 
 //! Represents the post-processing of one variable
 struct VariableConfiguration {
@@ -17,6 +18,8 @@ struct VariableConfiguration {
    //! Which calibrators should be use
    std::vector<Calibrator*> calibrators;
    Options variableOptions;
+   std::vector<ParameterFile*> parameterFileCalibrators;
+   ParameterFile* parameterFileDownscaler;
 };
 
 //! Represents what and how the post-processing should be done. Includes which input file to

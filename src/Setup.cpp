@@ -55,7 +55,7 @@ Setup::Setup(const std::vector<std::string>& argv) :
    }
 
    // Implement a finite state machine
-   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, END = 30, ERROR = 40};
+   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, PARDOWN = 30, PAROPTDOWN = 35, PARCAL = 40, PAROPTCAL = 45, END = 90, ERROR = 100};
    State state = START;
    State prevState = START;
 
@@ -63,11 +63,15 @@ Setup::Setup(const std::vector<std::string>& argv) :
    Options vOptions;
    Options dOptions;
    Options cOptions;
+   Options pOptions;
    std::string errorMessage = "";
 
    std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
+   std::string parameterFile = "";
    std::vector<Calibrator*> calibrators;
+   std::vector<ParameterFile*> parameterFileCalibrators;
+   ParameterFile* parameterFileDownscaler = NULL;
    while(true) {
       // std::cout << state << std::endl;
       if(state != ERROR)
@@ -105,6 +109,10 @@ Setup::Setup(const std::vector<std::string>& argv) :
                state = CAL;
                index++;
             }
+            else if(argv[index] == "-p") {
+               errorMessage = "-p must be after a -d or -c";
+               state = ERROR;
+            }
             else {
                state = VAROPT;
             }
@@ -124,6 +132,10 @@ Setup::Setup(const std::vector<std::string>& argv) :
          }
          else if(argv[index] == "-v") {
             state = NEWVAR;
+         }
+         else if(argv[index] == "-p") {
+            errorMessage = "-p must be after a -d or -c";
+            state = ERROR;
          }
          else {
             // Process variable options
@@ -145,7 +157,9 @@ Setup::Setup(const std::vector<std::string>& argv) :
             VariableConfiguration varconf;
             varconf.variable = variable;
             varconf.downscaler = d;
+            varconf.parameterFileDownscaler = parameterFileDownscaler;
             varconf.calibrators = calibrators;
+            varconf.parameterFileCalibrators = parameterFileCalibrators;
             varconf.variableOptions = vOptions;
             variableConfigurations.push_back(varconf);
          }
@@ -156,8 +170,10 @@ Setup::Setup(const std::vector<std::string>& argv) :
          // Reset to defaults
          vOptions.clear();
          downscaler = defaultDownscaler();
+         parameterFileDownscaler = NULL;
          dOptions.clear();
          calibrators.clear();
+         parameterFileCalibrators.clear();
 
          if(argv.size() <= index) {
             state = END;
@@ -191,6 +207,9 @@ Setup::Setup(const std::vector<std::string>& argv) :
                state = DOWN;
                index++;
             }
+            else if(argv[index] == "-p") {
+               state = PARDOWN;
+            }
             else {
                state = DOWNOPT;
             }
@@ -207,9 +226,68 @@ Setup::Setup(const std::vector<std::string>& argv) :
          else if(argv[index] == "-v") {
             state = NEWVAR;
          }
+         else if(argv[index] == "-p") {
+            state = PARDOWN;
+         }
          else {
             // Process downscaler options
             dOptions.addOptions(argv[index]);
+            index++;
+         }
+      }
+      else if(state == PARDOWN) {
+         if(argv.size() <= index) {
+            // -p but nothing after it
+            errorMessage = "No parameter file after '-p'";
+            state = ERROR;
+         }
+         else {
+            parameterFile = argv[index];
+            index++;
+            if(argv.size() <= index) {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-c") {
+               state = CAL;
+               index++;
+            }
+            else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-d") {
+               // Two downscalers defined for one variable
+               state = DOWN;
+               index++;
+            }
+            else if(argv[index] == "-p") {
+               // Two parameter files defined for one variable
+               errorMessage = "Two or more -p used for one downscaler";
+               state = ERROR;
+               index++;
+            }
+            else {
+               state = PAROPTDOWN;
+            }
+         }
+      }
+      else if(state == PAROPTDOWN) {
+         if(argv.size() <= index) {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-c") {
+            state = CAL;
+            index++;
+         }
+         else if(argv[index] == "-v") {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-p") {
+            errorMessage = "Two or more -p used for one calibrator";
+            state = ERROR;
+         }
+         else {
+            // Process parameter file options
+            pOptions.addOptions(argv[index]);
             index++;
          }
       }
@@ -234,6 +312,9 @@ Setup::Setup(const std::vector<std::string>& argv) :
             else if(argv[index] == "-d") {
                state = NEWCAL;
             }
+            else if(argv[index] == "-p") {
+               state = PARCAL;
+            }
             else {
                state = CALOPT;
             }
@@ -252,22 +333,88 @@ Setup::Setup(const std::vector<std::string>& argv) :
          else if(argv[index] == "-d") {
             state = NEWCAL;
          }
+         else if(argv[index] == "-p") {
+            state = PARCAL;
+         }
          else {
             // Process calibrator options
             cOptions.addOptions(argv[index]);
             index++;
          }
       }
+      else if(state == PARCAL) {
+         if(argv.size() <= index) {
+            // -p but nothing after it
+            state = ERROR;
+            errorMessage = "No parameter file after '-p'";
+         }
+         else {
+            parameterFile = argv[index];
+            if(argv.size() <= index) {
+               state = NEWCAL;
+               index++;
+            }
+            else if(argv[index] == "-v") {
+               state = NEWCAL;
+               index++;
+            }
+            else if(argv[index] == "-c") {
+               state = NEWCAL;
+               index++;
+            }
+            else if(argv[index] == "-d") {
+               state = NEWCAL;
+               index++;
+            }
+            else if(argv[index] == "-p") {
+               state = PARCAL;
+               index++;
+            }
+            else {
+               state = PAROPTCAL;
+            }
+         }
+      }
+      else if(state == PAROPTCAL) {
+         if(argv.size() <= index) {
+            state = NEWCAL;
+         }
+         else if(argv[index] ==  "-c") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-v") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-d") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-p") {
+            state = PARCAL;
+         }
+         else {
+            // Process calibrator options
+            pOptions.addOptions(argv[index]);
+            index++;
+         }
+      }
       else if(state == NEWCAL) {
          // We do not need to check that the same calibrator has been added for this variable
          // since this is perfectly fine (e.g. smoothing twice).
+
+         ParameterFile* p = NULL;
+         if(parameterFile != "") {
+            p = ParameterFile::getScheme(parameterFile, pOptions);
+         }
+
          cOptions.addOption("variable", Variable::getTypeName(variable));
-         Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
+         Calibrator* c = Calibrator::getScheme(calibrator, p, cOptions);
          calibrators.push_back(c);
 
          // Reset
          calibrator = "";
+         parameterFile = "";
          cOptions.clear();
+         pOptions.clear();
          if(argv.size() <= index) {
             state = NEWVAR;
          }

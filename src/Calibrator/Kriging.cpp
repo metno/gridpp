@@ -5,8 +5,8 @@
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
 
-CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(),
+CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFile* iParameterFile, const Options& iOptions):
+      Calibrator(iParameterFile),
       mVariable(iVariable),
       mEfoldDist(30000),
       mMaxElevDiff(100),
@@ -22,9 +22,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
    iOptions.getValue("radius", mRadius);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);
    std::string parfilename;
-   if(!iOptions.getValue("parameters", parfilename)) {
-      Util::error("CalibratorKriging: 'parameters' required");
-   }
    if(mEfoldDist< 0) {
       Util::error("CalibratorKriging: 'efoldDist' must be >= 0");
    }
@@ -34,9 +31,8 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
    if(mRadius < 0) {
       Util::error("CalibratorKriging: 'radius' must be >= 0");
    }
-   std::string fileType = "text";
+   std::string fileType = "textSpatial";
    iOptions.getValue("fileType", fileType);
-   mParameterFile = ParameterFile::getScheme(fileType, parfilename);
    if(!mParameterFile->isLocationDependent()) {
       std::stringstream ss;
       ss << "Kriging requires a parameter file with spatial information";
@@ -87,10 +83,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
          Util::error("CalibratorKriging: the lower value must be less than upper value in 'range'");
       }
    }
-}
-
-CalibratorKriging::~CalibratorKriging() {
-   delete mParameterFile;
 }
 
 bool CalibratorKriging::calibrateCore(File& iFile) const {
@@ -277,12 +269,7 @@ float CalibratorKriging::calcWeight(const Location& loc1, const Location& loc2) 
 
 std::string CalibratorKriging::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c kriging","Spreads bias in space by using optimal interpolation.")<< std::endl;
-   ss << Util::formatDescription("   parameters=required","Read bias parameters from this text file. The file format is:") << std::endl;
-   ss << Util::formatDescription("", "offset0 lat lon elev bias") << std::endl;
-   ss << Util::formatDescription("","...         ") << std::endl;
-   ss << Util::formatDescription("","offsetN lat lon elev bias") << std::endl;
-   ss << Util::formatDescription("   fileType=text",ParameterFile::getDescription()) << std::endl;
+   ss << Util::formatDescription("-c kriging","Spreads bias in space by using optimal interpolation. A parameter file is required, which must have one column with the bias.")<< std::endl;
    ss << Util::formatDescription("   radius=30000","How far away (in meters) should bias be spread to? Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   efoldDist=30000","Bias is reduced to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   maxElevDiff=100","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0.") << std::endl;

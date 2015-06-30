@@ -11,7 +11,6 @@ class CalibratorRegression : public Calibrator {
       std::string name() const {return "regression";};
    private:
       bool calibrateCore(File& iFile) const;
-      const ParameterFile* mParameterFile;
       Variable::Type mVariable;
 };
 #endif

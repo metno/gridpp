@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorCloud::CalibratorCloud(Variable::Type iPrecip, Variable::Type iCloud) :
-      Calibrator(),
+      Calibrator(NULL),
       mCloudType(iCloud),
       mPrecipType(iPrecip) {
 

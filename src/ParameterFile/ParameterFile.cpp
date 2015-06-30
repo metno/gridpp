@@ -6,37 +6,23 @@
 #include <set>
 #include <fstream>
 
-ParameterFile::ParameterFile(std::string iFilename) : mFilename(iFilename) {
-
+ParameterFile::ParameterFile(const Options& iOptions) : mFilename("") {
+   iOptions.getValue("file", mFilename);
 }
 
-ParameterFile* ParameterFile::getScheme(std::string iFilename, const Options& iOptions) {
-   std::string name;
-   if(ParameterFileMetnoKalman::isValid(iFilename)) {
-      name = "metnoKalman";
-   }
-   else if(ParameterFileText::isValid(iFilename)) {
-      name = "text";
-   }
-   else {
-      Util::error("Could not determine type for parameter file '" + iFilename + "'");
-   }
-   return getScheme(name, iFilename, iOptions);
-}
-
-ParameterFile* ParameterFile::getScheme(std::string iName, std::string iFilename, const Options& iOptions) {
+ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions) {
    ParameterFile* p;
    if(iName == "metnoKalman") {
-      p = new ParameterFileMetnoKalman(iFilename);
+      p = new ParameterFileMetnoKalman(iOptions);
    }
    else if(iName == "text") {
-      p = new ParameterFileText(iFilename);
+      p = new ParameterFileText(iOptions);
    }
    else if(iName == "textSpatial") {
-      p = new ParameterFileText(iFilename, true);
+      p = new ParameterFileText(iOptions, true);
    }
    else {
-      Util::error("Could not determine type for parameter file '" + iFilename + "'");
+      Util::error("Parameter file type '" + iName + "' not recognized");
    }
    return p;
 }
@@ -141,8 +127,15 @@ int ParameterFile::getNumParameters() const {
    return size;
 }
 
-std::string ParameterFile::getDescription() {
+std::string ParameterFile::getDescription(bool iSpatialOnly) {
    std::stringstream ss;
-   ss << "What file type is the parameters in? One of 'text', 'textSpatial, and 'metnoKalman'.";
+   if(iSpatialOnly)
+      ss << "What file type is the parameters in? One of 'text' and 'metnoKalman'.";
+   else
+      ss << "What file type is the parameters in? One of 'text' and 'metnoKalman'.";
    return ss.str();
+}
+
+void ParameterFile::setFilename(std::string iFilename) {
+   mFilename = iFilename;
 }

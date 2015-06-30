@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(),
+      Calibrator(NULL),
       mInputVariable(iVariable),
       mOutputVariable(Variable::PrecipAcc) {
    std::string outputVariable;

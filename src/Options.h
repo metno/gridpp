@@ -9,9 +9,10 @@
 //! Empty (i.e. "") keys or values are not allowed
 class Options {
    public:
+      Options();
       //! Creates container
       //! @param iOptionString options with format: "key1=value1 key2=value2..."
-      Options(std::string iOptionString="");
+      Options(std::string iOptionString);
 
       //! \brief Adds key and value to container
       //! @param iKey cannot be ""

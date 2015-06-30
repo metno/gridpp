@@ -3,7 +3,7 @@
 #include "../File/File.h"
 #include <math.h>
 CalibratorQnh::CalibratorQnh() :
-      Calibrator() {
+      Calibrator(NULL) {
 
 }
 bool CalibratorQnh::calibrateCore(File& iFile) const {

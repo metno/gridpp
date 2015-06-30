@@ -8,8 +8,7 @@ class Parameters;
 
 class CalibratorKriging : public Calibrator {
    public:
-      CalibratorKriging(Variable::Type iVariable, const Options& iOptions);
-      ~CalibratorKriging();
+      CalibratorKriging(Variable::Type iVariable, const ParameterFile* iParameterFile, const Options& iOptions);
       static std::string description();
       float calcWeight(const Location& loc1, const Location& loc2) const;
       enum Type {
@@ -23,7 +22,6 @@ class CalibratorKriging : public Calibrator {
       float mRadius;
       float mMaxElevDiff;
       float mEfoldDist;
-      const ParameterFile* mParameterFile;
       std::string name() const {return "kriging";};
       File* mPrevious;
       Variable::Type mAuxVariable;

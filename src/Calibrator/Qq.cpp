@@ -5,9 +5,8 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 CalibratorQq::CalibratorQq(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(),
+      Calibrator(iParameterFile),
       mVariable(iVariable),
-      mParameterFile(iParameterFile),
       mLowerQuantile(0),
       mUpperQuantile(1),
       mPolicy(ExtrapolationPolicy::OneToOne) {
@@ -122,12 +121,9 @@ bool CalibratorQq::calibrateCore(File& iFile) const {
 
 std::string CalibratorQq::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c qq", "Quantile-quantile mapping. Calibrates forecasts based on a map of sorted observations and sorted forecasts. For a given raw forecast, the quantile within the historical forecasts is found. Then the observation at the same quantile is used as the calibrated forecast.") << std::endl;
-   ss << Util::formatDescription("   parameters=required", "Read parameters from this text file. The file format is:") << std::endl;
-   ss << Util::formatDescription("", "offset0 obs0 fcst0 obs1 fcst1 ...") << std::endl;
-   ss << Util::formatDescription("", "...") << std::endl;
-   ss << Util::formatDescription("", "offsetN obs0 fcst0 obs1 fcst1 ...") << std::endl;
-   ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued. If the file only has a single line, then the same set of parameters are used for all offsets.") << std::endl;
+   ss << Util::formatDescription("-c qq", "Quantile-quantile mapping. Calibrates forecasts based on a map of sorted observations and sorted forecasts. For a given raw forecast, the quantile within the historical forecasts is found. Then the observation at the same quantile is used as the calibrated forecast. A parameter file is required with an even number of columns as follows") << std::endl;
+   ss << Util::formatDescription("", "[obs0 fcs0 obs1 fcst1 .. obsN fcstN") << std::endl;
+   ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued.") << std::endl;
    ss << Util::formatDescription("   extrapolation=1to1", "If a forecast is outside the curve, how should extrapolation be done? '1to1': Use a slope of 1, i.e. preserving the bias at the nearest end point; 'meanSlope': Use the average slope from the lower to upper endpoints; 'nearestSlope': Use the slope through the two nearest points; 'zero': Use a slope of 0, meaning that the forecast will equal the max/min observation.") << std::endl;
    return ss.str();
 }

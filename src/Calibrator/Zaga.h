@@ -32,7 +32,6 @@ class CalibratorZaga : public Calibrator {
       static std::string description();
       std::string name() const {return "zaga";};
    private:
-      const ParameterFile* mParameterFile;
       bool calibrateCore(File& iFile) const;
       //! What precip threshold should be used to count members with no precip?
       float mFracThreshold;

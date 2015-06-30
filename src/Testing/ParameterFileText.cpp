@@ -5,7 +5,7 @@
 
 namespace {
    TEST(ParameterFileTextTest, singleTime) {
-      ParameterFileText file("testing/files/parametersSingleTime.txt");
+      ParameterFileText file(Options("file=testing/files/parametersSingleTime.txt"));
       ASSERT_EQ(1, file.getTimes().size());
       Parameters par = file.getParameters(0);
       ASSERT_EQ(9, par.size());
@@ -17,7 +17,7 @@ namespace {
    }
 
    TEST(ParameterFileTextTest, multipleTime) {
-      ParameterFileText file("testing/files/parametersMultipleTime.txt");
+      ParameterFileText file(Options("file=testing/files/parametersMultipleTime.txt"));
       ASSERT_EQ(8, file.getTimes().size());
       Parameters par = file.getParameters(30);
       ASSERT_EQ(8, par.size());
@@ -25,7 +25,7 @@ namespace {
       EXPECT_FLOAT_EQ(-0.04039751, par[5]);
    }
    TEST(ParameterFileTextTest, empty) {
-      ParameterFileText file("testing/files/parametersEmpty.txt");
+      ParameterFileText file(Options("file=testing/files/parametersEmpty.txt"));
       ASSERT_EQ(6, file.getTimes().size());
       Parameters par = file.getParameters(0);
       ASSERT_EQ(0, par.size());
@@ -33,22 +33,22 @@ namespace {
    TEST(ParameterFileTextTest, invalidFiles) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(ParameterFileText("testing/files/parametersUnevenRows.txt"), ".*");
-      EXPECT_DEATH(ParameterFileText("testing/files/parametersDoesntExist.txt"), ".*");
-      EXPECT_DEATH(ParameterFileText("testing/files/parametersInvalidTime.txt"), ".*");
-      EXPECT_DEATH(ParameterFileText("testing/files/parametersInvalidEntries.txt"), ".*");
+      EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersUnevenRows.txt")), ".*");
+      EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersDoesntExist.txt")), ".*");
+      EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersInvalidTime.txt")), ".*");
+      EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersInvalidEntries.txt")), ".*");
    }
    TEST(ParameterFileTextTest, invalidTime) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFileText file("testing/files/parametersMultipleTime.txt");
+      ParameterFileText file(Options("file=testing/files/parametersMultipleTime.txt"));
       EXPECT_DEATH(file.getParameters(1100), ".*");
       EXPECT_DEATH(file.getParameters(-1), ".*");
    }
 
    // Spatial
    TEST(ParameterFileTextTest, default) {
-      ParameterFileText file("testing/files/parametersKriging.txt", true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
       std::vector<Location> locations = file.getLocations();
       ASSERT_EQ(4, locations.size());
       std::set<Location> locationsSet(locations.begin(), locations.end());
@@ -61,9 +61,9 @@ namespace {
       EXPECT_EQ(locationsSet, expected);
    }
    TEST(ParameterFileTextTest, write) {
-      ParameterFileText file("testing/files/parametersKriging.txt", true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
       file.write("testing/files/parametersKriging2.txt");
-      ParameterFileText file2("testing/files/parametersKriging2.txt", true);
+      ParameterFileText file2(Options("file=testing/files/parametersKriging2.txt"), true);
       // Should have the same locations
       std::vector<Location> locations1 = file.getLocations();
       std::vector<Location> locations2 = file.getLocations();
@@ -74,7 +74,7 @@ namespace {
    TEST(ParameterFileTextTest, writeError) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFileText file("testing/files/parametersKriging.txt", true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
       // Shouldn't be able to write to a directory
       EXPECT_DEATH(file.write("testing/files/"), ".*");
    }

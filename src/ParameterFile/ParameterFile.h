@@ -9,16 +9,14 @@
 //! Represents a collection of parameters, one set for each forecast time
 class ParameterFile {
    public:
-      ParameterFile(std::string iFilename);
+      ParameterFile(const Options& iOptions);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       Parameters getParameters(int iTime, const Location& iLocation) const;
       //! Only use this if isLocationDependent() is false
       Parameters getParameters(int iTime) const;
 
-      static ParameterFile* getScheme(std::string iName, std::string iFilename, const Options& iOptions=Options());
-      // Auto detect type
-      static ParameterFile* getScheme(std::string iFilename, const Options& iOptions=Options());
+      static ParameterFile* getScheme(std::string iName, const Options& iOptions=Options());
 
       //! Does this file provide different parameters for different locations?
       virtual bool isLocationDependent() const;
@@ -38,12 +36,14 @@ class ParameterFile {
       int getNumParameters() const;
 
       std::string getFilename() const;
-      static std::string getDescription();
+      virtual std::string name() const = 0;
+      static std::string getDescription(bool iSpatialOnly=false);
    protected:
 
       // Store all location-dependent parameters here
       std::map<Location, std::map<int, Parameters> > mParameters; // Location, Offset, Parameters
       std::string mFilename;
+      void setFilename(std::string iFilename);
 };
 #include "MetnoKalman.h"
 #include "Text.h"

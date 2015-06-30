@@ -11,7 +11,6 @@ class CalibratorQq : public Calibrator {
       std::string name() const {return "qq";};
    private:
       bool calibrateCore(File& iFile) const;
-      const ParameterFile* mParameterFile;
       Variable::Type mVariable;
       float mLowerQuantile;
       float mUpperQuantile;

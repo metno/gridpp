@@ -8,12 +8,18 @@
 
 ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : ParameterFile(iOptions),
       mLocalMV(-99999) {
-   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
+   if(!isValid(getFilename()))
+      Util::error(getFilename() + " is not a valid parameter file");
+
    int coeffFreq = 3; // How often are the coefficients for? In time steps.
 
+   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
+
+   // Empty file
    if(!ifs.good()) {
       return;
    }
+
    std::vector<std::pair<std::pair<int, Location>, Parameters> > allParameters; // Time, Location, Parameters
    char line[10000];
    ifs.getline(line, 10000, '\n'); // Header line
@@ -24,8 +30,10 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : Pa
       std::stringstream ss(line);
       // Note: The first value read is not the number of locations. The true number is a bit fewer.
       bool status = ss >> temp >> numTimes;
-      if(!status) {
-         Util::error("Could not read second header line from file '" + mFilename + "'");
+      assert(status);
+
+      for(int t = 0; t < (numTimes-1)*coeffFreq+1; t++) {
+         mTimes.push_back(t);
       }
    }
    while(ifs.good()) {
@@ -34,64 +42,49 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : Pa
          std::stringstream ss(line);
          int stationId;
          bool status = ss >> stationId;
-         if(!status) {
-            Util::error("Could not read station ID from file '" + mFilename + "'");
-         }
+         assert(status);
+         translate(stationId);
 
          float lat;
          status = ss >> lat;
-         if(!status) {
-            Util::error("Could not read lat from file '" + mFilename + "'");
-         }
+         assert(status);
+         translate(lat);
 
          float lon;
          status = ss >> lon;
-         if(!status) {
-            Util::error("Could not read lon from file '" + mFilename + "'");
-         }
+         assert(status);
+         translate(lon);
 
          float elev;
          status = ss >> elev;
-         if(!status) {
-            Util::error("Could not read elev from file '" + mFilename + "'");
-         }
+         assert(status);
+         translate(elev);
 
          float modelElev;
          status = ss >> modelElev;
-         if(!status) {
-            Util::error("Could not read model elevation from file '" + mFilename + "'");
-         }
+         assert(status);
+         translate(modelElev);
 
          float lastObs;
          status = ss >> lastObs;
-         if(!status) {
-            Util::error("Could not read last observation from file '" + mFilename + "'");
-         }
-         if(lastObs == mLocalMV)
-            lastObs = Util::MV;
+         assert(status);
+         translate(lastObs);
 
          // Loop over each value
          std::vector<float> values;
          while(ss.good()) {
             float value;
             bool status  = ss >> value;
-            if(!status) {
-               Util::error("Could not read value from file '" + mFilename + "'");
-            }
-            if(value == mLocalMV)
-               value = Util::MV;
+            assert(status);
+            translate(value);
             values.push_back(value);
          }
-         if(values.size() != numTimes) {
-            std::stringstream ss;
-            ss << "ParameterFileMetnoKalman: Expecting " << numTimes << " columns of bias, found " << values.size();
-            Util::error(ss.str());
-         }
+         assert(values.size() == numTimes);
+
          Location location(lat,lon,elev);
          // Values are for every 3 (coeffFreq) hours. Interpolate between so we get values every hour
          for(int i = 0; i < values.size(); i++) {
             mParameters[location][i*coeffFreq] = Parameters(values[i]);
-            mTimes.push_back(i*coeffFreq);
             // Fill in the gaps
             if(i < values.size() - 1) {
                for(int k = 1; k < coeffFreq; k++) {
@@ -103,7 +96,6 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : Pa
                   else {
                      mParameters[location][i*coeffFreq+k] = Parameters(Util::MV);
                   }
-                  mTimes.push_back(i*coeffFreq+k);
                }
             }
          }
@@ -135,11 +127,36 @@ bool ParameterFileMetnoKalman::isValid(std::string iFilename) {
 
    values.clear();
    ifs.getline(line, 10000, '\n'); // Header line
-   while(ss >> value) {
+   std::stringstream ss2(line);
+   while(ss2 >> value) {
       values.push_back(value);
    }
    if(values.size() != 2)
       return false;
+   int numTimes = values[1];
+   int numCols = 6 + numTimes;
+   while(true) {
+      values.clear();
+      ifs.getline(line, 10000, '\n');
+      if(ifs.good() && line[0] != '#') {
+         std::stringstream ss(line);
+         float value;
+         while(true) {
+            if(!ss.good())
+               break;
+            bool status = ss >> value;
+            values.push_back(value);
+            if(!status)
+               return false;
+         }
+         if(values.size() != numCols) {
+            return false;
+         }
+      }
+      else {
+         break;
+      }
+   }
    return true;
 }
 

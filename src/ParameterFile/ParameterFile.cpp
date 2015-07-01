@@ -18,9 +18,6 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
    else if(iName == "text") {
       p = new ParameterFileText(iOptions);
    }
-   else if(iName == "textSpatial") {
-      p = new ParameterFileText(iOptions, true);
-   }
    else if(iName == "netcdf") {
       p = new ParameterFileNetcdf(iOptions);
    }
@@ -75,9 +72,13 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) co
             const Location& currLoc = it->first;
             float dist = iLocation.getDistance(currLoc);
             if(!Util::isValid(minDist) || (Util::isValid(dist) && dist < minDist)) {
-               minDist = dist;
-               loc = it->first;
-               break;
+               // Check that this location actually has parameters available for this time
+               std::map<int, Parameters>::const_iterator it2 = it->second.find(iTime);
+               bool hasAtThisTime = it2->second.size() > 0;
+               if(hasAtThisTime) {
+                  minDist = dist;
+                  loc = it->first;
+               }
             }
          }
          if(!Util::isValid(minDist)) {

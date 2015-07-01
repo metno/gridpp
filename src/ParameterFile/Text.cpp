@@ -7,12 +7,13 @@
 #include <fstream>
 #include <algorithm>
 
-ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsSpatial) : ParameterFile(iOptions),
-      mIsSpatial(iIsSpatial) {
+ParameterFileText::ParameterFileText(const Options& iOptions) : ParameterFile(iOptions),
+      mIsSpatial(false) {
    std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    if(!ifs.good()) {
       Util::error("Parameter file '" + getFilename() + "' does not exist");
    }
+   iOptions.getValue("spatial", mIsSpatial);
    mNumParameters = Util::MV;
    int counter = 0;
    std::set<int> times;
@@ -147,6 +148,11 @@ void ParameterFileText::write(const std::string& iFilename) const {
    }
    ofs.close();
 }
+
+bool ParameterFileText::isLocationDependent() const {
+   return mIsSpatial;
+}
+
 std::string ParameterFileText::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-p text", "Simple ascii text file with space separated entries. Each line represents one lead time, and each column one parameter.") << std::endl;

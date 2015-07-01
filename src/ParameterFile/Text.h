@@ -18,12 +18,13 @@
 class ParameterFileText : public ParameterFile {
    public:
       //! Read parameters from this file
-      ParameterFileText(const Options& iOptions, bool iIsSpatial=false);
+      ParameterFileText(const Options& iOptions);
 
       bool isFixedSize() const;
 
       std::vector<int> getTimes() const;
       static bool isValid(std::string iFilename);
+      bool isLocationDependent() const;
 
       int getNumParameters() const;
       //! Write parameter file to disk

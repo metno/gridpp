@@ -18,5 +18,11 @@ class ParameterFileMetnoKalman : public ParameterFile {
    private:
       std::vector<int> mTimes;
       float mLocalMV;
+      //! Applies any translations of values from raw file, such as converting missing values
+      //! and potentially applying scale and offset attributes in the future.
+      template <class T> void translate(T& value) const {
+         if(value == mLocalMV)
+            value = Util::MV;
+      }
 };
 #endif

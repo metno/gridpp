@@ -31,8 +31,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFi
    if(mRadius < 0) {
       Util::error("CalibratorKriging: 'radius' must be >= 0");
    }
-   std::string fileType = "textSpatial";
-   iOptions.getValue("fileType", fileType);
    if(!mParameterFile->isLocationDependent()) {
       std::stringstream ss;
       ss << "Kriging requires a parameter file with spatial information";

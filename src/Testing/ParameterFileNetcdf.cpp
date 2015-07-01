@@ -4,7 +4,7 @@
 #include <algorithm>
 
 namespace {
-   TEST(ParameterFilenetcdfTest, singleTime) {
+   TEST(ParameterFileNetcdfTest, singleTime) {
       ParameterFileNetcdf file(Options("file=testing/files/10x10_param.nc"));
       ASSERT_EQ(2, file.getTimes().size());
       // Location loc(5,5,142.1456);
@@ -13,6 +13,9 @@ namespace {
       ASSERT_EQ(2, par.size());
       EXPECT_FLOAT_EQ(0.3, par[0]);
       EXPECT_FLOAT_EQ(2.3, par[1]);
+   }
+   TEST(ParameterFileNetcdfTest, description) {
+      ParameterFileNetcdf::description();
    }
 }
 int main(int argc, char **argv) {

@@ -48,7 +48,7 @@ namespace {
 
    // Spatial
    TEST(ParameterFileTextTest, default) {
-      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt spatial=1"));
       std::vector<Location> locations = file.getLocations();
       ASSERT_EQ(4, locations.size());
       std::set<Location> locationsSet(locations.begin(), locations.end());
@@ -61,9 +61,9 @@ namespace {
       EXPECT_EQ(locationsSet, expected);
    }
    TEST(ParameterFileTextTest, write) {
-      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt spatial=1"));
       file.write("testing/files/parametersKriging2.txt");
-      ParameterFileText file2(Options("file=testing/files/parametersKriging2.txt"), true);
+      ParameterFileText file2(Options("file=testing/files/parametersKriging2.txt spatial=1"));
       // Should have the same locations
       std::vector<Location> locations1 = file.getLocations();
       std::vector<Location> locations2 = file.getLocations();
@@ -71,10 +71,13 @@ namespace {
       std::sort(locations2.begin(), locations2.end());
       EXPECT_EQ(locations1, locations2);
    }
+   TEST(ParameterFileTextTest, description) {
+      ParameterFileText::description();
+   }
    TEST(ParameterFileTextTest, writeError) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFileText file(Options("file=testing/files/parametersKriging.txt"), true);
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt spatial=1"));
       // Shouldn't be able to write to a directory
       EXPECT_DEATH(file.write("testing/files/"), ".*");
    }

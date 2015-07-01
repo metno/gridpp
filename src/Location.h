@@ -17,6 +17,14 @@ class Location {
       //! Used for sorting in std::map
       bool operator<(const Location &right) const;
       bool operator==(const Location &right) const;
+
+      float getDistance(const Location& loc1) const;
+
+      //! A comparator that only looks at lat/lon, and ignores elevation
+      class CmpIgnoreElevation {
+         public:
+            bool operator()(const Location &right, const Location &left) const;
+      };
    private:
       float mLat;
       float mLon;

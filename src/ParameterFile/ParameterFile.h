@@ -41,7 +41,7 @@ class ParameterFile {
    protected:
 
       // Store all location-dependent parameters here
-      std::map<Location, std::map<int, Parameters> > mParameters; // Location, Offset, Parameters
+      std::map<Location, std::map<int, Parameters>, Location::CmpIgnoreElevation > mParameters; // Location, Offset, Parameters
       std::string mFilename;
       void setFilename(std::string iFilename);
 };

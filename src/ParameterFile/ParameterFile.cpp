@@ -51,27 +51,51 @@ Parameters ParameterFile::getParameters(int iTime) const {
    }
 }
 Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) const {
+   if(mParameters.size() == 0)
+      return Parameters();
    // Find the right location to use
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   Location loc(Util::MV,Util::MV,Util::MV);
    if(mParameters.size() == 1) {
       // One set of parameters for all locations
-       it = mParameters.begin();
+      std::map<Location, std::map<int, Parameters> >::const_iterator it = mParameters.begin();
+      loc = it->first;
    }
    else {
+      std::map<Location, std::map<int, Parameters> >::const_iterator it;
       it = mParameters.find(iLocation);
       // Nearest neighbour
       // TODO
       if(it == mParameters.end()) {
+         std::map<Location, std::map<int, Parameters> >::const_iterator it;
+         float minDist = Util::MV;
+         for(it = mParameters.begin(); it != mParameters.end(); it++) {
+            const Location& currLoc = it->first;
+            float dist = iLocation.getDistance(currLoc);
+            if(!Util::isValid(minDist) || (Util::isValid(dist) && dist < minDist)) {
+               minDist = dist;
+               loc = it->first;
+               break;
+            }
+         }
+         if(!Util::isValid(minDist)) {
+            // TODO: No nearby location found
+            Util::error("No parameter locations found");
+         }
+         else {
+         }
+      }
+      else {
+         loc = iLocation;
       }
    }
 
    // Find the right time to use
-   std::map<int,Parameters> timeParameters = it->second;
+   std::map<int,Parameters> timeParameters = mParameters.find(loc)->second;//it->second;
    if(timeParameters.size() == 1) {
       // One set of parameters for all times
       return timeParameters.begin()->second;
    }
-   else if(it->second.find(iTime) != it->second.end()) {
+   else if(timeParameters.find(iTime) != timeParameters.end()) {
       return timeParameters[iTime];
    }
    else {

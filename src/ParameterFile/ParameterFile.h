@@ -48,5 +48,6 @@ class ParameterFile {
 #include "MetnoKalman.h"
 #include "Text.h"
 #include "Simple.h"
+#include "Netcdf.h"
 // #include "ParameterFileNetcdf.h"
 #endif

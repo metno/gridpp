@@ -71,6 +71,7 @@ void writeUsage() {
    std::cout << "Parameter formats with Options (and default values)" << std::endl;
    std::cout << ParameterFileText::description();
    std::cout << ParameterFileMetnoKalman::description();
+   std::cout << ParameterFileNetcdf::description();
 }
 
 int main(int argc, const char *argv[]) {

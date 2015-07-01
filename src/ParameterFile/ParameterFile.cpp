@@ -21,6 +21,9 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
    else if(iName == "textSpatial") {
       p = new ParameterFileText(iOptions, true);
    }
+   else if(iName == "netcdf") {
+      p = new ParameterFileNetcdf(iOptions);
+   }
    else {
       Util::error("Parameter file type '" + iName + "' not recognized");
    }

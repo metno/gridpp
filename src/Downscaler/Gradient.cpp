@@ -4,7 +4,7 @@
 #include <math.h>
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable),
+      Downscaler(iVariable, iOptions),
       mSearchRadius(3),
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),

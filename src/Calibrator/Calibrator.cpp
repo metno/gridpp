@@ -7,7 +7,7 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../File/File.h"
 
-Calibrator::Calibrator(const ParameterFile* iParameterFile) : mParameterFile(iParameterFile) {
+Calibrator::Calibrator(const ParameterFile* iParameterFile, const Options& iOptions) : Scheme(iOptions), mParameterFile(iParameterFile) {
 
 }
 Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParameterFile, const Options& iOptions) {
@@ -26,7 +26,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'cloud' needs variable");
       }
-      CalibratorCloud* c = new CalibratorCloud(Variable::Precip, Variable::getType(variable));
+      CalibratorCloud* c = new CalibratorCloud(Variable::getType(variable), iOptions);
       return c;
    }
    else if(iName == "accumulate") {
@@ -46,7 +46,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       return c;
    }
    else if(iName == "phase") {
-      CalibratorPhase* c = new CalibratorPhase(iParameterFile);
+      CalibratorPhase* c = new CalibratorPhase(iParameterFile, iOptions);
       float minPrecip;
       if(iOptions.getValue("minPrecip", minPrecip)) {
          c->setMinPrecip(minPrecip);
@@ -63,7 +63,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'windDirection' needs variable");
       }
-      CalibratorWindDirection* c = new CalibratorWindDirection(iParameterFile, Variable::getType(variable));
+      CalibratorWindDirection* c = new CalibratorWindDirection(iParameterFile, Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -95,7 +95,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       return c;
    }
    else if(iName == "qnh") {
-      CalibratorQnh* c = new CalibratorQnh();
+      CalibratorQnh* c = new CalibratorQnh(iOptions);
 
       return c;
    }
@@ -113,7 +113,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");
       }
-      CalibratorRegression* c = new CalibratorRegression(iParameterFile, Variable::getType(variable));
+      CalibratorRegression* c = new CalibratorRegression(iParameterFile, Variable::getType(variable), iOptions);
 
       return c;
    }

@@ -53,7 +53,7 @@ namespace {
       setLatLonElev(to,   (float[]) {54},   (float[]){9}, (float[]){10});
 
       vec3Int I, J;
-      DownscalerSmart d(Variable::Precip);
+      DownscalerSmart d(Variable::Precip, Options());
       d.setSearchRadius(10); // Search the whole grid
       d.setNumSmart(2);
       d.getSmartNeighbours(from, to, I, J);
@@ -68,7 +68,7 @@ namespace {
       EXPECT_EQ(0, J[0][0][1]);
    }
    TEST_F(TestDownscalerSmart, 10x10) {
-      DownscalerSmart d(Variable::T);
+      DownscalerSmart d(Variable::T, Options());
       d.setSearchRadius(3);
       d.setNumSmart(2);
       FileArome from("testing/files/10x10.nc");
@@ -102,7 +102,7 @@ namespace {
       EXPECT_EQ(2, J[0][4][0]);
    }
    TEST_F(TestDownscalerSmart, 10x10minElevDiff) {
-      DownscalerSmart d(Variable::T);
+      DownscalerSmart d(Variable::T, Options());
       d.setSearchRadius(3);
       d.setNumSmart(2);
       d.setMinElevDiff(109);
@@ -141,7 +141,7 @@ namespace {
       setLatLonElev(from, (float[]) {50,55,60}, (float[]){0,10}, (float[]){3, 15, 6, 30, 20, 11});
       setLatLonElev(to,   (float[]) {55},       (float[]){10},   (float[]){22.3});
 
-      DownscalerSmart d(Variable::T);
+      DownscalerSmart d(Variable::T, Options());
       d.setSearchRadius(3);
       d.setNumSmart(2);
       vec3Int I, J;
@@ -173,7 +173,7 @@ namespace {
       setLatLonElev(to, (float[]) {5.5}, (float[]){2,4, 10,20}, (float[]){120, 80, 600, 600});
       vec3Int I, J;
 
-      DownscalerSmart d(Variable::Precip);
+      DownscalerSmart d(Variable::Precip, Options());
       d.setSearchRadius(1);
       d.setNumSmart(20);
       d.getSmartNeighbours(from, to, I, J);
@@ -195,7 +195,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      DownscalerSmart d(Variable::Precip);
+      DownscalerSmart d(Variable::Precip, Options());
       // Check that default is valid
       EXPECT_GE(d.getSearchRadius(), 0);
       d.setSearchRadius(5);
@@ -211,7 +211,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      DownscalerSmart d(Variable::Precip);
+      DownscalerSmart d(Variable::Precip, Options());
       // Check that default is valid
       EXPECT_GT(d.getNumSmart(), 0);
       d.setNumSmart(5);
@@ -228,7 +228,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      DownscalerSmart d(Variable::Precip);
+      DownscalerSmart d(Variable::Precip, Options());
       // Check that default is valid
       EXPECT_GT(d.getNumSearchPoints(), 0);
       d.setNumSmart(5);

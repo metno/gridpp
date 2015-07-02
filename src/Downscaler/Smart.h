@@ -10,7 +10,7 @@ typedef std::vector<std::vector<std::vector<int> > > vec3Int; // lat, lon, neigh
 class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerSmart(Variable::Type iVariable);
+      DownscalerSmart(Variable::Type iVariable, const Options& iOptions);
       //! Use this many smart neighbours
       void setNumSmart(int iNumSmart);
       int getNumSmart() const;

@@ -2,8 +2,8 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include <math.h>
-CalibratorQnh::CalibratorQnh() :
-      Calibrator(NULL) {
+CalibratorQnh::CalibratorQnh(const Options& iOptions) :
+      Calibrator(NULL, iOptions) {
 
 }
 bool CalibratorQnh::calibrateCore(File& iFile) const {

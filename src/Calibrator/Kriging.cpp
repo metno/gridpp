@@ -6,7 +6,7 @@
 #include <math.h>
 
 CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFile* iParameterFile, const Options& iOptions):
-      Calibrator(iParameterFile),
+      Calibrator(iParameterFile, iOptions),
       mVariable(iVariable),
       mEfoldDist(30000),
       mMaxElevDiff(100),

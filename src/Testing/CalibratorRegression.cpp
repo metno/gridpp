@@ -23,7 +23,7 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_0order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression0order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
+      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -38,7 +38,7 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_1order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression1order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
+      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -53,7 +53,7 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_2order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression2order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
+      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -68,7 +68,7 @@ namespace {
    TEST_F(TestCalibratorRegression, missing_parameters) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regressionMissing.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T);
+      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
 
       cal.calibrate(from);
       FieldPtr after = from.getField(Variable::T, 0);
@@ -85,7 +85,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       ParameterFileText par(Options("file=testing/files/regressionInvalid1.txt"));
-      EXPECT_DEATH(CalibratorRegression cal = CalibratorRegression(&par, Variable::T), ".*");
+      EXPECT_DEATH(CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options()), ".*");
    }
    TEST_F(TestCalibratorRegression, description) {
       CalibratorRegression::description();

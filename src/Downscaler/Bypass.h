@@ -8,7 +8,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! Skip the downscaling stage
 class DownscalerBypass : public Downscaler {
    public:
-      DownscalerBypass(Variable::Type iVariable);
+      DownscalerBypass(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "bypass";};
    private:

@@ -18,7 +18,7 @@ namespace {
       {
          FileArome from("testing/files/10x10.nc");
          FilePoint to("testing/files/filePoint.txt", Options("lat=1 lon=2 elev=3 time=2"));
-         DownscalerNearestNeighbour d = DownscalerNearestNeighbour(Variable::T);
+         DownscalerNearestNeighbour d = DownscalerNearestNeighbour(Variable::T, Options());
          bool status = d.downscale(from, to);
          EXPECT_TRUE(status);
          std::vector<Variable::Type> variables(1, Variable::T);

@@ -5,9 +5,10 @@
 #include "../Parameters.h"
 #include "../Location.h"
 #include "../Options.h"
+#include "../Scheme.h"
 
 //! Represents a collection of parameters, one set for each forecast time
-class ParameterFile {
+class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions);
 

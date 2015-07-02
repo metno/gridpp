@@ -6,8 +6,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorWindDirection::CalibratorWindDirection(const ParameterFile* iParameterFile, Variable::Type iVariable):
-      Calibrator(iParameterFile),
+CalibratorWindDirection::CalibratorWindDirection(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions):
+      Calibrator(iParameterFile, iOptions),
       mVariable(iVariable) {
    if(mParameterFile->getNumParameters() != 9) {
       Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");

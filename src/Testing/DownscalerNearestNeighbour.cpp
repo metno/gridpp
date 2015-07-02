@@ -43,7 +43,7 @@ namespace {
       DownscalerNearestNeighbour::description();
    }
    TEST_F(TestDownscalerNearestNeighbour, downscale) {
-      DownscalerNearestNeighbour d(Variable::T);
+      DownscalerNearestNeighbour d(Variable::T, Options());
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
       setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
@@ -57,7 +57,7 @@ namespace {
       EXPECT_FLOAT_EQ(fromT(1,0,0), toT(1,1,0));
    }
    TEST_F(TestDownscalerNearestNeighbour, 10x10) {
-      DownscalerNearestNeighbour d(Variable::T);
+      DownscalerNearestNeighbour d(Variable::T, Options());
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(2,2,1,from.getNumTime());

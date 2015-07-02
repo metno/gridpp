@@ -29,7 +29,7 @@ namespace {
             return parFile;
          }
          CalibratorPhase getCalibrator(ParameterFile* parFile) {
-            return CalibratorPhase(parFile);
+            return CalibratorPhase(parFile, Options());
          }
          void setValues(const File& iFile, float iPrecip, float iTemp, float iRh, float iPressure) {
             FieldPtr precip   = iFile.getField(Variable::Precip, 0);

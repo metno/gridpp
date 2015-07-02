@@ -5,7 +5,7 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 CalibratorQq::CalibratorQq(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iParameterFile),
+      Calibrator(iParameterFile, iOptions),
       mVariable(iVariable),
       mLowerQuantile(0),
       mUpperQuantile(1),

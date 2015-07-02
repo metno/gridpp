@@ -35,7 +35,7 @@ namespace {
             return parFile;
          }
          CalibratorWindDirection getCalibrator(ParameterFile* parFile) {
-            return CalibratorWindDirection(parFile, Variable::T);
+            return CalibratorWindDirection(parFile, Variable::T, Options());
          }
    };
    TEST_F(TestCalibratorWindDirection, getFactor) {

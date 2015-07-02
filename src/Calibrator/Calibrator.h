@@ -2,15 +2,16 @@
 #define CALIBRATOR_H
 #include <string>
 #include <vector>
+#include "../Scheme.h"
 class File;
 class Options;
 class ParameterFile;
 
 //! Abstract calibration class
-class Calibrator {
+class Calibrator : public Scheme {
    public:
       //! The calibrator does not free the memory of iParameterFile
-      Calibrator(const ParameterFile* iParameterFile);
+      Calibrator(const ParameterFile* iParameterFile, const Options& iOptions);
       virtual ~Calibrator() {};
       //! \brief Calibrate one or more fields in iFile
       //! @return true if calibration was successful, false otherwise

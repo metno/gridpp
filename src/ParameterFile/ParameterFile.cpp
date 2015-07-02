@@ -6,7 +6,9 @@
 #include <set>
 #include <fstream>
 
-ParameterFile::ParameterFile(const Options& iOptions) : mFilename("") {
+ParameterFile::ParameterFile(const Options& iOptions) :
+      Scheme(iOptions),
+      mFilename("") {
    iOptions.getValue("file", mFilename);
 }
 

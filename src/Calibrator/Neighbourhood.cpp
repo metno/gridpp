@@ -5,7 +5,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(NULL),
+      Calibrator(NULL, iOptions),
       mRadius(3),
       mVariable(iVariable),
       mStatType(Util::StatTypeMean),

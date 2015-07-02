@@ -7,7 +7,7 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
 CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions):
-      Calibrator(iParameterFile),
+      Calibrator(iParameterFile, iOptions),
       mMainPredictor(iMainPredictor),
       mFracThreshold(0.5),
       mOutputPop(false),

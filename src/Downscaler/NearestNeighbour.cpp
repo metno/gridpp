@@ -5,8 +5,8 @@
 
 // std::map<const File*, std::map<const File*, std::pair<vec2Int, vec2Int> > > DownscalerNearestNeighbour::mNeighbourCache;
 
-DownscalerNearestNeighbour::DownscalerNearestNeighbour(Variable::Type iVariable) :
-      Downscaler(iVariable) {
+DownscalerNearestNeighbour::DownscalerNearestNeighbour(Variable::Type iVariable, const Options& iOptions) :
+      Downscaler(iVariable, iOptions) {
 }
 
 void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput) const {

@@ -4,7 +4,7 @@
 
 std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
 
-Downscaler::Downscaler(Variable::Type iVariable) :
+Downscaler::Downscaler(Variable::Type iVariable, const Options& iOptions) : Scheme(iOptions),
       mVariable(iVariable) {
 }
 
@@ -18,14 +18,14 @@ bool Downscaler::downscale(const File& iInput, File& iOutput) const {
 
 Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions) {
    if(iName == "nearestNeighbour") {
-      return new DownscalerNearestNeighbour(iVariable);
+      return new DownscalerNearestNeighbour(iVariable, iOptions);
    }
    else if(iName == "gradient") {
       DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
       return d;
    }
    else if(iName == "smart") {
-      DownscalerSmart* d = new DownscalerSmart(iVariable);
+      DownscalerSmart* d = new DownscalerSmart(iVariable, iOptions);
       float searchRadius = Util::MV;
       if(iOptions.getValue("searchRadius", searchRadius)) {
          d->setSearchRadius(searchRadius);
@@ -41,11 +41,11 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       return d;
    }
    else if(iName == "bypass") {
-      DownscalerBypass* d = new DownscalerBypass(iVariable);
+      DownscalerBypass* d = new DownscalerBypass(iVariable, iOptions);
       return d;
    }
    else if(iName == "pressure") {
-      DownscalerPressure* d = new DownscalerPressure(iVariable);
+      DownscalerPressure* d = new DownscalerPressure(iVariable, iOptions);
       return d;
    }
    else {

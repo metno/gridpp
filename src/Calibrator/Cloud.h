@@ -6,7 +6,7 @@
 //! Ensures that if a member has precip it also has full cloud cover
 class CalibratorCloud : public Calibrator {
    public:
-      CalibratorCloud(Variable::Type iPrecip=Variable::Precip, Variable::Type iCloud=Variable::Cloud);
+      CalibratorCloud(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "cloud";};
    private:

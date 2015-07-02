@@ -12,7 +12,7 @@ namespace {
          FileArome from("testing/files/10x10.nc");
          FileArome to("testing/files/10x10_copy.nc");
          EXPECT_TRUE(from.hasVariable(Variable::T));
-         DownscalerNearestNeighbour d(Variable::T);
+         DownscalerNearestNeighbour d(Variable::T, Options());
          std::vector<Variable::Type> variables;
          variables.push_back(Variable::T);
          d.downscale(from, to);
@@ -32,7 +32,7 @@ namespace {
          FileArome from("testing/files/10x10.nc");
          FileArome to("testing/files/10x10_copy.nc");
          EXPECT_TRUE(from.hasVariable(Variable::T));
-         DownscalerSmart d(Variable::T);
+         DownscalerSmart d(Variable::T, Options());
          std::vector<Variable::Type> variables;
          variables.push_back(Variable::T);
          d.downscale(from, to);

@@ -4,8 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorRegression::CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable) :
-      Calibrator(iParameterFile),
+CalibratorRegression::CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions) :
+      Calibrator(iParameterFile, iOptions),
       mVariable(iVariable) {
    if(iParameterFile->getNumParameters() == 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one datacolumns");

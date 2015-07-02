@@ -5,13 +5,14 @@
 #include <boost/uuid/uuid.hpp>
 #include "../Options.h"
 #include "../Variable.h"
+#include "../Scheme.h"
 class File;
 typedef std::vector<std::vector<int> > vec2Int;
 
 //! Converts fields from one grid to another
-class Downscaler {
+class Downscaler : public Scheme {
    public:
-      Downscaler(Variable::Type iVariable);
+      Downscaler(Variable::Type iVariable, const Options& iOptions);
       virtual ~Downscaler() {};
       bool downscale(const File& iInput, File& iOutput) const;
       static Downscaler* getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions);

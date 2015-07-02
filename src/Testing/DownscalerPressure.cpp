@@ -46,7 +46,7 @@ namespace {
    };
 
    TEST_F(TestDownscalerPressure, 10x10) {
-      DownscalerPressure d(Variable::T);
+      DownscalerPressure d(Variable::T, Options());
       FileArome from("testing/files/10x10.nc");
       FileFake to(1,4,1,from.getNumTime());
       setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});

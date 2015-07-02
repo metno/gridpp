@@ -10,7 +10,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! Uses the pressure at the nearest neighbour when the lookup location does not have an elevation
 class DownscalerPressure : public Downscaler {
    public:
-      DownscalerPressure(Variable::Type iVariable);
+      DownscalerPressure(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "pressure";};
       static float calcPressure(float iElev0, float iPressure0, float iElev1);

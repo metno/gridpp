@@ -6,7 +6,7 @@ class ParameterFile;
 //! Applies polynomial regression to forecasts
 class CalibratorRegression : public Calibrator {
    public:
-      CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable);
+      CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "regression";};
    private:

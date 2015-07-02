@@ -4,8 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile) :
-      Calibrator(iParameterFile),
+CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile, const Options& iOptions) :
+      Calibrator(iParameterFile, iOptions),
       mMinPrecip(0.2),
       mEstimatePressure(true),
       mUseWetbulb(1) {

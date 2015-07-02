@@ -4,8 +4,8 @@
 #include <math.h>
 const float DownscalerPressure::mConstant = -1.21e-4;
 
-DownscalerPressure::DownscalerPressure(Variable::Type iVariable) :
-      Downscaler(iVariable) {
+DownscalerPressure::DownscalerPressure(Variable::Type iVariable, const Options& iOptions) :
+      Downscaler(iVariable, iOptions) {
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {

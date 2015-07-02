@@ -18,7 +18,7 @@ namespace {
    };
    TEST_F(TestCalibratorQnh, 10x10) {
       FileArome from("testing/files/10x10.nc");
-      CalibratorQnh cal = CalibratorQnh();
+      CalibratorQnh cal = CalibratorQnh(Options());
       FieldPtr p = from.getField(Variable::P, 0);
 
       for(int i = 0; i < from.getNumTime(); i++)

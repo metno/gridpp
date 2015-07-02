@@ -1,11 +1,10 @@
 #include "Cloud.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorCloud::CalibratorCloud(Variable::Type iPrecip, Variable::Type iCloud) :
-      Calibrator(NULL),
-      mCloudType(iCloud),
-      mPrecipType(iPrecip) {
-
+CalibratorCloud::CalibratorCloud(Variable::Type iVariable, const Options& iOptions) :
+      Calibrator(NULL, iOptions),
+      mCloudType(iVariable),
+      mPrecipType(Variable::Precip) {
 }
 bool CalibratorCloud::calibrateCore(File& iFile) const {
    int nLat = iFile.getNumLat();

@@ -38,6 +38,13 @@ FileFake::FileFake(int nLat, int nLon, int nEns, int nTime) :
          mElevs[i][j] = 0;
       }
    }
+   mLandFractions.resize(getNumLat());
+   for(int i = 0; i < getNumLat(); i++) {
+      mLandFractions[i].resize(getNumLon());
+      for(int j = 0; j < getNumLon(); j++) {
+         mLandFractions[i][j] = (float) i / getNumLat() / 2 + (float) j / getNumLon();
+      }
+   }
 }
 
 FieldPtr FileFake::getFieldCore(Variable::Type iVariable, int iTime) const {

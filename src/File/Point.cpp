@@ -25,9 +25,11 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    std::vector<float> lat0(1, lat);
    std::vector<float> lon0(1, lon);
    std::vector<float> elev0(1, elev);
+   std::vector<float> landFraction0(1, Util::MV);
    mLats.push_back(lat0);
    mLons.push_back(lon0);
    mElevs.push_back(elev0);
+   mLandFractions.push_back(landFraction0);
    mNLat = 1;
    mNLon = 1;
    mNEns = 1;

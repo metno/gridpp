@@ -11,6 +11,7 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    mLats.resize(1);
    mLons.resize(1);
    mElevs.resize(1);
+   mLandFractions.resize(1);
    if(!iOptions.getValues("lats", mLats[0])) {
       Util::error("Missing 'lats' option for '" + iFilename + "'");
    }
@@ -20,6 +21,7 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    if(!iOptions.getValues("elevs", mElevs[0])) {
       Util::error("Missing 'elevs' option for '" + iFilename + "'");
    }
+   mLandFractions[0].resize(mElevs[0].size(), Util::MV);
    if(!iOptions.getValues("names", mNames)) {
       Util::error("Missing 'names' option for '" + iFilename + "'");
    }

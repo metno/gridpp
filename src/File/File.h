@@ -42,9 +42,11 @@ class File {
       vec2 getLats() const;
       vec2 getLons() const;
       vec2 getElevs() const;
+      vec2 getLandFractions() const;
       bool setLats(vec2 iLats);
       bool setLons(vec2 iLons);
       bool setElevs(vec2 iElevs);
+      bool setLandFractions(vec2 iLandFractions);
 
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(Variable::Type iVariable) const;
@@ -84,6 +86,7 @@ class File {
       vec2 mLats;
       vec2 mLons;
       vec2 mElevs;
+      vec2 mLandFractions;
       int mNTime;
       int mNLat;
       int mNLon;

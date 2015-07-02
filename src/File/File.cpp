@@ -311,6 +311,12 @@ bool File::setElevs(vec2 iElevs) {
    mElevs = iElevs;
    return true;
 }
+bool File::setLandFractions(vec2 iLandFractions) {
+   if(iLandFractions.size() != mNLat || iLandFractions[0].size() != mNLon)
+      return false;
+   mLandFractions = iLandFractions;
+   return true;
+}
 vec2 File::getLats() const {
    return mLats;
 }
@@ -319,6 +325,9 @@ vec2 File::getLons() const {
 }
 vec2 File::getElevs() const {
    return mElevs;
+}
+vec2 File::getLandFractions() const {
+   return mLandFractions;
 }
 int File::getNumLat() const {
    return mNLat;

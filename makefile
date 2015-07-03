@@ -6,11 +6,11 @@ CFLAGS   = -Wall -Wno-reorder -Wno-sign-compare
 
 # Flags for optimized compilation
 CFLAGS_O = -O3 -fopenmp $(CFLAGS)
-LIBS_O   = -lnetcdf_c++
+LIBS_O   = -lnetcdf_c++ -lgsl -lblas
 
 # Flags for debug compilation
 CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
-LIBS_D   = -lnetcdf_c++ -L build/gtest -lgtest
+LIBS_D   = -lnetcdf_c++ -lgsl -lblas -L build/gtest -lgtest
 
 
 # Don't change below here
@@ -35,6 +35,9 @@ DRVOBJ_D	= $(BUILDDIR_D)/Driver/Gpp.o
 KFSRC  	= src/Driver/Kf.cpp
 KFOBJ_O	= $(BUILDDIR_O)/Driver/Kf.o
 KFOBJ_D	= $(BUILDDIR_D)/Driver/Kf.o
+TRAINRC  = src/Driver/Train.cpp
+TRAINOBJ_O= $(BUILDDIR_O)/Driver/Train.o
+TRAINOBJ_D= $(BUILDDIR_D)/Driver/Train.o
 SRC     	= $(CORESRC) $(CALSRC) $(FILESRC) $(DOWNSRC) $(PARSRC)
 HEADERS 	= $(SRC:.cpp=.h)
 OBJ0_O   = $(patsubst src/%,$(BUILDDIR_O)/%,$(SRC))
@@ -70,11 +73,17 @@ gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
 kalmanFilter: $(OBJ_O) $(KFOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(KFOBJ_O) $(LIBS_O) -o $@
 
+train: $(OBJ_O) $(TRAINOBJ_O) makefile
+	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(TRAINOBJ_O) $(LIBS_O) -o $@
+
 gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 kalmanFilter_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(KFOBJ_D) $(LIBS_D) -o $@
+
+train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
+	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(TRAINOBJ_D) $(LIBS_D) -o $@
 
 test: gtest $(TESTS)
 	./runAllTests.sh

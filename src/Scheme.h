@@ -1,6 +1,7 @@
 #ifndef SCHEME_H
 #define SCHEME_H
 class Options;
+class ParameterFile;
 
 //! Base class for downscaler, calibrator
 class Scheme {

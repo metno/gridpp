@@ -29,7 +29,8 @@ class ParameterFileText : public ParameterFile {
       int getNumParameters() const;
       //! Write parameter file to disk
       //! @param iFilename Write to this filename. If empty, write to the file that was read from.
-      void write(const std::string& iFilename="") const;
+      void write(const std::string& iFilename) const;
+      void write() const;
       static std::string description();
       std::string name() const {return "text";};
    private:

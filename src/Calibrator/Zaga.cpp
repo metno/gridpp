@@ -6,6 +6,7 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
+#include "../TrainingData.h"
 CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions):
       Calibrator(iParameterFile, iOptions),
       mMainPredictor(iMainPredictor),
@@ -14,6 +15,7 @@ CalibratorZaga::CalibratorZaga(const ParameterFile* iParameterFile, Variable::Ty
       mNeighbourhoodSize(0),
       mPopThreshold(0.5),
       mMaxEnsMean(100),
+      mLogLikelihoodTolerance(1e-4),
       m6h(false) {
    if(iParameterFile == NULL) {
       Util::error("Calibrator 'zaga' needs parameters");
@@ -202,7 +204,7 @@ bool CalibratorZaga::calibrateCore(File& iFile) const {
    return true;
 }
 
-float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac, const Parameters& iParameters) {
    if(iQuantile < 0 || iQuantile >= 1) {
       Util::warning("Quantile must be in the interval [0,1)");
       return Util::MV;
@@ -257,7 +259,7 @@ float CalibratorZaga::getInvCdf(float iQuantile, float iEnsMean, float iEnsFrac,
       return Util::MV;
    return value;
 }
-float CalibratorZaga::getCdf(float iThreshold, float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+float CalibratorZaga::getCdf(float iThreshold, float iEnsMean, float iEnsFrac, const Parameters& iParameters) {
    if(!Util::isValid(iThreshold) || !Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac))
       return Util::MV;
 
@@ -313,7 +315,37 @@ float CalibratorZaga::getCdf(float iThreshold, float iEnsMean, float iEnsFrac, P
    assert(cdf >= 0);
    return cdf;
 }
-float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParameters) {
+
+float CalibratorZaga::getPdf(float iThreshold, float iEnsMean, float iEnsFrac, const Parameters& iParameters) {
+   float mua = iParameters[0];
+   float mub = iParameters[1];
+   float sa  = iParameters[2];
+   float sb  = iParameters[3];
+
+   float P0 = getP0(iEnsMean, iEnsFrac, iParameters);
+
+   // Compute parameters of distribution (in same way as done in gamlss in R)
+   float mu    = exp(mua + mub * pow(iEnsMean, 1.0/3));
+   float sigma = exp(sa + sb * iEnsMean);
+
+   if(mu <= 0 || sigma <= 0)
+      return Util::MV;
+   if(!Util::isValid(mu) || !Util::isValid(sigma))
+      return Util::MV;
+
+   // Parameters in boost and wikipedia
+   float shape = 1/(sigma*sigma); // k
+   float scale = sigma*sigma*mu;  // theta
+   if(!Util::isValid(scale) || !Util::isValid(shape))
+      return Util::MV;
+
+   // std::cout << mu << " " << sigma << " " << P0 << " " << shape << " " << scale << std::endl;
+   boost::math::gamma_distribution<> dist(shape, scale);
+   float contPdf = boost::math::pdf(dist, iThreshold) ;
+   float pdf = (1 - P0)*contPdf;
+   return pdf;
+}
+float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, const Parameters& iParameters) {
    if(!Util::isValid(iEnsMean) || !Util::isValid(iEnsFrac) || iEnsMean < 0 || iEnsFrac < 0 || iEnsFrac > 1)
       return Util::MV;
    // Check that parameters are valid
@@ -328,6 +360,264 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, Parameters& iParamet
    float logit = a + b * iEnsMean + c * iEnsFrac + d * pow(iEnsMean, 1.0/3);
    float P0 = Util::invLogit(logit);
    return P0;
+}
+
+Parameters CalibratorZaga::train(const TrainingData& iData, int iOffset) const {
+   double timeStart = Util::clock();
+   std::vector<ObsEns> data = iData.getData(iOffset);
+   std::vector<float> obs, mean, frac;
+   obs.resize(data.size(), Util::MV);
+   mean.resize(data.size(), Util::MV);
+   frac.resize(data.size(), Util::MV);
+   // Compute predictors in model
+   for(int i = 0; i < data.size(); i++) {
+      obs[i] = data[i].first;
+      std::vector<float> ens = data[i].second;
+      mean[i] = Util::calculateStat(ens, Util::StatTypeMean);
+      int total = 0;
+      int valid = 0;
+      for(int j = 0; j < ens.size(); j++) {
+         if(Util::isValid(ens[j])) {
+            total += ens[j] <= mFracThreshold;
+            valid++;
+         }
+      }
+      if(valid > 0)
+         frac[i] = total / valid;
+      else
+         abort();
+      assert(frac[i] >= 0 && frac[i] <= 1);
+   }
+
+   int N = mean.size();
+   double* p = new double[1+3*N]; 
+   p[0] = N;
+   for(int n = 0; n < N; n++) {
+      p[1+n] = obs[n];
+      p[1+n+N] = mean[n];
+      p[1+n+2*N] = frac[n];
+   }
+
+   /*
+   gsl_multimin_function_fdf my_func;
+   double p[8] = { 0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1 }; 
+
+   my_func.n = 8;
+   my_func.f = &CalibratorZaga::my_f;
+   my_func.df = &CalibratorZaga::my_df;
+   my_func.fdf = &CalibratorZaga::my_fdf;
+   my_func.params = (void *)p;
+
+   */
+
+   gsl_multimin_function my_func;
+   my_func.n = 8;
+   my_func.f = &CalibratorZaga::my_f;
+   my_func.params = (void *)p;
+
+   // Initialize parameters
+   gsl_vector* x = gsl_vector_alloc (8);
+   gsl_vector_set (x, 0, 0.1);
+   gsl_vector_set (x, 1, 0.1);
+   gsl_vector_set (x, 2, 0.1);
+   gsl_vector_set (x, 3, 0.1);
+   gsl_vector_set (x, 4, 0.1);
+   gsl_vector_set (x, 5, 0.1);
+   gsl_vector_set (x, 6, 0.1);
+   gsl_vector_set (x, 7, 0.1);
+
+   // const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_conjugate_fr;
+   // gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc (T, 2);
+   // gsl_multimin_fdfminimizer_set (s, &my_func, x, 0.01, 1e-4);
+
+   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
+   gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 8);
+   gsl_vector *ss = gsl_vector_alloc (8);
+   gsl_vector_set_all (ss, 0.01);
+   gsl_multimin_fminimizer_set (s, &my_func, x, ss);
+
+
+   int iter = 0;
+   int status = GSL_CONTINUE;
+   do
+   {
+      iter++;
+      // status = gsl_multimin_fdfminimizer_iterate (s);
+      // status = gsl_multimin_fminimizer_iterate (s);
+      gsl_multimin_fminimizer_iterate (s);
+
+      // if (status)
+      //    break;
+
+      double size = gsl_multimin_fminimizer_size (s);
+      status = gsl_multimin_test_size (size, mLogLikelihoodTolerance);
+
+      // status = gsl_multimin_test_gradient (s->gradient, 1e-3);
+      // if (status == GSL_SUCCESS)
+      //    printf ("Minimum found at:\n");
+
+      if(0) {
+         std::cout << iter;
+         for(int i = 0; i < 8; i++) {
+         std::cout << " " << gsl_vector_get(s->x, i);
+         assert(Util::isValid(gsl_vector_get(s->x, i)));
+         }
+         std::cout << std::endl;
+      }
+   }
+   while (status == GSL_CONTINUE && iter < 5000);
+
+   std::vector<float> values(8,0);
+   for(int i = 0; i < 8; i++) {
+      values[i] = gsl_vector_get (s->x, i);
+   }
+
+   // gsl_multimin_fdfminimizer_free (s);
+   gsl_multimin_fminimizer_free (s);
+   gsl_vector_free (x);
+   gsl_vector_free (ss);
+
+   Parameters par(values);
+
+   double timeEnd = Util::clock();
+   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   std::cout << "Iterations: " << iter << std::endl;
+   return par;
+}
+
+double CalibratorZaga::my_f(const gsl_vector *v, void *params) {
+   double x, y;
+   double *p = (double *)params;
+
+   int N = p[0];
+   double* obs = p + 1;
+   double* mean = p + 1 + N;
+   double* frac = p + 1 + 2*N;
+
+   const double* arr = gsl_vector_const_ptr(v, 0);
+   std::vector<float> vec(arr, arr+8);
+   Parameters par(vec);
+   float mua = gsl_vector_get(v, 0);
+   float mub = gsl_vector_get(v, 1);
+   float sa  = gsl_vector_get(v, 2);
+   float sb  = gsl_vector_get(v, 3);
+   float a   = gsl_vector_get(v, 4);
+   float b   = gsl_vector_get(v, 5);
+   float c   = gsl_vector_get(v, 6);
+   float d   = gsl_vector_get(v, 7);
+
+   float total = 0;
+   for(int n = 0; n < N; n++) {
+      // float mean03 = pow(mean[n], 1.0/3);
+      // float logit = a + b * mean[n] + c * frac[n] + d * mean03;
+      // float P0 = Util::invLogit(logit);
+      float P0 = getP0(mean[n], frac[n], par);
+      if(obs[n] == 0) {
+         assert(P0 > 0);
+         total += log(P0);
+      }
+      else {
+         /*
+         // Compute parameters of distribution (in same way as done in gamlss in R)
+         float mu    = exp(mua + mub * mean03);
+         float sigma = exp(sa + sb * mean[n]);
+
+         if(mu <= 0 || sigma <= 0)
+            return Util::MV;
+         if(!Util::isValid(mu) || !Util::isValid(sigma))
+            return Util::MV;
+
+         // Parameters in boost and wikipedia
+         float shape = 1/(sigma*sigma); // k
+         float scale = sigma*sigma*mu;  // theta
+         if(!Util::isValid(scale) || !Util::isValid(shape))
+            return Util::MV;
+
+         // std::cout << mu << " " << sigma << " " << P0 << " " << shape << " " << scale << std::endl;
+         boost::math::gamma_distribution<> dist(shape, scale);
+         float contPdf = boost::math::pdf(dist, obs[n]) ;
+         float pdf = (1 - P0)*contPdf;
+         */
+         float pdf = getPdf(obs[n], mean[n], frac[n], par);
+         if(pdf == 0 || !Util::isValid(pdf))
+            pdf = 0.00001;
+         assert(pdf > 0);
+         total += log(pdf);
+      }
+   }
+   // std::cout << "Log likelihood: " << total << std::endl;
+   return -total; 
+}
+/*
+void CalibratorZaga::my_df(const gsl_vector *v, void *params, gsl_vector *df) {
+   double x, y;
+   double *p = (double *)params;
+
+   int N = p[0];
+   double* obs = p + 1;
+   double* mean = p + 1 + N;
+   double* frac = p + 1 + 2*N;
+
+   float mua = gsl_vector_get(v, 0);
+   float mub = gsl_vector_get(v, 1);
+   float sa  = gsl_vector_get(v, 2);
+   float sb  = gsl_vector_get(v, 3);
+   float a   = gsl_vector_get(v, 4);
+   float b   = gsl_vector_get(v, 5);
+   float c   = gsl_vector_get(v, 6);
+   float d   = gsl_vector_get(v, 7);
+
+   float total = 0;
+   double deriv[8] = {0,0,0,0,0,0,0,0};
+   int counter = 0;
+   for(int n = 0; n < N; n++) {
+      float logit = a + b * mean[n] + c * frac[n] + d * pow(mean[n], 1.0/3);
+      float P0 = Util::invLogit(logit);
+      if(obs[n] == 0) {
+         deriv[4] += (1-P0);
+         deriv[5] += mean[n]*(1-P0);
+         deriv[6] += frac[n]*(1-P0);
+         deriv[7] += pow(mean[n], 1.0/3)*(1-P0);
+      }
+      else {
+         // Compute parameters of distribution (in same way as done in gamlss in R)
+         float mu    = exp(mua + mub * pow(mean[n], 1.0/3));
+         float sigma = exp(sa + sb * mean[n]);
+
+         if(mu <= 0 || sigma <= 0)
+            abort();
+         if(!Util::isValid(mu) || !Util::isValid(sigma))
+            abort();
+
+         // Parameters in boost and wikipedia
+         float shape = 1/(sigma*sigma); // k
+         float scale = sigma*sigma*mu;  // theta
+         if(!Util::isValid(scale) || !Util::isValid(shape))
+            abort();
+
+         // std::cout << mu << " " << sigma << " " << P0 << " " << shape << " " << scale << std::endl;
+         boost::math::gamma_distribution<> dist(shape, scale);
+         float contPdf = boost::math::pdf(dist, obs[n]) ;
+         float pdf = (1 - P0)*contPdf;
+         // TODO:
+         deriv[0] += 1;
+      }
+      counter++;
+   }
+   gsl_vector_set(df, 0, 1);
+   gsl_vector_set(df, 1, 1);
+}
+
+void CalibratorZaga::my_fdf(const gsl_vector *x, void *params, double *f, gsl_vector *df) {
+  *f = my_f(x, params); 
+  my_df(x, params, df);
+}
+*/
+
+float CalibratorZaga::logLikelihood(float obs, float iEnsMean, float iEnsFrac, const Parameters& iParameters) {
+   assert(Util::isValid(obs));
+   float pdf = getCdf(obs, iEnsMean, iEnsFrac, iParameters);
+   return log(pdf);
 }
 
 std::string CalibratorZaga::description() {

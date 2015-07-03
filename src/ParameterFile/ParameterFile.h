@@ -39,6 +39,7 @@ class ParameterFile : public Scheme {
       std::string getFilename() const;
       virtual std::string name() const = 0;
       static std::string getDescription(bool iSpatialOnly=false);
+      virtual void write() const {};
    protected:
 
       // Store all location-dependent parameters here

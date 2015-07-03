@@ -113,19 +113,22 @@ int ParameterFileText::getNumParameters() const {
    return mNumParameters;
 }
 
+void ParameterFileText::write() const {
+   write(mFilename);
+}
 void ParameterFileText::write(const std::string& iFilename) const {
    std::string filename = iFilename;
-   if(iFilename == "") {
-      filename = mFilename;
-   }
    std::ofstream ofs(filename.c_str(), std::ios_base::out);
    if(!ofs.good()) {
-      Util::error("Cannot write spatial parameters to " + filename);
+      Util::error("Cannot write parameters to " + filename);
    }
 
    std::map<Location, std::map<int, Parameters> >::const_iterator it;
    // Loop over times
-   ofs << "# time lat lon elev parameters" << std::endl;
+   if(mIsSpatial)
+      ofs << "# time lat lon elev parameters" << std::endl;
+   else
+      ofs << "# time parameters" << std::endl;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
       std::map<int, Parameters>::const_iterator it2;
       // Loop over locations

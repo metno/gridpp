@@ -5,7 +5,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorQc::CalibratorQc(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(NULL, iOptions),
+      Calibrator(iOptions),
       mVariable(iVariable),
       mMin(Util::MV),
       mMax(Util::MV) {
@@ -14,7 +14,7 @@ CalibratorQc::CalibratorQc(Variable::Type iVariable, const Options& iOptions):
    Util::warning("CalibratorQc: both 'min' and 'max' are missing, therefore no correction is applied.");
 }
 
-bool CalibratorQc::calibrateCore(File& iFile) const {
+bool CalibratorQc::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

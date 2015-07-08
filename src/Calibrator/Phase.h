@@ -6,7 +6,7 @@ class ParameterFile;
 //! Creates a precipitation-phase field
 class CalibratorPhase : public Calibrator {
    public:
-      CalibratorPhase(const ParameterFile* iParameterFile, const Options& iOptions);
+      CalibratorPhase(const Options& iOptions);
       static std::string description();
       std::string name() const {return "phase";};
       //! Compute wetbulb temperature
@@ -21,7 +21,7 @@ class CalibratorPhase : public Calibrator {
       void  setUseWetbulb(bool iUseWetbulb);
       bool  getUseWetbulb();
    private:
-      bool calibrateCore(File& iFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       float mMinPrecip;
       bool mUseWetbulb;
       //! If true compute pressure based on standard atmosphere (instead of using forecasted data)

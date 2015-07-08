@@ -5,8 +5,8 @@
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
 
-CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFile* iParameterFile, const Options& iOptions):
-      Calibrator(iParameterFile, iOptions),
+CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iOptions):
+      Calibrator(iOptions),
       mVariable(iVariable),
       mEfoldDist(30000),
       mMaxElevDiff(100),
@@ -30,11 +30,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFi
    }
    if(mRadius < 0) {
       Util::error("CalibratorKriging: 'radius' must be >= 0");
-   }
-   if(!mParameterFile->isLocationDependent()) {
-      std::stringstream ss;
-      ss << "Kriging requires a parameter file with spatial information";
-      Util::error(ss.str());
    }
 
    std::string type;
@@ -83,7 +78,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const ParameterFi
    }
 }
 
-bool CalibratorKriging::calibrateCore(File& iFile) const {
+bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -92,10 +87,16 @@ bool CalibratorKriging::calibrateCore(File& iFile) const {
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
 
+   if(!iParameterFile->isLocationDependent()) {
+      std::stringstream ss;
+      ss << "Kriging requires a parameter file with spatial information";
+      Util::error(ss.str());
+   }
+
    // Precompute if a gridpoint has an observation location (for any point in time) within the
    // radius of influence. This saves time for gridpoints without observations close by, since this
    // does not need to be determined for each forecast time.
-   std::vector<Location> pointLocations = mParameterFile->getLocations();
+   std::vector<Location> pointLocations = iParameterFile->getLocations();
    std::vector<std::vector<bool> > hasObs;
    hasObs.resize(nLat);
    int total = 0;
@@ -143,7 +144,7 @@ bool CalibratorKriging::calibrateCore(File& iFile) const {
             for(int k = 0; k < pointLocations.size(); k++) {
                Location loc = pointLocations[k];
                if(Util::getDistance(loc.lat(), loc.lon(), lat, lon, mUseApproxDistance) <= mRadius && fabs(loc.elev() - elev) <= mMaxElevDiff) {
-                  Parameters parameters = mParameterFile->getParameters(t, loc);
+                  Parameters parameters = iParameterFile->getParameters(t, loc);
                   if(parameters.size() > 0) {
                      validLocations.push_back(loc);
                      bias.push_back(parameters[0]);

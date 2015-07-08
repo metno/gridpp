@@ -2,11 +2,11 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorCloud::CalibratorCloud(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(NULL, iOptions),
+      Calibrator(iOptions),
       mCloudType(iVariable),
       mPrecipType(Variable::Precip) {
 }
-bool CalibratorCloud::calibrateCore(File& iFile) const {
+bool CalibratorCloud::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

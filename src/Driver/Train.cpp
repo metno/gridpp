@@ -42,16 +42,16 @@ int main(int argc, const char *argv[]) {
       Util::error("kalmanFilter: 'data' required.");
    }
    */
-   Options dataOptions("file=testing/files/obsfcst.txt spatial=1");
    Options outputOptions("file=newParameters.txt spatial=0");
-   Options schemeOptions("fractThreshold=1");
+   // Options schemeOptions("fracThreshold=1");
+   Options schemeOptions("fracThreshold=1");
    Variable::Type variable = Variable::T;
 
-   ParameterFile* dataFile   = ParameterFile::getScheme("text", dataOptions);
    ParameterFile* outputFile = ParameterFile::getScheme("text", outputOptions);
 
    // Scheme* scheme = new CalibratorZaga(outputFile, variable, schemeOptions);
-   CalibratorZaga* scheme = new CalibratorZaga(outputFile, variable, schemeOptions);
+   // CalibratorZaga* scheme = new CalibratorZaga(outputFile, variable, schemeOptions);
+   CalibratorRegression* scheme = new CalibratorRegression(variable, Options("order=1 intercept=0"));
    TrainingData trainingData(dataFilename);
    for(int i = 6; i < 12; i += 6) {
       Parameters par = scheme->train(trainingData, i);

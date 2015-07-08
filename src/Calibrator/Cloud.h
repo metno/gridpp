@@ -10,7 +10,7 @@ class CalibratorCloud : public Calibrator {
       static std::string description();
       std::string name() const {return "cloud";};
    private:
-      bool calibrateCore(File& iFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mPrecipType;
       Variable::Type mCloudType;
 };

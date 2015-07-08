@@ -11,14 +11,14 @@ class ParameterFile;
 class Calibrator : public Scheme {
    public:
       //! The calibrator does not free the memory of iParameterFile
-      Calibrator(const ParameterFile* iParameterFile, const Options& iOptions);
+      Calibrator(const Options& iOptions);
       virtual ~Calibrator() {};
       //! \brief Calibrate one or more fields in iFile
       //! @return true if calibration was successful, false otherwise
-      bool calibrate(File& iFile) const;
+      bool calibrate(File& iFile, const ParameterFile* iParameterFile) const;
 
       //! Instantiates a calibrator with name iName
-      static Calibrator* getScheme(std::string iName, const ParameterFile* iParameterFile, const Options& iOptions);
+      static Calibrator* getScheme(std::string iName, const Options& iOptions);
 
       //! \brief Ensure that values in iAfter are in the same order as in iBefore.
       //! If missing values are encountered in iBefore or iAfter, then iAfter is left unchanged.
@@ -27,13 +27,8 @@ class Calibrator : public Scheme {
 
       //! Returns the name of this calibrator
       virtual std::string name() const = 0;
-
-      //! Returns the parameter file given to this calibrator. Note that a NULL value may be
-      //! returned.
-      const ParameterFile* getParameterFile();
    protected:
-      virtual bool calibrateCore(File& iFile) const = 0;
-      const ParameterFile* mParameterFile;
+      virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
    private:
 };
 #include "Zaga.h"

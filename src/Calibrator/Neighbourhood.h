@@ -15,7 +15,7 @@ class CalibratorNeighbourhood : public Calibrator {
       std::string name() const {return "neighbourhood";};
       int  getRadius() const;
    private:
-      bool calibrateCore(File& iFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
       int mRadius;
       Util::StatType mStatType;

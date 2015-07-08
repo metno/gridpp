@@ -130,7 +130,7 @@ int main(int argc, const char *argv[]) {
       for(int c = 0; c < varconf.calibrators.size(); c++) {
          // Calibrate
          std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
-         varconf.calibrators[c]->calibrate(*setup.outputFile);
+         varconf.calibrators[c]->calibrate(*setup.outputFile, varconf.parameterFileCalibrators[c]);
       }
       double e = Util::clock();
       std::cout << "   " << e-s << " seconds" << std::endl;

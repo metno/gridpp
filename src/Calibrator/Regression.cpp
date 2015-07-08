@@ -4,14 +4,16 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorRegression::CalibratorRegression(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iParameterFile, iOptions),
-      mVariable(iVariable) {
-   if(iParameterFile->getNumParameters() == 0) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one datacolumns");
-   }
+#include "../TrainingData.h"
+CalibratorRegression::CalibratorRegression(Variable::Type iVariable, const Options& iOptions) :
+      Calibrator(iOptions),
+      mVariable(iVariable),
+      mOrder(1),
+      mIntercept(true) {
+   iOptions.getValue("order", mOrder);
+   iOptions.getValue("intercept", mIntercept);
 }
-bool CalibratorRegression::calibrateCore(File& iFile) const {
+bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -20,18 +22,22 @@ bool CalibratorRegression::calibrateCore(File& iFile) const {
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
 
+   if(iParameterFile->getNumParameters() == 0) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one datacolumns");
+   }
+
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters;
-      if(!mParameterFile->isLocationDependent())
-         parameters = mParameterFile->getParameters(t);
+      if(!iParameterFile->isLocationDependent())
+         parameters = iParameterFile->getParameters(t);
       const FieldPtr field = iFile.getField(mVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            if(mParameterFile->isLocationDependent())
-               parameters = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            if(iParameterFile->isLocationDependent())
+               parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
             for(int e = 0; e < nEns; e++) {
                if(Util::isValid((*field)(i,j,e))) {
                   float total = 0;
@@ -56,8 +62,82 @@ bool CalibratorRegression::calibrateCore(File& iFile) const {
    return true;
 }
 
+Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) const {
+   if(mOrder > 1) {
+      std::stringstream ss;
+      ss << "CalibratorRegression: Cannot train regression of order greater than 1 (i.e a + bx)";
+      Util::error(ss.str());
+   }
+
+   double timeStart = Util::clock();
+   std::vector<ObsEns> data = iData.getData(iOffset);
+   std::vector<float> obs, mean;
+   obs.resize(data.size(), Util::MV);
+   mean.resize(data.size(), Util::MV);
+   float totalObs = 0;
+   float totalForecast = 0;
+   float totalForecast2 = 0;
+   float totalObsForecast = 0;
+   int counter = 0;
+   // Compute predictors in model
+   for(int i = 0; i < data.size(); i++) {
+      float obs = data[i].first;
+      std::vector<float> ens = data[i].second;
+      float ensMean = Util::calculateStat(ens, Util::StatTypeMean);
+      if(Util::isValid(obs) && Util::isValid(ensMean)) {
+         totalObs += obs;
+         totalForecast += ensMean;
+         totalForecast2 += ensMean*ensMean;
+         totalObsForecast += obs*ensMean;
+         counter++;
+      }
+   }
+
+   if(counter <= 0) {
+      std::stringstream ss;
+      ss << "CalibratorRegression: Cannot train regression, no valid data";
+      Util::error(ss.str());
+   }
+
+   std::vector<float> values;
+   float meanObs = totalObs / counter;
+   float meanForecast = totalForecast / counter;
+   float meanForecast2 = totalForecast2 / counter;
+   float meanObsForecast = totalObsForecast / counter;
+   if(mOrder == 0) {
+      values.push_back(totalObs);
+   }
+   else if(mOrder == 1) {
+      float intercept;
+      float slope;
+      if(mIntercept) {
+         slope = (meanObsForecast - meanForecast*meanObs)/(meanForecast2 - meanForecast*meanForecast);
+         intercept = meanObs - slope*meanForecast;
+      }
+      else {
+         intercept = 0;
+         slope = meanObsForecast / meanForecast2;
+      }
+      values.push_back(intercept);
+      values.push_back(slope);
+   }
+   else {
+      abort();
+   }
+
+   Parameters par(values);
+
+   double timeEnd = Util::clock();
+   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   return par;
+
+
+}
+
 std::string CalibratorRegression::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c regression", "Applies polynomial regression equation to forecasts: newForecast = a + b * forecast + c * forecast^2 ... . A parameter file is required with the values [a b c ... ]") << std::endl;
+   ss << Util::formatDescription("   order=1", "What order is the regression? 0th order: a; 1st order: a + bx; 2nd order a + bc + cx^2; etc.") << std::endl;
+   ss << Util::formatDescription("   intercept=1", "Should the regression include an intercept term? If 1, then yes. Only applied when training.") << std::endl;
    return ss.str();
 }

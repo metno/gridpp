@@ -15,7 +15,7 @@ class TrainingData;
 //! Designed for precip
 class CalibratorZaga : public Calibrator {
    public:
-      CalibratorZaga(const ParameterFile* iParameterFile, Variable::Type iMainPredictor, const Options& iOptions);
+      CalibratorZaga(Variable::Type iMainPredictor, const Options& iOptions);
       //! Get probability mass at 0 mm (i.e probability of no precipitation)
       //! If any input has missing values, the end result is missing
       static float getP0(float iEnsMean, float iEnsFrac, const Parameters& iParameters);
@@ -38,7 +38,7 @@ class CalibratorZaga : public Calibrator {
       //! Create parameters based on training data
       Parameters train(const TrainingData& iData, int iOffset) const;
    private:
-      bool calibrateCore(File& iFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       static float logLikelihood(float obs, float iEnsMean, float iEnsFrac, const Parameters& iParameters);
       static double my_f(const gsl_vector *v, void *params);
       // static void my_df(const gsl_vector *v, void *params, gsl_vector *df);

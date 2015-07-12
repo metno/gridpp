@@ -73,7 +73,7 @@ gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
 kalmanFilter: $(OBJ_O) $(KFOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(KFOBJ_O) $(LIBS_O) -o $@
 
-train: $(OBJ_O) $(TRAINOBJ_O) makefile
+gridpp_train: $(OBJ_O) $(TRAINOBJ_O) makefile
 	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(TRAINOBJ_O) $(LIBS_O) -o $@
 
 gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
@@ -82,7 +82,7 @@ gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
 kalmanFilter_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(KFOBJ_D) $(LIBS_D) -o $@
 
-train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
+gridpp_train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(TRAINOBJ_D) $(LIBS_D) -o $@
 
 test: gtest $(TESTS)

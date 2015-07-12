@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include "../Scheme.h"
+#include "../Parameters.h"
+#include "../TrainingData.h"
 class File;
 class Options;
 class ParameterFile;
@@ -27,6 +29,8 @@ class Calibrator : public Scheme {
 
       //! Returns the name of this calibrator
       virtual std::string name() const = 0;
+
+      virtual Parameters train(const TrainingData& iData, int iOffset) const;
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
    private:

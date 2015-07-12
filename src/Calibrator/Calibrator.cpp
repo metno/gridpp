@@ -152,3 +152,7 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
       iAfter[ei] = valueCal;
    }
 }
+
+Parameters Calibrator::train(const TrainingData& iData, int iOffset) const {
+   Util::error("Cannot train method. Not yet implemented.");
+}

@@ -6,6 +6,7 @@
 #include <cmath>
 #include "../Util.h"
 #include "../Options.h"
+Uuid File::mNextTag = 0;
 
 File::File(std::string iFilename) :
       mFilename(iFilename),
@@ -286,7 +287,7 @@ long File::getCacheSize() const {
    return size;
 }
 
-boost::uuids::uuid File::getUniqueTag() const {
+Uuid File::getUniqueTag() const {
    return mTag;
 }
 bool File::setLats(vec2 iLats) {
@@ -342,7 +343,8 @@ int File::getNumTime() const {
    return mNTime;
 }
 void File::createNewTag() const {
-   mTag = boost::uuids::random_generator()();
+   mTag = mNextTag; //boost::uuids::random_generator()();
+   mNextTag++;
 }
 void File::setReferenceTime(double iTime) {
    mReferenceTime = iTime;

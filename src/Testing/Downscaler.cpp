@@ -3,7 +3,6 @@
 #include "../Downscaler/Downscaler.h"
 #include <gtest/gtest.h>
 #include <boost/assign/list_of.hpp>
-#include <boost/uuid/uuid.hpp>
 
 namespace {
    class TestDownscaler : public ::testing::Test {
@@ -221,9 +220,9 @@ namespace {
       EXPECT_EQ(1, J[0][0]);
 
       // Don't change the grid
-      boost::uuids::uuid idBefore = from.getUniqueTag();
+      Uuid idBefore = from.getUniqueTag();
       setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
-      boost::uuids::uuid idAfter = from.getUniqueTag();
+      Uuid idAfter = from.getUniqueTag();
       EXPECT_EQ(idBefore, idAfter);
       Downscaler::getNearestNeighbour(from, to, I, J);
       ASSERT_EQ(2, I.size());

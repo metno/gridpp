@@ -3,7 +3,6 @@
 #include "../ParameterFile/ParameterFile.h"
 #include <gtest/gtest.h>
 #include <boost/assign/list_of.hpp>
-#include <boost/uuid/uuid.hpp>
 
 namespace {
    class ParameterFileTest : public ::testing::Test {

@@ -2,10 +2,10 @@
 #define DOWNSCALER_H
 #include <string>
 #include <map>
-#include <boost/uuid/uuid.hpp>
 #include "../Options.h"
 #include "../Variable.h"
 #include "../Scheme.h"
+#include "../Uuid.h"
 class File;
 typedef std::vector<std::vector<int> > vec2Int;
 
@@ -43,7 +43,7 @@ class Downscaler : public Scheme {
       static bool isCached(const File& iFrom, const File& iTo);
       static void addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ);
       static bool getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-      static std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
+      static std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
 };
 #include "NearestNeighbour.h"
 #include "Gradient.h"

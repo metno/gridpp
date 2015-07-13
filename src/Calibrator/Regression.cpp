@@ -71,9 +71,6 @@ Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) c
 
    double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
-   std::vector<float> obs, mean;
-   obs.resize(data.size(), Util::MV);
-   mean.resize(data.size(), Util::MV);
    float totalObs = 0;
    float totalForecast = 0;
    float totalForecast2 = 0;
@@ -105,7 +102,7 @@ Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) c
    float meanForecast2 = totalForecast2 / counter;
    float meanObsForecast = totalObsForecast / counter;
    if(mOrder == 0) {
-      values.push_back(totalObs);
+      values.push_back(meanObs);
    }
    else if(mOrder == 1) {
       float intercept;

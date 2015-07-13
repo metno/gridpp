@@ -4,11 +4,6 @@
 boost::variate_generator<boost::mt19937, boost::uniform_01<> > TrainingData::mRand(boost::mt19937(0), boost::uniform_01<>());
 
 TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
-
-}
-
-std::vector<ObsEns> TrainingData::getData(int iOffset) const {
-   std::vector<ObsEns> data;
    if(mFilename != "") {
       std::cout << "Reading " << mFilename << std::endl;
       std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
@@ -18,7 +13,7 @@ std::vector<ObsEns> TrainingData::getData(int iOffset) const {
       int counter = 0;
       char line[10000];
       ifs.getline(line, 10000, '\n');
-      while(ifs.good() && data.size() < 10000) {
+      while(ifs.good() && mData.size() < 10000) {
          ifs.getline(line, 10000, '\n');
          if(ifs.good() && line[0] != '#') {
             std::stringstream ss(line);
@@ -26,22 +21,21 @@ std::vector<ObsEns> TrainingData::getData(int iOffset) const {
             std::vector<float> ens;
             int id, date, init, offset;
             float lat, lon, elev, obs;
-            ss >> id >> lat >> lon >> elev >> date >> init >> offset >> obs;
-            if(offset == iOffset) {
-               while(ss.good()) {
-                  float value;
-                  bool status  = ss >> value;
-                  if(status) {
-                     ens.push_back(value);
-                  }
+            // ss >> id >> lat >> lon >> elev >> date >> init >> offset >> obs;
+            ss >> lat >> lon >> elev >> offset >> obs;
+            while(ss.good()) {
+               float value;
+               bool status  = ss >> value;
+               if(status) {
+                  ens.push_back(value);
                }
-               ObsEns obsEns(obs, ens);
-               data.push_back(obsEns);
-               counter++;
             }
+            ObsEns obsEns(obs, ens);
+            mData[offset].push_back(obsEns);
+            counter++;
          }
       }
-      std::cout << "Found " << data.size() << " rows" << std::endl;
+      std::cout << "Found " << counter << " rows" << std::endl;
    }
    else {
       for(int t = 0; t < 1000; t++) {
@@ -51,10 +45,14 @@ std::vector<ObsEns> TrainingData::getData(int iOffset) const {
             ens[j] = getRand();
          }
          ObsEns obsEns(obs, ens);
-         data.push_back(obsEns);
+         mData[0].push_back(obsEns);
       }
    }
-   return data;
+}
+
+std::vector<ObsEns> TrainingData::getData(int iOffset) const {
+   std::map<int, std::vector<ObsEns> >::const_iterator it = mData.find(iOffset);
+   return it->second;
 }
 
 float TrainingData::getRand() {
@@ -63,4 +61,13 @@ float TrainingData::getRand() {
       return 0;
    else
       return (value-0.1)*5;
+}
+
+std::vector<int> TrainingData::getOffsets() const {
+   std::vector<int> offsets;
+   std::map<int, std::vector<ObsEns> >::const_iterator it;
+   for(it = mData.begin(); it != mData.end(); it++) {
+      offsets.push_back(it->first);
+   }
+   return offsets;
 }

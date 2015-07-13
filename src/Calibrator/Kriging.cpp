@@ -266,6 +266,42 @@ float CalibratorKriging::calcWeight(const Location& loc1, const Location& loc2) 
    return weight;
 }
 
+Parameters CalibratorKriging::train(const TrainingData& iData, int iOffset) const {
+   double timeStart = Util::clock();
+   std::vector<ObsEns> data = iData.getData(iOffset);
+   float totalBias = 0;
+   int counter = 0;
+   // Compute predictors in model
+   for(int i = 0; i < data.size(); i++) {
+      float obs = data[i].first;
+      std::vector<float> ens = data[i].second;
+      float mean = Util::calculateStat(ens, Util::StatTypeMean);
+      if(Util::isValid(obs) && Util::isValid(mean)) {
+         totalBias += obs - mean;
+         counter++;
+      }
+   }
+
+   float bias = 0;
+   if(counter <= 0) {
+      std::stringstream ss;
+      ss << "CalibratorKriging: No valid data, no correction will be made.";
+      Util::warning(ss.str());
+      bias = 0;
+   }
+   else {
+      bias = totalBias / counter;
+   }
+
+   std::vector<float> values;
+   values.push_back(bias);
+   Parameters par(values);
+
+   double timeEnd = Util::clock();
+   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   return par;
+}
+
 std::string CalibratorKriging::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c kriging","Spreads bias in space by using optimal interpolation. A parameter file is required, which must have one column with the bias.")<< std::endl;

@@ -120,6 +120,38 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    return true;
 }
 
+Parameters CalibratorQq::train(const TrainingData& iData, int iOffset) const {
+   double timeStart = Util::clock();
+   std::vector<ObsEns> data = iData.getData(iOffset);
+   std::vector<float> obs, mean;
+   std::vector<float> values;
+   values.reserve(2*data.size());
+   int counter = 0;
+   // Compute predictors in model
+   for(int i = 0; i < data.size(); i++) {
+      float obs = data[i].first;
+      std::vector<float> ens = data[i].second;
+      float mean = Util::calculateStat(ens, Util::StatTypeMean);
+      if(Util::isValid(obs) && Util::isValid(mean)) {
+         values.push_back(obs);
+         values.push_back(mean);
+         counter++;
+      }
+   }
+
+   if(counter <= 0) {
+      std::stringstream ss;
+      ss << "CalibratorQq: No valid data, no correction will be made.";
+      Util::warning(ss.str());
+   }
+
+   Parameters par(values);
+
+   double timeEnd = Util::clock();
+   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   return par;
+}
+
 std::string CalibratorQq::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c qq", "Quantile-quantile mapping. Calibrates forecasts based on a map of sorted observations and sorted forecasts. For a given raw forecast, the quantile within the historical forecasts is found. Then the observation at the same quantile is used as the calibrated forecast. A parameter file is required with an even number of columns as follows") << std::endl;

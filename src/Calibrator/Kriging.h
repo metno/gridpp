@@ -15,6 +15,7 @@ class CalibratorKriging : public Calibrator {
          TypeCressman = 10,
          TypeBarnes   = 20
       };
+      Parameters train(const TrainingData& iData, int iOffset) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
 

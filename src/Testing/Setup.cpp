@@ -33,8 +33,8 @@ namespace {
       EXPECT_EQ(Variable::T,  setup.variableConfigurations[0].variable);
       EXPECT_EQ(1,            setup.variableConfigurations[0].calibrators.size());
       EXPECT_EQ("zaga",       setup.variableConfigurations[0].calibrators[0]->name());
-      EXPECT_EQ("text",       setup.variableConfigurations[0].calibrators[0]->getParameterFile()->name());
-      EXPECT_EQ("testing/files/parameters.txt",       setup.variableConfigurations[0].calibrators[0]->getParameterFile()->getFilename());
+      EXPECT_EQ("text",       setup.variableConfigurations[0].parameterFileCalibrators[0]->name());
+      EXPECT_EQ("testing/files/parameters.txt",       setup.variableConfigurations[0].parameterFileCalibrators[0]->getFilename());
    }
    TEST(SetupTest, repeatVariable) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -v T -d smart -c neighbourhood"));

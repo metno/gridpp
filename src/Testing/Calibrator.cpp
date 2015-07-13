@@ -109,8 +109,7 @@ namespace {
    TEST_F(TestCalibrator, factoryZaga) {
       {
          Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
-         c = Calibrator::getScheme("zaga", parFile, Options("variable=T popThreshold=0.24 outputPop=1 fracThreshold=0.34 neighbourhoodSize=24 maxEnsMean=90"));
+         c = Calibrator::getScheme("zaga", Options("variable=T popThreshold=0.24 outputPop=1 fracThreshold=0.34 neighbourhoodSize=24 maxEnsMean=90"));
          EXPECT_TRUE(c);
          EXPECT_EQ("zaga", c->name());
          EXPECT_FLOAT_EQ(0.24, ((CalibratorZaga*) c)->getPopThreshold());
@@ -122,8 +121,7 @@ namespace {
       }
       {
          Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
-         c = Calibrator::getScheme("zaga", parFile, Options("variable=T popThreshold=-0.12 outputPop=0 fracThreshold=-0.92 neighbourhoodSize=6 maxEnsMean=40"));
+         c = Calibrator::getScheme("zaga", Options("variable=T popThreshold=-0.12 outputPop=0 fracThreshold=-0.92 neighbourhoodSize=6 maxEnsMean=40"));
          EXPECT_TRUE(c);
          EXPECT_EQ("zaga", c->name());
          EXPECT_FLOAT_EQ(-0.12, ((CalibratorZaga*) c)->getPopThreshold());
@@ -136,22 +134,21 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryNeighbourhood) {
       Calibrator* c;
-      c = Calibrator::getScheme("neighbourhood", NULL, Options("variable=Precip radius=3"));
+      c = Calibrator::getScheme("neighbourhood", Options("variable=Precip radius=3"));
       EXPECT_TRUE(c);
       EXPECT_EQ("neighbourhood", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryQc) {
       Calibrator* c;
-      c = Calibrator::getScheme("qc", NULL, Options("variable=Precip m3"));
+      c = Calibrator::getScheme("qc", Options("variable=Precip m3"));
       EXPECT_TRUE(c);
       EXPECT_EQ("qc", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryPhase) {
       Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersPhase.txt"));
-      c = Calibrator::getScheme("phase", parFile, Options("variable=Precip minPrecip=0.771 useWetbulb=0"));
+      c = Calibrator::getScheme("phase", Options("variable=Precip minPrecip=0.771 useWetbulb=0"));
       EXPECT_TRUE(c);
       EXPECT_EQ("phase", c->name());
       EXPECT_FLOAT_EQ(0.771, ((CalibratorPhase*) c)->getMinPrecip());
@@ -160,64 +157,56 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryRegression) {
       Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/regression1order.txt"));
-      c = Calibrator::getScheme("regression", parFile, Options("variable=Precip"));
+      c = Calibrator::getScheme("regression", Options("variable=Precip"));
       EXPECT_TRUE(c);
       EXPECT_EQ("regression", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryQnh) {
       Calibrator* c;
-      c = Calibrator::getScheme("qnh", NULL, Options("variable=Precip"));
+      c = Calibrator::getScheme("qnh", Options("variable=Precip"));
       EXPECT_TRUE(c);
       EXPECT_EQ("qnh", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryWindow) {
       Calibrator* c;
-      c = Calibrator::getScheme("window", NULL, Options("variable=Precip radius=2 stat=quantile quantile=0.5"));
+      c = Calibrator::getScheme("window", Options("variable=Precip radius=2 stat=quantile quantile=0.5"));
       EXPECT_TRUE(c);
       EXPECT_EQ("window", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryKriging) {
       Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("metnoKalman", Options("file=testing/files/kalmanOutput.txt"));
-      c = Calibrator::getScheme("kriging", parFile, Options("variable=Precip radius=100 maxElevDiff=100 efoldDist=2"));
+      c = Calibrator::getScheme("kriging", Options("variable=Precip radius=100 maxElevDiff=100 efoldDist=2"));
       EXPECT_TRUE(c);
       EXPECT_EQ("kriging", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryQq) {
       Calibrator* c;
-         ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersQq.txt"));
-      c = Calibrator::getScheme("qq", parFile, Options("variable=Precip"));
+      c = Calibrator::getScheme("qq", Options("variable=Precip"));
       EXPECT_TRUE(c);
       EXPECT_EQ("qq", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryValid) {
-      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
-      Calibrator::getScheme("zaga", parFile, Options("variable=T"));
-      Calibrator::getScheme("zaga", parFile, Options("variable=Precip variable=T"));
-      Calibrator::getScheme("neighbourhood", parFile, Options("variable=Precip variable=T"));
+      Calibrator::getScheme("zaga", Options("variable=T"));
+      Calibrator::getScheme("zaga", Options("variable=Precip variable=T"));
+      Calibrator::getScheme("neighbourhood", Options("variable=Precip variable=T"));
    }
    TEST_F(TestCalibrator, factoryInvalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
-      EXPECT_DEATH(Calibrator::getScheme("zaga", NULL, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("zaga", parFile, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("zaga", NULL, Options("variable=T")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("cloud", NULL, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("neighbourhood", NULL, Options("radius=-2")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("phase", NULL, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("regression", NULL, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("regression", NULL, Options("variable=T")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("cloud", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("neighbourhood", Options("radius=-2")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
       parFile = ParameterFile::getScheme("text", Options("file=testing/files/regression1order.txt"));
-      EXPECT_DEATH(Calibrator::getScheme("regression", parFile, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("qc", NULL, Options("")), ".*");
-      EXPECT_DEATH(Calibrator::getScheme("window", NULL, Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("qc", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("window", Options("")), ".*");
    }
 }
 int main(int argc, char **argv) {

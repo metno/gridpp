@@ -29,7 +29,7 @@ namespace {
             return parFile;
          }
          CalibratorPhase getCalibrator(ParameterFile* parFile) {
-            return CalibratorPhase(parFile, Options());
+            return CalibratorPhase(Options());
          }
          void setValues(const File& iFile, float iPrecip, float iTemp, float iRh, float iPressure) {
             FieldPtr precip   = iFile.getField(Variable::Precip, 0);
@@ -50,10 +50,10 @@ namespace {
       ASSERT_EQ(2, parameters.size());
       EXPECT_FLOAT_EQ(273.7, parameters[0]);
       EXPECT_FLOAT_EQ(274.7, parameters[1]);
-      CalibratorPhase cal = getCalibrator(&parFile);
+      CalibratorPhase cal = CalibratorPhase(Options());
       cal.setUseWetbulb(true);
 
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       FieldPtr phase    = file.getField(Variable::Phase, 0);
       FieldPtr precip   = file.getField(Variable::Precip, 0);
       FieldPtr temp     = file.getField(Variable::T, 0);
@@ -69,52 +69,52 @@ namespace {
       FileFake file(1,1,1,1);
       FieldPtr phase = file.getField(Variable::Phase, 0);
       ParameterFileSimple parFile = getParameterFile(273.7,274.7);
-      CalibratorPhase cal = getCalibrator(&parFile);
+      CalibratorPhase cal = CalibratorPhase(Options());
       setValues(file, 5, 270, 0.95, 101325);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
 
       setValues(file, 5, 274, 0.98, 101325);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSleet, (*phase)(0,0,0));
 
       setValues(file, 0, 274, 0.5, 101325);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseNone, (*phase)(0,0,0));
 
       setValues(file, 5, 275, 0.5, 101325);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, useWetbulb) {
       FileFake file(1,1,1,1);
       FieldPtr phase = file.getField(Variable::Phase, 0);
       ParameterFileSimple parFile = getParameterFile(273.7,274.7);
-      CalibratorPhase cal = getCalibrator(&parFile);
+      CalibratorPhase cal = CalibratorPhase(Options());
       setValues(file, 5, 275, 0.5, 101325);
 
       cal.setUseWetbulb(false);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseRain, (*phase)(0,0,0));
 
       cal.setUseWetbulb(true);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
 
       setValues(file, 5, 274, 0.5, 101325);
       cal.setUseWetbulb(false);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSleet, (*phase)(0,0,0));
       cal.setUseWetbulb(true);
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, missingParameters) {
       FileArome file("testing/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(Util::MV,1.5);
-      CalibratorPhase cal = getCalibrator(&parFile);
+      CalibratorPhase cal = CalibratorPhase(Options());
 
-      cal.calibrate(file);
+      cal.calibrate(file, &parFile);
       FieldPtr phase = file.getField(Variable::Phase, 0);
       for(int i = 0; i < file.getNumLat(); i++) {
          for(int j = 0; j < file.getNumLon(); j++) {

@@ -34,16 +34,13 @@ namespace {
             ParameterFileSimple parFile(getParameters(a1, a2, a3, a4, a5, a6, a7, a8, a9));
             return parFile;
          }
-         CalibratorWindDirection getCalibrator(ParameterFile* parFile) {
-            return CalibratorWindDirection(parFile, Variable::T, Options());
-         }
    };
    TEST_F(TestCalibratorWindDirection, getFactor) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
       ParameterFileSimple parFile = getParameterFile(1,0,0,0,0,0,0,0,0);
-      CalibratorWindDirection cal = getCalibrator(&parFile);
+      CalibratorWindDirection cal(Variable::T, Options());
       Parameters par = parFile.getParameters(0);
 
       EXPECT_FLOAT_EQ(1, cal.getFactor(0, par));
@@ -53,7 +50,6 @@ namespace {
       EXPECT_FLOAT_EQ(1, cal.getFactor(270, par));
 
       parFile = getParameterFile(1,0,1,0,0,0,0,0,0);
-      cal = getCalibrator(&parFile);
       par = parFile.getParameters(0);
 
       EXPECT_FLOAT_EQ(2, cal.getFactor(0, par));
@@ -63,7 +59,6 @@ namespace {
       EXPECT_FLOAT_EQ(1, cal.getFactor(270, par));
 
       parFile = getParameterFile(1,1,0.5,0,0,0,0,0,0);
-      cal = getCalibrator(&parFile);
       par = parFile.getParameters(0);
 
       EXPECT_FLOAT_EQ(1.5, cal.getFactor(0, par));
@@ -78,7 +73,7 @@ namespace {
 
       // Test that getFactor does not give negative values
       ParameterFileSimple parFile = getParameterFile(1,2,3,0,0,0,0,0,0);
-      CalibratorWindDirection cal = getCalibrator(&parFile);
+      CalibratorWindDirection cal(Variable::T, Options());
       Parameters par = parFile.getParameters(0);
       for(int dir = 0; dir <= 360; dir = dir + 15) {
          EXPECT_GE(cal.getFactor(dir, par), 0);
@@ -86,7 +81,6 @@ namespace {
 
       // Test that getFactor returns invalid factor when parameters are invalid
       parFile = getParameterFile(1,2,3,0,0,0,Util::MV,0,0);
-      cal = getCalibrator(&parFile);
       par = parFile.getParameters(0);
       for(int dir = 0; dir <= 360; dir = dir + 15) {
          EXPECT_FLOAT_EQ(Util::MV, cal.getFactor(dir, par));

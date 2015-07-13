@@ -23,8 +23,7 @@ namespace {
    // 1 5 5 140 -5.4
    // 1 0 0 150  4
    TEST_F(TestCalibratorKriging, calcWeight) {
-      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
-      CalibratorKriging cal = CalibratorKriging(Variable::T, parFile, Options("radius=300000 maxElevDiff=100 efoldDist=200000"));
+      CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=300000 maxElevDiff=100 efoldDist=200000"));
       EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(60,10,100),Location(61,10,100)));
       EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(61,10,100),Location(60,10,100)));
       EXPECT_FLOAT_EQ(0.28969184, cal.calcWeight(Location(60,10,100),Location(62,10,100)));
@@ -53,7 +52,7 @@ namespace {
       FileArome from("testing/files/10x10.nc");
       // Kriging when each observation only affects one grid point at a time (radius 1m)
       ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
-      CalibratorKriging cal = CalibratorKriging(Variable::T, parFile, Options("radius=1 maxElevDiff=100 efoldDist=200000"));
+      CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=1 maxElevDiff=100 efoldDist=200000"));
 
       // Prior to kriging
       FieldPtr field0 = from.getField(Variable::T, 0);
@@ -64,7 +63,7 @@ namespace {
       EXPECT_FLOAT_EQ(283.9548,  (*field1)(0,0,0));
 
       // After kriging
-      cal.calibrate(from);
+      cal.calibrate(from, parFile);
       FieldPtr after0 = from.getField(Variable::T, 0);
       FieldPtr after1 = from.getField(Variable::T, 1);
       EXPECT_NEAR(307.19666,     (*after0)(5,5,0), 1e-3); // Same lat/lon, diff elev. Bias = 1*0.9992003 * 4.2
@@ -79,7 +78,7 @@ namespace {
          FileArome from("testing/files/10x10.nc");
          CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=120000 efoldDist=2e10 maxElevDiff=1000 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
-         cal.calibrate(from);
+         cal.calibrate(from, parFile);
          FieldPtr after0 = from.getField(Variable::T, 0);
          FieldPtr after1 = from.getField(Variable::T, 1);
 
@@ -105,7 +104,7 @@ namespace {
          FileArome from("testing/files/10x10.nc");
          CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=0 efoldDist=2e10 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
-         cal.calibrate(from);
+         cal.calibrate(from, parFile);
          FieldPtr after0 = from.getField(Variable::T, 0);
          FieldPtr after1 = from.getField(Variable::T, 1);
 
@@ -124,7 +123,7 @@ namespace {
       FileArome from("testing/files/10x10.nc");
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=1 maxElevDiff=1000 efoldDist=1e10 auxVariable=Precip range=0,1 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
-      cal.calibrate(from);
+      cal.calibrate(from, parFile);
       FieldPtr after0 = from.getField(Variable::T, 0);
       EXPECT_NEAR(307.2,   (*after0)(5,5,0), 1e-3); // Bias should be 4.2, and precip is < 1.
       EXPECT_FLOAT_EQ(310, (*after0)(5,4,0)); // Precip is above 1 so correction should be off
@@ -133,38 +132,28 @@ namespace {
    }
    */
    TEST_F(TestCalibratorKriging, valid) {
-      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
-      CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=100 efoldDist=2"));
-      CalibratorKriging(Variable::T, parFile, Options("maxElevDiff=100 efoldDist=2"));
-      CalibratorKriging(Variable::T, parFile, Options("radius=100 efoldDist=2"));
-      CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=100"));
-      CalibratorKriging(Variable::T, parFile, Options(""));
-      CalibratorKriging(Variable::T, parFile, Options("radius=0"));
-      CalibratorKriging(Variable::T, parFile, Options("maxElevDiff=0"));
-      CalibratorKriging(Variable::T, parFile, Options("efoldDist=0"));
-      CalibratorKriging(Variable::T, parFile, Options("efoldDist=0"));
-      parFile = ParameterFile::getScheme("metnoKalman", Options("file=testing/files/kalmanOutput.txt"));
-      CalibratorKriging(Variable::T, parFile, Options("efoldDist=0"));
-      CalibratorKriging(Variable::T, parFile, Options("efoldDist=0 operator=additive"));
-      CalibratorKriging(Variable::T, parFile, Options("efoldDist=0 operator=multiplicative"));
+      CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=100 efoldDist=2"));
+      CalibratorKriging(Variable::T, Options("maxElevDiff=100 efoldDist=2"));
+      CalibratorKriging(Variable::T, Options("radius=100 efoldDist=2"));
+      CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=100"));
+      CalibratorKriging(Variable::T, Options(""));
+      CalibratorKriging(Variable::T, Options("radius=0"));
+      CalibratorKriging(Variable::T, Options("maxElevDiff=0"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=additive"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=multiplicative"));
    }
    TEST_F(TestCalibratorKriging, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(CalibratorKriging(Variable::T, NULL, Options("")), ".*");
       // Negative values
-      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
-      EXPECT_DEATH(CalibratorKriging(Variable::T, parFile, Options("radius=-1 maxElevDiff=100 efoldDist=2")), ".*");
-      EXPECT_DEATH(CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=-1 efoldDist=2")), ".*");
-      EXPECT_DEATH(CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=-100 efoldDist=-1")), ".*");
-      EXPECT_DEATH(CalibratorKriging(Variable::T, NULL, Options("radius=100 maxElevDiff=-100 efoldDist=2")), ".*");
-
-      // Invalid fileType
-      parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
-      EXPECT_DEATH(CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=100 efoldDist=2")), ".*");
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=-1 maxElevDiff=100 efoldDist=2")), ".*");
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=-1 efoldDist=2")), ".*");
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=-100 efoldDist=-1")), ".*");
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=-100 efoldDist=2")), ".*");
 
       // Invalid operator
-      EXPECT_DEATH(CalibratorKriging(Variable::T, parFile, Options("radius=100 maxElevDiff=100 efoldDist=2 operator=nonvalidOperator")), ".*");
+      EXPECT_DEATH(CalibratorKriging(Variable::T, Options("radius=100 maxElevDiff=100 efoldDist=2 operator=nonvalidOperator")), ".*");
    }
    TEST_F(TestCalibratorKriging, description) {
       CalibratorKriging::description();

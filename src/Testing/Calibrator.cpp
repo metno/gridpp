@@ -155,6 +155,13 @@ namespace {
       EXPECT_FALSE(((CalibratorPhase*) c)->getUseWetbulb());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryGaussian) {
+      Calibrator* c;
+      c = Calibrator::getScheme("gaussian", Options("variable=Precip"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("gaussian", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryRegression) {
       Calibrator* c;
       c = Calibrator::getScheme("regression", Options("variable=Precip"));

@@ -37,6 +37,14 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable), iOptions);
       return c;
    }
+   else if(iName == "gaussian") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'gaussian' needs variable");
+      }
+      CalibratorGaussian* c = new CalibratorGaussian(Variable::getType(variable), iOptions);
+      return c;
+   }
    else if(iName == "neighbourhood") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {

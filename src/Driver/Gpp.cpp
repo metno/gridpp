@@ -67,6 +67,7 @@ void writeUsage() {
    std::cout << CalibratorPhase::description();
    std::cout << CalibratorRegression::description();
    std::cout << CalibratorKriging::description();
+   std::cout << CalibratorGaussian::description();
    std::cout << std::endl;
    std::cout << "Parameter formats with Options (and default values)" << std::endl;
    std::cout << ParameterFileText::description();

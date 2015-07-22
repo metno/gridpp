@@ -40,6 +40,7 @@ class Calibrator : public Scheme {
 // #include "Wind.h"
 #include "Temperature.h"
 #include "Accumulate.h"
+#include "Gaussian.h"
 #include "Neighbourhood.h"
 #include "Qc.h"
 #include "Qnh.h"

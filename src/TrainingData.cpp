@@ -22,17 +22,23 @@ TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
             int id, date, init, offset;
             float lat, lon, elev, obs;
             // ss >> id >> lat >> lon >> elev >> date >> init >> offset >> obs;
-            ss >> lat >> lon >> elev >> offset >> obs;
+            ss >> offset >> lat >> lon >> elev >> obs;
+            bool isValid = Util::isValid(obs);
             while(ss.good()) {
                float value;
                bool status  = ss >> value;
+               if(!Util::isValid(value)) {
+                  isValid = false;
+               }
                if(status) {
                   ens.push_back(value);
                }
             }
-            ObsEns obsEns(obs, ens);
-            mData[offset].push_back(obsEns);
-            counter++;
+            if(isValid) {
+               ObsEns obsEns(obs, ens);
+               mData[offset].push_back(obsEns);
+               counter++;
+            }
          }
       }
       std::cout << "Found " << counter << " rows" << std::endl;
@@ -52,7 +58,13 @@ TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
 
 std::vector<ObsEns> TrainingData::getData(int iOffset) const {
    std::map<int, std::vector<ObsEns> >::const_iterator it = mData.find(iOffset);
-   return it->second;
+   if(it == mData.end()) {
+      std::vector<ObsEns> empty;
+      return empty;
+   }
+   else {
+      return it->second;
+   }
 }
 
 float TrainingData::getRand() {

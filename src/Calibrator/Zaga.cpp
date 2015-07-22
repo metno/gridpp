@@ -367,6 +367,10 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, const Parameters& iP
 Parameters CalibratorZaga::train(const TrainingData& iData, int iOffset) const {
    double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
+   if(data.size() == 0) {
+      std::cout << "No data to train on...";
+      return Parameters();
+   }
    std::vector<float> obs, mean, frac;
    obs.resize(data.size(), Util::MV);
    mean.resize(data.size(), Util::MV);

@@ -35,10 +35,12 @@ int main(int argc, const char *argv[]) {
    SetupTrain setup(args);
 
    Variable::Type variable = Variable::T;
+   std::vector<int> offsets = setup.trainingData->getOffsets();
 
-   for(int i = 6; i < 12; i += 6) {
-      Parameters par = setup.method->train(*setup.trainingData, i);
-      std::cout << "Parameters time " << i << ":";
+   for(int i = 0; i < offsets.size(); i++) {
+      int offset = offsets[i];
+      Parameters par = setup.method->train(*setup.trainingData, offset);
+      std::cout << "Calculating parameters for offset=" << i << ": ";
       for(int k = 0; k < par.size(); k++) {
          std::cout << " " << par[k];
       }

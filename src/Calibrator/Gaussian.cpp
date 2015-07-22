@@ -218,6 +218,10 @@ float CalibratorGaussian::getPdf(float iThreshold, float iEnsMean, float iEnsSpr
 Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) const {
    double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
+   if(data.size() == 0) {
+      std::cout << "No data to train on...";
+      return Parameters();
+   }
    std::vector<float> obs, mean, spread;
    obs.resize(data.size(), Util::MV);
    mean.resize(data.size(), Util::MV);
@@ -278,6 +282,12 @@ Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) con
 
       double size = gsl_multimin_fminimizer_size (s);
       status = gsl_multimin_test_size (size, mLogLikelihoodTolerance);
+      /*
+      for(int i = 0; i < 4; i++) {
+         std::cout << gsl_vector_get (s->x, i) << " ";
+      }
+      std::cout << std::endl;
+      */
 
    }
    while (status == GSL_CONTINUE && iter < 5000);
@@ -295,8 +305,8 @@ Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) con
    Parameters par(values);
 
    double timeEnd = Util::clock();
-   std::cout << "Time: " << timeEnd - timeStart << std::endl;
-   std::cout << "Iterations: " << iter << std::endl;
+   std::cout << "Computation time: " << timeEnd - timeStart << std::endl;
+   std::cout << "Num of iterations: " << iter << std::endl;
    return par;
 }
 
@@ -320,6 +330,7 @@ double CalibratorGaussian::my_f(const gsl_vector *v, void *params) {
    float total = 0;
    for(int n = 0; n < N; n++) {
       float pdf = getPdf(obs[n], mean[n], spread[n], par);
+      // std::cout << "   " << obs[n] << " " << mean[n] << std::endl;
       if(pdf == 0 || !Util::isValid(pdf))
          pdf = 0.00001;
       assert(pdf > 0);

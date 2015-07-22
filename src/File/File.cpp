@@ -304,6 +304,25 @@ bool File::setLons(vec2 iLons) {
    if(mLons != iLons)
       createNewTag();
    mLons = iLons;
+   for(int i = 0; i < mLons.size(); i++) {
+      for(int j = 0; j < mLons[i].size(); j++) {
+         float lon = mLons[i][j];
+         if(Util::isValid(lon)) {
+            // Ensure lon is between -180 and 180
+            int sign = lon / fabs(lon);
+            lon = fabs(lon);
+            lon = fmod(lon,360); // lon is between 0 and 360
+            lon = sign * lon; // lon is between -360 and 306
+            if(lon > 180)
+               lon = lon - 360;
+            else if(lon < -180)
+               lon = lon + 360;
+            mLons[i][j] = lon;
+            assert(mLons[i][j] >= -180.0001 && mLons[i][j] <= 180.0001);
+         }
+      }
+   }
+
    return true;
 }
 bool File::setElevs(vec2 iElevs) {

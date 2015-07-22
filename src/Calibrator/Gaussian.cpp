@@ -131,13 +131,11 @@ float CalibratorGaussian::getInvCdf(float iQuantile, float iEnsMean, float iEnsS
          return Util::MV;
    }
 
-   float mua = iParameters[0];
-   float mub = iParameters[1];
-   float sa  = iParameters[2];
-   float sb  = iParameters[3];
+   float sa  = iParameters[0];
+   float sb  = iParameters[1];
 
    // Compute parameters of distribution (in same way as done in gamlss in R)
-   float mu    = mua + mub * iEnsMean;
+   float mu    = iEnsMean;
    float sigma = exp(sa  + sb * iEnsSpread);
 
    if(mu <= 0 || sigma <= 0)
@@ -164,13 +162,11 @@ float CalibratorGaussian::getCdf(float iThreshold, float iEnsMean, float iEnsSpr
          return Util::MV;
    }
 
-   float mua = iParameters[0];
-   float mub = iParameters[1];
-   float sa  = iParameters[2];
-   float sb  = iParameters[3];
+   float sa  = iParameters[0];
+   float sb  = iParameters[1];
 
    // Compute parameters of distribution (in same way as done in gamlss in R)
-   float mu    = mua + mub * iEnsMean;
+   float mu    = iEnsMean;
    float sigma = exp(sa + sb * iEnsSpread);
 
    if(mu <= 0 || sigma <= 0)
@@ -196,13 +192,11 @@ float CalibratorGaussian::getCdf(float iThreshold, float iEnsMean, float iEnsSpr
 }
 
 float CalibratorGaussian::getPdf(float iThreshold, float iEnsMean, float iEnsSpread, const Parameters& iParameters) {
-   float mua = iParameters[0];
-   float mub = iParameters[1];
-   float sa  = iParameters[2];
-   float sb  = iParameters[3];
+   float sa  = iParameters[0];
+   float sb  = iParameters[1];
 
    // Compute parameters of distribution (in same way as done in gamlss in R)
-   float mu    = mua + mub * iEnsMean;
+   float mu    = iEnsMean;
    float sigma = exp(sa + sb * iEnsSpread);
 
    if(mu <= 0 || sigma <= 0)
@@ -216,7 +210,6 @@ float CalibratorGaussian::getPdf(float iThreshold, float iEnsMean, float iEnsSpr
 }
 
 Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) const {
-   double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
    if(data.size() == 0) {
       std::cout << "No data to train on...";
@@ -256,20 +249,18 @@ Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) con
    */
 
    gsl_multimin_function my_func;
-   my_func.n = 4;
+   my_func.n = mNumParameters;
    my_func.f = &CalibratorGaussian::my_f;
    my_func.params = (void *)p;
 
    // Initialize parameters
-   gsl_vector* x = gsl_vector_alloc (4);
+   gsl_vector* x = gsl_vector_alloc (mNumParameters);
    gsl_vector_set (x, 0, 0);
    gsl_vector_set (x, 1, 1);
-   gsl_vector_set (x, 2, 0);
-   gsl_vector_set (x, 3, 1);
 
    const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-   gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 4);
-   gsl_vector *ss = gsl_vector_alloc (4);
+   gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, mNumParameters);
+   gsl_vector *ss = gsl_vector_alloc (mNumParameters);
    gsl_vector_set_all (ss, 0.01);
    gsl_multimin_fminimizer_set (s, &my_func, x, ss);
 
@@ -292,8 +283,8 @@ Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) con
    }
    while (status == GSL_CONTINUE && iter < 5000);
 
-   std::vector<float> values(4,0);
-   for(int i = 0; i < 4; i++) {
+   std::vector<float> values(mNumParameters,0);
+   for(int i = 0; i < mNumParameters; i++) {
       values[i] = gsl_vector_get (s->x, i);
    }
 
@@ -304,8 +295,6 @@ Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) con
 
    Parameters par(values);
 
-   double timeEnd = Util::clock();
-   std::cout << "Computation time: " << timeEnd - timeStart << std::endl;
    std::cout << "Num of iterations: " << iter << std::endl;
    return par;
 }
@@ -320,12 +309,10 @@ double CalibratorGaussian::my_f(const gsl_vector *v, void *params) {
    double* spread = p + 1 + 2*N;
 
    const double* arr = gsl_vector_const_ptr(v, 0);
-   std::vector<float> vec(arr, arr+4);
+   std::vector<float> vec(arr, arr+mNumParameters);
    Parameters par(vec);
-   float mua = gsl_vector_get(v, 0);
-   float mub = gsl_vector_get(v, 1);
-   float sa  = gsl_vector_get(v, 2);
-   float sb  = gsl_vector_get(v, 3);
+   float sa  = gsl_vector_get(v, 0);
+   float sb  = gsl_vector_get(v, 1);
 
    float total = 0;
    for(int n = 0; n < N; n++) {
@@ -408,9 +395,9 @@ void CalibratorGaussian::my_fdf(const gsl_vector *x, void *params, double *f, gs
 std::string CalibratorGaussian::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c gaussian", "Calibrates an ensemble using a Gaussian distribution, suitable for parameters like temperature. The distribution has two parameters:") << std::endl;
-   ss << Util::formatDescription("", "* mean  = a + b * ensmean") << std::endl;
-   ss << Util::formatDescription("", "* sigma = exp(c + d * ensspread)") << std::endl;
-   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensspread is the standard deviation of members. The parameter set must contain 8 columns with the values [a b c d].") << std::endl;
+   ss << Util::formatDescription("", "* mean  = ensmean") << std::endl;
+   ss << Util::formatDescription("", "* sigma = exp(a + b * ensspread)") << std::endl;
+   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensspread is the standard deviation of members. The parameter set must contain 8 columns with the values [a b].") << std::endl;
    ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
    return ss.str();
 }

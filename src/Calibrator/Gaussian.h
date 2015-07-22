@@ -32,5 +32,6 @@ class CalibratorGaussian : public Calibrator {
       Variable::Type mMainPredictor;
       int  mNeighbourhoodSize;
       float mLogLikelihoodTolerance;
+      static const int mNumParameters = 2;
 };
 #endif

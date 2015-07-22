@@ -365,7 +365,6 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, const Parameters& iP
 }
 
 Parameters CalibratorZaga::train(const TrainingData& iData, int iOffset) const {
-   double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
    if(data.size() == 0) {
       std::cout << "No data to train on...";
@@ -485,8 +484,6 @@ Parameters CalibratorZaga::train(const TrainingData& iData, int iOffset) const {
 
    Parameters par(values);
 
-   double timeEnd = Util::clock();
-   std::cout << "Time: " << timeEnd - timeStart << std::endl;
    std::cout << "Iterations: " << iter << std::endl;
    return par;
 }

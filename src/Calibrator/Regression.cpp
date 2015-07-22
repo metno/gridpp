@@ -69,7 +69,6 @@ Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) c
       Util::error(ss.str());
    }
 
-   double timeStart = Util::clock();
    std::vector<ObsEns> data = iData.getData(iOffset);
    float totalObs = 0;
    float totalForecast = 0;
@@ -124,11 +123,7 @@ Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) c
 
    Parameters par(values);
 
-   double timeEnd = Util::clock();
-   std::cout << "Time: " << timeEnd - timeStart << std::endl;
    return par;
-
-
 }
 
 std::string CalibratorRegression::description() {

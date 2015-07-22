@@ -39,7 +39,10 @@ int main(int argc, const char *argv[]) {
 
    for(int i = 0; i < offsets.size(); i++) {
       int offset = offsets[i];
+      double timeStart = Util::clock();
       Parameters par = setup.method->train(*setup.trainingData, offset);
+      double timeEnd = Util::clock();
+      std::cout << "Time: " << timeEnd - timeStart << std::endl;
       std::cout << "Calculating parameters for offset=" << i << ": ";
       for(int k = 0; k < par.size(); k++) {
          std::cout << " " << par[k];

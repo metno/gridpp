@@ -12,7 +12,6 @@ TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
       }
       int counter = 0;
       char line[10000];
-      ifs.getline(line, 10000, '\n');
       while(ifs.good() && mData.size() < 10000) {
          ifs.getline(line, 10000, '\n');
          if(ifs.good() && line[0] != '#') {

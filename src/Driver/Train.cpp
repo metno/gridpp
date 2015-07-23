@@ -48,7 +48,7 @@ int main(int argc, const char *argv[]) {
          std::cout << " " << par[k];
       }
       std::cout << std::endl;
-      setup.output->setParameters(par, i/6-1, Location(Util::MV, Util::MV, Util::MV));
+      setup.output->setParameters(par, offset, Location(Util::MV, Util::MV, Util::MV));
    }
 
    setup.output->write();

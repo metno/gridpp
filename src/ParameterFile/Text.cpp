@@ -10,10 +10,10 @@
 ParameterFileText::ParameterFileText(const Options& iOptions) : ParameterFile(iOptions),
       mIsSpatial(false) {
    std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
-   if(!ifs.good()) {
-      Util::error("Parameter file '" + getFilename() + "' does not exist");
-   }
    iOptions.getValue("spatial", mIsSpatial);
+   if(!ifs.good()) {
+      return;
+   }
    mNumParameters = Util::MV;
    int counter = 0;
    std::set<int> times;
@@ -118,7 +118,7 @@ void ParameterFileText::write() const {
 }
 void ParameterFileText::write(const std::string& iFilename) const {
    std::string filename = iFilename;
-   std::ofstream ofs(filename.c_str(), std::ios_base::out);
+   std::ofstream ofs(filename.c_str(), std::ios_base::trunc);
    if(!ofs.good()) {
       Util::error("Cannot write parameters to " + filename);
    }

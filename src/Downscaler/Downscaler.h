@@ -34,6 +34,8 @@ class Downscaler : public Scheme {
       //! @param iI I-index of nearest point. Set to Util::MV if no nearest neighbour.
       //! @param iJ J-index of nearest point. Set to Util::MV if no nearest neighbour.
       static void getNearestNeighbour(const File& iFrom, float iLon, float iLat, int& iI, int &iJ);
+
+      static std::string getDescriptions();
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
       Variable::Type mVariable;

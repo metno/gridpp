@@ -27,8 +27,8 @@ namespace {
          std::string standardNames = Variable::getStandardName(variables[i]);
       }
    }
-   TEST(VariableTest, description) {
-      Variable::description();
+   TEST(VariableTest, getDescriptions) {
+      Variable::getDescriptions();
    }
 }
 int main(int argc, char **argv) {

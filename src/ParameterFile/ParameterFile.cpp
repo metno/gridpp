@@ -169,3 +169,11 @@ std::string ParameterFile::getDescription(bool iSpatialOnly) {
 void ParameterFile::setFilename(std::string iFilename) {
    mFilename = iFilename;
 }
+
+std::string ParameterFile::getDescriptions() {
+   std::stringstream ss;
+   ss << ParameterFileText::description() << std::endl;
+   ss << ParameterFileMetnoKalman::description() << std::endl;
+   ss << ParameterFileNetcdf::description() << std::endl;
+   return ss.str();
+}

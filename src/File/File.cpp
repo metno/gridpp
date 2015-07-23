@@ -383,3 +383,12 @@ void File::setTimes(std::vector<double> iTimes) {
 std::vector<double> File::getTimes() const {
    return mTimes;
 }
+
+std::string File::getDescriptions() {
+   std::stringstream ss;
+   ss << FileArome::description();
+   ss << FileEc::description();
+   ss << FilePoint::description();
+   ss << FileNorcomQnh::description();
+   return ss.str();
+}

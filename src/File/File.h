@@ -74,6 +74,7 @@ class File {
       //! @ param iTimes vector of number of seconds since 1970-01-01 00:00:00 +00:00
       void setTimes(std::vector<double> iTimes);
       std::vector<double> getTimes() const;
+      static std::string getDescriptions();
    protected:
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;

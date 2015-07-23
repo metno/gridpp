@@ -30,6 +30,8 @@ class Calibrator : public Scheme {
       //! Returns the name of this calibrator
       virtual std::string name() const = 0;
 
+      static std::string getDescriptions();
+
       virtual Parameters train(const TrainingData& iData, int iOffset) const;
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;

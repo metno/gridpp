@@ -164,3 +164,20 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
 Parameters Calibrator::train(const TrainingData& iData, int iOffset) const {
    Util::error("Cannot train method. Not yet implemented.");
 }
+
+std::string Calibrator::getDescriptions() {
+   std::stringstream ss;
+   ss << CalibratorZaga::description() << std::endl;
+   ss << CalibratorCloud::description() << std::endl;
+   ss << CalibratorQc::description() << std::endl;
+   ss << CalibratorQq::description() << std::endl;
+   ss << CalibratorQnh::description() << std::endl;
+   ss << CalibratorAccumulate::description() << std::endl;
+   ss << CalibratorWindDirection::description() << std::endl;
+   ss << CalibratorNeighbourhood::description() << std::endl;
+   ss << CalibratorPhase::description() << std::endl;
+   ss << CalibratorRegression::description() << std::endl;
+   ss << CalibratorKriging::description() << std::endl;
+   ss << CalibratorGaussian::description() << std::endl;
+   return ss.str();
+}

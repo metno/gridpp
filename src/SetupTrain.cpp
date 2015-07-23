@@ -34,7 +34,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       if(state != ERROR)
          prevState = state;
       if(state == START) {
-         if(index < argv.size() && argv[index] == "-o") {
+         if(index < argv.size() && argv[index] == "-p") {
             state = OUTPUT;
             index++;
          }
@@ -47,14 +47,14 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             index++;
          }
          else {
-            errorMessage = "'-o', '-v', or '-c' reqired";
+            errorMessage = "'-p', '-v', or '-c' reqired";
             state = ERROR;
          }
       }
       else if(state == OUTPUT) {
          if(argv.size() <= index) {
-            // -o but nothing after it
-            errorMessage = "Nothing after '-o'";
+            // -p but nothing after it
+            errorMessage = "Nothing after '-p'";
             state = ERROR;
          }
          else {
@@ -63,9 +63,9 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             if(argv.size() <= index) {
                state = END;
             }
-            else if(argv[index] == "-o") {
+            else if(argv[index] == "-p") {
                state = ERROR;
-               errorMessage = "Duplicate '-o'";
+               errorMessage = "Duplicate '-p'";
             }
             else if(argv[index] == "-c") {
                state = METHOD;
@@ -88,9 +88,9 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = METHOD;
             index++;
          }
-         else if(argv[index] == "-o") {
+         else if(argv[index] == "-p") {
             state = ERROR;
-            errorMessage = "Duplicate '-o'";
+            errorMessage = "Duplicate '-p'";
          }
          else if(argv[index] == "-v") {
             state = VAR;
@@ -118,7 +118,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
                state = ERROR;
                errorMessage = "Duplicate '-c'";
             }
-            else if(argv[index] == "-o") {
+            else if(argv[index] == "-p") {
                state = OUTPUT;
                index++;
             }
@@ -135,7 +135,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
          if(argv.size() <= index) {
             state = END;
          }
-         else if(argv[index] == "-o") {
+         else if(argv[index] == "-p") {
             state = OUTPUT;
             index++;
          }
@@ -168,7 +168,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             else if(argv[index] == "-c") {
                state = METHOD;
             }
-            else if(argv[index] == "-o") {
+            else if(argv[index] == "-p") {
                state = OUTPUT;
             }
             else if(argv[index] == "-v") {

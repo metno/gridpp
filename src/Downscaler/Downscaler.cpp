@@ -311,3 +311,13 @@ void Downscaler::getNearestNeighbour(const File& iFrom, float iLon, float iLat, 
       }
    }
 }
+
+std::string Downscaler::getDescriptions() {
+   std::stringstream ss;
+   ss << DownscalerNearestNeighbour::description();
+   ss << DownscalerGradient::description();
+   ss << DownscalerSmart::description();
+   ss << DownscalerPressure::description();
+   ss << DownscalerBypass::description();
+   return ss.str();
+}

@@ -10,16 +10,28 @@
 #include "../SetupTrain.h"
 #include "../TrainingData.h"
 void writeUsage() {
-   std::cout << "Trains a method in gridpp" << std::endl;
+   std::cout << "Trains a calibration method in gridpp" << std::endl;
    std::cout << std::endl;
-   std::cout << "usage:  gridpp_train dataFile -o output [options] -c method [options] -v variable" << std::endl;
+   std::cout << "usage:  gridpp_train dataFile -p parameters [options] -c calibrator [options] -v variable" << std::endl;
    std::cout << std::endl;
    std::cout << "Arguments:" << std::endl;
    std::cout << Util::formatDescription("dataFile=required","Input text file with obs/forecast data. Must be in the following format:") << std::endl;
-   std::cout << Util::formatDescription("","<time> <lat> <lon> <elev> <obs> <fcst>") << std::endl;
-   std::cout << Util::formatDescription("-o output","Put parameters into this output file") << std::endl;
-   std::cout << Util::formatDescription("-m method","Train this calibration method") << std::endl;
+   std::cout << Util::formatDescription("","<time> <lat> <lon> <elev> <obs> <ens1> <ens2> ... <ensN>") << std::endl;
+   std::cout << Util::formatDescription("-p parameters","Put parameters into this output format.") << std::endl;
+   std::cout << Util::formatDescription("-c calibrator","Train this calibration method") << std::endl;
    std::cout << Util::formatDescription("-v variable","Train this variable") << std::endl;
+   std::cout << std::endl;
+   std::cout << "Example:" << std::endl;
+   std::cout << "   ./gridpp_train testing/files/training.txt -p text file=parameters.txt -c regression -v T" << std::endl;
+   std::cout << std::endl;
+   std::cout << "Variables:" << std::endl;
+   std::cout << Variable::getDescriptions();
+   std::cout << std::endl;
+   std::cout << "Calibrators with options (and default values):" << std::endl;
+   std::cout << Calibrator::getDescriptions();
+   std::cout << std::endl;
+   std::cout << "Parameter formats with Options (and default values)" << std::endl;
+   std::cout << ParameterFile::getDescriptions();
    std::cout << std::endl;
 }
 int main(int argc, const char *argv[]) {

@@ -20,7 +20,7 @@ namespace {
             }
             return grid;
          };
-         void setLatLon(FileFake& iFile, float iLat[], float iLon[]) {
+         void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
             int nLat = iFile.getNumLat(); 
@@ -68,8 +68,8 @@ namespace {
    TEST_F(TestDownscaler, validNearestNeighbours) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
-      setLatLon(from, (float[]) {50,55,60}, (float[]){0,10});
-      setLatLon(to,   (float[]) {40, 54.99},   (float[]){-1,9.99});
+      setLatLon(from, (const float[]) {50,55,60}, (const float[]){0,10});
+      setLatLon(to,   (const float[]) {40, 54.99},   (const float[]){-1,9.99});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -92,8 +92,12 @@ namespace {
    TEST_F(TestDownscaler, missingLatLon) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
-      setLatLon(from, (float[]) {50,Util::MV,60}, (float[]){0,Util::MV});
-      setLatLon(to,   (float[]) {40, 54},   (float[]){-1,Util::MV});
+      float lat1[] = {50,Util::MV,60};
+      float lon1[] = {0,Util::MV};
+      float lat2[] = {40, 54};
+      float lon2[] = {-1,Util::MV};
+      setLatLon(from, lat1, lon1);
+      setLatLon(to,   lat2, lon2);
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -118,8 +122,8 @@ namespace {
       int nLon = 4;
       FileFake from(nLat,nLon,1,1);
       FileFake to(nLat,nLon,1,1);
-      setLatLon(from, (float[]) {50,55,60}, (float[]){0,3,5,10});
-      setLatLon(to,   (float[]) {50,55,60}, (float[]){0,3,5,10});
+      setLatLon(from, (const float[]) {50,55,60}, (const float[]){0,3,5,10});
+      setLatLon(to,   (const float[]) {50,55,60}, (const float[]){0,3,5,10});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -142,8 +146,8 @@ namespace {
       int nLon = 5;
       FileFake from(nLat,nLon,1,1);
       FileFake to(nLat,nLon,1,1);
-      setLatLon(from, (float[]) {1}, (float[]){0,1,2,3,4});
-      setLatLon(to,   (float[]) {1}, (float[]){0,2,2.5,3,4});
+      setLatLon(from, (const float[]) {1}, (const float[]){0,1,2,3,4});
+      setLatLon(to,   (const float[]) {1}, (const float[]){0,2,2.5,3,4});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -165,8 +169,8 @@ namespace {
       int nLon = 1;
       FileFake from(nLat,nLon,1,1);
       FileFake to(nLat,nLon,1,1);
-      setLatLon(from, (float[]) {0,1,2,3,4}, (float[]){1});
-      setLatLon(to,   (float[]) {0,2,2.5,3,4}, (float[]){1});
+      setLatLon(from, (const float[]) {0,1,2,3,4}, (const float[]){1});
+      setLatLon(to,   (const float[]) {0,2,2.5,3,4}, (const float[]){1});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -186,8 +190,8 @@ namespace {
    TEST_F(TestDownscaler, unsortedGrid) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
-      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
-      setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
+      setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
+      setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -210,8 +214,8 @@ namespace {
    TEST_F(TestDownscaler, cache) {
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
-      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
-      setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
+      setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
+      setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
 
       vec2Int I, J;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -222,7 +226,7 @@ namespace {
 
       // Don't change the grid
       boost::uuids::uuid idBefore = from.getUniqueTag();
-      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
+      setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
       boost::uuids::uuid idAfter = from.getUniqueTag();
       EXPECT_EQ(idBefore, idAfter);
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -233,7 +237,7 @@ namespace {
 
       // Change the grid
       idBefore = from.getUniqueTag();
-      setLatLon(from, (float[]) {60,55,50}, (float[]){5,4});
+      setLatLon(from, (const float[]) {60,55,50}, (const float[]){5,4});
       idAfter = from.getUniqueTag();
       EXPECT_NE(idBefore, idAfter);
       Downscaler::getNearestNeighbour(from, to, I, J);

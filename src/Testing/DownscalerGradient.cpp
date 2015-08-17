@@ -143,7 +143,7 @@ namespace {
       }
    }
    TEST_F(TestDownscalerGradient, 10x10negativeTemperatures) {
-      setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,2}, (float[]){100000, 10000, 0});
+      setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,2,2}, (float[]){100000, 10000, 0, 0});
       {
          // When the gradient goes outside the domain of the variable, use nearest neightbour
          DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0"));

@@ -4,6 +4,9 @@ Gridded post-processor
 .. image:: https://travis-ci.org/metno/gridpp.svg?branch=master
     :target: https://travis-ci.org/metno/gridpp
 
+.. image:: https://coveralls.io/repos/metno/gridpp/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/metno/gridpp?branch=master 
+
 The program post-processes an AROME or ECMWF NetCDF file by using various
 downscaling and calibration methods. Post-processed forecasts are placed in a
 second Netcdf file, which has the desired output grid.

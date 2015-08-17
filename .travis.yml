@@ -6,11 +6,16 @@ env:
  - DIST=trusty
 
 before_install:
-  - cp -a .pbuilderrc $HOME
-  - sudo apt-get update -qq
-  - sudo apt-get install pbuilder aptitude
-  - sudo pbuilder create --debootstrapopts --variant=buildd
+ - cp -a .pbuilderrc $HOME
+ - sudo apt-get update -qq
+ - sudo apt-get install pbuilder aptitude
+ - sudo pbuilder create --debootstrapopts --variant=buildd
+
+install:
+ - sudo pip install cpp-coveralls
 
 script: sudo debuild-pbuilder -us -uc
+
+after_success: coveralls --gcov-options '\-lp'
 
 os: linux

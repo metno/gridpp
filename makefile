@@ -9,7 +9,7 @@ LIBS_O   = -lnetcdf_c++
 
 # Flags for debug compilation
 CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG
-LIBS_D   = -lnetcdf_c++ -L build/gtest -lgtest
+LIBS_D   = -lnetcdf_c++ -L build/gtest -lgtest -lpthread 
 
 
 # Don't change below here

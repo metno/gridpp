@@ -35,43 +35,27 @@ void writeUsage() {
    std::cout << "   - Multiple identical calibrators are allowed for a single variable." << std::endl;
    std::cout << "   - Only one parameter format can be specified for given a downscaler or calibrator." << std::endl;
    std::cout << std::endl;
+   std::cout << "Example:" << std::endl;
+   std::cout << "   ./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d nearestNeighbour" << std::endl;
+   std::cout << std::endl;
    std::cout << "Inputs/Outputs:" << std::endl;
    std::cout << "   I/O types are autodetected, but can be specified using:" << std::endl;
-   std::cout << FileArome::description();
-   std::cout << FileEc::description();
-   std::cout << FilePoint::description();
-   std::cout << FileNorcomQnh::description();
+   std::cout << File::getDescriptions();
    std::cout << std::endl;
    std::cout << "Variables:" << std::endl;
-   std::cout << Variable::description();
+   std::cout << Variable::getDescriptions();
    std::cout << std::endl;
    std::cout << "Variable options (and default values):" << std::endl;
    std::cout << Util::formatDescription("write=1", "Set to 0 to prevent the variable to be written to output") << std::endl;
    std::cout << std::endl;
    std::cout << "Downscalers with options (and default values):" << std::endl;
-   std::cout << DownscalerNearestNeighbour::description();
-   std::cout << DownscalerGradient::description();
-   std::cout << DownscalerSmart::description();
-   std::cout << DownscalerPressure::description();
-   std::cout << DownscalerBypass::description();
+   std::cout << Downscaler::getDescriptions();
    std::cout << std::endl;
    std::cout << "Calibrators with options (and default values):" << std::endl;
-   std::cout << CalibratorZaga::description();
-   std::cout << CalibratorCloud::description();
-   std::cout << CalibratorQc::description();
-   std::cout << CalibratorQq::description();
-   std::cout << CalibratorQnh::description();
-   std::cout << CalibratorAccumulate::description();
-   std::cout << CalibratorWindDirection::description();
-   std::cout << CalibratorNeighbourhood::description();
-   std::cout << CalibratorPhase::description();
-   std::cout << CalibratorRegression::description();
-   std::cout << CalibratorKriging::description();
+   std::cout << Calibrator::getDescriptions();
    std::cout << std::endl;
    std::cout << "Parameter formats with Options (and default values)" << std::endl;
-   std::cout << ParameterFileText::description();
-   std::cout << ParameterFileMetnoKalman::description();
-   std::cout << ParameterFileNetcdf::description();
+   std::cout << ParameterFile::getDescriptions();
 }
 
 int main(int argc, const char *argv[]) {
@@ -130,7 +114,7 @@ int main(int argc, const char *argv[]) {
       for(int c = 0; c < varconf.calibrators.size(); c++) {
          // Calibrate
          std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
-         varconf.calibrators[c]->calibrate(*setup.outputFile);
+         varconf.calibrators[c]->calibrate(*setup.outputFile, varconf.parameterFileCalibrators[c]);
       }
       double e = Util::clock();
       std::cout << "   " << e-s << " seconds" << std::endl;

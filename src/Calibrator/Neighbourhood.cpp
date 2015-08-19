@@ -5,7 +5,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(NULL, iOptions),
+      Calibrator(iOptions),
       mRadius(3),
       mVariable(iVariable),
       mStatType(Util::StatTypeMean),
@@ -52,7 +52,7 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
    }
 }
 
-bool CalibratorNeighbourhood::calibrateCore(File& iFile) const {
+bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

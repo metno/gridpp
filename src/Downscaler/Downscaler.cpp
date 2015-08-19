@@ -2,7 +2,7 @@
 #include <cmath>
 #include "../File/File.h"
 
-std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
+std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
 
 Downscaler::Downscaler(Variable::Type iVariable, const Options& iOptions) : Scheme(iOptions),
       mVariable(iVariable) {
@@ -265,11 +265,11 @@ void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec
 }
 
 bool Downscaler::isCached(const File& iFrom, const File& iTo) {
-   std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > >::const_iterator it = mNeighbourCache.find(iFrom.getUniqueTag());
+   std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > >::const_iterator it = mNeighbourCache.find(iFrom.getUniqueTag());
    if(it == mNeighbourCache.end()) {
       return false;
    }
-   std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> >::const_iterator it2 = it->second.find(iTo.getUniqueTag());
+   std::map<Uuid, std::pair<vec2Int, vec2Int> >::const_iterator it2 = it->second.find(iTo.getUniqueTag());
    if(it2 == it->second.end()) {
       return false;
    }
@@ -310,4 +310,14 @@ void Downscaler::getNearestNeighbour(const File& iFrom, float iLon, float iLat, 
          }
       }
    }
+}
+
+std::string Downscaler::getDescriptions() {
+   std::stringstream ss;
+   ss << DownscalerNearestNeighbour::description();
+   ss << DownscalerGradient::description();
+   ss << DownscalerSmart::description();
+   ss << DownscalerPressure::description();
+   ss << DownscalerBypass::description();
+   return ss.str();
 }

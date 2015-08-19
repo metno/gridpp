@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(NULL, iOptions),
+      Calibrator(iOptions),
       mRadius(3),
       mVariable(iVariable),
       mStatType(Util::StatTypeMean),
@@ -48,7 +48,7 @@ CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOpt
       }
    }
 }
-bool CalibratorWindow::calibrateCore(File& iFile) const {
+bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

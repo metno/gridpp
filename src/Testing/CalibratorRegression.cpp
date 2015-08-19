@@ -23,9 +23,9 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_0order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression0order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
-      cal.calibrate(from);
+      cal.calibrate(from, &par);
       FieldPtr after = from.getField(Variable::T, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
@@ -38,9 +38,9 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_1order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression1order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
-      cal.calibrate(from);
+      cal.calibrate(from, &par);
       FieldPtr after = from.getField(Variable::T, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
@@ -53,9 +53,9 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_2order) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression2order.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
-      cal.calibrate(from);
+      cal.calibrate(from, &par);
       FieldPtr after = from.getField(Variable::T, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
@@ -68,9 +68,9 @@ namespace {
    TEST_F(TestCalibratorRegression, missing_parameters) {
       FileArome from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regressionMissing.txt"));
-      CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
-      cal.calibrate(from);
+      cal.calibrate(from, &par);
       FieldPtr after = from.getField(Variable::T, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
@@ -83,9 +83,11 @@ namespace {
    // Incorrect number of data columns
    TEST_F(TestCalibratorRegression, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+	  FileArome from("testing/files/10x10.nc");
       Util::setShowError(false);
       ParameterFileText par(Options("file=testing/files/regressionInvalid1.txt"));
-      EXPECT_DEATH(CalibratorRegression cal = CalibratorRegression(&par, Variable::T, Options()), ".*");
+      CalibratorRegression calibrator(Variable::T, Options());
+      EXPECT_DEATH(calibrator.calibrate(from, &par), ".*");
    }
    TEST_F(TestCalibratorRegression, description) {
       CalibratorRegression::description();

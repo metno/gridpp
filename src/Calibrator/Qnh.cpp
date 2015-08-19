@@ -3,10 +3,10 @@
 #include "../File/File.h"
 #include <math.h>
 CalibratorQnh::CalibratorQnh(const Options& iOptions) :
-      Calibrator(NULL, iOptions) {
+      Calibrator(iOptions) {
 
 }
-bool CalibratorQnh::calibrateCore(File& iFile) const {
+bool CalibratorQnh::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

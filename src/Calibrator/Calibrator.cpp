@@ -7,17 +7,17 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../File/File.h"
 
-Calibrator::Calibrator(const ParameterFile* iParameterFile, const Options& iOptions) : Scheme(iOptions), mParameterFile(iParameterFile) {
+Calibrator::Calibrator(const Options& iOptions) : Scheme(iOptions) {
 
 }
-Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParameterFile, const Options& iOptions) {
+Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
    if(iName == "zaga") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'zaga' needs variable");
       }
-      CalibratorZaga* c = new CalibratorZaga(iParameterFile, Variable::getType(variable), iOptions);
+      CalibratorZaga* c = new CalibratorZaga(Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -37,6 +37,14 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable), iOptions);
       return c;
    }
+   else if(iName == "gaussian") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'gaussian' needs variable");
+      }
+      CalibratorGaussian* c = new CalibratorGaussian(Variable::getType(variable), iOptions);
+      return c;
+   }
    else if(iName == "neighbourhood") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
@@ -46,7 +54,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       return c;
    }
    else if(iName == "phase") {
-      CalibratorPhase* c = new CalibratorPhase(iParameterFile, iOptions);
+      CalibratorPhase* c = new CalibratorPhase(iOptions);
       float minPrecip;
       if(iOptions.getValue("minPrecip", minPrecip)) {
          c->setMinPrecip(minPrecip);
@@ -63,7 +71,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'windDirection' needs variable");
       }
-      CalibratorWindDirection* c = new CalibratorWindDirection(iParameterFile, Variable::getType(variable), iOptions);
+      CalibratorWindDirection* c = new CalibratorWindDirection(Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -72,7 +80,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'kriging' needs variable");
       }
-      CalibratorKriging* c = new CalibratorKriging(Variable::getType(variable), iParameterFile, iOptions);
+      CalibratorKriging* c = new CalibratorKriging(Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -104,7 +112,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");
       }
-      CalibratorQq* c = new CalibratorQq(iParameterFile, Variable::getType(variable), iOptions);
+      CalibratorQq* c = new CalibratorQq(Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -113,7 +121,7 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       if(!iOptions.getValue("variable", variable)) {
          Util::error("Calibrator 'regression' needs variable");
       }
-      CalibratorRegression* c = new CalibratorRegression(iParameterFile, Variable::getType(variable), iOptions);
+      CalibratorRegression* c = new CalibratorRegression(Variable::getType(variable), iOptions);
 
       return c;
    }
@@ -122,8 +130,8 @@ Calibrator* Calibrator::getScheme(std::string iName, const ParameterFile* iParam
       return NULL;
    }
 }
-bool Calibrator::calibrate(File& iFile) const {
-   return calibrateCore(iFile);
+bool Calibrator::calibrate(File& iFile, const ParameterFile* iParameterFile) const {
+   return calibrateCore(iFile, iParameterFile);
 }
 
 void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& iAfter) {
@@ -153,6 +161,23 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
    }
 }
 
-const ParameterFile* Calibrator::getParameterFile() {
-   return mParameterFile;
+Parameters Calibrator::train(const TrainingData& iData, int iOffset) const {
+   Util::error("Cannot train method. Not yet implemented.");
+}
+
+std::string Calibrator::getDescriptions() {
+   std::stringstream ss;
+   ss << CalibratorZaga::description() << std::endl;
+   ss << CalibratorCloud::description() << std::endl;
+   ss << CalibratorQc::description() << std::endl;
+   ss << CalibratorQq::description() << std::endl;
+   ss << CalibratorQnh::description() << std::endl;
+   ss << CalibratorAccumulate::description() << std::endl;
+   ss << CalibratorWindDirection::description() << std::endl;
+   ss << CalibratorNeighbourhood::description() << std::endl;
+   ss << CalibratorPhase::description() << std::endl;
+   ss << CalibratorRegression::description() << std::endl;
+   ss << CalibratorKriging::description() << std::endl;
+   ss << CalibratorGaussian::description() << std::endl;
+   return ss.str();
 }

@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(NULL, iOptions),
+      Calibrator(iOptions),
       mInputVariable(iVariable),
       mOutputVariable(Variable::PrecipAcc) {
    std::string outputVariable;
@@ -10,7 +10,7 @@ CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable, const Optio
       mOutputVariable = Variable::getType(outputVariable);
    }
 }
-bool CalibratorAccumulate::calibrateCore(File& iFile) const {
+bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

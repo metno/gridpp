@@ -6,11 +6,12 @@ class ParameterFile;
 //! Applies polynomial regression to forecasts
 class CalibratorQq : public Calibrator {
    public:
-      CalibratorQq(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions);
+      CalibratorQq(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "qq";};
+      Parameters train(const TrainingData& iData, int iOffset) const;
    private:
-      bool calibrateCore(File& iFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
       float mLowerQuantile;
       float mUpperQuantile;

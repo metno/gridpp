@@ -34,7 +34,6 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersUnevenRows.txt")), ".*");
-      EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersDoesntExist.txt")), ".*");
       EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersInvalidTime.txt")), ".*");
       EXPECT_DEATH(ParameterFileText(Options("file=testing/files/parametersInvalidEntries.txt")), ".*");
    }

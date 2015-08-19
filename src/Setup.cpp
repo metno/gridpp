@@ -407,8 +407,9 @@ Setup::Setup(const std::vector<std::string>& argv) :
          }
 
          cOptions.addOption("variable", Variable::getTypeName(variable));
-         Calibrator* c = Calibrator::getScheme(calibrator, p, cOptions);
+         Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
          calibrators.push_back(c);
+         parameterFileCalibrators.push_back(p);
 
          // Reset
          calibrator = "";

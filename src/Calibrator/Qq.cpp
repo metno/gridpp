@@ -4,16 +4,13 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorQq::CalibratorQq(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iParameterFile, iOptions),
+CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
+      Calibrator(iOptions),
       mVariable(iVariable),
       mLowerQuantile(0),
       mUpperQuantile(1),
       mPolicy(ExtrapolationPolicy::OneToOne) {
 
-   if(mParameterFile->getNumParameters() % 2 != 0) {
-      Util::error("Parameter file '" + mParameterFile->getFilename() + "' must have an even number of datacolumns");
-   }
    std::string extrapolation;
    if(iOptions.getValue("extrapolation", extrapolation)) {
       if(extrapolation == "1to1")
@@ -29,7 +26,7 @@ CalibratorQq::CalibratorQq(const ParameterFile* iParameterFile, Variable::Type i
       }
    }
 }
-bool CalibratorQq::calibrateCore(File& iFile) const {
+bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -38,11 +35,15 @@ bool CalibratorQq::calibrateCore(File& iFile) const {
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
 
+   if(iParameterFile->getNumParameters() % 2 != 0) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
+   }
+
    for(int t = 0; t < nTime; t++) {
       std::vector<float> obsVec, fcstVec;
       Parameters parameters;
-      if(!mParameterFile->isLocationDependent()) {
-         parameters = mParameterFile->getParameters(t);
+      if(!iParameterFile->isLocationDependent()) {
+         parameters = iParameterFile->getParameters(t);
          separate(parameters, obsVec, fcstVec);
       }
       const FieldPtr field = iFile.getField(mVariable, t);
@@ -51,8 +52,8 @@ bool CalibratorQq::calibrateCore(File& iFile) const {
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             int N = obsVec.size();
-            if(mParameterFile->isLocationDependent()) {
-               parameters = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            if(iParameterFile->isLocationDependent()) {
+               parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
                separate(parameters, obsVec, fcstVec);
             }
             for(int e = 0; e < nEns; e++) {
@@ -117,6 +118,38 @@ bool CalibratorQq::calibrateCore(File& iFile) const {
       }
    }
    return true;
+}
+
+Parameters CalibratorQq::train(const TrainingData& iData, int iOffset) const {
+   double timeStart = Util::clock();
+   std::vector<ObsEns> data = iData.getData(iOffset);
+   std::vector<float> obs, mean;
+   std::vector<float> values;
+   values.reserve(2*data.size());
+   int counter = 0;
+   // Compute predictors in model
+   for(int i = 0; i < data.size(); i++) {
+      float obs = data[i].first;
+      std::vector<float> ens = data[i].second;
+      float mean = Util::calculateStat(ens, Util::StatTypeMean);
+      if(Util::isValid(obs) && Util::isValid(mean)) {
+         values.push_back(obs);
+         values.push_back(mean);
+         counter++;
+      }
+   }
+
+   if(counter <= 0) {
+      std::stringstream ss;
+      ss << "CalibratorQq: No valid data, no correction will be made.";
+      Util::warning(ss.str());
+   }
+
+   Parameters par(values);
+
+   double timeEnd = Util::clock();
+   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   return par;
 }
 
 std::string CalibratorQq::description() {

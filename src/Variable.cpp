@@ -76,7 +76,7 @@ Variable::Type Variable::getType(std::string iName) {
       Util::error("Undefined variable type: " + iName);
 }
 
-std::string Variable::description() {
+std::string Variable::getDescriptions() {
    std::stringstream ss;
    ss << Util::formatDescription("-v T", "Temperature") << std::endl;
    ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;

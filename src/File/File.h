@@ -3,10 +3,8 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 #include "../Variable.h"
-#include "../Util.h"
+#include "../Uuid.h"
 #include "../Field.h"
 
 class Options;
@@ -66,7 +64,7 @@ class File {
       //! Returns a tag that uniquely identifies the latitude/longitude grid
       //! If the grid changes, a new tag is issued. Two files with the same grid
       //! will not have the same unique tag.
-      boost::uuids::uuid getUniqueTag() const;
+      Uuid getUniqueTag() const;
 
       //! Set the time that the file is issued
       //! @ param iTime The number of seconds since 1970-01-01 00:00:00 +00:00
@@ -76,6 +74,7 @@ class File {
       //! @ param iTimes vector of number of seconds since 1970-01-01 00:00:00 +00:00
       void setTimes(std::vector<double> iTimes);
       std::vector<double> getTimes() const;
+      static std::string getDescriptions();
    protected:
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
@@ -94,11 +93,12 @@ class File {
    private:
       std::string mFilename;
       mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
-      mutable boost::uuids::uuid mTag;
+      mutable Uuid mTag;
       void createNewTag() const;
       FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
       double mReferenceTime;
       std::vector<double> mTimes;
+	  static Uuid mNextTag;
 };
 #include "Netcdf.h"
 #include "Fake.h"

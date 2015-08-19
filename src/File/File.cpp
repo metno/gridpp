@@ -6,6 +6,7 @@
 #include <cmath>
 #include "../Util.h"
 #include "../Options.h"
+Uuid File::mNextTag = 0;
 
 File::File(std::string iFilename) :
       mFilename(iFilename),
@@ -286,7 +287,7 @@ long File::getCacheSize() const {
    return size;
 }
 
-boost::uuids::uuid File::getUniqueTag() const {
+Uuid File::getUniqueTag() const {
    return mTag;
 }
 bool File::setLats(vec2 iLats) {
@@ -303,6 +304,25 @@ bool File::setLons(vec2 iLons) {
    if(mLons != iLons)
       createNewTag();
    mLons = iLons;
+   for(int i = 0; i < mLons.size(); i++) {
+      for(int j = 0; j < mLons[i].size(); j++) {
+         float lon = mLons[i][j];
+         if(Util::isValid(lon)) {
+            // Ensure lon is between -180 and 180
+            int sign = lon / fabs(lon);
+            lon = fabs(lon);
+            lon = fmod(lon,360); // lon is between 0 and 360
+            lon = sign * lon; // lon is between -360 and 306
+            if(lon > 180)
+               lon = lon - 360;
+            else if(lon < -180)
+               lon = lon + 360;
+            mLons[i][j] = lon;
+            assert(mLons[i][j] >= -180.0001 && mLons[i][j] <= 180.0001);
+         }
+      }
+   }
+
    return true;
 }
 bool File::setElevs(vec2 iElevs) {
@@ -342,7 +362,8 @@ int File::getNumTime() const {
    return mNTime;
 }
 void File::createNewTag() const {
-   mTag = boost::uuids::random_generator()();
+   mTag = mNextTag; //boost::uuids::random_generator()();
+   mNextTag++;
 }
 void File::setReferenceTime(double iTime) {
    mReferenceTime = iTime;
@@ -361,4 +382,13 @@ void File::setTimes(std::vector<double> iTimes) {
 }
 std::vector<double> File::getTimes() const {
    return mTimes;
+}
+
+std::string File::getDescriptions() {
+   std::stringstream ss;
+   ss << FileArome::description();
+   ss << FileEc::description();
+   ss << FilePoint::description();
+   ss << FileNorcomQnh::description();
+   return ss.str();
 }

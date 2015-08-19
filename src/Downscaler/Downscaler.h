@@ -2,10 +2,10 @@
 #define DOWNSCALER_H
 #include <string>
 #include <map>
-#include <boost/uuid/uuid.hpp>
 #include "../Options.h"
 #include "../Variable.h"
 #include "../Scheme.h"
+#include "../Uuid.h"
 class File;
 typedef std::vector<std::vector<int> > vec2Int;
 
@@ -34,6 +34,8 @@ class Downscaler : public Scheme {
       //! @param iI I-index of nearest point. Set to Util::MV if no nearest neighbour.
       //! @param iJ J-index of nearest point. Set to Util::MV if no nearest neighbour.
       static void getNearestNeighbour(const File& iFrom, float iLon, float iLat, int& iI, int &iJ);
+
+      static std::string getDescriptions();
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
       Variable::Type mVariable;
@@ -43,7 +45,7 @@ class Downscaler : public Scheme {
       static bool isCached(const File& iFrom, const File& iTo);
       static void addToCache(const File& iFrom, const File& iTo, vec2Int iI, vec2Int iJ);
       static bool getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-      static std::map<boost::uuids::uuid, std::map<boost::uuids::uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
+      static std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
 };
 #include "NearestNeighbour.h"
 #include "Gradient.h"

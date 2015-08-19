@@ -4,21 +4,13 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorPhase::CalibratorPhase(const ParameterFile* iParameterFile, const Options& iOptions) :
-      Calibrator(iParameterFile, iOptions),
+CalibratorPhase::CalibratorPhase(const Options& iOptions) :
+      Calibrator(iOptions),
       mMinPrecip(0.2),
       mEstimatePressure(true),
       mUseWetbulb(1) {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'phase' needs parameters");
-   }
-
-   if(iParameterFile->getNumParameters() != 2) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
-   }
-
 }
-bool CalibratorPhase::calibrateCore(File& iFile) const {
+bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -28,12 +20,20 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
    iFile.initNewVariable(Variable::Phase);
    vec2 elevs = iFile.getElevs();
 
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'phase' needs parameters");
+   }
+
+   if(iParameterFile->getNumParameters() != 2) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
+   }
+
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters par;
-      if(!mParameterFile->isLocationDependent())
-         par = mParameterFile->getParameters(t);
+      if(!iParameterFile->isLocationDependent())
+         par = iParameterFile->getParameters(t);
       float snowSleetThreshold = par[0];
       float sleetRainThreshold = par[1];
       const FieldPtr temp = iFile.getField(Variable::T, t);
@@ -52,8 +52,8 @@ bool CalibratorPhase::calibrateCore(File& iFile) const {
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             float currElev = elevs[i][j];
-            if(mParameterFile->isLocationDependent())
-               par = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], currElev));
+            if(iParameterFile->isLocationDependent())
+               par = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], currElev));
             for(int e = 0; e < nEns; e++) {
                float currDryTemp  = (*temp)(i,j,e);
                float currTemp     = currDryTemp;

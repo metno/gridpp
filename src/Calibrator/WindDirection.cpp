@@ -6,15 +6,12 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorWindDirection::CalibratorWindDirection(const ParameterFile* iParameterFile, Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iParameterFile, iOptions),
+CalibratorWindDirection::CalibratorWindDirection(Variable::Type iVariable, const Options& iOptions):
+      Calibrator(iOptions),
       mVariable(iVariable) {
-   if(mParameterFile->getNumParameters() != 9) {
-      Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
-   }
 }
 
-bool CalibratorWindDirection::calibrateCore(File& iFile) const {
+bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -23,20 +20,24 @@ bool CalibratorWindDirection::calibrateCore(File& iFile) const {
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
 
+   if(iParameterFile->getNumParameters() != 9) {
+      Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
+   }
+
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Field& wind      = *iFile.getField(mVariable, t);
       Field& direction = *iFile.getField(Variable::WD, t);
 
       Parameters parameters;
-      if(!mParameterFile->isLocationDependent())
-         parameters = mParameterFile->getParameters(t);
+      if(!iParameterFile->isLocationDependent())
+         parameters = iParameterFile->getParameters(t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            if(mParameterFile->isLocationDependent())
-               parameters = mParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            if(iParameterFile->isLocationDependent())
+               parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
             for(int e = 0; e < nEns; e++) {
                float currDirection = direction(i,j,e);
                float factor = getFactor(currDirection, parameters);

@@ -46,7 +46,7 @@ class Variable {
       static std::string getStandardName(Type iType);
 
       //! Description of all defined variables
-      static std::string description();
+      static std::string getDescriptions();
 
       //! Vector of all defined variables
       static std::vector<Type> getAllVariables();

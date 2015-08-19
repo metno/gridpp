@@ -12,6 +12,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mConstantGradient(Util::MV),
       mDefaultGradient(0),
       mMinElevDiff(30),
+      mAverageNeighbourhood(false),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
@@ -21,6 +22,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("logTransform", mLogTransform);
    iOptions.getValue("constantGradient", mConstantGradient);
    iOptions.getValue("minElevDiff", mMinElevDiff);
+   iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -62,8 +64,32 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   ofield(i,j,e) = ifield(Icenter,Jcenter,e);
                }
                else {
-                  float dElev = currElev - nearestElev;
                   float gradient = mDefaultGradient;
+                  float totalValue = 0;
+                  float totalElev = 0;
+                  int counter = 0;
+                  int averagingRadius = 0;
+                  if(mAverageNeighbourhood)
+                     averagingRadius = mSearchRadius;
+                  for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
+                     for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
+                        float currValue = ifield(ii,jj,e);
+                        float currElev  = ielevs[ii][jj];
+                        if(Util::isValid(currValue) && Util::isValid(currElev)) {
+                           totalValue += currValue;
+                           totalElev  += currElev;
+                           counter++;
+                        }
+                     }
+                  }
+                  float baseValue = Util::MV;
+                  float baseElev  = Util::MV;
+                  if(counter > 0) {
+                     baseValue = totalValue / counter;
+                     baseElev  = totalElev  / counter;
+                  }
+                  float dElev = currElev - baseElev;
+
                   if(Util::isValid(mConstantGradient)) {
                      gradient = mConstantGradient;
                   }
@@ -145,14 +171,14 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   }
                   float value = Util::MV;
                   if(mLogTransform) {
-                     value = ifield(Icenter,Jcenter,e) * exp(gradient * dElev);
+                     value = baseValue * exp(gradient * dElev);
                   }
                   else {
-                     value = ifield(Icenter,Jcenter,e) + dElev * gradient;
+                     value = baseValue + dElev * gradient;
                   }
                   if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
                      // Use nearest neighbour if the gradient put us outside the bounds of the variable
-                     ofield(i,j,e) = (ifield)(Icenter, Jcenter, e);
+                     ofield(i,j,e) = baseValue;
                   }
                   else {
                      ofield(i,j,e)  = value;
@@ -188,12 +214,13 @@ std::string DownscalerGradient::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-d gradient", "Adjusts the nearest neighbour based on the elevation difference to the output gridpoint and the gradient in the surrounding neighbourhood: T = T(nn) + gradient * dElev. If the gradient puts the forecast outside the domain of the variable (e.g. negative precipitation) then the nearest neighbour is used.") << std::endl;
    ss << Util::formatDescription("   constantGradient=undef", "Fix gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
-   ss << Util::formatDescription("   searchRadius=3", "Compute gradient in a neighbourhood box of points within +- radius in both east-west and north-south direction.") << std::endl;
+   ss << Util::formatDescription("   searchRadius=3", "Compute gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
    ss << Util::formatDescription("   minElevDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
    ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev). Useful for pressure variables. Can be used together with constantGradient.") << std::endl;
    ss << Util::formatDescription("   defaultGradient=0", "If the gradient is not computable (too unstable), use this default gradient.") << std::endl;
    ss << Util::formatDescription("   minGradient=undef", "Do not allow gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   maxGradient=undef", "Do not allow gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
+   ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast and elevation within the search radius be used when determining what value to apply the gradient to?") << std::endl;
    return ss.str();
 }
 

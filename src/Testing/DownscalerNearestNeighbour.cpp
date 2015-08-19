@@ -18,7 +18,7 @@ namespace {
             }
             return grid;
          };
-         void setLatLon(FileFake& iFile, float iLat[], float iLon[]) {
+         void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
             int nLat = iFile.getNumLat(); 
@@ -46,8 +46,8 @@ namespace {
       DownscalerNearestNeighbour d(Variable::T, Options());
       FileFake from(3,2,1,1);
       FileFake to(2,2,1,1);
-      setLatLon(from, (float[]) {60,50,55}, (float[]){5,4});
-      setLatLon(to,   (float[]) {56,49},    (float[]){3,4.6});
+      setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
+      setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
       d.downscale(from, to);
       const Field& fromT = *from.getField(Variable::T, 0);
       const Field& toT   = *to.getField(Variable::T, 0);
@@ -61,7 +61,7 @@ namespace {
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(2,2,1,from.getNumTime());
-      setLatLon(to,   (float[]) {5,11},    (float[]){2,3});
+      setLatLon(to, (const float[]) {5,11}, (const float[]){2,3});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);

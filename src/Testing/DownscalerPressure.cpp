@@ -19,7 +19,7 @@ namespace {
             return grid;
          };
          // iElev must be a flat array with lon varying fastest
-         void setLatLonElev(FileFake& iFile, float iLat[], float iLon[], float iElev[]) {
+         void setLatLonElev(FileFake& iFile, const float iLat[], const float iLon[], const float iElev[]) {
             vec2 lat;
             vec2 lon;
             vec2 elev;
@@ -49,7 +49,7 @@ namespace {
       DownscalerPressure d(Variable::T, Options());
       FileArome from("testing/files/10x10.nc");
       FileFake to(1,4,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
+      setLatLonElev(to, (const float[]) {5}, (const float[]){2,2,12,20}, (const float[]){120, 1500, 600, -100});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);

@@ -20,7 +20,7 @@ namespace {
             return grid;
          };
          // iElev must be a flat array with lon varying fastest
-         void setLatLonElev(FileFake& iFile, float iLat[], float iLon[], float iElev[]) {
+         void setLatLonElev(FileFake& iFile, const float iLat[], const float iLon[], const float iElev[]) {
             vec2 lat;
             vec2 lon;
             vec2 elev;
@@ -49,8 +49,8 @@ namespace {
    TEST_F(TestDownscalerSmart, isValid) {
       FileFake from(3,2,1,1);
       FileFake to(1,1,1,1);
-      setLatLonElev(from, (float[]) {50,55,60}, (float[]){0,10}, (float[]){3, 15, 6, 30, 20, 11});
-      setLatLonElev(to,   (float[]) {54},   (float[]){9}, (float[]){10});
+      setLatLonElev(from, (const float[]) {50,55,60}, (const float[]){0,10}, (const float[]){3, 15, 6, 30, 20, 11});
+      setLatLonElev(to,   (const float[]) {54},   (const float[]){9}, (const float[]){10});
 
       vec3Int I, J;
       DownscalerSmart d(Variable::Precip, Options());
@@ -78,7 +78,8 @@ namespace {
       // Case 2: Within domain
       // Case 3/4: Nearest neighbour is on the boundary, so only the western half is used
       // Case 5: Elevation is missing, so use the nearest neighbour
-      setLatLonElev(to, (float[]) {5}, (float[]){2,3,12,20,2}, (float[]){120, 80, 600, 600, Util::MV});
+      float elev[] = {120, 80, 600, 600, Util::MV};
+      setLatLonElev(to, (const float[]) {5}, (const float[]){2,3,12,20,2}, elev);
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
@@ -109,7 +110,8 @@ namespace {
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       FileFake to(1,3,1,from.getNumTime());
-      setLatLonElev(to, (float[]) {5}, (float[]){2,2,2}, (float[]){120, 50, Util::MV});
+      float elev[] = {120, 50, Util::MV};
+      setLatLonElev(to, (const float[]) {5}, (const float[]){2,2,2}, elev);
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(Variable::T, 0);
@@ -138,8 +140,8 @@ namespace {
    TEST_F(TestDownscalerSmart, minElevDiff) {
       FileFake from(3,2,1,1);
       FileFake to(1,1,1,1);
-      setLatLonElev(from, (float[]) {50,55,60}, (float[]){0,10}, (float[]){3, 15, 6, 30, 20, 11});
-      setLatLonElev(to,   (float[]) {55},       (float[]){10},   (float[]){22.3});
+      setLatLonElev(from, (const float[]) {50,55,60}, (const float[]){0,10}, (const float[]){3, 15, 6, 30, 20, 11});
+      setLatLonElev(to,   (const float[]) {55},       (const float[]){10},   (const float[]){22.3});
 
       DownscalerSmart d(Variable::T, Options());
       d.setSearchRadius(3);
@@ -168,9 +170,9 @@ namespace {
    }
    TEST_F(TestDownscalerSmart, fewerPointsThanSmart) {
       FileFake from(5,3,1,1);
-      setLatLonElev(from, (float[]) {4,5,6,7,8}, (float[]){5,10,15}, (float[]){70,50,20,80,60,70,50,40,30,20,10,40,50,30,60});
+      setLatLonElev(from, (const float[]) {4,5,6,7,8}, (const float[]){5,10,15}, (const float[]){70,50,20,80,60,70,50,40,30,20,10,40,50,30,60});
       FileFake to(1,4,1,1);
-      setLatLonElev(to, (float[]) {5.5}, (float[]){2,4, 10,20}, (float[]){120, 80, 600, 600});
+      setLatLonElev(to, (const float[]) {5.5}, (const float[]){2,4, 10,20}, (const float[]){120, 80, 600, 600});
       vec3Int I, J;
 
       DownscalerSmart d(Variable::Precip, Options());

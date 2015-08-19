@@ -10,7 +10,7 @@ namespace {
          void SetUp() {
             mFrom = new FileArome("testing/files/10x10.nc");
             mTo   = new FileFake(1,4,1,mFrom->getNumTime());
-            setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,12,20}, (float[]){120, 1500, 600, -100});
+            setLatLonElev(*mTo, (const float[]) {5}, (const float[]){2,2,12,20}, (const float[]){120, 1500, 600, -100});
          }
          void TearDown() {
             delete mFrom;
@@ -29,7 +29,7 @@ namespace {
             return grid;
          };
          // iElev must be a flat array with lon varying fastest
-         void setLatLonElev(FileFake& iFile, float iLat[], float iLon[], float iElev[]) {
+         void setLatLonElev(FileFake& iFile, const float iLat[], const float iLon[], const float iElev[]) {
             vec2 lat;
             vec2 lon;
             vec2 elev;
@@ -143,7 +143,7 @@ namespace {
       }
    }
    TEST_F(TestDownscalerGradient, 10x10negativeTemperatures) {
-      setLatLonElev(*mTo, (float[]) {5}, (float[]){2,2,2}, (float[]){100000, 10000, 0});
+      setLatLonElev(*mTo, (const float[]) {5}, (const float[]){2,2,2,2}, (const float[]){100000, 10000, 0, 0});
       {
          // When the gradient goes outside the domain of the variable, use nearest neightbour
          DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0"));

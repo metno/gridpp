@@ -1,3 +1,21 @@
+gridpp (0.1.6) precise; urgency=low
+
+  * Adds QNH output for Nordcom
+
+ -- Thomas Nils Nipen <thomasn@pc4423.pc.met.no>  Mon, 22 Jun 2015 10:58:46 +0200
+
+gridpp (0.1.5) precise; urgency=low
+
+  * Fixes bug in setting reference time
+
+ -- Thomas Nils Nipen <thomasn@pc4423.pc.met.no>  Tue, 28 Apr 2015 13:54:59 +0200
+
+gridpp (0.1.4) precise; urgency=low
+
+  * Appends to "history" attribute
+
+ -- Thomas Nils Nipen <thomasn@met.no>  Fri, 24 Apr 2015 14:03:35 +0200
+
 gridpp (0.1.3) precise; urgency=low
 
   * Adjust runtime dependencies

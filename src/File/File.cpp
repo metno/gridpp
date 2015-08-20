@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cmath>
 #include "../Util.h"
+#include "../Options.h"
 
 File::File(std::string iFilename) :
       mFilename(iFilename),
@@ -12,23 +13,46 @@ File::File(std::string iFilename) :
    createNewTag();
 }
 
-File* File::getScheme(std::string iFilename, bool iReadOnly) {
+File* File::getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly) {
    File* file;
-   // TODO:
-   // Autodetect type based on content
-   if(FileArome::isValid(iFilename)) {
+   // Determine the filetype, either through user-specified option type=...
+   // or by autodetecting.
+   std::string type = "";
+   if(!iOptions.getValue("type", type)) {
+      // Autodetect type based on content
+      if(FileArome::isValid(iFilename)) {
+         type = "arome";
+      }
+      else if(FileEc::isValid(iFilename)) {
+         type = "ec";
+      }
+   }
+
+   // Instantiate the file
+   if(type == "") {
+      if(!Util::exists(iFilename)) {
+         Util::warning("File '" + iFilename + " does not exist");
+         return NULL;
+      }
+      else {
+         Util::warning("Could not find suitable parser for '" + iFilename + "'");
+         return NULL;
+      }
+   }
+   else if(type == "arome") {
       file = new FileArome(iFilename, iReadOnly);
    }
-   else if(FileEc::isValid(iFilename)) {
+   else if(type == "ec") {
       file = new FileEc(iFilename, iReadOnly);
    }
-   else if(!Util::exists(iFilename)) {
-      Util::warning("File '" + iFilename + " does not exist");
-      return NULL;
+   else if(type == "point") {
+      file = new FilePoint(iFilename, iOptions);
+   }
+   else if(type == "norcomQnh") {
+      file = new FileNorcomQnh(iFilename, iOptions);
    }
    else {
-      Util::warning("Could not find suitable parser for '" + iFilename + "'");
-      return NULL;
+      Util::error("Could not understand file type " + type);
    }
    return file;
 }
@@ -162,8 +186,7 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
       }
       else {
          std::string variableType = Variable::getTypeName(iVariable);
-         std::cout << variableType << " not available in '" << getFilename() << "'" << std::endl;
-         abort();
+         Util::error(variableType + " not available in '" + getFilename() + "'");
       }
    }
    if(mFields[iVariable].size() <= iTime) {

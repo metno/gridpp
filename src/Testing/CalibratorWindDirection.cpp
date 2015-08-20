@@ -2,7 +2,7 @@
 #include "../Util.h"
 #include "../ParameterFile.h"
 #include "../Parameters.h"
-#include "../Calibrator/Smooth.h"
+#include "../Calibrator/WindDirection.h"
 #include <gtest/gtest.h>
 #include <cmath>
 
@@ -39,66 +39,6 @@ namespace {
             return CalibratorWindDirection(parFile, Variable::T);
          }
    };
-   /*
-   TEST_F(TestCalibratorWindDirection, 10x10_noCorrection) {
-      // Test that when the correction factor is 1, the values are unchanged
-      FileArome from("testing/files/10x10.nc");
-
-      ParameterFile parFile = getParameterFile(1,0,0,0,0,0,0,0,0);
-      CalibratorWindDirection cal = getCalibrator(&parFile);
-
-      Field before = *from.getField(Variable::T, 0);
-      cal.calibrate(from);
-      Field after   = *from.getField(Variable::T, 0);
-      ASSERT_EQ(10, after.getNumLat());
-      ASSERT_EQ(10, after.getNumLon());
-      ASSERT_EQ(1,  after.getNumEns());
-
-      for(int i = 0; i < from.getNumLat(); i++) {
-         for(int j = 0; j < from.getNumLon(); j++) {
-            EXPECT_FLOAT_EQ(before(i,j,0), after(i,j,0));
-         }
-      }
-   }
-   TEST_F(TestCalibratorWindDirection, 10x10) {
-      FileArome from("testing/files/10x10.nc");
-
-      ParameterFile parFile = getParameterFile(1,0.5,0.2,0,0,0,0,0,0);
-      CalibratorWindDirection cal = getCalibrator(&parFile);
-
-      Field before = *from.getField(Variable::T, 0);
-      cal.calibrate(from);
-      Field after   = *from.getField(Variable::T, 0);
-      ASSERT_EQ(10, after.getNumLat());
-      ASSERT_EQ(10, after.getNumLon());
-      ASSERT_EQ(1,  after.getNumEns());
-
-      for(int i = 0; i < from.getNumLat(); i++) {
-         for(int j = 0; j < from.getNumLon(); j++) {
-            EXPECT_FLOAT_EQ(before(i,j,0), after(i,j,0));
-         }
-      }
-   }
-   TEST_F(TestCalibratorWindDirection, 10x10_missingValues) {
-      FileArome from("testing/files/10x10.nc");
-      CalibratorSmooth cal = CalibratorSmooth(Variable::T);
-      cal.setSmoothRadius(1);
-      FieldPtr field = from.getField(Variable::T, 0);
-      (*field)(4,1,0) = Util::MV;
-      (*field)(4,2,0) = Util::MV;
-      (*field)(4,3,0) = Util::MV;
-      (*field)(5,1,0) = Util::MV;
-      (*field)(5,2,0) = Util::MV;
-      (*field)(5,3,0) = Util::MV;
-      (*field)(6,1,0) = Util::MV;
-      (*field)(6,2,0) = Util::MV;
-      (*field)(6,3,0) = Util::MV;
-
-      cal.calibrate(from);
-      EXPECT_FLOAT_EQ(Util::MV, (*field)(5,2,0));
-      EXPECT_FLOAT_EQ(304.6667, (*field)(5,1,0));
-   }
-   */
    TEST_F(TestCalibratorWindDirection, getFactor) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
@@ -157,7 +97,7 @@ namespace {
       // EXPECT_DEATH(cal.getFactor(-1, par), ".*");
    }
    TEST_F(TestCalibratorWindDirection, description) {
-      CalibratorSmooth::description();
+      CalibratorWindDirection::description();
    }
 }
 int main(int argc, char **argv) {

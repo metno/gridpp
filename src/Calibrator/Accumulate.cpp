@@ -54,6 +54,6 @@ bool CalibratorAccumulate::calibrateCore(File& iFile) const {
 }
 std::string CalibratorAccumulate::description() {
    std::stringstream ss;
-   ss << "   -c accumulate" << std::endl;
+   ss << Util::formatDescription("-c accumulate","") << std::endl;
    return ss.str();
 }

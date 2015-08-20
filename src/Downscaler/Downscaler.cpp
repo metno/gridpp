@@ -21,19 +21,7 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       return new DownscalerNearestNeighbour(iVariable);
    }
    else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iVariable);
-      float constantGradient = Util::MV;
-      if(iOptions.getValue("constantGradient", constantGradient)) {
-         d->setConstantGradient(constantGradient);
-      }
-      float searchRadius = Util::MV;
-      if(iOptions.getValue("searchRadius", searchRadius)) {
-         d->setSearchRadius(searchRadius);
-      }
-      float minElevDiff = Util::MV;
-      if(iOptions.getValue("minElevDiff", minElevDiff)) {
-         d->setMinElevDiff(minElevDiff);
-      }
+      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
       return d;
    }
    else if(iName == "smart") {

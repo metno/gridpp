@@ -7,7 +7,7 @@
 namespace {
    class TestCalibrator : public ::testing::Test {
       public:
-         std::vector<float> vec(float iVector[], int iSize) {
+         std::vector<float> vec(const float iVector[], int iSize) {
             std::vector<float> vec(iSize, 0);
             for(int i = 0; i < iSize; i++) {
                vec[i] = iVector[i];
@@ -18,8 +18,8 @@ namespace {
    };
 
    TEST_F(TestCalibrator, shuffle) {
-      const std::vector<float> vec1 = vec((float[]) {5,1,4,7,6,2,3}, 7);
-            std::vector<float> vec2 = vec((float[]) {32,14,21,0,11,2,5}, 7);
+      const std::vector<float> vec1 = vec((const float[]) {5,1,4,7,6,2,3}, 7);
+            std::vector<float> vec2 = vec((const float[]) {32,14,21,0,11,2,5}, 7);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(7, vec1.size());
       ASSERT_EQ(7, vec2.size());
@@ -32,8 +32,8 @@ namespace {
       EXPECT_EQ(5, vec2[6]);
    }
    TEST_F(TestCalibrator, shuffleDifferentSizes) {
-      const std::vector<float> vec1 = vec((float[]) {5,4}, 2);
-            std::vector<float> vec2 = vec((float[]) {1,2,3}, 3);
+      const std::vector<float> vec1 = vec((const float[]) {5,4}, 2);
+            std::vector<float> vec2 = vec((const float[]) {1,2,3}, 3);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(2, vec1.size());
       ASSERT_EQ(3, vec2.size());
@@ -44,7 +44,7 @@ namespace {
    }
    TEST_F(TestCalibrator, shuffleZeroSize) {
       const std::vector<float> vec1;
-            std::vector<float> vec2 = vec((float[]) {1,2,3}, 3);
+            std::vector<float> vec2 = vec((const float[]) {1,2,3}, 3);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(0, vec1.size());
       ASSERT_EQ(3, vec2.size());
@@ -61,8 +61,10 @@ namespace {
       ASSERT_EQ(0, vec2.size());
    }
    TEST_F(TestCalibrator, shuffleWithMissing) {
-      const std::vector<float> vec1 = vec((float[]) {3, Util::MV, 19,3}, 4);
-            std::vector<float> vec2 = vec((float[]) {1,2,4,3}, 4);
+      float ar1[] = {3, Util::MV, 19, 3};
+      float ar2[] = {1,2,4,3};
+      const std::vector<float> vec1 = vec(ar1, 4);
+            std::vector<float> vec2 = vec(ar2, 4);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(4, vec1.size());
       ASSERT_EQ(4, vec2.size());
@@ -73,8 +75,10 @@ namespace {
       EXPECT_EQ(3, vec2[3]);
    }
    TEST_F(TestCalibrator, shuffleWithMissing2) {
-      const std::vector<float> vec1 = vec((float[]) {3, 1, 19,3}, 4);
-            std::vector<float> vec2 = vec((float[]) {1,2,Util::MV,3}, 4);
+      float ar1[] = {3, 1, 19,3};
+      float ar2[] = {1,2,Util::MV,3};
+      const std::vector<float> vec1 = vec(ar1, 4);
+            std::vector<float> vec2 = vec(ar2, 4);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(4, vec1.size());
       ASSERT_EQ(4, vec2.size());
@@ -85,8 +89,8 @@ namespace {
       EXPECT_EQ(3, vec2[3]);
    }
    TEST_F(TestCalibrator, shuffleRepeated) {
-      const std::vector<float> vec1 = vec((float[]) {3,1,7,1}, 4);
-            std::vector<float> vec2 = vec((float[]) {1,2,4,3}, 4);
+      const std::vector<float> vec1 = vec((const float[]) {3,1,7,1}, 4);
+            std::vector<float> vec2 = vec((const float[]) {1,2,4,3}, 4);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(4, vec1.size());
       ASSERT_EQ(4, vec2.size());
@@ -96,8 +100,8 @@ namespace {
       EXPECT_TRUE(vec2[3]==1 || vec2[3]==2);
    }
    TEST_F(TestCalibrator, shuffleRepeated2) {
-      const std::vector<float> vec1 = vec((float[]) {3,2,7,1}, 4);
-            std::vector<float> vec2 = vec((float[]) {1,2,1,3}, 4);
+      const std::vector<float> vec1 = vec((const float[]) {3,2,7,1}, 4);
+            std::vector<float> vec2 = vec((const float[]) {1,2,1,3}, 4);
       Calibrator::shuffle(vec1, vec2);
       EXPECT_EQ(4, vec1.size());
       ASSERT_EQ(4, vec2.size());
@@ -114,11 +118,18 @@ namespace {
       EXPECT_FLOAT_EQ(0.9, ((CalibratorZaga*) c)->getFracThreshold());
       delete c;
    }
-   TEST_F(TestCalibrator, factorySmooth) {
+   TEST_F(TestCalibrator, factoryNeighbourhood) {
       Calibrator* c;
-      c = Calibrator::getScheme("smooth", Options("variable=Precip smoothRadius=3"));
+      c = Calibrator::getScheme("neighbourhood", Options("variable=Precip radius=3"));
       EXPECT_TRUE(c);
-      EXPECT_EQ("smooth", c->name());
+      EXPECT_EQ("neighbourhood", c->name());
+      delete c;
+   }
+   TEST_F(TestCalibrator, factoryQc) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qc", Options("variable=Precip m3"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qc", c->name());
       delete c;
    }
    TEST_F(TestCalibrator, factoryPhase) {
@@ -130,10 +141,37 @@ namespace {
       EXPECT_FALSE(((CalibratorPhase*) c)->getUseWetbulb());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryRegression) {
+      Calibrator* c;
+      c = Calibrator::getScheme("regression", Options("variable=Precip parameters=testing/files/regression1order.txt"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("regression", c->name());
+      delete c;
+   }
+   TEST_F(TestCalibrator, factoryQnh) {
+      Calibrator* c;
+      c = Calibrator::getScheme("qnh", Options("variable=Precip"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("qnh", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T parameters=testing/files/parameters.txt"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
-      Calibrator::getScheme("smooth", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
+      Calibrator::getScheme("neighbourhood", Options("variable=Precip variable=T parameters=testing/files/parameters.txt"));
+   }
+   TEST_F(TestCalibrator, factoryInvalid) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("parameters=testing/files/parameters.txt")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("zaga", Options("variable=T")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("cloud", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("neighbourhood", Options("radius=-2")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("phase", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("variable=T")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("regression", Options("parameters=testing/files/regression1order.txt")), ".*");
    }
 }
 int main(int argc, char **argv) {

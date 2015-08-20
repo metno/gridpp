@@ -27,6 +27,8 @@ class Setup {
    public:
       File* inputFile;
       File* outputFile;
+      Options inputOptions;
+      Options outputOptions;
       std::vector<VariableConfiguration> variableConfigurations;
       Setup(const std::vector<std::string>& argv);
       ~Setup();

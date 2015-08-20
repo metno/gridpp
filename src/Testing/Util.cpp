@@ -149,17 +149,31 @@ namespace {
       Util::setShowStatus(false);
       Util::status("test");
    }
-   TEST_F(UtilTest, clock) {
-      double sleepmicros = 50000;
-      double sleepsec    = sleepmicros/1e6;
-      double s = Util::clock();
-      usleep(sleepmicros);
-      double e = Util::clock();
-      EXPECT_NEAR(sleepsec, e-s, sleepsec/20);
+   TEST_F(UtilTest, getDate) {
+      EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));
+      EXPECT_FLOAT_EQ(20001015, Util::getDate(971623971));
+   }
+   TEST_F(UtilTest, getTime) {
+      EXPECT_FLOAT_EQ(122915, Util::getTime(1432816155));
+      EXPECT_FLOAT_EQ(153251, Util::getTime(971623971));
+   }
+   TEST_F(UtilTest, getUnixTime) {
+      EXPECT_FLOAT_EQ(1432816155, Util::getUnixTime(20150528, 122915));
+      EXPECT_FLOAT_EQ(971623971,  Util::getUnixTime(20001015, 153251));
+      EXPECT_FLOAT_EQ(1432771190, Util::getUnixTime(20150528, -600));
    }
    TEST_F(UtilTest, getCurrentDate) {
       int date = Util::getCurrentDate();
-      EXPECT_LT(2000000, date);
+      EXPECT_GT(date, 20000000);
+      EXPECT_LT(date, 99999999);
+   }
+   TEST_F(UtilTest, getCurrentTime) {
+      EXPECT_GE(Util::getCurrentTime(), 0);
+      EXPECT_LT(Util::getCurrentTime(), 240000);
+   }
+   TEST_F(UtilTest, getCurrentUnixTime) {
+      // A rough check that we are after 2000/01/01 00:00:00
+      EXPECT_GT(Util::getCurrentUnixTime(), 946684800);
    }
    TEST_F(UtilTest, getCurrentDateString) {
       std::string date = Util::getCurrentTimeStamp();
@@ -171,13 +185,13 @@ namespace {
       bool status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
       // Change 10x10_copy.nc
-      CalibratorSmooth smooth(Variable::T);
+      CalibratorNeighbourhood neighbourhood(Variable::T, Options(""));
       FileArome f1("testing/files/10x10.nc");
       FileArome f2("testing/files/10x10_copy.nc");
       FieldPtr field1 = f1.getField(Variable::T, 0);
       FieldPtr field2 = f2.getField(Variable::T, 0);
       EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
-      smooth.calibrate(f2);
+      neighbourhood.calibrate(f2);
       // Values should be different now
       EXPECT_NE((*field2)(1,1,0), (*field1)(1,1,0));
       std::vector<Variable::Type> vars(1,Variable::T);
@@ -202,6 +216,34 @@ namespace {
       EXPECT_FALSE(status);
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
+   }
+   TEST_F(UtilTest, hasChar) {
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", 't'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", ' '));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '2'));
+      EXPECT_TRUE(Util::hasChar("te  2384 &$*#2t", '&'));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", ','));
+      EXPECT_FALSE(Util::hasChar("te  2384 &$*#2t", 'q'));
+
+      EXPECT_FALSE(Util::hasChar("", 'q'));
+      EXPECT_FALSE(Util::hasChar("", ' '));
+
+      EXPECT_TRUE(Util::hasChar("test\nq2", '2'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", 't'));
+      EXPECT_TRUE(Util::hasChar("test\nq2", '\n'));
+      EXPECT_FALSE(Util::hasChar("test\nq2", ' '));
+      EXPECT_FALSE(Util::hasChar("test\nq2", '3'));
+   }
+   TEST_F(UtilTest, formatDescription) {
+      EXPECT_EQ("test      ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 0));
+      EXPECT_EQ("  test    ad qwi qwio\n          wqio dwqion\n          qdwion", Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 22, 2));
+      // Invalid input should not throw an error
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 5, 2); // Too narrow message
+      Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
+   }
+   TEST_F(UtilTest, gridppVersion) {
+      std::string version = Util::gridppVersion();
+      EXPECT_NE("", version);
    }
 }
 int main(int argc, char **argv) {

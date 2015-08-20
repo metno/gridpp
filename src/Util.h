@@ -55,15 +55,31 @@ class Util {
       static float rad2deg(float rad);
 
       static float pi;
+
+      static std::string gridppVersion();
       
       //! Radius of the earth in meters
       static double radiusEarth;
       
       //! \brief Convert unix timestamp to YYYYMMDD format
       static int getDate(time_t iUnixTime);
+
+      //! \brief Convert unix timestamp to HHMMSS format
+      static int getTime(time_t iUnixTime);
       
-      //! \brief Get the current date in YYYYMMDD format
+      //! \brief Get the current unix time (UTC)
+      //! @param iDate in YYYYMMDD format
+      //! @param iTime in HHMMSS format (can be negative to subtract time)
+      static time_t getUnixTime(int iDate, int iTime);
+
+      //! \brief Get the current date in YYYYMMDD format (UTC)
       static int getCurrentDate();
+
+      //! \brief Get the current date in HHMMSS format (UTC)
+      static int getCurrentTime();
+
+      //! \brief Get the current date/time in unix time (UTC)
+      static time_t getCurrentUnixTime();
 
       //! \brief Get the current date in YYYY-MM-DD HH:MM:SS format
       static std::string getCurrentTimeStamp();
@@ -85,6 +101,13 @@ class Util {
       //! \brief Computes the inverse logit of x
       //! @return x A value on the interval (0,1)
       static float invLogit(float x);
+
+      //! Returns true if iString contains one or more of iChar
+      static bool hasChar(std::string iString, char iChar);
+
+      //! Create a formatted string useful for outputing descriptions of methods. Places the title
+      //! on the left side and the message on the right, with automatic line wrapping.
+      static std::string formatDescription(std::string iTitle, std::string iMessage, int iTitleLength=32, int iMaxLength=100, int iTitleIndent=3);
       
       //! \brief Comparator class for sorting pairs using the first entry.
       //! Sorts from smallest to largest

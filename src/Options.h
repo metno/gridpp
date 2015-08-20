@@ -10,7 +10,7 @@
 class Options {
    public:
       //! Creates container
-      // @param iOptionString options with format: "key1=value1 key2=value2..."
+      //! @param iOptionString options with format: "key1=value1 key2=value2..."
       Options(std::string iOptionString="");
 
       //! \brief Adds key and value to container
@@ -34,6 +34,11 @@ class Options {
       //! Remove all key-value pairs from container
       void clear();
 
+      //! String representation of all options in with format: "key1=value1 key2=value2...".
+      //! Can be used to reconstruct the object by passing into the constructor.
+      //! Order of options is not specified.
+      std::string toString() const;
+
       //! \brief Find value corresponding to key
       //! @param iKey find this key
       //! @param iValue places the value in this variable. If key does not exist, this is unchanged.
@@ -45,6 +50,36 @@ class Options {
             if(key == iKey) {
                std::stringstream ss(value);
                ss >> iValue;
+               return true;
+            }
+         }
+         return false;
+      };
+
+      //! \brief Find vector values corresponding to key
+      //! @param iKey find this key
+      //! @param iValues places the values in this variable (variable cleared first). If key does
+      //! not exist, the vector is empty.
+      //! @return true if key is found, false otherwise
+      template <class T> bool getValues(std::string iKey, std::vector<T>& iValues) const {
+         iValues.clear();
+         for(int i = 0; i < mPairs.size(); i++) {
+            // Attributes are organized as follows:
+            // option=value1,value2,value3...
+            std::string key   = mPairs[i].first;
+            if(key == iKey) {
+               std::string values = mPairs[i].second;
+               std::stringstream ss(values);
+               // Parse collection of attributes separated by commas
+               while(ss) {
+                  std::string betweenComma;
+                  if(!getline(ss, betweenComma, ','))
+                     break; // We're at the end of the line
+                  std::stringstream ss2(betweenComma);
+                  T value;
+                  ss2 >> value;
+                  iValues.push_back(value);
+               }
                return true;
             }
          }

@@ -47,16 +47,12 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
       CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable));
       return c;
    }
-   else if(iName == "smooth") {
+   else if(iName == "neighbourhood") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'smooth' needs variable");
+         Util::error("Calibrator 'neighbourhood' needs variable");
       }
-      CalibratorSmooth* c = new CalibratorSmooth(Variable::getType(variable));
-      int smoothRadius;
-      if(iOptions.getValue("smoothRadius", smoothRadius)) {
-         c->setSmoothRadius(smoothRadius);
-      }
+      CalibratorNeighbourhood* c = new CalibratorNeighbourhood(Variable::getType(variable), iOptions);
       return c;
    }
    else if(iName == "phase") {
@@ -89,6 +85,35 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
          Util::error("Calibrator 'zaga' needs variable");
       }
       CalibratorWindDirection* c = new CalibratorWindDirection(parFile, Variable::getType(variable));
+
+      return c;
+   }
+   else if(iName == "qc") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'qc' needs variable");
+      }
+      CalibratorQc* c = new CalibratorQc(Variable::getType(variable), iOptions);
+
+      return c;
+   }
+   else if(iName == "qnh") {
+      CalibratorQnh* c = new CalibratorQnh();
+
+      return c;
+   }
+   else if(iName == "regression") {
+      std::string parFilename;
+      if(!iOptions.getValue("parameters", parFilename)) {
+         Util::error("Calibrator 'regression' needs parameters");
+      }
+
+      ParameterFile* parFile = new ParameterFile(parFilename);
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'regression' needs variable");
+      }
+      CalibratorRegression* c = new CalibratorRegression(parFile, Variable::getType(variable));
 
       return c;
    }

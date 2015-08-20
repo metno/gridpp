@@ -13,8 +13,6 @@ class FileNetcdf : public File {
       FileNetcdf(std::string iFilename, bool iReadOnly=false);
       ~FileNetcdf();
 
-      // Does this file contain the variable?
-      bool hasVariableCore(Variable::Type iVariable) const;
       virtual std::string getVariableName(Variable::Type iVariable) const = 0;
       //! Add attribute to a variable (overwrite if existing)
       void setAttribute(NcVar* iVar, std::string iName, std::string iValue);
@@ -30,6 +28,10 @@ class FileNetcdf : public File {
       float getScale(NcVar* iVar) const;
       float getOffset(NcVar* iVar) const;
       NcFile mFile;
+
+      // Does this file contain the variable?
+      bool hasVariableCore(Variable::Type iVariable) const;
+      bool hasVariableCore(std::string iVariable) const;
 
       NcDim* getDim(std::string iDim) const;
       NcVar* getVar(std::string iVar) const;

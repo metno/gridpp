@@ -16,7 +16,21 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
 
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
-   mElevs = getLatLonVariable("altitude");
+   if(hasVariableCore("surface_geopotential")) {
+      FieldPtr elevField = getFieldCore("surface_geopotential", 0);
+      mElevs.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mElevs[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            float value = (*elevField)(i,j,0) / 9.81;
+            mElevs[i][j] = value;
+         }
+      }
+      std::cout << "Deriving altitude from geopotential height in " << getFilename() << std::endl;
+   }
+   else {
+      mElevs = getLatLonVariable("altitude");
+   }
 
    if(hasVar("time")) {
       NcVar* vTime = getVar("time");
@@ -35,15 +49,19 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
       NcVar* vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
       vReferenceTime->get(&referenceTime, 1);
+      setReferenceTime(referenceTime);
    }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
 FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
-   std::string variable = getVariableName(iVariable);
+   std::string variableName = getVariableName(iVariable);
+   return getFieldCore(variableName, iTime);
+}
+FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
    // Not cached, retrieve data
-   NcVar* var = getVar(variable);
+   NcVar* var = getVar(iVariable);
    int nLat  = mNLat;
    int nLon  = mNLon;
 
@@ -69,7 +87,7 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    }
    else {
       std::stringstream ss;
-      ss << "Cannot read variable '" << variable << "' from '" << getFilename() << "'";
+      ss << "Cannot read variable '" << iVariable << "' from '" << getFilename() << "'";
       Util::error(ss.str());
    }
    float* values = new float[nLat*nLon];
@@ -217,6 +235,13 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::P) {
       return "surface_air_pressure";
    }
+   else if(iVariable == Variable::MSLP) {
+      return "air_pressure_at_sea_level";
+   }
+   else if(iVariable == Variable::QNH) {
+      // TODO: What name to use?
+      return "qnh";
+   }
    else if(iVariable == Variable::Fake) {
       return "fake";
    }
@@ -262,4 +287,10 @@ bool FileArome::isValid(std::string iFilename) {
    }
    file.close();
    return status;
+}
+
+std::string FileArome::description() {
+   std::stringstream ss;
+   ss << Util::formatDescription("type=arome", "AROME file") << std::endl;
+   return ss.str();
 }

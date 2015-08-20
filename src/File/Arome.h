@@ -17,10 +17,12 @@ class FileArome : public FileNetcdf {
       int  getDate() const;
       // Is the file readable in this format?
       static bool isValid(std::string iFilename);
+      static std::string description();
       std::string name() const {return "arome";};
    protected:
       void writeCore(std::vector<Variable::Type> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
+      FieldPtr getFieldCore(std::string iVariable, int iTime) const;
       vec2 getLatLonVariable(std::string iVariable) const;
       int mDate;
 };

@@ -17,9 +17,12 @@ FileNetcdf::~FileNetcdf() {
 }
 
 bool FileNetcdf::hasVariableCore(Variable::Type iVariable) const {
-   NcError q(NcError::silent_nonfatal); 
    std::string variable = getVariableName(iVariable);
-   NcVar* var = mFile.get_var(variable.c_str());
+   return hasVariableCore(variable);
+}
+bool FileNetcdf::hasVariableCore(std::string iVariable) const {
+   NcError q(NcError::silent_nonfatal); 
+   NcVar* var = mFile.get_var(iVariable.c_str());
    return var != NULL;
 }
 

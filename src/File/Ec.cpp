@@ -40,6 +40,7 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
       NcVar* vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
       vReferenceTime->get(&referenceTime, 1);
+      setReferenceTime(referenceTime);
    }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
@@ -166,6 +167,9 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
    }
    else if(iVariable == Variable::V) {
       return "y_wind_10m";
+   }
+   else if(iVariable == Variable::MSLP) {
+      return "sea_level_pressure";
    }
    else if(iVariable == Variable::RH) {
       return "relative_humidity_2m";
@@ -306,4 +310,9 @@ NcVar* FileEc::getLonVar() const {
    else
       vLon = getVar("lon");
    return vLon;
+}
+std::string FileEc::description() {
+   std::stringstream ss;
+   ss << Util::formatDescription("type=ec", "ECMWF ensemble file") << std::endl;
+   return ss.str();
 }

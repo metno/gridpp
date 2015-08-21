@@ -16,6 +16,7 @@ RELEASE_DEPS_precise = -Vrelease:Depends="libnetcdf6"
 RELEASE_DEPS_trusty = -Vrelease:Depends="libnetcdfc7"
 
 %:
+	chown -R 1234:1234 /var/cache/pbuilder/ccache
 	dh $@ 
 
 override_dh_gencontrol:

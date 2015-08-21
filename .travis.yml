@@ -8,7 +8,7 @@ env:
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install pbuilder aptitude
- - sudo pbuilder_dist ${DIST} create --debootstrapopts --variant=buildd
+ - sudo pbuilder-dist ${DIST} create --debootstrapopts --variant=buildd
  - sudo pip install cpp-coveralls
 
 script:

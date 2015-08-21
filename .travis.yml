@@ -1,7 +1,6 @@
 sudo: required
 
 env:
- - DIST=lucid
  - DIST=precise
  - DIST=trusty
 

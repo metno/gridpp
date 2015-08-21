@@ -11,7 +11,6 @@
 
 # https://raphaelhertzog.com/2010/09/27/different-dependencies-between-debian-and-ubuntu-but-common-source-package/
 RELEASE ?= $(shell lsb_release -c | cut -d: -f2 | sed -e's:\s::g')
-RELEASE_DEPS_lucid = -Vrelease:Depends="libnetcdf4"
 RELEASE_DEPS_precise = -Vrelease:Depends="libnetcdf6"
 RELEASE_DEPS_trusty = -Vrelease:Depends="libnetcdfc7"
 

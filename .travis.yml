@@ -14,6 +14,7 @@ before_install:
 script:
  - sed -i "s:precise:${DIST}:g" debian/changelog
  - debuild -S -uc
+ - sudo chmod a+rwx /var/cache/pbuilder/ccache
  - pbuilder-dist ${DIST} build ../*.dsc
 
 after_success: coveralls --gcov-options '\-lp'

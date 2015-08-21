@@ -6,15 +6,15 @@ env:
  - DIST=trusty
 
 before_install:
- - cp -a .pbuilderrc $HOME
  - sudo apt-get update -qq
  - sudo apt-get install pbuilder aptitude
- - sudo pbuilder create --debootstrapopts --variant=buildd
-
-install:
+ - sudo pbuilder_dist ${DIST} create --debootstrapopts --variant=buildd
  - sudo pip install cpp-coveralls
 
-script: sudo debuild-pbuilder -us -uc
+script:
+ - sed -i "s:precise:${DIST}:g" debian/changelog
+ - debuild -S -uc
+ - pbuilder-dist ${DIST} build ../*.dsc
 
 after_success: coveralls --gcov-options '\-lp'
 

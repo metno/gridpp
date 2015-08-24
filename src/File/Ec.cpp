@@ -6,27 +6,28 @@
 
 FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
    // Set dimensions
-   NcDim* dTime = getDim("time");
-   NcDim* dEns  = getDim("ensemble_member");
-   NcDim* dLon  = getLonDim();
-   NcDim* dLat  = getLatDim();
-   mNTime = dTime->size();
-   mNEns  = dEns->size();
-   mNLat  = dLat->size();
-   mNLon  = dLon->size();
+   int dTime = getDim("time");
+   int dEns  = getDim("ensemble_member");
+   int dLon  = getLonDim();
+   int dLat  = getLatDim();
+   mNTime = getDimSize("time");
+   mNEns  = getDimSize("ensemble_member");
+   mNLat  = getDimSize(dLat);
+   mNLon  = getDimSize(dLon);
 
    // Retrieve lat/lon/elev
-   NcVar* vLat = getLatVar();
-   NcVar* vLon = getLonVar();
-   NcVar* vElev = getVar("altitude");
+   int vLat = getLatVar();
+   int vLon = getLonVar();
+   int vElev = getVar("altitude");
    mLats  = getGridValues(vLat);
    mLons  = getGridValues(vLon);
    mElevs = getGridValues(vElev);
 
    if(hasVar("time")) {
-      NcVar* vTime = getVar("time");
+      int vTime = getVar("time");
       double* times = new double[mNTime];
-      vTime->get(times , mNTime);
+      int status = nc_get_var_double(mFile, vTime, times);
+      handleNetcdfError(status, "could not get times");
       setTimes(std::vector<double>(times, times+mNTime));
       delete[] times;
    }
@@ -37,9 +38,10 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    }
 
    if(hasVar("forecast_reference_time")) {
-      NcVar* vReferenceTime = getVar("forecast_reference_time");
+      int vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
-      vReferenceTime->get(&referenceTime, 1);
+      int status = nc_get_var_double(mFile, vReferenceTime, &referenceTime);
+      handleNetcdfError(status, "could not get reference time");
       setReferenceTime(referenceTime);
    }
 
@@ -49,16 +51,16 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
 FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
    std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
-   NcVar* var = getVar(variable);
+   int var = getVar(variable);
    int nTime = mNTime;
    int nEns  = mNEns;
    int nLat  = mNLat;
    int nLon  = mNLon;
 
-   long count[5] = {1, 1, nEns, nLat, nLon};
+   size_t count[5] = {1, 1, nEns, nLat, nLon};
+   size_t start[5] = {iTime, 0, 0, 0, 0};
    float* values = new float[nTime*1*nEns*nLat*nLon];
-   var->set_cur(iTime, 0, 0, 0, 0);
-   var->get(values, count);
+   nc_get_vara_float(mFile, var, start, count, values);
    float MV = getMissingValue(var);
 
    float offset = getOffset(var);
@@ -87,32 +89,44 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
 }
 
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
+   int status = ncredef(mFile);
+   handleNetcdfError(status, "could not put into define mode");
+
+   // Define variables
+   for(int v = 0; v < iVariables.size(); v++) {
+      Variable::Type varType = iVariables[v];
+      std::string variable = getVariableName(varType);
+      int var = Util::MV;
+      if(!hasVariableCore(varType)) {
+         // Create variable
+         int dTime    = getDim("time");
+         int dSurface = getDim("surface");
+         int dEns     = getDim("ensemble_member");
+         int dLon = getLonDim();
+         int dLat = getLatDim();
+         int dims[5] = {dTime, dSurface, dEns, dLat, dLon};
+         int status = nc_def_var(mFile, variable.c_str(), NC_FLOAT, 5, dims, &var);
+         handleNetcdfError(status, "could not define variable");
+      }
+   }
+   status = ncendef(mFile);
+   handleNetcdfError(status, "could not put into data mode");
+
    writeTimes();
    writeReferenceTime();
    writeGlobalAttributes();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
-      NcVar* var;
-      if(hasVariableCore(varType)) {
-         var = getVar(variable);
-      }
-      else {
-         // Create variable
-         NcDim* dTime    = getDim("time");
-         NcDim* dSurface = getDim("surface");
-         NcDim* dEns     = getDim("ensemble_member");
-         NcDim* dLon     = getLonDim();
-         NcDim* dLat     = getLatDim();
-         var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dEns, dLat, dLon);
-      }
+      assert(hasVariableCore(varType));
+      int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            var->set_cur(t, 0, 0, 0, 0);
+            size_t start[5] = {t, 0, 0, 0, 0};
             float* values = new float[mNTime*1*mNEns*mNLat*mNLon];
 
             int index = 0;
@@ -133,15 +147,20 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
                   }
                }
             }
-            if(var->num_dims() == 5) {
-               var->put(values, 1, 1, mNEns, mNLat, mNLon);
+            int numDims = getNumDims(var);
+            if(numDims == 5) {
+               size_t count[5] = {1,1,mNEns, mNLat, mNLon};
+               int status = nc_put_vara_float(mFile, var, start, count, values);
+               handleNetcdfError(status, "could not write variable " + variable);
                setAttribute(var, "coordinates", "longitude latitude");
                setAttribute(var, "units", Variable::getUnits(varType));
                setAttribute(var, "standard_name", Variable::getStandardName(varType));
             }
             else {
-               Util::warning("Cannot write " + variable + " to '" + getFilename() +
-                             "' because it does not have 5 dimensions");
+               std::stringstream ss;
+               ss << "Cannot write " << variable << " to '" << getFilename() <<
+                             "' because it does not have 5 dimensions. It has " << numDims << " dimensions.";
+               Util::warning(ss.str());
             }
          }
       }
@@ -179,19 +198,20 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
 
 bool FileEc::isValid(std::string iFilename) {
    bool isValid = false;
-   NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
-   if(file.is_valid()) {
+   int file;
+   int status = nc_open(iFilename.c_str(), NC_NOWRITE, &file);
+   if(status == NC_NOERR) {
       isValid = hasDim(file, "time") &&
                (hasVar(file, "lat") || hasVar(file, "latitude")) &&
                (hasVar(file, "lon") || hasVar(file, "longitude")) &&
                hasDim(file, "ensemble_member") &&
                (hasDim(file, "lat") || hasDim(file, "latitude")  || hasDim(file, "y")) &&
                (hasDim(file, "lon") || hasDim(file, "longitude") || hasDim(file, "x"));
-      file.close();
+      nc_close(file);
    }
    return isValid;
 }
-vec2 FileEc::getGridValues(NcVar* iVar) const {
+vec2 FileEc::getGridValues(int iVar) const {
    // Initialize values
    vec2 grid;
    grid.resize(getNumLat());
@@ -201,13 +221,15 @@ vec2 FileEc::getGridValues(NcVar* iVar) const {
 
    // We have a lat/lon grid, where lat/lons are only provided along the pertinent dimension
    // Values are assumed to be constant across the other dimension.
-   if(iVar->num_dims() == 1) {
-      long size = iVar->get_dim(0)->size();
-      long count[1] = {size};
+   int numDims = getNumDims(iVar);
+   if(numDims == 1) {
+      int dim;
+      nc_inq_vardimid(mFile, iVar, &dim);
+      long size = getDimSize(dim);
       float* values = new float[size];
-      iVar->get(values, count);
+      nc_get_var_float(mFile, iVar, values);
       // Latitude variable
-      if(iVar->get_dim(0) == getLatDim()) {
+      if(dim == getLatDim()) {
          for(int i = 0; i < getNumLat(); i++) {
             for(int j = 0; j < getNumLon(); j++) {
                grid[i][j] = values[i];
@@ -215,7 +237,7 @@ vec2 FileEc::getGridValues(NcVar* iVar) const {
          }
       }
       // Longitude variable
-      else if(iVar->get_dim(0) == getLonDim()) {
+      else if(dim == getLonDim()) {
          for(int i = 0; i < getNumLat(); i++) {
             for(int j = 0; j < getNumLon(); j++) {
                grid[i][j] = values[j];
@@ -224,25 +246,27 @@ vec2 FileEc::getGridValues(NcVar* iVar) const {
       }
       else {
          std::stringstream ss;
-         ss << "Variable " << iVar->name() << " does not have lat or lon dimension";
+         ss << "Missing lat or lon dimension";
          Util::error(ss.str());
       }
       delete[] values;
    }
    // We have a projected grid, where lat and lons are provided for each grid point
    else {
-      int N = iVar->num_dims();
+      int N = getNumDims(iVar);
       long count[N];
       int size = 1;
       int indexLat = Util::MV;
       int indexLon = Util::MV;
+      int dims[N];
+      nc_inq_vardimid(mFile, iVar, dims);
       for(int i = 0; i < N; i++) {
-         if(iVar->get_dim(i) == getLatDim()) {
+         if(dims[i] == getLatDim()) {
             count[i] = getNumLat();
             size *= count[i];
             indexLat = i;
          }
-         else if(iVar->get_dim(i) == getLonDim()) {
+         else if(dims[i] == getLonDim()) {
             count[i] = getNumLon();
             size *= count[i];
             indexLon = i;
@@ -253,11 +277,11 @@ vec2 FileEc::getGridValues(NcVar* iVar) const {
       }
       if(!Util::isValid(indexLat) || !Util::isValid(indexLon)) {
          std::stringstream ss;
-         ss << "Variable " << iVar->name() << " does not have lat and/or lon dimensions";
+         ss << "Missing lat and/or lon dimensions";
          Util::error(ss.str());
       }
       float* values = new float[size];
-      iVar->get(values, count);
+      nc_get_var_float(mFile, iVar, values);
       for(int i = 0; i < getNumLat(); i++) {
          for(int j = 0; j < getNumLon(); j++) {
             // Latitude dimension is ordered first
@@ -275,8 +299,8 @@ vec2 FileEc::getGridValues(NcVar* iVar) const {
    return grid;
 }
 
-NcDim* FileEc::getLatDim() const {
-   NcDim* dLat;
+int FileEc::getLatDim() const {
+   int dLat;
    if(hasDim("y"))
       dLat = getDim("y");
    else if(hasDim("latitude"))
@@ -285,8 +309,8 @@ NcDim* FileEc::getLatDim() const {
       dLat = getDim("lat");
    return dLat;
 }
-NcDim* FileEc::getLonDim() const {
-   NcDim* dLon;
+int FileEc::getLonDim() const {
+   int dLon;
    if(hasDim("x"))
       dLon = getDim("x");
    else if(hasDim("longitude"))
@@ -295,16 +319,16 @@ NcDim* FileEc::getLonDim() const {
       dLon = getDim("lon");
    return dLon;
 }
-NcVar* FileEc::getLatVar() const {
-   NcVar* vLat;
+int FileEc::getLatVar() const {
+   int vLat;
    if(hasVar("latitude"))
       vLat = getVar("latitude");
    else
       vLat = getVar("lat");
    return vLat;
 }
-NcVar* FileEc::getLonVar() const {
-   NcVar* vLon;
+int FileEc::getLonVar() const {
+   int vLon;
    if(hasVar("longitude"))
       vLon = getVar("longitude");
    else

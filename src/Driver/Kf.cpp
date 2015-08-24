@@ -50,10 +50,10 @@ int main(int argc, const char *argv[]) {
    options.getValue("output", outputFilename);
 
    KalmanFilter kf(Variable::T, 0.1);
-   ParameterFileSpatial dataFile   = ParameterFileSpatial(dataFilename);
-   ParameterFileSpatial currFile   = ParameterFileSpatial(currentFilename);
-   ParameterFileSpatial newFile    = ParameterFileSpatial(newFilename);
-   ParameterFileSpatial outputFile = ParameterFileSpatial(outputFilename);
+   ParameterFileText dataFile(Options("file=" + dataFilename + " spatial=1"));
+   ParameterFileText currFile(Options("file=" + currentFilename + " spatial=1"));
+   ParameterFileText newFile(Options("file=" + newFilename + " spatial=1"));
+   ParameterFileText outputFile(Options("file=" + outputFilename + " spatial=1"));
 
    std::vector<int>      times     = Util::combine(dataFile.getTimes(), currFile.getTimes());
    std::vector<Location> locations = Util::combine(dataFile.getLocations(), currFile.getLocations());

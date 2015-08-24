@@ -4,6 +4,8 @@ gridpp
 gridpp_debug
 gridpp_train
 gridpp_train_debug
+gridpp_kf
+gridpp_kf_debug
 *.nc
 gmon.out
 tags

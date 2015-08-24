@@ -136,5 +136,6 @@ std::string ParameterFileNetcdf::description() {
    ss << Util::formatDescription("-p netcdf", "Parameters stored in a Netcdf file. File must have contain: dimensions time, lat (or y), lon (or x), coeff; variables with dims: time[time], latitude[lat,lon], longitude[lat,lon], coefficients[time,lat,lon,coeff]. The number of parameters in a set must be constant and equals the size of the 'coeff' dimension.") << std::endl;
    ss << Util::formatDescription("   dimName=coefficient", "What is the name of the dimension representing different coefficients?") << std::endl;
    ss << Util::formatDescription("   varName=coeff", "What is the name of the variable containing the coefficients?") << std::endl;
+   ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
    return ss.str();
 }

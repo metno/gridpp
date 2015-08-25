@@ -7,13 +7,13 @@ env:
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install pbuilder aptitude ubuntu-dev-tools
+ - for CHAR in $(seq 0 9) a b c d e f; do sudo mkdir -p /var/cache/pbuilder/ccache/${CHAR}; done
  - pbuilder-dist ${DIST} create --debootstrapopts --variant=buildd
  - sudo pip install cpp-coveralls
 
 script:
  - sed -i "s:precise:${DIST}:g" debian/changelog
  - debuild -S -uc
- - sudo chmod a+rwx /var/cache/pbuilder/ccache
  - pbuilder-dist ${DIST} build ../*.dsc
 
 after_success: coveralls --gcov-options '\-lp'

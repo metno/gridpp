@@ -9,15 +9,14 @@
 ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFile(iOptions),
       mDimName("coeff"),
       mVarName("coefficient") {
-   NcFile file(getFilename().c_str(), NcFile::ReadOnly);
-   if(!file.is_valid()) {
-      Util::error("Parameter file " + getFilename() + " not valid");
-   }
+   int file;
+   int status = nc_open(getFilename().c_str(), NC_NOWRITE, &file);
+   handleNetcdfError(status, "invalid parameter file");
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
 
-   NcDim* dTime = getDim(file, "time");
-   NcDim* dLon;
+   int dTime = getDim(file, "time");
+   int dLon;
    if(hasDim(file, "lon"))
       dLon = getDim(file, "lon");
    else if(hasDim(file, "x"))
@@ -25,7 +24,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    else {
       Util::error("Could not determine longitude dimension in " + getFilename());
    }
-   NcDim* dLat;
+   int dLat;
    if(hasDim(file, "lat"))
       dLat = getDim(file, "lat");
    else if(hasDim(file, "y"))
@@ -33,24 +32,27 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    else {
       Util::error("Could not determine latitude dimension in " + getFilename());
    }
-   NcDim* dCoeff = getDim(file, mDimName);
-   int nTime  = dTime->size();
-   int nLat   = dLat->size();
-   int nLon   = dLon->size();
-   int nCoeff = dCoeff->size();
+   int dCoeff = getDim(file, mDimName);
+   int nTime  = getDimSize(file, dTime);
+   int nLat   = getDimSize(file, dLat);
+   int nLon   = getDimSize(file, dLon);
+   int nCoeff = getDimSize(file, dCoeff);
 
    // get lats lons
    long count2[2] = {nLat, nLon};
-   NcVar* vLat = getVar(file, "latitude");
-   NcVar* vLon = getVar(file, "longitude");
-   NcVar* vElev = getVar(file, "altitude");
+   int vLat = getVar(file, "latitude");
+   int vLon = getVar(file, "longitude");
+   int vElev = getVar(file, "altitude");
    float* lats = new float[nLat*nLon];
    float* lons = new float[nLat*nLon];
    float* elevs = new float[nLat*nLon];
-   vLat->get(lats, count2);
-   vLon->get(lons, count2);
+   status = nc_get_var_float(file, vLat, lats);
+   handleNetcdfError(status, "could not get latitudes");
+   status = nc_get_var_float(file, vLon, lons);
+   handleNetcdfError(status, "could not get longitudes");
    if(hasVar(file, "altitude")) {
-      vElev->get(elevs, count2);
+      status = nc_get_var_float(file, vElev, elevs);
+      handleNetcdfError(status, "could not get altitudes");
    }
    else {
       for(int i = 0; i < nLat*nLon; i++) {
@@ -58,14 +60,15 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       }
    }
 
-   NcVar* vTime = getVar(file, "time");
+   int vTime = getVar(file, "time");
    double* times = new double[nTime];
-   vTime->get(times , nTime);
+   status = nc_get_var_double(file, vTime, times);
+   handleNetcdfError(status, "could not get times");
 
-   NcVar* var = getVar(file, mVarName);
-   long count[4] = {nTime, nLat, nLon, nCoeff};
+   int var = getVar(file, mVarName);
    float* values = new float[nLat*nLon*nTime*nCoeff];
-   var->get(values, count);
+   status = nc_get_var_float(file, var, values);
+   handleNetcdfError(status, "could not get parameter values");
    int index = 0;
    for(int t = 0; t < nTime; t++) {
       mTimes.push_back(t);
@@ -91,20 +94,21 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    delete[] times;
 }
 
-NcDim* ParameterFileNetcdf::getDim(const NcFile& iFile, std::string iDim) const {
-   NcError q(NcError::silent_nonfatal); 
-   NcDim* dim = iFile.get_dim(iDim.c_str());
-   if(dim == NULL) {
+int ParameterFileNetcdf::getDim(int iFile, std::string iDim) const {
+   int dim;
+   int status = nc_inq_dimid(iFile, iDim.c_str(), &dim);
+   if(status != NC_NOERR) {
       std::stringstream ss;
       ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
       Util::error(ss.str());
    }
    return dim;
 }
-NcVar* ParameterFileNetcdf::getVar(const NcFile& iFile, std::string iVar) const {
-   NcError q(NcError::silent_nonfatal); 
-   NcVar* var = iFile.get_var(iVar.c_str());
-   if(var == NULL) {
+
+int ParameterFileNetcdf::getVar(int iFile, std::string iVar) const {
+   int var;
+   int status = nc_inq_varid(iFile, iVar.c_str(), &var);
+   if(status != NC_NOERR) {
       std::stringstream ss;
       ss << "File '" << getFilename() << "' does not have variable '" << iVar << "'";
       Util::error(ss.str());
@@ -112,23 +116,31 @@ NcVar* ParameterFileNetcdf::getVar(const NcFile& iFile, std::string iVar) const 
    return var;
 }
 
+bool ParameterFileNetcdf::hasDim(int iFile, std::string iDim) {
+   int dim;
+   int status = nc_inq_dimid(iFile, iDim.c_str(), &dim);
+   return status == NC_NOERR;
+}
+
+bool ParameterFileNetcdf::hasVar(int iFile, std::string iVar) {
+   int var;
+   int status = nc_inq_varid(iFile, iVar.c_str(), &var);
+   return status == NC_NOERR;
+}
+
+int ParameterFileNetcdf::getDimSize(int iFile, int iDim) const {
+   size_t len;
+   int status = nc_inq_dimlen(iFile, iDim, &len);
+   return len;
+}
+
+
 std::vector<int> ParameterFileNetcdf::getTimes() const {
    return mTimes;
 }
 
 bool ParameterFileNetcdf::isValid(std::string iFilename) {
    return true;
-}
-bool ParameterFileNetcdf::hasDim(const NcFile& iFile, std::string iDim) const {
-   NcError q(NcError::silent_nonfatal); 
-   NcDim* dim = iFile.get_dim(iDim.c_str());
-   return dim != NULL;
-}
-bool ParameterFileNetcdf::hasVar(const NcFile& iFile, std::string iVar) const {
-   NcError q(NcError::silent_nonfatal); 
-
-   NcVar* var = iFile.get_var(iVar.c_str());
-   return var != NULL;
 }
 
 std::string ParameterFileNetcdf::description() {
@@ -138,4 +150,25 @@ std::string ParameterFileNetcdf::description() {
    ss << Util::formatDescription("   varName=coeff", "What is the name of the variable containing the coefficients?") << std::endl;
    ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
    return ss.str();
+}
+void ParameterFileNetcdf::write() const {
+   std::vector<Location> locations = getLocations();
+   std::vector<int> times = getTimes();
+
+
+
+}
+
+void ParameterFileNetcdf::handleNetcdfError(int status, std::string message) const {
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      if(message == "") {
+         ss << "Netcdf error when reading/writing " << getFilename() << ". Netcdf error code: " << status << ".";
+      }
+      else {
+         ss << "Netcdf error for file " << getFilename() << ": " << message << ". "
+            << "Netcdf error code: " << status << ".";
+      }
+      Util::error(ss.str());
+   }
 }

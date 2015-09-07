@@ -1,7 +1,7 @@
 #ifndef PARAMETER_FILE_NETCDF_H
 #define PARAMETER_FILE_NETCDF_H
 #include <iostream>
-#include <netcdf.hh>
+#include <netcdf.h>
 #include <map>
 #include "ParameterFile.h"
 #include "../Parameters.h"
@@ -18,14 +18,18 @@ class ParameterFileNetcdf : public ParameterFile {
 
       static std::string description();
       std::string name() const {return "netcdf";};
+
+      void write() const;
    private:
       std::vector<int> mTimes;
       float mLocalMV;
-      NcDim* getDim(const NcFile& iFile, std::string iDim) const;
-      NcVar* getVar(const NcFile& iFile, std::string iVar) const;
-      bool hasDim(const NcFile& iFile, std::string iDim) const;
-      bool hasVar(const NcFile& iFile, std::string iVar) const;
+      int    getDim(int iFile, std::string iDim) const;
+      int    getVar(int iFile, std::string iVar) const;
+      int    getDimSize(int iFile, int iDim) const;
+      static bool   hasDim(int iFile, std::string iDim);
+      static bool   hasVar(int iFile, std::string iVar);
       std::string mDimName;
       std::string mVarName;
+      void handleNetcdfError(int status, std::string message="") const;
 };
 #endif

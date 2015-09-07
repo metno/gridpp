@@ -6,12 +6,9 @@
 
 FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
    // Set dimensions
-   NcDim* dTime = getDim("time");
-   NcDim* dLon  = getDim("x");
-   NcDim* dLat  = getDim("y");
-   mNTime = dTime->size();
-   mNLat  = dLat->size();
-   mNLon  = dLon->size();
+   mNTime = getDimSize("time");
+   mNLat  = getDimSize("y");
+   mNLon  = getDimSize("x");
    mNEns  = 1;
 
    mLats = getLatLonVariable("latitude");
@@ -46,9 +43,10 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
    }
 
    if(hasVar("time")) {
-      NcVar* vTime = getVar("time");
+      int vTime = getVar("time");
       double* times = new double[mNTime];
-      vTime->get(times , mNTime);
+      int status = nc_get_var_double(mFile, vTime, times);
+      handleNetcdfError(status, "could not get times");
       setTimes(std::vector<double>(times, times+mNTime));
       delete[] times;
    }
@@ -59,9 +57,10 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
    }
 
    if(hasVar("forecast_reference_time")) {
-      NcVar* vReferenceTime = getVar("forecast_reference_time");
+      int vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
-      vReferenceTime->get(&referenceTime, 1);
+      int status = nc_get_var_double(mFile, vReferenceTime, &referenceTime);
+      handleNetcdfError(status, "could not get reference time");
       setReferenceTime(referenceTime);
    }
 
@@ -74,29 +73,37 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
 }
 FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
    // Not cached, retrieve data
-   NcVar* var = getVar(iVariable);
+   int var = getVar(iVariable);
    int nLat  = mNLat;
    int nLon  = mNLon;
 
-   int numDims = var->num_dims();
+   int numDims = getNumDims(var);
 
-   long* count;
+   size_t* count;
+   size_t* start;
    long totalCount = nLat*nLon;
    if(numDims == 4) {
       // Variable has a surface dimension
-      count = new long[4];
+      count = new size_t[4];
       count[0] = 1;
       count[1] = 1;
       count[2] = nLat;
       count[3] = nLon;
-      var->set_cur(iTime, 0, 0, 0);
+      start = new size_t[4];
+      start[0] = iTime;
+      start[1] = 0;
+      start[2] = 0;
+      start[3] = 0;
    }
    else if(numDims == 3) {
-      count = new long[3];
+      count = new size_t[3];
       count[0] = 1;
       count[1] = nLat;
       count[2] = nLon;
-      var->set_cur(iTime, 0, 0);
+      start = new size_t[3];
+      start[0] = iTime;
+      start[1] = 0;
+      start[2] = 0;
    }
    else {
       std::stringstream ss;
@@ -104,7 +111,7 @@ FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
       Util::error(ss.str());
    }
    float* values = new float[nLat*nLon];
-   var->get(values, count);
+   nc_get_vara_float(mFile, var, start, count, values);
    float MV = getMissingValue(var);
 
    float offset = getOffset(var);
@@ -129,6 +136,7 @@ FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
    }
    delete[] values;
    delete[] count;
+   delete[] start;
    return field;
 }
 
@@ -136,32 +144,35 @@ FileArome::~FileArome() {
 }
 
 void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
+   int status = ncredef(mFile);
+   handleNetcdfError(status, "could not put into define mode");
+
+   // Define variables
+   for(int v = 0; v < iVariables.size(); v++) {
+      Variable::Type varType = iVariables[v];
+      std::string variable = getVariableName(varType);
+      int var;
+      if(!hasVariableCore(varType)) {
+         // Create variable
+         int dTime    = getDim("time");
+         int dLon     = getDim("x");
+         int dLat     = getDim("y");
+         int dims[3]  = {dTime, dLat, dLon};
+         int status = nc_def_var(mFile,variable.c_str(), NC_DOUBLE, 1, dims, &var);
+         handleNetcdfError(status, "could not define variable");
+      }
+   }
+   status = ncendef(mFile);
+   handleNetcdfError(status, "could not put into data mode");
+
    writeTimes();
    writeReferenceTime();
    writeGlobalAttributes();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
-      NcVar* var;
-      if(hasVariableCore(varType)) {
-         var = getVar(variable);
-      }
-      else {
-         // Create variable
-         if(0) {
-            NcDim* dTime    = getDim("time");
-            NcDim* dSurface = getDim("height0");
-            NcDim* dLon     = getDim("x");
-            NcDim* dLat     = getDim("y");
-            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dSurface, dLat, dLon);
-         }
-         else {
-            NcDim* dTime    = getDim("time");
-            NcDim* dLon     = getDim("x");
-            NcDim* dLat     = getDim("y");
-            var = mFile.add_var(variable.c_str(), ncFloat, dTime, dLat, dLon);
-         }
-      }
+      assert(hasVariableCore(varType));
+      int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
@@ -186,14 +197,20 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                   index++;
                }
             }
-            int numDims = var->num_dims();
+            int numDims;
+            int status = nc_inq_varndims(mFile, var, &numDims);
+            handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
             if(numDims == 4) {
-               var->set_cur(t, 0, 0, 0);
-               var->put(values, 1, 1, mNLat, mNLon);
+               size_t count[4] = {1, 1, mNLat, mNLon};
+               size_t start[4] = {t, 0, 0, 0};
+               int status = nc_put_vara_float(mFile, var, start, count, values);
+               handleNetcdfError(status, "could not write variable " + variable);
             }
             else if(numDims == 3) {
-               var->set_cur(t, 0, 0);
-               var->put(values, 1, mNLat, mNLon);
+               size_t count[3] = {1, mNLat, mNLon};
+               size_t start[3] = {t, 0, 0};
+               int status = nc_put_vara_float(mFile, var, start, count, values);
+               handleNetcdfError(status, "could not write variable " + variable);
             }
             else {
                std::stringstream ss;
@@ -271,11 +288,12 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    return "";
 }
 vec2 FileArome::getLatLonVariable(std::string iVar) const {
-   NcVar* var = getVar(iVar);
+   int var = getVar(iVar);
    float MV = getMissingValue(var);
    long count[2] = {getNumLat(), getNumLon()};
    float* values = new float[getNumLon()*getNumLat()];
-   var->get(values, count);
+   int status = nc_get_var_float(mFile, var, values);
+   handleNetcdfError(status, "could not get data from variable " + iVar);
    vec2 grid;
    grid.resize(getNumLat());
    for(int i = 0; i < getNumLat(); i++) {
@@ -297,15 +315,16 @@ int FileArome::getDate() const {
 }
 
 bool FileArome::isValid(std::string iFilename) {
-   bool status = false;
-   NcFile file = NcFile(iFilename.c_str(), NcFile::ReadOnly);
-   if(file.is_valid()) {
-      status = hasDim(file, "time") && hasDim(file, "x") && hasDim(file, "y") &&
+   bool isValid = false;
+   int file;
+   int status = nc_open(iFilename.c_str(), NC_NOWRITE, &file);
+   if(status == NC_NOERR) {
+      isValid = hasDim(file, "time") && hasDim(file, "x") && hasDim(file, "y") &&
                !hasDim(file, "ensemble_member") &&
                hasVar(file, "latitude") && hasVar(file, "longitude");
    }
-   file.close();
-   return status;
+   nc_close(file);
+   return isValid;
 }
 
 std::string FileArome::description() {

@@ -28,10 +28,10 @@ class FileEc : public FileNetcdf {
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
 
       std::vector<int> mTimes;
-      vec2 getGridValues(NcVar* iVariable) const;
-      NcDim* getLatDim() const;
-      NcDim* getLonDim() const;
-      NcVar* getLatVar() const;
-      NcVar* getLonVar() const;
+      vec2 getGridValues(int iVariable) const;
+      int getLatDim() const;
+      int getLonDim() const;
+      int getLatVar() const;
+      int getLonVar() const;
 };
 #endif

@@ -137,9 +137,14 @@ void FileNetcdf::appendGlobalAttribute(std::string iName, std::string iValue) {
    int id;
    int status = nc_inq_attid(mFile, NC_GLOBAL, iName.c_str(), &id);
    if(status == NC_NOERR) {
+      size_t len;
+      int status = nc_inq_attlen(mFile, NC_GLOBAL, iName.c_str(), &len);
+      handleNetcdfError(status, "could not determine global attribute length");
+
       char value[10000];
-      int status = nc_get_att_text(mFile, NC_GLOBAL, iName.c_str(), value);
+      status = nc_get_att_text(mFile, NC_GLOBAL, iName.c_str(), value);
       handleNetcdfError(status, "could not append global attribute");
+      value[len] = '\0';
       std::stringstream ss;
       ss << value << "\n" << iValue;
       setGlobalAttribute(iName, ss.str());
@@ -153,9 +158,14 @@ void FileNetcdf::prependGlobalAttribute(std::string iName, std::string iValue) {
    int id;
    int status = nc_inq_attid(mFile, NC_GLOBAL, iName.c_str(), &id);
    if(status == NC_NOERR) {
+      size_t len;
+      int status = nc_inq_attlen(mFile, NC_GLOBAL, iName.c_str(), &len);
+      handleNetcdfError(status, "could not determine global attribute length");
+
       char value[10000];
-      int status = nc_get_att_text(mFile, NC_GLOBAL, iName.c_str(), value);
+      status = nc_get_att_text(mFile, NC_GLOBAL, iName.c_str(), value);
       handleNetcdfError(status, "could not get attribute when prepending a new value");
+      value[len] = '\0';
       std::stringstream ss;
       ss << iValue << "\n" << value;
       setGlobalAttribute(iName, ss.str());

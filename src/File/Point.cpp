@@ -34,28 +34,45 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    mNLon = 1;
    mNEns = 1;
    std::vector<double> times;
+   mNTime = Util::MV;
+   mNEns = Util::MV;
 
-   // Determine the times for this filetype.
-   if(iOptions.getValue("time", mNTime)) {
-      // Empty file, probably used as output only
-      for(int i = 0; i < mNTime; i++)
-         times.push_back(Util::MV);
-   }
-   else {
-      // Existing file
-      std::ifstream ifs(getFilename().c_str());
-      if(ifs.good()) {
-         while(ifs.good()) {
-            double time, value;
-            ifs >> time >> value;
-            if(ifs.good())
-               times.push_back(time);
+   // Determine time and ensemble dimension if possible
+   std::ifstream ifs(getFilename().c_str());
+   if(ifs.good()) {
+      while(ifs.good()) {
+         char line[10000];
+         ifs.getline(line, 10000, '\n');
+         if(ifs.good() && line[0] != '#') {
+            std::stringstream ss(line);
+            double time;
+            ss >> time;
+            times.push_back(time);
+            double value;
+            mNEns = 0;
+            while(ss >> value) {
+               mNEns++;
+            }
          }
          mNTime = times.size();
       }
-      else {
-         Util::error("Missing 'time' option for empty file '" + iFilename + "'");
-      }
+   }
+
+   // Otherwise get the time or ensemble dimension from options
+   iOptions.getValue("ens", mNEns);
+   if(iOptions.getValue("time", mNTime)) {
+      times.clear();
+      // Empty file, probably used as output only
+      for(int i = 0; i < mNTime; i++)
+         times.push_back(i);
+   }
+
+   // Check that we got time and ensemble dimension
+   if(!Util::isValid(mNTime)) {
+      Util::error("Missing 'time' option for empty file '" + iFilename + "'");
+   }
+   if(!Util::isValid(mNEns)) {
+      Util::error("Missing 'ens' option for empty file '" + iFilename + "'");
    }
    setTimes(times);
 }
@@ -66,12 +83,38 @@ FilePoint::~FilePoint() {
 FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
    std::ifstream ifs(getFilename().c_str());
    FieldPtr field = getEmptyField();
-   for(int i = 0; i < getNumTime(); i++) {
-      float time, value;
-      ifs >> time >> value;
-      if(i == iTime)
-         (*field)(0,0,0) = value;
+
+   int row = 0;
+   while(ifs.good()) {
+      char line[10000];
+      ifs.getline(line, 10000, '\n');
+      if(ifs.good() && line[0] != '#') {
+         std::stringstream ss(line);
+         double time;
+         ss >> time;
+
+         if(time == iTime) {
+            double value;
+            int e = 0;
+            while(ss >> value) {
+               if(e >= mNEns) {
+                  std::stringstream ss;
+                  ss << "Row " << row << " in file '" << getFilename() << "' has too many members (expecting " << mNEns << ")" << std::endl;
+                  Util::error(ss.str());
+               }
+               (*field)(0,0,e) = value;
+               e++;
+            }
+            if(e != mNEns) {
+               std::stringstream ss;
+               ss << "Row " << row << " in file '" << getFilename() << "' has too many members (expecting " << mNEns << ")" << std::endl;
+               Util::error(ss.str());
+            }
+         }
+      }
+      row++;
    }
+
    ifs.close();
    return field;
 }
@@ -89,7 +132,9 @@ void FilePoint::writeCore(std::vector<Variable::Type> iVariables) {
       if(field != NULL) {
          ofs << (long) getTimes()[i];
          ofs.precision(2);
-         ofs << std::fixed << " " << (*field)(0,0,0);
+         for(int e = 0; e < getNumEns(); e++) {
+            ofs << std::fixed << " " << (*field)(0,0,e);
+         }
          ofs << std::endl;
       }
    }
@@ -98,10 +143,11 @@ void FilePoint::writeCore(std::vector<Variable::Type> iVariables) {
 
 std::string FilePoint::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("type=point", "Point file for one location. Each row is a time when the first column is the UNIX time and the second the forecast value.") << std::endl;
+   ss << Util::formatDescription("type=point", "Point file for one location. Each row contains columns where the first column is the UNIX time and the second and onward columns are an ensemble of forecast values (each member has one column).") << std::endl;
    ss << Util::formatDescription("   lat=required", "Latitude (in degrees, north is positive)") << std::endl;
    ss << Util::formatDescription("   lon=required", "Longitude (in degrees, east is positive)") << std::endl;
    ss << Util::formatDescription("   elev=required", "Elevation (in meters)") << std::endl;
    ss << Util::formatDescription("   time=undef", "Number of times. Required if the file does not exist.") << std::endl;
+   ss << Util::formatDescription("   ens=1", "Number of ensemble members.") << std::endl;
    return ss.str();
 }

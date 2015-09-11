@@ -42,15 +42,15 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    long count2[2] = {nLat, nLon};
    int vLat = getVar(file, "latitude");
    int vLon = getVar(file, "longitude");
-   int vElev = getVar(file, "altitude");
    float* lats = new float[nLat*nLon];
    float* lons = new float[nLat*nLon];
-   float* elevs = new float[nLat*nLon];
    status = nc_get_var_float(file, vLat, lats);
    handleNetcdfError(status, "could not get latitudes");
    status = nc_get_var_float(file, vLon, lons);
    handleNetcdfError(status, "could not get longitudes");
+   float* elevs = new float[nLat*nLon];
    if(hasVar(file, "altitude")) {
+      int vElev = getVar(file, "altitude");
       status = nc_get_var_float(file, vElev, elevs);
       handleNetcdfError(status, "could not get altitudes");
    }
@@ -154,9 +154,6 @@ std::string ParameterFileNetcdf::description() {
 void ParameterFileNetcdf::write() const {
    std::vector<Location> locations = getLocations();
    std::vector<int> times = getTimes();
-
-
-
 }
 
 void ParameterFileNetcdf::handleNetcdfError(int status, std::string message) const {

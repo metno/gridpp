@@ -27,19 +27,21 @@ CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
    }
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
-   int nEns = iFile.getNumEns();
-   int nTime = iFile.getNumTime();
-   vec2 lats = iFile.getLats();
-   vec2 lons = iFile.getLons();
-   vec2 elevs = iFile.getElevs();
+   const int nLat = iFile.getNumLat();
+   const int nLon = iFile.getNumLon();
+   const int nEns = iFile.getNumEns();
+   const int nTime = iFile.getNumTime();
+   const vec2 lats = iFile.getLats();
+   const vec2 lons = iFile.getLons();
+   const vec2 elevs = iFile.getElevs();
 
    if(iParameterFile->getNumParameters() % 2 != 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
    }
 
    for(int t = 0; t < nTime; t++) {
+      // Retrieve the calibration parameters for this time
+      // Overwrite them later if they are location dependent
       std::vector<float> obsVec, fcstVec;
       Parameters parameters;
       if(!iParameterFile->isLocationDependent()) {
@@ -48,7 +50,7 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
       const FieldPtr field = iFile.getField(mVariable, t);
 
-      #pragma omp parallel for
+      #pragma omp parallel for private(obsVec,fcstVec,parameters)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             int N = obsVec.size();

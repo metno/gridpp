@@ -42,7 +42,7 @@ class FileNetcdf : public File {
       bool   hasVar(std::string iVar) const;
       static bool   hasDim(int iFile, std::string iDim);
       static bool   hasVar(int iFile, std::string iVar);
-      float getMissingValue(int iVar)const ;
+      float getMissingValue(int iVar) const;
       void  setMissingValue(int iVar, float iValue)const ;
       void writeTimes();
       void writeReferenceTime();

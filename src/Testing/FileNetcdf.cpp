@@ -31,6 +31,11 @@ namespace {
       file.setGlobalAttribute("history2", "test123");
       EXPECT_EQ("test123", file.getGlobalAttribute("history2"));
    }
+   TEST_F(FileNetcdf, missingAttribute) {
+      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      std::string att = file.getGlobalAttribute("qowhoiqfhoiqhdow");
+      EXPECT_EQ("", att);
+   }
    TEST_F(FileNetcdf, appendAttribute) {
       // Check that appending and prepending works
       FileArome file = FileArome("testing/files/10x10_copy.nc");

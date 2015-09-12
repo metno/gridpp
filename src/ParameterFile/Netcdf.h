@@ -23,6 +23,11 @@ class ParameterFileNetcdf : public ParameterFile {
    private:
       std::vector<int> mTimes;
       float mLocalMV;
+      int    getLatDim(int iFile) const;
+      int    getLonDim(int iFile) const;
+      int    getTimeDim(int iFile) const;
+      int    getCoefficientDim(int iFile) const;
+
       int    getDim(int iFile, std::string iDim) const;
       int    getVar(int iFile, std::string iVar) const;
       int    getDimSize(int iFile, int iDim) const;
@@ -31,5 +36,12 @@ class ParameterFileNetcdf : public ParameterFile {
       std::string mDimName;
       std::string mVarName;
       void handleNetcdfError(int status, std::string message="") const;
+      //! Convert linear index 'i' to vector 'iInidices'. 'iCount' specifies the size of the data
+      //! Using row-major ordering (last index varies fastest)
+      std::vector<int> getIndices(int i, const std::vector<int>& iCount) const;
+
+      // Read variable from file, convert missing values
+      // User must release memory
+      float* getNcFloats(int iFile, int iVar);
 };
 #endif

@@ -19,6 +19,8 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    int dLon;
    if(hasDim(file, "lon"))
       dLon = getDim(file, "lon");
+   else if(hasDim(file, "longitude"))
+      dLon = getDim(file, "longitude");
    else if(hasDim(file, "x"))
       dLon = getDim(file, "x");
    else {
@@ -27,6 +29,8 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    int dLat;
    if(hasDim(file, "lat"))
       dLat = getDim(file, "lat");
+   else if(hasDim(file, "latitude"))
+      dLat = getDim(file, "latitude");
    else if(hasDim(file, "y"))
       dLat = getDim(file, "y");
    else {
@@ -38,16 +42,32 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    int nLon   = getDimSize(file, dLon);
    int nCoeff = getDimSize(file, dCoeff);
 
-   // get lats lons
    long count2[2] = {nLat, nLon};
-   int vLat = getVar(file, "latitude");
-   int vLon = getVar(file, "longitude");
+   // Get latitudes
+   int vLat = Util::MV;
+   if(hasVar(file, "lat"))
+      vLat = getVar(file, "lat");
+   else if(hasVar(file, "latitude"))
+      vLat = getVar(file, "latitude");
+   else
+      Util::error("Could not determine latitude variable");
    float* lats = new float[nLat*nLon];
-   float* lons = new float[nLat*nLon];
    status = nc_get_var_float(file, vLat, lats);
    handleNetcdfError(status, "could not get latitudes");
+
+   // Get longitudes
+   int vLon = Util::MV;
+   if(hasVar(file, "lon"))
+      vLon = getVar(file, "lon");
+   else if(hasVar(file, "longitude"))
+      vLon = getVar(file, "longitude");
+   else
+      Util::error("Could not determine longitude variable");
+   float* lons = new float[nLat*nLon];
    status = nc_get_var_float(file, vLon, lons);
    handleNetcdfError(status, "could not get longitudes");
+
+   // Get elevations
    float* elevs = new float[nLat*nLon];
    if(hasVar(file, "altitude")) {
       int vElev = getVar(file, "altitude");

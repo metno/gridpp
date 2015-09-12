@@ -58,62 +58,69 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
                separate(parameters, obsVec, fcstVec);
             }
-            for(int e = 0; e < nEns; e++) {
-               float raw = (*field)(i,j,e);
-               float value = Util::MV;
-               if(Util::isValid(raw)) {
-                  float smallestObs  = obsVec[0];
-                  float smallestFcst = fcstVec[0];
-                  float largestObs   = obsVec[obsVec.size()-1];
-                  float largestFcst  = fcstVec[fcstVec.size()-1];
+            // Only process if all parameters are valid
+            bool hasValidParameters = true;
+            for(int p = 0; p < parameters.size(); p++) {
+               hasValidParameters = hasValidParameters && Util::isValid(parameters[p]);
+            }
+            if(hasValidParameters) {
+               for(int e = 0; e < nEns; e++) {
+                  float raw = (*field)(i,j,e);
+                  float value = Util::MV;
+                  if(Util::isValid(raw)) {
+                     float smallestObs  = obsVec[0];
+                     float smallestFcst = fcstVec[0];
+                     float largestObs   = obsVec[obsVec.size()-1];
+                     float largestFcst  = fcstVec[fcstVec.size()-1];
 
-                  // Linear interpolation within curve
-                  if(raw > smallestFcst && raw < largestFcst) {
-                     value = Util::interpolate(raw, fcstVec, obsVec);
-                  }
-                  // Extrapolate outside curve
-                  else {
-                     float nearestObs;
-                     float nearestFcst;
-                     if(raw <= smallestFcst) {
-                        nearestObs  = smallestObs;
-                        nearestFcst = smallestFcst;
+                     // Linear interpolation within curve
+                     if(raw > smallestFcst && raw < largestFcst) {
+                        value = Util::interpolate(raw, fcstVec, obsVec);
                      }
+                     // Extrapolate outside curve
                      else {
-                        nearestObs  = largestObs;
-                        nearestFcst = largestFcst;
-                     }
-                     float slope = 1;
-                     if(mPolicy == ExtrapolationPolicy::Zero) {
-                        slope = 0;
-                     }
-                     if(mPolicy == ExtrapolationPolicy::OneToOne || N <= 1) {
-                        slope = 1;
-                     }
-                     else if(mPolicy == ExtrapolationPolicy::MeanSlope) {
-                        float dObs  = largestObs - smallestObs;
-                        float dFcst = largestFcst - smallestFcst;
-                        slope = dObs / dFcst;
-                     }
-                     else if(mPolicy == ExtrapolationPolicy::NearestSlope) {
-                        float dObs;
-                        float dFcst;
+                        float nearestObs;
+                        float nearestFcst;
                         if(raw <= smallestFcst) {
-                           dObs  = obsVec[1] - obsVec[0];
-                           dFcst = fcstVec[1] - fcstVec[0];
+                           nearestObs  = smallestObs;
+                           nearestFcst = smallestFcst;
                         }
                         else {
-                           dObs  = obsVec[N-1] - obsVec[N-2];
-                           dFcst = fcstVec[N-1] - fcstVec[N-2];
+                           nearestObs  = largestObs;
+                           nearestFcst = largestFcst;
                         }
-                        slope = dObs / dFcst;
+                        float slope = 1;
+                        if(mPolicy == ExtrapolationPolicy::Zero) {
+                           slope = 0;
+                        }
+                        if(mPolicy == ExtrapolationPolicy::OneToOne || N <= 1) {
+                           slope = 1;
+                        }
+                        else if(mPolicy == ExtrapolationPolicy::MeanSlope) {
+                           float dObs  = largestObs - smallestObs;
+                           float dFcst = largestFcst - smallestFcst;
+                           slope = dObs / dFcst;
+                        }
+                        else if(mPolicy == ExtrapolationPolicy::NearestSlope) {
+                           float dObs;
+                           float dFcst;
+                           if(raw <= smallestFcst) {
+                              dObs  = obsVec[1] - obsVec[0];
+                              dFcst = fcstVec[1] - fcstVec[0];
+                           }
+                           else {
+                              dObs  = obsVec[N-1] - obsVec[N-2];
+                              dFcst = fcstVec[N-1] - fcstVec[N-2];
+                           }
+                           slope = dObs / dFcst;
+                        }
+                        value = nearestObs + slope * (raw - nearestFcst);
                      }
-                     value = nearestObs + slope * (raw - nearestFcst);
+                     (*field)(i,j,e) = value;
                   }
-                  (*field)(i,j,e) = value;
-               }
-               else {
-                  (*field)(i,j,e)  = Util::MV;
+                  else {
+                     (*field)(i,j,e)  = Util::MV;
+                  }
                }
             }
          }
@@ -158,7 +165,7 @@ std::string CalibratorQq::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c qq", "Quantile-quantile mapping. Calibrates forecasts based on a map of sorted observations and sorted forecasts. For a given raw forecast, the quantile within the historical forecasts is found. Then the observation at the same quantile is used as the calibrated forecast. A parameter file is required with an even number of columns as follows") << std::endl;
    ss << Util::formatDescription("", "[obs0 fcs0 obs1 fcst1 .. obsN fcstN") << std::endl;
-   ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued.") << std::endl;
+   ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued. If a parameter set has one or more missing values, then the ensemble using this parameter set is not processed.") << std::endl;
    ss << Util::formatDescription("   extrapolation=1to1", "If a forecast is outside the curve, how should extrapolation be done? '1to1': Use a slope of 1, i.e. preserving the bias at the nearest end point; 'meanSlope': Use the average slope from the lower to upper endpoints; 'nearestSlope': Use the slope through the two nearest points; 'zero': Use a slope of 0, meaning that the forecast will equal the max/min observation.") << std::endl;
    return ss.str();
 }

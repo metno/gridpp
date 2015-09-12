@@ -84,6 +84,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "diagnose") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'diagnose' needs variable");
+      }
+      CalibratorDiagnose* c = new CalibratorDiagnose(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else if(iName == "window") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
@@ -172,6 +181,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorQc::description() << std::endl;
    ss << CalibratorQq::description() << std::endl;
    ss << CalibratorQnh::description() << std::endl;
+   ss << CalibratorDiagnose::description() << std::endl;
    ss << CalibratorAccumulate::description() << std::endl;
    ss << CalibratorWindDirection::description() << std::endl;
    ss << CalibratorNeighbourhood::description() << std::endl;

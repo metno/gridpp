@@ -51,5 +51,6 @@ class Calibrator : public Scheme {
 #include "Regression.h"
 #include "WindDirection.h"
 #include "Kriging.h"
+#include "Diagnose.h"
 #include "Window.h"
 #endif

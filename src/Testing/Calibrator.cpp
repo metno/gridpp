@@ -166,6 +166,13 @@ namespace {
       EXPECT_EQ("gaussian", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryDiagnose) {
+      Calibrator* c;
+      c = Calibrator::getScheme("diagnose", Options("variable=W"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("diagnose", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryRegression) {
       Calibrator* c;
       c = Calibrator::getScheme("regression", Options("variable=Precip"));
@@ -206,6 +213,7 @@ namespace {
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T"));
       Calibrator::getScheme("neighbourhood", Options("variable=Precip variable=T"));
    }
+   // Missing variable
    TEST_F(TestCalibrator, factoryInvalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
@@ -217,7 +225,11 @@ namespace {
       parFile = ParameterFile::getScheme("text", Options("file=testing/files/regression1order.txt"));
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("qc", Options("")), ".*");
+      EXPECT_DEATH(Calibrator::getScheme("diagnose", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("window", Options("")), ".*");
+   }
+   TEST_F(TestCalibrator, descriptions) {
+      std::string descriptions = Calibrator::getDescriptions();
    }
 }
 int main(int argc, char **argv) {

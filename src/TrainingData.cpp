@@ -5,7 +5,6 @@ boost::variate_generator<boost::mt19937, boost::uniform_01<> > TrainingData::mRa
 
 TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
    if(mFilename != "") {
-      std::cout << "Reading " << mFilename << std::endl;
       std::ifstream ifs(mFilename.c_str(), std::ifstream::in);
       if(!ifs.good()) {
          Util::error("File '" + mFilename + "' does not exist");
@@ -40,7 +39,6 @@ TrainingData::TrainingData(std::string iFilename) : mFilename(iFilename) {
             }
          }
       }
-      std::cout << "Found " << counter << " rows" << std::endl;
    }
    else {
       for(int t = 0; t < 1000; t++) {

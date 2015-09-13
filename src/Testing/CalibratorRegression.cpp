@@ -89,6 +89,26 @@ namespace {
       CalibratorRegression calibrator(Variable::T, Options());
       EXPECT_DEATH(calibrator.calibrate(from, &par), ".*");
    }
+   TEST_F(TestCalibratorRegression, training) {
+      // R code:
+      // data = data.frame(x=c(4,5,9),y=c(3.2,5,14))
+      FileArome from("testing/files/10x10.nc");
+      TrainingData data("testing/files/trainingDataTemperature.txt");
+
+      // glm(y ~ x)$coefficients
+      CalibratorRegression cal = CalibratorRegression(Variable::T, Options("order=1"));
+      Parameters par = cal.train(data, 0);
+      ASSERT_EQ(2, par.size());
+      EXPECT_FLOAT_EQ(-5.7142825, par[0]);
+      EXPECT_FLOAT_EQ(2.185714286, par[1]);
+
+      // glm(y ~ x-1)$coefficients
+      cal = CalibratorRegression(Variable::T, Options("order=1 intercept=0"));
+      par = cal.train(data, 0);
+      ASSERT_EQ(2, par.size());
+      EXPECT_FLOAT_EQ(0, par[0]);
+      EXPECT_FLOAT_EQ(1.342623, par[1]);
+   }
    TEST_F(TestCalibratorRegression, description) {
       CalibratorRegression::description();
    }

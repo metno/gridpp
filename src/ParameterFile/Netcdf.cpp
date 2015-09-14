@@ -26,6 +26,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    int nLon   = getDimSize(file, dLon);
    int nCoeff = getDimSize(file, dCoeff);
 
+
    // TODO: Deal with case where lat and lon are one-dimensional variables
    // Get latitudes
    int vLat = Util::MV;
@@ -35,7 +36,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       vLat = getVar(file, "latitude");
    else
       Util::error("Could not determine latitude variable");
-   float* lats = getNcFloats(file, vLat);
+   vec2 lats = getGridValues(file, vLat);
 
    // Get longitudes
    int vLon = Util::MV;
@@ -45,18 +46,21 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       vLon = getVar(file, "longitude");
    else
       Util::error("Could not determine longitude variable");
-   float* lons = getNcFloats(file, vLon);
+   vec2 lons = getGridValues(file, vLon);
 
    // Get elevations
-   float* elevs = NULL;
+   vec2 elevs;
    if(hasVar(file, "altitude")) {
       int vElev = getVar(file, "altitude");
-      elevs = getNcFloats(file, vElev);
+      elevs = getGridValues(file, vElev);
    }
    else {
-      elevs = new float[nLat*nLon];
-      for(int i = 0; i < nLat*nLon; i++) {
-         elevs[i] = Util::MV;
+      elevs.resize(nLat);
+      for(int i = 0; i < nLat; i++) {
+         elevs[i].resize(nLon);
+         for(int j = 0; j < nLon; j++) {
+            elevs[i][j]= Util::MV;
+         }
       }
    }
 
@@ -78,7 +82,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             int locIndex = i * nLon + j;
-            Location location(lats[locIndex], lons[locIndex], elevs[locIndex]);
+            Location location(lats[i][j], lons[i][j], elevs[i][j]);
             mParameters[location][time] = parameters;
          }
       }
@@ -141,22 +145,20 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       assert(indices.size() == ndims);
 
       // Determine the location, time, and parameter corresponding to 'index'
-      int locIndex = indices[latDimIndex]*sizes[lonDimIndex] + indices[lonDimIndex];
+      int i = indices[latDimIndex];
+      int j = indices[lonDimIndex];
       int coeffIndex = indices[coeffDimIndex];
       int timeIndex = 0;
       if(Util::isValid(timeDimIndex))
          timeIndex = indices[timeDimIndex];
 
-      Location location(lats[locIndex], lons[locIndex], elevs[locIndex]);
+      Location location(lats[i][j], lons[i][j], elevs[i][j]);
 
       // Assign parameter
       mParameters[location][timeIndex][coeffIndex] = currParameter;
       index++;
    }
 
-   delete[] lats;
-   delete[] lons;
-   delete[] elevs;
    delete[] values;
    delete[] times;
 }
@@ -201,6 +203,18 @@ int ParameterFileNetcdf::getDimSize(int iFile, int iDim) const {
    return len;
 }
 
+std::vector<int> ParameterFileNetcdf::getDims(int iFile, int iVar) const {
+   int ndims;
+   int status = nc_inq_varndims(iFile, iVar, &ndims);
+   handleNetcdfError(status, "could not get number of dimensions of coefficients variable");
+
+   // Fetch the dimensions of the coefficients variable
+   int dims[ndims];
+   status = nc_inq_vardimid(iFile, iVar, dims);
+   handleNetcdfError(status, "could not get dimensions for coefficients variable");
+   std::vector<int> dimsVec(dims, dims+ndims);
+   return dimsVec;
+}
 
 std::vector<int> ParameterFileNetcdf::getTimes() const {
    return mTimes;
@@ -315,4 +329,94 @@ float* ParameterFileNetcdf::getNcFloats(int iFile, int iVar) {
          values[i] = Util::MV;
    }
    return values;
+}
+
+vec2 ParameterFileNetcdf::getGridValues(int iFile, int iVar) const {
+   // Initialize values
+   vec2 grid;
+   int dLat = getLatDim(iFile);
+   int dLon = getLonDim(iFile);
+   int nLat = getDimSize(iFile, dLat);
+   int nLon = getDimSize(iFile, dLon);
+   grid.resize(nLat);
+   for(int i = 0; i < nLat; i++) {
+      grid[i].resize(nLon, Util::MV);
+   }
+
+   // We have a lat/lon grid, where lat/lons are only provided along the pertinent dimension
+   // Values are assumed to be constant across the other dimension.
+   std::vector<int> dims = getDims(iFile, iVar);
+   int numDims = dims.size();
+   if(numDims == 1) {
+      int dim = dims[0];
+      long size = getDimSize(iFile, dim);
+      float* values = new float[size];
+      nc_get_var_float(iFile, iVar, values);
+      // Latitude variable
+      if(dim == getLatDim(iFile)) {
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               grid[i][j] = values[i];
+            }
+         }
+      }
+      // Longitude variable
+      else if(dim == getLonDim(iFile)) {
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               grid[i][j] = values[j];
+            }
+         }
+      }
+      else {
+         std::stringstream ss;
+         ss << "Missing lat or lon dimension";
+         Util::error(ss.str());
+      }
+      delete[] values;
+   }
+   // We have a projected grid, where lat and lons are provided for each grid point
+   else {
+      long count[numDims];
+      int size = 1;
+      int indexLat = Util::MV;
+      int indexLon = Util::MV;
+      std::vector<int> dims = getDims(iFile, iVar);
+      for(int i = 0; i < numDims; i++) {
+         if(dims[i] == getLatDim(iFile)) {
+            count[i] = nLat;
+            size *= count[i];
+            indexLat = i;
+         }
+         else if(dims[i] == getLonDim(iFile)) {
+            count[i] = nLon;
+            size *= count[i];
+            indexLon = i;
+         }
+         else {
+            count[i] = 1;
+         }
+      }
+      if(!Util::isValid(indexLat) || !Util::isValid(indexLon)) {
+         std::stringstream ss;
+         ss << "Missing lat and/or lon dimensions";
+         Util::error(ss.str());
+      }
+      float* values = new float[size];
+      nc_get_var_float(iFile, iVar, values);
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            // Latitude dimension is ordered first
+            if(indexLat < indexLon) {
+               grid[i][j] = values[i*nLon + j];
+            }
+            // Longitude dimension is ordered first
+            else {
+               grid[i][j] = values[j*nLat + i];
+            }
+         }
+      }
+      delete[] values;
+   }
+   return grid;
 }

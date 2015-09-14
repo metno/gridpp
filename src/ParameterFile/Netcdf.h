@@ -27,6 +27,7 @@ class ParameterFileNetcdf : public ParameterFile {
       int    getLonDim(int iFile) const;
       int    getTimeDim(int iFile) const;
       int    getCoefficientDim(int iFile) const;
+      std::vector<int> getDims(int iFile, int iVar) const;
 
       int    getDim(int iFile, std::string iDim) const;
       int    getVar(int iFile, std::string iVar) const;
@@ -43,5 +44,10 @@ class ParameterFileNetcdf : public ParameterFile {
       // Read variable from file, convert missing values
       // User must release memory
       float* getNcFloats(int iFile, int iVar);
+
+      // Reads lat/lon/elev values from the variable, regardless of the order of the x, y dimensions
+      // For lat/lon, the variable can have one or two dimensions. If the former, then the values
+      // are assumed to be the same across the other dimension.
+      vec2 getGridValues(int iFile, int iVariable) const;
 };
 #endif

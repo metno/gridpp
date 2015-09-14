@@ -1,6 +1,7 @@
 #include "../File/Arome.h"
 #include "../Util.h"
 #include "../Downscaler/Downscaler.h"
+#include "../Calibrator/Zaga.h"
 #include <gtest/gtest.h>
 
 // For each test it is safe to assume that 10x10_copy.nc is identical to 10x10.nc
@@ -55,6 +56,18 @@ namespace {
       file.appendGlobalAttribute("history99311",  "value15");
       EXPECT_EQ("value321", file.getGlobalAttribute("history71623"));
       EXPECT_EQ("value15",  file.getGlobalAttribute("history99311"));
+   }
+   TEST_F(FileNetcdf, createNewVariable) {
+      FileArome file("testing/files/10x10_copy.nc");
+      std::vector<Variable::Type> vars;
+      vars.push_back(Variable::Pop6h);
+      std::vector<float> pars(8,0);
+      Parameters par(pars);
+      ParameterFileSimple parFile(par);
+      file.initNewVariable(Variable::Pop6h);
+      CalibratorZaga cal(Variable::Pop6h, Options("outputPop=1 neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5 6h=1"));
+      cal.calibrate(file, &parFile);
+      file.write(vars);
    }
 }
 int main(int argc, char **argv) {

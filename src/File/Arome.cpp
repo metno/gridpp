@@ -151,14 +151,14 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
-      int var;
       if(!hasVariableCore(varType)) {
          // Create variable
          int dTime    = getDim("time");
          int dLon     = getDim("x");
          int dLat     = getDim("y");
          int dims[3]  = {dTime, dLat, dLon};
-         int status = nc_def_var(mFile,variable.c_str(), NC_DOUBLE, 1, dims, &var);
+         int var = Util::MV;
+         int status = nc_def_var(mFile,variable.c_str(), NC_FLOAT, 3, dims, &var);
          handleNetcdfError(status, "could not define variable");
       }
    }
@@ -214,7 +214,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
             }
             else {
                std::stringstream ss;
-               ss << "Cannot write variable '" << variable << "' from '" << getFilename() << "'";
+               ss << "Cannot write variable '" << variable << "' to '" << getFilename() << "'";
                Util::error(ss.str());
             }
             setAttribute(var, "coordinates", "longitude latitude");

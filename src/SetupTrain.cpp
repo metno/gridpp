@@ -10,7 +10,10 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       Util::error("Missing training data file");
    }
 
-   Variable::Type variable = Variable::T;
+   // Set initial non-working values
+   Variable::Type variable = Variable::None;
+   method = NULL;
+   output = NULL;
 
    // Implement a finite state machine
    enum State {START = 0, OUTPUT = 1, OUTPUTOPT = 2, METHOD = 3, METHODOPT = 10, VAR = 20, END = 90, ERROR = 100};
@@ -19,9 +22,6 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
 
    std::string dataFilename = argv[0];
    trainingData = new TrainingData(dataFilename);
-   if(argv.size() == 1) {
-      Util::error("No method defined");
-   }
 
    Options oOptions;
    Options mOptions;
@@ -34,21 +34,25 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       if(state != ERROR)
          prevState = state;
       if(state == START) {
-         if(index < argv.size() && argv[index] == "-p") {
+         if(argv.size() <= index) {
+            state = ERROR;
+            errorMessage = "'-p', '-v', and '-c' required";
+         }
+         else if(argv[index] == "-p") {
             state = OUTPUT;
             index++;
          }
-         else if(index < argv.size() && argv[index] == "-c") {
+         else if(argv[index] == "-c") {
             state = METHOD;
             index++;
          }
-         else if(index < argv.size() && argv[index] == "-v") {
-            state = METHOD;
+         else if(argv[index] == "-v") {
+            state = VAR;
             index++;
          }
          else {
-            errorMessage = "'-p', '-v', or '-c' reqired";
             state = ERROR;
+            errorMessage = "'" + argv[index] + "' unrecognized";
          }
       }
       else if(state == OUTPUT) {
@@ -58,24 +62,13 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            outputType = argv[index];
-            index++;
-            if(argv.size() <= index) {
-               state = END;
-            }
-            else if(argv[index] == "-p") {
+            if(outputType != "") {
                state = ERROR;
                errorMessage = "Duplicate '-p'";
             }
-            else if(argv[index] == "-c") {
-               state = METHOD;
-               index++;
-            }
-            else if(argv[index] == "-v") {
-               state = VAR;
-               index++;
-            }
             else {
+               outputType = argv[index];
+               index++;
                state = OUTPUTOPT;
             }
          }
@@ -109,24 +102,13 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            methodType = argv[index];
-            index++;
-            if(argv.size() <= index) {
-               state = END;
-            }
-            else if(argv[index] == "-c") {
+            if(methodType != "") {
                state = ERROR;
                errorMessage = "Duplicate '-c'";
             }
-            else if(argv[index] == "-p") {
-               state = OUTPUT;
-               index++;
-            }
-            else if(argv[index] == "-v") {
-               state = VAR;
-               index++;
-            }
             else {
+               methodType = argv[index];
+               index++;
                state = METHODOPT;
             }
          }
@@ -160,20 +142,32 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            variable = Variable::getType(argv[index]);
-            index++;
-            if(argv.size() <= index) {
-               state = END;
-            }
-            else if(argv[index] == "-c") {
-               state = METHOD;
-            }
-            else if(argv[index] == "-p") {
-               state = OUTPUT;
-            }
-            else if(argv[index] == "-v") {
+            if(variable != Variable::None) {
                state = ERROR;
                errorMessage = "Duplicate '-v'";
+            }
+            else {
+               variable = Variable::getType(argv[index]);
+               index++;
+               if(argv.size() <= index) {
+                  state = END;
+               }
+               else if(argv[index] == "-c") {
+                  state = METHOD;
+                  index++;
+               }
+               else if(argv[index] == "-p") {
+                  state = OUTPUT;
+                  index++;
+               }
+               else if(argv[index] == "-v") {
+                  state = ERROR;
+                  errorMessage = "Duplicate '-v'";
+               }
+               else {
+                  state = ERROR;
+                  errorMessage = "Junk after -v <variable>";
+               }
             }
          }
       }
@@ -193,10 +187,14 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       }
    }
    if(method == NULL) {
-      Util::error("Missing method");
+      std::stringstream ss;
+      ss << "Could not understand command line arguments: Missing -c.";
+      Util::error(ss.str());
    }
    if(output == NULL) {
-      Util::error("Missing output");
+      std::stringstream ss;
+      ss << "Could not understand command line arguments: Missing -p.";
+      Util::error(ss.str());
    }
 }
 SetupTrain::~SetupTrain() {

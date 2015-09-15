@@ -16,6 +16,7 @@ class TrainingData {
       // std::vector<std::vector<float> > getEns(const Location& iLocation);
       std::vector<ObsEns> getData(int iOffset) const;
       std::vector<int> getOffsets() const;
+      std::string getFilename() const;
    private:
       std::string mFilename;
       static float getRand();

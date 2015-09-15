@@ -80,3 +80,7 @@ std::vector<int> TrainingData::getOffsets() const {
    }
    return offsets;
 }
+
+std::string TrainingData::getFilename() const {
+   return mFilename;
+}

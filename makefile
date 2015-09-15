@@ -84,6 +84,12 @@ gridpp_kf_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
 gridpp_train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
 	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(TRAINOBJ_D) $(LIBS_D) -o $@
 
+nearestNeighbour: $(OBJ_O) $(BUILDDIR_O)/Driver/TestNearestNeighbours.o makefile
+	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(BUILDDIR_O)/Driver/TestNearestNeighbours.o  $(LIBS_O) -o $@
+
+nearestNeighbour_debug: $(OBJ_D) $(BUILDDIR_D)/Driver/TestNearestNeighbours.o makefile
+	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(BUILDDIR_D)/Driver/TestNearestNeighbours.o  $(LIBS_D) -o $@
+
 test: gtest $(TESTS)
 	./runAllTests.sh
 

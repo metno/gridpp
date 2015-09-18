@@ -1,6 +1,6 @@
 # Change these to suit your system
-CC      	= g++
-IFLAGS  	= -I/usr/include/
+CXX      ?= g++
+IFLAGS   = -I/usr/include/
 LFLAGS   = -L/usr/lib
 CFLAGS   = -Wall -Wno-reorder -Wno-sign-compare
 
@@ -58,42 +58,42 @@ $(BUILDDIR):
 	@mkdir build build/Calibrator build/Downscaler build/File build/ParameterFile build/Driver build/Testing
 
 $(BUILDDIR_O)/%.o : src/%.cpp $(INCS)
-	$(CC) $(CFLAGS_O) $(IFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS_O) $(IFLAGS) -c $< -o $@
 
 $(BUILDDIR_D)/%.o : src/%.cpp $(INCS)
-	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS_D) $(IFLAGS) -c $< -o $@
 
 $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
-	$(CC) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
+	$(CXX) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
 
 gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
-	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
+	$(CXX) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
 gridpp_kf: $(OBJ_O) $(KFOBJ_O) makefile
-	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(KFOBJ_O) $(LIBS_O) -o $@
+	$(CXX) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(KFOBJ_O) $(LIBS_O) -o $@
 
 gridpp_train: $(OBJ_O) $(TRAINOBJ_O) makefile
-	$(CC) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(TRAINOBJ_O) $(LIBS_O) -o $@
+	$(CXX) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(TRAINOBJ_O) $(LIBS_O) -o $@
 
 gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
-	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
+	$(CXX) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 gridpp_kf_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
-	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(KFOBJ_D) $(LIBS_D) -o $@
+	$(CXX) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(KFOBJ_D) $(LIBS_D) -o $@
 
 gridpp_train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
-	$(CC) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(TRAINOBJ_D) $(LIBS_D) -o $@
+	$(CXX) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(TRAINOBJ_D) $(LIBS_D) -o $@
 
 test: gtest $(TESTS)
 	./runAllTests.sh
 
 testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
-	$(CC) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
+	$(CXX) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
 
 count:
 	@wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
 
-clean: 
+clean:
 	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
 		coverage/* coverage.* build/gtest gridpp

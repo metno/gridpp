@@ -82,7 +82,7 @@ To test the program on a real operational AROME file, follow these steps:
 
 .. code-block:: bash
 
-   ./gridpp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc -v Precip -c smooth smoothRadius=10
+   ./gridpp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc -v Precip -c neighbourhood radius=10
 
 
 

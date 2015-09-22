@@ -119,9 +119,14 @@ void FileNetcdf::setMissingValue(int iVar, float iValue) const {
    }
 }
 
+void FileNetcdf::setAttribute(std::string iVariable, std::string iName, std::string iValue) {
+   int var = getVar(iVariable);
+   setAttribute(var, iName, iValue);
+}
+
 void FileNetcdf::setAttribute(int iVar, std::string iName, std::string iValue) {
    startDefineMode();
-   int status = nc_put_att_text(mFile, iVar,iName.c_str(), iName.size(), iValue.c_str());
+   int status = nc_put_att_text(mFile, iVar,iName.c_str(), iValue.size(), iValue.c_str());
    handleNetcdfError(status, "could not set attribute");
    startDataMode();
 }
@@ -173,6 +178,31 @@ void FileNetcdf::prependGlobalAttribute(std::string iName, std::string iValue) {
    else {
       setGlobalAttribute(iName, iValue);
    }
+}
+
+std::string FileNetcdf::getAttribute(std::string iVariable, std::string iName) {
+   int var = getVar(iVariable);
+   return getAttribute(var, iName);
+}
+
+std::string FileNetcdf::getAttribute(int iVar, std::string iName) {
+   std::string ret = "";
+   int id;
+   int status = nc_inq_attid(mFile, iVar, iName.c_str(), &id);
+   if(status == NC_NOERR) {
+      size_t len;
+      int status = nc_inq_attlen(mFile, iVar, iName.c_str(), &len);
+      handleNetcdfError(status, "could not determine attribute length");
+
+      char* value = new char[len+1];
+      status = nc_get_att_text(mFile, iVar, iName.c_str(), value);
+      handleNetcdfError(status, "could not get attribute");
+      value[len] = '\0';
+      if(status == NC_NOERR)
+         ret = std::string(value);
+      delete[] value;
+   }
+   return ret;
 }
 
 std::string FileNetcdf::getGlobalAttribute(std::string iName) {

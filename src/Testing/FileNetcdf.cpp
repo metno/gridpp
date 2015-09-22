@@ -57,6 +57,37 @@ namespace {
       EXPECT_EQ("value321", file.getGlobalAttribute("history71623"));
       EXPECT_EQ("value15",  file.getGlobalAttribute("history99311"));
    }
+   TEST_F(FileNetcdf, setAttribute) {
+      // Check that appending and prepending to an empty attribute works
+      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      file.setGlobalAttribute("att1",     "value93824");
+      file.appendGlobalAttribute("att1",  "append");
+      file.setGlobalAttribute("att1",     "value321192839819");
+
+      file.setAttribute("air_temperature_2m", "att1", "value71");
+      file.setAttribute("air_temperature_2m", "att1", "value72");
+      file.setAttribute("air_temperature_2m", "att1", "value73");
+
+      file.setGlobalAttribute("att2",  "value15");
+      std::vector<Variable::Type> vars;
+      vars.push_back(Variable::T);
+      file.write(vars);
+      FileArome file2 = FileArome("testing/files/10x10_copy.nc");
+      EXPECT_EQ("value321192839819", file.getGlobalAttribute("att1"));
+      EXPECT_EQ("value15",  file.getGlobalAttribute("att2"));
+      EXPECT_EQ("value73",  file.getAttribute("air_temperature_2m", "att1"));
+      EXPECT_EQ("",  file.getAttribute("air_temperature_2m", "att2"));
+   }
+   TEST_F(FileNetcdf, setAttributeError) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      FileArome file = FileArome("testing/files/10x10_copy.nc");
+
+      // Variable do not exist
+      EXPECT_DEATH(file.setAttribute("nonvalid_variable", "units", "value93824"), ".*");
+      EXPECT_DEATH(file.getAttribute("q", "att1"), ".*");
+   }
    TEST_F(FileNetcdf, createNewVariable) {
       FileArome file("testing/files/10x10_copy.nc");
       std::vector<Variable::Type> vars;

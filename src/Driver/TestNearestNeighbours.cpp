@@ -12,16 +12,16 @@ int main(int argc, const char *argv[]) {
 
    const FileArome ifile(inputFile);
    FileArome ofile(outputFile);
-   DownscalerNearestNeighbour downscaler(Variable::T);
+   DownscalerNearestNeighbour downscaler(Variable::T, Options());
    vec2Int I1, I2, J1, J2;
    double t0 = Util::clock();
    downscaler.getNearestNeighbour(ifile, ofile, I1, J1);
    double t1 = Util::clock();
-   downscaler.getNearestNeighbourFast(ifile, ofile, I2, J2);
+   downscaler.getNearestNeighbourBruteForce(ifile, ofile, I2, J2);
    double t2 = Util::clock();
 
-   std::cout << "Slow: " << t1-t0 << std::endl;
-   std::cout << "Fast: " << t2-t1 << std::endl;
+   std::cout << "Slow: " << t2-t1 << std::endl;
+   std::cout << "Fast: " << t1-t2 << std::endl;
 
    assert(I1.size() == I2.size());
    assert(J1.size() == J2.size());

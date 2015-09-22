@@ -289,7 +289,7 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    }
 }
 
-void Downscaler::getNearestNeighbourSlow(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
+void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    if(isCached(iFrom, iTo)) {
        getFromCache(iFrom, iTo, iI, iJ);
        return;
@@ -328,172 +328,8 @@ void Downscaler::getNearestNeighbourSlow(const File& iFrom, const File& iTo, vec
       iJ[i].resize(nLon, Util::MV);
       for(int j = 0; j < nLon; j++) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
-            getNearestNeighbourSlow(iFrom, olons[i][j], olats[i][j], iI[i][j], iJ[i][j]);
+            getNearestNeighbourBruteForce(iFrom, olons[i][j], olats[i][j], iI[i][j], iJ[i][j]);
          }
-      }
-   }
-   addToCache(iFrom, iTo, iI, iJ);
-}
-
-void Downscaler::getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
-   if(iTo.getNumLat() == 0 || iTo.getNumLon() == 0) {
-      return;
-   }
-
-   if(isCached(iFrom, iTo)) {
-      getFromCache(iFrom, iTo, iI, iJ);
-      return;
-   }
-
-   if(iFrom.getNumLat() == 0 || iFrom.getNumLon() == 0) {
-      iI.resize(iTo.getNumLat());
-      iJ.resize(iTo.getNumLat());
-      for(int i = 0; i < iTo.getNumLat(); i++) {
-         iI[i].resize(iTo.getNumLon(), Util::MV);
-         iJ[i].resize(iTo.getNumLon(), Util::MV);
-      }
-      return;
-   }
-
-   vec2 ilats = iFrom.getLats();
-   vec2 ilons = iFrom.getLons();
-   vec2 olats = iTo.getLats();
-   vec2 olons = iTo.getLons();
-   int nLon = iTo.getNumLon();
-   int nLat = iTo.getNumLat();
-
-   iI.resize(nLat);
-   iJ.resize(nLat);
-
-   // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
-      if(ilats == olats && ilons == olons) {
-         for(int i = 0; i < nLat; i++) {
-            iI[i].resize(nLon, 0);
-            iJ[i].resize(nLon, 0);
-            for(int j = 0; j < nLon; j++) {
-               iI[i][j] = i;
-               iJ[i][j] = j;
-            }
-         }
-      }
-      Util::status("Grids are identical, short cut in finding nearest neighbours");
-      return;
-   }
-
-   // Check if grid has missing points
-   bool hasMissing = false;
-   for(int ii = 0; ii < iFrom.getNumLat(); ii++) {
-      for(int jj = 0; jj < iFrom.getNumLon(); jj++) {
-         if(!Util::isValid(ilats[ii][jj]) || !Util::isValid(ilons[ii][jj])) {
-            hasMissing = true;
-         }
-      }
-   }
-   if(hasMissing) {
-      std::stringstream ss;
-      ss << "Lats/lons has missing gridpoints, using a slower method to find nearest neighbours";
-      Util::warning(ss.str());
-      return getNearestNeighbour(iFrom, iTo, iI, iJ);
-   }
-   // Check if grid is sorted
-   bool isSorted = true;
-   for(int ii = 1; ii < iFrom.getNumLat(); ii++) {
-      for(int jj = 1; jj < iFrom.getNumLon(); jj++) {
-         if(!Util::isValid(ilats[ii][jj]) || !Util::isValid(ilons[ii][jj]) || ilats[ii][jj] < ilats[ii-1][jj] || ilons[ii][jj] < ilons[ii][jj-1]) {
-            isSorted = false;
-         }
-      }
-   }
-   if(!isSorted) {
-      std::stringstream ss;
-      ss << "Lats/lons are not sorted, using a slower method to find nearest neighbours";
-      Util::warning(ss.str());
-      return getNearestNeighbour(iFrom, iTo, iI, iJ);
-   }
-
-   float tol = 0.2;
-
-   #pragma omp parallel for
-   for(int i = 0; i < nLat; i++) {
-      int I = 0;
-      int J = 0;
-      iI[i].resize(nLon, 0);
-      iJ[i].resize(nLon, 0);
-      for(int j = 0; j < nLon; j++) {
-         // if(j % 10 == 0)
-         //    std::cout << i << " " << j << std::endl;
-         int counter = 0;
-         float currLat = olats[i][j];
-         float currLon = olons[i][j];
-         while(true) {
-            // std::cout << "   " << ilats[I][J] << " " << ilons[I][J] << std::endl;
-            if(fabs(ilons[I][J] - currLon) < tol && fabs(ilats[I][J] - currLat) < tol) {
-               int startI = std::max(0, I-10);
-               int startJ = std::max(0, J-10);
-               int endI   = std::min(iFrom.getNumLat()-1, I+10);
-               int endJ   = std::min(iFrom.getNumLon()-1, J+10);
-               // std::cout << i << " " << j << " " << olats[i][j] << " " << ilats[I][J] << " " << olons[i][j] << " " << ilons[I][J] << std::endl;
-               // std::cout << i << " " << j << " " << abs(ilons[I][J] - olons[i][j]) << " " << abs(ilats[I][J] - olats[i][j]) << std::endl;
-               // std::cout << i << " " << j << " Searching in [" << startI << " " << startJ << " " << endI << " " << endJ << "]" << std::endl;
-               float minDist = Util::MV;
-               for(int ii = startI; ii <= endI; ii++) {
-                  for(int jj = startJ; jj <= endJ; jj++) {
-                     float currDist = Util::getDistance(olats[i][j], olons[i][j], ilats[ii][jj], ilons[ii][jj]);
-                     if(!Util::isValid(minDist) || currDist < minDist) {
-                        // std::cout << ilats[ii][jj] << " " << ilons[ii][jj] << "    " << currDist << std::endl;
-                        I = ii;
-                        J = jj;
-                        minDist = currDist;
-                     }
-                  }
-               }
-               // std::cout << "Found: " << i << " " << j << " " << olats[i][j] << " " << olons[i][j] << " " << ilats[I][J] << " " << ilons[I][J] << " " << minDist << std::endl;
-               break;
-            }
-            else {
-               assert(I >= 0);
-               assert(J >= 0);
-               assert(ilons.size() > I);
-               assert(ilons[I].size() > J);
-               assert(olons.size() > i);
-               assert(olons[i].size() > j);
-               assert(ilats.size() > I);
-               assert(ilats[I].size() > J);
-               assert(olats.size() > i);
-               assert(olats[i].size() > j);
-               if(ilons[I][J] < currLon-tol)
-                  J++;
-               else if(ilons[I][J] > currLon+tol)
-                  J--;
-               if(ilats[I][J] < currLat-tol)
-                  I++;
-               else if(ilats[I][J] < currLat+tol)
-                  I--;
-               I = std::min(iFrom.getNumLat()-1, std::max(0, I));
-               J = std::min(iFrom.getNumLon()-1, std::max(0, J));
-            }
-            counter++;
-            if(counter > 1000) {
-               // std::cout << "Couldn't find for " << i << " " << j << std::endl;
-               float minDist = Util::MV;
-               for(int ii = 0; ii < iFrom.getNumLat(); ii++) {
-                  for(int jj = 0; jj < iFrom.getNumLon(); jj++) {
-                     float currDist = Util::getDistance(olats[i][j], olons[i][j], ilats[ii][jj], ilons[ii][jj]);
-                     // std::cout << ii << " " << jj << " " << currDist << " " << minDist << std::endl;
-                     if(Util::isValid(currDist) && (!Util::isValid(minDist) || currDist < minDist)) {
-                        I = ii;
-                        J = jj;
-                        minDist = currDist;
-                     }
-                  }
-               }
-               break;
-            }
-         }
-         iI[i][j] = I;
-         iJ[i][j] = J;
-         // std::cout << "Found: " << i << " " << j << " " << olats[i][j] << " " << olons[i][j] << " " << ilats[I][J] << " " << ilons[i][J] << std::endl;
       }
    }
    addToCache(iFrom, iTo, iI, iJ);
@@ -534,9 +370,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
    }
 
    KDTree searchTree;
-   //std::cout << "Building tree..."<<std::endl;
    searchTree.buildTree(iFrom);
-   //std::cout << "Done" << std::endl;
    searchTree.getNearestNeighbour(iTo, iI, iJ);
 
    addToCache(iFrom, iTo, iI, iJ);
@@ -566,7 +400,7 @@ bool Downscaler::getFromCache(const File& iFrom, const File& iTo, vec2Int& iI, v
    return true;
 }
 
-void Downscaler::getNearestNeighbourSlow(const File& iFrom, float iLon, float iLat, int& iI, int &iJ) {
+void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, float iLat, int& iI, int &iJ) {
    vec2 ilats = iFrom.getLats();
    vec2 ilons = iFrom.getLons();
 

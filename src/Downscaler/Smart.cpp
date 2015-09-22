@@ -89,7 +89,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
    int numSearch = getNumSearchPoints(mSearchRadius);
 
    vec2Int Icenter, Jcenter;
-   getNearestNeighbourFast(iFrom, iTo, Icenter, Jcenter);
+   getNearestNeighbour(iFrom, iTo, Icenter, Jcenter);
 
    iI.resize(nLat);
    iJ.resize(nLat);

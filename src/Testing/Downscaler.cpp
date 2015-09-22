@@ -72,7 +72,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -100,7 +100,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -126,7 +126,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -150,7 +150,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 
@@ -173,7 +173,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbourFast(from, to, If, Jf);
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 

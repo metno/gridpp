@@ -18,10 +18,22 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
    // Retrieve lat/lon/elev
    int vLat = getLatVar();
    int vLon = getLonVar();
-   int vElev = getVar("altitude");
    mLats  = getGridValues(vLat);
    mLons  = getGridValues(vLon);
-   mElevs = getGridValues(vElev);
+
+   if(hasVar("altitude")) {
+      int vElev = getVar("altitude");
+      mElevs = getGridValues(vElev);
+   }
+   else {
+      mElevs.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mElevs[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            mElevs[i][j] = Util::MV;
+         }
+      }
+   }
 
    // TODO: No land fraction info in EC files?
    mLandFractions.resize(getNumLat());

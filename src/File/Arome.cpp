@@ -13,7 +13,7 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
 
    mLats = getLatLonVariable("latitude");
    mLons = getLatLonVariable("longitude");
-   if(hasVariableCore("surface_geopotential")) {
+   if(hasVar("surface_geopotential")) {
       FieldPtr elevField = getFieldCore("surface_geopotential", 0);
       mElevs.resize(getNumLat());
       for(int i = 0; i < getNumLat(); i++) {
@@ -25,11 +25,20 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
       }
       std::cout << "Deriving altitude from geopotential height in " << getFilename() << std::endl;
    }
-   else {
+   else if(hasVar("altitude")) {
       mElevs = getLatLonVariable("altitude");
    }
+   else {
+      mElevs.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mElevs[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            mElevs[i][j] = Util::MV;
+         }
+      }
+   }
 
-   if(hasVariableCore("land_area_fraction")) {
+   if(hasVar("land_area_fraction")) {
       mLandFractions = getLatLonVariable("land_area_fraction");
    }
    else {

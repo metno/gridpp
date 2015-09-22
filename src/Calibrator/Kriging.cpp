@@ -13,8 +13,8 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       mAuxVariable(Variable::None),
       mLowerThreshold(Util::MV),
       mUpperThreshold(Util::MV),
-      mRadius(5),
-      mOperator(Util::OperatorAdditive),
+      mRadius(30000),
+      mOperator(Util::OperatorAdd),
       // Use an approximation when calculating distances between points?
       mUseApproxDistance(true),
       mKrigingType(TypeCressman) {
@@ -47,14 +47,20 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
 
    std::string op;
    if(iOptions.getValue("operator", op)) {
-      if(op == "additive") {
-         mOperator = Util::OperatorAdditive;
+      if(op == "add") {
+         mOperator = Util::OperatorAdd;
       }
-      else if(op == "multiplicative") {
-         mOperator = Util::OperatorMultiplicative;
+      else if(op == "subtract") {
+         mOperator = Util::OperatorSubtract;
+      }
+      else if(op == "multiply") {
+         mOperator = Util::OperatorMultiply;
+      }
+      else if(op == "divide") {
+         mOperator = Util::OperatorDivide;
       }
       else {
-         Util::error("CalibratorKriging: 'oeprator' not recognized");
+         Util::error("CalibratorKriging: 'operator' not recognized");
       }
    }
 
@@ -147,7 +153,14 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                   Parameters parameters = iParameterFile->getParameters(t, loc);
                   if(parameters.size() > 0) {
                      validLocations.push_back(loc);
-                     bias.push_back(parameters[0]);
+                     float currBias = parameters[0];
+                     if(mOperator == Util::OperatorMultiply) {
+                        currBias = currBias - 1;
+                     }
+                     else if(mOperator == Util::OperatorDivide) {
+                        currBias = currBias - 1;
+                     }
+                     bias.push_back(currBias);
                   }
                }
             }
@@ -213,8 +226,9 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                if(Util::isValid(finalBias)) {
                   // Apply bias to each ensemble member
                   for(int e = 0; e < nEns; e++) {
+                     float rawValue = (*field)(i,j,e);
                      // Determine if we should turn kriging off based on auxillary variable
-                     bool turnOn = true;
+                     bool turnOn = Util::isValid(rawValue);
                      if(mAuxVariable != Variable::None) {
                         float aux = (*auxField)(i,j,e);
                         if(Util::isValid(aux)) {
@@ -225,13 +239,24 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                      }
 
                      if(turnOn) {
-                        if(mOperator == Util::OperatorAdditive) {
+                        if(mOperator == Util::OperatorAdd) {
                            (*field)(i,j,e) += finalBias;
                         }
-                        else if(mOperator == Util::OperatorMultiplicative) {
+                        else if(mOperator == Util::OperatorSubtract) {
+                           (*field)(i,j,e) -= finalBias;
+                        }
+                        else if(mOperator == Util::OperatorMultiply) {
                            // TODO: How do we ensure that the matrix is positive definite in this
                            // case?
-                           (*field)(i,j,e) *= finalBias;
+                           (*field)(i,j,e) *= (finalBias+1);
+                        }
+                        else if(mOperator == Util::OperatorDivide) {
+                           // TODO: How do we ensure that the matrix is positive definite in this
+                           // case?
+                           (*field)(i,j,e) /= (finalBias+1);
+                        }
+                        else {
+                           Util::error("Unrecognized operator in CalibratorKriging");
                         }
                      }
                   }
@@ -252,12 +277,12 @@ float CalibratorKriging::calcWeight(const Location& loc1, const Location& loc2) 
          return 0;
       }
       if(mKrigingType == TypeCressman) {
-         float horizWeight = (mRadius*mRadius - horizDist*horizDist) / (mRadius*mRadius + horizDist*horizDist);
+         float horizWeight = (mEfoldDist*mEfoldDist - horizDist*horizDist) / (mEfoldDist*mEfoldDist + horizDist*horizDist);
          float vertWeight  = (mMaxElevDiff*mMaxElevDiff - vertDist*vertDist) / (mMaxElevDiff*mMaxElevDiff + vertDist*vertDist);
          weight = horizWeight * vertWeight;
       }
       else if(mKrigingType == TypeBarnes) {
-         float horizWeight = exp(-horizDist*horizDist/(2*mRadius*mRadius));
+         float horizWeight = exp(-horizDist*horizDist/(2*mEfoldDist*mEfoldDist));
          float vertWeight  = exp(-vertDist*vertDist/(2*mMaxElevDiff*mMaxElevDiff));
          weight = horizWeight * vertWeight;
          return weight;
@@ -305,12 +330,12 @@ Parameters CalibratorKriging::train(const TrainingData& iData, int iOffset) cons
 std::string CalibratorKriging::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c kriging","Spreads bias in space by using optimal interpolation. A parameter file is required, which must have one column with the bias.")<< std::endl;
-   ss << Util::formatDescription("   radius=30000","How far away (in meters) should bias be spread to? Must be >= 0.") << std::endl;
-   ss << Util::formatDescription("   efoldDist=30000","Bias is reduced to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
+   ss << Util::formatDescription("   radius=30000","Only use values from locations within this radius (in meters). Must be >= 0.") << std::endl;
+   ss << Util::formatDescription("   efoldDist=30000","How fast should the weight of a station reduce with distance? For cressman: linearly decrease to this distance (in meters); For barnes: reduce to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   maxElevDiff=100","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
    ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
    ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
-   ss << Util::formatDescription("   operator=additive","How should the bias be applied to the raw forecast? One of 'additive', 'multiplicative'.") << std::endl;
+   ss << Util::formatDescription("   operator=add","How should the bias be applied to the raw forecast? One of 'add', 'subtract', 'multiply', 'divide'.") << std::endl;
    return ss.str();
 }

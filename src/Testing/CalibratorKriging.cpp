@@ -23,7 +23,7 @@ namespace {
    // 1 5 5 140 -5.4
    // 1 0 0 150  4
    TEST_F(TestCalibratorKriging, calcWeight) {
-      CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=300000 maxElevDiff=100 efoldDist=200000"));
+      CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=300000 maxElevDiff=100 efoldDist=300000"));
       EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(60,10,100),Location(61,10,100)));
       EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(61,10,100),Location(60,10,100)));
       EXPECT_FLOAT_EQ(0.28969184, cal.calcWeight(Location(60,10,100),Location(62,10,100)));
@@ -140,8 +140,8 @@ namespace {
       CalibratorKriging(Variable::T, Options("radius=0"));
       CalibratorKriging(Variable::T, Options("maxElevDiff=0"));
       CalibratorKriging(Variable::T, Options("efoldDist=0"));
-      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=additive"));
-      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=multiplicative"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=add"));
+      CalibratorKriging(Variable::T, Options("efoldDist=0 operator=multiply"));
    }
    TEST_F(TestCalibratorKriging, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

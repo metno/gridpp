@@ -126,8 +126,10 @@ class Util {
       };
 
       enum Operator {
-         OperatorAdditive       = 0,
-         OperatorMultiplicative = 10,
+         OperatorAdd       = 0,
+         OperatorSubtract  = 10,
+         OperatorMultiply  = 20,
+         OperatorDivide    = 30,
       };
 
       //! Applies statistics operator to array. Missing values are ignored.

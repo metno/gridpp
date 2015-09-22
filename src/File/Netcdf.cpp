@@ -121,7 +121,7 @@ void FileNetcdf::setMissingValue(int iVar, float iValue) const {
 
 void FileNetcdf::setAttribute(int iVar, std::string iName, std::string iValue) {
    startDefineMode();
-   int status = nc_put_att_text(mFile, iVar,iName.c_str(), 1, iValue.c_str());
+   int status = nc_put_att_text(mFile, iVar,iName.c_str(), iName.size(), iValue.c_str());
    handleNetcdfError(status, "could not set attribute");
    startDataMode();
 }

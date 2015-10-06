@@ -48,6 +48,11 @@ namespace {
       EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(65,10,200),Location(60,10,200)));
       EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(65,10,200),Location(60,10,400)));
    }
+   // Test that we don't get negative weights with Cressman
+   TEST_F(TestCalibratorKriging, radiusBiggerThanEfold) {
+      CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=3000000 maxElevDiff=100 efoldDist=3000"));
+      EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(60,10,100),Location(61,10,100)));
+   }
    TEST_F(TestCalibratorKriging, 10x10) {
       FileArome from("testing/files/10x10.nc");
       // Kriging when each observation only affects one grid point at a time (radius 1m)

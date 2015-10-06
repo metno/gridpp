@@ -277,6 +277,8 @@ float CalibratorKriging::calcWeight(const Location& loc1, const Location& loc2) 
          return 0;
       }
       if(mKrigingType == TypeCressman) {
+         if(horizDist > mEfoldDist || vertDist > mMaxElevDiff)
+            return 0;
          float horizWeight = (mEfoldDist*mEfoldDist - horizDist*horizDist) / (mEfoldDist*mEfoldDist + horizDist*horizDist);
          float vertWeight  = (mMaxElevDiff*mMaxElevDiff - vertDist*vertDist) / (mMaxElevDiff*mMaxElevDiff + vertDist*vertDist);
          weight = horizWeight * vertWeight;

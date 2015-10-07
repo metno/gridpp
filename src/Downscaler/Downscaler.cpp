@@ -30,10 +30,10 @@ namespace {
          size_t index2;
 
          Indexed() {}
-         Indexed(const float& lon_,
-                 const float& lat_,
-                 const size_t& index1_,
-                 const size_t& index2_):
+         Indexed(const float lon_,
+                 const float lat_,
+                 const size_t index1_,
+                 const size_t index2_):
             lon(lon_), lat(lat_), index1(index1_), index2(index2_) {}
       };
 
@@ -42,13 +42,13 @@ namespace {
 
       unode root;
 
-      static const TreeNode* nearestNeighbour(const unode &root, const float lon, const float lat);
+      static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
       static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);
       static void subTree(indexdVec& iLonLat,
                           const size_t from,
                           const size_t to,
                           const bool xsection,
-                          const TreeNode *parent,
+                          const TreeNode* parent,
                           unode& root);
 
    public:
@@ -59,11 +59,11 @@ namespace {
       void buildTree(const File& iFrom);
       void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
 
-      friend bool compareLons (const KDTree::Indexed &l, const KDTree::Indexed &r);
-      friend bool compareLats (const KDTree::Indexed &l, const KDTree::Indexed &r);
+      friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
+      friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
    };
 
-   void KDTree::buildTree(const File &iFrom) {
+   void KDTree::buildTree(const File& iFrom) {
 
       vec2 ilats = iFrom.getLats();
       vec2 ilons = iFrom.getLons();
@@ -87,15 +87,15 @@ namespace {
       if(to >= 0) subTree(lons, 0, to, true, NULL, root);
    }
 
-   bool compareLons (const KDTree::Indexed &l, const KDTree::Indexed &r){ return (l.lon < r.lon); }
-   bool compareLats (const KDTree::Indexed &l, const KDTree::Indexed &r){ return (l.lat < r.lat); }
+   bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r){ return (l.lon < r.lon); }
+   bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r){ return (l.lat < r.lat); }
 
-   void KDTree::subTree(indexdVec &iLonLat,
+   void KDTree::subTree(indexdVec& iLonLat,
                         const size_t from,
                         const size_t to,
                         const bool xsection,
-                        const TreeNode *parent,
-                        unode &root) {
+                        const TreeNode* parent,
+                        unode& root) {
 
       unode node(new KDTree::TreeNode());
       root.swap(node);
@@ -132,7 +132,7 @@ namespace {
 
    }
 
-   const KDTree::TreeNode* KDTree::firstGuess(const unode &root, const float lon, const float lat) {
+   const KDTree::TreeNode* KDTree::firstGuess(const unode& root, const float lon, const float lat) {
       if(root->xsection){
          if(lon <= root->lon) {
             if(root->left) return firstGuess(root->left, lon, lat);
@@ -202,7 +202,7 @@ namespace {
       return nearestLeaf;
    }
 
-   void KDTree::getNearestNeighbour(const File &iTo, vec2Int &iI, vec2Int &iJ) const {
+   void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const {
 
       vec2 olats = iTo.getLats();
       vec2 olons = iTo.getLons();

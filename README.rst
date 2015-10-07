@@ -45,7 +45,7 @@ Installation Instructions
    * Netcdf c++ library
    * (Optional) Google test library (if developing new code)
 
-2. Edit CC, CFLAGS_O, IFLAGS, and LFLAGS in makefile
+2. Edit CXX, CFLAGS_O, IFLAGS, and LFLAGS in makefile
 
 3. Run 'make'
 

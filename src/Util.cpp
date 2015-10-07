@@ -96,6 +96,7 @@ float Util::getDistance(float lat1, float lon1, float lat2, float lon2, bool app
    double lat2r = deg2rad(lat2);
    double lon1r = deg2rad(lon1);
    double lon2r = deg2rad(lon2);
+   // Calculate distance according to: http://www.movable-type.co.uk/scripts/latlong.html
    if(approx) {
       float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
       float dy2 = (lat1r-lat2r)*(lat1r-lat2r);

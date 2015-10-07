@@ -10,11 +10,12 @@ class CalibratorKriging : public Calibrator {
    public:
       CalibratorKriging(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      float calcWeight(const Location& loc1, const Location& loc2) const;
+      float calcCovar(const Location& loc1, const Location& loc2) const;
       enum Type {
          TypeCressman = 10,
          TypeBarnes   = 20
       };
+      //! Compute the bias at the training point
       Parameters train(const TrainingData& iData, int iOffset) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

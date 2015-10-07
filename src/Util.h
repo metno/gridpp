@@ -43,8 +43,8 @@ class Util {
       //! @param lon1 Longitude in degrees of point 1
       //! @param lat2 Latitude in degrees of point 2
       //! @param lon2 Longitude in degrees of point 2
-      //! @param approx Should an approximation be used? If true, assumes a flat earth in the
-      //!               vicinity of the two points. Computes the result much faster.
+      //! @param approx Should an approximation be used? If true, use equirectangular approximation
+      //!               Computes the result much faster.
       //! @return Distance in meters
       static float getDistance(float lat1, float lon1, float lat2, float lon2, bool approx=false);
 

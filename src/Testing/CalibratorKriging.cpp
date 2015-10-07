@@ -22,36 +22,36 @@ namespace {
    // 0 5 5 140  4.2
    // 1 5 5 140 -5.4
    // 1 0 0 150  4
-   TEST_F(TestCalibratorKriging, calcWeight) {
+   TEST_F(TestCalibratorKriging, calcCovar) {
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=300000 maxElevDiff=100 efoldDist=300000"));
-      EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(60,10,100),Location(61,10,100)));
-      EXPECT_FLOAT_EQ(0.75794888, cal.calcWeight(Location(61,10,100),Location(60,10,100)));
-      EXPECT_FLOAT_EQ(0.28969184, cal.calcWeight(Location(60,10,100),Location(62,10,100)));
-      EXPECT_FLOAT_EQ(0.28969184, cal.calcWeight(Location(62,10,100),Location(60,10,100)));
-      EXPECT_FLOAT_EQ(0.6,        cal.calcWeight(Location(60,10,100),Location(60,10,150)));
-      EXPECT_FLOAT_EQ(0.6,        cal.calcWeight(Location(60,10,150),Location(60,10,100)));
-      EXPECT_FLOAT_EQ(0.4547693,  cal.calcWeight(Location(60,10,100),Location(61,10,150)));
-      EXPECT_FLOAT_EQ(0.4547693,  cal.calcWeight(Location(60,10,100),Location(61,10,150)));
-      EXPECT_FLOAT_EQ(0.4547693,  cal.calcWeight(Location(61,10,150),Location(60,10,100)));
-      EXPECT_FLOAT_EQ(0.4547693,  cal.calcWeight(Location(60,10,150),Location(61,10,100)));
-      EXPECT_FLOAT_EQ(0.4547693,  cal.calcWeight(Location(61,10,100),Location(60,10,150)));
+      EXPECT_FLOAT_EQ(0.75794888, cal.calcCovar(Location(60,10,100),Location(61,10,100)));
+      EXPECT_FLOAT_EQ(0.75794888, cal.calcCovar(Location(61,10,100),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(0.28969184, cal.calcCovar(Location(60,10,100),Location(62,10,100)));
+      EXPECT_FLOAT_EQ(0.28969184, cal.calcCovar(Location(62,10,100),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(0.6,        cal.calcCovar(Location(60,10,100),Location(60,10,150)));
+      EXPECT_FLOAT_EQ(0.6,        cal.calcCovar(Location(60,10,150),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(0.4547693,  cal.calcCovar(Location(60,10,100),Location(61,10,150)));
+      EXPECT_FLOAT_EQ(0.4547693,  cal.calcCovar(Location(60,10,100),Location(61,10,150)));
+      EXPECT_FLOAT_EQ(0.4547693,  cal.calcCovar(Location(61,10,150),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(0.4547693,  cal.calcCovar(Location(60,10,150),Location(61,10,100)));
+      EXPECT_FLOAT_EQ(0.4547693,  cal.calcCovar(Location(61,10,100),Location(60,10,150)));
 
       // Identical locations
-      EXPECT_FLOAT_EQ(1, cal.calcWeight(Location(60,10,100),Location(60,10,100)));
-      EXPECT_FLOAT_EQ(1, cal.calcWeight(Location(20,0,300), Location(20,0,300)));
+      EXPECT_FLOAT_EQ(1, cal.calcCovar(Location(60,10,100),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(1, cal.calcCovar(Location(20,0,300), Location(20,0,300)));
 
       // Missing locations
-      EXPECT_FLOAT_EQ(Util::MV,   cal.calcWeight(Location(60,10,Util::MV),Location(60,10,100)));
+      EXPECT_FLOAT_EQ(Util::MV,   cal.calcCovar(Location(60,10,Util::MV),Location(60,10,100)));
 
       // Outside the radius
-      EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(60,10,200),Location(60,10,400)));
-      EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(65,10,200),Location(60,10,200)));
-      EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(65,10,200),Location(60,10,400)));
+      EXPECT_FLOAT_EQ(0, cal.calcCovar(Location(60,10,200),Location(60,10,400)));
+      EXPECT_FLOAT_EQ(0, cal.calcCovar(Location(65,10,200),Location(60,10,200)));
+      EXPECT_FLOAT_EQ(0, cal.calcCovar(Location(65,10,200),Location(60,10,400)));
    }
    // Test that we don't get negative weights with Cressman
    TEST_F(TestCalibratorKriging, radiusBiggerThanEfold) {
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=3000000 maxElevDiff=100 efoldDist=3000"));
-      EXPECT_FLOAT_EQ(0, cal.calcWeight(Location(60,10,100),Location(61,10,100)));
+      EXPECT_FLOAT_EQ(0, cal.calcCovar(Location(60,10,100),Location(61,10,100)));
    }
    TEST_F(TestCalibratorKriging, 10x10) {
       FileArome from("testing/files/10x10.nc");

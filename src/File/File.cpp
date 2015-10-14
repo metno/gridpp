@@ -85,6 +85,9 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
       }
       // Try to derive the field
       else if(iVariable == Variable::Precip) {
+         if(!hasVariableCore(Variable::PrecipAcc)) {
+            Util::error("Cannot derive Precip");
+         }
          // Deaccumulate
          FieldPtr field = getEmptyField();
          addField(field, Variable::Precip, 0); // First offset is 0
@@ -112,6 +115,9 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
          }
       }
       else if(iVariable == Variable::PrecipAcc) {
+         if(!hasVariableCore(Variable::Precip)) {
+            Util::error("Cannot derive PrecipAcc");
+         }
          // Accumulate
          FieldPtr prevAccum = getEmptyField(0);
          addField(prevAccum, Variable::PrecipAcc, 0); // First offset is 0

@@ -93,6 +93,15 @@ namespace {
       EXPECT_FLOAT_EQ(4.6,      (*acc1)(0,0,0));
       EXPECT_FLOAT_EQ(10.7,     (*acc2)(0,0,0));
    }
+   TEST_F(FileTest, impossibleDerive) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      FileArome file("testing/files/10x10_noPrecip.nc");
+      ASSERT_TRUE(!file.hasVariable(Variable::Precip));
+      EXPECT_DEATH(file.getField(Variable::Precip, 0), ".*");
+      EXPECT_DEATH(file.getField(Variable::PrecipAcc, 0), ".*");
+   }
    TEST_F(FileTest, getFieldInvalidTime) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

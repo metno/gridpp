@@ -296,6 +296,12 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
       // TODO: What name to use?
       return "qnh";
    }
+   else if(iVariable == Variable::SwinAcc) {
+      return "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time";
+   }
+   else if(iVariable == Variable::LwinAcc) {
+      return "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time";
+   }
    else if(iVariable == Variable::Fake) {
       return "fake";
    }

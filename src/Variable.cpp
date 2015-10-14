@@ -39,6 +39,10 @@ std::string Variable::getTypeName(Type iType) {
       return "MSLP";
    else if(iType == QNH)
       return "QNH";
+   else if(iType == LwinAcc)
+      return "LwinAcc";
+   else if(iType == SwinAcc)
+      return "SwinAcc";
    else if(iType == Fake)
       return "Fake";
    else
@@ -82,6 +86,10 @@ Variable::Type Variable::getType(std::string iName) {
       return MSLP;
    else if(iName == "QNH")
       return QNH;
+   else if(iName == "SwinAcc")
+      return SwinAcc;
+   else if(iName == "LwinAcc")
+      return LwinAcc;
    else if(iName == "Fake")
       return Fake;
    else
@@ -108,6 +116,8 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v P", "Pressure") << std::endl;
    ss << Util::formatDescription("-v MSLP", "Mean sea-level pressure") << std::endl;
    ss << Util::formatDescription("-v QNH", "Pressure reduced to sea-level using standard atmosphere (ICAO)") << std::endl;
+   ss << Util::formatDescription("-v SwinAcc", "Accumulated incoming shortwave radiation") << std::endl;
+   ss << Util::formatDescription("-v LwinAcc", "Accumulated incoming longwave radiation") << std::endl;
    return ss.str();
 }
 
@@ -121,6 +131,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::PrecipMiddle);
    variables.push_back(Variable::PrecipHigh);
    variables.push_back(Variable::Precip);
+   variables.push_back(Variable::SwinAcc);
+   variables.push_back(Variable::LwinAcc);
    variables.push_back(Variable::W);
    variables.push_back(Variable::WD);
    variables.push_back(Variable::U);
@@ -131,6 +143,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::P);
    variables.push_back(Variable::MSLP);
    variables.push_back(Variable::QNH);
+   variables.push_back(Variable::LwinAcc);
+   variables.push_back(Variable::SwinAcc);
    // Do not include Variable::NONE;
    return variables;
 }
@@ -173,6 +187,10 @@ float Variable::getMin(Type iType) {
          return 0;
       case QNH:
          return 0;
+      case LwinAcc:
+         return Util::MV;
+      case SwinAcc:
+         return Util::MV;
       default:
          return Util::MV;
    }
@@ -216,6 +234,10 @@ float Variable::getMax(Type iType) {
          return Util::MV;
       case QNH:
          return Util::MV;
+      case LwinAcc:
+         return Util::MV;
+      case SwinAcc:
+         return Util::MV;
       default:
          return Util::MV;
    }
@@ -258,6 +280,10 @@ std::string Variable::getUnits(Type iType) {
          return "pa";
       case QNH:
          return "pa";
+      case LwinAcc:
+         return "W s/m^2";
+      case SwinAcc:
+         return "W s/m^2";
       default:
          return "no_units";
    }
@@ -303,6 +329,10 @@ std::string Variable::getStandardName(Type iType) {
       case QNH:
          // TODO: What is the standard name for QNH?
          return "air_pressure_at_sea_level_qnh";
+      case SwinAcc:
+         return "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time";
+      case LwinAcc:
+         return "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time";
       default:
          return "no_units";
    }

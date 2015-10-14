@@ -12,6 +12,9 @@ class Variable {
          PrecipAcc = 1,    // Accumulated ending at the specified time
          Pop       = 2,    // Probability of precipitation
          Pop6h     = 3,    // Probability of precipitation for the last 6 hours
+         PrecipLow = 4,    // Low estimate of precipitation
+         PrecipMiddle = 5, // Middle estimate of precipitation
+         PrecipHigh = 6,   // High estimate of precipitation
          Cloud     = 10,   // Cloud cover (between 0 and 1)
          T         = 20,   // 2m temperature (K)
          U         = 30,   // 10m U-wind (m/s)

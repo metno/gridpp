@@ -43,6 +43,8 @@ Installation Instructions
 
    * Boost libraries
    * Netcdf c++ library
+   * libgsl0
+   * libblas
    * (Optional) Google test library (if developing new code)
 
 2. Edit CXX, CFLAGS_O, IFLAGS, and LFLAGS in makefile

@@ -49,6 +49,9 @@ class CalibratorZaga : public Calibrator {
       bool mOutputPop;
       int  mNeighbourhoodSize;
       float mPopThreshold;
+      float mPrecipLowQuantile;
+      float mPrecipMiddleQuantile;
+      float mPrecipHighQuantile;
       float mMaxEnsMean;
       bool m6h;
       float mLogLikelihoodTolerance;

@@ -23,4 +23,17 @@ class KalmanFilter {
       static float mVarVarW;
       static float mMaxP;
 };
+class KalmanParameters {
+   public:
+      KalmanParameters(const Parameters& iParameters);
+      Parameters toParameters() const;
+      float pVarV;
+      float kalmanGainVar;
+      float varV;
+      float p;
+      float kalmanGain;
+      float error;
+      float lastError;
+      float biasEstimate;
+};
 #endif

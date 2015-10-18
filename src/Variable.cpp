@@ -11,6 +11,12 @@ std::string Variable::getTypeName(Type iType) {
       return "Pop";
    else if(iType == Pop6h)
       return "Pop6h";
+   else if(iType == PrecipLow)
+      return "PrecipLow";
+   else if(iType == PrecipMiddle)
+      return "PrecipMiddle";
+   else if(iType == PrecipHigh)
+      return "PrecipHigh";
    else if(iType == Cloud)
       return "Cloud";
    else if(iType == T)
@@ -33,6 +39,10 @@ std::string Variable::getTypeName(Type iType) {
       return "MSLP";
    else if(iType == QNH)
       return "QNH";
+   else if(iType == LwinAcc)
+      return "LwinAcc";
+   else if(iType == SwinAcc)
+      return "SwinAcc";
    else if(iType == Fake)
       return "Fake";
    else
@@ -48,6 +58,12 @@ Variable::Type Variable::getType(std::string iName) {
       return Pop;
    else if(iName == "Pop6h")
       return Pop6h;
+   else if(iName == "PrecipLow")
+      return PrecipLow;
+   else if(iName == "PrecipMiddle")
+      return PrecipMiddle;
+   else if(iName == "PrecipHigh")
+      return PrecipHigh;
    else if(iName == "Cloud")
       return Cloud;
    else if(iName == "T")
@@ -70,6 +86,10 @@ Variable::Type Variable::getType(std::string iName) {
       return MSLP;
    else if(iName == "QNH")
       return QNH;
+   else if(iName == "SwinAcc")
+      return SwinAcc;
+   else if(iName == "LwinAcc")
+      return LwinAcc;
    else if(iName == "Fake")
       return Fake;
    else
@@ -83,6 +103,9 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
    ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
    ss << Util::formatDescription("-v Pop6h", "Probability of precip for the last 6 hours") << std::endl;
+   ss << Util::formatDescription("-v PrecipLow", "Low estimate of precipitation") << std::endl;
+   ss << Util::formatDescription("-v PrecipMiddl", "Middle estimate of precipitation") << std::endl;
+   ss << Util::formatDescription("-v PrecipHigh", "High estimate of precipitation") << std::endl;
    ss << Util::formatDescription("-v W", "Wind speed") << std::endl;
    ss << Util::formatDescription("-v WD", "Wind direction") << std::endl;
    ss << Util::formatDescription("-v U", "U-wind") << std::endl;
@@ -93,6 +116,8 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v P", "Pressure") << std::endl;
    ss << Util::formatDescription("-v MSLP", "Mean sea-level pressure") << std::endl;
    ss << Util::formatDescription("-v QNH", "Pressure reduced to sea-level using standard atmosphere (ICAO)") << std::endl;
+   ss << Util::formatDescription("-v SwinAcc", "Accumulated incoming shortwave radiation") << std::endl;
+   ss << Util::formatDescription("-v LwinAcc", "Accumulated incoming longwave radiation") << std::endl;
    return ss.str();
 }
 
@@ -102,7 +127,12 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::PrecipAcc);
    variables.push_back(Variable::Pop);
    variables.push_back(Variable::Pop6h);
+   variables.push_back(Variable::PrecipLow);
+   variables.push_back(Variable::PrecipMiddle);
+   variables.push_back(Variable::PrecipHigh);
    variables.push_back(Variable::Precip);
+   variables.push_back(Variable::SwinAcc);
+   variables.push_back(Variable::LwinAcc);
    variables.push_back(Variable::W);
    variables.push_back(Variable::WD);
    variables.push_back(Variable::U);
@@ -113,6 +143,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::P);
    variables.push_back(Variable::MSLP);
    variables.push_back(Variable::QNH);
+   variables.push_back(Variable::LwinAcc);
+   variables.push_back(Variable::SwinAcc);
    // Do not include Variable::NONE;
    return variables;
 }
@@ -128,6 +160,12 @@ float Variable::getMin(Type iType) {
       case Pop:
          return 0;
       case Pop6h:
+         return 0;
+      case PrecipLow:
+         return 0;
+      case PrecipMiddle:
+         return 0;
+      case PrecipHigh:
          return 0;
       case W:
          return 0;
@@ -149,6 +187,10 @@ float Variable::getMin(Type iType) {
          return 0;
       case QNH:
          return 0;
+      case LwinAcc:
+         return Util::MV;
+      case SwinAcc:
+         return Util::MV;
       default:
          return Util::MV;
    }
@@ -166,6 +208,12 @@ float Variable::getMax(Type iType) {
          return 1;
       case Pop6h:
          return 1;
+      case PrecipLow:
+         return Util::MV;
+      case PrecipMiddle:
+         return Util::MV;
+      case PrecipHigh:
+         return Util::MV;
       case W:
          return Util::MV;
       case WD:
@@ -186,6 +234,10 @@ float Variable::getMax(Type iType) {
          return Util::MV;
       case QNH:
          return Util::MV;
+      case LwinAcc:
+         return Util::MV;
+      case SwinAcc:
+         return Util::MV;
       default:
          return Util::MV;
    }
@@ -202,6 +254,12 @@ std::string Variable::getUnits(Type iType) {
          return "1";
       case Pop6h:
          return "1";
+      case PrecipLow:
+         return "kg/m^2";
+      case PrecipMiddle:
+         return "kg/m^2";
+      case PrecipHigh:
+         return "kg/m^2";
       case W:
          return "m/s";
       case WD:
@@ -222,6 +280,10 @@ std::string Variable::getUnits(Type iType) {
          return "pa";
       case QNH:
          return "pa";
+      case LwinAcc:
+         return "W s/m^2";
+      case SwinAcc:
+         return "W s/m^2";
       default:
          return "no_units";
    }
@@ -237,6 +299,12 @@ std::string Variable::getStandardName(Type iType) {
       case Pop:
          return "precipitation_amount";
       case Pop6h:
+         return "precipitation_amount";
+      case PrecipLow:
+         return "precipitation_amount";
+      case PrecipMiddle:
+         return "precipitation_amount";
+      case PrecipHigh:
          return "precipitation_amount";
       case W:
          return "wind_speed";
@@ -261,6 +329,10 @@ std::string Variable::getStandardName(Type iType) {
       case QNH:
          // TODO: What is the standard name for QNH?
          return "air_pressure_at_sea_level_qnh";
+      case SwinAcc:
+         return "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time";
+      case LwinAcc:
+         return "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time";
       default:
          return "no_units";
    }

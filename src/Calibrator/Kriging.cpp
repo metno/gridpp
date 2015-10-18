@@ -13,6 +13,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       mAuxVariable(Variable::None),
       mLowerThreshold(Util::MV),
       mUpperThreshold(Util::MV),
+      mCrossValidate(false),
       mRadius(30000),
       mOperator(Util::OperatorAdd),
       mUseApproxDistance(true),
@@ -83,6 +84,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
          Util::error("CalibratorKriging: the lower value must be less than upper value in 'range'");
       }
    }
+   iOptions.getValue("crossValidate", mCrossValidate);
 }
 
 bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -206,9 +208,27 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
             // Calculate the covariance of each observation to this gridpoint
             std::vector<float> S;
             S.resize(N);
+            float maxCovar = Util::MV;
+            int ImaxCovar = Util::MV;
             for(int ii = 0; ii < N; ii++) {
                Location iloc = pointLocations[ii];
                S[ii] = calcCovar(iloc, Location(lat, lon, elev));
+               if(!Util::isValid(ImaxCovar) || S[ii] > maxCovar) {
+                  ImaxCovar = ii;
+                  maxCovar = S[ii];
+               }
+            }
+
+            // Don't use the nearest station when cross validating
+            if(0 && mCrossValidate) {
+               S[ImaxCovar] = 0;
+               vec2 cvMatrix = matrix;
+               for(int ii = 0; ii < N; ii++) {
+                  cvMatrix[ImaxCovar][ii] = 0;
+                  cvMatrix[ii][ImaxCovar] = 0;
+               }
+               cvMatrix[ImaxCovar][ImaxCovar] = 1;
+               inverse = Util::inverse(cvMatrix);
             }
 
             // Compute weights (matrix-vector product)
@@ -218,6 +238,10 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                for(int jj = 0; jj < N; jj++) {
                   weights[ii] += inverse[ii][jj] * S[ii];
                }
+            }
+            // Set the weight of the nearest location to 0 when cross-validating
+            if(mCrossValidate) {
+               weights[ImaxCovar] = 0;
             }
 
             // Compute final bias (dot product of bias and weights)
@@ -372,5 +396,6 @@ std::string CalibratorKriging::description() {
    ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
    ss << Util::formatDescription("   operator=add","How should the bias be applied to the raw forecast? One of 'add', 'subtract', 'multiply', 'divide'. For add/subtract, the mean of the field is assumed to be 0, and for multiply/divide, 1.") << std::endl;
    ss << Util::formatDescription("   approxDist=true","When computing the distance between two points, should the equirectangular approximation be used to save time? Should be good enough for most kriging purposes.") << std::endl;
+   ss << Util::formatDescription("   crossValidate=false","If true, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
    return ss.str();
 }

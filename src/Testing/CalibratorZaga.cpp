@@ -11,6 +11,9 @@ namespace {
          }
          virtual ~TestCalibratorZaga() {
          }
+         void reset10x10() const {
+            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+         };
          virtual void SetUp() {
          }
          virtual void TearDown() {
@@ -204,16 +207,72 @@ namespace {
       CalibratorZaga cal(Variable::Precip, Options("outputPop=1 neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5"));
       cal.calibrate(file, &parFile);
       FieldPtr pop  = file.getField(Variable::Pop, 0);
-      // mu    = exp(-1.1 + 1.4 * (0.2)^0.33333) = 0.754824
-      // sigma = exp(0.05 + -0.05 * 0.2) = 1.040811
-      // nu    = inv.logit(2.03 -0.05*0.2 + 0.82 * 0.75 -2.71*(0.2)^0.33333) = 0.7408083
-      // Compute 1-CDF at 0.5 mm using R:
-      // require(gamlss)
-      // require(boot)
-      // 1-pZAGA(0.5, 0.754824, 1.040811, 0.7408083)
-      // 0.1306302
+      /*
+      mu    = exp(-1.1 + 1.4 * (0.2)^0.33333) = 0.754824
+      sigma = exp(0.05 + -0.05 * 0.2) = 1.040811
+      nu    = inv.logit(2.03 -0.05*0.2 + 0.82 * 0.75 -2.71*(0.2)^0.33333) = 0.7408083
+      # Compute 1-CDF at 0.5 mm using R:
+      require(gamlss)
+      require(boot)
+      1-pZAGA(0.5, 0.754824, 1.040811, 0.7408083)
+      0.1306302
+      */
       EXPECT_FLOAT_EQ(0.13062906, (*pop)(0,0,0));
    }
+   TEST_F(TestCalibratorZaga, precipLow) {
+      // Set up file
+      FileFake file(2, 2, 1, 1);
+      // Set up calibrator
+      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+      FieldPtr precip  = file.getField(Variable::Precip, 0);
+      // In the neighbourhood around point (0,0):
+      // Frac(precip <= 0.4) = 0.75 mean = 0.2
+      (*precip)(0,0,0) = 0.1;
+      (*precip)(0,1,0) = 0;
+      (*precip)(1,0,0) = 0.5;
+      (*precip)(1,1,0) = 0.2;
+      CalibratorZaga cal(Variable::Precip, Options("outputPop=1 precipLowQuantile=0.1 precipHighQuantile=0.8 neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5"));
+      cal.calibrate(file, &parFile);
+      FieldPtr precipLow  = file.getField(Variable::PrecipLow, 0);
+      FieldPtr precipHigh  = file.getField(Variable::PrecipHigh, 0);
+      // require(gamlss)
+      // require(boot)
+      // qZAGA(0.1, 0.754824, 1.040811, 0.7408083)
+      // qZAGA(0.8, 0.754824, 1.040811, 0.7408083)
+      EXPECT_FLOAT_EQ(0, (*precipLow)(0,0,0));
+      EXPECT_FLOAT_EQ(0.17855705, (*precipHigh)(0,0,0));
+   }
+   /*
+   TEST_F(TestCalibratorZaga, aromeVariables) {
+      {
+         FileArome to("testing/files/10x10_copy.nc");
+         for(int t = 0; t < to.getNumTime(); t++) {
+            to.addField(to.getEmptyField(), Variable::PrecipLow, t);
+            to.addField(to.getEmptyField(), Variable::PrecipMiddle, t);
+            to.addField(to.getEmptyField(), Variable::PrecipHigh, t);
+            to.addField(to.getEmptyField(), Variable::Pop, t);
+         }
+         // Set up calibrator
+         ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
+         CalibratorZaga cal(Variable::Precip, Options("outputPop=1 precipLowQuantile=0.1 precipMiddleQuantile=0.5 precipHighQuantile=0.8 neighbourhoodSize=1 fracThreshold=0.5 popThreshold=0.1"));
+         cal.calibrate(to, &parFile);
+         std::vector<Variable::Type> variables;
+         variables.push_back(Variable::PrecipLow);
+         variables.push_back(Variable::PrecipMiddle);
+         variables.push_back(Variable::PrecipHigh);
+         variables.push_back(Variable::Pop);
+         ASSERT_TRUE(to.hasVariable(Variable::PrecipMiddle));
+         to.write(variables);
+      }
+
+      FileArome from("testing/files/10x10.nc");
+      FileArome to("testing/files/10x10_copy.nc");
+      ASSERT_TRUE(to.hasVariable(Variable::PrecipMiddle));
+      FieldPtr p0 = from.getField(Variable::PrecipMiddle, 1);
+      FieldPtr p1 = to.getField(Variable::PrecipMiddle, 1);
+      reset10x10();
+   }
+   */
    TEST_F(TestCalibratorZaga, outputPop6h) {
       // Set up file
       FileFake file(2, 2, 1, 6);

@@ -114,3 +114,38 @@ Parameters KalmanFilter::update(float iObs, float iForecast, const Parameters& i
 
    return Parameters(parameters);
 }
+
+KalmanParameters::KalmanParameters(const Parameters& iParameters):
+      pVarV(1000),
+      kalmanGainVar(0),
+      varV(1),
+      p(1),
+      kalmanGain(0),
+      error(0),
+      lastError(0),
+      biasEstimate(0) {
+   if(iParameters.size() == 8) {
+      pVarV          = iParameters[0];
+      kalmanGainVar  = iParameters[1];
+      varV           = iParameters[2];
+      p              = iParameters[3];
+      kalmanGain     = iParameters[4];
+      error          = iParameters[5];
+      lastError      = iParameters[6];
+      biasEstimate   = iParameters[7];
+   }
+}
+
+Parameters KalmanParameters::toParameters() const {
+   std::vector<float> parameters;
+   parameters[0] = pVarV;
+   parameters[1] = kalmanGainVar;
+   parameters[2] = varV;
+   parameters[3] = p;
+   parameters[4] = kalmanGain;
+   parameters[5] = error;
+   parameters[6] = lastError;
+   parameters[7] = biasEstimate;
+
+   return Parameters(parameters);
+}

@@ -32,5 +32,6 @@ class CalibratorKriging : public Calibrator {
       Type mKrigingType;
       bool mUseApproxDistance;
       Util::Operator mOperator;
+      bool mCrossValidate;
 };
 #endif

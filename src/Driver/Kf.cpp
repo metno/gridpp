@@ -25,7 +25,9 @@ void writeUsage() {
    std::cout << "Notes:" << std::endl;
    std::cout << "   - If 'input' contains stations that don't exist in currCoeffs, new parameters" << std::endl;
    std::cout << "     initialized." << std::endl;
-
+   std::cout << std::endl;
+   std::cout << "Inputs/Outputs:" << std::endl;
+   std::cout << KalmanFilter::description();
    std::cout << std::endl;
 }
 int main(int argc, const char *argv[]) {
@@ -34,57 +36,50 @@ int main(int argc, const char *argv[]) {
       return 0;
    }
 
-   std::string dataFilename = "";
-   std::string currentFilename = "";
-   std::string newFilename = "";
+   std::string fcstFilename = "";
+   std::string obsFilename = "";
+   std::string dbFilename = "";
    std::string outputFilename = "";
    Options options;
    for(int i = 1; i < argc; i++) {
       options.addOptions(std::string(argv[i]));
    }
-   if(!options.getValue("data", dataFilename)) {
-      Util::error("kalmanFilter: 'data' required.");
+   if(!options.getValue("fcst", fcstFilename)) {
+      Util::error("kalmanFilter: 'fcst' required.");
    }
-   options.getValue("current", currentFilename);
-   options.getValue("new", newFilename);
-   options.getValue("output", outputFilename);
+   options.getValue("obs", obsFilename);
+   int startTime = 0;
+   int endTime = 0;
+   options.getValue("startTime", startTime);
+   options.getValue("endTime", endTime);
 
-   KalmanFilter kf(Variable::T, 0.1);
-   ParameterFileText dataFile(Options("file=" + dataFilename + " spatial=1"));
-   ParameterFileText currFile(Options("file=" + currentFilename + " spatial=1"));
-   ParameterFileText newFile(Options("file=" + newFilename + " spatial=1"));
-   ParameterFileText outputFile(Options("file=" + outputFilename + " spatial=1"));
+   Options kfOptions = options;
 
-   std::vector<int>      times     = Util::combine(dataFile.getTimes(), currFile.getTimes());
-   std::vector<Location> locations = Util::combine(dataFile.getLocations(), currFile.getLocations());
-   for(int t = 0; t < times.size(); t++) {
-      int time = times[t];
-      for(int i = 0; i < locations.size(); i++) {
-         const Location& location = locations[i];
+   KalmanFilter kf(Variable::T, kfOptions);
+   FilePoint fcstFile = FilePoint(fcstFilename, Options("lat=5 lon=5 elev=1000 ens=1"));
 
-         Parameters currData = dataFile.getParameters(time, location);
-         // KF must still be run when obs/fcst are missing because it needs to update certain
-         // coefficients.
-         float obs      = Util::MV;
-         float forecast = Util::MV;
-         if(currData.size() == 2) {
-            obs      = currData[0];
-            forecast = currData[1];
-         }
+   // Downscale to observations
 
-         std::vector<float> values;
-         Parameters currKF = currFile.getParameters(time, location);
-         Parameters newKF  = kf.update(obs, forecast, currKF);
-         newFile.setParameters(newKF, time, location);
-         if(outputFilename != "") {
-            Parameters bias;
-            std::vector<float> biasVector(1, newKF[7]);
-            outputFile.setParameters(biasVector, time, location);
-         }
-      }
+   FilePoint obsFile = FilePoint(obsFilename, Options("lat=5 lon=5 elev=1000 ens=1"));
+   ParameterFileText* dbIn = NULL;
+   if(options.getValue("dbin", dbFilename)) {
+      dbIn = new ParameterFileText(Options("file=" + dbFilename + " spatial=1"));
+   }
+   ParameterFileText* dbOut = NULL;
+   if(options.getValue("dbout", dbFilename)) {
+      dbOut = new ParameterFileText(Options("file=" + dbFilename + " spatial=1"));
+   }
+   ParameterFileText* outputFile = NULL;
+   if(options.getValue("output", outputFilename)) {
+      outputFile = new ParameterFileText(Options("file=" + outputFilename + " spatial=1"));
    }
 
-   newFile.write();
-   if(outputFilename != "")
-      outputFile.write();
+   kf.writeBiasFile(fcstFile, obsFile, 20150101, startTime, endTime, dbIn, dbOut, outputFile);
+
+   if(dbIn != NULL)
+      delete dbIn;
+   if(dbOut != NULL)
+      delete dbOut;
+   if(outputFile != NULL)
+      delete outputFile;
 }

@@ -5,35 +5,46 @@ class Obs;
 class Forecast;
 class Parameters;
 class File;
+class Options;
+class ParameterFile;
+
+class KalmanParameters {
+   public:
+      // Use existing parameters
+      KalmanParameters(const Parameters& iParameters);
+      // Initialize new parameters
+      KalmanParameters(std::vector<float> x, std::vector<float> k, std::vector<std::vector<float> > P);
+      Parameters toParameters() const;
+      std::vector<float> x; // Last estimate
+      std::vector<float> k; // Kalman gain
+      std::vector<std::vector<float> > P; // Covariance matrix
+      int dim() const {return x.size();};
+};
 
 class KalmanFilter {
    public:
-      KalmanFilter(Variable::Type iVariable, float iRatio);
-      //! Returns the next bias
-      float calcBias(const Obs& iObs, const Forecast& iForecast, const Parameters& iParameters) const;
-      float calcBias(const Parameters& iParameters) const;
-      //! Updates parameters
-      Parameters update(const Obs& iObs, const Forecast& iForecast, const Parameters& iOldParameters) const;
-      Parameters update(float iObs, float iForecast, const Parameters& iOldParameters) const;
-
+      KalmanFilter(Variable::Type iVariable, const Options& iOptions);
+      bool writeBiasFile(const File& iFcst,
+            const File& iObs,
+            int iCurrDate,
+            int iStartTime,
+            int iEndTime,
+            const ParameterFile* iDbIn=NULL,
+            ParameterFile* iDbOut=NULL,
+            ParameterFile* iBiasFile=NULL);
+      static std::string description();
    private:
       Variable::Type mVariable;
-      float mRatio;
-      static float mVarVarV;
-      static float mVarVarW;
-      static float mMaxP;
+      float mRatio; // std W / std V
+      float mHourlyCorr;
+      float mV;
+      int mDim; // Hours between obs?
+      std::vector<std::vector<float> > getW() const;
+      int getParameterIndex(int iTime) const;
+      KalmanParameters initialize() const;
 };
-class KalmanParameters {
+class KalmanDb {
    public:
-      KalmanParameters(const Parameters& iParameters);
-      Parameters toParameters() const;
-      float pVarV;
-      float kalmanGainVar;
-      float varV;
-      float p;
-      float kalmanGain;
-      float error;
-      float lastError;
-      float biasEstimate;
+      KalmanDb(const ParameterFile& iFile);
 };
 #endif

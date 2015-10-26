@@ -24,8 +24,8 @@ namespace {
    };
 
    TEST_F(KalmanFilterTest, default) {
-      KalmanFilter kf(Variable::T, 0.1);
-      ParameterFileText  data(Options("file=testing/files/sampleObsFcst.txt spatial=1"));
+      KalmanFilter kf(Variable::T, Options());
+      ParameterFileText data(Options("file=testing/files/sampleObsFcst.txt spatial=1"));
    }
    /*
    TEST_F(KalmanFilterTest, calcBias) {

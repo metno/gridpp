@@ -9,7 +9,7 @@ CFLAGS_O = -O3 -fopenmp $(CFLAGS)
 LIBS_O   = -lnetcdf -lgsl -lblas
 
 # Flags for debug compilation
-CFLAGS_D = -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
+CFLAGS_D = -fPIC -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
 LIBS_D   = -lnetcdf -lgsl -lblas -L build/gtest -lgtest -lpthread
 
 # Don't change below here
@@ -52,6 +52,8 @@ INCS    	= makefile $(HEADERS)
 
 default: $(EXE_O)
 
+all: gridpp gridpp_train gridpp_kf
+
 debug: $(EXE_D)
 
 $(BUILDDIR):
@@ -66,7 +68,7 @@ $(BUILDDIR_D)/%.o : src/%.cpp $(INCS)
 $(BUILDDIR_D)/%.E : src/%.cpp $(INCS)
 	$(CXX) $(CFLAGS_D) $(IFLAGS) -c $< -o $@ -E
 
-gridpp: $(OBJ_O) $(DRVOBJ_O) makefile
+$(EXE_O): $(OBJ_O) $(DRVOBJ_O) makefile
 	$(CXX) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(DRVOBJ_O) $(LIBS_O) -o $@
 
 gridpp_kf: $(OBJ_O) $(KFOBJ_O) makefile
@@ -75,7 +77,7 @@ gridpp_kf: $(OBJ_O) $(KFOBJ_O) makefile
 gridpp_train: $(OBJ_O) $(TRAINOBJ_O) makefile
 	$(CXX) $(CFLAGS_O) $(LFLAGS) $(OBJ_O) $(TRAINOBJ_O) $(LIBS_O) -o $@
 
-gridpp_debug: $(OBJ_D) $(DRVOBJ_D) makefile gtest
+$(EXE_D): $(OBJ_D) $(DRVOBJ_D) makefile gtest
 	$(CXX) $(CFLAGS_D) $(LFLAGS) $(OBJ_D) $(DRVOBJ_D) $(LIBS_D) -o $@
 
 gridpp_kf_debug: $(OBJ_D) $(KFOBJ_D) makefile gtest
@@ -87,8 +89,17 @@ gridpp_train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
 test: gtest $(TESTS)
 	./runAllTests.sh
 
-testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
-	$(CXX) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
+libgridpp.a: $(OBJ_D)
+	ar rvs $@ $(OBJ_D)
+
+libgridpp.so: $(OBJ_D)
+	$(CXX) $(CFLAGS_D) -shared -Wl,-soname,libgridpp.so -o libgridpp.so $(OBJ_D)
+
+testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) libgridpp.so gtest
+	$(CXX) $(CFLAGS_D) $< $(LFLAGS) -L. -lgridpp $(LIBS_D) -o $@
+
+#testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
+#	$(CXX) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
 
 count:
 	@wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
@@ -96,7 +107,7 @@ count:
 clean:
 	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
-		coverage/* coverage.* build/gtest gridpp
+		coverage/* coverage.* build/gtest gridpp gridpp_kf gridpp_debug gridpp_kf_debug libgridpp.a libgridpp.so
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp

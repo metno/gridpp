@@ -96,7 +96,7 @@ libgridpp.so: $(OBJ_D)
 	$(CXX) $(CFLAGS_D) -shared -Wl,-soname,libgridpp.so -o libgridpp.so $(OBJ_D)
 
 testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) libgridpp.so gtest
-	$(CXX) $(CFLAGS_D) $< $(LFLAGS) -L. -lgridpp $(LIBS_D) -o $@
+	$(CXX) $(CFLAGS_D) $< $(LFLAGS) -L. -Wl,-rpath,./ -lgridpp $(LIBS_D) -o $@
 
 #testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
 #	$(CXX) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@

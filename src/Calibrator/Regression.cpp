@@ -14,6 +14,9 @@ CalibratorRegression::CalibratorRegression(Variable::Type iVariable, const Optio
    iOptions.getValue("intercept", mIntercept);
 }
 bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'regression' requires a valid parameter file");
+   }
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

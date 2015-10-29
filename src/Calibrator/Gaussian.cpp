@@ -22,6 +22,10 @@ CalibratorGaussian::CalibratorGaussian(Variable::Type iMainPredictor, const Opti
 }
 
 bool CalibratorGaussian::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'gaussian' requires a parameter file");
+   }
+
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -29,10 +33,6 @@ bool CalibratorGaussian::calibrateCore(File& iFile, const ParameterFile* iParame
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
-
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'gaussian' needs parameters");
-   }
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {

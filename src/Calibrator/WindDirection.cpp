@@ -12,6 +12,13 @@ CalibratorWindDirection::CalibratorWindDirection(Variable::Type iVariable, const
 }
 
 bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'windDirection' requires a parameter file");
+   }
+   if(iParameterFile->getNumParameters() != 9) {
+      Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
+   }
+
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -19,10 +26,6 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
-
-   if(iParameterFile->getNumParameters() != 9) {
-      Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
-   }
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {

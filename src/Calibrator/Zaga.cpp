@@ -41,6 +41,10 @@ CalibratorZaga::CalibratorZaga(Variable::Type iMainPredictor, const Options& iOp
 }
 
 bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'zaga' requires a parameter file");
+   }
+
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
@@ -48,10 +52,6 @@ bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterF
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
-
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'zaga' needs parameters");
-   }
 
    Variable::Type popVariable = Variable::Pop;
    int startTime = 0;

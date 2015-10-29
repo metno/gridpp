@@ -27,6 +27,13 @@ CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
    }
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
+   if(iParameterFile == NULL) {
+      Util::error("Calibrator 'qq' requires a parameter file");
+   }
+   if(iParameterFile->getNumParameters() % 2 != 0) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
+   }
+
    const int nLat = iFile.getNumLat();
    const int nLon = iFile.getNumLon();
    const int nEns = iFile.getNumEns();
@@ -34,10 +41,6 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    const vec2 lats = iFile.getLats();
    const vec2 lons = iFile.getLons();
    const vec2 elevs = iFile.getElevs();
-
-   if(iParameterFile->getNumParameters() % 2 != 0) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
-   }
 
    for(int t = 0; t < nTime; t++) {
       // Retrieve the calibration parameters for this time

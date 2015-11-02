@@ -7,6 +7,10 @@ env:
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install pbuilder aptitude ubuntu-dev-tools libgsl0-dev libblas-dev
+# Temporary hack to get pbuilder to work
+ - sudo sed '286,289d' /usr/bin/pbuilder-dist > temp
+ - sudo mv temp /usr/bin/pbuilder-dist
+ - sudo chmod a+x /usr/bin/pbuilder-dist
  - for CHAR in $(seq 0 9) a b c d e f; do sudo mkdir -p /var/cache/pbuilder/ccache/${CHAR}; done
  - pbuilder-dist ${DIST} create --debootstrapopts --variant=buildd
  - sudo pip install cpp-coveralls

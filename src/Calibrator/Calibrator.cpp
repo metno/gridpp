@@ -134,6 +134,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "bct") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'bct' needs variable");
+      }
+      CalibratorBct* c = new CalibratorBct(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else if(iName == "sort") {
       std::string variable;
       if(!iOptions.getValue("variable", variable)) {
@@ -181,6 +190,7 @@ void Calibrator::shuffle(const std::vector<float>& iBefore, std::vector<float>& 
 
 Parameters Calibrator::train(const TrainingData& iData, int iOffset) const {
    Util::error("Cannot train method. Not yet implemented.");
+   return Parameters();
 }
 
 std::string Calibrator::getDescriptions() {
@@ -198,6 +208,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorRegression::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
+   ss << CalibratorBct::description() << std::endl;
    ss << CalibratorSort::description() << std::endl;
    return ss.str();
 }

@@ -208,6 +208,20 @@ namespace {
       EXPECT_EQ("qq", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factorySort) {
+      Calibrator* c;
+      c = Calibrator::getScheme("sort", Options("variable=Precip"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("sort", c->name());
+      delete c;
+   }
+   TEST_F(TestCalibrator, factoryBct) {
+      Calibrator* c;
+      c = Calibrator::getScheme("bct", Options("variable=W"));
+      EXPECT_TRUE(c);
+      EXPECT_EQ("bct", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T"));

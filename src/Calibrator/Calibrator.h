@@ -49,6 +49,7 @@ class Calibrator : public Scheme {
 #include "Qq.h"
 #include "Phase.h"
 #include "Regression.h"
+#include "Sort.h"
 #include "WindDirection.h"
 #include "Kriging.h"
 #include "Diagnose.h"

@@ -134,6 +134,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "sort") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'sort' needs variable");
+      }
+      CalibratorSort* c = new CalibratorSort(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
@@ -189,5 +198,6 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorRegression::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
+   ss << CalibratorSort::description() << std::endl;
    return ss.str();
 }

@@ -84,6 +84,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
          Util::error("CalibratorKriging: the lower value must be less than upper value in 'range'");
       }
    }
+   std::cout << mLowerThreshold << " " << mUpperThreshold << std::endl;
    iOptions.getValue("crossValidate", mCrossValidate);
 }
 
@@ -105,6 +106,8 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
       ss << "Kriging requires a parameter file with spatial information";
       Util::error(ss.str());
    }
+   std::vector<Location> obsLocations = iParameterFile->getLocations();
+
    // General proceedure for a given gridpoint:
    // S              = matrix * weights
    // weights        = (matrix)^-1 * S
@@ -114,47 +117,23 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
    // S:       The obs-to-current_grid_point covariance (Nx1)
    // bias:    The bias at each obs location (Nx1)
 
-   // Precompute if a gridpoint has an observation location (for any point in time) within the
-   // radius of influence. This saves time for gridpoints without observations close by, since this
-   // does not need to be determined for each forecast time.
-   std::vector<std::vector<bool> > hasObs(nLat);
-   std::vector<Location> pointLocations = iParameterFile->getLocations();
-   #pragma omp parallel for
-   for(int i = 0; i < nLat; i++) {
-      hasObs[i].resize(nLon);
-      for(int j = 0; j < nLon; j++) {
-         hasObs[i][j] = false;
-         float lat = lats[i][j];
-         float lon = lons[i][j];
-         float elev = elevs[i][j];
-         for(int k = 0; k < pointLocations.size(); k++) {
-            Location loc = pointLocations[k];
-            bool withinHoriz = Util::getDistance(loc.lat(), loc.lon(), lat, lon, mUseApproxDistance) <= mRadius;
-            bool withinVertical = fabs(loc.elev() - elev) <= mMaxElevDiff;
-            if(withinHoriz && withinVertical) {
-               hasObs[i][j] = true;
-               break;
-            }
-         }
-      }
-   }
 
    // Compute obs-obs covariance-matrix once
    vec2 matrix;
-   int N = pointLocations.size();
+   int N = obsLocations.size();
+   std::cout << "      Point locations: " << N << std::endl;
    matrix.resize(N);
    for(int ii = 0; ii < N; ii++) {
       matrix[ii].resize(N,0);
    }
    for(int ii = 0; ii < N; ii++) {
-      Location iloc = pointLocations[ii];
-
+      Location iloc = obsLocations[ii];
       // The diagonal is 1, since the distance from a point to itself
       // is 0, therefore its weight is 1.
       matrix[ii][ii] = 1;
       // The matrix is symmetric, so only compute one of the halves
       for(int jj = ii+1; jj < N; jj++) {
-         Location jloc = pointLocations[jj];
+         Location jloc = obsLocations[jj];
          // Improve conditioning of matrix when you have two or more stations
          // that are very close
          float factor = 0.414 / 0.5;
@@ -166,7 +145,48 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
    }
 
    // Compute (matrix)^-1
+   std::cout << "      Precomputing inverse of obs-to-obs covariance matrix: ";
+   std::cout.flush();
+   double s1 = Util::clock();
    vec2 inverse = Util::inverse(matrix);
+   double e1 = Util::clock();
+   std::cout << e1 - s1 << " seconds" << std::endl;
+
+   // Compute grid-point to obs-point covariances
+   std::cout << "      Precomputing gridpoint-to-obs covariances: ";
+   std::cout.flush();
+   double s2 = Util::clock();
+   // Store the covariances of each gridpoint to every obs-point. To save memory, 
+   // only store values that are above 0. Store the index of the obs-point.
+   // This means that Sindex does not have the same size for every gridpoint.
+   std::vector<std::vector<std::vector<float> > > S; // lat, lon, obspoint
+   std::vector<std::vector<std::vector<int> > > Sindex;
+   S.resize(nLat);
+   Sindex.resize(nLat);
+   for(int i = 0; i < nLat; i++) {
+      S[i].resize(nLon);
+      Sindex[i].resize(nLon);
+   }
+
+   #pragma omp parallel for
+   for(int i = 0; i < nLat; i++) {
+      for(int j = 0; j < nLon; j++) {
+         float lat = lats[i][j];
+         float lon = lons[i][j];
+         float elev = elevs[i][j];
+         const Location gridPoint(lat, lon, elev);
+         for(int ii = 0; ii < N; ii++) {
+            Location obsPoint = obsLocations[ii];
+            float covar = calcCovar(obsPoint, gridPoint);
+            if(covar > 0) {
+               S[i][j].push_back(covar);
+               Sindex[i][j].push_back(ii);
+            }
+         }
+      }
+   }
+   double e2 = Util::clock();
+   std::cout << e2 - s2 << " seconds" << std::endl;
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
@@ -179,8 +199,8 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
       // Arrange all the biases for all stations into one vector
       std::vector<float> bias(N,0);
-      for(int k = 0; k < pointLocations.size(); k++) {
-         Location loc = pointLocations[k];
+      for(int k = 0; k < obsLocations.size(); k++) {
+         Location loc = obsLocations[k];
          Parameters parameters = iParameterFile->getParameters(t, loc);
          if(parameters.size() > 0) {
             float currBias = parameters[0];
@@ -200,34 +220,25 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            // No point running kriging for gridpoints where we know there
-            // are no nearby observations
-            if(!hasObs[i][j]) {
-               continue;
-            }
-            float lat = lats[i][j];
-            float lon = lons[i][j];
-            float elev = elevs[i][j];
 
-            // Calculate the covariance of each observation to this gridpoint
-            std::vector<float> S;
-            S.resize(N);
-            float maxCovar = Util::MV;
-            int ImaxCovar = Util::MV;
-            for(int ii = 0; ii < N; ii++) {
-               Location iloc = pointLocations[ii];
-               S[ii] = calcCovar(iloc, Location(lat, lon, elev));
-               if(!Util::isValid(ImaxCovar) || S[ii] > maxCovar) {
-                  ImaxCovar = ii;
-                  maxCovar = S[ii];
-               }
-            }
+            std::vector<float> currS = S[i][j];
+            std::vector<int> currI = Sindex[i][j];
+            int currN = currS.size();
+
 
             // Don't use the nearest station when cross validating
-            if(0 && mCrossValidate) {
-               S[ImaxCovar] = 0;
+            float maxCovar = Util::MV;
+            int ImaxCovar = Util::MV;
+            if(mCrossValidate) {
+               for(int ii = 0; ii < currS.size(); ii++) {
+                  if(!Util::isValid(ImaxCovar) || currS[ii] > maxCovar) {
+                     ImaxCovar = ii;
+                     maxCovar = currS[ii];
+                  }
+               }
+               currS[ImaxCovar] = 0;
                vec2 cvMatrix = matrix;
-               for(int ii = 0; ii < N; ii++) {
+               for(int ii = 0; ii < currN; ii++) {
                   cvMatrix[ImaxCovar][ii] = 0;
                   cvMatrix[ii][ImaxCovar] = 0;
                }
@@ -237,10 +248,16 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
             // Compute weights (matrix-vector product)
             std::vector<float> weights;
-            weights.resize(N, 0);
-            for(int ii = 0; ii < N; ii++) {
+            weights.resize(currN, 0);
+            // Only loop over non-zero values in the vector
+            for(int ii = 0; ii < currN; ii++) {
+               // We cannot use the same short-cup in the inner loop
+               // Even though a covariance to a point is 0, the corresponding row in
+               // the inverse-matrix must be used since it covaries with other points
+               // that the gridpoint covaries with
                for(int jj = 0; jj < N; jj++) {
-                  weights[ii] += inverse[ii][jj] * S[ii];
+                  int II = currI[ii];
+                  weights[ii] += inverse[II][jj] * currS[ii];
                }
             }
             // Set the weight of the nearest location to 0 when cross-validating
@@ -250,13 +267,13 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
             // Compute final bias (dot product of bias and weights)
             float finalBias = 0;
-            for(int ii = 0; ii < N; ii++) {
-               float currBias = bias[ii];
+            for(int ii = 0; ii < currN; ii++) {
+               float currBias = bias[currI[ii]];
                if(!Util::isValid(currBias)) {
                   finalBias = Util::MV;
                   break;
                }
-               finalBias += bias[ii]*weights[ii];
+               finalBias += bias[currI[ii]]*weights[ii];
             }
 
             if(Util::isValid(finalBias)) {

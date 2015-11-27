@@ -658,7 +658,7 @@ float CalibratorZaga::logLikelihood(float obs, float iEnsMean, float iEnsFrac, c
 
 std::string CalibratorZaga::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precip and precip. The distribution has three parameters:") << std::endl;
+   ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precipitation. The distribution has three parameters:") << std::endl;
    ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
    ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
    ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;

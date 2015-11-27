@@ -105,7 +105,18 @@ bool ParameterFileText::isFixedSize() const {
 }
 
 bool ParameterFileText::isValid(std::string iFilename) {
-   // TODO
+   std::ifstream ifs(iFilename.c_str(), std::ifstream::in);
+   if(!ifs.good()) {
+      return false;
+   }
+   return true;
+}
+
+bool ParameterFileText::isReadable() const {
+   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
+   if(!ifs.good()) {
+      return false;
+   }
    return true;
 }
 

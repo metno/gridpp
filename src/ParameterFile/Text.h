@@ -24,6 +24,7 @@ class ParameterFileText : public ParameterFile {
 
       std::vector<int> getTimes() const;
       static bool isValid(std::string iFilename);
+      bool isReadable() const;
       bool isLocationDependent() const;
 
       int getNumParameters() const;

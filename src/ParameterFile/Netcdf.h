@@ -10,11 +10,13 @@
 class ParameterFileNetcdf : public ParameterFile {
    public:
       ParameterFileNetcdf(const Options& iOptions);
+      ~ParameterFileNetcdf();
 
       bool isFixedSize() const {return true;};
       std::vector<int> getTimes() const;
 
       static bool isValid(std::string iFilename);
+      bool isReadable() const;
 
       static std::string description();
       std::string name() const {return "netcdf";};
@@ -49,5 +51,7 @@ class ParameterFileNetcdf : public ParameterFile {
       // For lat/lon, the variable can have one or two dimensions. If the former, then the values
       // are assumed to be the same across the other dimension.
       vec2 getGridValues(int iFile, int iVariable) const;
+
+      int mFile;
 };
 #endif

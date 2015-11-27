@@ -13,6 +13,7 @@ class ParameterFileMetnoKalman : public ParameterFile {
       std::vector<int> getTimes() const;
 
       static bool isValid(std::string iFilename);
+      bool isReadable() const;
       std::string name() const {return "metnoKalman";};
       static std::string description();
    private:

@@ -48,6 +48,11 @@ namespace {
       }
    }
    */
+   TEST(ParameterFileNetcdfTest, invalidFiles) {
+      EXPECT_FALSE(ParameterFileText::isValid("testing/files/parametersf98wey8y8y89rwe.nc"));
+      ParameterFileText p(Options("testing/files/parametersf98wey8y8y89rwe.nc"));
+      EXPECT_FALSE(p.isReadable());
+   }
    TEST(ParameterFileNetcdfTest, description) {
       ParameterFileNetcdf::description();
    }

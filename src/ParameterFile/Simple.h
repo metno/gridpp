@@ -15,6 +15,7 @@ class ParameterFileSimple : public ParameterFile {
 
       std::vector<int> getTimes() const;
       static bool isValid(std::string iFilename);
+      bool isReadable() const {return true;};
       std::string name() const {return "simple";};
    private:
       int mNumParameters;

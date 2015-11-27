@@ -83,6 +83,9 @@ namespace {
       // Text in station ID
       EXPECT_FALSE(ParameterFileMetnoKalman::isValid("testing/files/kalmanInvalid4.txt"));
       EXPECT_DEATH(ParameterFileMetnoKalman(Options("testing/files/kalmanInvalid4.txt")), ".*");
+      // Non-existant file
+      EXPECT_FALSE(ParameterFileMetnoKalman::isValid("testing/files/kalman98yewd98ywe89.txt"));
+      EXPECT_DEATH(ParameterFileMetnoKalman(Options("testing/files/kalman98yewd98ywe89.txt")), ".*");
    }
    TEST(ParameterFileMetnoKalman, emptyFile) {
       ParameterFileMetnoKalman file(Options("file=testing/files/kalmanEmpty.txt"));

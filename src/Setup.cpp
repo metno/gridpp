@@ -59,7 +59,7 @@ Setup::Setup(const std::vector<std::string>& argv) :
    State state = START;
    State prevState = START;
 
-   Variable::Type variable;
+   Variable::Type variable = Variable::None;
    Options vOptions;
    Options dOptions;
    Options cOptions;
@@ -404,35 +404,40 @@ Setup::Setup(const std::vector<std::string>& argv) :
          ParameterFile* p = NULL;
          if(parameterFile != "") {
             p = ParameterFile::getScheme(parameterFile, pOptions);
+            if(!p->isReadable()) {
+               state = ERROR;
+               errorMessage = "Could not open parameter file: " + pOptions.toString();
+            }
          }
+         if(state != ERROR) {
+            cOptions.addOption("variable", Variable::getTypeName(variable));
+            Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
+            calibrators.push_back(c);
+            parameterFileCalibrators.push_back(p);
 
-         cOptions.addOption("variable", Variable::getTypeName(variable));
-         Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
-         calibrators.push_back(c);
-         parameterFileCalibrators.push_back(p);
-
-         // Reset
-         calibrator = "";
-         parameterFile = "";
-         cOptions.clear();
-         pOptions.clear();
-         if(argv.size() <= index) {
-            state = NEWVAR;
-         }
-         else if(argv[index] == "-c") {
-            state = CAL;
-            index++;
-         }
-         else if(argv[index] == "-v") {
-            state = NEWVAR;
-         }
-         else if(argv[index] == "-d") {
-            state = DOWN;
-            index++;
-         }
-         else {
-            state = ERROR;
-            errorMessage = "No recognized option after '-c calibrator'";
+            // Reset
+            calibrator = "";
+            parameterFile = "";
+            cOptions.clear();
+            pOptions.clear();
+            if(argv.size() <= index) {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-c") {
+               state = CAL;
+               index++;
+            }
+            else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-d") {
+               state = DOWN;
+               index++;
+            }
+            else {
+               state = ERROR;
+               errorMessage = "No recognized option after '-c calibrator'";
+            }
          }
       }
       else if(state == END) {
@@ -440,7 +445,7 @@ Setup::Setup(const std::vector<std::string>& argv) :
       }
       else if(state == ERROR) {
          std::stringstream ss;
-         ss << "Could not understand command line arguments: " << errorMessage << ".";
+         ss << "Invalid command line arguments: " << errorMessage << ".";
          Util::error(ss.str());
       }
    }

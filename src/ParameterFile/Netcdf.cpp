@@ -11,48 +11,49 @@
 ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFile(iOptions),
       mDimName("coeff"),
       mVarName("coefficient") {
-   int file;
-   int status = nc_open(getFilename().c_str(), NC_NOWRITE, &file);
-   handleNetcdfError(status, "invalid parameter file");
+   int status = nc_open(getFilename().c_str(), NC_NOWRITE, &mFile);
+   if(status != NC_NOERR) {
+      return;
+   }
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
 
-   int dTime = getTimeDim(file);
-   int dLon  = getLonDim(file);
-   int dLat  = getLatDim(file);
-   int dCoeff = getCoefficientDim(file);
-   int nTime  = getDimSize(file, dTime);
-   int nLat   = getDimSize(file, dLat);
-   int nLon   = getDimSize(file, dLon);
-   int nCoeff = getDimSize(file, dCoeff);
+   int dTime = getTimeDim(mFile);
+   int dLon  = getLonDim(mFile);
+   int dLat  = getLatDim(mFile);
+   int dCoeff = getCoefficientDim(mFile);
+   int nTime  = getDimSize(mFile, dTime);
+   int nLat   = getDimSize(mFile, dLat);
+   int nLon   = getDimSize(mFile, dLon);
+   int nCoeff = getDimSize(mFile, dCoeff);
 
 
    // TODO: Deal with case where lat and lon are one-dimensional variables
    // Get latitudes
    int vLat = Util::MV;
-   if(hasVar(file, "lat"))
-      vLat = getVar(file, "lat");
-   else if(hasVar(file, "latitude"))
-      vLat = getVar(file, "latitude");
+   if(hasVar(mFile, "lat"))
+      vLat = getVar(mFile, "lat");
+   else if(hasVar(mFile, "latitude"))
+      vLat = getVar(mFile, "latitude");
    else
       Util::error("Could not determine latitude variable");
-   vec2 lats = getGridValues(file, vLat);
+   vec2 lats = getGridValues(mFile, vLat);
 
    // Get longitudes
    int vLon = Util::MV;
-   if(hasVar(file, "lon"))
-      vLon = getVar(file, "lon");
-   else if(hasVar(file, "longitude"))
-      vLon = getVar(file, "longitude");
+   if(hasVar(mFile, "lon"))
+      vLon = getVar(mFile, "lon");
+   else if(hasVar(mFile, "longitude"))
+      vLon = getVar(mFile, "longitude");
    else
       Util::error("Could not determine longitude variable");
-   vec2 lons = getGridValues(file, vLon);
+   vec2 lons = getGridValues(mFile, vLon);
 
    // Get elevations
    vec2 elevs;
-   if(hasVar(file, "altitude")) {
-      int vElev = getVar(file, "altitude");
-      elevs = getGridValues(file, vElev);
+   if(hasVar(mFile, "altitude")) {
+      int vElev = getVar(mFile, "altitude");
+      elevs = getGridValues(mFile, vElev);
    }
    else {
       elevs.resize(nLat);
@@ -64,14 +65,14 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
       }
    }
 
-   int vTime = getVar(file, "time");
+   int vTime = getVar(mFile, "time");
    double* times = new double[nTime];
-   status = nc_get_var_double(file, vTime, times);
+   status = nc_get_var_double(mFile, vTime, times);
    handleNetcdfError(status, "could not get times");
 
-   int var = getVar(file, mVarName);
+   int var = getVar(mFile, mVarName);
    int totalNumParameters = nLat*nLon*nTime*nCoeff;
-   float* values = getNcFloats(file, var);
+   float* values = getNcFloats(mFile, var);
 
    // Intitialize parameters to empty and then fill in later
    std::vector<float> params(nCoeff, Util::MV);
@@ -103,19 +104,19 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    int coeffDimIndex = Util::MV;
 
    int ndims;
-   status = nc_inq_varndims(file, var, &ndims);
+   status = nc_inq_varndims(mFile, var, &ndims);
    handleNetcdfError(status, "could not get number of dimensions of coefficients variable");
 
    // Fetch the dimensions of the coefficients variable
    int dims[ndims];
-   status = nc_inq_vardimid(file, var, dims);
+   status = nc_inq_vardimid(mFile, var, dims);
    handleNetcdfError(status, "could not get dimensions for coefficients variable");
 
    // Get dimensions sizes
    std::vector<int> sizes;
    for(int d = 0; d < ndims; d++) {
       size_t size;
-      int status = nc_inq_dimlen(file, dims[d], &size);
+      int status = nc_inq_dimlen(mFile, dims[d], &size);
       handleNetcdfError(status, "could not get size of a dimension for coefficients variable");
       sizes.push_back(size);
       if(dims[d] == dLat)
@@ -161,6 +162,10 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
 
    delete[] values;
    delete[] times;
+}
+
+ParameterFileNetcdf::~ParameterFileNetcdf() {
+   nc_close(mFile);
 }
 
 int ParameterFileNetcdf::getDim(int iFile, std::string iDim) const {
@@ -221,7 +226,17 @@ std::vector<int> ParameterFileNetcdf::getTimes() const {
 }
 
 bool ParameterFileNetcdf::isValid(std::string iFilename) {
-   return true;
+   if(!Util::exists(iFilename))
+      return false;
+
+   int file;
+   int status = nc_open(iFilename.c_str(), NC_NOWRITE, &file);
+   nc_close(file);
+   return status == NC_NOERR;
+}
+
+bool ParameterFileNetcdf::isReadable() const {
+   return ParameterFileNetcdf::isValid(getFilename());
 }
 
 std::string ParameterFileNetcdf::description() {

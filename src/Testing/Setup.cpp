@@ -163,8 +163,15 @@ namespace {
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c -d nearest")), ".*");
 
       // Parameters before other schemes
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -p text testing/files/parameters.txt -v Precip -c zaga")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -p text testing/files/parameters.txt -c zaga")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -p text file=testing/files/parameters.txt -v Precip -c zaga")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -p text file=testing/files/parameters.txt -c zaga")), ".*");
+
+      // Invalid parameter file
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersInvalidTime.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p netcdf file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
    }
    TEST(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();

@@ -235,6 +235,12 @@ namespace {
       std::string date = Util::getCurrentTimeStamp();
       EXPECT_EQ(19, date.size());
    }
+   TEST_F(UtilTest, exists) {
+      EXPECT_FALSE(Util::exists("testing/files/parametersw89ey8wehf.txt"));
+      EXPECT_FALSE(Util::exists("testing/parametersw89ey8wehf.txt"));
+      EXPECT_FALSE(Util::exists("testing/q/parametersw89ey8wehf.txt"));
+      EXPECT_TRUE(Util::exists("testing/files/10x10.nc"));
+   }
    TEST_F(UtilTest, copy) {
       // Check that copying a file works. Do this by modifying a file, and then overwritiing
       // it with known contents.

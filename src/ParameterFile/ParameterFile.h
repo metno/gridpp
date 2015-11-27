@@ -32,6 +32,7 @@ class ParameterFile : public Scheme {
 
       std::vector<Location> getLocations() const;
       virtual std::vector<int> getTimes() const = 0;
+      virtual bool isReadable() const = 0;
 
       // Returns Util::MV if the number are not consistent
       int getNumParameters() const;

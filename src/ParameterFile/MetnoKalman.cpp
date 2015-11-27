@@ -159,6 +159,9 @@ bool ParameterFileMetnoKalman::isValid(std::string iFilename) {
    }
    return true;
 }
+bool ParameterFileMetnoKalman::isReadable() const {
+   return ParameterFileMetnoKalman::isValid(getFilename());
+}
 
 std::string ParameterFileMetnoKalman::description() {
    std::stringstream ss;

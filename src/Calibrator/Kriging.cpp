@@ -116,7 +116,11 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
    // matrix:  The obs-to-obs covariance matrix (NxN)
    // S:       The obs-to-current_grid_point covariance (Nx1)
    // bias:    The bias at each obs location (Nx1)
-
+   //
+   // Note that when computing the weights, we can take a shortcut since most values in
+   // S are zero. However, the weights will still have the length of all stations (not the
+   // number of nearby stations), since when computing the bias we still need to 
+   // weight in far away biases (because they can covary with the nearby stations)
 
    // Compute obs-obs covariance-matrix once
    vec2 matrix;
@@ -190,6 +194,7 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
+      std::cout << "Time: " << t << std::endl;
       FieldPtr field = iFile.getField(mVariable, t);
       FieldPtr accum = iFile.getEmptyField(0);
       FieldPtr weights = iFile.getEmptyField(0);
@@ -225,6 +230,9 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
             std::vector<int> currI = Sindex[i][j];
             int currN = currS.size();
 
+            // No correction if there are no nearby stations
+            if(currN == 0)
+               continue;
 
             // Don't use the nearest station when cross validating
             float maxCovar = Util::MV;
@@ -248,16 +256,12 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
             // Compute weights (matrix-vector product)
             std::vector<float> weights;
-            weights.resize(currN, 0);
-            // Only loop over non-zero values in the vector
-            for(int ii = 0; ii < currN; ii++) {
-               // We cannot use the same short-cup in the inner loop
-               // Even though a covariance to a point is 0, the corresponding row in
-               // the inverse-matrix must be used since it covaries with other points
-               // that the gridpoint covaries with
-               for(int jj = 0; jj < N; jj++) {
-                  int II = currI[ii];
-                  weights[ii] += inverse[II][jj] * currS[ii];
+            weights.resize(N, 0);
+            for(int ii = 0; ii < N; ii++) {
+               // Only loop over non-zero values in the vector
+               for(int jj = 0; jj < currN; jj++) {
+                  int JJ = currI[jj];
+                  weights[ii] += inverse[ii][JJ] * currS[jj];
                }
             }
             // Set the weight of the nearest location to 0 when cross-validating
@@ -267,13 +271,13 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
             // Compute final bias (dot product of bias and weights)
             float finalBias = 0;
-            for(int ii = 0; ii < currN; ii++) {
-               float currBias = bias[currI[ii]];
+            for(int ii = 0; ii < N; ii++) {
+               float currBias = bias[ii];
                if(!Util::isValid(currBias)) {
                   finalBias = Util::MV;
                   break;
                }
-               finalBias += bias[currI[ii]]*weights[ii];
+               finalBias += bias[ii]*weights[ii];
             }
 
             if(Util::isValid(finalBias)) {

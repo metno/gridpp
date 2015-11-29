@@ -7,8 +7,8 @@
 FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
    // Set dimensions
    mNTime = getDimSize("time");
-   mNLat  = getDimSize("y");
-   mNLon  = getDimSize("x");
+   mNLat  = getDimSize(getYname());
+   mNLon  = getDimSize(getXname());
    mNEns  = 1;
 
    mLats = getLatLonVariable("latitude");
@@ -164,8 +164,8 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       if(!hasVariableCore(varType)) {
          // Create variable
          int dTime    = getDim("time");
-         int dLon     = getDim("x");
-         int dLat     = getDim("y");
+         int dLon     = getDim(getXname());
+         int dLat     = getDim(getYname());
          int dims[3]  = {dTime, dLat, dLon};
          int var = Util::MV;
          int status = nc_def_var(mFile,variable.c_str(), NC_FLOAT, 3, dims, &var);
@@ -357,7 +357,9 @@ bool FileArome::isValid(std::string iFilename) {
    int file;
    int status = nc_open(iFilename.c_str(), NC_NOWRITE, &file);
    if(status == NC_NOERR) {
-      isValid = hasDim(file, "time") && hasDim(file, "x") && hasDim(file, "y") &&
+      isValid = hasDim(file, "time") &&
+               (hasDim(file, "x") || hasDim(file, "rlon")) &&
+               (hasDim(file, "y") || hasDim(file, "rlat")) &&
                !hasDim(file, "ensemble_member") &&
                hasVar(file, "latitude") && hasVar(file, "longitude");
    }
@@ -369,4 +371,18 @@ std::string FileArome::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=arome", "AROME file") << std::endl;
    return ss.str();
+}
+
+std::string FileArome::getXname() const {
+   std::string xname = "x";
+   if(!hasDim(xname))
+      xname = "rlon";
+   return xname;
+}
+
+std::string FileArome::getYname() const {
+   std::string yname = "y";
+   if(!hasDim(yname))
+      yname = "rlat";
+   return yname;
 }

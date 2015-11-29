@@ -17,7 +17,8 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       mRadius(30000),
       mOperator(Util::OperatorAdd),
       mUseApproxDistance(true),
-      mKrigingType(TypeCressman) {
+      mKrigingType(TypeCressman),
+      mWindow(0) {
    iOptions.getValue("efoldDist", mEfoldDist);
    iOptions.getValue("radius", mRadius);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);
@@ -80,6 +81,8 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       else {
          Util::error("CalibratorKriging: 'range' required if using 'auxVariable'.");
       }
+
+      iOptions.getValue("window", mWindow);
       if(mLowerThreshold > mUpperThreshold) {
          Util::error("CalibratorKriging: the lower value must be less than upper value in 'range'");
       }
@@ -100,6 +103,71 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
+
+   // Check if this method can be applied
+   bool hasValidGridpoint = false;
+   for(int i = 0; i < nLat; i++) {
+      for(int j = 0; j < nLon; j++) {
+         if(Util::isValid(lats[i][j]) && Util::isValid(lons[i][j]) && Util::isValid(elevs[i][j])) {
+            hasValidGridpoint = true;
+         }
+      }
+   }
+   if(!hasValidGridpoint) {
+      Util::warning("There are no gridpoints with valid lat/lon/elev values. Skipping kriging...");
+      return false;
+   }
+
+   // Precompute weights from auxillary variable
+   std::vector<std::vector<std::vector<std::vector<float> > > > auxWeights;
+   if(mAuxVariable != Variable::None) {
+      // Initialize
+      auxWeights.resize(nLat);
+      for(int i = 0; i < nLat; i++) {
+         auxWeights[i].resize(nLon);
+         for(int j = 0; j < nLon; j++) {
+            auxWeights[i][j].resize(nEns);
+            for(int e = 0; e < nEns; e++) {
+               auxWeights[i][j][e].resize(nTime, 0);
+            }
+         }
+      }
+      // Load auxillarcy variable
+      std::vector<FieldPtr> auxFields;
+      auxFields.resize(nTime);
+      for(int t = 0; t < nTime; t++) {
+         auxFields[t] = iFile.getField(mAuxVariable, t);
+      }
+
+      // Compute auxillary weights
+      for(int t = 0; t < nTime; t++) {
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  float total = 0;
+                  int start = std::max(t-mWindow,0);
+                  int end   = std::min(nTime-1,t+mWindow);
+                  int numValid = 0;
+                  for(int tt = start; tt <= end; tt++) {
+                     float aux = (*auxFields[tt])(i,j,e);
+                     if(Util::isValid(aux)) {
+                        if(aux >= mLowerThreshold && aux <= mUpperThreshold) {
+                           total++;
+                        }
+                        numValid++;
+                     }
+                  }
+                  int windowSize = end - start + 1;
+                  if(numValid == 0)
+                     auxWeights[i][j][e][t] = 1;
+                  else
+                     auxWeights[i][j][e][t] += total / numValid;
+               }
+            }
+         }
+      }
+   }
 
    if(!iParameterFile->isLocationDependent()) {
       std::stringstream ss;
@@ -194,13 +262,9 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      std::cout << "Time: " << t << std::endl;
       FieldPtr field = iFile.getField(mVariable, t);
       FieldPtr accum = iFile.getEmptyField(0);
       FieldPtr weights = iFile.getEmptyField(0);
-      FieldPtr auxField;
-      if(mAuxVariable != Variable::None)
-         auxField = iFile.getField(mAuxVariable, t);
 
       // Arrange all the biases for all stations into one vector
       std::vector<float> bias(N,0);
@@ -291,37 +355,36 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                // Apply bias to each ensemble member
                for(int e = 0; e < nEns; e++) {
                   float rawValue = (*field)(i,j,e);
-                  // Determine if we should turn kriging off based on auxillary variable
-                  bool turnOn = Util::isValid(rawValue);
+
+                  // Adjust bias based on auxillary weight
                   if(mAuxVariable != Variable::None) {
-                     float aux = (*auxField)(i,j,e);
-                     if(Util::isValid(aux)) {
-                        if(aux < mLowerThreshold || aux > mUpperThreshold) {
-                           turnOn = false;
-                        }
+                     float weight = auxWeights[i][j][e][t];
+                     if(mOperator == Util::OperatorAdd || mOperator == Util::OperatorSubtract) {
+                        finalBias = finalBias * weight;
+                     }
+                     else {
+                        finalBias = pow(finalBias, weight);
                      }
                   }
 
-                  if(turnOn) {
-                     if(mOperator == Util::OperatorAdd) {
-                        (*field)(i,j,e) += finalBias;
-                     }
-                     else if(mOperator == Util::OperatorSubtract) {
-                        (*field)(i,j,e) -= finalBias;
-                     }
-                     else if(mOperator == Util::OperatorMultiply) {
-                        // TODO: How do we ensure that the matrix is positive definite in this
-                        // case?
-                        (*field)(i,j,e) *= finalBias;
-                     }
-                     else if(mOperator == Util::OperatorDivide) {
-                        // TODO: How do we ensure that the matrix is positive definite in this
-                        // case?
-                        (*field)(i,j,e) /= finalBias;
-                     }
-                     else {
-                        Util::error("Unrecognized operator in CalibratorKriging");
-                     }
+                  if(mOperator == Util::OperatorAdd) {
+                     (*field)(i,j,e) += finalBias;
+                  }
+                  else if(mOperator == Util::OperatorSubtract) {
+                     (*field)(i,j,e) -= finalBias;
+                  }
+                  else if(mOperator == Util::OperatorMultiply) {
+                     // TODO: How do we ensure that the matrix is positive definite in this
+                     // case?
+                     (*field)(i,j,e) *= finalBias;
+                  }
+                  else if(mOperator == Util::OperatorDivide) {
+                     // TODO: How do we ensure that the matrix is positive definite in this
+                     // case?
+                     (*field)(i,j,e) /= finalBias;
+                  }
+                  else {
+                     Util::error("Unrecognized operator in CalibratorKriging");
                   }
                }
             }
@@ -418,6 +481,7 @@ std::string CalibratorKriging::description() {
    ss << Util::formatDescription("   maxElevDiff=100","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
    ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
+   ss << Util::formatDescription("   window=0","Use a time window to allow weighting of the kriging. Use the fraction of timesteps within +- window where the auxillary variable is within the range. Use 0 for no window.") << std::endl;
    ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
    ss << Util::formatDescription("   operator=add","How should the bias be applied to the raw forecast? One of 'add', 'subtract', 'multiply', 'divide'. For add/subtract, the mean of the field is assumed to be 0, and for multiply/divide, 1.") << std::endl;
    ss << Util::formatDescription("   approxDist=true","When computing the distance between two points, should the equirectangular approximation be used to save time? Should be good enough for most kriging purposes.") << std::endl;

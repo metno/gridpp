@@ -33,6 +33,7 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
             mElevs[i][j] = Util::MV;
          }
       }
+      Util::warning("No altitude field available in " + getFilename());
    }
 
    // TODO: No land fraction info in EC files?

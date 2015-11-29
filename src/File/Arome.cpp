@@ -36,6 +36,7 @@ FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilena
             mElevs[i][j] = Util::MV;
          }
       }
+      Util::warning("No altitude field available in " + getFilename());
    }
 
    if(hasVar("land_area_fraction")) {

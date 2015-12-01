@@ -1,3 +1,14 @@
+gridpp (0.2.0) precise; urgency=low
+
+  * Adds new calibrators and allows gridded parameter files
+    - Calibration using Box-Cox distribution
+    - Kriging of bias
+    - Calibration using Gaussian distribution
+    - Kalman filter program
+    - Parameter files can be specified using -p
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Tue, 01 Dec 2015 10:13:32 +0100
+
 gridpp (0.1.6) precise; urgency=low
 
   * Adds QNH output for Nordcom

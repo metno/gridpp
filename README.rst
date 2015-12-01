@@ -7,7 +7,7 @@ Gridded post-processor
 .. image:: https://coveralls.io/repos/metno/gridpp/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/metno/gridpp?branch=master 
 
-The program post-processes an AROME or ECMWF NetCDF file by using various
+The program post-processes NetCDF files used at MET-Norway by using various
 downscaling and calibration methods. Post-processed forecasts are placed in a
 second Netcdf file, which has the desired output grid.
 
@@ -26,9 +26,17 @@ Calibrators include:
 
 * spatial smoothing (average within a neighbourhood)
 
-* ensemble calibration of precipitation using zero-adjusted Gamma distribution
+* quantile-quantile mapping
 
-* polynomial regression of any order
+* linear regression
+
+* Kriging of biases at points onto a grid (additive and multiplicative)
+
+* ensemble calibration using zero-adjusted Gamma distribution (e.g. for precipitation)
+
+* ensemble calibration using Box-Cox t-distribution (e.g. for windspeed)
+
+* ensemble calibration using Gaussian distribution (e.g. for temperature)
 
 * calculation of precipitation phase, using wetbulb temperature
 
@@ -39,6 +47,8 @@ Calibrators include:
 Installation Instructions
 -------------------------
 
+**From source**
+
 1. Ensure the following libraries are installed:
 
    * Boost libraries
@@ -47,10 +57,15 @@ Installation Instructions
    * libblas
    * (Optional) Google test library (if developing new code)
 
-2. Edit CXX, CFLAGS_O, IFLAGS, and LFLAGS in makefile
+2. Download the source code from a release: https://github.com/metno/gridpp/releases
 
-3. Run 'make'
+3. Edit CXX, CFLAGS_O, IFLAGS, and LFLAGS in makefile
 
+4. Run 'make'
+
+**From debian packages**
+
+Follow instructions here: https://launchpad.net/~metno/+archive/ubuntu/gridpp
 
 
 Running the program
@@ -65,26 +80,10 @@ To test the program on a fake dataset, run:
 
 .. code-block:: bash
 
-   ./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d gradient -v Precip -d smart numSmart=3 searchRadius=3
+   ./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc\
+      -v T -d gradient\
+      -v Precip -d smart numSmart=3 searchRadius=3
    ncview testing/files/10x10_copy.nc
-
-
-
-Example
--------
-To test the program on a real operational AROME file, follow these steps:
-
-1. Make a copy of a file to post-process:
-
-.. code-block:: bash
-
-   cp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc
-
-2. Create a smoothed precipitation field in localcopy.nc:
-
-.. code-block:: bash
-
-   ./gridpp /starc/DNMI_AROME_METCOOP/2015/01/01/AROME_MetCoOp_00_DEF.nc_20150101 localcopy.nc -v Precip -c neighbourhood radius=10
 
 
 

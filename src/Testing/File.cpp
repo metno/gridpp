@@ -145,6 +145,11 @@ namespace {
       File* f = File::getScheme("missingfilename", Options());
       EXPECT_EQ(NULL, f);
    }
+   TEST_F(FileTest, factoryNorcom) {
+      File* f = File::getScheme("file=testing/files/norcom.txt", Options("type=norcomQnh lats=60 lons=9 elevs=100 names=Test numTimes=100 startTime=0 endTime=3"));
+      ASSERT_TRUE(f);
+      EXPECT_EQ("norcom", f->name());
+   }
    TEST_F(FileTest, deaccumulate) {
       // Create accumulation field
       FileArome from("testing/files/1x1.nc");

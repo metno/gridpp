@@ -17,7 +17,7 @@ class FileNorcomQnh : public File {
       FileNorcomQnh(std::string iFilename, const Options& iOptions);
       ~FileNorcomQnh();
       static std::string description();
-      std::string name() const {return "point";};
+      std::string name() const {return "norcom";};
    protected:
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
       void writeCore(std::vector<Variable::Type> iVariables);

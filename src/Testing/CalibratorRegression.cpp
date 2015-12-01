@@ -89,6 +89,14 @@ namespace {
       CalibratorRegression calibrator(Variable::T, Options());
       EXPECT_DEATH(calibrator.calibrate(from, &par), ".*");
    }
+   // Missing parameter file
+   TEST_F(TestCalibratorRegression, invalid2) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+	  FileArome from("testing/files/10x10.nc");
+      Util::setShowError(false);
+      CalibratorRegression calibrator(Variable::T, Options());
+      EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");
+   }
    TEST_F(TestCalibratorRegression, training) {
       // R code:
       // data = data.frame(x=c(4,5,9),y=c(3.2,5,14))

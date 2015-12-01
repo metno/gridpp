@@ -47,10 +47,6 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    for(int i = 0; i < mNTime; i++)
       times.push_back(i);
 
-   if(!iOptions.getValues("elevs", mElevs[0])) {
-      Util::error("Missing 'elevs' option for '" + iFilename + "'");
-   }
-
    // Determine the times for this filetype.
    if(!iOptions.getValue("startTime", mStartTime)) {
       Util::error("Missing 'startTime' option for '" + iFilename + "'");

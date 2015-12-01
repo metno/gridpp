@@ -37,14 +37,36 @@ namespace {
       // FieldPtr field = to.getField(Variable::P, 0);
       // EXPECT_FLOAT_EQ(1, (*field)(0,0,0));
    }
+   TEST_F(FileNorcomQnhTest, description) {
+      FileNorcomQnh::description();
+   }
+   TEST_F(FileNorcomQnhTest, valid) {
+      // Longitudes outside 360, -360 should be allowed
+      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=300 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
+      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
+      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=-370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
+   }
    TEST_F(FileNorcomQnhTest, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       // lats, lons, elevs not the same
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1,2 lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2,3,2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2 elevs=3,2 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1,2 lons=2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2,3,2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2 elevs=3,2 names=test numTimes=2 startTime=0 endTime=1")), ".*");
       EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q,w numTimes=2 startTime=0 endTime=1")), ".*");
+
+      // Missing attributes
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 startTime=0")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("")), ".*");
+
+      // Invalid latitude
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=101 lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=-91 lons=180 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
 
       // Start/end time not in ascending order
       EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q numTimes=2 startTime=1 endTime=0")), ".*");

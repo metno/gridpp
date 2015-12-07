@@ -267,9 +267,15 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
       return "precipitation_amount_high_estimate";
    }
    else if(iVariable == Variable::U) {
+      return "eastward_wind_10m";
+   }
+   else if(iVariable == Variable::Xwind) {
       return "x_wind_10m";
    }
    else if(iVariable == Variable::V) {
+      return "northward_wind_10m";
+   }
+   else if(iVariable == Variable::Ywind) {
       return "y_wind_10m";
    }
    else if(iVariable == Variable::W) {

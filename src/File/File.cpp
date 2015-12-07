@@ -162,6 +162,23 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                addField(windSpeed, Variable::W, t);
             }
          }
+         else if(hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind)) {
+            for(int t = 0; t < getNumTime(); t++) {
+               FieldPtr windSpeed = getEmptyField();
+               const FieldPtr x = getField(Variable::Xwind, t);
+               const FieldPtr y = getField(Variable::Ywind, t);
+               for(int lat = 0; lat < getNumLat(); lat++) {
+                  for(int lon = 0; lon < getNumLon(); lon++) {
+                     for(int e = 0; e < getNumEns(); e++) {
+                        float currX = (*x)(lat,lon,e);
+                        float currY = (*y)(lat,lon,e);
+                        (*windSpeed)(lat,lon,e) = sqrt(currX*currX + currY*currY);
+                     }
+                  }
+               }
+               addField(windSpeed, Variable::W, t);
+            }
+         }
          else {
             Util::error("Cannot derive wind speed from variables in file");
          }
@@ -187,13 +204,41 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                addField(windDir, Variable::WD, t);
             }
          }
+         else if(hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind)) {
+            for(int t = 0; t < getNumTime(); t++) {
+               FieldPtr windDir = getEmptyField();
+               const FieldPtr x = getField(Variable::Xwind, t);
+               const FieldPtr y = getField(Variable::Ywind, t);
+               for(int lat = 0; lat < getNumLat(); lat++) {
+                  for(int lon = 0; lon < getNumLon(); lon++) {
+                     for(int e = 0; e < getNumEns(); e++) {
+                        float currX = (*x)(lat,lon,e);
+                        float currY = (*y)(lat,lon,e);
+                        float dir = std::atan2(-currX,-currY) * 180 / Util::pi;
+                        if(dir < 0)
+                           dir += 360;
+                        (*windDir)(lat,lon,e) = dir;
+                     }
+                  }
+               }
+               addField(windDir, Variable::WD, t);
+            }
+         }
          else {
-            Util::error("Cannot derive wind speed from variables in file");
+            Util::warning("Cannot derive wind speed from variables in file");
+            for(int t = 0; t < getNumTime(); t++) {
+               FieldPtr field = getEmptyField();
+               addField(field, iVariable, t);
+            }
          }
       }
       else {
          std::string variableType = Variable::getTypeName(iVariable);
-         Util::error(variableType + " not available in '" + getFilename() + "'");
+         Util::warning(variableType + " not available in '" + getFilename() + "'");
+         for(int t = 0; t < getNumTime(); t++) {
+            FieldPtr field = getEmptyField();
+            addField(field, iVariable, t);
+         }
       }
    }
    if(mFields[iVariable].size() <= iTime) {
@@ -270,10 +315,12 @@ bool File::hasVariable(Variable::Type iVariable) const {
       return hasVariableCore(Variable::Precip);
    }
    else if(iVariable == Variable::W) {
-      return hasVariableCore(Variable::V) && hasVariableCore(Variable::U);
+      return (hasVariableCore(Variable::V) && hasVariableCore(Variable::U)) ||
+             (hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind));
    }
    else if(iVariable == Variable::WD) {
-      return hasVariableCore(Variable::V) && hasVariableCore(Variable::U);
+      return (hasVariableCore(Variable::V) && hasVariableCore(Variable::U)) ||
+             (hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind));
    }
    
    // Check if field has been initialized

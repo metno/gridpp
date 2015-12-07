@@ -23,8 +23,12 @@ std::string Variable::getTypeName(Type iType) {
       return "T";
    else if(iType == U)
       return "U";
+   else if(iType == Xwind)
+      return "Xwind";
    else if(iType == V)
       return "V";
+   else if(iType == Ywind)
+      return "Ywind";
    else if(iType == W)
       return "W";
    else if(iType == WD)
@@ -70,8 +74,12 @@ Variable::Type Variable::getType(std::string iName) {
       return T;
    else if(iName == "U")
       return U;
+   else if(iName == "Xwind")
+      return Xwind;
    else if(iName == "V")
       return V;
+   else if(iName == "Ywind")
+      return Ywind;
    else if(iName == "W")
       return W;
    else if(iName == "WD")
@@ -109,7 +117,9 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v W", "Wind speed") << std::endl;
    ss << Util::formatDescription("-v WD", "Wind direction") << std::endl;
    ss << Util::formatDescription("-v U", "U-wind") << std::endl;
+   ss << Util::formatDescription("-v Xwind", "X-wind") << std::endl;
    ss << Util::formatDescription("-v V", "V-wind") << std::endl;
+   ss << Util::formatDescription("-v Ywind", "Y-wind") << std::endl;
    ss << Util::formatDescription("-v Cloud", "Cloud cover") << std::endl;
    ss << Util::formatDescription("-v RH", "Relative humidity") << std::endl;
    ss << Util::formatDescription("-v Phase", "Precipitation phase (0 none, 1 rain, 2 sleet, 3 snow)") << std::endl;
@@ -136,7 +146,9 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    variables.push_back(Variable::W);
    variables.push_back(Variable::WD);
    variables.push_back(Variable::U);
+   variables.push_back(Variable::Xwind);
    variables.push_back(Variable::V);
+   variables.push_back(Variable::Ywind);
    variables.push_back(Variable::Cloud);
    variables.push_back(Variable::RH);
    variables.push_back(Variable::Phase);
@@ -173,7 +185,11 @@ float Variable::getMin(Type iType) {
          return 0;
       case U:
          return Util::MV;
+      case Xwind:
+         return Util::MV;
       case V:
+         return Util::MV;
+      case Ywind:
          return Util::MV;
       case Cloud:
          return 0;
@@ -220,7 +236,11 @@ float Variable::getMax(Type iType) {
          return 360;
       case U:
          return Util::MV;
+      case Xwind:
+         return Util::MV;
       case V:
+         return Util::MV;
+      case Ywind:
          return Util::MV;
       case Cloud:
          return 1;
@@ -266,7 +286,11 @@ std::string Variable::getUnits(Type iType) {
          return "degrees";
       case U:
          return "m/s";
+      case Xwind:
+         return "m/s";
       case V:
+         return "m/s";
+      case Ywind:
          return "m/s";
       case Cloud:
          return "1";
@@ -313,9 +337,13 @@ std::string Variable::getStandardName(Type iType) {
       case U:
          // TODO: Is this correct?
          return "eastward_wind";
+      case Xwind:
+         return "x_wind";
       case V:
          // TODO: Is this correct?
          return "northward_wind";
+      case Ywind:
+         return "y_wind";
       case Cloud:
          return "cloud_area_fraction";
       case RH:

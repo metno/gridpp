@@ -21,10 +21,20 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
    // Check that we have the required variables
    std::vector<Variable::Type> requiredVariables;
    if(mOutputVariable == Variable::W || mOutputVariable == Variable::WD) {
-      requiredVariables.push_back(Variable::U);
-      requiredVariables.push_back(Variable::V);
+      if(iFile.hasVariable(Variable::U)) {
+         requiredVariables.push_back(Variable::U);
+         requiredVariables.push_back(Variable::V);
+      }
+      else {
+         requiredVariables.push_back(Variable::Xwind);
+         requiredVariables.push_back(Variable::Ywind);
+      }
    }
    else if(mOutputVariable == Variable::U || mOutputVariable == Variable::V) {
+      requiredVariables.push_back(Variable::W);
+      requiredVariables.push_back(Variable::WD);
+   }
+   else if(mOutputVariable == Variable::Xwind || mOutputVariable == Variable::Ywind) {
       requiredVariables.push_back(Variable::W);
       requiredVariables.push_back(Variable::WD);
    }
@@ -55,13 +65,13 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
                if(mOutputVariable == Variable::W) {
                }
                // Diagnose U from W and WD
-               else if(mOutputVariable == Variable::U) {
+               else if(mOutputVariable == Variable::U || mOutputVariable == Variable::Xwind) {
                   const Field& fieldW = *iFile.getField(Variable::W, t);
                   const Field& fieldWD = *iFile.getField(Variable::WD, t);
                   output(i,j,e) = - fieldW(i,j,e) * sin(fieldWD(i,j,e) / 180.0 * Util::pi);
                }
                // Diagnose V from W and WD
-               else if(mOutputVariable == Variable::V) {
+               else if(mOutputVariable == Variable::V || mOutputVariable == Variable::Ywind) {
                   const Field& fieldW = *iFile.getField(Variable::W, t);
                   const Field& fieldWD = *iFile.getField(Variable::WD, t);
                   output(i,j,e) = - fieldW(i,j,e) * cos(fieldWD(i,j,e) / 180.0 * Util::pi);

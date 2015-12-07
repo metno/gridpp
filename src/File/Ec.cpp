@@ -118,8 +118,9 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
+      std::string typeName = Variable::getTypeName(varType);
       if(variable == "") {
-         Util::error("Cannot write variable '" + variable + "' because there EC output file has no definition for it");
+         Util::error("Cannot write variable '" + typeName + "' because there EC output file has no definition for it");
       }
       int var = Util::MV;
       if(!hasVariableCore(varType)) {
@@ -177,7 +178,8 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
                size_t count[5] = {1,1,mNEns, mNLat, mNLon};
                int status = nc_put_vara_float(mFile, var, start, count, values);
                handleNetcdfError(status, "could not write variable " + variable);
-               setAttribute(var, "coordinates", "longitude latitude");
+               // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
+               setAttribute(var, "coordinates", "lon lat");
                setAttribute(var, "units", Variable::getUnits(varType));
                setAttribute(var, "standard_name", Variable::getStandardName(varType));
             }
@@ -207,9 +209,15 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
       return "precipitation_amount";
    }
    else if(iVariable == Variable::U) {
+      return "eastward_wind_10m";
+   }
+   else if(iVariable == Variable::Xwind) {
       return "x_wind_10m";
    }
    else if(iVariable == Variable::V) {
+      return "northward_wind_10m";
+   }
+   else if(iVariable == Variable::Ywind) {
       return "y_wind_10m";
    }
    else if(iVariable == Variable::W) {

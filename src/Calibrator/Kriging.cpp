@@ -9,7 +9,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       Calibrator(iOptions),
       mVariable(iVariable),
       mEfoldDist(30000),
-      mMaxElevDiff(100),
+      mMaxElevDiff(Util::MV),
       mAuxVariable(Variable::None),
       mLowerThreshold(Util::MV),
       mUpperThreshold(Util::MV),
@@ -26,7 +26,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
    if(mEfoldDist< 0) {
       Util::error("CalibratorKriging: 'efoldDist' must be >= 0");
    }
-   if(mMaxElevDiff < 0) {
+   if(Util::isValid(mMaxElevDiff) && mMaxElevDiff < 0) {
       Util::error("CalibratorKriging: 'maxElevDiff' must be >= 0");
    }
    if(mRadius < 0) {
@@ -87,7 +87,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
          Util::error("CalibratorKriging: the lower value must be less than upper value in 'range'");
       }
    }
-   std::cout << mLowerThreshold << " " << mUpperThreshold << std::endl;
    iOptions.getValue("crossValidate", mCrossValidate);
 }
 
@@ -401,21 +400,28 @@ float CalibratorKriging::calcCovar(const Location& loc1, const Location& loc2) c
    if(isValidLoc1 && isValidLoc2) {
       float horizDist = Util::getDistance(loc1.lat(), loc1.lon(), loc2.lat(), loc2.lon(), mUseApproxDistance);
       float vertDist  = fabs(loc1.elev() - loc2.elev());
-      if(horizDist >= mRadius || vertDist >= mMaxElevDiff) {
+      if(horizDist >= mRadius || (Util::isValid(mMaxElevDiff) && vertDist >= mMaxElevDiff)) {
+         // Outside radius of influence
          return 0;
       }
       if(mKrigingType == TypeCressman) {
-         if(horizDist > mEfoldDist || vertDist > mMaxElevDiff)
+         if(horizDist > mEfoldDist || (Util::isValid(mMaxElevDiff) && vertDist > mMaxElevDiff))
             return 0;
          float horizWeight = (mEfoldDist*mEfoldDist - horizDist*horizDist) /
                              (mEfoldDist*mEfoldDist + horizDist*horizDist);
-         float vertWeight  = (mMaxElevDiff*mMaxElevDiff - vertDist*vertDist) /
-                             (mMaxElevDiff*mMaxElevDiff + vertDist*vertDist);
+         float vertWeight = 1;
+         if(Util::isValid(mMaxElevDiff)) {
+            vertWeight  = (mMaxElevDiff*mMaxElevDiff - vertDist*vertDist) /
+                                (mMaxElevDiff*mMaxElevDiff + vertDist*vertDist);
+         }
          weight = horizWeight * vertWeight;
       }
       else if(mKrigingType == TypeBarnes) {
          float horizWeight = exp(-horizDist*horizDist/(2*mEfoldDist*mEfoldDist));
-         float vertWeight  = exp(-vertDist*vertDist/(2*mMaxElevDiff*mMaxElevDiff));
+         float vertWeight  = 1;
+         if(Util::isValid(mMaxElevDiff)) {
+            vertWeight  = exp(-vertDist*vertDist/(2*mMaxElevDiff*mMaxElevDiff));
+         }
          weight = horizWeight * vertWeight;
          return weight;
       }
@@ -478,7 +484,7 @@ std::string CalibratorKriging::description() {
    ss << Util::formatDescription("-c kriging","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
    ss << Util::formatDescription("   radius=30000","Only use values from locations within this radius (in meters). Must be >= 0.") << std::endl;
    ss << Util::formatDescription("   efoldDist=30000","How fast should the weight of a station reduce with distance? For cressman: linearly decrease to this distance (in meters); For barnes: reduce to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
-   ss << Util::formatDescription("   maxElevDiff=100","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0.") << std::endl;
+   ss << Util::formatDescription("   maxElevDiff=undef","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0. Leave undefined if no reduction of bias in the vertical is desired.") << std::endl;
    ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
    ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
    ss << Util::formatDescription("   window=0","Use a time window to allow weighting of the kriging. Use the fraction of timesteps within +- window where the auxillary variable is within the range. Use 0 for no window.") << std::endl;

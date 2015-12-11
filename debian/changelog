@@ -1,13 +1,19 @@
 gridpp (0.2.0) precise; urgency=low
 
   * Adds new calibrators and allows gridded parameter files
+  * New features:
     - Calibration using Box-Cox distribution
-    - Kriging of bias
     - Calibration using Gaussian distribution
+    - Kriging of bias
     - Kalman filter program
-    - Parameter files can be specified using -p
+    - Computes probability of preciptiation
+    - Quantile-quantile calibration
+    - Allows gridded parameter files
+    - Uses libnetcdf instead of libnetcdf_c++
+  * Backwards-incompatible changes:
+    - Parameter files must be specified using -p
 
- -- Thomas Nipen <thomas.nipen@met.no>  Tue, 01 Dec 2015 10:13:32 +0100
+ -- Thomas Nipen <thomas.nipen@met.no>  Fri, 11 Dec 2015 12:48:07 +0100
 
 gridpp (0.1.6) precise; urgency=low
 

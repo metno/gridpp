@@ -319,7 +319,7 @@ std::string Variable::getStandardName(Type iType) {
       case Precip:
          return "precipitation_amount";
       case PrecipAcc:
-         return "precipitation_amount_acc";
+         return "precipitation_amount";
       case Pop:
          return "precipitation_amount";
       case Pop6h:

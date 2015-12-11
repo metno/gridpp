@@ -89,14 +89,14 @@ gridpp_train_debug: $(OBJ_D) $(TRAINOBJ_D) makefile gtest
 test: gtest $(TESTS)
 	./runAllTests.sh
 
-libgridpp.a: $(OBJ_D)
+$(BUILDDIR_D)/libgridpp.a: $(OBJ_D)
 	ar rvs $@ $(OBJ_D)
 
-libgridpp.so: $(OBJ_D)
-	$(CXX) $(CFLAGS_D) -shared -Wl,-soname,libgridpp.so -o libgridpp.so $(OBJ_D)
+$(BUILDDIR_D)/libgridpp.so: $(OBJ_D)
+	$(CXX) $(CFLAGS_D) -shared -Wl,-soname,libgridpp.so -o $@ $(OBJ_D)
 
-testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) libgridpp.so gtest
-	$(CXX) $(CFLAGS_D) $< $(LFLAGS) -L. -Wl,-rpath,./ -lgridpp $(LIBS_D) -o $@
+testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(BUILDDIR_D)/libgridpp.so gtest
+	$(CXX) $(CFLAGS_D) $< $(LFLAGS) -L$(BUILDDIR_D) -Wl,-rpath,./$(BUILDDIR_D) -lgridpp $(LIBS_D) -o $@
 
 #testing/%.exe: $(BUILDDIR_D)/Testing/%.o $(INCS) $(OBJ_D) gtest
 #	$(CXX) $(CFLAGS_D) $(OBJ_D) $< $(LFLAGS) $(LIBS_D) -o $@
@@ -107,7 +107,7 @@ count:
 clean:
 	rm -rf build/*/*.o build/*/*/*.o build/*/*.E build/*/*/*.E gmon.out $(EXE) testing/*.exe\
 		*.gcno build/*/*.gcda build/*/*.gcno build/*/*/*.gcda build/*/*/*.gcno\
-		coverage/* coverage.* build/gtest gridpp gridpp_kf gridpp_debug gridpp_kf_debug libgridpp.a libgridpp.so
+		coverage/* coverage.* build/gtest gridpp gridpp_kf gridpp_debug gridpp_kf_debug build/*/libgridpp.a build/*/libgridpp.so
 
 tags:
 	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp

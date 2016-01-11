@@ -26,7 +26,7 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
    vec2 elevs = iFile.getElevs();
 
    if(iParameterFile->getNumParameters() == 0) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one datacolumns");
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one dataacolumns");
    }
 
    // Loop over offsets
@@ -65,23 +65,22 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
    return true;
 }
 
-Parameters CalibratorRegression::train(const TrainingData& iData, int iOffset) const {
+Parameters CalibratorRegression::train(const std::vector<ObsEns>& iData) const {
    if(mOrder > 1) {
       std::stringstream ss;
       ss << "CalibratorRegression: Cannot train regression of order greater than 1 (i.e a + bx)";
       Util::error(ss.str());
    }
 
-   std::vector<ObsEns> data = iData.getData(iOffset);
    float totalObs = 0;
    float totalForecast = 0;
    float totalForecast2 = 0;
    float totalObsForecast = 0;
    int counter = 0;
    // Compute predictors in model
-   for(int i = 0; i < data.size(); i++) {
-      float obs = data[i].first;
-      std::vector<float> ens = data[i].second;
+   for(int i = 0; i < iData.size(); i++) {
+      float obs = iData[i].first;
+      std::vector<float> ens = iData[i].second;
       float ensMean = Util::calculateStat(ens, Util::StatTypeMean);
       if(Util::isValid(obs) && Util::isValid(ensMean)) {
          totalObs += obs;

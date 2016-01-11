@@ -46,21 +46,61 @@ int main(int argc, const char *argv[]) {
    }
    SetupTrain setup(args);
 
-   Variable::Type variable = Variable::T;
-   std::vector<int> offsets = setup.trainingData->getOffsets();
+   File* forecast = setup.forecasts[0];
+   File* observation = setup.observations[0];
+   int nLat = observation->getNumLat();
+   int nLon = observation->getNumLon();
+   int nEns = observation->getNumEns();
+   int nTime = observation->getNumTime();
+   vec2 lats = observation->getLats();
+   vec2 lons = observation->getLons();
+   vec2 elevs = observation->getElevs();
 
-   for(int i = 0; i < offsets.size(); i++) {
-      int offset = offsets[i];
-      double timeStart = Util::clock();
-      Parameters par = setup.method->train(*setup.trainingData, offset);
-      double timeEnd = Util::clock();
-      std::cout << "Time: " << timeEnd - timeStart << std::endl;
-      std::cout << "Calculating parameters for offset=" << i << ": ";
-      for(int k = 0; k < par.size(); k++) {
-         std::cout << " " << par[k];
+   Variable::Type variable = Variable::T;
+   std::vector<double> offsets = forecast->getTimes();
+   int D = setup.forecasts.size();
+
+   std::cout << "Number of files: " << D << std::endl;
+
+   for(int t = 0; t < offsets.size(); t++) {
+      // Loop over all files
+      std::vector<FieldPtr> ffields;
+      std::vector<FieldPtr> ofields;
+      for(int d = 0; d < D; d++) {
+         ffields.push_back(setup.forecasts[d]->getField(variable, t));
+         ofields.push_back(setup.observations[d]->getField(variable, t));
       }
-      std::cout << std::endl;
-      setup.output->setParameters(par, offset, Location(Util::MV, Util::MV, Util::MV));
+
+      vec2Int I, J;
+      Downscaler::getNearestNeighbour(*forecast, *observation, I, J);
+
+      #pragma omp parallel for
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            int offset = t;
+            double timeStart = Util::clock();
+
+            // Arrange data
+            std::vector<ObsEns> data;
+            for(int d = 0; d < D; d++){
+               // Downscaling (currently nearest neighbour)
+               float obs = (*ofields[d])(I[i][j],J[i][j],0);
+               const Ens& ens = (*ffields[d])(i,j);
+               ObsEns obsens(obs, ens);
+               data.push_back(obsens);
+            }
+
+            Parameters par = setup.method->train(data);
+            double timeEnd = Util::clock();
+            std::cout << "Time: " << timeEnd - timeStart << std::endl;
+            std::cout << "Calculating parameters for offset=" << i << ": ";
+            for(int k = 0; k < par.size(); k++) {
+               std::cout << " " << par[k];
+            }
+            std::cout << std::endl;
+            setup.output->setParameters(par, offset, Location(Util::MV, Util::MV, Util::MV));
+         }
+      }
    }
 
    setup.output->write();

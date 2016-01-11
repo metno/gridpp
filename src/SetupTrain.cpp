@@ -20,14 +20,17 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    State state = START;
    State prevState = START;
 
-   std::string dataFilename = argv[0];
-   trainingData = new TrainingData(dataFilename);
+   std::string obsFilename = argv[0];
+   observations.push_back(File::getScheme(obsFilename, Options()));
+   std::string fcstFilename = argv[1];
+   forecasts.push_back(File::getScheme(fcstFilename, Options()));
+   downscaler = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
 
    Options oOptions;
    Options mOptions;
    std::string outputType = "";
    std::string methodType = "";
-   int index = 1;
+   int index = 2;
    std::string errorMessage = "";
    while(true) {
       // std::cout << state << std::endl;
@@ -174,7 +177,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       else if(state == END) {
          mOptions.addOption("variable", Variable::getTypeName(variable));
          method = Calibrator::getScheme(methodType, mOptions);
-         output = ParameterFile::getScheme(outputType, oOptions);
+         output = ParameterFile::getScheme(outputType, oOptions, true);
          break;
       }
       else if(state == ERROR) {
@@ -198,7 +201,11 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    }
 }
 SetupTrain::~SetupTrain() {
-   delete trainingData;
+   for(int i = 0; i < observations.size(); i++)
+      delete observations[i];
+   for(int i = 0; i < forecasts.size(); i++)
+      delete forecasts[i];
    delete output;
    delete method;
+   delete downscaler;
 }

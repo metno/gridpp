@@ -7,7 +7,7 @@
 #include "../Location.h"
 class ParameterFileMetnoKalman : public ParameterFile {
    public:
-      ParameterFileMetnoKalman(const Options& iOptions);
+      ParameterFileMetnoKalman(const Options& iOptions, bool iIsNew=false);
 
       bool isFixedSize() const {return true;};
       std::vector<int> getTimes() const;

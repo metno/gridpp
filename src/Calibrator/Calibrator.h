@@ -5,6 +5,9 @@
 #include "../Scheme.h"
 #include "../Parameters.h"
 #include "../TrainingData.h"
+
+typedef std::vector<float> Ens;
+typedef std::pair<float,Ens> ObsEns;
 class File;
 class Options;
 class ParameterFile;
@@ -32,7 +35,7 @@ class Calibrator : public Scheme {
 
       static std::string getDescriptions();
 
-      virtual Parameters train(const TrainingData& iData, int iOffset) const;
+      virtual Parameters train(const std::vector<ObsEns>& iData) const;
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
    private:

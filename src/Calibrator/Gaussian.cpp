@@ -209,20 +209,19 @@ float CalibratorGaussian::getPdf(float iThreshold, float iEnsMean, float iEnsSpr
    return pdf;
 }
 
-Parameters CalibratorGaussian::train(const TrainingData& iData, int iOffset) const {
-   std::vector<ObsEns> data = iData.getData(iOffset);
-   if(data.size() == 0) {
+Parameters CalibratorGaussian::train(const std::vector<ObsEns>& iData) const {
+   if(iData.size() == 0) {
       std::cout << "No data to train on...";
       return Parameters();
    }
    std::vector<float> obs, mean, spread;
-   obs.resize(data.size(), Util::MV);
-   mean.resize(data.size(), Util::MV);
-   spread.resize(data.size(), Util::MV);
+   obs.resize(iData.size(), Util::MV);
+   mean.resize(iData.size(), Util::MV);
+   spread.resize(iData.size(), Util::MV);
    // Compute predictors in model
-   for(int i = 0; i < data.size(); i++) {
-      obs[i] = data[i].first;
-      std::vector<float> ens = data[i].second;
+   for(int i = 0; i < iData.size(); i++) {
+      obs[i] = iData[i].first;
+      std::vector<float> ens = iData[i].second;
       mean[i] = Util::calculateStat(ens, Util::StatTypeMean);
       spread[i] = Util::calculateStat(ens, Util::StatTypeStd);
    }

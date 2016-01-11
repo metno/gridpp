@@ -132,17 +132,16 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    return true;
 }
 
-Parameters CalibratorQq::train(const TrainingData& iData, int iOffset) const {
+Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
    double timeStart = Util::clock();
-   std::vector<ObsEns> data = iData.getData(iOffset);
    std::vector<float> obs, mean;
    std::vector<float> values;
-   values.reserve(2*data.size());
+   values.reserve(2*iData.size());
    int counter = 0;
    // Compute predictors in model
-   for(int i = 0; i < data.size(); i++) {
-      float obs = data[i].first;
-      std::vector<float> ens = data[i].second;
+   for(int i = 0; i < iData.size(); i++) {
+      float obs = iData[i].first;
+      std::vector<float> ens = iData[i].second;
       float mean = Util::calculateStat(ens, Util::StatTypeMean);
       if(Util::isValid(obs) && Util::isValid(mean)) {
          values.push_back(obs);

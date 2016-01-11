@@ -7,7 +7,7 @@
 #include <fstream>
 #include <algorithm>
 
-ParameterFileText::ParameterFileText(const Options& iOptions) : ParameterFile(iOptions),
+ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mIsSpatial(false) {
    std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    iOptions.getValue("spatial", mIsSpatial);

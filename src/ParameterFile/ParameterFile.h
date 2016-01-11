@@ -10,14 +10,14 @@
 //! Represents a collection of parameters, one set for each forecast time
 class ParameterFile : public Scheme {
    public:
-      ParameterFile(const Options& iOptions);
+      ParameterFile(const Options& iOptions, bool iIsNew=false);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       Parameters getParameters(int iTime, const Location& iLocation) const;
       //! Only use this if isLocationDependent() is false
       Parameters getParameters(int iTime) const;
 
-      static ParameterFile* getScheme(std::string iName, const Options& iOptions=Options());
+      static ParameterFile* getScheme(std::string iName, const Options& iOptions, bool iIsNew=false);
 
       //! Does this file provide different parameters for different locations?
       virtual bool isLocationDependent() const;
@@ -31,7 +31,7 @@ class ParameterFile : public Scheme {
       void setParameters(Parameters iParameters, int iTime);
 
       std::vector<Location> getLocations() const;
-      virtual std::vector<int> getTimes() const = 0;
+      virtual std::vector<int> getTimes() const;
       virtual bool isReadable() const = 0;
 
       // Returns Util::MV if the number are not consistent
@@ -49,6 +49,7 @@ class ParameterFile : public Scheme {
       std::map<Location, std::map<int, Parameters>, Location::CmpIgnoreElevation > mParameters; // Location, Offset, Parameters
       std::string mFilename;
       void setFilename(std::string iFilename);
+      bool mIsNew; // Should this file be created?
 };
 #include "MetnoKalman.h"
 #include "Text.h"

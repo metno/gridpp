@@ -8,15 +8,20 @@
 #include <fstream>
 #include <math.h>
 
-ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFile(iOptions),
+ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mDimName("coeff"),
       mVarName("coefficient") {
-   int status = nc_open(getFilename().c_str(), NC_NOWRITE, &mFile);
-   if(status != NC_NOERR) {
-      return;
-   }
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
+
+   if(iIsNew) {
+      int status = nc_create(getFilename().c_str(), NC_NETCDF4, &mFile);
+      handleNetcdfError(status, "Could not write file");
+      return;
+   }
+
+   int status = nc_open(getFilename().c_str(), NC_NOWRITE, &mFile);
+   handleNetcdfError(status, "Could not read file");
 
    int dTime = getTimeDim(mFile);
    int dLon  = getLonDim(mFile);
@@ -78,7 +83,6 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions) : ParameterFil
    std::vector<float> params(nCoeff, Util::MV);
    Parameters parameters(params);
    for(int t = 0; t < nTime; t++) {
-      mTimes.push_back(t);
       int time = t;
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -179,6 +183,17 @@ int ParameterFileNetcdf::getDim(int iFile, std::string iDim) const {
    return dim;
 }
 
+int ParameterFileNetcdf::createDim(int iFile, std::string iDim, int iLength) const {
+   int id;
+   int status = nc_def_dim(iFile, iDim.c_str(), iLength, &id);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "Could not create dimension '" << iDim << "'";
+      handleNetcdfError(status, ss.str());
+   }
+   return id;
+}
+
 int ParameterFileNetcdf::getVar(int iFile, std::string iVar) const {
    int var;
    int status = nc_inq_varid(iFile, iVar.c_str(), &var);
@@ -221,10 +236,6 @@ std::vector<int> ParameterFileNetcdf::getDims(int iFile, int iVar) const {
    return dimsVec;
 }
 
-std::vector<int> ParameterFileNetcdf::getTimes() const {
-   return mTimes;
-}
-
 bool ParameterFileNetcdf::isValid(std::string iFilename) {
    if(!Util::exists(iFilename))
       return false;
@@ -250,6 +261,47 @@ std::string ParameterFileNetcdf::description() {
 void ParameterFileNetcdf::write() const {
    std::vector<Location> locations = getLocations();
    std::vector<int> times = getTimes();
+   if(times.size() == 0 || locations.size() == 0) {
+      Util::error("Cannot write parameter file '" + getFilename() + "'. No data to write.");
+   }
+   Parameters par0 = getParameters(times[0], locations[0]);
+
+   int nTime = times.size();
+   int nLon = locations.size();
+   int nLat = 1;
+   int nCoeff = par0.size();
+
+   // Define variables
+   // Create variable
+   int dTime = createDim(mFile, "time", nTime);
+   int dLon  = createDim(mFile, "lon", nLon);
+   int dLat  = createDim(mFile, "lat", nLat);
+   int dCoeff = createDim(mFile, "coeff", nCoeff);
+   int dims[4]  = {dTime, dLat, dLon, dCoeff};
+   int var = Util::MV;
+   int status = nc_def_var(mFile, mVarName.c_str(), NC_FLOAT, 4, dims, &var);
+   handleNetcdfError(status, "could not define variable");
+   status = ncendef(mFile);
+   handleNetcdfError(status, "could not put into data mode");
+
+   // Put in data
+   float* values = new float[nCoeff];
+   for(int t = 0; t < times.size(); t++) {
+      for(int i = 0; i < locations.size(); i++) {
+         Parameters par = getParameters(times[t], locations[i]);
+         if(par.size() != nCoeff) {
+            Util::error("Wrong parameter size");
+         }
+         for(int k = 0; k < nCoeff; k++) {
+            values[k] = par[k];
+         }
+         size_t count[4] = {1, 1, 1, nCoeff};
+         size_t start[4] = {t, 0, i, 0};
+         int status = nc_put_vara_float(mFile, var, start, count, values);
+         handleNetcdfError(status, "could not write data");
+      }
+   }
+   delete[] values;
 }
 
 void ParameterFileNetcdf::handleNetcdfError(int status, std::string message) const {

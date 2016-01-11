@@ -429,16 +429,15 @@ float CalibratorKriging::calcCovar(const Location& loc1, const Location& loc2) c
    return weight;
 }
 
-Parameters CalibratorKriging::train(const TrainingData& iData, int iOffset) const {
+Parameters CalibratorKriging::train(const std::vector<ObsEns>& iData) const {
    double timeStart = Util::clock();
-   std::vector<ObsEns> data = iData.getData(iOffset);
    float totalObs = 0;
    float totalFcst = 0;
    int counter = 0;
    // Compute predictors in model
-   for(int i = 0; i < data.size(); i++) {
-      float obs = data[i].first;
-      std::vector<float> ens = data[i].second;
+   for(int i = 0; i < iData.size(); i++) {
+      float obs = iData[i].first;
+      std::vector<float> ens = iData[i].second;
       float mean = Util::calculateStat(ens, Util::StatTypeMean);
       if(Util::isValid(obs) && Util::isValid(mean)) {
          totalObs += obs;

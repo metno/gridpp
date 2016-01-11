@@ -6,22 +6,23 @@
 #include <set>
 #include <fstream>
 
-ParameterFile::ParameterFile(const Options& iOptions) :
+ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       Scheme(iOptions),
-      mFilename("") {
+      mFilename(""),
+      mIsNew(iIsNew) {
    iOptions.getValue("file", mFilename);
 }
 
-ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions) {
+ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {
    ParameterFile* p;
    if(iName == "metnoKalman") {
-      p = new ParameterFileMetnoKalman(iOptions);
+      p = new ParameterFileMetnoKalman(iOptions, iIsNew);
    }
    else if(iName == "text") {
-      p = new ParameterFileText(iOptions);
+      p = new ParameterFileText(iOptions, iIsNew);
    }
    else if(iName == "netcdf") {
-      p = new ParameterFileNetcdf(iOptions);
+      p = new ParameterFileNetcdf(iOptions, iIsNew);
    }
    else {
       Util::error("Parameter file type '" + iName + "' not recognized");
@@ -130,6 +131,18 @@ std::vector<Location> ParameterFile::getLocations() const {
       locations.push_back(it->first);
    }
    return locations;
+}
+
+std::vector<int> ParameterFile::getTimes() const {
+   std::vector<int> times;
+   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      std::map<int, Parameters>::const_iterator it2;
+      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+         times.push_back(it2->first);
+      }
+   }
+   return times;
 }
 
 bool ParameterFile::isLocationDependent() const {

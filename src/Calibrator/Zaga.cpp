@@ -397,20 +397,19 @@ float CalibratorZaga::getP0(float iEnsMean, float iEnsFrac, const Parameters& iP
    return P0;
 }
 
-Parameters CalibratorZaga::train(const TrainingData& iData, int iOffset) const {
-   std::vector<ObsEns> data = iData.getData(iOffset);
-   if(data.size() == 0) {
+Parameters CalibratorZaga::train(const std::vector<ObsEns>& iData) const {
+   if(iData.size() == 0) {
       std::cout << "No data to train on...";
       return Parameters();
    }
    std::vector<float> obs, mean, frac;
-   obs.resize(data.size(), Util::MV);
-   mean.resize(data.size(), Util::MV);
-   frac.resize(data.size(), Util::MV);
+   obs.resize(iData.size(), Util::MV);
+   mean.resize(iData.size(), Util::MV);
+   frac.resize(iData.size(), Util::MV);
    // Compute predictors in model
-   for(int i = 0; i < data.size(); i++) {
-      obs[i] = data[i].first;
-      std::vector<float> ens = data[i].second;
+   for(int i = 0; i < iData.size(); i++) {
+      obs[i] = iData[i].first;
+      std::vector<float> ens = iData[i].second;
       mean[i] = Util::calculateStat(ens, Util::StatTypeMean);
       int total = 0;
       int valid = 0;

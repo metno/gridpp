@@ -11,8 +11,7 @@ class CalibratorRegression : public Calibrator {
       CalibratorRegression(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "regression";};
-      //! Create parameters based on training data
-      Parameters train(const TrainingData& iData, int iOffset) const;
+      Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;

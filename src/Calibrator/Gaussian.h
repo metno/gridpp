@@ -24,8 +24,7 @@ class CalibratorGaussian : public Calibrator {
 
       static std::string description();
       std::string name() const {return "gaussian";};
-      //! Create parameters based on training data
-      Parameters train(const TrainingData& iData, int iOffset) const;
+      Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       static double my_f(const gsl_vector *v, void *params);
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

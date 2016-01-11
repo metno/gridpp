@@ -18,7 +18,7 @@
 class ParameterFileText : public ParameterFile {
    public:
       //! Read parameters from this file
-      ParameterFileText(const Options& iOptions);
+      ParameterFileText(const Options& iOptions, bool iIsNew=false);
 
       bool isFixedSize() const;
 

@@ -6,7 +6,7 @@
 #include <set>
 #include <fstream>
 
-ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions) : ParameterFile(iOptions),
+ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mLocalMV(-99999) {
    if(!isValid(getFilename()))
       Util::error(getFilename() + " is not a valid parameter file");

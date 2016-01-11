@@ -16,7 +16,7 @@ class CalibratorKriging : public Calibrator {
          TypeBarnes   = 20
       };
       //! Compute the bias at the training point
-      Parameters train(const TrainingData& iData, int iOffset) const;
+      Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
 

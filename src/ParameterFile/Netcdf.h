@@ -9,11 +9,10 @@
 #include "../File/File.h"
 class ParameterFileNetcdf : public ParameterFile {
    public:
-      ParameterFileNetcdf(const Options& iOptions);
+      ParameterFileNetcdf(const Options& iOptions, bool iIsNew=false);
       ~ParameterFileNetcdf();
 
       bool isFixedSize() const {return true;};
-      std::vector<int> getTimes() const;
 
       static bool isValid(std::string iFilename);
       bool isReadable() const;
@@ -23,7 +22,6 @@ class ParameterFileNetcdf : public ParameterFile {
 
       void write() const;
    private:
-      std::vector<int> mTimes;
       float mLocalMV;
       int    getLatDim(int iFile) const;
       int    getLonDim(int iFile) const;
@@ -32,6 +30,7 @@ class ParameterFileNetcdf : public ParameterFile {
       std::vector<int> getDims(int iFile, int iVar) const;
 
       int    getDim(int iFile, std::string iDim) const;
+      int    createDim(int iFile, std::string iDim, int iLength) const;
       int    getVar(int iFile, std::string iVar) const;
       int    getDimSize(int iFile, int iDim) const;
       static bool   hasDim(int iFile, std::string iDim);

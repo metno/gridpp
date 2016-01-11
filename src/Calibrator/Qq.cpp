@@ -159,7 +159,7 @@ Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
    Parameters par(values);
 
    double timeEnd = Util::clock();
-   std::cout << "Time: " << timeEnd - timeStart << std::endl;
+   // std::cout << "Time: " << timeEnd - timeStart << std::endl;
    return par;
 }
 

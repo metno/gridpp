@@ -267,12 +267,11 @@ void ParameterFileNetcdf::write() const {
    Parameters par0 = getParameters(times[0], locations[0]);
 
    int nTime = times.size();
-   int nLon = locations.size();
-   int nLat = 1;
+   int nLon = 1;
+   int nLat = locations.size();
    int nCoeff = par0.size();
 
-   // Define variables
-   // Create variable
+   // Create dimensions
    int dTime = createDim(mFile, "time", nTime);
    int dLon  = createDim(mFile, "lon", nLon);
    int dLat  = createDim(mFile, "lat", nLat);
@@ -281,12 +280,33 @@ void ParameterFileNetcdf::write() const {
    int var = Util::MV;
    int status = nc_def_var(mFile, mVarName.c_str(), NC_FLOAT, 4, dims, &var);
    handleNetcdfError(status, "could not define variable");
+
+   // Create lat/lon/elev
+   int vLat = Util::MV;
+   int vLon = Util::MV;
+   int vElev = Util::MV;
+   int vTime = Util::MV;
+   int dimsGrid[2] = {dLat, dLon};
+   status = nc_def_var(mFile, "latitude", NC_FLOAT, 2, dimsGrid, &vLat);
+   handleNetcdfError(status, "could not define latitude");
+   status = nc_def_var(mFile, "longitude", NC_FLOAT, 2, dimsGrid, &vLon);
+   handleNetcdfError(status, "could not define longitude");
+   status = nc_def_var(mFile, "altitude", NC_FLOAT, 2, dimsGrid, &vElev);
+   handleNetcdfError(status, "could not define altitude");
+   status = nc_def_var(mFile, "time", NC_FLOAT, 1, &dTime, &vTime);
+   handleNetcdfError(status, "could not define time");
+
    status = ncendef(mFile);
    handleNetcdfError(status, "could not put into data mode");
 
    // Put in data
    float* values = new float[nCoeff];
    for(int t = 0; t < times.size(); t++) {
+      int time = times[t];
+      size_t countTime = 1;
+      size_t startTime = t;
+      int status = nc_put_vara_int(mFile, vTime, &startTime, &countTime, &time);
+      handleNetcdfError(status, "could not write data");
       for(int i = 0; i < locations.size(); i++) {
          Parameters par = getParameters(times[t], locations[i]);
          if(par.size() != nCoeff) {
@@ -296,9 +316,20 @@ void ParameterFileNetcdf::write() const {
             values[k] = par[k];
          }
          size_t count[4] = {1, 1, 1, nCoeff};
-         size_t start[4] = {t, 0, i, 0};
+         size_t start[4] = {t, i, 0, 0};
          int status = nc_put_vara_float(mFile, var, start, count, values);
          handleNetcdfError(status, "could not write data");
+         size_t countGrid[2] = {1, 1};
+         size_t startGrid[2] = {i, 0};
+         float lat = locations[i].lat();
+         float lon = locations[i].lon();
+         float elev = locations[i].elev();
+         status = nc_put_vara_float(mFile, vLat, startGrid, countGrid, &lat);
+         handleNetcdfError(status, "could not write latitude");
+         status = nc_put_vara_float(mFile, vLon, startGrid, countGrid, &lon);
+         handleNetcdfError(status, "could not write longitude");
+         status = nc_put_vara_float(mFile, vElev, startGrid, countGrid, &elev);
+         handleNetcdfError(status, "could not write altitude");
       }
    }
    delete[] values;

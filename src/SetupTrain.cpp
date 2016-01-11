@@ -21,10 +21,21 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    State prevState = START;
 
    std::string obsFilename = argv[0];
-   observations.push_back(File::getScheme(obsFilename, Options()));
    std::string fcstFilename = argv[1];
-   forecasts.push_back(File::getScheme(fcstFilename, Options()));
+   std::vector<std::string> obsFilenames = Util::glob(obsFilename);
+   std::vector<std::string> fcstFilenames = Util::glob(fcstFilename);
+
+   for(int i = 0; i < obsFilenames.size(); i++) {
+      observations.push_back(File::getScheme(obsFilenames[i], Options(), true));
+   }
+   for(int i = 0; i < fcstFilenames.size(); i++) {
+      std::cout << "Adding " << fcstFilenames[i] << std::endl;
+      forecasts.push_back(File::getScheme(fcstFilenames[i], Options(), true));
+   }
    downscaler = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
+
+   std::cout << "Obs files: " << obsFilename << std::endl;
+   std::cout << "Fcst files: " << fcstFilename << std::endl;
 
    Options oOptions;
    Options mOptions;

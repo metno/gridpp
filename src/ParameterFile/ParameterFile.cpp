@@ -134,15 +134,15 @@ std::vector<Location> ParameterFile::getLocations() const {
 }
 
 std::vector<int> ParameterFile::getTimes() const {
-   std::vector<int> times;
+   std::set<int> times;
    std::map<Location, std::map<int, Parameters> >::const_iterator it;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
       std::map<int, Parameters>::const_iterator it2;
       for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-         times.push_back(it2->first);
+         times.insert(it2->first);
       }
    }
-   return times;
+   return std::vector<int>(times.begin(), times.end());
 }
 
 bool ParameterFile::isLocationDependent() const {

@@ -35,6 +35,9 @@ void writeUsage() {
    std::cout << std::endl;
 }
 int main(int argc, const char *argv[]) {
+   Util::setShowError(true);
+   Util::setShowWarning(true);
+   Util::setShowStatus(false);
    if(argc <= 1) {
       writeUsage();
       return 0;
@@ -48,37 +51,69 @@ int main(int argc, const char *argv[]) {
 
    File* forecast = setup.forecasts[0];
    File* observation = setup.observations[0];
-   int nLat = observation->getNumLat();
-   int nLon = observation->getNumLon();
-   int nEns = observation->getNumEns();
-   int nTime = observation->getNumTime();
-   vec2 lats = observation->getLats();
-   vec2 lons = observation->getLons();
-   vec2 elevs = observation->getElevs();
+   int nLat = forecast->getNumLat();
+   int nLon = forecast->getNumLon();
+   int nEns = forecast->getNumEns();
+   int nTime = forecast->getNumTime();
+   vec2 lats = forecast->getLats();
+   vec2 lons = forecast->getLons();
+   vec2 elevs = forecast->getElevs();
 
    Variable::Type variable = Variable::T;
    std::vector<double> offsets = forecast->getTimes();
    int D = setup.forecasts.size();
 
    std::cout << "Number of files: " << D << std::endl;
+   std::cout << "Number of lats: " << nLat << std::endl;
+   std::cout << "Number of lons: " << nLon << std::endl;
+   std::cout << "Number of times: " << offsets.size() << std::endl;
+   // assert(observation->getNumTime() <= forecast->getNumTime());
 
-   for(int t = 0; t < offsets.size(); t++) {
+   // figure out which files match
+   std::vector<int> indexF;
+   std::vector<int> indexO;
+   for(int f = 0; f < setup.forecasts.size(); f++) {
+      int io = Util::MV;
+      double timeF = setup.forecasts[f]->getReferenceTime();
+      for(int o = 0; o < setup.observations.size(); o++) {
+         double timeO = setup.observations[f]->getReferenceTime();
+         if(timeF == timeO) {
+            io = o;
+         }
+      }
+      if(Util::isValid(io)) {
+         indexF.push_back(f);
+         indexO.push_back(io);
+      }
+   }
+
+   int validD = indexF.size();
+   std::cout << "Number of valid days: " << validD << std::endl;
+   if(validD == 0) {
+      return -1;
+   }
+
+   vec2Int I, J;
+   Downscaler::getNearestNeighbour(*observation, *forecast, I, J);
+
+   for(int t = 0; t < 10; t++) { // offsets.size(); t++) {
+      std::cout << t << std::endl;
       // Loop over all files
       std::vector<FieldPtr> ffields;
       std::vector<FieldPtr> ofields;
-      for(int d = 0; d < D; d++) {
-         ffields.push_back(setup.forecasts[d]->getField(variable, t));
-         ofields.push_back(setup.observations[d]->getField(variable, t));
+      for(int d = 0; d < validD; d++) {
+         ffields.push_back(setup.forecasts[indexF[d]]->getField(variable, t));
+         ofields.push_back(setup.observations[indexO[d]]->getField(variable, t));
       }
 
-      vec2Int I, J;
-      Downscaler::getNearestNeighbour(*forecast, *observation, I, J);
-
-      #pragma omp parallel for
+      // #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             int offset = t;
             double timeStart = Util::clock();
+            float lat = lats[i][j];
+            float lon = lons[i][j];
+            float elev = elevs[i][j];
 
             // Arrange data
             std::vector<ObsEns> data;
@@ -92,13 +127,13 @@ int main(int argc, const char *argv[]) {
 
             Parameters par = setup.method->train(data);
             double timeEnd = Util::clock();
-            std::cout << "Time: " << timeEnd - timeStart << std::endl;
-            std::cout << "Calculating parameters for offset=" << i << ": ";
-            for(int k = 0; k < par.size(); k++) {
-               std::cout << " " << par[k];
-            }
-            std::cout << std::endl;
-            setup.output->setParameters(par, offset, Location(Util::MV, Util::MV, Util::MV));
+            // std::cout << "Time: " << timeEnd - timeStart << std::endl;
+            // std::cout << "Calculating parameters for offset=" << i << ": ";
+            // for(int k = 0; k < par.size(); k++) {
+            //    std::cout << " " << par[k];
+            // }
+            // std::cout << std::endl;
+            setup.output->setParameters(par, offset, Location(lat, lon, elev));
          }
       }
    }

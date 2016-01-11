@@ -6,6 +6,9 @@
 #include <cmath>
 #include <math.h>
 #include <assert.h>
+namespace Cglob {
+#include <glob.h>
+}
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/date_duration.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -117,6 +120,17 @@ float Util::deg2rad(float deg) {
 float Util::rad2deg(float rad) {
    return (rad * 180 / Util::pi);
 }
+std::vector<std::string> Util::glob(std::string iFilenames) {
+   std::vector<std::string> files;
+   int flags = 0;
+   Cglob::glob_t results;
+   Cglob::glob(iFilenames.c_str(), flags, NULL, &results);
+   for(int i = 0; i < results.gl_pathc; i++) {
+      files.push_back(results.gl_pathv[i]);
+   }
+   return files;
+}
+
 std::string Util::gridppVersion() {
    return GRIDPP_VERSION;
 }

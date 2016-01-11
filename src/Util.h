@@ -59,6 +59,9 @@ class Util {
 
       static float pi;
 
+      // Return a vector of filenames from a single string containing wildcards
+      static std::vector<std::string> glob(std::string iFilenames);
+
       static std::string gridppVersion();
       
       //! Radius of the earth in meters

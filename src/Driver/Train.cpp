@@ -180,41 +180,62 @@ int main(int argc, const char *argv[]) {
 
       ////////////////////////
       // Compute parameters
-      // Do this in parallel, inserting the values into a preallocated matrix
-      std::vector<std::vector<std::vector<float> > > parameters;
-      parameters.resize(nLat);
-      for(int i = 0; i < nLat; i++) {
-         parameters[i].resize(nLon);
-      }
+      if(setup.output->isLocationDependent()) {
+         // Do this in parallel, inserting the values into a preallocated matrix
+         std::vector<std::vector<std::vector<float> > > parameters;
+         parameters.resize(nLat);
+         for(int i = 0; i < nLat; i++) {
+            parameters[i].resize(nLon);
+         }
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               // Arrange data
+               std::vector<ObsEns> data;
+               for(int d = 0; d < ffields.size(); d++){
+                  // Downscaling (currently nearest neighbour)
+                  float obs = (*ofields[d])(I[i][j],J[i][j],0);
+                  const Ens& ens = (*ffields[d])(i,j);
+                  ObsEns obsens(obs, ens);
+                  data.push_back(obsens);
+               }
 
-      #pragma omp parallel for
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            // Arrange data
-            std::vector<ObsEns> data;
-            for(int d = 0; d < ffields.size(); d++){
-               // Downscaling (currently nearest neighbour)
-               float obs = (*ofields[d])(I[i][j],J[i][j],0);
-               const Ens& ens = (*ffields[d])(i,j);
-               ObsEns obsens(obs, ens);
-               data.push_back(obsens);
+               Parameters par = setup.method->train(data);
+               parameters[i][j] = par.getValues();
             }
+         }
 
-            Parameters par = setup.method->train(data);
-            parameters[i][j] = par.getValues();
+         // Then save values serially
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               float lat = lats[i][j];
+               float lon = lons[i][j];
+               float elev = elevs[i][j];
+
+               setup.output->setParameters(Parameters(parameters[i][j]), t, Location(lat, lon, elev));
+            }
          }
       }
-
-      // Then save values serially
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            int offset = t;
-            float lat = lats[i][j];
-            float lon = lons[i][j];
-            float elev = elevs[i][j];
-
-            setup.output->setParameters(Parameters(parameters[i][j]), offset, Location(lat, lon, elev));
+      else {
+         std::cout << "Location independent estimation" << std::endl;
+         // Arrange data
+         std::vector<ObsEns> data;
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int d = 0; d < ffields.size(); d++){
+                  // Downscaling (currently nearest neighbour)
+                  float obs = (*ofields[d])(I[i][j],J[i][j],0);
+                  const Ens& ens = (*ffields[d])(i,j);
+                  if(Util::isValid(obs) && Util::isValid(ens[0])) {
+                     ObsEns obsens(obs, ens);
+                     data.push_back(obsens);
+                  }
+               }
+            }
          }
+         std::cout << "Using " << data.size() << " data points" << std::endl;
+         Parameters par = setup.method->train(data);
+         setup.output->setParameters(par, t, Location(Util::MV, Util::MV, Util::MV));
       }
    }
 

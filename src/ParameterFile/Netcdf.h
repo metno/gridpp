@@ -16,6 +16,7 @@ class ParameterFileNetcdf : public ParameterFile {
 
       static bool isValid(std::string iFilename);
       bool isReadable() const;
+      bool isLocationDependent() const { return true; };
 
       static std::string description();
       std::string name() const {return "netcdf";};

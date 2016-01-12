@@ -31,6 +31,15 @@ namespace {
             ParameterFileSimple parFile(getParameters(a1, a2, a3, a4, a5, a6, a7, a8));
             return parFile;
          }
+         ObsEns getObsEns(float obs, float ens0, float ens1=Util::MV, float ens2=Util::MV) {
+            std::vector<float> ens;
+            ens.push_back(ens0);
+            if(Util::isValid(ens1))
+               ens.push_back(ens1);
+            if(Util::isValid(ens2))
+               ens.push_back(ens2);
+            return ObsEns(obs, ens);
+         }
    };
    TEST_F(TestCalibratorQq, 1to1) {
       FileArome from("testing/files/10x10.nc");
@@ -116,6 +125,18 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*field)(5,5,0));
       // Unaffected by other missing values
       EXPECT_FLOAT_EQ(270, (*field)(5,2,0));
+   }
+   TEST_F(TestCalibratorQq, train) {
+      CalibratorQq cal(Variable::T ,Options("extrapolation=1to1"));
+      std::vector<ObsEns> data;
+      data.push_back(getObsEns(3, 2));
+      data.push_back(getObsEns(4, 3));
+      Parameters parameters = cal.train(data);
+
+      EXPECT_FLOAT_EQ(3, parameters[0]);
+      EXPECT_FLOAT_EQ(2, parameters[1]);
+      EXPECT_FLOAT_EQ(4, parameters[2]);
+      EXPECT_FLOAT_EQ(3, parameters[3]);
    }
    TEST_F(TestCalibratorQq, unevenNumberOfParameters) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

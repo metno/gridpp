@@ -20,28 +20,60 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    State state = START;
    State prevState = START;
 
-   std::string obsFilename = argv[0];
-   std::string fcstFilename = argv[1];
+   downscaler = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
+
+   // Process obs/fcst filenames and options
+   Options obsOptions, fcstOptions;
+   std::string obsFilename, fcstFilename;
+   int index = 0;
+   while(index < argv.size()) {
+      std::string arg = argv[index];
+      if(obsFilename == "") {
+         obsFilename = arg;
+      }
+      else if(fcstFilename == "") {
+         if(Util::hasChar(arg, '=')) {
+            obsOptions.addOptions(arg);
+         }
+         else {
+            fcstFilename = arg;
+         }
+      }
+      else {
+         if(Util::hasChar(arg, '=')) {
+            fcstOptions.addOptions(arg);
+         }
+         else {
+            break;
+         }
+      }
+      index++;
+   }
    std::vector<std::string> obsFilenames = Util::glob(obsFilename);
    std::vector<std::string> fcstFilenames = Util::glob(fcstFilename);
 
+   if(obsFilenames.size() == 0 || fcstFilenames.size() == 0) {
+      Util::error("No valid obs or fcst files");
+   }
    for(int i = 0; i < obsFilenames.size(); i++) {
-      observations.push_back(File::getScheme(obsFilenames[i], Options(), true));
+      File* file = File::getScheme(obsFilenames[i], obsOptions, true);
+      if(file == NULL) {
+         Util::error("Could not open '" + obsFilenames[i] + "'");
+      }
+      observations.push_back(file);
    }
    for(int i = 0; i < fcstFilenames.size(); i++) {
-      std::cout << "Adding " << fcstFilenames[i] << std::endl;
-      forecasts.push_back(File::getScheme(fcstFilenames[i], Options(), true));
+      File* file = File::getScheme(fcstFilenames[i], fcstOptions, true);
+      if(file == NULL) {
+         Util::error("Could not open '" + fcstFilenames[i] + "'");
+      }
+      forecasts.push_back(file);
    }
-   downscaler = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
-
-   std::cout << "Obs files: " << obsFilename << std::endl;
-   std::cout << "Fcst files: " << fcstFilename << std::endl;
 
    Options oOptions;
    Options mOptions;
    std::string outputType = "";
    std::string methodType = "";
-   int index = 2;
    std::string errorMessage = "";
    while(true) {
       // std::cout << state << std::endl;

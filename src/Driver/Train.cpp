@@ -10,20 +10,23 @@
 #include "../SetupTrain.h"
 #include "../TrainingData.h"
 void writeUsage() {
-   std::cout << "Trains a calibration method in gridpp" << std::endl;
+   std::cout << "Trains a calibration method in gridpp using observations and forecast files. The resulting parameter file is on the same grid as the forecasts and observations will be interpolated to the forecast grid using nearest neighbour." << std::endl;
    std::cout << std::endl;
-   std::cout << "usage:  gridpp_train dataFile -p parameters [options] -c calibrator [options] -v variable" << std::endl;
+   std::cout << "usage:  gridpp_train obsFiles [options] fcstFiles [options] -p parameters [options] -c calibrator [options] -v variable" << std::endl;
    std::cout << std::endl;
    std::cout << "Arguments:" << std::endl;
-   std::cout << Util::formatDescription("dataFile=required","Input text file with obs/forecast data. Must be in the following format:") << std::endl;
-   std::cout << Util::formatDescription("","<time> <lat> <lon> <elev> <obs> <ens1> <ens2> ... <ensN>") << std::endl;
+   std::cout << Util::formatDescription("obsFiles=required","Input file(s) with observations. Can be a regular expression if the whole string is surrounded by \" \". ") << std::endl;
+   std::cout << Util::formatDescription("fcstFiles=required","Input file(s) with forecasts. Can be a regular expression if the whole string is surrounded by \" \". ") << std::endl;
    std::cout << Util::formatDescription("-p parameters","Put parameters into this output format.") << std::endl;
    std::cout << Util::formatDescription("-c calibrator","Train this calibration method") << std::endl;
    std::cout << Util::formatDescription("-v variable","Train this variable") << std::endl;
    std::cout << std::endl;
    std::cout << "Example:" << std::endl;
-   std::cout << "   ./gridpp_train testing/files/training.txt -p text file=parameters.txt -c regression -v T" << std::endl;
+   std::cout << "   ./gridpp_train testing/files/trainingDataObs.txt type=text testing/files/trainingDataFcst.txt type=text -p text file=parameters.txt -c regression -v T" << std::endl;
    std::cout << std::endl;
+   std::cout << "Obs/fcst files" << std::endl;
+   std::cout << "   Obs/fcst file types are autodetected, but can be specified using:" << std::endl;
+   std::cout << File::getDescriptions();
    std::cout << "Variables:" << std::endl;
    std::cout << Variable::getDescriptions();
    std::cout << std::endl;

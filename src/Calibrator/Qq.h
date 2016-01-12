@@ -15,6 +15,7 @@ class CalibratorQq : public Calibrator {
       Variable::Type mVariable;
       float mLowerQuantile;
       float mUpperQuantile;
+      std::vector<float> mQuantiles;
       struct ExtrapolationPolicy {
          enum Policy {
             OneToOne = 0,

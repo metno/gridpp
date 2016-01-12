@@ -25,6 +25,7 @@ CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
          Util::error("CalibratorQq: value for 'extrapolation' not recognized");
       }
    }
+   iOptions.getValues("quantiles", mQuantiles);
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile == NULL) {
@@ -134,26 +135,53 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
 Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
    double timeStart = Util::clock();
-   std::vector<float> obs, mean;
+   std::vector<float> obs, fcst;
    std::vector<float> values;
    values.reserve(2*iData.size());
    int counter = 0;
    // Compute predictors in model
    for(int i = 0; i < iData.size(); i++) {
-      float obs = iData[i].first;
+      float currObs = iData[i].first;
       std::vector<float> ens = iData[i].second;
-      float mean = Util::calculateStat(ens, Util::StatTypeMean);
-      if(Util::isValid(obs) && Util::isValid(mean)) {
-         values.push_back(obs);
-         values.push_back(mean);
-         counter++;
+      float currFcst = Util::calculateStat(ens, Util::StatTypeMean);
+      if(Util::isValid(currObs) && Util::isValid(currFcst)) {
+         obs.push_back(currObs);
+         fcst.push_back(currFcst);
       }
    }
+   assert(obs.size() == fcst.size());
 
-   if(counter <= 0) {
+   if(obs.size() == 0 || fcst.size() == 0) {
       std::stringstream ss;
       ss << "CalibratorQq: No valid data, no correction will be made.";
       Util::warning(ss.str());
+   }
+
+   // Sort
+   std::sort(obs.begin(), obs.end());
+   std::sort(fcst.begin(), fcst.end());
+
+   if(obs.size() == 0) {
+
+   }
+   else if(mQuantiles.size() > 0) {
+      int N = obs.size();
+      std::vector<float> x(N);
+      for(int i = 0; i < N; i++) {
+         x[i] = (float) i / (N-1);
+      }
+      for(int i = 0; i < mQuantiles.size(); i++) {
+         float currObs  = Util::interpolate(mQuantiles[i], x, obs);
+         float currFcst = Util::interpolate(mQuantiles[i], x, fcst);
+         values.push_back(currObs);
+         values.push_back(currFcst);
+      }
+   }
+   else {
+      for(int i = 0; i < obs.size(); i++) {
+         values.push_back(obs[i]);
+         values.push_back(fcst[i]);
+      }
    }
 
    Parameters par(values);
@@ -169,6 +197,7 @@ std::string CalibratorQq::description() {
    ss << Util::formatDescription("", "[obs0 fcs0 obs1 fcst1 .. obsN fcstN") << std::endl;
    ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued. If a parameter set has one or more missing values, then the ensemble using this parameter set is not processed.") << std::endl;
    ss << Util::formatDescription("   extrapolation=1to1", "If a forecast is outside the curve, how should extrapolation be done? '1to1': Use a slope of 1, i.e. preserving the bias at the nearest end point; 'meanSlope': Use the average slope from the lower to upper endpoints; 'nearestSlope': Use the slope through the two nearest points; 'zero': Use a slope of 0, meaning that the forecast will equal the max/min observation.") << std::endl;
+   ss << Util::formatDescription("   quantiles=undef", "If creating training parameters, should specific quantiles be stored, instead of all observations and forecasts? Can be a vector of values between 0 and 1.") << std::endl;
    return ss.str();
 }
 

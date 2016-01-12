@@ -104,4 +104,5 @@ class File {
 #include "Fake.h"
 #include "Point.h"
 #include "NorcomQnh.h"
+#include "Text.h"
 #endif

@@ -49,6 +49,9 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    else if(type == "point") {
       file = new FilePoint(iFilename, iOptions);
    }
+   else if(type == "text") {
+      file = new FileText(iFilename, iOptions);
+   }
    else if(type == "norcomQnh") {
       file = new FileNorcomQnh(iFilename, iOptions);
    }
@@ -443,5 +446,6 @@ std::string File::getDescriptions() {
    ss << FileEc::description();
    ss << FilePoint::description();
    ss << FileNorcomQnh::description();
+   ss << FileText::description();
    return ss.str();
 }

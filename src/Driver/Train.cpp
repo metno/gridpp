@@ -38,6 +38,7 @@ void writeUsage() {
    std::cout << std::endl;
 }
 int main(int argc, const char *argv[]) {
+   double startTime = Util::clock();
    Util::setShowError(true);
    Util::setShowWarning(true);
    Util::setShowStatus(false);
@@ -56,7 +57,6 @@ int main(int argc, const char *argv[]) {
    File* observation = setup.observations[0];
    int nLat = forecast->getNumLat();
    int nLon = forecast->getNumLon();
-   int nEns = forecast->getNumEns();
    int nTime = forecast->getNumTime();
    vec2 lats = forecast->getLats();
    vec2 lons = forecast->getLons();
@@ -66,11 +66,23 @@ int main(int argc, const char *argv[]) {
    std::vector<double> offsets = forecast->getTimes();
    int D = setup.forecasts.size();
 
-   std::cout << "Number of files: " << D << std::endl;
+   std::cout << "Number of obs files: " << setup.observations.size() << std::endl;
+   std::cout << "Number of fcst files: " << setup.forecasts.size() << std::endl;
    std::cout << "Number of lats: " << nLat << std::endl;
    std::cout << "Number of lons: " << nLon << std::endl;
-   std::cout << "Number of times: " << offsets.size() << std::endl;
-   // assert(observation->getNumTime() <= forecast->getNumTime());
+   std::cout << "Number of times: " << nTime << std::endl;
+   std::cout << "Forecast reference times: ";
+   for(int f = 0; f < setup.forecasts.size(); f++) {
+      double timeF = setup.forecasts[f]->getReferenceTime();
+      std::cout << " " << timeF;
+   }
+   std::cout << std::endl;
+   std::cout << "Observation reference times: ";
+   for(int f = 0; f < setup.observations.size(); f++) {
+      double timeO = setup.observations[f]->getReferenceTime();
+      std::cout << " " << timeO;
+   }
+   std::cout << std::endl;
 
    // figure out which files match
    std::vector<int> indexF;
@@ -79,7 +91,7 @@ int main(int argc, const char *argv[]) {
       int io = Util::MV;
       double timeF = setup.forecasts[f]->getReferenceTime();
       for(int o = 0; o < setup.observations.size(); o++) {
-         double timeO = setup.observations[f]->getReferenceTime();
+         double timeO = setup.observations[o]->getReferenceTime();
          if(timeF == timeO) {
             io = o;
          }
@@ -98,29 +110,89 @@ int main(int argc, const char *argv[]) {
 
    vec2Int I, J;
    Downscaler::getNearestNeighbour(*observation, *forecast, I, J);
+   std::vector<double> ftimes = forecast->getTimes();
+   std::vector<double> otimes = observation->getTimes();
+   double freftime = forecast->getReferenceTime();
+   double oreftime = observation->getReferenceTime();
 
-   for(int t = 0; t < 10; t++) { // offsets.size(); t++) {
-      std::cout << t << std::endl;
+   std::cout << "Forecast offsets:";
+   for(int t = 0; t < ftimes.size(); t++) {
+      std::cout << " " << ftimes[t] - freftime;
+   }
+   std::cout << std::endl;
+   std::cout << "Observation offsets:";
+   for(int t = 0; t < otimes.size(); t++) {
+      std::cout << " " << otimes[t] - oreftime;
+   }
+   std::cout << std::endl;
+
+   // If multiple available obstimes, then use the one with the lowest ftime
+   for(int t = 0; t < offsets.size(); t++) {
+      std::cout << "Forecast time index: " << t << std::endl;
+      double ftime = ftimes[t] - freftime;
+      int fTimeIndex = t;
+      int oTimeIndex = Util::MV;
+      int fmaxDays = ftimes[ftimes.size()-1] / 86400;
+      for(int d = 0; d < fmaxDays; d++) {
+         // Find appropriate obs time
+         for(int tt = 0; tt < otimes.size(); tt++) {
+            double otime = otimes[tt] - oreftime + d * 86400;
+            if(otime == ftime) {
+               oTimeIndex = tt;
+               break;
+            }
+         }
+      }
+      assert(Util::isValid(oTimeIndex));
+
       // Loop over all files
       std::vector<FieldPtr> ffields;
       std::vector<FieldPtr> ofields;
-      for(int d = 0; d < validD; d++) {
-         ffields.push_back(setup.forecasts[indexF[d]]->getField(variable, t));
-         ofields.push_back(setup.observations[indexO[d]]->getField(variable, t));
+      for(int d = 0; d < setup.forecasts.size(); d++) {
+         double ftime = setup.forecasts[d]->getTimes()[t];
+         int fDateIndex = d;
+         int oDateIndex = Util::MV;
+
+         // Find corresponding observation file
+         for(int dd = 0; dd < setup.observations.size(); dd++) {
+            double otime = setup.observations[dd]->getTimes()[oTimeIndex];
+            if(ftime == otime) {
+               oDateIndex = dd;
+               break;
+            }
+         }
+
+         if(Util::isValid(fDateIndex) && Util::isValid(oDateIndex)) {
+            std::cout << "   Found matching: (" << fDateIndex << "," << fTimeIndex << ") " 
+                      << " (" << oDateIndex << "," << oTimeIndex << ")" << std::endl;
+            assert(setup.forecasts.size() > fDateIndex);
+            assert(setup.observations.size() > oDateIndex);
+            ffields.push_back(setup.forecasts[fDateIndex]->getField(variable, fTimeIndex));
+            ofields.push_back(setup.observations[oDateIndex]->getField(variable, oTimeIndex));
+         }
+      }
+      if(ffields.size() == 0) {
+         std::stringstream ss;
+         ss << "Cannot find files with available data for timestep " << t << std::endl;
+         Util::error(ss.str());
+      }
+      assert(ffields.size() > 0);
+
+      ////////////////////////
+      // Compute parameters
+      // Do this in parallel, inserting the values into a preallocated matrix
+      std::vector<std::vector<std::vector<float> > > parameters;
+      parameters.resize(nLat);
+      for(int i = 0; i < nLat; i++) {
+         parameters[i].resize(nLon);
       }
 
-      // #pragma omp parallel for
+      #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            int offset = t;
-            double timeStart = Util::clock();
-            float lat = lats[i][j];
-            float lon = lons[i][j];
-            float elev = elevs[i][j];
-
             // Arrange data
             std::vector<ObsEns> data;
-            for(int d = 0; d < D; d++){
+            for(int d = 0; d < ffields.size(); d++){
                // Downscaling (currently nearest neighbour)
                float obs = (*ofields[d])(I[i][j],J[i][j],0);
                const Ens& ens = (*ffields[d])(i,j);
@@ -129,17 +201,25 @@ int main(int argc, const char *argv[]) {
             }
 
             Parameters par = setup.method->train(data);
-            double timeEnd = Util::clock();
-            // std::cout << "Time: " << timeEnd - timeStart << std::endl;
-            // std::cout << "Calculating parameters for offset=" << i << ": ";
-            // for(int k = 0; k < par.size(); k++) {
-            //    std::cout << " " << par[k];
-            // }
-            // std::cout << std::endl;
-            setup.output->setParameters(par, offset, Location(lat, lon, elev));
+            parameters[i][j] = par.getValues();
+         }
+      }
+
+      // Then save values serially
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            int offset = t;
+            float lat = lats[i][j];
+            float lon = lons[i][j];
+            float elev = elevs[i][j];
+
+            setup.output->setParameters(Parameters(parameters[i][j]), offset, Location(lat, lon, elev));
          }
       }
    }
 
+   std::cout << "Writing to parameter file" << std::endl;
    setup.output->write();
+   double endTime = Util::clock();
+   std::cout << "Total time: " << endTime - startTime << std::endl;
 }

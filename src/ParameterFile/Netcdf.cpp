@@ -299,39 +299,59 @@ void ParameterFileNetcdf::write() const {
    status = ncendef(mFile);
    handleNetcdfError(status, "could not put into data mode");
 
-   // Put in data
-   float* values = new float[nCoeff];
+   double s = Util::clock();
+   // Write locations
+   for(int i = 0; i < locations.size(); i++) {
+      size_t countGrid[2] = {1, 1};
+      size_t startGrid[2] = {i, 0};
+      float lat = locations[i].lat();
+      float lon = locations[i].lon();
+      float elev = locations[i].elev();
+      status = nc_put_vara_float(mFile, vLat, startGrid, countGrid, &lat);
+      handleNetcdfError(status, "could not write latitude");
+      status = nc_put_vara_float(mFile, vLon, startGrid, countGrid, &lon);
+      handleNetcdfError(status, "could not write longitude");
+      status = nc_put_vara_float(mFile, vElev, startGrid, countGrid, &elev);
+      handleNetcdfError(status, "could not write altitude");
+   }
+
+   // Write times
+   int* timesAr = new int[nTime];
+   for(int t = 0; t < times.size(); t++) {
+      timesAr[t] = times[t];
+   }
+   size_t countTime = nTime;
+   size_t startTime = 0;
+   status = nc_put_vara_int(mFile, vTime, &startTime, &countTime, timesAr);
+   handleNetcdfError(status, "could not write times");
+   delete[] timesAr;
+
+   double e = Util::clock();
+   std::cout << "Writing times/locations: " << e - s << std::endl;
+
+   // Write parameters
+   float* values = new float[nTime*nCoeff*nLat];
    for(int t = 0; t < times.size(); t++) {
       int time = times[t];
-      size_t countTime = 1;
-      size_t startTime = t;
-      int status = nc_put_vara_int(mFile, vTime, &startTime, &countTime, &time);
-      handleNetcdfError(status, "could not write data");
       for(int i = 0; i < locations.size(); i++) {
          Parameters par = getParameters(times[t], locations[i]);
          if(par.size() != nCoeff) {
             Util::error("Wrong parameter size");
          }
          for(int k = 0; k < nCoeff; k++) {
-            values[k] = par[k];
+            int index = t * nLat * nCoeff + i * nCoeff + k;
+            values[index] = par[k];
          }
-         size_t count[4] = {1, 1, 1, nCoeff};
-         size_t start[4] = {t, i, 0, 0};
-         int status = nc_put_vara_float(mFile, var, start, count, values);
-         handleNetcdfError(status, "could not write data");
-         size_t countGrid[2] = {1, 1};
-         size_t startGrid[2] = {i, 0};
-         float lat = locations[i].lat();
-         float lon = locations[i].lon();
-         float elev = locations[i].elev();
-         status = nc_put_vara_float(mFile, vLat, startGrid, countGrid, &lat);
-         handleNetcdfError(status, "could not write latitude");
-         status = nc_put_vara_float(mFile, vLon, startGrid, countGrid, &lon);
-         handleNetcdfError(status, "could not write longitude");
-         status = nc_put_vara_float(mFile, vElev, startGrid, countGrid, &elev);
-         handleNetcdfError(status, "could not write altitude");
       }
    }
+   double e2 = Util::clock();
+   std::cout << "Rearranging parameters: " << e2 - e << std::endl;
+   size_t count[4] = {nTime, nLat, 1, nCoeff};
+   size_t start[4] = {0, 0, 0, 0};
+   status = nc_put_vara_float(mFile, var, start, count, values);
+   handleNetcdfError(status, "could not write data");
+   double e3 = Util::clock();
+   std::cout << "Writing parameters: " << e3 - e2 << std::endl;
    delete[] values;
 }
 

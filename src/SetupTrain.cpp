@@ -11,7 +11,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    }
 
    // Set initial non-working values
-   Variable::Type variable = Variable::None;
+   variable = Variable::None;
    method = NULL;
    output = NULL;
 

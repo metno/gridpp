@@ -62,7 +62,7 @@ int main(int argc, const char *argv[]) {
    vec2 lons = forecast->getLons();
    vec2 elevs = forecast->getElevs();
 
-   Variable::Type variable = Variable::T;
+   Variable::Type variable = setup.variable;
    std::vector<double> offsets = forecast->getTimes();
    int D = setup.forecasts.size();
 

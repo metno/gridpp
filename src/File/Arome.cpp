@@ -184,17 +184,23 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       assert(hasVariableCore(varType));
       int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
+      float* values = new float[mNTime*mNLat*mNLon];
+      for(int k = 0; k < mNTime*mNLat*mNLon; k++) {
+         values[k] = Util::MV;
+      }
+
+      // Arrange all data into the 'values' array
+      double t00 = Util::clock();
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            float* values = new float[mNLat*mNLon];
-
-            int index = 0;
+            #pragma omp parallel for
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
                   float value = (*field)(lat,lon,0);
+                  int index = t * mNLat * mNLon + lat * mNLon + lon;
                   if(!Util::isValid(value)) {
                      // Field has missing value indicator and the value is missing
                      // Save values using the file's missing indicator value
@@ -204,35 +210,41 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                      value = ((*field)(lat,lon,0) - offset)/scale;
                   }
                   values[index] = value;
-                  index++;
                }
             }
-            int numDims;
-            int status = nc_inq_varndims(mFile, var, &numDims);
-            handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
-            if(numDims == 4) {
-               size_t count[4] = {1, 1, mNLat, mNLon};
-               size_t start[4] = {t, 0, 0, 0};
-               int status = nc_put_vara_float(mFile, var, start, count, values);
-               handleNetcdfError(status, "could not write variable " + variable);
-            }
-            else if(numDims == 3) {
-               size_t count[3] = {1, mNLat, mNLon};
-               size_t start[3] = {t, 0, 0};
-               int status = nc_put_vara_float(mFile, var, start, count, values);
-               handleNetcdfError(status, "could not write variable " + variable);
-            }
-            else {
-               std::stringstream ss;
-               ss << "Cannot write variable '" << variable << "' to '" << getFilename() << "'";
-               Util::error(ss.str());
-            }
-            setAttribute(var, "coordinates", "longitude latitude");
-            setAttribute(var, "units", Variable::getUnits(varType));
-            setAttribute(var, "standard_name", Variable::getStandardName(varType));
-            delete[] values;
          }
       }
+      double t11 = Util::clock();
+      std::cout << "Arranging time " << t11-t00 << "s" << std::endl;
+
+      // Write to file
+      int numDims;
+      int status = nc_inq_varndims(mFile, var, &numDims);
+      handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
+      if(numDims == 4) {
+         size_t count[4] = {mNTime, 1, mNLat, mNLon};
+         size_t start[4] = {0, 0, 0, 0};
+         int status = nc_put_vara_float(mFile, var, start, count, values);
+         handleNetcdfError(status, "could not write variable " + variable);
+      }
+      else if(numDims == 3) {
+         size_t count[3] = {mNTime, mNLat, mNLon};
+         size_t start[3] = {0, 0, 0};
+         double t0 = Util::clock();
+         int status = nc_put_vara_float(mFile, var, start, count, values);
+         handleNetcdfError(status, "could not write variable " + variable);
+         double t1 = Util::clock();
+         std::cout << "Writing time " << t1-t0 << "s" << std::endl;
+      }
+      else {
+         std::stringstream ss;
+         ss << "Cannot write variable '" << variable << "' to '" << getFilename() << "'";
+         Util::error(ss.str());
+      }
+      delete[] values;
+      setAttribute(var, "coordinates", "longitude latitude");
+      setAttribute(var, "units", Variable::getUnits(varType));
+      setAttribute(var, "standard_name", Variable::getStandardName(varType));
       setMissingValue(var, MV);
    }
 }

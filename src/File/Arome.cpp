@@ -82,6 +82,7 @@ FieldPtr FileArome::getFieldCore(Variable::Type iVariable, int iTime) const {
    return getFieldCore(variableName, iTime);
 }
 FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
+   startDataMode();
    // Not cached, retrieve data
    int var = getVar(iVariable);
    int nLat  = mNLat;
@@ -154,10 +155,9 @@ FileArome::~FileArome() {
 }
 
 void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
-   int status = ncredef(mFile);
-   handleNetcdfError(status, "could not put into define mode");
+   startDefineMode();
 
-   // Define variables
+   // Define variables (< 0.01 s)
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -171,30 +171,42 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
          int status = nc_def_var(mFile,variable.c_str(), NC_FLOAT, 3, dims, &var);
          handleNetcdfError(status, "could not define variable");
       }
+      int var = getVar(variable);
+      float MV = getMissingValue(var); // The output file's missing value indicator
+      setAttribute(var, "coordinates", "longitude latitude");
+      setAttribute(var, "units", Variable::getUnits(varType));
+      setAttribute(var, "standard_name", Variable::getStandardName(varType));
+      setMissingValue(var, MV);
    }
-   status = ncendef(mFile);
-   handleNetcdfError(status, "could not put into data mode");
+   defineTimes();
+   defineReferenceTime();
+   defineGlobalAttributes();
 
-   writeTimes();
+   startDataMode(); // 0.5 seconds
    writeReferenceTime();
-   writeGlobalAttributes();
+   writeTimes(); // 2-3 seconds
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
       assert(hasVariableCore(varType));
       int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
+      float* values = new float[mNTime*mNLat*mNLon];
+      for(int k = 0; k < mNTime*mNLat*mNLon; k++) {
+         values[k] = Util::MV;
+      }
+
+      // Arrange all data into the 'values' array
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            float* values = new float[mNLat*mNLon];
-
-            int index = 0;
+            #pragma omp parallel for
             for(int lat = 0; lat < mNLat; lat++) {
                for(int lon = 0; lon < mNLon; lon++) {
                   float value = (*field)(lat,lon,0);
+                  int index = t * mNLat * mNLon + lat * mNLon + lon;
                   if(!Util::isValid(value)) {
                      // Field has missing value indicator and the value is missing
                      // Save values using the file's missing indicator value
@@ -204,36 +216,33 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
                      value = ((*field)(lat,lon,0) - offset)/scale;
                   }
                   values[index] = value;
-                  index++;
                }
             }
-            int numDims;
-            int status = nc_inq_varndims(mFile, var, &numDims);
-            handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
-            if(numDims == 4) {
-               size_t count[4] = {1, 1, mNLat, mNLon};
-               size_t start[4] = {t, 0, 0, 0};
-               int status = nc_put_vara_float(mFile, var, start, count, values);
-               handleNetcdfError(status, "could not write variable " + variable);
-            }
-            else if(numDims == 3) {
-               size_t count[3] = {1, mNLat, mNLon};
-               size_t start[3] = {t, 0, 0};
-               int status = nc_put_vara_float(mFile, var, start, count, values);
-               handleNetcdfError(status, "could not write variable " + variable);
-            }
-            else {
-               std::stringstream ss;
-               ss << "Cannot write variable '" << variable << "' to '" << getFilename() << "'";
-               Util::error(ss.str());
-            }
-            setAttribute(var, "coordinates", "longitude latitude");
-            setAttribute(var, "units", Variable::getUnits(varType));
-            setAttribute(var, "standard_name", Variable::getStandardName(varType));
-            delete[] values;
          }
       }
-      setMissingValue(var, MV);
+
+      // Write to file
+      int numDims;
+      int status = nc_inq_varndims(mFile, var, &numDims);
+      handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
+      if(numDims == 4) {
+         size_t count[4] = {mNTime, 1, mNLat, mNLon};
+         size_t start[4] = {0, 0, 0, 0};
+         int status = nc_put_vara_float(mFile, var, start, count, values);
+         handleNetcdfError(status, "could not write variable " + variable);
+      }
+      else if(numDims == 3) {
+         size_t count[3] = {mNTime, mNLat, mNLon};
+         size_t start[3] = {0, 0, 0};
+         int status = nc_put_vara_float(mFile, var, start, count, values);
+         handleNetcdfError(status, "could not write variable " + variable);
+      }
+      else {
+         std::stringstream ss;
+         ss << "Cannot write variable '" << variable << "' to '" << getFilename() << "'";
+         Util::error(ss.str());
+      }
+      delete[] values;
    }
 }
 

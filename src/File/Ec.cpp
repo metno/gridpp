@@ -71,6 +71,7 @@ FileEc::FileEc(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iR
 }
 
 FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
+   startDataMode();
    std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
    int var = getVar(variable);
@@ -111,18 +112,17 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
 }
 
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
-   int status = ncredef(mFile);
-   handleNetcdfError(status, "could not put into define mode");
+   startDefineMode();
 
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
       std::string typeName = Variable::getTypeName(varType);
+
       if(variable == "") {
          Util::error("Cannot write variable '" + typeName + "' because there EC output file has no definition for it");
       }
-      int var = Util::MV;
       if(!hasVariableCore(varType)) {
          // Create variable
          int dTime    = getDim("time");
@@ -131,16 +131,24 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
          int dLon = getLonDim();
          int dLat = getLatDim();
          int dims[5] = {dTime, dSurface, dEns, dLat, dLon};
+         int var = Util::MV;
          int status = nc_def_var(mFile, variable.c_str(), NC_FLOAT, 5, dims, &var);
          handleNetcdfError(status, "could not define variable '" + variable + "'");
       }
+      int var = getVar(variable);
+      float MV = getMissingValue(var); // The output file's missing value indicator
+      // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
+      setAttribute(var, "coordinates", "lon lat");
+      setAttribute(var, "units", Variable::getUnits(varType));
+      setAttribute(var, "standard_name", Variable::getStandardName(varType));
    }
-   status = ncendef(mFile);
-   handleNetcdfError(status, "could not put into data mode");
+   defineTimes();
+   defineReferenceTime();
+   defineGlobalAttributes();
+   startDataMode();
 
    writeTimes();
    writeReferenceTime();
-   writeGlobalAttributes();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -178,10 +186,6 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
                size_t count[5] = {1,1,mNEns, mNLat, mNLon};
                int status = nc_put_vara_float(mFile, var, start, count, values);
                handleNetcdfError(status, "could not write variable " + variable);
-               // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
-               setAttribute(var, "coordinates", "lon lat");
-               setAttribute(var, "units", Variable::getUnits(varType));
-               setAttribute(var, "standard_name", Variable::getStandardName(varType));
             }
             else {
                std::stringstream ss;

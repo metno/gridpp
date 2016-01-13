@@ -5,7 +5,8 @@
 #include "../Util.h"
 
 FileNetcdf::FileNetcdf(std::string iFilename, bool iReadOnly) :
-      File(iFilename) {
+      File(iFilename),
+      mInDataMode(true) {
    int status = nc_open(getFilename().c_str(), iReadOnly ? NC_NOWRITE: NC_WRITE, &mFile);
    if(status != NC_NOERR) {
       Util::error("Could not open NetCDF file " + getFilename());
@@ -128,14 +129,12 @@ void FileNetcdf::setAttribute(int iVar, std::string iName, std::string iValue) {
    startDefineMode();
    int status = nc_put_att_text(mFile, iVar,iName.c_str(), iValue.size(), iValue.c_str());
    handleNetcdfError(status, "could not set attribute");
-   startDataMode();
 }
 
 void FileNetcdf::setGlobalAttribute(std::string iName, std::string iValue) {
    startDefineMode();
    int status = nc_put_att_text(mFile, NC_GLOBAL, iName.c_str(), iValue.size(), iValue.c_str());
    handleNetcdfError(status, "could not set global attribute");
-   startDataMode();
 }
 
 void FileNetcdf::appendGlobalAttribute(std::string iName, std::string iValue) {
@@ -225,6 +224,18 @@ std::string FileNetcdf::getGlobalAttribute(std::string iName) {
    return ret;
 }
 
+void FileNetcdf::defineTimes() {
+   if(!hasVar("time")) {
+      int dTime  = getDim("time");
+      int id;
+      int status = nc_def_var(mFile, "time", NC_DOUBLE, 1, &dTime, &id);
+      handleNetcdfError(status, "creating time variable");
+   }
+   int vTime = getVar("time");
+   setAttribute(vTime, "long_name", "time");
+   setAttribute(vTime, "standard_name", "time");
+   setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+}
 void FileNetcdf::writeTimes() {
    std::vector<double> times = getTimes();
    if(times.size() != getNumTime()) {
@@ -240,18 +251,6 @@ void FileNetcdf::writeTimes() {
       if(!Util::isValid(times[i]))
          times[i] = NC_FILL_FLOAT;
    }
-   if(!hasVar("time")) {
-      int dTime  = getDim("time");
-      int id;
-      int status = ncredef(mFile);
-      handleNetcdfError(status, "could not put into define mode");
-      status = nc_def_var(mFile, "time", NC_DOUBLE, 1, &dTime, &id);
-
-      handleNetcdfError(status, "creating time variable");
-
-      status = ncendef(mFile);
-      handleNetcdfError(status, "could not put into data mode");
-   }
    int vTime = getVar("time");
    double timesArr[getNumTime()];
    for(int t = 0; t < getNumTime(); t++) {
@@ -259,32 +258,26 @@ void FileNetcdf::writeTimes() {
    }
    int status = nc_put_var_double(mFile, vTime, timesArr);
    handleNetcdfError(status, "could not write times");
-   setAttribute(vTime, "long_name", "time");
-   setAttribute(vTime, "standard_name", "time");
+}
+void FileNetcdf::defineReferenceTime() {
+   if(!hasVar("forecast_reference_time")) {
+      int id;
+      int status = nc_def_var(mFile, "forecast_reference_time", NC_DOUBLE, 0, NULL, &id);
+      handleNetcdfError(status, "writing reference time");
+   }
+   int vTime = getVar("forecast_reference_time");
+   setAttribute(vTime, "standard_name", "forecast_reference_time");
    setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }
 void FileNetcdf::writeReferenceTime() {
-   if(!hasVar("forecast_reference_time")) {
-      int id;
-      int status = ncredef(mFile);
-      handleNetcdfError(status, "could not put into define mode");
-      status = nc_def_var(mFile, "forecast_reference_time", NC_DOUBLE, 0, NULL, &id);
-
-      handleNetcdfError(status, "writing reference time");
-
-      status = ncendef(mFile);
-      handleNetcdfError(status, "could not put into data mode");
-   }
    int vTime = getVar("forecast_reference_time");
    double referenceTime = getReferenceTime();
    if(!Util::isValid(referenceTime))
       referenceTime = NC_FILL_DOUBLE;
    int status = nc_put_var_double(mFile, vTime, &referenceTime);
    handleNetcdfError(status, "could not write reference time");
-   setAttribute(vTime, "standard_name", "forecast_reference_time");
-   setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
 }
-void FileNetcdf::writeGlobalAttributes() {
+void FileNetcdf::defineGlobalAttributes() {
    if(getGlobalAttribute("Conventions") != "")
       setGlobalAttribute("Conventions", "CF-1.0");
    std::stringstream ss;
@@ -306,11 +299,17 @@ void FileNetcdf::handleNetcdfError(int status, std::string message) const {
    }
 }
 
-void FileNetcdf::startDefineMode() {
-   int status = ncredef(mFile);
-   handleNetcdfError(status, "could not put into define mode");
+void FileNetcdf::startDefineMode() const {
+   if(mInDataMode) {
+      int status = ncredef(mFile);
+      handleNetcdfError(status, "could not put into define mode");
+   }
+   mInDataMode = false;
 }
-void FileNetcdf::startDataMode() {
-   int status = ncendef(mFile);
-   handleNetcdfError(status, "could not put into data mode");
+void FileNetcdf::startDataMode() const {
+   if(!mInDataMode) {
+      int status = ncendef(mFile);
+      handleNetcdfError(status, "could not put into data mode");
+   }
+   mInDataMode = true;
 }

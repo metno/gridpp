@@ -78,6 +78,22 @@ namespace {
       EXPECT_EQ("value73",  file.getAttribute("air_temperature_2m", "att1"));
       EXPECT_EQ("",  file.getAttribute("air_temperature_2m", "att2"));
    }
+   TEST_F(FileNetcdf, inandoutOfDataMode) {
+      // Check that we can go in and out of data mode without error
+      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      // Define attributes
+      file.setAttribute("air_temperature_2m", "att1", "value71");
+      EXPECT_EQ("value71",  file.getAttribute("air_temperature_2m", "att1"));
+      // Read data
+      FieldPtr field = file.getField(Variable::T, 0);
+      std::vector<Variable::Type> vars(1,Variable::T);
+      // Write data
+      file.write(vars);
+
+      // Add more attributes
+      file.setAttribute("air_temperature_2m", "att1", "value72");
+      EXPECT_EQ("value72",  file.getAttribute("air_temperature_2m", "att1"));
+   }
    TEST_F(FileNetcdf, setAttributeError) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

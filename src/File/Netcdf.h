@@ -57,12 +57,20 @@ class FileNetcdf : public File {
       static bool   hasVar(int iFile, std::string iVar);
       float getMissingValue(int iVar) const;
       void  setMissingValue(int iVar, float iValue)const ;
+      void defineTimes();
+      void defineReferenceTime();
+      void defineGlobalAttributes();
       void writeTimes();
       void writeReferenceTime();
-      void writeGlobalAttributes();
       void handleNetcdfError(int status, std::string message="") const;
-      void startDefineMode();
-      void startDataMode();
+
+      // Netcdf file must be in define mode when adding variables and attributes
+      // but in data mode when data is read or written. However it is not clear how
+      // to know which mode the file is currently in and an error occurs when attempting
+      // to switch to the same mode the file currently is in. Keep track of this in mInDataMode
+      void startDefineMode() const;
+      void startDataMode() const;
+      mutable bool mInDataMode;
 };
 #include "Ec.h"
 #include "Arome.h"

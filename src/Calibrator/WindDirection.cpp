@@ -12,9 +12,6 @@ CalibratorWindDirection::CalibratorWindDirection(Variable::Type iVariable, const
 }
 
 bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'windDirection' requires a parameter file");
-   }
    if(iParameterFile->getNumParameters() != 9) {
       Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
    }

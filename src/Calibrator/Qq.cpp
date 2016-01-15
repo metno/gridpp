@@ -28,9 +28,6 @@ CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
    iOptions.getValues("quantiles", mQuantiles);
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'qq' requires a parameter file");
-   }
    if(iParameterFile->getNumParameters() % 2 != 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
    }

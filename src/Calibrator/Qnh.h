@@ -10,6 +10,7 @@ class CalibratorQnh : public Calibrator {
       static std::string description();
       std::string name() const {return "qnh";};
       static float calcQnh(float iElev, float iPressure);
+      bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
 };

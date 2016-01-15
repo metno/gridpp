@@ -163,6 +163,11 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
    }
 }
 bool Calibrator::calibrate(File& iFile, const ParameterFile* iParameterFile) const {
+   if(requiresParameterFile() && iParameterFile == NULL) {
+      std::stringstream ss;
+      ss << "Calibrator '" << name() << "' requires a parameter file";
+      Util::error(ss.str());
+   }
    return calibrateCore(iFile, iParameterFile);
 }
 

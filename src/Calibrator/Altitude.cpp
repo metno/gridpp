@@ -7,10 +7,6 @@ CalibratorAltitude::CalibratorAltitude(const Options& iOptions) :
       Calibrator(iOptions) {
 }
 bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'altitude' requires a parameter file");
-   }
-
    if(!iParameterFile->isLocationDependent()) {
       Util::error("Cannot use a location independent parameter file to update the altitudes");
    }

@@ -11,13 +11,9 @@ CalibratorPhase::CalibratorPhase(const Options& iOptions) :
       mUseWetbulb(1) {
 }
 bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'phase' requires a parameter file");
-   }
    if(iParameterFile->getNumParameters() != 2) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
    }
-
 
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();

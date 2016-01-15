@@ -8,6 +8,7 @@ class CalibratorDiagnose : public Calibrator {
       CalibratorDiagnose(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "diagnose";};
+      bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mOutputVariable;

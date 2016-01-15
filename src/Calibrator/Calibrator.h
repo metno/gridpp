@@ -36,6 +36,9 @@ class Calibrator : public Scheme {
       static std::string getDescriptions();
 
       virtual Parameters train(const std::vector<ObsEns>& iData) const;
+
+      // Does this calibrator require a parameter file?
+      virtual bool requiresParameterFile() const { return true;};
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
    private:

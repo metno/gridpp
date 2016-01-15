@@ -14,10 +14,6 @@ CalibratorBct::CalibratorBct(Variable::Type iMainPredictor, const Options& iOpti
 }
 
 bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'bct' requires a parameter file");
-   }
-
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

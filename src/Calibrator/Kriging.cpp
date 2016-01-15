@@ -91,10 +91,6 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
 }
 
 bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   if(iParameterFile == NULL) {
-      Util::error("Calibrator 'kriging' requires a parameter file");
-   }
-
    int nLat = iFile.getNumLat();
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();

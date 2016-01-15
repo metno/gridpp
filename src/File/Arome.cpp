@@ -185,6 +185,7 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
    startDataMode(); // 0.5 seconds
    writeReferenceTime();
    writeTimes(); // 2-3 seconds
+   writeLatLonVariable("altitude");
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -363,6 +364,55 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
    delete[] values;
    return grid;
 }
+void FileArome::writeLatLonVariable(std::string iVar) {
+   if(!hasVar(iVar)) {
+      // Create variable
+      int dLon     = getDim(getXname());
+      int dLat     = getDim(getYname());
+      int dims[2]  = {dLat, dLon};
+      int var = Util::MV;
+      int status = nc_def_var(mFile, iVar.c_str(), NC_FLOAT, 2, dims, &var);
+      handleNetcdfError(status, "could not define variable");
+   }
+   int var = getVar(iVar);
+   float MV = getMissingValue(var);
+   int numDims;
+   int status = nc_inq_varndims(mFile, var, &numDims);
+   handleNetcdfError(status, "could not determine number of dimensions for variable " + iVar);
+
+   // Assign values
+   float* values = new float[getNumLon()*getNumLat()];
+   vec2 grid;
+   grid.resize(getNumLat());
+   for(int i = 0; i < getNumLat(); i++) {
+      grid[i].resize(getNumLon());
+      for(int j = 0; j < getNumLon(); j++) {
+         int index = i*getNumLon() + j;
+         float value = values[index];
+         if(values[index] == MV)
+            value = Util::MV;
+         grid[i][j] = value;
+         assert(index < getNumLon()*getNumLat());
+      }
+   }
+
+   // Write to file
+   if(numDims == 2) {
+      status = nc_put_var_float(mFile, var, values);
+      handleNetcdfError(status, "could not set data to variable " + iVar);
+   }
+   else if(numDims == 4) {
+      size_t count[4] = {1,1,getNumLat(),getNumLon()};
+      size_t start[4] = {0,0,0,0};
+      int status = nc_put_vara_float(mFile, var, start, count, values);
+      handleNetcdfError(status, "could not set data to variable " + iVar);
+   }
+   else {
+      Util::error("Cannot write " + iVar + " from AROME file. Must have either 2 or 4 dimensions");
+   }
+   delete[] values;
+
+}
 int FileArome::getDate() const {
    return mDate;
 }
@@ -372,7 +422,7 @@ bool FileArome::isValid(std::string iFilename) {
    int file;
    int status = nc_open(iFilename.c_str(), NC_NOWRITE, &file);
    if(status == NC_NOERR) {
-      isValid = hasDim(file, "time") &&
+      isValid = 
                (hasDim(file, "x") || hasDim(file, "rlon")) &&
                (hasDim(file, "y") || hasDim(file, "rlat")) &&
                !hasDim(file, "ensemble_member") &&

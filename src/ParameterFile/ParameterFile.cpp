@@ -57,6 +57,25 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) co
    if(mParameters.size() == 0)
       return Parameters();
    // Find the right location to use
+   Location loc = getNearestLocation(iTime, iLocation);
+
+   // Find the right time to use
+   std::map<int,Parameters> timeParameters = mParameters.find(loc)->second;//it->second;
+   if(timeParameters.size() == 1) {
+      // One set of parameters for all times
+      return timeParameters.begin()->second;
+   }
+   else if(timeParameters.find(iTime) != timeParameters.end()) {
+      return timeParameters[iTime];
+   }
+   else {
+      std::stringstream ss;
+      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
+      Util::error(ss.str());
+   }
+}
+
+Location ParameterFile::getNearestLocation(int iTime, const Location& iLocation) const {
    Location loc(Util::MV,Util::MV,Util::MV);
    if(mParameters.size() == 1) {
       // One set of parameters for all locations
@@ -92,24 +111,10 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) co
          }
       }
       else {
-         loc = iLocation;
+         loc = it->first;
       }
    }
-
-   // Find the right time to use
-   std::map<int,Parameters> timeParameters = mParameters.find(loc)->second;//it->second;
-   if(timeParameters.size() == 1) {
-      // One set of parameters for all times
-      return timeParameters.begin()->second;
-   }
-   else if(timeParameters.find(iTime) != timeParameters.end()) {
-      return timeParameters[iTime];
-   }
-   else {
-      std::stringstream ss;
-      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
-      Util::error(ss.str());
-   }
+   return loc;
 }
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {

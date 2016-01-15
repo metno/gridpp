@@ -18,6 +18,7 @@ class ParameterFile : public Scheme {
       Parameters getParameters(int iTime) const;
 
       static ParameterFile* getScheme(std::string iName, const Options& iOptions, bool iIsNew=false);
+      Location getNearestLocation(int iTime, const Location& iLocation) const;
 
       //! Does this file provide different parameters for different locations?
       virtual bool isLocationDependent() const;

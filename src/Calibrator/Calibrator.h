@@ -40,22 +40,23 @@ class Calibrator : public Scheme {
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
    private:
 };
-#include "Zaga.h"
-#include "Cloud.h"
 // #include "Wind.h"
 #include "Temperature.h"
 #include "Accumulate.h"
+#include "Altitude.h"
 #include "Bct.h"
+#include "Cloud.h"
+#include "Diagnose.h"
 #include "Gaussian.h"
+#include "Kriging.h"
 #include "Neighbourhood.h"
+#include "Phase.h"
 #include "Qc.h"
 #include "Qnh.h"
 #include "Qq.h"
-#include "Phase.h"
 #include "Regression.h"
 #include "Sort.h"
 #include "WindDirection.h"
-#include "Kriging.h"
-#include "Diagnose.h"
 #include "Window.h"
+#include "Zaga.h"
 #endif

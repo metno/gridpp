@@ -222,6 +222,13 @@ namespace {
       EXPECT_EQ("bct", c->name());
       delete c;
    }
+   TEST_F(TestCalibrator, factoryAltitude) {
+      Calibrator* c;
+      c = Calibrator::getScheme("altitude", Options());
+      EXPECT_TRUE(c);
+      EXPECT_EQ("altitude", c->name());
+      delete c;
+   }
    TEST_F(TestCalibrator, factoryValid) {
       Calibrator::getScheme("zaga", Options("variable=T"));
       Calibrator::getScheme("zaga", Options("variable=Precip variable=T"));

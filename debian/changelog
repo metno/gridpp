@@ -3,6 +3,7 @@ gridpp (0.2.1) precise; urgency=low
   * Gridded parameter estimation
   * Faster writing of Netcdf files
   * Improved flexibility of specifying kriging precip smoothing
+  * Added -c altitude
 
  -- Thomas Nipen <thomas.nipen@met.no>  Wed, 13 Jan 2016 15:27:51 +0100
 

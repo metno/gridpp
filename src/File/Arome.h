@@ -24,6 +24,7 @@ class FileArome : public FileNetcdf {
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
       FieldPtr getFieldCore(std::string iVariable, int iTime) const;
       vec2 getLatLonVariable(std::string iVariable) const;
+      void writeLatLonVariable(std::string iVariable);
       int mDate;
       std::string getXname() const;
       std::string getYname() const;

@@ -152,6 +152,11 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "altitude") {
+      CalibratorAltitude* c = new CalibratorAltitude(iOptions);
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
@@ -195,20 +200,21 @@ Parameters Calibrator::train(const std::vector<ObsEns>& iData) const {
 
 std::string Calibrator::getDescriptions() {
    std::stringstream ss;
-   ss << CalibratorZaga::description() << std::endl;
-   ss << CalibratorCloud::description() << std::endl;
-   ss << CalibratorQc::description() << std::endl;
-   ss << CalibratorQq::description() << std::endl;
-   ss << CalibratorQnh::description() << std::endl;
-   ss << CalibratorDiagnose::description() << std::endl;
    ss << CalibratorAccumulate::description() << std::endl;
-   ss << CalibratorWindDirection::description() << std::endl;
+   ss << CalibratorAltitude::description() << std::endl;
+   ss << CalibratorBct::description() << std::endl;
+   ss << CalibratorCloud::description() << std::endl;
+   ss << CalibratorDiagnose::description() << std::endl;
+   ss << CalibratorGaussian::description() << std::endl;
+   ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorPhase::description() << std::endl;
+   ss << CalibratorQc::description() << std::endl;
+   ss << CalibratorQnh::description() << std::endl;
+   ss << CalibratorQq::description() << std::endl;
    ss << CalibratorRegression::description() << std::endl;
-   ss << CalibratorKriging::description() << std::endl;
-   ss << CalibratorGaussian::description() << std::endl;
-   ss << CalibratorBct::description() << std::endl;
    ss << CalibratorSort::description() << std::endl;
+   ss << CalibratorWindDirection::description() << std::endl;
+   ss << CalibratorZaga::description() << std::endl;
    return ss.str();
 }

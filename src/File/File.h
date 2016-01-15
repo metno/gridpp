@@ -77,6 +77,7 @@ class File {
       static std::string getDescriptions();
    protected:
       virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
+      // File must save variables, but also altitudes, in case they got changed
       virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
       //! Can the subclass provide this variable?
       virtual bool hasVariableCore(Variable::Type iVariable) const = 0;

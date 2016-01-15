@@ -64,6 +64,8 @@ int FileNetcdf::getVar(std::string iVar) const {
 }
 
 int FileNetcdf::getDimSize(std::string iDim) const {
+   if(!hasDim(iDim))
+      return 0;
    int dim = getDim(iDim);
    size_t len;
    int status = nc_inq_dimlen(mFile, dim, &len);

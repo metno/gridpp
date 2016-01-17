@@ -155,7 +155,14 @@ FileArome::~FileArome() {
 }
 
 void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
+   // General rule: Try to define all variables first, then write variables
+   // to avoid swapping between define and data mode unnecessarily
    startDefineMode();
+
+   // Define lat/lon/elev
+   defineLatLonVariable("latitude");
+   defineLatLonVariable("longitude");
+   defineLatLonVariable("altitude");
 
    // Define variables (< 0.01 s)
    for(int v = 0; v < iVariables.size(); v++) {
@@ -364,7 +371,7 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
    delete[] values;
    return grid;
 }
-void FileArome::writeLatLonVariable(std::string iVar) {
+void FileArome::defineLatLonVariable(std::string iVar) {
    if(!hasVar(iVar)) {
       // Create variable
       int dLon     = getDim(getXname());
@@ -373,6 +380,14 @@ void FileArome::writeLatLonVariable(std::string iVar) {
       int var = Util::MV;
       int status = nc_def_var(mFile, iVar.c_str(), NC_FLOAT, 2, dims, &var);
       handleNetcdfError(status, "could not define variable");
+   }
+}
+
+void FileArome::writeLatLonVariable(std::string iVar) {
+   if(!hasVar(iVar)) {
+      startDefineMode();
+      defineLatLonVariable(iVar);
+      startDataMode();
    }
    int var = getVar(iVar);
    float MV = getMissingValue(var);

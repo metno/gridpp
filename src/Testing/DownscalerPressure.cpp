@@ -48,7 +48,9 @@ namespace {
    TEST_F(TestDownscalerPressure, 10x10) {
       DownscalerPressure d(Variable::T, Options());
       FileArome from("testing/files/10x10.nc");
-      FileFake to(1,4,1,from.getNumTime());
+      std::stringstream ss;
+      ss << "nLat=1 nLon=4 nEns=1 nTime=" << from.getNumTime();
+      FileFake to(Options(ss.str()));
       setLatLonElev(to, (const float[]) {5}, (const float[]){2,2,12,20}, (const float[]){120, 1500, 600, -100});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);

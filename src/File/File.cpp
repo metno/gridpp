@@ -8,7 +8,7 @@
 #include "../Options.h"
 Uuid File::mNextTag = 0;
 
-File::File(std::string iFilename) :
+File::File(std::string iFilename, const Options& iOptions) :
       mFilename(iFilename),
       mReferenceTime(Util::MV) {
    createNewTag();
@@ -41,10 +41,10 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
       }
    }
    else if(type == "arome") {
-      file = new FileArome(iFilename, iReadOnly);
+      file = new FileArome(iFilename, iOptions, iReadOnly);
    }
    else if(type == "ec") {
-      file = new FileEc(iFilename, iReadOnly);
+      file = new FileEc(iFilename, iOptions, iReadOnly);
    }
    else if(type == "point") {
       file = new FilePoint(iFilename, iOptions);

@@ -65,8 +65,8 @@ namespace {
       EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", Variable::T, Options()), ".*");
    }
    TEST_F(TestDownscaler, validNearestNeighbours) {
-      FileFake from(3,2,1,1);
-      FileFake to(2,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {50,55,60}, (const float[]){0,10});
       setLatLon(to,   (const float[]) {40, 54.99},   (const float[]){-1,9.99});
 
@@ -89,8 +89,8 @@ namespace {
       EXPECT_EQ(1, J[1][1]);
    }
    TEST_F(TestDownscaler, missingLatLon) {
-      FileFake from(3,2,1,1);
-      FileFake to(2,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       float lat1[] = {50,Util::MV,60};
       float lon1[] = {0,Util::MV};
       float lat2[] = {40, 54};
@@ -119,8 +119,8 @@ namespace {
    TEST_F(TestDownscaler, identicalGrid) {
       int nLat = 3;
       int nLon = 4;
-      FileFake from(nLat,nLon,1,1);
-      FileFake to(nLat,nLon,1,1);
+      FileFake from(Options("nLat=3 nLon=4 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=3 nLon=4 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {50,55,60}, (const float[]){0,3,5,10});
       setLatLon(to,   (const float[]) {50,55,60}, (const float[]){0,3,5,10});
 
@@ -143,8 +143,8 @@ namespace {
    TEST_F(TestDownscaler, notIdenticalGridDiffLon) {
       int nLat = 1;
       int nLon = 5;
-      FileFake from(nLat,nLon,1,1);
-      FileFake to(nLat,nLon,1,1);
+      FileFake from(Options("nLat=1 nLon=5 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=1 nLon=5 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {1}, (const float[]){0,1,2,3,4});
       setLatLon(to,   (const float[]) {1}, (const float[]){0,2,2.5,3,4});
 
@@ -166,8 +166,8 @@ namespace {
    TEST_F(TestDownscaler, notIdenticalGridDiffLat) {
       int nLat = 5;
       int nLon = 1;
-      FileFake from(nLat,nLon,1,1);
-      FileFake to(nLat,nLon,1,1);
+      FileFake from(Options("nLat=5 nLon=1 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=5 nLon=1 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {0,1,2,3,4}, (const float[]){1});
       setLatLon(to,   (const float[]) {0,2,2.5,3,4}, (const float[]){1});
 
@@ -187,8 +187,8 @@ namespace {
       }
    }
    TEST_F(TestDownscaler, unsortedGrid) {
-      FileFake from(3,2,1,1);
-      FileFake to(2,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
       setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
 
@@ -211,8 +211,8 @@ namespace {
       EXPECT_EQ(0, J[1][1]);
    }
    TEST_F(TestDownscaler, cache) {
-      FileFake from(3,2,1,1);
-      FileFake to(2,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
       setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
 
@@ -246,7 +246,7 @@ namespace {
       EXPECT_EQ(1, J[0][0]);
    }
    TEST_F(TestDownscaler, copyConstructor) {
-      FileFake from(3,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
       FileFake to = from;
       vec2Int I, J;
       EXPECT_EQ(from.getUniqueTag(), to.getUniqueTag());

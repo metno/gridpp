@@ -6,11 +6,12 @@
 #include <boost/shared_ptr.hpp>
 #include "Netcdf.h"
 #include "../Variable.h"
+#include "../Options.h"
 
 //! Represents a Netcdf data file
 class FileArome : public FileNetcdf {
    public:
-      FileArome(std::string iFilename, bool iReadOnly=false);
+      FileArome(std::string iFilename, const Options& iOptions=Options(), bool iReadOnly=false);
       ~FileArome();
 
       std::string getVariableName(Variable::Type iVariable) const;

@@ -67,7 +67,7 @@ namespace {
 
    TEST_F(TestCalibratorZaga, small) {
       // Set up file
-      FileFake file(1, 1, 3, 1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=3 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(Options("fracThreshold=0.5"));
@@ -82,7 +82,7 @@ namespace {
    }
    TEST_F(TestCalibratorZaga, maxEnsMean) {
       // Set up file
-      FileFake file(1, 1, 3, 1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=3 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(Options("fracThreshold=0.5 maxEnsMean=4"));
@@ -93,7 +93,7 @@ namespace {
    }
    TEST_F(TestCalibratorZaga, missingEnsemble) {
       // Set up file
-      FileFake file(1, 1, 3, 1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=3 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       CalibratorZaga cal = getCalibrator(Options("fracThreshold=0.5"));
@@ -103,7 +103,7 @@ namespace {
    }
    TEST_F(TestCalibratorZaga, missingParameters) {
       // Set up file
-      FileFake file(1, 1, 3, 1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=3 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
       CalibratorZaga cal = getCalibrator(Options("fracThreshold=0.5"));
@@ -194,7 +194,7 @@ namespace {
    }
    TEST_F(TestCalibratorZaga, outputPop) {
       // Set up file
-      FileFake file(2, 2, 1, 1);
+      FileFake file(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       FieldPtr precip  = file.getField(Variable::Precip, 0);
@@ -221,7 +221,7 @@ namespace {
    }
    TEST_F(TestCalibratorZaga, precipLow) {
       // Set up file
-      FileFake file(2, 2, 1, 1);
+      FileFake file(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       FieldPtr precip  = file.getField(Variable::Precip, 0);
@@ -275,7 +275,7 @@ namespace {
    */
    TEST_F(TestCalibratorZaga, outputPop6h) {
       // Set up file
-      FileFake file(2, 2, 1, 6);
+      FileFake file(Options("nLat=2 nLon=2 nEns=1 nTime=6"));
       // Set up calibrator
       ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       // In the neighbourhood around point (0,0):

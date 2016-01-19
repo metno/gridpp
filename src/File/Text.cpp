@@ -7,7 +7,7 @@
 #include "../Location.h"
 
 FileText::FileText(std::string iFilename, const Options& iOptions) :
-      File(iFilename) {
+      File(iFilename, iOptions) {
 
    std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    if(!ifs.good()) {

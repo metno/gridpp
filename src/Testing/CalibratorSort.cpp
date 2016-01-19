@@ -30,7 +30,7 @@ namespace {
    };
    TEST_F(TestCalibratorSort, simple) {
       CalibratorSort cal = CalibratorSort(Variable::T ,Options(""));
-      FileFake file(1, 1, 3, 1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=3 nTime=1"));
       //              Before sort   After sort
       test(cal, file, 3,1,2,        1,2,3);
       test(cal, file, 1,1,2,        1,1,2);

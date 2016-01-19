@@ -10,7 +10,7 @@
 //! Represents a Netcdf data file
 class FileNetcdf : public File {
    public:
-      FileNetcdf(std::string iFilename, bool iReadOnly=false);
+      FileNetcdf(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
       ~FileNetcdf();
 
       virtual std::string getVariableName(Variable::Type iVariable) const = 0;

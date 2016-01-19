@@ -7,7 +7,7 @@
 #include <iomanip>
 
 FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
-      File(iFilename) {
+      File(iFilename, iOptions) {
    mLats.resize(1);
    mLons.resize(1);
    mElevs.resize(1);

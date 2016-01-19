@@ -9,7 +9,9 @@ namespace {
       public:
          void SetUp() {
             mFrom = new FileArome("testing/files/10x10.nc");
-            mTo   = new FileFake(1,4,1,mFrom->getNumTime());
+            std::stringstream ss;
+            ss << "nLat=1 nLon=4 nEns=1 nTime=" << mFrom->getNumTime();
+            mTo = new FileFake(Options(ss.str()));
             setLatLonElev(*mTo, (const float[]) {5}, (const float[]){2,2,12,20}, (const float[]){120, 1500, 600, -100});
          }
          void TearDown() {

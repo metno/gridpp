@@ -15,7 +15,7 @@ typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 //! Represents a data file containing spatial and temporal data initialized at one particular time
 class File {
    public:
-      File(std::string iFilename);
+      File(std::string iFilename, const Options& iOptions);
       virtual ~File();
 
       //! Insantiates a file. Returns null if file does not exist or cannot be parsed.
@@ -99,7 +99,7 @@ class File {
       FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
       double mReferenceTime;
       std::vector<double> mTimes;
-	  static Uuid mNextTag;
+      static Uuid mNextTag;
 };
 #include "Netcdf.h"
 #include "Fake.h"

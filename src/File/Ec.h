@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include "Netcdf.h"
 #include "../Variable.h"
+#include "../Options.h"
 
 //! Represents an ensemble Netcdf data file from ECMWF
 //! Must have:
@@ -17,7 +18,7 @@
 //!    5 dimensional variables (time, *, ensemble_member, <lat dim>, <lon dim>)
 class FileEc : public FileNetcdf {
    public:
-      FileEc(std::string iFilename, bool iReadOnly=false);
+      FileEc(std::string iFilename, const Options& iOptions=Options(), bool iReadOnly=false);
 
       std::string getVariableName(Variable::Type iVariable) const;
       static bool isValid(std::string iFilename);

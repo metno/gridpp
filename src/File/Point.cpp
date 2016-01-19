@@ -6,7 +6,7 @@
 #include "../Util.h"
 
 FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
-      File(iFilename) {
+      File(iFilename, iOptions) {
    float lat,lon,elev;
    if(!iOptions.getValue("lat", lat)) {
       Util::error("Missing 'lat' option for '" + iFilename + "'");

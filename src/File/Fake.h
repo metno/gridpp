@@ -5,7 +5,7 @@
 //! A file type giving fake data, useful for testing
 class FileFake : public File {
    public:
-      FileFake(int nLat=10, int nLon=10, int nEns=2, int nTime=10);
+      FileFake(const Options& iOptions);
       static std::string description();
       std::string name() const {return "fake";};
    protected:

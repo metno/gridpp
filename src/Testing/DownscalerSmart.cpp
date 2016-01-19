@@ -47,8 +47,8 @@ namespace {
    };
 
    TEST_F(TestDownscalerSmart, isValid) {
-      FileFake from(3,2,1,1);
-      FileFake to(1,1,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
       setLatLonElev(from, (const float[]) {50,55,60}, (const float[]){0,10}, (const float[]){3, 15, 6, 30, 20, 11});
       setLatLonElev(to,   (const float[]) {54},   (const float[]){9}, (const float[]){10});
 
@@ -73,7 +73,9 @@ namespace {
       d.setNumSmart(2);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,5,1,from.getNumTime());
+      std::stringstream ss;
+      ss << "nLat=1 nLon=5 nEns=1 nTime=" << from.getNumTime();
+      FileFake to(Options(ss.str()));
       // Case 1: West boundary outside domain
       // Case 2: Within domain
       // Case 3/4: Nearest neighbour is on the boundary, so only the western half is used
@@ -109,7 +111,9 @@ namespace {
       d.setMinElevDiff(109);
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(1,3,1,from.getNumTime());
+      std::stringstream ss;
+      ss << "nLat=1 nLon=3 nEns=1 nTime=" << from.getNumTime();
+      FileFake to(Options(ss.str()));
       float elev[] = {120, 50, Util::MV};
       setLatLonElev(to, (const float[]) {5}, (const float[]){2,2,2}, elev);
       bool status = d.downscale(from, to);
@@ -138,8 +142,8 @@ namespace {
       EXPECT_FLOAT_EQ(301, toT(0,2,0));
    }
    TEST_F(TestDownscalerSmart, minElevDiff) {
-      FileFake from(3,2,1,1);
-      FileFake to(1,1,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
       setLatLonElev(from, (const float[]) {50,55,60}, (const float[]){0,10}, (const float[]){3, 15, 6, 30, 20, 11});
       setLatLonElev(to,   (const float[]) {55},       (const float[]){10},   (const float[]){22.3});
 
@@ -169,9 +173,9 @@ namespace {
 
    }
    TEST_F(TestDownscalerSmart, fewerPointsThanSmart) {
-      FileFake from(5,3,1,1);
+      FileFake from(Options("nLat=5 nLon=3 nEns=1 nTime=1"));
       setLatLonElev(from, (const float[]) {4,5,6,7,8}, (const float[]){5,10,15}, (const float[]){70,50,20,80,60,70,50,40,30,20,10,40,50,30,60});
-      FileFake to(1,4,1,1);
+      FileFake to(Options("nLat=1 nLon=4 nEns=1 nTime=1"));
       setLatLonElev(to, (const float[]) {5.5}, (const float[]){2,4, 10,20}, (const float[]){120, 80, 600, 600});
       vec3Int I, J;
 

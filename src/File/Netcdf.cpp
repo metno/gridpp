@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileNetcdf::FileNetcdf(std::string iFilename, bool iReadOnly) :
-      File(iFilename),
+FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iReadOnly) :
+      File(iFilename, iOptions),
       mInDataMode(true) {
    int status = nc_open(getFilename().c_str(), iReadOnly ? NC_NOWRITE: NC_WRITE, &mFile);
    if(status != NC_NOERR) {

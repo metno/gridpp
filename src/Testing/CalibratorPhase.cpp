@@ -66,7 +66,7 @@ namespace {
       EXPECT_FLOAT_EQ(Variable::PhaseRain, (*phase)(2,5,0));
    }
    TEST_F(TestCalibratorPhase, phases) {
-      FileFake file(1,1,1,1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
       FieldPtr phase = file.getField(Variable::Phase, 0);
       ParameterFileSimple parFile = getParameterFile(273.7,274.7);
       CalibratorPhase cal = CalibratorPhase(Options());
@@ -87,7 +87,7 @@ namespace {
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, useWetbulb) {
-      FileFake file(1,1,1,1);
+      FileFake file(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
       FieldPtr phase = file.getField(Variable::Phase, 0);
       ParameterFileSimple parFile = getParameterFile(273.7,274.7);
       CalibratorPhase cal = CalibratorPhase(Options());

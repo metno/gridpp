@@ -1,10 +1,15 @@
 #include "Fake.h"
-FileFake::FileFake(int nLat, int nLon, int nEns, int nTime) :
-      File("") {
-   mNLat = nLat;
-   mNLon = nLon;
-   mNEns = nEns;
-   mNTime = nTime;
+FileFake::FileFake(const Options& iOptions) :
+      File("", iOptions) {
+   mNLat = 10;
+   mNLon = 10;
+   mNEns = 2;
+   mNTime = 10;
+
+   iOptions.getValue("nLat", mNLat);
+   iOptions.getValue("nLon", mNLon);
+   iOptions.getValue("nEns", mNEns);
+   iOptions.getValue("nTime", mNTime);
    if(!Util::isValid(mNLat) || mNLat <= 0) {
       Util::error("FileFake: Invalid number of latitudes");
    }

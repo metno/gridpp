@@ -42,7 +42,7 @@ namespace {
    TEST_F(FileTest, hasSameDimensions) {
       FileArome f1("testing/files/10x10.nc");
       FileArome f2("testing/files/10x10_copy.nc");
-      FileFake f3(3,3,1,1);
+      FileFake f3(Options("nLat=3 nLon=3 nEns=1 nTime=1"));
       EXPECT_TRUE(f1.hasSameDimensions(f2));
       EXPECT_TRUE(f2.hasSameDimensions(f1));
       EXPECT_FALSE(f1.hasSameDimensions(f3));
@@ -56,7 +56,7 @@ namespace {
       FieldPtr field = f1.getField(Variable::Fake, 0);
    }
    TEST_F(FileTest, deriveVariables) {
-      FileFake file(3, 3, 1, 3);
+      FileFake file(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       ASSERT_TRUE(file.hasVariable(Variable::Precip));
       FieldPtr p0 = file.getField(Variable::Precip, 0);
       FieldPtr p1 = file.getField(Variable::Precip, 1);
@@ -106,7 +106,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      FileFake f0(3, 3, 1, 3);
+      FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
       FileArome f1("testing/files/10x10.nc");
       EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
@@ -115,13 +115,13 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      FileFake f0(3, 3, 1, 3);
+      FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       f0.getField(Variable::T, 1);
       EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
       EXPECT_DEATH(f0.getField(Variable::T, 100), ".*");
    }
    TEST_F(FileTest, setgetTimes) {
-      FileFake f0(3, 3, 1, 3);
+      FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       std::vector<double> setTimes(3,0);
       setTimes[0] = 3.123;
       setTimes[1] = 4.624;
@@ -135,7 +135,7 @@ namespace {
       EXPECT_DOUBLE_EQ(5,     getTimes[2]);
    }
    TEST_F(FileTest, setgetReferenceTime) {
-      FileFake f0(3, 3, 1, 3);
+      FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       f0.setReferenceTime(4.1123);
 
       double referenceTime = f0.getReferenceTime();

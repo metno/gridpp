@@ -44,8 +44,8 @@ namespace {
    }
    TEST_F(TestDownscalerNearestNeighbour, downscale) {
       DownscalerNearestNeighbour d(Variable::T, Options());
-      FileFake from(3,2,1,1);
-      FileFake to(2,2,1,1);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {60,50,55}, (const float[]){5,4});
       setLatLon(to,   (const float[]) {56,49},    (const float[]){3,4.6});
       d.downscale(from, to);
@@ -60,7 +60,9 @@ namespace {
       DownscalerNearestNeighbour d(Variable::T, Options());
       FileArome from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
-      FileFake to(2,2,1,from.getNumTime());
+      std::stringstream ss;
+      ss << "nLat=2 nLon=2 nEns=1 nTime=" << from.getNumTime();
+      FileFake to(Options(ss.str()));
       setLatLon(to, (const float[]) {5,11}, (const float[]){2,3});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);

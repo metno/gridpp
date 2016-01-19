@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileArome::FileArome(std::string iFilename, bool iReadOnly) : FileNetcdf(iFilename, iReadOnly) {
+FileArome::FileArome(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdf(iFilename, iOptions, iReadOnly) {
    // Set dimensions
    mNTime = getDimSize("time");
    mNLat  = getDimSize(getYname());

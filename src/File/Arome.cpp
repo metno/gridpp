@@ -398,16 +398,17 @@ void FileArome::writeLatLonVariable(std::string iVar) {
    // Assign values
    float* values = new float[getNumLon()*getNumLat()];
    vec2 grid;
-   grid.resize(getNumLat());
+   if(iVar == "latitude")
+      grid = getLats();
+   else if(iVar == "longitude")
+      grid = getLons();
+   else if(iVar == "altitude")
+      grid = getElevs();
    for(int i = 0; i < getNumLat(); i++) {
-      grid[i].resize(getNumLon());
       for(int j = 0; j < getNumLon(); j++) {
          int index = i*getNumLon() + j;
-         float value = values[index];
-         if(values[index] == MV)
-            value = Util::MV;
-         grid[i][j] = value;
-         assert(index < getNumLon()*getNumLat());
+         float value = grid[i][j];
+         values[index] = value;
       }
    }
 

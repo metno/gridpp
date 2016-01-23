@@ -53,5 +53,9 @@ class ParameterFileNetcdf : public ParameterFile {
       vec2 getGridValues(int iFile, int iVariable) const;
 
       int mFile;
+
+      void startDefineMode() const;
+      void startDataMode() const;
+      mutable bool mInDataMode;
 };
 #endif

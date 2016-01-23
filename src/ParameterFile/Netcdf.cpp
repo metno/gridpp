@@ -10,13 +10,15 @@
 
 ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mDimName("coeff"),
-      mVarName("coefficient") {
+      mVarName("coefficient"),
+      mInDataMode(false) {
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
 
    if(iIsNew) {
       int status = nc_create(getFilename().c_str(), NC_NETCDF4, &mFile);
       handleNetcdfError(status, "Could not write file");
+      startDataMode();
       return;
    }
 
@@ -166,6 +168,8 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
    delete[] values;
    delete[] times;
+
+   startDataMode();
 }
 
 ParameterFileNetcdf::~ParameterFileNetcdf() {
@@ -259,6 +263,7 @@ std::string ParameterFileNetcdf::description() {
    return ss.str();
 }
 void ParameterFileNetcdf::write() const {
+   startDefineMode();
    std::vector<Location> locations = getLocations();
    std::vector<int> times = getTimes();
    if(times.size() == 0 || locations.size() == 0) {
@@ -296,24 +301,27 @@ void ParameterFileNetcdf::write() const {
    status = nc_def_var(mFile, "time", NC_FLOAT, 1, &dTime, &vTime);
    handleNetcdfError(status, "could not define time");
 
-   status = ncendef(mFile);
-   handleNetcdfError(status, "could not put into data mode");
+   startDataMode();
 
    double s = Util::clock();
+   float* lats  = new float[locations.size()];
+   float* lons  = new float[locations.size()];
+   float* elevs = new float[locations.size()];
    // Write locations
    for(int i = 0; i < locations.size(); i++) {
-      size_t countGrid[2] = {1, 1};
-      size_t startGrid[2] = {i, 0};
-      float lat = locations[i].lat();
-      float lon = locations[i].lon();
-      float elev = locations[i].elev();
-      status = nc_put_vara_float(mFile, vLat, startGrid, countGrid, &lat);
-      handleNetcdfError(status, "could not write latitude");
-      status = nc_put_vara_float(mFile, vLon, startGrid, countGrid, &lon);
-      handleNetcdfError(status, "could not write longitude");
-      status = nc_put_vara_float(mFile, vElev, startGrid, countGrid, &elev);
-      handleNetcdfError(status, "could not write altitude");
+      lats[i] = locations[i].lat();
+      lons[i] = locations[i].lon();
+      elevs[i] = locations[i].elev();
    }
+   status = nc_put_var_float(mFile, vLat, lats);
+   handleNetcdfError(status, "could not write latitude");
+   delete[] lats;
+   status = nc_put_var_float(mFile, vLon, lons);
+   handleNetcdfError(status, "could not write longitude");
+   delete[] lons;
+   status = nc_put_var_float(mFile, vElev, elevs);
+   handleNetcdfError(status, "could not write altitude");
+   delete[] elevs;
 
    // Write times
    int* timesAr = new int[nTime];
@@ -537,4 +545,18 @@ vec2 ParameterFileNetcdf::getGridValues(int iFile, int iVar) const {
       delete[] values;
    }
    return grid;
+}
+void ParameterFileNetcdf::startDefineMode() const {
+   if(mInDataMode) {
+      int status = ncredef(mFile);
+      handleNetcdfError(status, "could not put into define mode");
+   }
+   mInDataMode = false;
+}
+void ParameterFileNetcdf::startDataMode() const {
+   if(!mInDataMode) {
+      int status = ncendef(mFile);
+      handleNetcdfError(status, "could not put into data mode");
+   }
+   mInDataMode = true;
 }

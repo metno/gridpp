@@ -11,19 +11,22 @@
 ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mDimName("coeff"),
       mVarName("coefficient"),
-      mInDataMode(false) {
+      mInDefineMode(false) {
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
 
    if(iIsNew) {
       int status = nc_create(getFilename().c_str(), NC_NETCDF4, &mFile);
       handleNetcdfError(status, "Could not write file");
-      startDataMode();
+      mInDefineMode = true; // New files are in define mode when created
+      endDefineMode();
       return;
    }
 
    int status = nc_open(getFilename().c_str(), NC_NOWRITE, &mFile);
    handleNetcdfError(status, "Could not read file");
+   mInDefineMode = false;
+   endDefineMode();
 
    int dTime = getTimeDim(mFile);
    int dLon  = getLonDim(mFile);
@@ -169,7 +172,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    delete[] values;
    delete[] times;
 
-   startDataMode();
+   endDefineMode();
 }
 
 ParameterFileNetcdf::~ParameterFileNetcdf() {
@@ -301,7 +304,7 @@ void ParameterFileNetcdf::write() const {
    status = nc_def_var(mFile, "time", NC_FLOAT, 1, &dTime, &vTime);
    handleNetcdfError(status, "could not define time");
 
-   startDataMode();
+   endDefineMode();
 
    double s = Util::clock();
    float* lats  = new float[locations.size()];
@@ -547,16 +550,18 @@ vec2 ParameterFileNetcdf::getGridValues(int iFile, int iVar) const {
    return grid;
 }
 void ParameterFileNetcdf::startDefineMode() const {
-   if(mInDataMode) {
+   if(!mInDefineMode) {
+      // Only call redefine if we went into data mode at some point
       int status = ncredef(mFile);
       handleNetcdfError(status, "could not put into define mode");
+      mInDefineMode = true;
    }
-   mInDataMode = false;
 }
-void ParameterFileNetcdf::startDataMode() const {
-   if(!mInDataMode) {
+void ParameterFileNetcdf::endDefineMode() const {
+   if(mInDefineMode) {
+      // Only end define mode if we at some point entered
       int status = ncendef(mFile);
       handleNetcdfError(status, "could not put into data mode");
+      mInDefineMode = false;
    }
-   mInDataMode = true;
 }

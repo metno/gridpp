@@ -55,7 +55,7 @@ class ParameterFileNetcdf : public ParameterFile {
       int mFile;
 
       void startDefineMode() const;
-      void startDataMode() const;
-      mutable bool mInDataMode;
+      void endDefineMode() const;
+      mutable bool mInDefineMode;
 };
 #endif

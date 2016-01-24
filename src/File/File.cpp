@@ -82,9 +82,7 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
    if(needsReading) {
       // Load non-derived variable from file
       if(hasVariableCore(iVariable)) {
-         for(int t = 0; t < getNumTime(); t++) {
-            mFields[iVariable][t] = getFieldCore(iVariable, t);
-         }
+         mFields[iVariable][iTime] = getFieldCore(iVariable, iTime);
       }
       // Try to derive the field
       else if(iVariable == Variable::Precip) {

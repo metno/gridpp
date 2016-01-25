@@ -70,7 +70,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
             Util::error(ss.str());
          }
          Parameters parameters(values);
-         mParameters[location][time] = parameters;
+         setParameters(parameters, time, location);
          counter++;
       }
    }
@@ -78,17 +78,6 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    mTimes = std::vector<int>(times.begin(), times.end());
    std::sort(mTimes.begin(), mTimes.end());
 
-   // Ensure all locations have parameters for all times
-   // Inserting empty parameter sets where there are none
-   std::map<Location, std::map<int, Parameters> >::iterator it;
-   for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      std::map<int, Parameters>::const_iterator it2;
-      for(int t = 0; t < mTimes.size(); t++) {
-         if(it->second.find(t) == it->second.end()) {
-            it->second[t] = Parameters();
-         }
-      }
-   }
    std::stringstream ss;
    ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
    Util::status(ss.str());
@@ -134,19 +123,18 @@ void ParameterFileText::write(const std::string& iFilename) const {
       Util::error("Cannot write parameters to " + filename);
    }
 
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   std::map<Location, std::vector<Parameters> >::const_iterator it;
    // Loop over times
    if(mIsSpatial)
       ofs << "# time lat lon elev parameters" << std::endl;
    else
       ofs << "# time parameters" << std::endl;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      std::map<int, Parameters>::const_iterator it2;
       // Loop over locations
       const Location& location = it->first;
-      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-         int time = it2->first;
-         const Parameters& parameters = it2->second;
+      for(int i = 0; i < it->second.size(); i++) {
+         int time = i;
+         const Parameters& parameters = it->second[i];
          if(parameters.size() != 0) {
             ofs << time;
             if(mIsSpatial) {

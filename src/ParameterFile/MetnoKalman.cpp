@@ -84,17 +84,17 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions, bool
          Location location(lat,lon,elev);
          // Values are for every 3 (coeffFreq) hours. Interpolate between so we get values every hour
          for(int i = 0; i < values.size(); i++) {
-            mParameters[location][i*coeffFreq] = Parameters(values[i]);
+            setParameters(Parameters(values[i]), i*coeffFreq, location);
             // Fill in the gaps
             if(i < values.size() - 1) {
                for(int k = 1; k < coeffFreq; k++) {
                   float a = 1 - ((float) k)/coeffFreq;
                   float b = 1 - a;
                   if(Util::isValid(values[i]) && Util::isValid(values[i+1])) {
-                     mParameters[location][i*coeffFreq+k] = Parameters(a*values[i]+b*values[i+1]);
+                     setParameters(Parameters(a*values[i]+b*values[i+1]), i*coeffFreq+k, location);
                   }
                   else {
-                     mParameters[location][i*coeffFreq+k] = Parameters(Util::MV);
+                     setParameters(Parameters(Util::MV), i*coeffFreq+k, location);
                   }
                }
             }

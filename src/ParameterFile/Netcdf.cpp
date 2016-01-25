@@ -93,7 +93,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
          for(int j = 0; j < nLon; j++) {
             int locIndex = i * nLon + j;
             Location location(lats[i][j], lons[i][j], elevs[i][j]);
-            mParameters[location][time] = parameters;
+            setParameters(parameters, time, location);
          }
       }
    }

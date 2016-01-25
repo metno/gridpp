@@ -44,10 +44,13 @@ class ParameterFile : public Scheme {
       virtual void write() const {};
 
       static std::string getDescriptions();
+
+      // Return the number of bytes in cache
+      long getCacheSize() const;
    protected:
 
       // Store all location-dependent parameters here
-      std::map<Location, std::map<int, Parameters>, Location::CmpIgnoreElevation > mParameters; // Location, Offset, Parameters
+      std::map<Location, std::vector<Parameters>, Location::CmpIgnoreElevation > mParameters; // Location, Offset, Parameters
       std::string mFilename;
       void setFilename(std::string iFilename);
       bool mIsNew; // Should this file be created?

@@ -32,19 +32,19 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
 
 Parameters ParameterFile::getParameters(int iTime) const {
    // Find the right location to use
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   std::map<Location, std::vector<Parameters> >::const_iterator it;
    if(mParameters.size() == 1) {
       // One set of parameters for all locations
        it = mParameters.begin();
    }
 
    // Find the right time to use
-   std::map<int,Parameters> timeParameters = it->second;
+   const std::vector<Parameters>& timeParameters = it->second;
    if(timeParameters.size() == 1) {
       // One set of parameters for all times
-      return timeParameters.begin()->second;
+      return timeParameters[0];
    }
-   else if(it->second.find(iTime) != it->second.end()) {
+   else if(timeParameters.size() > iTime) {
       return timeParameters[iTime];
    }
    else {
@@ -60,12 +60,13 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) co
    Location loc = getNearestLocation(iTime, iLocation);
 
    // Find the right time to use
-   std::map<int,Parameters> timeParameters = mParameters.find(loc)->second;//it->second;
+   std::map<Location, std::vector<Parameters> >::const_iterator it = mParameters.find(loc);
+   const std::vector<Parameters>& timeParameters = it->second;
    if(timeParameters.size() == 1) {
       // One set of parameters for all times
-      return timeParameters.begin()->second;
+      return timeParameters[0];
    }
-   else if(timeParameters.find(iTime) != timeParameters.end()) {
+   else if(timeParameters.size() > iTime) {
       return timeParameters[iTime];
    }
    else {
@@ -79,24 +80,23 @@ Location ParameterFile::getNearestLocation(int iTime, const Location& iLocation)
    Location loc(Util::MV,Util::MV,Util::MV);
    if(mParameters.size() == 1) {
       // One set of parameters for all locations
-      std::map<Location, std::map<int, Parameters> >::const_iterator it = mParameters.begin();
+      std::map<Location, std::vector<Parameters> >::const_iterator it = mParameters.begin();
       loc = it->first;
    }
    else {
-      std::map<Location, std::map<int, Parameters> >::const_iterator it;
+      std::map<Location, std::vector<Parameters> >::const_iterator it;
       it = mParameters.find(iLocation);
       // Nearest neighbour
       // TODO
       if(it == mParameters.end()) {
-         std::map<Location, std::map<int, Parameters> >::const_iterator it;
+         std::map<Location, std::vector<Parameters> >::const_iterator it;
          float minDist = Util::MV;
          for(it = mParameters.begin(); it != mParameters.end(); it++) {
             const Location& currLoc = it->first;
             float dist = iLocation.getDistance(currLoc);
             if(!Util::isValid(minDist) || (Util::isValid(dist) && dist < minDist)) {
                // Check that this location actually has parameters available for this time
-               std::map<int, Parameters>::const_iterator it2 = it->second.find(iTime);
-               bool hasAtThisTime = it2->second.size() > 0;
+               bool hasAtThisTime = it->second.size() > iTime && it->second[iTime].size() != 0;
                if(hasAtThisTime) {
                   minDist = dist;
                   loc = it->first;
@@ -118,10 +118,14 @@ Location ParameterFile::getNearestLocation(int iTime, const Location& iLocation)
 }
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {
+   std::map<Location, std::vector<Parameters> >::const_iterator it = mParameters.find(iLocation);
+   if(mParameters[iLocation].size() <= iTime) {
+      mParameters[iLocation].resize(iTime+1);
+   }
    mParameters[iLocation][iTime] = iParameters;
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
-   std::map<Location, std::map<int,Parameters> >::iterator it = mParameters.begin();
+   std::map<Location, std::vector<Parameters> >::iterator it = mParameters.begin();
    it->second[iTime] = iParameters;
 }
 
@@ -131,7 +135,7 @@ std::string ParameterFile::getFilename() const {
 
 std::vector<Location> ParameterFile::getLocations() const {
    std::vector<Location> locations;
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   std::map<Location, std::vector<Parameters> >::const_iterator it;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
       locations.push_back(it->first);
    }
@@ -140,11 +144,11 @@ std::vector<Location> ParameterFile::getLocations() const {
 
 std::vector<int> ParameterFile::getTimes() const {
    std::set<int> times;
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   std::map<Location, std::vector<Parameters> >::const_iterator it;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      std::map<int, Parameters>::const_iterator it2;
-      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-         times.insert(it2->first);
+      for(int i = 0; i < it->second.size(); i++) {
+         if(it->second[i].size() != 0)
+            times.insert(i);
       }
    }
    return std::vector<int>(times.begin(), times.end());
@@ -162,14 +166,17 @@ int ParameterFile::getNumParameters() const {
    int size = Util::MV;
 
    std::vector<Location> locations;
-   std::map<Location, std::map<int, Parameters> >::const_iterator it;
+   std::map<Location, std::vector<Parameters> >::const_iterator it;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      std::map<int, Parameters>::const_iterator it2;
-      for(it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-         int currSize = it2->second.size();
-         if(Util::isValid(size) && currSize != currSize)
+      for(int i = 0; i < it->second.size(); i++) {
+         int currSize = it->second[i].size();
+         if(currSize != 0) {
+            if(Util::isValid(size) && currSize != size)
+               return Util::MV;
+            size = currSize;
+         }
+         else
             return Util::MV;
-         size = currSize;
       }
    }
    return size;
@@ -194,4 +201,15 @@ std::string ParameterFile::getDescriptions() {
    ss << ParameterFileMetnoKalman::description() << std::endl;
    ss << ParameterFileNetcdf::description() << std::endl;
    return ss.str();
+}
+
+long ParameterFile::getCacheSize() const {
+   std::map<Location, std::vector<Parameters>, Location::CmpIgnoreElevation >::const_iterator it;
+   long total = 0;
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      for(int i = 0; i < it->second.size(); i++) {
+         total++;
+      }
+   }
+   return total;
 }

@@ -8,19 +8,22 @@
 #include "../Scheme.h"
 
 //! Represents a collection of parameters, one set for each location and forecast time
-//! For locations/times without parameters, Parameters() is stored
+//! Parameters can be missing for some locations/times
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
-      //! Uses the nearest neighbour if the location isn't in the set
-      Parameters getParameters(int iTime, const Location& iLocation) const;
+      //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
+      Parameters getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour=true) const;
       //! Only use this if isLocationDependent() is false
       Parameters getParameters(int iTime) const;
 
       static ParameterFile* getScheme(std::string iName, const Options& iOptions, bool iIsNew=false);
-      Location getNearestLocation(int iTime, const Location& iLocation) const;
+      //! Finds the nearest parameter location with valid data at time iTime. Returns true if a
+      //! location is found and location is stored in iNearestLocation. If no locations are available,
+      //! false is returned.
+      bool getNearestLocation(int iTime, const Location& iLocation, Location& iNearestLocation) const;
 
       //! Does this file provide different parameters for different locations?
       virtual bool isLocationDependent() const;

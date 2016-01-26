@@ -53,11 +53,16 @@ Parameters ParameterFile::getParameters(int iTime) const {
       Util::error(ss.str());
    }
 }
-Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) const {
+Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour) const {
    if(mParameters.size() == 0)
       return Parameters();
    // Find the right location to use
-   Location loc = getNearestLocation(iTime, iLocation);
+   Location loc = iLocation;
+   if(iAllowNearestNeighbour) {
+      bool found = getNearestLocation(iTime, iLocation, loc);
+      if(!found)
+         return Parameters();
+   }
 
    // Find the right time to use
    LocationParameters::const_iterator it = mParameters.find(loc);
@@ -70,18 +75,15 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation) co
       return timeParameters[iTime];
    }
    else {
-      std::stringstream ss;
-      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
-      Util::error(ss.str());
+      return Parameters();
    }
 }
 
-Location ParameterFile::getNearestLocation(int iTime, const Location& iLocation) const {
-   Location loc(Util::MV,Util::MV,Util::MV);
+bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Location& iNearestLocation) const {
    if(mParameters.size() == 1) {
       // One set of parameters for all locations
       LocationParameters::const_iterator it = mParameters.begin();
-      loc = it->first;
+      iNearestLocation = it->first;
    }
    else {
       LocationParameters::const_iterator it = mParameters.find(iLocation);
@@ -98,22 +100,21 @@ Location ParameterFile::getNearestLocation(int iTime, const Location& iLocation)
                bool hasAtThisTime = it->second.size() > iTime && it->second[iTime].size() != 0;
                if(hasAtThisTime) {
                   minDist = dist;
-                  loc = it->first;
+                  iNearestLocation = it->first;
                }
             }
          }
          if(!Util::isValid(minDist)) {
-            // TODO: No nearby location found
-            Util::error("No parameter locations found");
+            return false;
          }
          else {
          }
       }
       else {
-         loc = it->first;
+         iNearestLocation = it->first;
       }
    }
-   return loc;
+   return true;
 }
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {

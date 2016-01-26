@@ -265,7 +265,7 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
       std::vector<float> bias(N,0);
       for(int k = 0; k < obsLocations.size(); k++) {
          Location loc = obsLocations[k];
-         Parameters parameters = iParameterFile->getParameters(t, loc);
+         Parameters parameters = iParameterFile->getParameters(t, loc, false);
          if(parameters.size() > 0) {
             float currBias = parameters[0];
             if(Util::isValid(currBias)) {

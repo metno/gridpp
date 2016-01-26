@@ -19,7 +19,8 @@ bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParame
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
       for(int j = 0; j < nLon; j++) {
-         Location loc = iParameterFile->getNearestLocation(0, Location(lats[i][j], lons[i][j], elevs[i][j]));
+         Location loc(Util::MV, Util::MV, Util::MV);
+         iParameterFile->getNearestLocation(0, Location(lats[i][j], lons[i][j], elevs[i][j]), loc);
          elevs[i][j] = loc.elev();
       }
    }

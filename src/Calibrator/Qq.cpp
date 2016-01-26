@@ -149,9 +149,9 @@ Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
    assert(obs.size() == fcst.size());
 
    if(obs.size() == 0 || fcst.size() == 0) {
-      std::stringstream ss;
-      ss << "CalibratorQq: No valid data, no correction will be made.";
-      Util::warning(ss.str());
+      // std::stringstream ss;
+      // ss << "CalibratorQq: No valid data, no correction will be made.";
+      // Util::warning(ss.str());
    }
 
    // Sort

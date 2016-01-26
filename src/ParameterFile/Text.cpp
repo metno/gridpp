@@ -14,7 +14,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    if(!ifs.good()) {
       return;
    }
-   mNumParameters = Util::MV;
+   int numParameters = Util::MV;
    int counter = 0;
    std::set<int> times;
    while(ifs.good()) {
@@ -61,9 +61,9 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
             }
             values.push_back(value);
          }
-         if(mNumParameters == Util::MV)
-            mNumParameters = values.size();
-         else if(values.size() != mNumParameters) {
+         if(numParameters == Util::MV)
+            numParameters = values.size();
+         else if(values.size() != numParameters) {
             std::stringstream ss;
             ss << "Parameter file '" + getFilename() + "' is corrupt, because it does not have the same"
                << " number of columns on each line" << std::endl;
@@ -81,8 +81,6 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    std::stringstream ss;
    ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
    Util::status(ss.str());
-   if(!Util::isValid(mNumParameters))
-      mNumParameters = 0;
 }
 
 std::vector<int> ParameterFileText::getTimes() const {
@@ -107,10 +105,6 @@ bool ParameterFileText::isReadable() const {
       return false;
    }
    return true;
-}
-
-int ParameterFileText::getNumParameters() const {
-   return mNumParameters;
 }
 
 void ParameterFileText::write() const {

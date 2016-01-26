@@ -13,10 +13,10 @@ namespace {
    TEST_F(ParameterFileTest, validDownscalers) {
       ParameterFile* p0 = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
       EXPECT_EQ("text", p0->name());
-      EXPECT_EQ(false, p0->isLocationDependent());
+      EXPECT_FALSE(p0->isLocationDependent());
       ParameterFile* p1 = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
       EXPECT_EQ("text", p1->name());
-      EXPECT_EQ(true, p1->isLocationDependent());
+      EXPECT_TRUE(p1->isLocationDependent());
       ParameterFile* p2 = ParameterFile::getScheme("metnoKalman", Options("file=testing/files/kalmanOutput.txt"));
       EXPECT_EQ("metnoKalman", p2->name());
       ParameterFile* p3 = ParameterFile::getScheme("netcdf", Options("file=testing/files/10x10_param.nc"));
@@ -36,6 +36,21 @@ namespace {
       par = p->getParameters(1, Location(-1,0.1,0));
       ASSERT_EQ(1, par.size());
       EXPECT_FLOAT_EQ(4, par[0]);
+
+      // Nearest neighbour for 9,9 is 9,9 for time 0 and 5,5 for time 1
+      Location loc = p->getNearestLocation(0, Location(9,9,0));
+      EXPECT_FLOAT_EQ(9, loc.lat());
+      EXPECT_FLOAT_EQ(9, loc.lon());
+      loc = p->getNearestLocation(1, Location(9,9,0));
+      EXPECT_FLOAT_EQ(5, loc.lat());
+      EXPECT_FLOAT_EQ(5, loc.lon());
+
+      par = p->getParameters(0, Location(9,9,0));
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(-1.1, par[0]);
+      par = p->getParameters(1, Location(9,9,0));
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(-5.4, par[0]);
    }
    TEST_F(ParameterFileTest, factoryInvalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

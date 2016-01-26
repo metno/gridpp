@@ -7,12 +7,14 @@
 #include "../Options.h"
 #include "../Scheme.h"
 
-//! Represents a collection of parameters, one set for each forecast time
+//! Represents a collection of parameters, one set for each location and forecast time
+//! For locations/times without parameters, Parameters() is stored
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
+      //! Uses the nearest neighbour if the location isn't in the set
       Parameters getParameters(int iTime, const Location& iLocation) const;
       //! Only use this if isLocationDependent() is false
       Parameters getParameters(int iTime) const;
@@ -50,7 +52,8 @@ class ParameterFile : public Scheme {
    protected:
 
       // Store all location-dependent parameters here
-      std::map<Location, std::vector<Parameters>, Location::CmpIgnoreElevation > mParameters; // Location, Offset, Parameters
+      typedef std::map<Location, std::vector<Parameters>, Location::CmpIgnoreElevation > LocationParameters;
+      LocationParameters mParameters; // Location, Offset, Parameters
       std::string mFilename;
       void setFilename(std::string iFilename);
       bool mIsNew; // Should this file be created?

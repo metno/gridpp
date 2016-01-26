@@ -27,7 +27,6 @@ class ParameterFileText : public ParameterFile {
       bool isReadable() const;
       bool isLocationDependent() const;
 
-      int getNumParameters() const;
       //! Write parameter file to disk
       //! @param iFilename Write to this filename. If empty, write to the file that was read from.
       void write(const std::string& iFilename) const;
@@ -35,7 +34,6 @@ class ParameterFileText : public ParameterFile {
       static std::string description();
       std::string name() const {return "text";};
    private:
-      int mNumParameters;
       bool mIsSpatial;
       std::vector<int> mTimes;
 };

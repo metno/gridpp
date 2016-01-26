@@ -60,38 +60,123 @@ namespace {
       ASSERT_EQ(1, par.size());
       EXPECT_FLOAT_EQ(-5.4, par[0]);
    }
-   TEST_F(ParameterFileTest, factoryInvalid) {
+   TEST_F(ParameterFileTest, setParameters) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(ParameterFile::getScheme("qwe", Options("")), ".*");
-   }
-   TEST_F(ParameterFileTest, setParameters) {
       ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=1"));
-      Parameters par = createParameters(5,2,3);
       Location loc = Location(0,0,0);
-      Parameters par2;
+      Parameters par;
       p->setParameters(createParameters(1,2,3),    0, Location(0,0,0));
       p->setParameters(createParameters(4,5,6),    3, Location(0,0,0));
       p->setParameters(createParameters(7,8,9),    2, Location(1,0,0));
       p->setParameters(createParameters(10,11,12), 3, Location(1,0,0));
       // Location 0,0,0 for time 0
-      par2 = p->getParameters(0, loc);
-      ASSERT_EQ(3, par2.size());
-      EXPECT_FLOAT_EQ(1, par2[0]);
+      par = p->getParameters(0, loc);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
       // No parametesr for time 1
-      par2 = p->getParameters(1, loc);
-      ASSERT_EQ(0, par2.size());
+      par = p->getParameters(1, loc);
+      ASSERT_EQ(0, par.size());
       // Location 1,0,0 for time 2
-      par2 = p->getParameters(2, loc);
-      ASSERT_EQ(3, par2.size());
-      EXPECT_FLOAT_EQ(7, par2[0]);
+      par = p->getParameters(2, loc);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(7, par[0]);
       // Location 1,0,0 for time 2
-      par2 = p->getParameters(2, loc, false);
-      ASSERT_EQ(0, par2.size());
+      par = p->getParameters(2, loc, false);
+      ASSERT_EQ(0, par.size());
       // Location 0,0,0 for time 3
-      par2 = p->getParameters(3, loc);
-      ASSERT_EQ(3, par2.size());
-      EXPECT_FLOAT_EQ(4, par2[0]);
+      par = p->getParameters(3, loc);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+
+      // No location provided
+      EXPECT_DEATH(p->getParameters(3), ".*");
+   }
+   // Time-independent
+   /*
+   TEST_F(ParameterFileTest, timeIndependent) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=1"));
+      Location loc = Location(0,0,0);
+      Parameters par;
+      p->setParameters(createParameters(1,2,3),    0, Location(0,0,0));
+      p->setParameters(createParameters(7,8,9),    0, Location(1,0,0));
+      // Same parameters regardless of time
+      // Time 0
+      par = p->getParameters(0, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(0, Location(1,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(7, par[0]);
+      // Time 1
+      par = p->getParameters(1, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(1, Location(1,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(7, par[0]);
+   }
+   */
+   // No locations
+   TEST_F(ParameterFileTest, locationIndependent) {
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));
+      Location loc = Location(0,0,0);
+      p->setParameters(createParameters(1,2,3), 0);
+      p->setParameters(createParameters(4,5,6), 1);
+
+      // No location specified
+      Parameters par = p->getParameters(0);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(1);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+
+      // Should get the same parameters regardless of what location is provided
+      par = p->getParameters(0, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(0, Location(0,1,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(1, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+      par = p->getParameters(1, Location(0,1,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+   } 
+   // No locations, one time
+   TEST_F(ParameterFileTest, noLocationsOneTime) {
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));
+      Location loc = Location(0,0,0);
+      p->setParameters(createParameters(1,2,3), 0);
+
+      // Same parameters regardless of time and location
+      Parameters par = p->getParameters(0);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(1);
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+
+      // Should get the same parameters regardless of what location is provided
+      par = p->getParameters(0, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+      par = p->getParameters(1, Location(0,0,0));
+      ASSERT_EQ(3, par.size());
+      EXPECT_FLOAT_EQ(1, par[0]);
+   } 
+   TEST_F(ParameterFileTest, descriptions) {
+      ParameterFile::getDescriptions();
+   }
+   TEST_F(ParameterFileTest, factoryInvalid) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(ParameterFile::getScheme("qwe", Options("")), ".*");
    }
 }
 int main(int argc, char **argv) {

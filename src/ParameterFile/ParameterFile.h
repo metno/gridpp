@@ -9,6 +9,9 @@
 
 //! Represents a collection of parameters, one set for each location and forecast time
 //! Parameters can be missing for some locations/times
+//! File can location and/or time independent, meaning that the same parameters are returned for all
+//! locations and/or times. This occurs if setParameters is used without a location and/or if only
+//! one time is available.
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
@@ -16,7 +19,7 @@ class ParameterFile : public Scheme {
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
       Parameters getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour=true) const;
-      //! Only use this if isLocationDependent() is false
+      //! Only use this if isLocationDependent() is false otherwise an error occurs
       Parameters getParameters(int iTime) const;
 
       static ParameterFile* getScheme(std::string iName, const Options& iOptions, bool iIsNew=false);

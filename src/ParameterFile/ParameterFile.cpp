@@ -31,6 +31,9 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
 }
 
 Parameters ParameterFile::getParameters(int iTime) const {
+   if(isLocationDependent()) {
+      Util::error("Cannot retrieve location-independent parameters for a location-dependent file");
+   }
    // Find the right location to use
    LocationParameters::const_iterator it;
    if(mParameters.size() == 1) {
@@ -125,8 +128,7 @@ void ParameterFile::setParameters(Parameters iParameters, int iTime, const Locat
    mParameters[iLocation][iTime] = iParameters;
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
-   LocationParameters::iterator it = mParameters.begin();
-   it->second[iTime] = iParameters;
+   setParameters(iParameters, iTime, Location(Util::MV, Util::MV, Util::MV));
 }
 
 std::string ParameterFile::getFilename() const {

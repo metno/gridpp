@@ -165,8 +165,11 @@ class Util {
       //! multiple values, the last element is returned.
       static int getUpperIndex(float iX, const std::vector<float>& iValues);
 
-      //! Copy the file with filename iFrom to filename iTo
+      //! Copy the file with filename iFrom to filename iTo. Returns true if successful.
       static bool copy(std::string iFrom, std::string iTo);
+     
+      //! Remove the file with filename. Returns true if successful.
+      static bool remove(std::string iFilename);
      
       //! \brief Comparator class for sorting pairs using the second entry.
       //! Sorts from smallest to largest

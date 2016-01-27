@@ -18,6 +18,7 @@ namespace Cglob {
 #include <fstream>
 #include <istream>
 #include <iomanip>
+#include <cstdio>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
@@ -244,6 +245,11 @@ bool Util::copy(std::string iFrom, std::string iTo) {
    source.close();
    dest.close();
    return true;
+}
+
+bool Util::remove(std::string iFilename) {
+   bool failure = std::remove(iFilename.c_str());
+   return !failure;
 }
 
 std::string Util::formatDescription(std::string iTitle, std::string iMessage, int iTitleLength, int iMaxLength, int iTitleIndent) {

@@ -279,6 +279,21 @@ namespace {
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
    }
+   TEST_F(UtilTest, remove) {
+      // Check that removing a file works.
+      std::string tempfile = "testing/files/temp123.nc";
+      bool status = Util::copy("testing/files/10x10.nc", tempfile);
+      status = Util::remove(tempfile);
+      EXPECT_TRUE(status);
+      EXPECT_FALSE(Util::exists(tempfile));
+   }
+   TEST_F(UtilTest, removeInvalid) {
+      // Check that removing a file works.
+      std::string tempfile = "testing/files/temp123.nc";
+      bool status = Util::remove(tempfile);
+      EXPECT_FALSE(status);
+      EXPECT_FALSE(Util::exists(tempfile));
+   }
    TEST_F(UtilTest, hasChar) {
       EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", 't'));
       EXPECT_TRUE(Util::hasChar("te  2384 &$*#st", ' '));

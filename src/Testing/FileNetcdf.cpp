@@ -104,6 +104,25 @@ namespace {
       EXPECT_DEATH(file.setAttribute("nonvalid_variable", "units", "value93824"), ".*");
       EXPECT_DEATH(file.getAttribute("q", "att1"), ".*");
    }
+   TEST_F(FileNetcdf, setLongAttribute) {
+      // Attempt to create a really long attribute
+      {
+         FileArome file = FileArome("testing/files/10x10_copy.nc");
+         std::stringstream ss;
+         for(int i = 0; i < 1e7; i++) {
+            ss << "1234567890";
+         }
+         ss << "1234";
+         std::string value = ss.str();
+         file.appendGlobalAttribute("history", value);
+         std::vector<Variable::Type> vars(1,Variable::T);
+         file.write(vars);
+      }
+      // Make sure the attribute hasn't been set to the really long value
+      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      std::string value = file.getGlobalAttribute("history");
+      EXPECT_TRUE(value.size() < 1e8);
+   }
    TEST_F(FileNetcdf, createNewVariable) {
       FileArome file("testing/files/10x10_copy.nc");
       std::vector<Variable::Type> vars;

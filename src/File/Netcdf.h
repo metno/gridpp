@@ -71,6 +71,7 @@ class FileNetcdf : public File {
       void startDefineMode() const;
       void startDataMode() const;
       mutable bool mInDataMode;
+      const static int mMaxAttributeLength = 100000000;
 };
 #include "Ec.h"
 #include "Arome.h"

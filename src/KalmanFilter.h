@@ -26,9 +26,7 @@ class KalmanFilter {
       KalmanFilter(Variable::Type iVariable, const Options& iOptions);
       bool writeBiasFile(const File& iFcst,
             const File& iObs,
-            int iCurrDate,
-            int iStartTime,
-            int iEndTime,
+            int iTimeStep,
             const ParameterFile* iDbIn=NULL,
             ParameterFile* iDbOut=NULL,
             ParameterFile* iBiasFile=NULL);
@@ -39,6 +37,7 @@ class KalmanFilter {
       float mHourlyCorr;
       float mV;
       int mDim; // Hours between obs?
+      float mElevGradient;
       std::vector<std::vector<float> > getW() const;
       int getParameterIndex(int iTime) const;
       KalmanParameters initialize() const;

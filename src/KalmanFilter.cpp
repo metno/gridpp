@@ -15,10 +15,12 @@ KalmanFilter::KalmanFilter(Variable::Type iVariable, const Options& iOptions) :
       mHourlyCorr(0.93),
       mV(2.0),
       mRatio(0.06),
+      mElevGradient(-0.0065),
       mDim(8) {
    iOptions.getValue("hourlyCorr",  mHourlyCorr);
    iOptions.getValue("v",  mV);
    iOptions.getValue("ratio",  mRatio);
+   iOptions.getValue("elevGradient",  mElevGradient);
    iOptions.getValue("dim",  mDim);
 
    if(mHourlyCorr < 0 || mHourlyCorr > 1)
@@ -33,9 +35,7 @@ KalmanFilter::KalmanFilter(Variable::Type iVariable, const Options& iOptions) :
 
 bool KalmanFilter::writeBiasFile(const File& iFcst,
       const File& iObs,
-      int iCurrDate,
-      int iStartTime,
-      int iEndTime,
+      int iTimeStep,
       const ParameterFile* iDbIn,
       ParameterFile* iDbOut,
       ParameterFile* iBiasFile) {
@@ -59,6 +59,9 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
          int Inearest = I[oi][oj];
          int Jnearest = J[oi][oj];
          bool inDb = true;
+         float oelev = oelevs[oi][oj];
+         float felev = felevs[Inearest][Jnearest];
+         float elevCorrection = mElevGradient * (oelev - felev);
          if(inDb) {
             int iI, iJ;
             KalmanParameters par = initialize(); // Initialize to empty
@@ -71,11 +74,12 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
             std::vector<std::vector<float> > P= par.P;
 
             // Iterate forward
-            for(int t = iStartTime; t <= iEndTime; t++) {
-               std::cout << "Iteration: " << t << std::endl;
+            for(int t = iTimeStep; t <= iTimeStep; t++) {
+               // std::cout << "Iteration: " << t << std::endl;
                int ftime = 0; // Forecast time
                int findex = t;
                float fcst = (*iFcst.getField(mVariable, findex))(Inearest,Jnearest,0);
+               fcst += elevCorrection;
                float obs = (*iObs.getField(mVariable, findex))(oi, oj,0);
 
                // Compute Pt|t-1. This increases the covariance.
@@ -105,12 +109,14 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
                   for(int i = 0; i < mDim; i++) {
                      x[i] = x[i] + k[i]*(y - x_dindex);
                   }
+                  /*
                   std::cout << "Iteration " << t << " " << dindex << " " << y;
                   for(int i = 0; i < mDim; i++) {
                      std::cout << " " << x[i];
                   }
                   std::cout << std::endl;
                   std::cout << "# " << t << " " << x[0] << " " << k[0] << " " << P[0][0] << " " << P[1][0] << " " << y << std::endl;
+                  */
                }
                else {
                   // Missing obs or forecast. P has already been increased, do not update x.
@@ -129,13 +135,20 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
             }
             if(iBiasFile != NULL) {
                std::vector<float> values(1,0);
-               int H = iFcst.getNumTime(); // TODO: Figure out which hours to write which parameters to
-               for(int h = 0; h < H; h++) {
-                  int index = round((float) h*mDim/24);
+               // Figure out which hours to write which parameters to
+               std::vector<double> times = iFcst.getTimes();
+               double refTime = iFcst.getReferenceTime();
+               for(int h = 0; h < times.size(); h++) {
+                  int sec = times[h] - refTime;
+                  int hour = sec / 3600 % 24;
+                  hour = h;
+                  int index = (int) round((float) hour*mDim/24) % mDim;
                   values[0] = parNew.x[index];
+                  assert(parNew.x.size() > index);
                   iBiasFile->setParameters(Parameters(values), h, obsLoc);
                }
             }
+            /*
             std::cout << "gain bias" << std::endl;
             for(int i = 0; i < mDim; i++) {
                std::cout << k[i] << " " << parNew.x[i];
@@ -144,6 +157,7 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
                }
                std::cout << std::endl;
             }
+            */
 
          }
          else {
@@ -157,6 +171,7 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
    if(iBiasFile != NULL) {
       iBiasFile->write();
    }
+   return true;
 }
 
 std::vector<std::vector<float> > KalmanFilter::getW() const {

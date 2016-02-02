@@ -9,8 +9,10 @@
 
 ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mIsSpatial(false) {
-   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    iOptions.getValue("spatial", mIsSpatial);
+   if(iIsNew)
+      return;
+   std::ifstream ifs(getFilename().c_str(), std::ifstream::in);
    if(!ifs.good()) {
       return;
    }

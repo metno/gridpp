@@ -1,6 +1,5 @@
 #ifndef FILE_EC_H
 #define FILE_EC_H
-#include <netcdf.hh>
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>

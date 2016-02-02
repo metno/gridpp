@@ -1,5 +1,6 @@
 #include "Ec.h"
 #include <math.h>
+#include <netcdf.h>
 #include <assert.h>
 #include <stdlib.h>
 #include "../Util.h"

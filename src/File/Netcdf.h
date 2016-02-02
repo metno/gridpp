@@ -1,6 +1,5 @@
 #ifndef FILE_NETCDF_H
 #define FILE_NETCDF_H
-#include <netcdf.h>
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>

@@ -1,5 +1,5 @@
-#ifndef METCAL_SETUP_H
-#define METCAL_SETUP_H
+#ifndef METCAL_SETUP_TRAIN_H
+#define METCAL_SETUP_TRAIN_H
 #include <string>
 #include <vector>
 #include "Variable.h"

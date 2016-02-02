@@ -77,6 +77,18 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    std::vector<Location> locations(locationsSet.begin(), locationsSet.end());
    std::sort(times.begin(), times.end());
 
+   mLats.resize(locations.size());
+   mLons.resize(locations.size());
+   mElevs.resize(locations.size());
+   for(int i = 0; i < locations.size(); i++) {
+      mLats[i].resize(1);
+      mLons[i].resize(1);
+      mElevs[i].resize(1);
+      mLats[i][0] = locations[i].lat();
+      mLons[i][0] = locations[i].lon();
+      mElevs[i][0] = locations[i].elev();
+   }
+
    setTimes(times);
    mNTime = times.size();
    mNLat = locations.size();

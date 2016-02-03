@@ -59,6 +59,9 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
                separate(parameters, obsVec, fcstVec);
             }
+            if(obsVec.size() < 1) {
+               Util::error("CalibratorQq cannot use parameters with size less than 2");
+            }
             // Only process if all parameters are valid
             bool hasValidParameters = true;
             for(int p = 0; p < parameters.size(); p++) {

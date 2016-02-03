@@ -93,7 +93,6 @@ namespace {
       EXPECT_DEATH(p->getParameters(3), ".*");
    }
    // Time-independent
-   /*
    TEST_F(ParameterFileTest, timeIndependent) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
@@ -118,7 +117,6 @@ namespace {
       ASSERT_EQ(3, par.size());
       EXPECT_FLOAT_EQ(7, par[0]);
    }
-   */
    // No locations
    TEST_F(ParameterFileTest, locationIndependent) {
       ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));

@@ -63,6 +63,9 @@ class ParameterFile : public Scheme {
       std::string mFilename;
       void setFilename(std::string iFilename);
       bool mIsNew; // Should this file be created?
+   private:
+      bool mIsTimeDependent;
+      int mMaxTime;
 };
 #include "MetnoKalman.h"
 #include "Text.h"

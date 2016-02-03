@@ -37,7 +37,6 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    int nLon   = getDimSize(mFile, dLon);
    int nCoeff = getDimSize(mFile, dCoeff);
 
-
    // TODO: Deal with case where lat and lon are one-dimensional variables
    // Get latitudes
    int vLat = Util::MV;

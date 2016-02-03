@@ -9,6 +9,8 @@
 ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       Scheme(iOptions),
       mFilename(""),
+      mIsTimeDependent(false),
+      mMaxTime(0),
       mIsNew(iIsNew) {
    iOptions.getValue("file", mFilename);
 }
@@ -31,6 +33,22 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
 }
 
 Parameters ParameterFile::getParameters(int iTime) const {
+   if(iTime < 0) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time;
+      Util::error(ss.str());
+   }
+
+   int time = iTime;
+   if(!isTimeDependent())
+      time = 0;
+
+   if(time > mMaxTime) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time << " (max " << mMaxTime << ")";
+      Util::error(ss.str());
+   }
+
    if(isLocationDependent()) {
       Util::error("Cannot retrieve location-independent parameters for a location-dependent file");
    }
@@ -43,26 +61,35 @@ Parameters ParameterFile::getParameters(int iTime) const {
 
    // Find the right time to use
    const std::vector<Parameters>& timeParameters = it->second;
-   if(timeParameters.size() == 1) {
-      // One set of parameters for all times
-      return timeParameters[0];
-   }
-   else if(timeParameters.size() > iTime) {
-      return timeParameters[iTime];
-   }
+   if(timeParameters.size() > time)
+      return timeParameters[time];
    else {
-      std::stringstream ss;
-      ss << "Parameter file '" << mFilename << "' does not have values for time " << iTime << ".";
-      Util::error(ss.str());
+      return Parameters();
    }
 }
 Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour) const {
+   if(iTime < 0) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time;
+      Util::error(ss.str());
+   }
+
+   int time = iTime;
+   if(!isTimeDependent())
+      time = 0;
+
+   if(time > mMaxTime) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time << " (max " << mMaxTime << ")";
+      Util::error(ss.str());
+   }
+
    if(mParameters.size() == 0)
       return Parameters();
    // Find the right location to use
    Location loc = iLocation;
    if(iAllowNearestNeighbour) {
-      bool found = getNearestLocation(iTime, iLocation, loc);
+      bool found = getNearestLocation(time, iLocation, loc);
       if(!found)
          return Parameters();
    }
@@ -70,13 +97,8 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bo
    // Find the right time to use
    LocationParameters::const_iterator it = mParameters.find(loc);
    const std::vector<Parameters>& timeParameters = it->second;
-   if(timeParameters.size() == 1) {
-      // One set of parameters for all times
-      return timeParameters[0];
-   }
-   else if(timeParameters.size() > iTime) {
-      return timeParameters[iTime];
-   }
+   if(timeParameters.size() > time)
+      return timeParameters[time];
    else {
       return Parameters();
    }
@@ -126,6 +148,8 @@ void ParameterFile::setParameters(Parameters iParameters, int iTime, const Locat
       mParameters[iLocation].resize(iTime+1);
    }
    mParameters[iLocation][iTime] = iParameters;
+   mIsTimeDependent = mIsTimeDependent || iTime > 0;
+   mMaxTime = std::max(mMaxTime, iTime);
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
    setParameters(iParameters, iTime, Location(Util::MV, Util::MV, Util::MV));
@@ -161,7 +185,7 @@ bool ParameterFile::isLocationDependent() const {
 }
 // TODO
 bool ParameterFile::isTimeDependent() const {
-   return true;
+   return mIsTimeDependent;
 }
 
 int ParameterFile::getNumParameters() const {

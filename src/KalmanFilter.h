@@ -8,42 +8,59 @@ class File;
 class Options;
 class ParameterFile;
 
+typedef std::vector<std::vector<float> > vec2;
+
+// Container for KF parameters. Stores:
+// - x (best estimate of bias)
+// - k (Kalman gain)
+// - P (error covariance of best estimate)
 class KalmanParameters {
    public:
-      // Use existing parameters
+      KalmanParameters(std::vector<float> x, std::vector<float> k, vec2 P);
       KalmanParameters(const Parameters& iParameters);
-      // Initialize new parameters
-      KalmanParameters(std::vector<float> x, std::vector<float> k, std::vector<std::vector<float> > P);
+
+      std::vector<float> x;
+      std::vector<float> k;
+      vec2 P;
+
+      // Serialize parameters into regular gridpp parameters
       Parameters toParameters() const;
-      std::vector<float> x; // Last estimate
-      std::vector<float> k; // Kalman gain
-      std::vector<std::vector<float> > P; // Covariance matrix
+
+      // Dimension of filter
       int dim() const {return x.size();};
 };
 
 class KalmanFilter {
    public:
       KalmanFilter(Variable::Type iVariable, const Options& iOptions);
+      // Run the KF on forecast and observation files for a specified timestep
+      // @param iDbIn read KF parameters from this file. If NULL, initialize new ones.
+      // @param iDbOut If not NULL, write KF parameters to this file.
+      // @param iBiasFile If not NULL, write biases to this file.
       bool writeBiasFile(const File& iFcst,
             const File& iObs,
             int iTimeStep,
             const ParameterFile* iDbIn=NULL,
             ParameterFile* iDbOut=NULL,
             ParameterFile* iBiasFile=NULL);
+
+      // Update the kalman filter parameters based on a measured bias at some time
+      KalmanParameters update(float iBias, int iTime, const KalmanParameters& iParameters);
+
+      // Returns KF parameters initialized when no information is available
+      KalmanParameters initialize() const;
       static std::string description();
    private:
+      vec2 getW() const;
+      int getParameterIndex(int iTime) const;
+
       Variable::Type mVariable;
       float mRatio; // std W / std V
-      float mHourlyCorr;
-      float mV;
-      int mDim; // Hours between obs?
+      float mHourlyCorr; // Auto-correlation of bias measurements
+      int mDim; // Number of observations to use per 24 hours
       float mElevGradient;
-      std::vector<std::vector<float> > getW() const;
-      int getParameterIndex(int iTime) const;
-      KalmanParameters initialize() const;
-};
-class KalmanDb {
-   public:
-      KalmanDb(const ParameterFile& iFile);
+      float mPinit;    // Initial standard error of estimate
+      mutable vec2 mW; // Error covariance matrix
+      float mV;        // Standard error of bias measurements
 };
 #endif

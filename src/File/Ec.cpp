@@ -83,7 +83,8 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
 
    size_t count[5] = {1, 1, nEns, nLat, nLon};
    size_t start[5] = {iTime, 0, 0, 0, 0};
-   float* values = new float[nTime*1*nEns*nLat*nLon];
+   size_t size = 1*1*nEns*nLat*nLon;
+   float* values = new float[size];
    nc_get_vara_float(mFile, var, start, count, values);
    float MV = getMissingValue(var);
 
@@ -156,13 +157,14 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
       assert(hasVariableCore(varType));
       int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
+      size_t size = 1*1*mNEns*mNLat*mNLon;
+      float* values = new float[size];
       for(int t = 0; t < mNTime; t++) {
          float offset = getOffset(var);
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
             size_t start[5] = {t, 0, 0, 0, 0};
-            float* values = new float[mNTime*1*mNEns*mNLat*mNLon];
 
             int index = 0;
             for(int e = 0; e < mNEns; e++) {
@@ -196,6 +198,7 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
             }
          }
       }
+      delete[] values;
    }
 }
 

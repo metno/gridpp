@@ -213,6 +213,12 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::T) {
       return "air_temperature_2m";
    }
+   else if(iVariable == Variable::TMin) {
+      return "air_temperature_2m_min6h";
+   }
+   else if(iVariable == Variable::TMax) {
+      return "air_temperature_2m_max6h";
+   }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
    }

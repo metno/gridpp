@@ -21,6 +21,10 @@ std::string Variable::getTypeName(Type iType) {
       return "Cloud";
    else if(iType == T)
       return "T";
+   else if(iType == TMin)
+      return "TMin";
+   else if(iType == TMax)
+      return "TMax";
    else if(iType == U)
       return "U";
    else if(iType == Xwind)
@@ -72,6 +76,10 @@ Variable::Type Variable::getType(std::string iName) {
       return Cloud;
    else if(iName == "T")
       return T;
+   else if(iName == "TMin")
+      return TMin;
+   else if(iName == "TMax")
+      return TMax;
    else if(iName == "U")
       return U;
    else if(iName == "Xwind")
@@ -107,6 +115,8 @@ Variable::Type Variable::getType(std::string iName) {
 std::string Variable::getDescriptions() {
    std::stringstream ss;
    ss << Util::formatDescription("-v T", "Temperature") << std::endl;
+   ss << Util::formatDescription("-v TMin", "Minimum temperature") << std::endl;
+   ss << Util::formatDescription("-v TMax", "Maximum temperature") << std::endl;
    ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;
    ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
    ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
@@ -165,6 +175,10 @@ float Variable::getMin(Type iType) {
    switch(iType) {
       case T:
          return 0;
+      case TMin:
+         return 0;
+      case TMax:
+         return 0;
       case Precip:
          return 0;
       case PrecipAcc:
@@ -216,6 +230,10 @@ float Variable::getMax(Type iType) {
    switch(iType) {
       case T:
          return Util::MV;
+      case TMin:
+         return Util::MV;
+      case TMax:
+         return Util::MV;
       case Precip:
          return Util::MV;
       case PrecipAcc:
@@ -265,6 +283,10 @@ float Variable::getMax(Type iType) {
 std::string Variable::getUnits(Type iType) {
    switch(iType) {
       case T:
+         return "K";
+      case TMin:
+         return "K";
+      case TMax:
          return "K";
       case Precip:
          return "kg/m^2";
@@ -316,6 +338,10 @@ std::string Variable::getStandardName(Type iType) {
    switch(iType) {
       case T:
          return "air_temperature";
+      case TMin:
+         return "air_temperature_2m";
+      case TMax:
+         return "air_temperature_2m";
       case Precip:
          return "precipitation_amount";
       case PrecipAcc:

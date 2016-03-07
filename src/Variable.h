@@ -17,6 +17,8 @@ class Variable {
          PrecipHigh   = 6,    // High estimate of precipitation
          Cloud        = 10,   // Cloud cover (between 0 and 1)
          T            = 20,   // 2m temperature (K)
+         TMin         = 21,   // 2m temperature minimum temperature (K)
+         TMax         = 22,   // 2m temperature maximum temperature (K)
          U            = 30,   // 10m U-wind (m/s)
          Xwind        = 31,   // 10m X-wind (m/s)
          V            = 40,   // 10m V-wind (m/s)

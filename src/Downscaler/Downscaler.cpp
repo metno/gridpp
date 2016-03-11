@@ -56,29 +56,26 @@ namespace {
       //KDTree(const KDTree &) = delete;
       //KDTree& operator=(const KDTree &) = delete;
 
-      void buildTree(const File& iFrom);
+      void buildTree(const vec2& iLats, const vec2& iLons);
       void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
 
       friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
       friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
    };
 
-   void KDTree::buildTree(const File& iFrom) {
+   void KDTree::buildTree(const vec2& iLats, const vec2& iLons) {
 
-      vec2 ilats = iFrom.getLats();
-      vec2 ilons = iFrom.getLons();
-
-      size_t nLon = iFrom.getNumLon();
-      size_t nLat = iFrom.getNumLat();
+      size_t nLon = iLats[0].size();
+      size_t nLat = iLats.size();
 
       indexdVec lons(nLon*nLat);
 
       indexdVec::iterator currLon = lons.begin();
       size_t to = -1;
-      for(size_t i = 0; i < ilats.size(); ++i) {
-        for(size_t j = 0; j < ilats[0].size(); ++j) {
-           if(Util::isValid(ilons[i][j]) && Util::isValid(ilats[i][j])) {
-              *(currLon++) = Indexed(ilons[i][j], ilats[i][j], i, j);
+      for(size_t i = 0; i < iLats.size(); ++i) {
+        for(size_t j = 0; j < iLats[0].size(); ++j) {
+           if(Util::isValid(iLons[i][j]) && Util::isValid(iLats[i][j])) {
+              *(currLon++) = Indexed(iLons[i][j], iLats[i][j], i, j);
               ++to;
            }
         }
@@ -370,7 +367,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
    }
 
    KDTree searchTree;
-   searchTree.buildTree(iFrom);
+   searchTree.buildTree(iFrom.getLats(), iFrom.getLons());
    searchTree.getNearestNeighbour(iTo, iI, iJ);
 
    addToCache(iFrom, iTo, iI, iJ);

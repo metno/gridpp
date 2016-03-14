@@ -9,6 +9,7 @@
 ParameterFileSimple::ParameterFileSimple(Parameters iParameters) : ParameterFile(Options()) {
    Location defaultLocation(Util::MV, Util::MV, Util::MV);
    setParameters(iParameters, 0, defaultLocation);
+   init();
 }
 
 std::vector<int> ParameterFileSimple::getTimes() const {

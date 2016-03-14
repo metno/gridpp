@@ -83,6 +83,8 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    std::stringstream ss;
    ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
    Util::status(ss.str());
+
+   init();
 }
 
 std::vector<int> ParameterFileText::getTimes() const {

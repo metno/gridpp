@@ -11,8 +11,27 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       mFilename(""),
       mIsTimeDependent(false),
       mMaxTime(0),
-      mIsNew(iIsNew) {
+      mIsNew(iIsNew),
+      mNearestNeighbourTree(NULL) {
    iOptions.getValue("file", mFilename);
+}
+ParameterFile::~ParameterFile() {
+   delete mNearestNeighbourTree;
+}
+
+void ParameterFile::init() {
+   vec2 lats, lons;
+   LocationParameters::const_iterator it = mParameters.begin();
+   for(it = mParameters.begin(); it != mParameters.end(); it++) {
+      const Location loc = it->first;
+      std::vector<float> lat(1, loc.lat());
+      std::vector<float> lon(1, loc.lon());
+      lats.push_back(lat);
+      lons.push_back(lon);
+      mLocations.push_back(loc);
+   }
+   mNearestNeighbourTree = new KDTree();
+   mNearestNeighbourTree->buildTree(lats, lons);
 }
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {
@@ -111,32 +130,44 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
       iNearestLocation = it->first;
    }
    else {
-      LocationParameters::const_iterator it = mParameters.find(iLocation);
       // Nearest neighbour
       // TODO
-      if(it == mParameters.end() || it->second.size() <= iTime || it->second[iTime].size() == 0) {
-         LocationParameters::const_iterator it;
-         float minDist = Util::MV;
-         for(it = mParameters.begin(); it != mParameters.end(); it++) {
-            const Location& currLoc = it->first;
-            float dist = iLocation.getDistance(currLoc);
-            if(!Util::isValid(minDist) || (Util::isValid(dist) && dist < minDist)) {
-               // Check that this location actually has parameters available for this time
-               bool hasAtThisTime = it->second.size() > iTime && it->second[iTime].size() != 0;
-               if(hasAtThisTime) {
-                  minDist = dist;
-                  iNearestLocation = it->first;
-               }
-            }
-         }
-         if(!Util::isValid(minDist)) {
-            return false;
-         }
-         else {
-         }
+      int I, J;
+      mNearestNeighbourTree->getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
+      const Location& loc = mLocations[I];
+      LocationParameters::const_iterator it2 = mParameters.find(loc);
+      bool hasAtThisTime = it2->second.size() > iTime && it2->second[iTime].size() != 0;
+      if(hasAtThisTime) {
+         iNearestLocation = loc;
+         return true;
       }
       else {
-         iNearestLocation = it->first;
+         std::cout << "Nearest neighbour has no data" << std::endl;
+         LocationParameters::const_iterator it = mParameters.find(iLocation);
+         if(it == mParameters.end() || it->second.size() <= iTime || it->second[iTime].size() == 0) {
+            LocationParameters::const_iterator it;
+            float minDist = Util::MV;
+            for(it = mParameters.begin(); it != mParameters.end(); it++) {
+               const Location& currLoc = it->first;
+               float dist = iLocation.getDistance(currLoc);
+               if(!Util::isValid(minDist) || (Util::isValid(dist) && dist < minDist)) {
+                  // Check that this location actually has parameters available for this time
+                  bool hasAtThisTime = it->second.size() > iTime && it->second[iTime].size() != 0;
+                  if(hasAtThisTime) {
+                     minDist = dist;
+                     iNearestLocation = it->first;
+                  }
+               }
+            }
+            if(!Util::isValid(minDist)) {
+               return false;
+            }
+            else {
+            }
+         }
+         else {
+            iNearestLocation = it->first;
+         }
       }
    }
    return true;

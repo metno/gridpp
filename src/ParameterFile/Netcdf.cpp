@@ -172,6 +172,8 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    delete[] times;
 
    endDefineMode();
+
+   init();
 }
 
 ParameterFileNetcdf::~ParameterFileNetcdf() {

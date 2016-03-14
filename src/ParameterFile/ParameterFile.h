@@ -6,6 +6,7 @@
 #include "../Location.h"
 #include "../Options.h"
 #include "../Scheme.h"
+#include "../KDTree.h"
 
 //! Represents a collection of parameters, one set for each location and forecast time
 //! Parameters can be missing for some locations/times
@@ -15,6 +16,11 @@
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
+      ~ParameterFile();
+
+      // Creates a tree of locations to aid in finding the nearest neighbour
+      // Must be called by the constructor of the inheriting classes
+      void init();
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
@@ -66,6 +72,8 @@ class ParameterFile : public Scheme {
    private:
       bool mIsTimeDependent;
       int mMaxTime;
+      mutable KDTree *mNearestNeighbourTree;
+      mutable std::vector<Location> mLocations;
 };
 #include "MetnoKalman.h"
 #include "Text.h"

@@ -1,4 +1,6 @@
 #include "KDTree.h"
+KDTree::KDTree() : root(NULL) {
+}
 
 void KDTree::buildTree(const vec2& iLats, const vec2& iLons) {
 
@@ -171,3 +173,9 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
    }
 }
 
+void KDTree::getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const {
+   const TreeNode * nearest = nearestNeighbour(root, iLon, iLat);
+   iI = nearest->ipos;
+   iJ = nearest->jpos;
+   return;
+}

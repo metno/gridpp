@@ -51,12 +51,13 @@ class KDTree {
                        unode& root);
 
 public:
-   KDTree(): root(NULL) {}
+   KDTree();
    //KDTree(const KDTree &) = delete;
    //KDTree& operator=(const KDTree &) = delete;
 
-   void buildTree(const vec2& iLats, const vec2& iLons);
    void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
+   void getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const;
+   void buildTree(const vec2& iLats, const vec2& iLons);
 
    friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
    friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);

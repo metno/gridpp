@@ -137,8 +137,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
       }
    }
 
-   KDTree searchTree;
-   searchTree.buildTree(iFrom.getLats(), iFrom.getLons());
+   KDTree searchTree(iFrom.getLats(), iFrom.getLons());
    searchTree.getNearestNeighbour(iTo, iI, iJ);
 
    addToCache(iFrom, iTo, iI, iJ);

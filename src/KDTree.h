@@ -7,60 +7,59 @@
 typedef std::vector<std::vector<int> > vec2Int;
 
 class KDTree {
-   struct TreeNode {
-      bool xsection;
-      float lon;
-      float lat;
-      size_t ipos;
-      size_t jpos;
+   public:
+      KDTree(const vec2& iLats, const vec2& iLons);
 
-      boost::scoped_ptr<TreeNode> left;
-      boost::scoped_ptr<TreeNode> right;
+      void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
+      // I,J: The indices into the lat/lon grid with the nearest neighbour
+      void getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const;
 
-      const TreeNode* parent;
+   private:
+      struct TreeNode {
+         bool xsection;
+         float lon;
+         float lat;
+         size_t ipos;
+         size_t jpos;
 
-      TreeNode(): xsection(false), left(NULL), right(NULL), parent(NULL) {}
-   };
+         boost::scoped_ptr<TreeNode> left;
+         boost::scoped_ptr<TreeNode> right;
 
-   struct Indexed {
-      float lon;
-      float lat;
-      size_t index1;
-      size_t index2;
+         const TreeNode* parent;
 
-      Indexed() {}
-      Indexed(const float lon_,
-              const float lat_,
-              const size_t index1_,
-              const size_t index2_):
-         lon(lon_), lat(lat_), index1(index1_), index2(index2_) {}
-   };
+         TreeNode(): xsection(false), left(NULL), right(NULL), parent(NULL) {}
+      };
 
-   typedef boost::scoped_ptr<TreeNode> unode;
-   typedef std::vector<Indexed> indexdVec;
+      struct Indexed {
+         float lon;
+         float lat;
+         size_t index1;
+         size_t index2;
 
-   unode root;
+         Indexed() {}
+         Indexed(const float lon_,
+                 const float lat_,
+                 const size_t index1_,
+                 const size_t index2_):
+            lon(lon_), lat(lat_), index1(index1_), index2(index2_) {}
+      };
 
-   static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
-   static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);
-   static void subTree(indexdVec& iLonLat,
-                       const size_t from,
-                       const size_t to,
-                       const bool xsection,
-                       const TreeNode* parent,
-                       unode& root);
+      friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
+      friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
+      typedef boost::scoped_ptr<TreeNode> unode;
+      typedef std::vector<Indexed> indexdVec;
 
-public:
-   KDTree();
-   //KDTree(const KDTree &) = delete;
-   //KDTree& operator=(const KDTree &) = delete;
+      unode root;
 
-   void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
-   void getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const;
-   void buildTree(const vec2& iLats, const vec2& iLons);
+      static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
+      static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);
+      static void subTree(indexdVec& iLonLat,
+                          const size_t from,
+                          const size_t to,
+                          const bool xsection,
+                          const TreeNode* parent,
+                          unode& root);
 
-   friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
-   friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
 };
 
 #endif

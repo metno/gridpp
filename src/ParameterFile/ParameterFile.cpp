@@ -30,8 +30,7 @@ void ParameterFile::init() {
       lons.push_back(lon);
       mLocations.push_back(loc);
    }
-   mNearestNeighbourTree = new KDTree();
-   mNearestNeighbourTree->buildTree(lats, lons);
+   mNearestNeighbourTree = new KDTree(lats, lons);
 }
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {

@@ -1,11 +1,15 @@
 #include "KDTree.h"
-KDTree::KDTree() : root(NULL) {
-}
+KDTree::KDTree(const vec2& iLats, const vec2& iLons) : root(NULL) {
+   if(iLats.size() != iLons.size())
+      Util::error("Cannot initialize KDTree, lats and lons not the same size");
 
-void KDTree::buildTree(const vec2& iLats, const vec2& iLons) {
+   size_t nLat = iLats.size();
+   if(nLat == 0)
+      Util::error("Cannot initialize KDTree, no valid locations");
 
    size_t nLon = iLats[0].size();
-   size_t nLat = iLats.size();
+   if(nLon == 0)
+      Util::error("Cannot initialize KDTree, no valid locations");
 
    indexdVec lons(nLon*nLat);
 
@@ -20,6 +24,9 @@ void KDTree::buildTree(const vec2& iLats, const vec2& iLons) {
      }
    }
 
+   if(to == -1) {
+      Util::error("Cannot initialize KDTree, no valid locations");
+   }
    if(to >= 0) subTree(lons, 0, to, true, NULL, root);
 }
 

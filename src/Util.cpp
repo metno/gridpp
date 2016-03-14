@@ -36,6 +36,7 @@ float Util::pi  = 3.14159265;
 double Util::radiusEarth = 6.378137e6;
 
 void Util::error(std::string iMessage) {
+#ifdef DEBUG
    if(mShowError) {
       std::cout << "Error: " << iMessage << std::endl;
       void *array[10];
@@ -43,8 +44,11 @@ void Util::error(std::string iMessage) {
       std::cout << "Stack trace:" << std::endl;
       backtrace_symbols_fd(array, size, 2);
    }
-#ifdef DEBUG
    __gcov_flush();
+#else
+   if(mShowError) {
+      std::cout << "Error: " << iMessage << std::endl;
+   }
 #endif
    abort();
 }

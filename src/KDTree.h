@@ -49,7 +49,7 @@ class KDTree {
       typedef boost::scoped_ptr<TreeNode> unode;
       typedef std::vector<Indexed> indexdVec;
 
-      unode root;
+      unode mRoot;
 
       static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
       static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);

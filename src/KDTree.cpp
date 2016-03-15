@@ -1,5 +1,5 @@
 #include "KDTree.h"
-KDTree::KDTree(const vec2& iLats, const vec2& iLons) : root(NULL) {
+KDTree::KDTree(const vec2& iLats, const vec2& iLons) : mRoot(NULL) {
    if(iLats.size() != iLons.size())
       Util::error("Cannot initialize KDTree, lats and lons not the same size");
 
@@ -27,7 +27,7 @@ KDTree::KDTree(const vec2& iLats, const vec2& iLons) : root(NULL) {
    if(to == -1) {
       Util::error("Cannot initialize KDTree, no valid locations");
    }
-   if(to >= 0) subTree(lons, 0, to, true, NULL, root);
+   if(to >= 0) subTree(lons, 0, to, true, NULL, mRoot);
 }
 
 bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r){ return (l.lon < r.lon); }
@@ -155,7 +155,7 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
    iI.resize(nLat);
    iJ.resize(nLat);
 
-   if(!root) {
+   if(!mRoot) {
       for(size_t i = 0; i < nLat; ++i) {
          iI[i].resize(nLon, Util::MV);
          iJ[i].resize(nLon, Util::MV);
@@ -172,7 +172,7 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
       for(size_t j = 0; j < nLon; ++j) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
             // Find the nearest neighbour from input grid (ii, jj)
-               nearest = nearestNeighbour(root, olons[i][j], olats[i][j]);
+               nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
                iI[i][j] = nearest->ipos;
                iJ[i][j] = nearest->jpos;
          }
@@ -181,7 +181,7 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
 }
 
 void KDTree::getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const {
-   const TreeNode * nearest = nearestNeighbour(root, iLon, iLat);
+   const TreeNode * nearest = nearestNeighbour(mRoot, iLon, iLat);
    iI = nearest->ipos;
    iJ = nearest->jpos;
    return;

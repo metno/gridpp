@@ -12,27 +12,11 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       mIsTimeDependent(false),
       mMaxTime(0),
       mIsNew(iIsNew),
-      mNearestNeighbourTree(NULL) {
+      mNearestNeighbourTree(new KDTree()) {
    iOptions.getValue("file", mFilename);
-}
-ParameterFile::~ParameterFile() {
-   if(mNearestNeighbourTree != NULL) {
-      std::cout << "Deleting tree" << std::endl;
-      delete mNearestNeighbourTree;
-   }
-}
-
-ParameterFile& ParameterFile::operator=(const ParameterFile& other) {
-   if(&other == this)
-      return *this;
-   this->mNearestNeighbourTree = NULL;
-   this->recomputeTree();
-   return *this;
 }
 
 void ParameterFile::recomputeTree() const {
-   if(mNearestNeighbourTree != NULL)
-      delete mNearestNeighbourTree;
    vec2 lats, lons;
    LocationParameters::const_iterator it = mParameters.begin();
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
@@ -43,7 +27,7 @@ void ParameterFile::recomputeTree() const {
       lons.push_back(lon);
       mLocations.push_back(loc);
    }
-   mNearestNeighbourTree = new KDTree(lats, lons);
+   mNearestNeighbourTree->build(lats, lons);
 }
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {

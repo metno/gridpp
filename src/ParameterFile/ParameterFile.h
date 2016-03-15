@@ -16,8 +16,6 @@
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
-      virtual ~ParameterFile();
-      ParameterFile& operator=(const ParameterFile& other);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
@@ -74,10 +72,8 @@ class ParameterFile : public Scheme {
 
       // Storing nearest neighbour information. Create a tree with the locations so that lookup for
       // a location is fast. However, every time a new location is added to mParameters, the tree
-      // must be recomputed, but to save time this should only be done the next time
-      // getNearestNeighbour or getLocations is called. Therefore, keep track of this using
-      // mRecomputeTree, which will be true if a recomputation is needed.
-      mutable KDTree *mNearestNeighbourTree;
+      // must be recomputed.
+      mutable boost::shared_ptr<KDTree> mNearestNeighbourTree;
       // Locations in the tree
       mutable std::vector<Location> mLocations;
 };

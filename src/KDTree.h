@@ -8,6 +8,8 @@ typedef std::vector<std::vector<int> > vec2Int;
 
 class KDTree {
    public:
+      KDTree();
+      void build(const vec2& iLats, const vec2& iLons);
       KDTree(const vec2& iLats, const vec2& iLons);
 
       void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;

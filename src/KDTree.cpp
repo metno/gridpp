@@ -1,5 +1,12 @@
 #include "KDTree.h"
-KDTree::KDTree(const vec2& iLats, const vec2& iLons) : mRoot(NULL) {
+KDTree::KDTree() : mRoot(NULL) {
+}
+
+KDTree::KDTree(const vec2& iLats, const vec2& iLons) {
+   build(iLats, iLons);
+}
+
+void KDTree::build(const vec2& iLats, const vec2& iLons) {
    if(iLats.size() != iLons.size())
       Util::error("Cannot initialize KDTree, lats and lons not the same size");
 

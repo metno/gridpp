@@ -16,8 +16,28 @@ namespace {
          virtual void TearDown() {
          }
    };
-   TEST_F(TestCalibratorAltitude, 10x10) {
+   TEST_F(TestCalibratorAltitude, arome) {
       FileArome from("testing/files/10x10.nc");
+      ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
+      CalibratorAltitude cal = CalibratorAltitude(Options());
+
+      cal.calibrate(from, &par);
+
+      // Elevations should all be 0
+      vec2 elevs = from.getElevs();
+      for(int i = 0; i < from.getNumLat(); i++) {
+         for(int j = 0; j < from.getNumLon(); j++) {
+            EXPECT_FLOAT_EQ(0, elevs[i][j]);
+         }
+      }
+      // Shouldn't have changed anything else
+      FieldPtr after = from.getField(Variable::T, 0);
+      EXPECT_FLOAT_EQ(301, (*after)(5,2,0));
+      EXPECT_FLOAT_EQ(304, (*after)(5,9,0));
+      EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
+   }
+   TEST_F(TestCalibratorAltitude, ec) {
+      FileEc from("testing/files/10x10_ec.nc");
       ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
       CalibratorAltitude cal = CalibratorAltitude(Options());
 

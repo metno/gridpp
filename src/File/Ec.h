@@ -29,6 +29,7 @@ class FileEc : public FileNetcdf {
 
       std::vector<int> mTimes;
       vec2 getGridValues(int iVariable) const;
+      void writeAltitude() const;
       int getLatDim() const;
       int getLonDim() const;
       int getLatVar() const;

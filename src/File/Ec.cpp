@@ -151,6 +151,7 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
 
    writeTimes();
    writeReferenceTime();
+   writeAltitude();
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -389,4 +390,58 @@ std::string FileEc::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=ec", "ECMWF ensemble file") << std::endl;
    return ss.str();
+}
+
+void FileEc::writeAltitude() const {
+   if(!hasVar("altitude")) {
+      return;
+   }
+   int vElev = getVar("altitude");
+   int numDims = getNumDims(vElev);
+   if(numDims == 1) {
+      Util::error("Cannot write altitude when the variable only has one dimension");
+   }
+
+   int N = getNumDims(vElev);
+   long count[N];
+   int size = 1;
+   int indexLat = Util::MV;
+   int indexLon = Util::MV;
+   int dims[N];
+   nc_inq_vardimid(mFile, vElev, dims);
+   for(int i = 0; i < N; i++) {
+      if(dims[i] == getLatDim()) {
+         count[i] = getNumLat();
+         size *= count[i];
+         indexLat = i;
+      }
+      else if(dims[i] == getLonDim()) {
+         count[i] = getNumLon();
+         size *= count[i];
+         indexLon = i;
+      }
+      else {
+         count[i] = 1;
+      }
+   }
+   float MV = getMissingValue(vElev);
+   float* values = new float[size];
+   vec2 elevs = getElevs();
+   for(int i = 0; i < getNumLat(); i++) {
+      for(int j = 0; j < getNumLon(); j++) {
+         float elev = elevs[i][j];
+         if(Util::isValid(MV) && !Util::isValid(elev))
+            elev = MV;
+         // Latitude dimension is ordered first
+         if(indexLat < indexLon) {
+            values[i*getNumLon() + j] = elev;
+         }
+         // Longitude dimension is ordered first
+         else {
+            values[j*getNumLat() + i] = elev;
+         }
+      }
+   }
+   nc_put_var_float(mFile, vElev, values);
+   delete[] values;
 }

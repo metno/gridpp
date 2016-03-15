@@ -88,9 +88,9 @@ namespace {
       EXPECT_DEATH(ParameterFileMetnoKalman(Options("testing/files/kalman98yewd98ywe89.txt")), ".*");
    }
    TEST(ParameterFileMetnoKalman, emptyFile) {
-      ParameterFileMetnoKalman file(Options("file=testing/files/kalmanEmpty.txt"));
-      std::vector<Location> locations = file.getLocations();
-      EXPECT_EQ(0, locations.size());
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(ParameterFileMetnoKalman(Options("file=testing/files/kalmanEmpty.txt")), ".*");
    }
    TEST(ParameterFileMetnoKalman, description) {
       ParameterFileMetnoKalman::description();

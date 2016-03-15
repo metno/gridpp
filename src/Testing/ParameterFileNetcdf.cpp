@@ -63,6 +63,7 @@ namespace {
          file.setParameters(createParameters(1,2,3), 0, Location(3,2,5));
          file.setParameters(createParameters(4,5,6), 1, Location(3,2,5));
          file.setParameters(createParameters(7,8,9), 1, Location(1,9,2));
+         file.recomputeTree();
          file.write();
       }
 

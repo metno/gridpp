@@ -7,9 +7,10 @@
 #include <fstream>
 
 ParameterFileSimple::ParameterFileSimple(Parameters iParameters) : ParameterFile(Options()) {
-   Location defaultLocation(Util::MV, Util::MV, Util::MV);
+   Location defaultLocation(0,0,0);
    setParameters(iParameters, 0, defaultLocation);
-   init();
+
+   recomputeTree();
 }
 
 std::vector<int> ParameterFileSimple::getTimes() const {

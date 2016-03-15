@@ -16,10 +16,23 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
    iOptions.getValue("file", mFilename);
 }
 ParameterFile::~ParameterFile() {
-   delete mNearestNeighbourTree;
+   if(mNearestNeighbourTree != NULL) {
+      std::cout << "Deleting tree" << std::endl;
+      delete mNearestNeighbourTree;
+   }
 }
 
-void ParameterFile::init() {
+ParameterFile& ParameterFile::operator=(const ParameterFile& other) {
+   if(&other == this)
+      return *this;
+   this->mNearestNeighbourTree = NULL;
+   this->recomputeTree();
+   return *this;
+}
+
+void ParameterFile::recomputeTree() const {
+   if(mNearestNeighbourTree != NULL)
+      delete mNearestNeighbourTree;
    vec2 lats, lons;
    LocationParameters::const_iterator it = mParameters.begin();
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
@@ -130,7 +143,6 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
    }
    else {
       // Nearest neighbour
-      // TODO
       int I, J;
       mNearestNeighbourTree->getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
       const Location& loc = mLocations[I];
@@ -141,7 +153,6 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
          return true;
       }
       else {
-         std::cout << "Nearest neighbour has no data" << std::endl;
          LocationParameters::const_iterator it = mParameters.find(iLocation);
          if(it == mParameters.end() || it->second.size() <= iTime || it->second[iTime].size() == 0) {
             LocationParameters::const_iterator it;
@@ -182,7 +193,7 @@ void ParameterFile::setParameters(Parameters iParameters, int iTime, const Locat
    mMaxTime = std::max(mMaxTime, iTime);
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
-   setParameters(iParameters, iTime, Location(Util::MV, Util::MV, Util::MV));
+   setParameters(iParameters, iTime, Location(0,0,0));
 }
 
 std::string ParameterFile::getFilename() const {
@@ -190,12 +201,7 @@ std::string ParameterFile::getFilename() const {
 }
 
 std::vector<Location> ParameterFile::getLocations() const {
-   std::vector<Location> locations;
-   LocationParameters::const_iterator it;
-   for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      locations.push_back(it->first);
-   }
-   return locations;
+   return mLocations;
 }
 
 std::vector<int> ParameterFile::getTimes() const {

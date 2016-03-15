@@ -70,6 +70,7 @@ namespace {
       p->setParameters(createParameters(4,5,6),    3, Location(0,0,0));
       p->setParameters(createParameters(7,8,9),    2, Location(1,0,0));
       p->setParameters(createParameters(10,11,12), 3, Location(1,0,0));
+      p->recomputeTree();
       // Location 0,0,0 for time 0
       par = p->getParameters(0, loc);
       ASSERT_EQ(3, par.size());
@@ -101,6 +102,7 @@ namespace {
       Parameters par;
       p->setParameters(createParameters(1,2,3),    0, Location(0,0,0));
       p->setParameters(createParameters(7,8,9),    0, Location(1,0,0));
+      p->recomputeTree();
       // Same parameters regardless of time
       // Time 0
       par = p->getParameters(0, Location(0,0,0));
@@ -151,6 +153,7 @@ namespace {
       ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));
       Location loc = Location(0,0,0);
       p->setParameters(createParameters(1,2,3), 0);
+      p->recomputeTree();
 
       // Same parameters regardless of time and location
       Parameters par = p->getParameters(0);

@@ -173,7 +173,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
    endDefineMode();
 
-   init();
+   recomputeTree();
 }
 
 ParameterFileNetcdf::~ParameterFileNetcdf() {

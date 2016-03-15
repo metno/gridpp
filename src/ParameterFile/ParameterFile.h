@@ -16,11 +16,8 @@
 class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
-      ~ParameterFile();
-
-      // Creates a tree of locations to aid in finding the nearest neighbour
-      // Must be called by the constructor of the inheriting classes
-      void init();
+      virtual ~ParameterFile();
+      ParameterFile& operator=(const ParameterFile& other);
 
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
@@ -44,6 +41,8 @@ class ParameterFile : public Scheme {
       //! Set the parameter valid for specified time
       void setParameters(Parameters iParameters, int iTime, const Location& iLocation);
       void setParameters(Parameters iParameters, int iTime);
+      //! After all parameters have been set, this function must be called
+      void recomputeTree() const;
 
       std::vector<Location> getLocations() const;
       virtual std::vector<int> getTimes() const;
@@ -72,7 +71,14 @@ class ParameterFile : public Scheme {
    private:
       bool mIsTimeDependent;
       int mMaxTime;
+
+      // Storing nearest neighbour information. Create a tree with the locations so that lookup for
+      // a location is fast. However, every time a new location is added to mParameters, the tree
+      // must be recomputed, but to save time this should only be done the next time
+      // getNearestNeighbour or getLocations is called. Therefore, keep track of this using
+      // mRecomputeTree, which will be true if a recomputation is needed.
       mutable KDTree *mNearestNeighbourTree;
+      // Locations in the tree
       mutable std::vector<Location> mLocations;
 };
 #include "MetnoKalman.h"

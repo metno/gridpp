@@ -1,3 +1,10 @@
+gridpp (0.2.2) precise; urgency=low
+
+  * Calibration faster when parameter grid is different than output grid
+  * -c altitude works for Ec file type
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Tue, 15 Mar 2016 14:33:43 +0100
+
 gridpp (0.2.1) precise; urgency=low
 
   * Gridded parameter estimation (gridpp_train)

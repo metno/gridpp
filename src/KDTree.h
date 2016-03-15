@@ -11,6 +11,8 @@ class KDTree {
       KDTree();
       void build(const vec2& iLats, const vec2& iLons);
       KDTree(const vec2& iLats, const vec2& iLons);
+      KDTree& operator=(const KDTree& other);
+      KDTree(const KDTree& other);
 
       void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
       // I,J: The indices into the lat/lon grid with the nearest neighbour
@@ -46,12 +48,15 @@ class KDTree {
             lon(lon_), lat(lat_), index1(index1_), index2(index2_) {}
       };
 
+      typedef boost::scoped_ptr<TreeNode> unode;
+      unode mRoot;
+      vec2 mLats;
+      vec2 mLons;
+
       friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
       friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
-      typedef boost::scoped_ptr<TreeNode> unode;
       typedef std::vector<Indexed> indexdVec;
 
-      unode mRoot;
 
       static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
       static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);

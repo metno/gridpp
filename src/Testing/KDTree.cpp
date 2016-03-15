@@ -93,6 +93,43 @@ namespace {
       EXPECT_EQ(0, I);
       EXPECT_EQ(3, J);
    }
+   TEST_F(KDTreeTest, assignmentOperator) {
+      vec2 lats, lons;
+      std::vector<float> lat(1,3), lon(1,2);
+      lats.push_back(lat);
+      lons.push_back(lon);
+      KDTree tree(lats, lons);
+      int I, J;
+      tree.getNearestNeighbour(3,2, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+      tree.getNearestNeighbour(2,1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+
+      tree = KDTree(lats, lons);
+      tree.getNearestNeighbour(3,2, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+      tree.getNearestNeighbour(2,1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+   }
+   TEST_F(KDTreeTest, copyConstructor) {
+      int I, J;
+      vec2 lats, lons;
+      std::vector<float> lat(1,3), lon(1,2);
+      lats.push_back(lat);
+      lons.push_back(lon);
+      KDTree tree(lats, lons);
+      KDTree other = tree;
+      tree.getNearestNeighbour(2,1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+      other.getNearestNeighbour(2,1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

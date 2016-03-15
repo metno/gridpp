@@ -6,7 +6,24 @@ KDTree::KDTree(const vec2& iLats, const vec2& iLons) {
    build(iLats, iLons);
 }
 
+KDTree& KDTree::operator=(const KDTree& other) {
+   if(this == &other)
+      return *this;
+   mLats = other.mLats;
+   mLons = other.mLons;
+   build(mLats, mLons);
+   return *this;
+}
+
+KDTree::KDTree(const KDTree& other) {
+   mLats = other.mLats;
+   mLons = other.mLons;
+   build(mLats, mLons);
+}
+
 void KDTree::build(const vec2& iLats, const vec2& iLons) {
+   mLats = iLats;
+   mLons = iLons;
    if(iLats.size() != iLons.size())
       Util::error("Cannot initialize KDTree, lats and lons not the same size");
 

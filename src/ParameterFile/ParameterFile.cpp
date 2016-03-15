@@ -11,8 +11,7 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       mFilename(""),
       mIsTimeDependent(false),
       mMaxTime(0),
-      mIsNew(iIsNew),
-      mNearestNeighbourTree(new KDTree()) {
+      mIsNew(iIsNew) {
    iOptions.getValue("file", mFilename);
 }
 
@@ -27,7 +26,7 @@ void ParameterFile::recomputeTree() const {
       lons.push_back(lon);
       mLocations.push_back(loc);
    }
-   mNearestNeighbourTree->build(lats, lons);
+   mNearestNeighbourTree.build(lats, lons);
 }
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {
@@ -128,7 +127,7 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
    else {
       // Nearest neighbour
       int I, J;
-      mNearestNeighbourTree->getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
+      mNearestNeighbourTree.getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
       const Location& loc = mLocations[I];
       LocationParameters::const_iterator it2 = mParameters.find(loc);
       bool hasAtThisTime = it2->second.size() > iTime && it2->second[iTime].size() != 0;

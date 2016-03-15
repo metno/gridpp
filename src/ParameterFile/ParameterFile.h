@@ -73,7 +73,7 @@ class ParameterFile : public Scheme {
       // Storing nearest neighbour information. Create a tree with the locations so that lookup for
       // a location is fast. However, every time a new location is added to mParameters, the tree
       // must be recomputed.
-      mutable boost::shared_ptr<KDTree> mNearestNeighbourTree;
+      mutable KDTree mNearestNeighbourTree;
       // Locations in the tree
       mutable std::vector<Location> mLocations;
 };

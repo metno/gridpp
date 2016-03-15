@@ -6,6 +6,7 @@
 #include "../Location.h"
 #include "../Options.h"
 #include "../Scheme.h"
+#include "../KDTree.h"
 
 //! Represents a collection of parameters, one set for each location and forecast time
 //! Parameters can be missing for some locations/times
@@ -38,6 +39,8 @@ class ParameterFile : public Scheme {
       //! Set the parameter valid for specified time
       void setParameters(Parameters iParameters, int iTime, const Location& iLocation);
       void setParameters(Parameters iParameters, int iTime);
+      //! After all parameters have been set, this function must be called
+      void recomputeTree() const;
 
       std::vector<Location> getLocations() const;
       virtual std::vector<int> getTimes() const;
@@ -66,6 +69,13 @@ class ParameterFile : public Scheme {
    private:
       bool mIsTimeDependent;
       int mMaxTime;
+
+      // Storing nearest neighbour information. Create a tree with the locations so that lookup for
+      // a location is fast. However, every time a new location is added to mParameters, the tree
+      // must be recomputed.
+      mutable KDTree mNearestNeighbourTree;
+      // Locations in the tree
+      mutable std::vector<Location> mLocations;
 };
 #include "MetnoKalman.h"
 #include "Text.h"

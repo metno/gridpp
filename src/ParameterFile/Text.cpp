@@ -33,7 +33,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
          }
          times.insert(time);
 
-         Location location(Util::MV, Util::MV, Util::MV);
+         Location location(0,0,0);
          if(mIsSpatial) {
             float lat;
             status = ss >> lat;
@@ -83,6 +83,8 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    std::stringstream ss;
    ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
    Util::status(ss.str());
+
+   recomputeTree();
 }
 
 std::vector<int> ParameterFileText::getTimes() const {

@@ -237,13 +237,13 @@ namespace {
    // Missing variable
    TEST_F(TestCalibrator, factoryInvalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
       ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
+      parFile = ParameterFile::getScheme("text", Options("file=testing/files/regression1order.txt"));
+      Util::setShowError(false);
       EXPECT_DEATH(Calibrator::getScheme("zaga", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("cloud", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("neighbourhood", Options("radius=-2")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
-      parFile = ParameterFile::getScheme("text", Options("file=testing/files/regression1order.txt"));
       EXPECT_DEATH(Calibrator::getScheme("regression", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("qc", Options("")), ".*");
       EXPECT_DEATH(Calibrator::getScheme("diagnose", Options("")), ".*");

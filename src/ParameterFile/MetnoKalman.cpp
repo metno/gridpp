@@ -102,6 +102,8 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions, bool
       }
    }
    ifs.close();
+
+   recomputeTree();
 }
 
 std::vector<int> ParameterFileMetnoKalman::getTimes() const {

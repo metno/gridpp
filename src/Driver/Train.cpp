@@ -8,7 +8,6 @@
 #include "../Util.h"
 #include "../Options.h"
 #include "../SetupTrain.h"
-#include "../TrainingData.h"
 void writeUsage() {
    std::cout << "Trains a calibration method in gridpp using observations and forecast files. The resulting parameter file is on the same grid as the forecasts and observations will be interpolated to the forecast grid using nearest neighbour." << std::endl;
    std::cout << std::endl;

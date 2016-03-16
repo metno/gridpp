@@ -6,7 +6,6 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-#include "../TrainingData.h"
 CalibratorZaga::CalibratorZaga(Variable::Type iMainPredictor, const Options& iOptions):
       Calibrator(iOptions),
       mMainPredictor(iMainPredictor),

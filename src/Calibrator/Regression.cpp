@@ -4,7 +4,6 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-#include "../TrainingData.h"
 CalibratorRegression::CalibratorRegression(Variable::Type iVariable, const Options& iOptions) :
       Calibrator(iOptions),
       mVariable(iVariable),

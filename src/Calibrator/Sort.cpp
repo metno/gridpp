@@ -4,7 +4,6 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-#include "../TrainingData.h"
 CalibratorSort::CalibratorSort(Variable::Type iVariable, const Options& iOptions) :
       Calibrator(iOptions),
       mVariable(iVariable) {

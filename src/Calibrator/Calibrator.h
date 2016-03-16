@@ -4,7 +4,6 @@
 #include <vector>
 #include "../Scheme.h"
 #include "../Parameters.h"
-#include "../TrainingData.h"
 
 typedef std::vector<float> Ens;
 typedef std::pair<float,Ens> ObsEns;

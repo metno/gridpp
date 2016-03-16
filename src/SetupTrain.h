@@ -7,7 +7,6 @@
 class Calibrator;
 class Downscaler;
 class ParameterFile;
-class TrainingData;
 class File;
 
 //! Represents what post-processing method should be trained. Includes which data file to

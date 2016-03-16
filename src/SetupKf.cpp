@@ -2,7 +2,6 @@
 #include "File/File.h"
 #include "Calibrator/Calibrator.h"
 #include "Downscaler/Downscaler.h"
-#include "TrainingData.h"
 
 SetupKf::SetupKf(const std::vector<std::string>& argv) {
 

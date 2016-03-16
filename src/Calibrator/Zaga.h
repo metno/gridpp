@@ -7,7 +7,6 @@
 
 class ParameterFile;
 class Parameters;
-class TrainingData;
 
 //! Ensemble calibration using zero-adjusted gamma distribution. Its predictors are:
 //! - ensemble mean

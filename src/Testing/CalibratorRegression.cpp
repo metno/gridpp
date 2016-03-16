@@ -101,8 +101,20 @@ namespace {
       // R code:
       // data = data.frame(x=c(4,5,9),y=c(3.2,5,14))
       FileArome from("testing/files/10x10.nc");
-      TrainingData data("testing/files/trainingDataTemperature.txt");
-      std::vector<ObsEns> obsens = data.getData(0);
+      std::vector<ObsEns> obsens;
+      Ens ens(3,0);
+      ens[0] = 4;
+      ens[1] = 4;
+      ens[2] = 4;
+      obsens.push_back(ObsEns(3.2, ens));
+      ens[0] = 6;
+      ens[1] = 5;
+      ens[2] = 4;
+      obsens.push_back(ObsEns(5, ens));
+      ens[0] = 9;
+      ens[1] = 8;
+      ens[2] = 10;
+      obsens.push_back(ObsEns(14, ens));
 
       // glm(y ~ x)$coefficients
       CalibratorRegression cal = CalibratorRegression(Variable::T, Options("order=1"));

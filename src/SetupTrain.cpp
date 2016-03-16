@@ -2,7 +2,6 @@
 #include "File/File.h"
 #include "Calibrator/Calibrator.h"
 #include "Downscaler/Downscaler.h"
-#include "TrainingData.h"
 
 SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
 

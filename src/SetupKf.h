@@ -7,7 +7,6 @@
 class Calibrator;
 class Downscaler;
 class ParameterFile;
-class TrainingData;
 class File;
 
 //! Represents how the Kalman filter should be run. Includes which data file to

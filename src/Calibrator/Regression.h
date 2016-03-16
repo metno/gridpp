@@ -3,7 +3,6 @@
 #include "Calibrator.h"
 class ParameterFile;
 class Parameters;
-class TrainingData;
 
 //! Applies polynomial regression to forecasts
 class CalibratorRegression : public Calibrator {

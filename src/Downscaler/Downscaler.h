@@ -35,6 +35,9 @@ class Downscaler : public Scheme {
       static void getNearestNeighbourBruteForce(const File& iFrom, float iLon, float iLat, int& iI, int &iJ);
 
       static std::string getDescriptions();
+
+      //! Clears nearest neighbour cache
+      static void clearCache();
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
       Variable::Type mVariable;

@@ -72,6 +72,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::clearCache();
       Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
@@ -100,6 +101,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::clearCache();
       Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
@@ -126,6 +128,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::clearCache();
       Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
@@ -150,6 +153,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::clearCache();
       Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
@@ -173,6 +177,7 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
+      Downscaler::clearCache();
       Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
@@ -194,7 +199,8 @@ namespace {
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::getNearestNeighbour(from, to, If, Jf);
+      Downscaler::clearCache();
+      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
       EXPECT_EQ(I, If);
       EXPECT_EQ(J, Jf);
 

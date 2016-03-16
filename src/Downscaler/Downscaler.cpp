@@ -200,3 +200,7 @@ std::string Downscaler::getDescriptions() {
    ss << DownscalerBypass::description();
    return ss.str();
 }
+
+void Downscaler::clearCache() {
+   mNeighbourCache.clear();
+}

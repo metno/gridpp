@@ -261,6 +261,8 @@ int main(int argc, const char *argv[]) {
       double time1 = Util::clock();
       std::cout << "   Time: " << time1 - time0 << " seconds" << std::endl;
    }
+   std::cout << "Recomputing nearest neighbour tree" << std::endl;
+   setup.output->recomputeTree();
 
    std::cout << "Writing to parameter file" << std::endl;
    setup.output->write();

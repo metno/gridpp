@@ -49,7 +49,7 @@ ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptio
 Parameters ParameterFile::getParameters(int iTime) const {
    if(iTime < 0) {
       std::stringstream ss;
-      ss << "Could not load parameters for time " << time;
+      ss << "Could not load parameters for time " << iTime;
       Util::error(ss.str());
    }
 
@@ -84,7 +84,7 @@ Parameters ParameterFile::getParameters(int iTime) const {
 Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour) const {
    if(iTime < 0) {
       std::stringstream ss;
-      ss << "Could not load parameters for time " << time;
+      ss << "Could not load parameters for time " << iTime;
       Util::error(ss.str());
    }
 
@@ -110,6 +110,9 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bo
 
    // Find the right time to use
    LocationParameters::const_iterator it = mParameters.find(loc);
+   if(it == mParameters.end())
+      return Parameters();
+
    const std::vector<Parameters>& timeParameters = it->second;
    if(timeParameters.size() > time)
       return timeParameters[time];
@@ -125,14 +128,18 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
       iNearestLocation = it->first;
    }
    else {
-      // Nearest neighbour
-      int I, J;
-      mNearestNeighbourTree.getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
-      const Location& loc = mLocations[I];
-      LocationParameters::const_iterator it2 = mParameters.find(loc);
+      // Try to see if we have an exact location
+      LocationParameters::const_iterator it2 = mParameters.find(iLocation);
+      if(it2 == mParameters.end()) {
+         // If not, use the nearest neighbour
+         int I, J;
+         mNearestNeighbourTree.getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
+         const Location& loc = mLocations[I];
+         it2 = mParameters.find(loc);
+      }
       bool hasAtThisTime = it2->second.size() > iTime && it2->second[iTime].size() != 0;
       if(hasAtThisTime) {
-         iNearestLocation = loc;
+         iNearestLocation = it2->first;
          return true;
       }
       else {
@@ -192,8 +199,7 @@ std::vector<int> ParameterFile::getTimes() const {
    LocationParameters::const_iterator it;
    for(it = mParameters.begin(); it != mParameters.end(); it++) {
       for(int i = 0; i < it->second.size(); i++) {
-         if(it->second[i].size() != 0)
-            times.insert(i);
+         times.insert(i);
       }
    }
    return std::vector<int>(times.begin(), times.end());

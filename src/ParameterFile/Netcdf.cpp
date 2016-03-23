@@ -273,12 +273,19 @@ void ParameterFileNetcdf::write() const {
    if(times.size() == 0 || locations.size() == 0) {
       Util::error("Cannot write parameter file '" + getFilename() + "'. No data to write.");
    }
-   Parameters par0 = getParameters(times[0], locations[0]);
+   int nCoeff = 0;
+   for(int i = 0; i < times.size(); i++) {
+      Parameters par0 = getParameters(times[i], locations[0], false);
+      nCoeff = std::max(nCoeff, par0.size());
+   }
+
+   if(nCoeff == 0) {
+      Util::error("Cannot write a parameter file where all parameters are missing");
+   }
 
    int nTime = times.size();
    int nLon = 1;
    int nLat = locations.size();
-   int nCoeff = par0.size();
 
    // Create dimensions
    int dTime = createDim(mFile, "time", nTime);
@@ -346,13 +353,21 @@ void ParameterFileNetcdf::write() const {
    for(int t = 0; t < times.size(); t++) {
       int time = times[t];
       for(int i = 0; i < locations.size(); i++) {
-         Parameters par = getParameters(times[t], locations[i]);
-         if(par.size() != nCoeff) {
-            Util::error("Wrong parameter size");
+         Parameters par = getParameters(times[t], locations[i], false);
+         if(par.size() == nCoeff) {
+            for(int k = 0; k < nCoeff; k++) {
+               int index = t * nLat * nCoeff + i * nCoeff + k;
+               values[index] = par[k];
+            }
          }
-         for(int k = 0; k < nCoeff; k++) {
-            int index = t * nLat * nCoeff + i * nCoeff + k;
-            values[index] = par[k];
+         else if(par.size() == 0) {
+            for(int k = 0; k < nCoeff; k++) {
+               int index = t * nLat * nCoeff + i * nCoeff + k;
+               values[index] = Util::MV;
+            }
+         }
+         else {
+            Util::error("Wrong parameter size");
          }
       }
    }

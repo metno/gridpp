@@ -138,11 +138,24 @@ int main(int argc, const char *argv[]) {
       int fTimeIndex = t;
       int oTimeIndex = Util::MV;
       int fmaxDays = ftimes[ftimes.size()-1] / 86400;
+
+      /*
+      // Use the same leadtime in obs and forecast (probably not optimal obs for
+      // leadtimes above 24h)
+      for(int tt = 0; tt < otimes.size(); tt++) {
+         double otime = otimes[tt] - oreftime;
+         if(otime == ftime) {
+            oTimeIndex = tt;
+            break;
+         }
+      }
+      */
+
       for(int d = 0; d < fmaxDays; d++) {
          // Find appropriate obs time
          for(int tt = 0; tt < otimes.size(); tt++) {
             double otime = otimes[tt] - oreftime + d * 86400;
-            if(otime == ftime) {
+            if(otime == ftime && (t == 0 || tt != 0)) {
                oTimeIndex = tt;
                break;
             }

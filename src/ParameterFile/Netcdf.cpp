@@ -83,19 +83,16 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    int totalNumParameters = nLat*nLon*nTime*nCoeff;
    float* values = getNcFloats(mFile, var);
 
-   // Intitialize parameters to empty and then fill in later
-   std::vector<float> params(nCoeff, Util::MV);
-   Parameters parameters(params);
-   for(int t = 0; t < nTime; t++) {
-      int time = t;
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            int locIndex = i * nLon + j;
-            Location location(lats[i][j], lons[i][j], elevs[i][j]);
-            setParameters(parameters, time, location);
-         }
+   // Initialize parameters to empty and then fill in later
+   std::vector<Location> locations;
+   for(int i = 0; i < nLat; i++) {
+      for(int j = 0; j < nLon; j++) {
+         int locIndex = i * nLon + j;
+         Location location(lats[i][j], lons[i][j], elevs[i][j]);
+         locations.push_back(location);
       }
    }
+   initializeEmpty(locations, nTime, nCoeff);
 
    /*
    Read parameters from file and arrange them in mParameters. This is a bit tricky because we do not

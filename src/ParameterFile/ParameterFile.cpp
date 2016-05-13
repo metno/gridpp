@@ -174,13 +174,13 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
 }
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {
+   mMaxTime = std::max(mMaxTime, iTime);
    LocationParameters::const_iterator it = mParameters.find(iLocation);
    if(mParameters[iLocation].size() <= iTime) {
-      mParameters[iLocation].resize(iTime+1);
+      mParameters[iLocation].resize(mMaxTime+1);
    }
    mParameters[iLocation][iTime] = iParameters;
    mIsTimeDependent = mIsTimeDependent || iTime > 0;
-   mMaxTime = std::max(mMaxTime, iTime);
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
    setParameters(iParameters, iTime, Location(0,0,0));
@@ -263,4 +263,13 @@ long ParameterFile::getCacheSize() const {
       }
    }
    return total;
+}
+
+void ParameterFile::initializeEmpty(const std::vector<Location>& iLocations, int iNumTimes, int iNumParameters) {
+   std::vector<float> params(iNumParameters, Util::MV);
+   Parameters parameters(params);
+   std::vector<Parameters> pars(iNumTimes, params);
+   for(int i = 0; i < iLocations.size(); i++) {
+      mParameters[iLocations[i]] = pars;
+   }
 }

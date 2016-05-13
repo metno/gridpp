@@ -126,7 +126,8 @@ float Util::rad2deg(float rad) {
    return (rad * 180 / Util::pi);
 }
 std::vector<std::string> Util::glob(std::string iFilenames) {
-   std::vector<std::string> files;
+   // Split on commas
+   std::vector<std::string> files = Util::split(iFilenames, ",");
    int flags = 0;
    Cglob::glob_t results;
    Cglob::glob(iFilenames.c_str(), flags, NULL, &results);
@@ -214,13 +215,26 @@ int Util::calcDate(int iDate, float iAddHours) {
    return returnDate;
 }
 
-std::vector<std::string> Util::split(std::string iString) {
+std::vector<std::string> Util::split(std::string iString, std::string iDelims) {
    std::vector<std::string> strings;
-   std::stringstream ss(iString);
-   std::string currString;
-   while(ss >> currString) {
-      strings.push_back(currString);
+
+   // Skip delimiters at beginning.
+   std::string::size_type lastPos = iString.find_first_not_of(iDelims, 0);
+
+   // Find first non-delimiter.
+   std::string::size_type pos = iString.find_first_of(iDelims, lastPos);
+
+   while(std::string::npos != pos || std::string::npos != lastPos) {
+      // Found a string
+      strings.push_back(iString.substr(lastPos, pos - lastPos));
+
+      // Skip delimiters
+      lastPos = iString.find_first_not_of(iDelims, pos);
+
+      // Find next non-delimiter.
+      pos = iString.find_first_of(iDelims, lastPos);
    }
+
    return strings;
 }
 float Util::logit(float p) {

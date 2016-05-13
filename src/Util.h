@@ -59,7 +59,7 @@ class Util {
 
       static float pi;
 
-      // Return a vector of filenames from a single string containing wildcards
+      // Return a vector of filenames from a single string containing wildcards and commas
       static std::vector<std::string> glob(std::string iFilenames);
 
       static std::string gridppVersion();
@@ -98,7 +98,7 @@ class Util {
       
       //! \brief Creates a vector of strings by splitting string on each space
       //! Multiple consecutive spaces are treated as one space
-      static std::vector<std::string> split(std::string iString);
+      static std::vector<std::string> split(std::string iString, std::string iDelims=" ");
 
       //! \brief Computes the logit of p
       //! @param p Must lie in the interval (0,1)

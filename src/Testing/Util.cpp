@@ -171,6 +171,24 @@ namespace {
       EXPECT_EQ("test", strings[0]);
       EXPECT_EQ("1", strings[1]);
    }
+   TEST_F(UtilTest, splitDelim) {
+      std::string s = "test 1,2, test";
+      std::vector<std::string> strings = Util::split(s, ",");
+      ASSERT_EQ(3, strings.size());
+      EXPECT_EQ("test 1", strings[0]);
+      EXPECT_EQ("2", strings[1]);
+      EXPECT_EQ(" test", strings[2]);
+   }
+   TEST_F(UtilTest, splitDelims) {
+      std::string s = "test 1,2q3 test,4q4";
+      std::vector<std::string> strings = Util::split(s, "q,");
+      ASSERT_EQ(5, strings.size());
+      EXPECT_EQ("test 1", strings[0]);
+      EXPECT_EQ("2", strings[1]);
+      EXPECT_EQ("3 test", strings[2]);
+      EXPECT_EQ("4", strings[3]);
+      EXPECT_EQ("4", strings[4]);
+   }
    TEST_F(UtilTest, logit) {
       const float p[] = {0.2,0.9};
       const float exp[] = {-1.386294, 2.197225};

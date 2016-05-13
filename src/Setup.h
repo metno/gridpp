@@ -1,5 +1,6 @@
 #ifndef METCAL_SETUP_H
 #define METCAL_SETUP_H
+#include <map>
 #include <string>
 #include <vector>
 #include "Variable.h"
@@ -28,8 +29,8 @@ struct VariableConfiguration {
 //! Aborts if one of the input files does not exits/cannot be parsed.
 class Setup {
    public:
-      File* inputFile;
-      File* outputFile;
+      std::vector<File*> inputFiles;
+      std::vector<File*> outputFiles;
       Options inputOptions;
       Options outputOptions;
       std::vector<VariableConfiguration> variableConfigurations;
@@ -37,6 +38,10 @@ class Setup {
       ~Setup();
       static std::string defaultDownscaler();
    private:
-      bool mIdenticalIOFiles;
+      // In some cases, it is not possible to open the same file first as readonly and then writeable
+      // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember
+      // to not free the memory of both files.
+      std::map<std::string, File*> mFileMap; // filename, file handle
+      bool hasFile(std::string iFilename) const;
 };
 #endif

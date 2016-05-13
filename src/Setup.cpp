@@ -3,8 +3,7 @@
 #include "Calibrator/Calibrator.h"
 #include "Downscaler/Downscaler.h"
 
-Setup::Setup(const std::vector<std::string>& argv) :
-      mIdenticalIOFiles(false) {
+Setup::Setup(const std::vector<std::string>& argv) {
 
    std::string inputFilename = "";
    std::string outputFilename = "";
@@ -34,24 +33,48 @@ Setup::Setup(const std::vector<std::string>& argv) :
       }
       index++;
    }
-   outputFile  = File::getScheme(outputFilename, outputOptions, false);
-   if(outputFile == NULL) {
-      Util::error("File '" + outputFilename + " must be a valid file");
+   std::vector<std::string> inputFilenames = Util::glob(inputFilename);
+   std::vector<std::string> outputFilenames = Util::glob(outputFilename);
+   if(inputFilenames.size() != outputFilenames.size()) {
+      std::stringstream ss;
+      ss << "Unequal number of input (" << inputFilenames.size() << ") and output ("
+         << outputFilenames.size() << ")";
+      Util::error(ss.str());
+   }
+   if(inputFilenames.size() == 0) {
+      Util::error("No valid input files");
+   }
+   if(outputFilenames.size() == 0) {
+      Util::error("No valid output files");
    }
 
-   // In some cases, it is not possible to open the same file first as readonly and then writeable
-   // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember
-   // to not free the memory of both files.
-   if(inputFilename == outputFilename) {
-      inputFile = outputFile;
-      mIdenticalIOFiles = true;
-   }
-   else {
-      inputFile = File::getScheme(inputFilename, inputOptions, true);
-   }
+   for(int f = 0; f < outputFilenames.size(); f++) {
 
-   if(inputFile == NULL) {
-      Util::error("File '" + inputFilename + " must be a valid file");
+      File* outputFile;
+      if(!hasFile(outputFilenames[f])) {
+         outputFile  = File::getScheme(outputFilenames[f], outputOptions, false);
+         if(outputFile == NULL) {
+            Util::error("File '" + outputFilenames[f] + " is invalid");
+         }
+         mFileMap[outputFilenames[f]] = outputFile;
+      }
+      else {
+         outputFile = mFileMap[outputFilenames[f]];
+      }
+      outputFiles.push_back(outputFile);
+
+      File* inputFile;
+      if(!hasFile(inputFilenames[f])) {
+         inputFile  = File::getScheme(inputFilenames[f], inputOptions, true);
+         if(inputFile == NULL) {
+            Util::error("File '" + inputFilenames[f] + " is invalid");
+         }
+         mFileMap[inputFilenames[f]] = inputFile;
+      }
+      else {
+         inputFile = mFileMap[inputFilenames[f]];
+      }
+      inputFiles.push_back(inputFile);
    }
 
    // Implement a finite state machine
@@ -451,9 +474,10 @@ Setup::Setup(const std::vector<std::string>& argv) :
    }
 }
 Setup::~Setup() {
-   delete outputFile;
-   if(!mIdenticalIOFiles)
-      delete inputFile;
+   std::map<std::string, File*>::const_iterator it = mFileMap.begin();
+   for(it = mFileMap.begin(); it != mFileMap.end(); it++)
+      delete it->second;
+
    for(int i = 0; i < variableConfigurations.size(); i++) {
       delete variableConfigurations[i].downscaler;
       for(int c = 0; c < variableConfigurations[i].calibrators.size(); c++) {
@@ -463,4 +487,9 @@ Setup::~Setup() {
 }
 std::string Setup::defaultDownscaler() {
    return "nearestNeighbour";
+}
+
+bool Setup::hasFile(std::string iFilename) const {
+   std::map<std::string, File*>::const_iterator it = mFileMap.find(iFilename);
+   return it != mFileMap.end();
 }

@@ -12,13 +12,13 @@
 void writeUsage() {
    std::cout << "Post-processes gridded forecasts" << std::endl;
    std::cout << std::endl;
-   std::cout << "usage:  gridpp input [options] output [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+" << std::endl;
+   std::cout << "usage:  gridpp inputs [options] outputs [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+" << std::endl;
    std::cout << "        gridpp [--version]" << std::endl;
    std::cout << "        gridpp [--help]" << std::endl;
    std::cout << std::endl;
    std::cout << "Arguments:" << std::endl;
-   std::cout << "   input         Input file with NetCDF data." << std::endl;
-   std::cout << "   output        Output file with NetCDF data. File must already exist. Must" << std::endl;
+   std::cout << "   input         One or more input files. Use comma to separate names. WHen string is surrounded by double quotes, wildcards can be used (e.g. *)" << std::endl;
+   std::cout << "   output        One or more output files. File must already exist. Must" << std::endl;
    std::cout << "                 contain lat/lon information." << std::endl;
    std::cout << "   -v var        One of the variables below." << std::endl;
    std::cout << "   -d downscaler One of the downscalers below." << std::endl;
@@ -87,48 +87,51 @@ int main(int argc, const char *argv[]) {
       args.push_back(std::string(argv[i]));
    }
    Setup setup(args);
-   std::cout << "Input type:  " << setup.inputFile->name() << std::endl;
-   std::cout << "Output type: " << setup.outputFile->name() << std::endl;
-   setup.outputFile->setTimes(setup.inputFile->getTimes());
-   setup.outputFile->setReferenceTime(setup.inputFile->getReferenceTime());
+   for(int f = 0; f < setup.inputFiles.size(); f++) {
+      std::cout << "Input type:  " << setup.inputFiles[f]->name() << std::endl;
+      std::cout << "Output type: " << setup.outputFiles[f]->name() << std::endl;
+      setup.outputFiles[f]->setTimes(setup.inputFiles[f]->getTimes());
+      setup.outputFiles[f]->setReferenceTime(setup.inputFiles[f]->getReferenceTime());
 
-   // Post-process file
-   std::vector<Variable::Type> writeVariables;
-   for(int v = 0; v < setup.variableConfigurations.size(); v++) {
+      // Post-process file
+      std::vector<Variable::Type> writeVariables;
+      for(int v = 0; v < setup.variableConfigurations.size(); v++) {
+         double s = Util::clock();
+         VariableConfiguration varconf = setup.variableConfigurations[v];
+         Variable::Type variable = varconf.variable;
+
+         bool write = 1;
+         varconf.variableOptions.getValue("write", write);
+         if(write) {
+            writeVariables.push_back(variable);
+         }
+         setup.outputFiles[f]->initNewVariable(variable);
+
+         std::cout << "Processing " << Variable::getTypeName(variable) << std::endl;
+
+         // Downscale
+         std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;
+         varconf.downscaler->downscale(*setup.inputFiles[f], *setup.outputFiles[f]);
+         for(int c = 0; c < varconf.calibrators.size(); c++) {
+            // Calibrate
+            std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
+            varconf.calibrators[c]->calibrate(*setup.outputFiles[f], varconf.parameterFileCalibrators[c]);
+         }
+         double e = Util::clock();
+         std::cout << "   " << e-s << " seconds" << std::endl;
+         std::cout << "Current mem usage input: " << setup.inputFiles[f]->getCacheSize() / 1e6<< std::endl;
+         std::cout << "Current mem usage output: " << setup.outputFiles[f]->getCacheSize() / 1e6<< std::endl;
+         // setup.inputFile->clear();
+      }
+
+      // Write to output
       double s = Util::clock();
-      VariableConfiguration varconf = setup.variableConfigurations[v];
-      Variable::Type variable = varconf.variable;
-
-      bool write = 1;
-      varconf.variableOptions.getValue("write", write);
-      if(write) {
-         writeVariables.push_back(variable);
-      }
-      setup.outputFile->initNewVariable(variable);
-
-      std::cout << "Processing " << Variable::getTypeName(variable) << std::endl;
-
-      // Downscale
-      std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;
-      varconf.downscaler->downscale(*setup.inputFile, *setup.outputFile);
-      for(int c = 0; c < varconf.calibrators.size(); c++) {
-         // Calibrate
-         std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
-         varconf.calibrators[c]->calibrate(*setup.outputFile, varconf.parameterFileCalibrators[c]);
-      }
+      setup.outputFiles[f]->write(writeVariables);
       double e = Util::clock();
-      std::cout << "   " << e-s << " seconds" << std::endl;
-      std::cout << "Current mem usage input: " << setup.inputFile->getCacheSize() / 1e6<< std::endl;
-      std::cout << "Current mem usage output: " << setup.outputFile->getCacheSize() / 1e6<< std::endl;
-      // setup.inputFile->clear();
+      std::cout << "Writing file: " << e-s << " seconds" << std::endl;
+      std::cout << "Total time:   " << e-start << " seconds" << std::endl;
+      setup.inputFiles[f]->clear();
+      setup.outputFiles[f]->clear();
    }
-
-   // Write to output
-   double s = Util::clock();
-   setup.outputFile->write(writeVariables);
-   double e = Util::clock();
-   std::cout << "Writing file: " << e-s << " seconds" << std::endl;
-   std::cout << "Total time:   " << e-start << " seconds" << std::endl;
-
    return 0;
 }

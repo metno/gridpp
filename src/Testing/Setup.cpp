@@ -137,6 +137,9 @@ namespace {
       MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d smart numSmart=2 -v Precip -d smart"));
 
       MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v Precip -c zaga -p text file=testing/files/parameters.txt -c zaga -p text file=testing/files/parameters.txt -d nearestNeighbour"));
+
+      // Multiple inputs and outputs
+      MetSetup(Util::split("testing/files/10x10.nc,testing/files/10x10_copy.nc testing/files/10x10.nc,testing/files/10x10_copy.nc -v Precip -c zaga -p text file=testing/files/parameters.txt -c zaga -p text file=testing/files/parameters.txt -d nearestNeighbour"));
    }
    TEST(SetupTest, shouldBeInValid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -172,6 +175,10 @@ namespace {
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersInvalidTime.txt")), ".*");
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p netcdf file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+
+      // Different number of input and output files
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
    }
    TEST(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();

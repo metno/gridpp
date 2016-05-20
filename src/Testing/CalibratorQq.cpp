@@ -161,6 +161,32 @@ namespace {
       EXPECT_FLOAT_EQ(5,    parameters[6]); // 100 %
       EXPECT_FLOAT_EQ(6,    parameters[7]);
    }
+   TEST_F(TestCalibratorQq, trainQuantilesWithExtra) {
+      CalibratorQq cal(Variable::T ,Options("extrapolation=1to1 quantiles=0,0.25,1 extraObs=-10,3 extraFcst=-5,1"));
+      std::vector<ObsEns> data;
+      data.push_back(getObsEns(4, 2));
+      data.push_back(getObsEns(2, 3));
+      data.push_back(getObsEns(1, 3));
+      data.push_back(getObsEns(5, 6));
+      data.push_back(getObsEns(0, 5));
+      Parameters parameters = cal.train(data);
+
+      // Sorted obs:  0 1 2 4 5
+      // Sorted fcst: 2 3 3 5 6
+      // With extra obs: -10 0 1 3 5
+      // With extra fcst: -5 1 2 3 6
+      ASSERT_EQ(10, parameters.size());
+      EXPECT_FLOAT_EQ(-10,  parameters[0]);
+      EXPECT_FLOAT_EQ(-5,   parameters[1]);
+      EXPECT_FLOAT_EQ(0,    parameters[2]);
+      EXPECT_FLOAT_EQ(1,    parameters[3]);
+      EXPECT_FLOAT_EQ(1,    parameters[4]);
+      EXPECT_FLOAT_EQ(2,    parameters[5]);
+      EXPECT_FLOAT_EQ(3,    parameters[6]);
+      EXPECT_FLOAT_EQ(3,    parameters[7]);
+      EXPECT_FLOAT_EQ(5,    parameters[8]);
+      EXPECT_FLOAT_EQ(6,    parameters[9]);
+   }
    TEST_F(TestCalibratorQq, unevenNumberOfParameters) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

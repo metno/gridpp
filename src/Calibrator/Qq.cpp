@@ -26,6 +26,11 @@ CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
       }
    }
    iOptions.getValues("quantiles", mQuantiles);
+   iOptions.getValues("extraObs", mExtraObs);
+   iOptions.getValues("extraFcst", mExtraFcst);
+   if(mExtraObs.size() != mExtraFcst.size()) {
+      Util::error("extraObs must have the same length as extraFcst");
+   }
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() % 2 != 0) {
@@ -163,7 +168,8 @@ Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
    // Sort
    std::sort(obs.begin(), obs.end());
    std::sort(fcst.begin(), fcst.end());
-
+   std::vector<float> obsQ;
+   std::vector<float> fcstQ;
    if(obs.size() == 0) {
 
    }
@@ -176,15 +182,31 @@ Parameters CalibratorQq::train(const std::vector<ObsEns>& iData) const {
       for(int i = 0; i < mQuantiles.size(); i++) {
          float currObs  = Util::interpolate(mQuantiles[i], x, obs);
          float currFcst = Util::interpolate(mQuantiles[i], x, fcst);
-         values.push_back(currObs);
-         values.push_back(currFcst);
+         obsQ.push_back(currObs);
+         fcstQ.push_back(currFcst);
       }
    }
    else {
       for(int i = 0; i < obs.size(); i++) {
-         values.push_back(obs[i]);
-         values.push_back(fcst[i]);
+         obsQ.push_back(obs[i]);
+         fcstQ.push_back(fcst[i]);
       }
+   }
+
+   // Add extra points
+   if(mExtraObs.size() > 0) {
+      for(int i = 0; i < mExtraObs.size(); i++) {
+         obsQ.push_back(mExtraObs[i]);
+         fcstQ.push_back(mExtraFcst[i]);
+      }
+      std::sort(obsQ.begin(), obsQ.end());
+      std::sort(fcstQ.begin(), fcstQ.end());
+   }
+
+   // Put into parameters
+   for(int i = 0; i < obsQ.size(); i++) {
+      values.push_back(obsQ[i]);
+      values.push_back(fcstQ[i]);
    }
 
    Parameters par(values);
@@ -201,6 +223,8 @@ std::string CalibratorQq::description() {
    ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued. If a parameter set has one or more missing values, then the ensemble using this parameter set is not processed.") << std::endl;
    ss << Util::formatDescription("   extrapolation=1to1", "If a forecast is outside the curve, how should extrapolation be done? '1to1': Use a slope of 1, i.e. preserving the bias at the nearest end point; 'meanSlope': Use the average slope from the lower to upper endpoints; 'nearestSlope': Use the slope through the two nearest points; 'zero': Use a slope of 0, meaning that the forecast will equal the max/min observation.") << std::endl;
    ss << Util::formatDescription("   quantiles=undef", "If creating training parameters, should specific quantiles be stored, instead of all observations and forecasts? Can be a vector of values between 0 and 1.") << std::endl;
+   ss << Util::formatDescription("   extraObs=undef", "Only applicable when training. Add these extra observations to the curve at the end.") << std::endl;
+   ss << Util::formatDescription("   extraFcst=undef", "Only applicable when training. Add these extra forecasts to the curve at the end. Must be the same length as extraObs.") << std::endl;
    return ss.str();
 }
 

@@ -27,5 +27,7 @@ class CalibratorQq : public Calibrator {
       ExtrapolationPolicy::Policy mPolicy;
       // Separate the vector of obs,fcst,obs,fcst,... into separate vectors
       static void separate(const Parameters& iParameters, std::vector<float>& iObs, std::vector<float>& iFcst);
+      std::vector<float> mExtraObs;
+      std::vector<float> mExtraFcst;
 };
 #endif

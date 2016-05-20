@@ -127,14 +127,17 @@ float Util::rad2deg(float rad) {
 }
 std::vector<std::string> Util::glob(std::string iFilenames) {
    // Split on commas
+   std::vector<std::string> returnFiles;
    std::vector<std::string> files = Util::split(iFilenames, ",");
-   int flags = 0;
-   Cglob::glob_t results;
-   Cglob::glob(iFilenames.c_str(), flags, NULL, &results);
-   for(int i = 0; i < results.gl_pathc; i++) {
-      files.push_back(results.gl_pathv[i]);
+   for(int k = 0; k < files.size(); k++) {
+      int flags = 0;
+      Cglob::glob_t results;
+      Cglob::glob(files[k].c_str(), flags, NULL, &results);
+      for(int i = 0; i < results.gl_pathc; i++) {
+         returnFiles.push_back(results.gl_pathv[i]);
+      }
    }
-   return files;
+   return returnFiles;
 }
 
 std::string Util::gridppVersion() {

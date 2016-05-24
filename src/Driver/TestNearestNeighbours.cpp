@@ -7,11 +7,14 @@
 #include "../Downscaler/Downscaler.h"
 #include "../Util.h"
 
+#include "../KDTree.h"
+#include "../VPTree.h"
+
 // For each gridpoint in iTo, find the nearest neighbour from iFrom
 // Output these into iI and iJ matrices, which represent the i and j indicies into the
 // grid in iTo
-void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
-void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
+void getNearestNeighbourVP(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
+void getNearestNeighbourKD(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ);
 
 int main(int argc, const char *argv[]) {
    if(argc != 2 && argc != 3) {
@@ -31,29 +34,58 @@ int main(int argc, const char *argv[]) {
 
    vec2Int I1, I2, J1, J2;
    double t0 = Util::clock();
-   getNearestNeighbourFast(ifile, ofile, I2, J2);
+   getNearestNeighbourVP(ifile, ofile, I2, J2);
    double t1 = Util::clock();
-   std::cout << "Fast: " << t1-t0 << std::endl;
+   std::cout << "VPTree: " << t1-t0 << std::endl;
    double t2 = Util::clock();
-   getNearestNeighbour(ifile, ofile, I1, J1);
+   getNearestNeighbourKD(ifile, ofile, I1, J1);
    double t3 = Util::clock();
-   std::cout << "Slow: " << t3-t2 << std::endl;
+   std::cout << "KDTree: " << t3-t2 << std::endl;
    float speedup = (t3-t2)/(t1-t0);
    std::cout << "Speedup factor: " << speedup << "x" << std::endl;
 
-
    assert(I1.size() == I2.size());
    assert(J1.size() == J2.size());
+
+   vec2 ilats = ifile.getLats();
+   vec2 ilons = ifile.getLons();
+   vec2 olats = ofile.getLats();
+   vec2 olons = ofile.getLons();
+
    for(int i = 0; i < I1.size(); i++) {
       for(int j = 0; j < I1[0].size(); j++) {
          if(I1[i][j] != I2[i][j] || J1[i][j] != J2[i][j]) {
-            std::cout << "ERROR: Different results for (" << i << " " << j << "): " << I1[i][j] << " " << J1[i][j] << " " << I2[i][j] << " " << J2[i][j] << std::endl;
+
+            std::cout << "ERROR: Different results for (" << i << " " << j << "): ";
+            std::cout << I1[i][j] << ' ' << J1[i][j] << ' ' << I2[i][j] << ' ' << J2[i][j] << '\t';
+
+            float distanceKD = Util::getDistance(olats[i][j], olons[i][j], ilats[I1[i][j]][J1[i][j]], ilons[I1[i][j]][J1[i][j]]);
+            float distanceVP = Util::getDistance(olats[i][j], olons[i][j], ilats[I2[i][j]][J2[i][j]], ilons[I2[i][j]][J2[i][j]]);
+            std::cout << std::fixed << distanceKD << '/' << std::fixed << distanceVP << std::endl;
          }
       }
    }
 }
 
-void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
+void getNearestNeighbourVP(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
+   vec2 ilats = iFrom.getLats();
+   vec2 ilons = iFrom.getLons();
+
+   VPTree t(ilats, ilons);
+   t.getNearestNeighbour(iTo, iI, iJ);
+
+}
+
+void getNearestNeighbourKD(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
+   vec2 ilats = iFrom.getLats();
+   vec2 ilons = iFrom.getLons();
+
+   KDTree t(ilats, ilons);
+   t.getNearestNeighbour(iTo, iI, iJ);
+
+}
+
+void getNearestNeighbourBrute(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    vec2 ilats = iFrom.getLats();
    vec2 ilons = iFrom.getLons();
    vec2 olats = iTo.getLats();
@@ -90,7 +122,7 @@ void getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int& iI, vec2In
    }
 }
 
-void getNearestNeighbourFast(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
+void getNearestNeighbourSemiBrute(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
    vec2 ilats = iFrom.getLats();
    vec2 ilons = iFrom.getLons();
    vec2 olats = iTo.getLats();

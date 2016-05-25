@@ -95,7 +95,7 @@ void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
    std::vector<double> times = getTimes();
    std::string startTime = getNorcomTimeStamp(times[mStartTime]);
    std::string endTime   = getNorcomTimeStamp(times[mEndTime]);
-   ofs << "FBNO52 ENNC " << currTimeStamp << std::endl;
+   ofs << "FBNO52 ENNC " << currTimeStamp << "\r\r" << std::endl;
    ofs << "VALID " << startTime << " - " << endTime << " UTC." << std::endl;
 
    ofs.precision(0);

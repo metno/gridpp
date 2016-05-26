@@ -1,3 +1,9 @@
+gridpp (0.2.2) precise; urgency=low
+
+  * Adds carriage returns in NorcomQnh file format
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Thu, 26 May 2016 10:11:34 +0200
+
 gridpp (0.2.1) precise; urgency=low
 
   * Gridded parameter estimation (gridpp_train)

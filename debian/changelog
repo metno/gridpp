@@ -8,7 +8,7 @@ gridpp (0.2.1) precise; urgency=low
   * Smaller memory footprint for processing EC file types
   * Added -v TMIn and -v TMax
 
- -- Thomas Nipen <thomas.nipen@met.no>  Wed, 13 Jan 2016 15:27:51 +0100
+ -- Thomas Nipen <thomas.nipen@met.no>  Wed, 26 May 2016 10:09:00 +0100
 
 gridpp (0.2.0) precise; urgency=low
 

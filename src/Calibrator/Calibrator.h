@@ -4,9 +4,11 @@
 #include <vector>
 #include "../Scheme.h"
 #include "../Parameters.h"
+#include "../Field.h"
 
 typedef std::vector<float> Ens;
 typedef std::pair<float,Ens> ObsEns;
+typedef std::pair<FieldPtr,FieldPtr> ObsEnsField;
 class File;
 class Options;
 class ParameterFile;
@@ -35,6 +37,7 @@ class Calibrator : public Scheme {
       static std::string getDescriptions();
 
       virtual Parameters train(const std::vector<ObsEns>& iData) const;
+      virtual Parameters train(const std::vector<ObsEnsField>& iData, int iIobs, int iJobs, int iIEns, int iJEns) const;
 
       // Does this calibrator require a parameter file?
       virtual bool requiresParameterFile() const { return true;};
@@ -48,6 +51,7 @@ class Calibrator : public Scheme {
 #include "Altitude.h"
 #include "Bct.h"
 #include "Cloud.h"
+#include "Coastal.h"
 #include "Diagnose.h"
 #include "Gaussian.h"
 #include "Kriging.h"

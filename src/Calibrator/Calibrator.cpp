@@ -203,12 +203,28 @@ Parameters Calibrator::train(const std::vector<ObsEns>& iData) const {
    return Parameters();
 }
 
+Parameters Calibrator::train(const std::vector<ObsEnsField>& iData, int iIobs, int iJobs, int iIens, int iJens) const {
+   // Arrange data
+   std::vector<ObsEns> data;
+   for(int d = 0; d < iData.size(); d++){
+      // Downscaling (currently nearest neighbour)
+      float obs = (*(iData[d].first))(iIobs,iJobs,0);
+      Ens ens   = (*(iData[d].second))(iIens, iJens);
+      ObsEns obsens(obs, ens);
+      data.push_back(obsens);
+   }
+
+   Parameters par = train(data);
+   return par;
+}
+
 std::string Calibrator::getDescriptions() {
    std::stringstream ss;
    ss << CalibratorAccumulate::description() << std::endl;
    ss << CalibratorAltitude::description() << std::endl;
    ss << CalibratorBct::description() << std::endl;
    ss << CalibratorCloud::description() << std::endl;
+   ss << CalibratorCoastal::description() << std::endl;
    ss << CalibratorDiagnose::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;

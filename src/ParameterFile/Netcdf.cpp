@@ -160,6 +160,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
       Location location(lats[i][j], lons[i][j], elevs[i][j]);
 
+      // TODO: Only insert when parameters are valid
       // Assign parameter
       mParameters[location][timeIndex][coeffIndex] = currParameter;
       index++;

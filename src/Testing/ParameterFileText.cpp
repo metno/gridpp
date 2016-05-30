@@ -71,6 +71,17 @@ namespace {
       std::sort(locations2.begin(), locations2.end());
       EXPECT_EQ(locations1, locations2);
    }
+   TEST(ParameterFileTextTest, missingFirstHour) {
+      ParameterFileText file(Options("file=testing/files/parametersKriging.txt spatial=1"));
+      Parameters par = file.getParameters(1, Location(0,0,150));
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+
+      // No parameters at time 0, so should find the nearest neighbour
+      par = file.getParameters(0, Location(0,0,150));
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4.2, par[0]);
+   }
    TEST(ParameterFileTextTest, description) {
       ParameterFileText::description();
    }

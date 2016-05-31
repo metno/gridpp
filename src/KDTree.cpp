@@ -64,8 +64,7 @@ void KDTree::subTree(indexdVec& iLonLat,
                      const TreeNode* parent,
                      unode& root) {
 
-   unode node(new KDTree::TreeNode());
-   root.swap(node);
+   root.reset(new KDTree::TreeNode());
 
    root->parent = parent;
    root->xsection = xsection;

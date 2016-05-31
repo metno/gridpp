@@ -6,19 +6,19 @@ KDTree::KDTree(const vec2& iLats, const vec2& iLons) {
    build(iLats, iLons);
 }
 
-KDTree& KDTree::operator=(const KDTree& other) {
-   if(this == &other)
-      return *this;
-   mLats = other.mLats;
-   mLons = other.mLons;
-   build(mLats, mLons);
+KDTree& KDTree::operator=(KDTree other) {
+   std::swap(mLats, other.mLats);
+   std::swap(mLons, other.mLons);
+
+   mRoot.swap(other.mRoot);
+
    return *this;
 }
 
 KDTree::KDTree(const KDTree& other) {
    mLats = other.mLats;
    mLons = other.mLons;
-   build(mLats, mLons);
+   mRoot.reset(new KDTree::TreeNode(*other.mRoot));
 }
 
 void KDTree::build(const vec2& iLats, const vec2& iLons) {

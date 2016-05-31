@@ -83,10 +83,17 @@ void KDTree::subTree(indexdVec& iLonLat,
    size_t med = from + len/2;
    if(xsection) {
       std::sort(iLonLat.begin() + from, iLonLat.begin() + to + 1, compareLons);
-      while(iLonLat[med].lon == iLonLat[med+1].lon && med < to) { ++med; }
-   } else {
+      while(med < to && iLonLat[med].lon == iLonLat[med+1].lon) {
+         assert(iLonLat.size() > med+1);
+         ++med;
+      }
+   }
+   else {
       std::sort(iLonLat.begin() + from, iLonLat.begin() + to + 1, compareLats);
-      while(iLonLat[med].lat == iLonLat[med+1].lat && med < to) { ++med; }
+      while(med < to && iLonLat[med].lat == iLonLat[med+1].lat) {
+         assert(iLonLat.size() > med+1);
+         ++med;
+      }
    }
 
    root->lon = iLonLat[med].lon;

@@ -189,16 +189,18 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
 
    const TreeNode * nearest;
 
-   #pragma omp parallel for private(nearest)
    for(size_t i = 0; i < nLat; ++i) {
       iI[i].resize(nLon, Util::MV);
       iJ[i].resize(nLon, Util::MV);
+   }
+   #pragma omp parallel for private(nearest)
+   for(size_t i = 0; i < nLat; ++i) {
       for(size_t j = 0; j < nLon; ++j) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
             // Find the nearest neighbour from input grid (ii, jj)
-               nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
-               iI[i][j] = nearest->ipos;
-               iJ[i][j] = nearest->jpos;
+            nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
+            iI[i][j] = nearest->ipos;
+            iJ[i][j] = nearest->jpos;
          }
       }
    }

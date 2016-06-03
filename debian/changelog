@@ -1,3 +1,9 @@
+gridpp (0.2.3) precise; urgency=low
+
+  * Adds even more carrige returns in NorcomQnh file format
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Fri, 03 Jun 2016 11:30:33 +0200
+
 gridpp (0.2.2) precise; urgency=low
 
   * Adds carriage returns in NorcomQnh file format

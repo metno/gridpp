@@ -96,7 +96,7 @@ void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
    std::string startTime = getNorcomTimeStamp(times[mStartTime]);
    std::string endTime   = getNorcomTimeStamp(times[mEndTime]);
    ofs << "FBNO52 ENNC " << currTimeStamp << "\r\r" << std::endl;
-   ofs << "VALID " << startTime << " - " << endTime << " UTC." << std::endl;
+   ofs << "VALID " << startTime << " - " << endTime << " UTC." << "\r" << std::endl;
 
    ofs.precision(0);
    // Write one line for each station
@@ -117,7 +117,7 @@ void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
          Util::error("Invalid value when writing QNH to NorcomQnh");
       }
       int valueHpa = valuePa / 100;
-      ofs << std::setfill('0') << std::setw(4) << std::right << valueHpa << " HPA" << std::endl;
+      ofs << std::setfill('0') << std::setw(4) << std::right << valueHpa << " HPA" << "\r" << std::endl;
    }
    ofs.close();
 }

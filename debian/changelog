@@ -1,9 +1,15 @@
-gridpp (0.2.3) precise; urgency=low
+gridpp (0.2.4) precise; urgency=low
 
   * Calibration faster when parameter grid is different than output grid
   * -c altitude works for Ec file type
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 15 Mar 2016 14:33:43 +0100
+
+gridpp (0.2.3) precise; urgency=low
+
+  * Adds even more carrige returns in NorcomQnh file format
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Fri, 03 Jun 2016 11:30:33 +0200
 
 gridpp (0.2.2) precise; urgency=low
 

@@ -1,6 +1,7 @@
 gridpp (0.2.4) precise; urgency=low
 
-  * Calibration faster when parameter grid is different than output grid
+  * Allows multiple input and output files
+  * Faster calibration when parameter grid is different than output grid
   * -c altitude works for Ec file type
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 15 Mar 2016 14:33:43 +0100

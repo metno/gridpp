@@ -17,9 +17,11 @@ void writeUsage() {
    std::cout << "        gridpp [--help]" << std::endl;
    std::cout << std::endl;
    std::cout << "Arguments:" << std::endl;
-   std::cout << "   input         One or more input files. Use comma to separate names. WHen string is surrounded by double quotes, wildcards can be used (e.g. *)" << std::endl;
-   std::cout << "   output        One or more output files. File must already exist. Must" << std::endl;
-   std::cout << "                 contain lat/lon information." << std::endl;
+   std::cout << "   inputs        One or more input files. Use comma to separate names. When" << std::endl;
+   std::cout << "                 string is surrounded by double quotes, wildcards can be used (e.g. *)." << std::endl;
+   std::cout << "   outputs       One or more output files. File must already exist. Must" << std::endl;
+   std::cout << "                 contain lat/lon information. If multiple input files are" << std::endl;
+   std::cout << "                 used, then the same number of outputs must be used." << std::endl;
    std::cout << "   -v var        One of the variables below." << std::endl;
    std::cout << "   -d downscaler One of the downscalers below." << std::endl;
    std::cout << "   -c calibrator One of the calibrators below." << std::endl;

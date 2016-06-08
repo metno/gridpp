@@ -130,7 +130,7 @@ std::vector<std::string> Util::glob(std::string iFilenames) {
    std::vector<std::string> returnFiles;
    std::vector<std::string> files = Util::split(iFilenames, ",");
    for(int k = 0; k < files.size(); k++) {
-      int flags = GLOB_TILDE;
+      int flags = GLOB_TILDE | GLOB_NOMAGIC;
       Cglob::glob_t results;
       Cglob::glob(files[k].c_str(), flags, NULL, &results);
       for(int i = 0; i < results.gl_pathc; i++) {

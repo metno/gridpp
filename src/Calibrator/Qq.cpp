@@ -51,9 +51,8 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       // Retrieve the calibration parameters for this time
       // Overwrite them later if they are location dependent
       std::vector<float> obsVecGlobal, fcstVecGlobal;
-      Parameters parameters;
       if(!iParameterFile->isLocationDependent()) {
-         parameters = iParameterFile->getParameters(t);
+         Parameters parameters = iParameterFile->getParameters(t);
          separate(parameters, obsVecGlobal, fcstVecGlobal);
       }
       #pragma omp parallel for
@@ -74,8 +73,11 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
             // Only process if all parameters are valid
             bool hasValidParameters = true;
-            for(int p = 0; p < parameters.size(); p++) {
-               hasValidParameters = hasValidParameters && Util::isValid(parameters[p]);
+            for(int p = 0; p < obsVec.size(); p++) {
+               hasValidParameters = hasValidParameters && Util::isValid(obsVec[p]);
+            }
+            for(int p = 0; p < fcstVec.size(); p++) {
+               hasValidParameters = hasValidParameters && Util::isValid(fcstVec[p]);
             }
             if(hasValidParameters) {
                for(int e = 0; e < nEns; e++) {

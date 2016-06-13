@@ -339,9 +339,9 @@ std::string Variable::getStandardName(Type iType) {
       case T:
          return "air_temperature";
       case TMin:
-         return "air_temperature_2m";
+         return "air_temperature";
       case TMax:
-         return "air_temperature_2m";
+         return "air_temperature";
       case Precip:
          return "precipitation_amount";
       case PrecipAcc:

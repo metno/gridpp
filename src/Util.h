@@ -153,6 +153,10 @@ class Util {
 
       static float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
 
+      //! @param addConst Add a constant coefficient to the predictors. The coefficient will appear
+      //! first in the output vector.
+      static std::vector<float> regression(const std::vector<float>& iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst=false);
+
       // Array operations
       //! Note: iValues must be sorted
       //! Finds index into array pointing to the largest element smaller than or equal to iX.

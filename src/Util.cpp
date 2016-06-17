@@ -25,6 +25,7 @@ namespace Cglob {
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #ifdef DEBUG
 extern "C" void __gcov_flush();
 #endif
@@ -494,6 +495,43 @@ float Util::interpolate(float x, const std::vector<float>& iX, const std::vector
 
    return y;
 
+}
+
+std::vector<float> regression(const std::vector<float> iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst) {
+   int N = iPredictors.size(); // Number of predictors
+   int T = iPredictand.size();
+   // Check that we have the right number of rows
+   for(int i = 0; i < iPredictors.size(); i++) {
+      if(iPredictors[i].size() != T) {
+         Util::error("One (or more) of the predictors does not have the same number of items as the predictand");
+      }
+   }
+
+   boost::numeric::ublas::matrix<float> A(T,N+iAddConst);
+   boost::numeric::ublas::matrix<float> y(T,1);
+   for(int t = 0; t < T; t++) {
+      for(int n = 0; n < N; n++) {
+         A(t,n+iAddConst) = iPredictors[n][t];
+         y(t,0) = iPredictand[t];
+      }
+   }
+
+   // Add constant term
+   if(iAddConst) {
+      for(int t = 0; t < T; t++) {
+         A(t,0) = 1;
+      }
+   }
+
+   boost::numeric::ublas::identity_matrix<float> Ainv(A.size1());
+   boost::numeric::ublas::permutation_matrix<size_t> pm(A.size1());
+   boost::numeric::ublas::lu_factorize(A, pm);
+   boost::numeric::ublas::lu_substitute(A, pm, y);
+   std::vector<float> values(T, 0);
+   for(int t = 0; t < T; t++) {
+      values[t] = y(t,0);
+   }
+   return values;
 }
 
 int Util::getLowerIndex(float iX, const std::vector<float>& iValues) {

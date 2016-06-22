@@ -5,15 +5,46 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileArome::FileArome(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdf(iFilename, iOptions, iReadOnly) {
+FileArome::FileArome(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdf(iFilename, iOptions, iReadOnly),
+      mXName(""),
+      mYName(""),
+      mLatName("latitude"),
+      mLonName("longitude") {
+
+   iOptions.getValue("lat", mLatName);
+   iOptions.getValue("lon", mLonName);
+
+   if(!iOptions.getValue("x", mXName)) {
+      if(hasDim("x"))
+         mXName = "x";
+      else if(hasDim("longitude"))
+         mXName = "longitude";
+      else if(hasDim("rlon"))
+         mXName = "rlon";
+      else {
+         Util::error("Cannot determine x dimension");
+      }
+   }
+   if(!iOptions.getValue("y", mYName)) {
+      if(hasDim("y"))
+         mYName = "y";
+      else if(hasDim("latitude"))
+         mYName = "latitude";
+      else if(hasDim("rlat"))
+         mYName = "rlat";
+      else {
+         Util::error("Cannot determine y dimension");
+      }
+   }
+
    // Set dimensions
    mNTime = getDimSize("time");
-   mNLat  = getDimSize(getYname());
-   mNLon  = getDimSize(getXname());
+   mNLat  = getDimSize(mYName);
+   mNLon  = getDimSize(mXName);
    mNEns  = 1;
 
-   mLats = getLatLonVariable("latitude");
-   mLons = getLatLonVariable("longitude");
+   mLats = getLatLonVariable(mLatName);
+   mLons = getLatLonVariable(mLonName);
    if(hasVar("surface_geopotential")) {
       FieldPtr elevField = getFieldCore("surface_geopotential", 0);
       mElevs.resize(getNumLat());
@@ -172,8 +203,8 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       if(!hasVariableCore(varType)) {
          // Create variable
          int dTime    = getDim("time");
-         int dLon     = getDim(getXname());
-         int dLat     = getDim(getYname());
+         int dLon     = getDim(mXName);
+         int dLat     = getDim(mYName);
          int dims[3]  = {dTime, dLat, dLon};
          int var = Util::MV;
          int status = nc_def_var(mFile,variable.c_str(), NC_FLOAT, 3, dims, &var);
@@ -354,8 +385,8 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
 
    if(numDims == 1) {
       // Figure out if this vector has the dimension of lat or lon
-      int dLon     = getDim(getXname());
-      int dLat     = getDim(getYname());
+      int dLon     = getDim(mXName);
+      int dLat     = getDim(mYName);
       int dim;
       int status = nc_inq_vardimid(mFile, var, &dim);
       float* values;
@@ -413,8 +444,8 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
 void FileArome::defineLatLonVariable(std::string iVar) {
    if(!hasVar(iVar)) {
       // Create variable
-      int dLon     = getDim(getXname());
-      int dLat     = getDim(getYname());
+      int dLon     = getDim(mXName);
+      int dLat     = getDim(mYName);
       int dims[2]  = {dLat, dLon};
       int var = Util::MV;
       int status = nc_def_var(mFile, iVar.c_str(), NC_FLOAT, 2, dims, &var);
@@ -490,23 +521,9 @@ bool FileArome::isValid(std::string iFilename) {
 std::string FileArome::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=arome", "AROME file") << std::endl;
+   ss << Util::formatDescription("lat=latitude", "Name of the variable representing latitudes") << std::endl;
+   ss << Util::formatDescription("lon=longitude", "Name of the variable representing longitudes") << std::endl;
+   ss << Util::formatDescription("x=undef", "Name of dimension in the x-direction. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("y=undef", "Name of dimension in the y-direction. If unspecified, the name is auto-detected.") << std::endl;
    return ss.str();
-}
-
-std::string FileArome::getXname() const {
-   std::string xname = "x";
-   if(!hasDim(xname))
-      xname = "rlon";
-   if(!hasDim(xname))
-      xname = "longitude";
-   return xname;
-}
-
-std::string FileArome::getYname() const {
-   std::string yname = "y";
-   if(!hasDim(yname))
-      yname = "rlat";
-   if(!hasDim(yname))
-      yname = "latitude";
-   return yname;
 }

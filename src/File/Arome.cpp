@@ -316,7 +316,7 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
       return "precipitation_amount_high_estimate";
    }
    else if(iVariable == Variable::PrecipRate) {
-      return "lwe_precipitation_amount";
+      return "lwe_precipitation_rate";
    }
    else if(iVariable == Variable::U) {
       return "eastward_wind_10m";

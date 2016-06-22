@@ -224,7 +224,7 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
       return "precipitation_amount";
    }
    else if(iVariable == Variable::PrecipRate) {
-      return "lwe_precipitation_amount";
+      return "lwe_precipitation_rate";
    }
    else if(iVariable == Variable::U) {
       return "eastward_wind_10m";

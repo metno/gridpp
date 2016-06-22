@@ -1,3 +1,9 @@
+gridpp (0.2.5) precise; urgency=low
+
+  * Allows varying radius in -c neighbourhood
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Wed, 22 Jun 2016 11:09:33 +0200
+
 gridpp (0.2.4) precise; urgency=low
 
   * Allows multiple input and output files

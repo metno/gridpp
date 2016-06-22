@@ -15,6 +15,7 @@ class Variable {
          PrecipLow    = 4,    // Low estimate of precipitation
          PrecipMiddle = 5,    // Middle estimate of precipitation
          PrecipHigh   = 6,    // High estimate of precipitation
+         PrecipRate   = 7,    // Precipitation rate
          Cloud        = 10,   // Cloud cover (between 0 and 1)
          T            = 20,   // 2m temperature (K)
          TMin         = 21,   // 2m temperature minimum temperature (K)

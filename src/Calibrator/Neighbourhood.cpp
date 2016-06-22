@@ -63,21 +63,28 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
       Field& precip = *iFile.getField(mVariable, t);
       Field precipRaw = precip;
 
+      int radius = mRadius;
+      if(iParameterFile != NULL) {
+         if(iParameterFile->isLocationDependent()) {
+            Util::error("Cannot use a location dependent parameter file for CalibratorNeighbourhood");
+         }
+         radius = iParameterFile->getParameters(t)[0];
+      }
+
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-
             for(int e = 0; e < nEns; e++) {
                // Put neighbourhood into vector
                std::vector<float> neighbourhood;
-               int Ni = std::min(nLat-1, i+mRadius) - std::max(0, i-mRadius) + 1;
-               int Nj = std::min(nLon-1, j+mRadius) - std::max(0, j-mRadius) + 1;
+               int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
+               int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
                assert(Ni > 0);
                assert(Nj > 0);
                neighbourhood.resize(Ni*Nj, Util::MV);
                int index = 0;
-               for(int ii = std::max(0, i-mRadius); ii <= std::min(nLat-1, i+mRadius); ii++) {
-                  for(int jj = std::max(0, j-mRadius); jj <= std::min(nLon-1, j+mRadius); jj++) {
+               for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
+                  for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
                      float value = precipRaw(ii,jj,e);
                      assert(index < Ni*Nj);
                      neighbourhood[index] = value;
@@ -100,7 +107,7 @@ int CalibratorNeighbourhood::getRadius() const {
 std::string CalibratorNeighbourhood::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;
-   ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction.") << std::endl;
+   ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction. The radius can alternatively be specified using a location-independent parameter file, with one parameter.") << std::endl;
    ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
    ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    return ss.str();

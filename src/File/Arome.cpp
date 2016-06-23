@@ -191,10 +191,20 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
    // to avoid swapping between define and data mode unnecessarily
    startDefineMode();
 
+   // check if altitudes are valid
+   bool isAltitudeValid = false;
+   vec2 elevs = getElevs();
+   for(int i = 0; i < elevs.size(); i++) {
+      for(int j = 0; j < elevs[i].size(); j++) {
+         isAltitudeValid = isAltitudeValid || Util::isValid(elevs[i][j]);
+      }
+   }
+
    // Define lat/lon/elev
-   defineLatLonVariable("latitude");
-   defineLatLonVariable("longitude");
-   defineLatLonVariable("altitude");
+   defineLatLonVariable(mLatName);
+   defineLatLonVariable(mLonName);
+   if(isAltitudeValid)
+      defineLatLonVariable("altitude");
 
    // Define variables (< 0.01 s)
    for(int v = 0; v < iVariables.size(); v++) {
@@ -212,7 +222,9 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       }
       int var = getVar(variable);
       float MV = getMissingValue(var); // The output file's missing value indicator
-      setAttribute(var, "coordinates", "longitude latitude");
+      std::stringstream ss;
+      ss << mLonName << " " << mLatName;
+      setAttribute(var, "coordinates", ss.str());
       setAttribute(var, "units", Variable::getUnits(varType));
       setAttribute(var, "standard_name", Variable::getStandardName(varType));
       setMissingValue(var, MV);
@@ -224,7 +236,8 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
    startDataMode(); // 0.5 seconds
    writeReferenceTime();
    writeTimes(); // 2-3 seconds
-   writeLatLonVariable("altitude");
+   if(isAltitudeValid)
+      writeLatLonVariable("altitude");
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);

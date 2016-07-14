@@ -8,6 +8,7 @@
 #include "../Util.h"
 #include "../Options.h"
 #include "../SetupTrain.h"
+#include "../Grid.h"
 void writeUsage() {
    std::cout << "Trains a calibration method in gridpp using observations and forecast files. The resulting parameter file is on the same grid as the forecasts and observations will be interpolated to the forecast grid using nearest neighbour." << std::endl;
    std::cout << std::endl;
@@ -204,22 +205,33 @@ int main(int argc, const char *argv[]) {
          for(int i = 0; i < nLat; i++) {
             parameters[i].resize(nLon);
          }
+         // Arrange data
+         std::vector<ObsEnsField> data;
+         for(int d = 0; d < ffields.size(); d++){
+            // Downscaling (currently nearest neighbour)
+            // float obs = (*ofields[d])(Io2f[i][j],Jo2f[i][j],0);
+            // const Ens& ens = (*ffields[d])(i,j);
+            FieldPtr obs = ofields[d];
+            FieldPtr ens   = (ffields[d]);
+            ObsEnsField obsens(obs, ens);
+            data.push_back(obsens);
+         }
+         Grid obsGrid;
+         obsGrid.lats(setup.observations[0]->getLats());
+         obsGrid.lons(setup.observations[0]->getLons());
+         obsGrid.elevs(setup.observations[0]->getElevs());
+         obsGrid.landFractions(setup.observations[0]->getLandFractions());
+         Grid ensGrid;
+         ensGrid.lats(setup.forecasts[0]->getLats());
+         ensGrid.lons(setup.forecasts[0]->getLons());
+         ensGrid.elevs(setup.forecasts[0]->getElevs());
+         ensGrid.landFractions(setup.forecasts[0]->getLandFractions());
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             for(int j = 0; j < nLon; j++) {
-               // Arrange data
-               std::vector<ObsEns> data;
-               for(int d = 0; d < ffields.size(); d++){
-                  // Downscaling (currently nearest neighbour)
-                  // float obs = (*ofields[d])(Io2f[i][j],Jo2f[i][j],0);
-                  // const Ens& ens = (*ffields[d])(i,j);
-                  float obs = (*ofields[d])(i,j,0);
-                  Ens ens   = (*ffields[d])(If2o[i][j],Jf2o[i][j]);
-                  ObsEns obsens(obs, ens);
-                  data.push_back(obsens);
-               }
-
-               Parameters par = setup.method->train(data);
+               int iobs = If2o[i][j];
+               int jobs = Jf2o[i][j];
+               Parameters par = setup.method->train(data, obsGrid, ensGrid, iobs, jobs, i, j);
                parameters[i][j] = par.getValues();
             }
          }

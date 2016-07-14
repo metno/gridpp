@@ -157,6 +157,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "coastal") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'sort' needs variable");
+      }
+      CalibratorCoastal* c = new CalibratorCoastal(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
@@ -203,11 +212,15 @@ Parameters Calibrator::train(const std::vector<ObsEns>& iData) const {
    return Parameters();
 }
 
-Parameters Calibrator::train(const std::vector<ObsEnsField>& iData, int iIobs, int iJobs, int iIens, int iJens) const {
+Parameters Calibrator::train(const std::vector<ObsEnsField>& iData, const Grid& iObsGrid, const Grid& iEnsGrid, int iIobs, int iJobs, int iIens, int iJens) const {
+   Util::error("Cannot train method. Not yet implemented.");
    // Arrange data
    std::vector<ObsEns> data;
    for(int d = 0; d < iData.size(); d++){
       // Downscaling (currently nearest neighbour)
+      int iIobs = 0;
+      int iJobs = 0;
+      abort();
       float obs = (*(iData[d].first))(iIobs,iJobs,0);
       Ens ens   = (*(iData[d].second))(iIens, iJens);
       ObsEns obsens(obs, ens);

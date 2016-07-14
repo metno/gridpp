@@ -12,6 +12,7 @@ typedef std::pair<FieldPtr,FieldPtr> ObsEnsField;
 class File;
 class Options;
 class ParameterFile;
+class Grid;
 
 //! Abstract calibration class
 class Calibrator : public Scheme {
@@ -37,7 +38,8 @@ class Calibrator : public Scheme {
       static std::string getDescriptions();
 
       virtual Parameters train(const std::vector<ObsEns>& iData) const;
-      virtual Parameters train(const std::vector<ObsEnsField>& iData, int iIobs, int iJobs, int iIEns, int iJEns) const;
+      // Defaults to using the regular train method
+      virtual Parameters train(const std::vector<ObsEnsField>& iData, const Grid& iObsGrid, const Grid& iEnsGrid, int iIobs, int iJobs, int iIEns, int iJEns) const;
 
       // Does this calibrator require a parameter file?
       virtual bool requiresParameterFile() const { return true;};

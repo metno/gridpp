@@ -4,6 +4,7 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
+#include "../Grid.h"
 CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iOptions) :
       Calibrator(iOptions),
       mVariable(iVariable),
@@ -77,12 +78,12 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
    return true;
 }
 
-Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, int iIobs, int iJobs, int iIens, int iJens) const {
+Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const Grid& iObsGrid, const Grid& iEnsGrid, int iIobs, int iJobs, int iIens, int iJens) const {
    std::vector<float> y;
    std::vector<std::vector<float> > x(3);
    int nLat = iData[0].second->getNumLat();
    int nLon = iData[0].second->getNumLon();
-   vec2 lsm = iData[0].second->getLandFractions();
+   vec2 lsm = iEnsGrid.landFractions();
 
    // Find nearest land and sea point
    float lowerValue = Util::MV;
@@ -110,6 +111,9 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, int i
       }
    }
 
+   assert(Util::isValid(Imax));
+   assert(Util::isValid(Jmax));
+
    // Compute predictors in model
    for(int i = 0; i < iData.size(); i++) {
       float obs = (*iData[i].first)(iIobs, iJobs, 0);
@@ -136,7 +140,7 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, int i
       Util::error(ss.str());
    }
 
-   std::vector<float> values = Util::regression(y, x, true);
+   std::vector<float> values = Util::regression(y, x, false);
    Parameters par(values);
 
    return par;

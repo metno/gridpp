@@ -497,9 +497,13 @@ float Util::interpolate(float x, const std::vector<float>& iX, const std::vector
 
 }
 
-std::vector<float> regression(const std::vector<float> iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst) {
+std::vector<float> Util::regression(const std::vector<float>& iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst) {
    int N = iPredictors.size(); // Number of predictors
    int T = iPredictand.size();
+
+   if(T < 2) {
+      Util::error("Cannot do regression with only one data point");
+   }
    // Check that we have the right number of rows
    for(int i = 0; i < iPredictors.size(); i++) {
       if(iPredictors[i].size() != T) {
@@ -522,14 +526,43 @@ std::vector<float> regression(const std::vector<float> iPredictand, const std::v
          A(t,0) = 1;
       }
    }
+   for(int i = 0; i < A.size1(); i++) {
+      for(int j = 0; j < A.size2(); j++) {
+         std::cout << A(i,j) << " ";
+      }
+      std::cout << std::endl;
+   }
 
-   boost::numeric::ublas::identity_matrix<float> Ainv(A.size1());
-   boost::numeric::ublas::permutation_matrix<size_t> pm(A.size1());
-   boost::numeric::ublas::lu_factorize(A, pm);
-   boost::numeric::ublas::lu_substitute(A, pm, y);
+   using namespace boost::numeric::ublas;
+   matrix<float> solution(T,1);
+   matrix<float> XTX(T,T);
+   matrix<float> XT = trans(A);
+   XTX = prod(XT, A);
+   for(int i = 0; i < XTX.size1(); i++) {
+      for(int j = 0; j < XTX.size2(); j++) {
+         std::cout << XTX(i,j) << " ";
+      }
+      std::cout << std::endl;
+   }
+   matrix<float> XTXinv(N,N);
+   XTXinv.assign(identity_matrix<float>(N)); 
+
+   typedef permutation_matrix<std::size_t> pmatrix; 
+   pmatrix pm(XTX.size1());
+   int res = lu_factorize(XTX,pm);
+   assert(res == 0);
+   lu_substitute(XTX, pm, XTXinv);
+   matrix<float> XTXinvXTy(N,N);
+   matrix<float> XTXinvXT = prod(XTXinv,XT);
+   solution = prod(XTXinvXT, y);
+
+   //boost::numeric::ublas::identity_matrix<float> Ainv(A.size1());
+   //boost::numeric::ublas::permutation_matrix<size_t> pm(A.size1());
+   //boost::numeric::ublas::lu_factorize(A, pm);
+   //boost::numeric::ublas::lu_substitute(A, pm, y);
    std::vector<float> values(T, 0);
    for(int t = 0; t < T; t++) {
-      values[t] = y(t,0);
+      values[t] = solution(t,0);
    }
    return values;
 }

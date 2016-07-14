@@ -1,9 +1,35 @@
-gridpp (0.2.2) precise; urgency=low
+gridpp (0.2.6) precise; urgency=low
 
-  * Calibration faster when parameter grid is different than output grid
+  * Adds precipitation rate variable
+  * Adds specification of lat/lon dimension/variable  names in netcdf files
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Wed, 22 Jun 2016 15:26:17 +0200
+
+gridpp (0.2.5) precise; urgency=low
+
+  * Allows varying radius in -c neighbourhood
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Wed, 22 Jun 2016 11:09:33 +0200
+
+gridpp (0.2.4) precise; urgency=low
+
+  * Allows multiple input and output files
+  * Faster calibration when parameter grid is different than output grid
   * -c altitude works for Ec file type
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 15 Mar 2016 14:33:43 +0100
+
+gridpp (0.2.3) precise; urgency=low
+
+  * Adds even more carrige returns in NorcomQnh file format
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Fri, 03 Jun 2016 11:30:33 +0200
+
+gridpp (0.2.2) precise; urgency=low
+
+  * Adds carriage returns in NorcomQnh file format
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Thu, 26 May 2016 10:11:34 +0200
 
 gridpp (0.2.1) precise; urgency=low
 
@@ -15,7 +41,7 @@ gridpp (0.2.1) precise; urgency=low
   * Smaller memory footprint for processing EC file types
   * Added -v TMIn and -v TMax
 
- -- Thomas Nipen <thomas.nipen@met.no>  Wed, 13 Jan 2016 15:27:51 +0100
+ -- Thomas Nipen <thomas.nipen@met.no>  Wed, 26 May 2016 10:09:00 +0100
 
 gridpp (0.2.0) precise; urgency=low
 

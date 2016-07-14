@@ -273,3 +273,15 @@ void ParameterFile::initializeEmpty(const std::vector<Location>& iLocations, int
       mParameters[iLocations[i]] = pars;
    }
 }
+
+void ParameterFile::setIsTimeDependent(bool iFlag) {
+   mIsTimeDependent = iFlag;
+}
+
+void ParameterFile::setMaxTime(int iMaxTime) {
+   mMaxTime = iMaxTime;
+}
+
+int ParameterFile::getMaxTime() const {
+   return mMaxTime;
+}

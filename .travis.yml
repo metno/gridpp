@@ -3,6 +3,7 @@ sudo: required
 env:
  - DIST=precise
  - DIST=trusty
+ - DIST=xenial
 
 before_install:
  - sudo apt-get update -qq
@@ -25,3 +26,13 @@ script:
 after_success: coveralls --gcov-options '\-lp'
 
 os: linux
+
+#deploy:
+#  provider: launchpad
+#  slug: "~christian-skarby/gridpp/master"
+#  oauth_token:
+#    secure: "QNH5xUjkO3sP26Ncd5e8m6yV9LVP9Qhdku9uar+EDEZccy2amwNfi0RZ3mhalw8wvJUTbKwJGAzxoWCGUspg2ptRUngKNgmuLSYpCxNKJpm5bQrBBgyhAWsQFOpOqk+nEFKUiWnAe5mgP2MU89+ZWEk5TK5vBt1wclK8CaZ+dwo="
+#  oauth_token_secret:
+#    secure: "b/4eRApZpX3ytYcIf2Z+F5j398/zQnU8sszsZeKkZU/q5j5TF1B5dmRVODIB2JvGhXqukHUdhu7p1oja/GcAZ4a+VF3IuxIe/HaSCMHUoryeNeIzjPhpCBDY21U7kFkPjbMVJGuVcMvOXcpRJ7b5baiW/iGyFx/z3WGSN8Z7R+k="
+#  on:
+#    tags: true

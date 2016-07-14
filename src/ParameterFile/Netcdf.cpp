@@ -144,6 +144,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
    // Loop over the parameters placing them into the right position
    int index = 0;
+   Parameters par;
    while(index < totalNumParameters) {
       float currParameter = values[index];
       // Translate the linear index into a vector index
@@ -160,8 +161,12 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
       Location location(lats[i][j], lons[i][j], elevs[i][j]);
 
+      // TODO: Only insert when parameters are valid
       // Assign parameter
       mParameters[location][timeIndex][coeffIndex] = currParameter;
+      if(timeIndex > 0)
+         setIsTimeDependent(true);
+      setMaxTime(std::max(getMaxTime(), timeIndex));
       index++;
    }
 

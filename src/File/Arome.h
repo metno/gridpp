@@ -28,7 +28,9 @@ class FileArome : public FileNetcdf {
       void writeLatLonVariable(std::string iVariable);
       void defineLatLonVariable(std::string iVariable);
       int mDate;
-      std::string getXname() const;
-      std::string getYname() const;
+      std::string mXName;
+      std::string mYName;
+      std::string mLatName;
+      std::string mLonName;
 };
 #endif

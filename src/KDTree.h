@@ -11,7 +11,7 @@ class KDTree {
       KDTree();
       void build(const vec2& iLats, const vec2& iLons);
       KDTree(const vec2& iLats, const vec2& iLons);
-      KDTree& operator=(const KDTree& other);
+      KDTree& operator=(KDTree other);
       KDTree(const KDTree& other);
 
       void getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const;
@@ -32,6 +32,26 @@ class KDTree {
          const TreeNode* parent;
 
          TreeNode(): xsection(false), left(NULL), right(NULL), parent(NULL) {}
+         TreeNode(const TreeNode &other):
+            xsection(other.xsection),
+            lon(other.lon),
+            lat(other.lat),
+            ipos(other.ipos),
+            jpos(other.jpos),
+            left(NULL),
+            right(NULL),
+            parent(NULL) {
+
+            if(other.left) {
+               left.reset(new TreeNode(*other.left));
+               left->parent = this;
+            }
+
+            if(other.right) {
+               right.reset(new TreeNode(*other.right));
+               right->parent = this;
+            }
+         }
       };
 
       struct Indexed {

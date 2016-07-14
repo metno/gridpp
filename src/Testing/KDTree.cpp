@@ -93,6 +93,33 @@ namespace {
       EXPECT_EQ(0, I);
       EXPECT_EQ(3, J);
    }
+   // Check that the code can handle cases where several points are in a line
+   TEST_F(KDTreeTest, cross) {
+      vec2 lats, lons;
+      // one row of irregular points (1x5)
+      //    4
+      //  1 2 3
+      //    0
+      std::vector<float> lat(5,0), lon(5,0);
+      lat[0] = 0; lon[0] = 1;
+      lat[1] = 1; lon[1] = 0;
+      lat[2] = 1; lon[2] = 1;
+      lat[3] = 1; lon[3] = 2;
+      lat[4] = 2; lon[3] = 1;
+      lats.push_back(lat);
+      lons.push_back(lon);
+      KDTree tree(lats, lons);
+      int I, J;
+      tree.getNearestNeighbour(0.1, 1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+      tree.getNearestNeighbour(0.6, 1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(2, J);
+      tree.getNearestNeighbour(1, 0.1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(1, J);
+   }
    TEST_F(KDTreeTest, assignmentOperator) {
       vec2 lats, lons;
       std::vector<float> lat(1,3), lon(1,2);

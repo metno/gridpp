@@ -6,19 +6,19 @@ KDTree::KDTree(const vec2& iLats, const vec2& iLons) {
    build(iLats, iLons);
 }
 
-KDTree& KDTree::operator=(const KDTree& other) {
-   if(this == &other)
-      return *this;
-   mLats = other.mLats;
-   mLons = other.mLons;
-   build(mLats, mLons);
+KDTree& KDTree::operator=(KDTree other) {
+   std::swap(mLats, other.mLats);
+   std::swap(mLons, other.mLons);
+
+   mRoot.swap(other.mRoot);
+
    return *this;
 }
 
 KDTree::KDTree(const KDTree& other) {
    mLats = other.mLats;
    mLons = other.mLons;
-   build(mLats, mLons);
+   mRoot.reset(new KDTree::TreeNode(*other.mRoot));
 }
 
 void KDTree::build(const vec2& iLats, const vec2& iLons) {
@@ -64,8 +64,7 @@ void KDTree::subTree(indexdVec& iLonLat,
                      const TreeNode* parent,
                      unode& root) {
 
-   unode node(new KDTree::TreeNode());
-   root.swap(node);
+   root.reset(new KDTree::TreeNode());
 
    root->parent = parent;
    root->xsection = xsection;
@@ -83,10 +82,17 @@ void KDTree::subTree(indexdVec& iLonLat,
    size_t med = from + len/2;
    if(xsection) {
       std::sort(iLonLat.begin() + from, iLonLat.begin() + to + 1, compareLons);
-      while(iLonLat[med].lon == iLonLat[med+1].lon && med < to) { ++med; }
-   } else {
+      while(med < to && iLonLat[med].lon == iLonLat[med+1].lon) {
+         assert(iLonLat.size() > med+1);
+         ++med;
+      }
+   }
+   else {
       std::sort(iLonLat.begin() + from, iLonLat.begin() + to + 1, compareLats);
-      while(iLonLat[med].lat == iLonLat[med+1].lat && med < to) { ++med; }
+      while(med < to && iLonLat[med].lat == iLonLat[med+1].lat) {
+         assert(iLonLat.size() > med+1);
+         ++med;
+      }
    }
 
    root->lon = iLonLat[med].lon;
@@ -189,16 +195,18 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
 
    const TreeNode * nearest;
 
-   #pragma omp parallel for private(nearest)
    for(size_t i = 0; i < nLat; ++i) {
       iI[i].resize(nLon, Util::MV);
       iJ[i].resize(nLon, Util::MV);
+   }
+   #pragma omp parallel for private(nearest)
+   for(size_t i = 0; i < nLat; ++i) {
       for(size_t j = 0; j < nLon; ++j) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
             // Find the nearest neighbour from input grid (ii, jj)
-               nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
-               iI[i][j] = nearest->ipos;
-               iJ[i][j] = nearest->jpos;
+            nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
+            iI[i][j] = nearest->ipos;
+            iJ[i][j] = nearest->jpos;
          }
       }
    }

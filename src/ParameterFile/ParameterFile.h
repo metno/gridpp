@@ -67,6 +67,9 @@ class ParameterFile : public Scheme {
       void setFilename(std::string iFilename);
       bool mIsNew; // Should this file be created?
       void initializeEmpty(const std::vector<Location>& iLocations, int iNumTimes, int iNumParameters);
+      void setIsTimeDependent(bool iFlag);
+      void setMaxTime(int iMaxTime);
+      int getMaxTime() const;
    private:
       bool mIsTimeDependent;
       int mMaxTime;

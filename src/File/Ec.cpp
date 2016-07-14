@@ -38,11 +38,17 @@ FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) :
    }
 
    // TODO: No land fraction info in EC files?
-   mLandFractions.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mLandFractions[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         mLandFractions[i][j] = Util::MV;
+   if(hasVar("land_area_fraction")) {
+      int vLandFraction = getVar("land_area_fraction");
+      mLandFractions = getGridValues(vLandFraction);
+   }
+   else {
+      mLandFractions.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mLandFractions[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            mLandFractions[i][j] = Util::MV;
+         }
       }
    }
 

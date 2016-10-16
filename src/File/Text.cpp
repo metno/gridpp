@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <fstream>
+#include <algorithm>
 #include "../Util.h"
 #include "../Location.h"
 

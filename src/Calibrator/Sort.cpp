@@ -1,5 +1,6 @@
 #include "Sort.h"
 #include <cmath>
+#include <algorithm>
 #include "../Util.h"
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"

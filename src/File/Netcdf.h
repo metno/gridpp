@@ -2,7 +2,6 @@
 #define FILE_NETCDF_H
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
 #include "File.h"
 #include "../Variable.h"
 

@@ -2,7 +2,6 @@
 #define FILE_AROME_H
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
 #include "Netcdf.h"
 #include "../Variable.h"
 #include "../Options.h"

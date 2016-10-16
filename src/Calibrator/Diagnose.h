@@ -10,7 +10,7 @@ class CalibratorDiagnose : public Calibrator {
       std::string name() const {return "diagnose";};
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mOutputVariable;
       // std::vector<Variable::Type> mDiagVariables;
 };

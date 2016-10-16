@@ -12,6 +12,6 @@ class CalibratorQnh : public Calibrator {
       static float calcQnh(float iElev, float iPressure);
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
 };
 #endif

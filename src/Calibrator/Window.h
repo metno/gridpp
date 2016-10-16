@@ -11,7 +11,7 @@ class CalibratorWindow : public Calibrator {
       std::string name() const {return "window";};
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
       int mRadius;
       Util::StatType mStatType;

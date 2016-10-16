@@ -11,6 +11,6 @@ class CalibratorAltitude : public Calibrator {
       static std::string description();
       std::string name() const {return "altitude";};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
 };
 #endif

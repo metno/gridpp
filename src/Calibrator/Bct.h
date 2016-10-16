@@ -18,7 +18,7 @@ class CalibratorBct : public Calibrator {
       static std::string description();
       std::string name() const {return "bct";};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mMainPredictor;
       float mMaxEnsMean;
 };

@@ -12,7 +12,7 @@ class CalibratorRegression : public Calibrator {
       std::string name() const {return "regression";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
       int mOrder;
       bool mIntercept;

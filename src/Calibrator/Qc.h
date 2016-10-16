@@ -16,7 +16,7 @@ class CalibratorQc : public Calibrator {
       std::string name() const {return "qc";};
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
       float mMin;
       float mMax;

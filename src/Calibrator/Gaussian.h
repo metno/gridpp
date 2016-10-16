@@ -26,7 +26,7 @@ class CalibratorGaussian : public Calibrator {
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       static double my_f(const gsl_vector *v, void *params);
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mMainPredictor;
       int  mNeighbourhoodSize;
       float mLogLikelihoodTolerance;

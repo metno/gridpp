@@ -11,7 +11,7 @@ class CalibratorQq : public Calibrator {
       std::string name() const {return "qq";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
       float mLowerQuantile;
       float mUpperQuantile;

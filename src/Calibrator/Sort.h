@@ -12,7 +12,7 @@ class CalibratorSort : public Calibrator {
       std::string name() const {return "sort";};
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
 };
 #endif

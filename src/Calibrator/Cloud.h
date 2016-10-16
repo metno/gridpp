@@ -11,7 +11,7 @@ class CalibratorCloud : public Calibrator {
       std::string name() const {return "cloud";};
       bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mPrecipType;
       Variable::Type mCloudType;
 };

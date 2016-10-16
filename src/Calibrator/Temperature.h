@@ -9,6 +9,6 @@ class CalibratorTemperature : public Calibrator {
       static std::string description();
       std::string name() const {return "temperature";};
    private:
-      bool calibrateCore(const File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
 };
 #endif

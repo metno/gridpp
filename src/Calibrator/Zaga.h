@@ -34,7 +34,7 @@ class CalibratorZaga : public Calibrator {
 
       static std::string description();
       std::string name() const override {return "zaga";};
-      Parameters train(const std::vector<ObsEns>& iData) const;
+      Parameters train(const std::vector<ObsEns>& iData) const override;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       static float logLikelihood(float obs, float iEnsMean, float iEnsFrac, const Parameters& iParameters);

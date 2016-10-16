@@ -81,8 +81,8 @@ FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
    int nLat  = mNLat;
    int nLon  = mNLon;
 
-   size_t count[5] = {1, 1, nEns, nLat, nLon};
-   size_t start[5] = {iTime, 0, 0, 0, 0};
+   size_t count[5] = {1, 1, static_cast<size_t>(nEns), static_cast<size_t>(nLat), static_cast<size_t>(nLon)};
+   size_t start[5] = {static_cast<size_t>(iTime), 0, 0, 0, 0};
    size_t size = 1*1*nEns*nLat*nLon;
    float* values = new float[size];
    nc_get_vara_float(mFile, var, start, count, values);
@@ -165,7 +165,7 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            size_t start[5] = {t, 0, 0, 0, 0};
+            size_t start[5] = {static_cast<size_t>(t), 0, 0, 0, 0};
 
             int index = 0;
             for(int e = 0; e < mNEns; e++) {
@@ -187,7 +187,7 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
             }
             int numDims = getNumDims(var);
             if(numDims == 5) {
-               size_t count[5] = {1,1,mNEns, mNLat, mNLon};
+               size_t count[5] = {1, 1, static_cast<size_t>(mNEns), static_cast<size_t>(mNLat), static_cast<size_t>(mNLon)};
                int status = nc_put_vara_float(mFile, var, start, count, values);
                handleNetcdfError(status, "could not write variable " + variable);
             }

@@ -33,7 +33,7 @@ class CalibratorZaga : public Calibrator {
       float getMaxEnsMean() {return mMaxEnsMean;};
 
       static std::string description();
-      std::string name() const {return "zaga";};
+      std::string name() const override {return "zaga";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;

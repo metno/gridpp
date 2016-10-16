@@ -13,7 +13,7 @@ class CalibratorQc : public Calibrator {
    public:
       CalibratorQc(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const {return "qc";};
+      std::string name() const override {return "qc";};
       bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;

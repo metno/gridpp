@@ -24,7 +24,7 @@ class CalibratorKriging : public Calibrator {
       float mRadius;
       float mMaxElevDiff;
       float mEfoldDist;
-      std::string name() const {return "kriging";};
+      std::string name() const override {return "kriging";};
       File* mPrevious;
       Variable::Type mAuxVariable;
       float mLowerThreshold;

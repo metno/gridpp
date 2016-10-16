@@ -12,7 +12,7 @@ class CalibratorNeighbourhood : public Calibrator {
    public:
       CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const {return "neighbourhood";};
+      std::string name() const override {return "neighbourhood";};
       int getRadius() const;
       bool requiresParameterFile() const { return false;};
    private:

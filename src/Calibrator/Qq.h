@@ -8,7 +8,7 @@ class CalibratorQq : public Calibrator {
    public:
       CalibratorQq(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const {return "qq";};
+      std::string name() const override {return "qq";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;

@@ -9,7 +9,7 @@ class CalibratorCloud : public Calibrator {
       CalibratorCloud(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const override {return "cloud";};
-      bool requiresParameterFile() const { return false;};
+      bool requiresParameterFile() const override { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mPrecipType;

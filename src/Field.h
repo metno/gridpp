@@ -1,7 +1,7 @@
 #ifndef FIELD_H
 #define FIELD_H
+#include <boost/shared_ptr.hpp>
 #include <vector>
-#include <memory>
 #include "Util.h"
 
 //! Encapsulates gridded data in 3 dimensions: latitude, longitude, ensemble member.
@@ -53,5 +53,5 @@ class Field {
       //! Index into flat array that corresponds to coordinate
       int getIndex(unsigned int i, unsigned int j, unsigned int k) const;
 };
-typedef std::shared_ptr<Field> FieldPtr;
+typedef boost::shared_ptr<Field> FieldPtr;
 #endif

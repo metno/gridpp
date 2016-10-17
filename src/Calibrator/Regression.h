@@ -9,10 +9,10 @@ class CalibratorRegression : public Calibrator {
    public:
       CalibratorRegression(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const override {return "regression";};
-      Parameters train(const std::vector<ObsEns>& iData) const override;
+      std::string name() const {return "regression";};
+      Parameters train(const std::vector<ObsEns>& iData) const;
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
       int mOrder;
       bool mIntercept;

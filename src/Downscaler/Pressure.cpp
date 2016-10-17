@@ -2,8 +2,6 @@
 #include "../File/File.h"
 #include "../Util.h"
 #include <math.h>
-#include <cassert>
-
 const float DownscalerPressure::mConstant = -1.21e-4;
 
 DownscalerPressure::DownscalerPressure(Variable::Type iVariable, const Options& iOptions) :

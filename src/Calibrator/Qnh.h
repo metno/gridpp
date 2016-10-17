@@ -8,10 +8,10 @@ class CalibratorQnh : public Calibrator {
    public:
       CalibratorQnh(const Options& iOptions);
       static std::string description();
-      std::string name() const override {return "qnh";};
+      std::string name() const {return "qnh";};
       static float calcQnh(float iElev, float iPressure);
-      bool requiresParameterFile() const override { return false;};
+      bool requiresParameterFile() const { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
 };
 #endif

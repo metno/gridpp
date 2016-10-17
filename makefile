@@ -5,11 +5,11 @@ LFLAGS   = -L/usr/lib
 CFLAGS   = -Wall -Wno-reorder -Wno-sign-compare
 
 # Flags for optimized compilation
-CFLAGS_O = -std=c++11 -O3 -fopenmp $(CFLAGS)
+CFLAGS_O = -O3 -fopenmp $(CFLAGS)
 LIBS_O   = -lnetcdf -lgsl -lblas
 
 # Flags for debug compilation
-CFLAGS_D = -std=c++11 -fPIC -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
+CFLAGS_D = -fPIC -g -pg -rdynamic -fprofile-arcs -ftest-coverage -coverage -DDEBUG $(CFLAGS)
 LIBS_D   = -lnetcdf -lgsl -lblas -L build/gtest -lgtest -lpthread
 
 # Don't change below here

@@ -279,13 +279,13 @@ void FileArome::writeCore(std::vector<Variable::Type> iVariables) {
       int status = nc_inq_varndims(mFile, var, &numDims);
       handleNetcdfError(status, "could not determine number of dimensions for variable " + variable);
       if(numDims == 4) {
-         size_t count[4] = {static_cast<size_t>(mNTime), 1, static_cast<size_t>(mNLat), static_cast<size_t>(mNLon)};
+         size_t count[4] = {mNTime, 1, mNLat, mNLon};
          size_t start[4] = {0, 0, 0, 0};
          int status = nc_put_vara_float(mFile, var, start, count, values);
          handleNetcdfError(status, "could not write variable " + variable);
       }
       else if(numDims == 3) {
-         size_t count[3] = {static_cast<size_t>(mNTime), static_cast<size_t>(mNLat), static_cast<size_t>(mNLon)};
+         size_t count[3] = {mNTime, mNLat, mNLon};
          size_t start[3] = {0, 0, 0};
          int status = nc_put_vara_float(mFile, var, start, count, values);
          handleNetcdfError(status, "could not write variable " + variable);
@@ -432,7 +432,7 @@ vec2 FileArome::getLatLonVariable(std::string iVar) const {
          handleNetcdfError(status, "could not get data from variable " + iVar);
       }
       else if(numDims == 4) {
-         size_t count[4] = {1,1,static_cast<size_t>(getNumLat()),static_cast<size_t>(getNumLon())};
+         size_t count[4] = {1,1,getNumLat(),getNumLon()};
          size_t start[4] = {0,0,0,0};
          int status = nc_get_vara_float(mFile, var, start, count, values);
          handleNetcdfError(status, "could not get data from variable " + iVar);
@@ -501,7 +501,7 @@ void FileArome::writeLatLonVariable(std::string iVar) {
       handleNetcdfError(status, "could not set data to variable " + iVar);
    }
    else if(numDims == 4) {
-      size_t count[4] = {1,1,static_cast<size_t>(getNumLat()),static_cast<size_t>(getNumLon())};
+      size_t count[4] = {1,1,getNumLat(),getNumLon()};
       size_t start[4] = {0,0,0,0};
       int status = nc_put_vara_float(mFile, var, start, count, values);
       handleNetcdfError(status, "could not set data to variable " + iVar);

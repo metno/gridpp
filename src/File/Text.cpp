@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <fstream>
-#include <algorithm>
 #include "../Util.h"
 #include "../Location.h"
 
@@ -26,36 +25,36 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
          // Loop over each value
          std::vector<float> currValues;
          int time;
-         ss >> time;
-         if(ss.fail()) {
+         bool status = ss >> time;
+         if(!status) {
             Util::error("Could not read time from file '" + iFilename + "'");
          }
          timesSet.insert(time);
 
          Location location(Util::MV, Util::MV, Util::MV);
          float lat;
-         ss >> lat;
-         if(ss.fail()) {
+         status = ss >> lat;
+         if(!status) {
             Util::error("Could not read lat from file '" + iFilename + "'");
          }
 
          float lon;
-         ss >> lon;
-         if(ss.fail()) {
+         status = ss >> lon;
+         if(!status) {
             Util::error("Could not read lon from file '" + iFilename + "'");
          }
 
          float elev;
-         ss >> elev;
-         if(ss.fail()) {
+         status = ss >> elev;
+         if(!status) {
             Util::error("Could not read elev from file '" + iFilename + "'");
          }
          location = Location(lat, lon, elev);
 
          while(ss.good()) {
             float value;
-            ss >> value;
-            if(ss.fail()) {
+            bool status  = ss >> value;
+            if(!status) {
                Util::error("Could not read value from file '" + iFilename + "'");
             }
             currValues.push_back(value);

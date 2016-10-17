@@ -1,6 +1,4 @@
 #include "KDTree.h"
-#include <algorithm>
-
 KDTree::KDTree() : mRoot(NULL) {
 }
 

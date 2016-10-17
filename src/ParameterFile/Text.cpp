@@ -27,8 +27,8 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
          // Loop over each value
          std::vector<float> values;
          int time;
-         ss >> time;
-         if(ss.fail()) {
+         bool status = ss >> time;
+         if(!status) {
             Util::error("Could not read time from file '" + mFilename + "'");
          }
          times.insert(time);
@@ -36,20 +36,20 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
          Location location(0,0,0);
          if(mIsSpatial) {
             float lat;
-            ss >> lat;
-            if(ss.fail()) {
+            status = ss >> lat;
+            if(!status) {
                Util::error("Could not read lat from file '" + mFilename + "'");
             }
 
             float lon;
-             ss >> lon;
-            if(ss.fail()) {
+            status = ss >> lon;
+            if(!status) {
                Util::error("Could not read lon from file '" + mFilename + "'");
             }
 
             float elev;
-            ss >> elev;
-            if(ss.fail()) {
+            status = ss >> elev;
+            if(!status) {
                Util::error("Could not read elev from file '" + mFilename + "'");
             }
             location = Location(lat, lon, elev);
@@ -57,8 +57,8 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
 
          while(ss.good()) {
             float value;
-            ss >> value;
-            if(ss.fail()) {
+            bool status  = ss >> value;
+            if(!status) {
                Util::error("Could not read value from file '" + mFilename + "'");
             }
             values.push_back(value);

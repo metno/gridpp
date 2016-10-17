@@ -8,10 +8,10 @@ class CalibratorQq : public Calibrator {
    public:
       CalibratorQq(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const override {return "qq";};
-      Parameters train(const std::vector<ObsEns>& iData) const override;
+      std::string name() const {return "qq";};
+      Parameters train(const std::vector<ObsEns>& iData) const;
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
       float mLowerQuantile;
       float mUpperQuantile;

@@ -16,9 +16,9 @@ class CalibratorBct : public Calibrator {
       static float getInvCdf(float iQuantile, float iEnsMean, float iEnsStd, const Parameters& iParameters);
 
       static std::string description();
-      std::string name() const override {return "bct";};
+      std::string name() const {return "bct";};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mMainPredictor;
       float mMaxEnsMean;
 };

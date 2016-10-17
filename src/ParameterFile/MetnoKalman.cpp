@@ -29,8 +29,8 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions, bool
    if(ifs.good() && line[0] != '#') {
       std::stringstream ss(line);
       // Note: The first value read is not the number of locations. The true number is a bit fewer.
-      ss >> temp >> numTimes;
-      assert(!ss.fail());
+      bool status = ss >> temp >> numTimes;
+      assert(status);
 
       for(int t = 0; t < (numTimes-1)*coeffFreq+1; t++) {
          mTimes.push_back(t);
@@ -41,41 +41,41 @@ ParameterFileMetnoKalman::ParameterFileMetnoKalman(const Options& iOptions, bool
       if(ifs.good() && line[0] != '#') {
          std::stringstream ss(line);
          int stationId;
-         ss >> stationId;
-         assert(!ss.fail());
+         bool status = ss >> stationId;
+         assert(status);
          translate(stationId);
 
          float lat;
-         ss >> lat;
-         assert(!ss.fail());
+         status = ss >> lat;
+         assert(status);
          translate(lat);
 
          float lon;
-         ss >> lon;
-         assert(!ss.fail());
+         status = ss >> lon;
+         assert(status);
          translate(lon);
 
          float elev;
-         ss >> elev;
-         assert(!ss.fail());
+         status = ss >> elev;
+         assert(status);
          translate(elev);
 
          float modelElev;
-         ss >> modelElev;
-         assert(!ss.fail());
+         status = ss >> modelElev;
+         assert(status);
          translate(modelElev);
 
          float lastObs;
-         ss >> lastObs;
-         assert(!ss.fail());
+         status = ss >> lastObs;
+         assert(status);
          translate(lastObs);
 
          // Loop over each value
          std::vector<float> values;
          while(ss.good()) {
             float value;
-            ss >> value;
-            assert(!ss.fail());
+            bool status  = ss >> value;
+            assert(status);
             translate(value);
             values.push_back(value);
          }
@@ -146,9 +146,9 @@ bool ParameterFileMetnoKalman::isValid(std::string iFilename) {
          while(true) {
             if(!ss.good())
                break;
-            ss >> value;
+            bool status = ss >> value;
             values.push_back(value);
-            if(ss.fail())
+            if(!status)
                return false;
          }
          if(values.size() != numCols) {

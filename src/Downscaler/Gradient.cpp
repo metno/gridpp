@@ -2,7 +2,6 @@
 #include "../File/File.h"
 #include "../Util.h"
 #include <math.h>
-#include <cassert>
 
 DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& iOptions) :
       Downscaler(iVariable, iOptions),

@@ -375,7 +375,7 @@ void ParameterFileNetcdf::write() const {
    }
    double e2 = Util::clock();
    std::cout << "Rearranging parameters: " << e2 - e << std::endl;
-   size_t count[4] = {static_cast<size_t>(nTime), static_cast<size_t>(nLat), 1, static_cast<size_t>(nCoeff)};
+   size_t count[4] = {nTime, nLat, 1, nCoeff};
    size_t start[4] = {0, 0, 0, 0};
    status = nc_put_vara_float(mFile, var, start, count, values);
    handleNetcdfError(status, "could not write data");

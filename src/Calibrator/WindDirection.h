@@ -13,12 +13,12 @@ class CalibratorWindDirection : public Calibrator {
    public:
       CalibratorWindDirection(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const {return "windDirection";};
+      std::string name() const override {return "windDirection";};
       //! Get multiplication factor for given wind direction
       //! @param iWindDirection in degrees, meteorological wind direction (0 degrees is from North)
       static float getFactor(float iWindDirection, const Parameters& iPar);
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
 };
 #endif

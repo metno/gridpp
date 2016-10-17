@@ -8,10 +8,10 @@ class CalibratorWindow : public Calibrator {
    public:
       CalibratorWindow(Variable::Type iVariable, const Options& iOptions);
       static std::string description();
-      std::string name() const {return "window";};
-      bool requiresParameterFile() const { return false;};
+      std::string name() const override {return "window";};
+      bool requiresParameterFile() const override { return false;};
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       Variable::Type mVariable;
       int mRadius;
       Util::StatType mStatType;

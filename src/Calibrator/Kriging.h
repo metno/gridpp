@@ -16,15 +16,15 @@ class CalibratorKriging : public Calibrator {
          TypeBarnes   = 20
       };
       //! Compute the bias at the training point
-      Parameters train(const std::vector<ObsEns>& iData) const;
+      Parameters train(const std::vector<ObsEns>& iData) const override;
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
 
       Variable::Type mVariable;
       float mRadius;
       float mMaxElevDiff;
       float mEfoldDist;
-      std::string name() const {return "kriging";};
+      std::string name() const override {return "kriging";};
       File* mPrevious;
       Variable::Type mAuxVariable;
       float mLowerThreshold;

@@ -8,7 +8,7 @@ class CalibratorPhase : public Calibrator {
    public:
       CalibratorPhase(const Options& iOptions);
       static std::string description();
-      std::string name() const {return "phase";};
+      std::string name() const override {return "phase";};
       //! Compute wetbulb temperature
       //! @param iTemperature Temperature in K
       //! @param iPressure Pressure in pa
@@ -21,7 +21,7 @@ class CalibratorPhase : public Calibrator {
       void  setUseWetbulb(bool iUseWetbulb);
       bool  getUseWetbulb();
    private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const override;
       float mMinPrecip;
       bool mUseWetbulb;
       //! If true compute pressure based on standard atmosphere (instead of using forecasted data)

@@ -2,6 +2,8 @@
 #include "../File/File.h"
 #include "../Util.h"
 #include <math.h>
+#include <algorithm>
+#include <cassert>
 
 DownscalerSmart::DownscalerSmart(Variable::Type iVariable, const Options& iOptions) :
       Downscaler(iVariable, iOptions),

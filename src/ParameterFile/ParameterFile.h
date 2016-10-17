@@ -17,6 +17,8 @@ class ParameterFile : public Scheme {
    public:
       ParameterFile(const Options& iOptions, bool iIsNew=false);
 
+      virtual ~ParameterFile() = default;
+
       //! Get the parameter valid for specified forecast timestep. This is an index, not an hour.
       //! @param iAllowNearestNeighbour Use the nearest neighbour if the location isn't in the set
       Parameters getParameters(int iTime, const Location& iLocation, bool iAllowNearestNeighbour=true) const;

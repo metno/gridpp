@@ -2,7 +2,6 @@
 #define FILE_H
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
 #include "../Variable.h"
 #include "../Uuid.h"
 #include "../Field.h"

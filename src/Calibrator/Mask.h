@@ -13,5 +13,6 @@ class CalibratorMask : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
+      bool mUseNearestOnly;
 };
 #endif

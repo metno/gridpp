@@ -6,7 +6,9 @@
 CalibratorMask::CalibratorMask(Variable::Type iVariable, const Options& iOptions) :
       Calibrator(iOptions),
       mVariable(iVariable),
-      mUseNearestOnly(false) {
+      mUseNearestOnly(false),
+      mKeep(true) {
+   iOptions.getValue("keep", mKeep);
 }
 bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(!iParameterFile->isLocationDependent()) {
@@ -22,11 +24,12 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
-   vec2 keep;
-   keep.resize(nLat);
+   vec2 isWithinRadius;
+
+   // Stores if a certain gridpoint is within some radius of influence
+   isWithinRadius.resize(nLat);
    for(int i = 0; i < nLat; i++) {
-      // Default to not keep, unless we find a parameter point within the radius
-      keep[i].resize(nLon, 0);
+      isWithinRadius[i].resize(nLon, 0);
    }
 
    for(int t = 0; t < nTime; t++) {
@@ -42,7 +45,7 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
                   Parameters parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
                   float dist = currLocation.getDistance(loc);
                   if(Util::isValid(dist) && dist < parameters[0]) {
-                     keep[i][j] = 1;
+                     isWithinRadius[i][j] = 1;
                   }
                }
                else {
@@ -51,12 +54,15 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
                      Parameters parameters = iParameterFile->getParameters(t, locations[k]);
                      float dist = currLocation.getDistance(locations[k]);
                      if(Util::isValid(dist) && dist < parameters[0]) {
-                        keep[i][j] = 1;
+                        isWithinRadius[i][j] = 1;
                      }
                   }
                }
             }
-            if(keep[i][j] == 0) {
+            // Remove the point if keep and we are not within the radius or we don't keep and are
+            // inside
+            bool remove = mKeep != isWithinRadius[i][j];
+            if(remove) {
                for(int e = 0; e < nEns; e++) {
                   (*field)(i,j,e) = Util::MV;
                }
@@ -70,6 +76,7 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
 
 std::string CalibratorMask::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c mask", "Only keep gridpoints that are within a certain radius of points in the parameter file. All other gridpoints are set to missing. The parameter file must be spatial and conain one parameter representing the radius in meters. Each gridpoint is checked against each parameter point to see if the gridpoint is within its radius.") << std::endl;
+   ss << Util::formatDescription("-c mask", "Allows removal of gridpoints that are not within (or alternatively within) a radius of a set of points provided in a parameter file. The removed gridpoints are set to missing. The parameter file must be spatial and conain one parameter representing the radius in meters. Each gridpoint is checked against each parameter point to see if the gridpoint is within its radius.") << std::endl;
+   ss << Util::formatDescription("   keep=1", "If 1, then all gridpoints within the radius of any parameter point will be kept. If 0, then all gridpoints within the radius of any parameter point will be removed.") << std::endl;
    return ss.str();
 }

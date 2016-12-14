@@ -52,6 +52,7 @@ class Calibrator : public Scheme {
 #include "Gaussian.h"
 #include "Kriging.h"
 #include "Neighbourhood.h"
+#include "Mask.h"
 #include "Phase.h"
 #include "Qc.h"
 #include "Qnh.h"

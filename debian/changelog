@@ -1,3 +1,9 @@
+gridpp (0.2.7) precise; urgency=low
+
+  * Adds -c mask
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Thu, 17 Nov 2016 15:36:47 +0100
+
 gridpp (0.2.6) precise; urgency=low
 
   * Adds precipitation rate variable

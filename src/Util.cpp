@@ -498,7 +498,7 @@ float Util::interpolate(float x, const std::vector<float>& iX, const std::vector
 }
 
 std::vector<float> Util::regression(const std::vector<float>& iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst) {
-   int N = iPredictors.size(); // Number of predictors
+   int N = iPredictors.size() + iAddConst; // Number of predictors
    int T = iPredictand.size();
 
    if(T < 2) {
@@ -511,58 +511,76 @@ std::vector<float> Util::regression(const std::vector<float>& iPredictand, const
       }
    }
 
-   boost::numeric::ublas::matrix<float> A(T,N+iAddConst);
-   boost::numeric::ublas::matrix<float> y(T,1);
+   boost::numeric::ublas::matrix<double> A(T,N);
+   boost::numeric::ublas::matrix<double> y(T,1);
    for(int t = 0; t < T; t++) {
       for(int n = 0; n < N; n++) {
-         A(t,n+iAddConst) = iPredictors[n][t];
+         if(iAddConst) {
+            if(n == 0)
+               A(t, n) = 1;
+            else
+               A(t, n) = iPredictors[n-1][t];
+         }
+         else {
+            A(t,n) = iPredictors[n][t];
+         }
          y(t,0) = iPredictand[t];
       }
    }
 
-   // Add constant term
-   if(iAddConst) {
-      for(int t = 0; t < T; t++) {
-         A(t,0) = 1;
-      }
-   }
+#if 0
+   std::cout << "\nX" << std::endl;
    for(int i = 0; i < A.size1(); i++) {
       for(int j = 0; j < A.size2(); j++) {
          std::cout << A(i,j) << " ";
       }
       std::cout << std::endl;
    }
+#endif
 
    using namespace boost::numeric::ublas;
-   matrix<float> solution(T,1);
-   matrix<float> XTX(T,T);
-   matrix<float> XT = trans(A);
+   matrix<double> solution(T,1);
+   matrix<double> XTX(T,T);
+   matrix<double> XT = trans(A);
    XTX = prod(XT, A);
+
+# if 0
+   std::cout << "\nXTX" << std::endl;
    for(int i = 0; i < XTX.size1(); i++) {
       for(int j = 0; j < XTX.size2(); j++) {
          std::cout << XTX(i,j) << " ";
       }
       std::cout << std::endl;
    }
-   matrix<float> XTXinv(N,N);
-   XTXinv.assign(identity_matrix<float>(N)); 
+#endif
+   matrix<double> XTXinv(N,N);
+   XTXinv.assign(identity_matrix<double>(N)); 
 
    typedef permutation_matrix<std::size_t> pmatrix; 
    pmatrix pm(XTX.size1());
    int res = lu_factorize(XTX,pm);
    assert(res == 0);
+
+#if 0
+   std::cout << "\npm" << std::endl;
+   for(int i = 0; i < XTX.size1(); i++) {
+      std::cout << pm(i) << " ";
+   }
+   std::cout << std::endl;
+#endif
+
    lu_substitute(XTX, pm, XTXinv);
-   matrix<float> XTXinvXTy(N,N);
-   matrix<float> XTXinvXT = prod(XTXinv,XT);
+   matrix<double> XTXinvXTy(N,N);
+   matrix<double> XTXinvXT = prod(XTXinv,XT);
    solution = prod(XTXinvXT, y);
 
    //boost::numeric::ublas::identity_matrix<float> Ainv(A.size1());
    //boost::numeric::ublas::permutation_matrix<size_t> pm(A.size1());
    //boost::numeric::ublas::lu_factorize(A, pm);
    //boost::numeric::ublas::lu_substitute(A, pm, y);
-   std::vector<float> values(T, 0);
-   for(int t = 0; t < T; t++) {
-      values[t] = solution(t,0);
+   std::vector<float> values(N, 0);
+   for(int n = 0; n < N; n++) {
+      values[n] = solution(n,0);
    }
    return values;
 }

@@ -111,6 +111,7 @@ int main(int argc, const char *argv[]) {
 
    // vec2Int Io2f, Jo2f;
    // Downscaler::getNearestNeighbour(*observation, *forecast, Io2f, Jo2f);
+   // Indicies into forecast grid for a given obs grid point
    vec2Int If2o, Jf2o;
    Downscaler::getNearestNeighbour(*forecast, *observation, If2o, Jf2o);
    std::cout << "Created nearest neighbour map" << std::endl;
@@ -229,9 +230,12 @@ int main(int argc, const char *argv[]) {
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             for(int j = 0; j < nLon; j++) {
-               int iobs = If2o[i][j];
-               int jobs = Jf2o[i][j];
-               Parameters par = setup.method->train(data, obsGrid, ensGrid, iobs, jobs, i, j);
+               int iens = If2o[i][j];
+               int jens = Jf2o[i][j];
+               if(i == 54 && j == 16) {
+                  std::cout << iens << " " << jens << " " << lats[iens][jens] << " " << lons[iens][jens] << std::endl;
+               }
+               Parameters par = setup.method->train(data, obsGrid, ensGrid, i, j, iens, jens);
                parameters[i][j] = par.getValues();
             }
          }

@@ -9,7 +9,7 @@ CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iO
       Calibrator(iOptions),
       mVariable(iVariable),
       mSearchRadius(3),
-      mMinLsmDiff(0.4) {
+      mMinLsmDiff(0.1) {
    iOptions.getValue("searchRadius", mSearchRadius);
    iOptions.getValue("minLsmDiff", mMinLsmDiff);
 }
@@ -26,15 +26,18 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
    if(iParameterFile->getNumParameters() == 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one dataacolumns");
    }
+   if(iParameterFile->isLocationDependent() == 0) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must be spatial");
+   }
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Parameters parameters;
       if(!iParameterFile->isLocationDependent())
-         parameters = iParameterFile->getParameters(t);
+          parameters = iParameterFile->getParameters(t);
       const FieldPtr field = iFile.getField(mVariable, t);
 
-      #pragma omp parallel for
+      #pragma omp parallel for private(parameters)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             if(iParameterFile->isLocationDependent())
@@ -53,7 +56,7 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
                         lowerValue = (*field)(ii,jj,e);
                         minLsm = currLsm;
                      }
-                     if(currLsm > minLsm) {
+                     if(currLsm > maxLsm) {
                         upperValue = (*field)(ii,jj,e);
                         maxLsm = currLsm;
                      }
@@ -65,11 +68,14 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
                float c = parameters[2];
                // If there is not sufficient variability in LSM in the neighbourhood, then
                // force don't use the range in the regression
-               float range = 0;
+               float gradient = 0;
                if(Util::isValid(lowerValue) && Util::isValid(upperValue) && (maxLsm - minLsm > mMinLsmDiff))
-                  range = upperValue - lowerValue;
+                  gradient = (upperValue - lowerValue) / (maxLsm - minLsm);
+               assert(Util::isValid(gradient));
+               assert(Util::isValid(nearestNeighbour));
 
-               float value = a + b * nearestNeighbour + c * range;
+               float value = a + b * nearestNeighbour + c * gradient;
+               assert(Util::isValid(value));
                (*field)(i,j,e) = value;
             }
          }
@@ -80,7 +86,6 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
 
 Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const Grid& iObsGrid, const Grid& iEnsGrid, int iIobs, int iJobs, int iIens, int iJens) const {
    std::vector<float> y;
-   std::vector<std::vector<float> > x(3);
    int nLat = iData[0].second->getNumLat();
    int nLon = iData[0].second->getNumLon();
    vec2 lsm = iEnsGrid.landFractions();
@@ -103,7 +108,7 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
             Jmin = jj;
             minLsm = currLsm;
          }
-         if(currLsm > minLsm) {
+         if(currLsm > maxLsm) {
             Imax = ii;
             Jmax = jj;
             maxLsm = currLsm;
@@ -111,10 +116,17 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
       }
    }
 
+   bool useRange = (maxLsm - minLsm) > mMinLsmDiff;
+   if(!useRange && 0)
+      std::cout << "not using range for " << iIens << "," << iJens << " range = " << (maxLsm - minLsm) << std::endl;
+   // useRange = 0;
+
    assert(Util::isValid(Imax));
    assert(Util::isValid(Jmax));
 
    // Compute predictors in model
+   std::vector<float> values;
+   std::vector<std::vector<float> > x(2);
    for(int i = 0; i < iData.size(); i++) {
       float obs = (*iData[i].first)(iIobs, iJobs, 0);
       std::vector<float> ensMin = (*iData[i].second)(Imin, Jmin);
@@ -124,13 +136,15 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
       std::vector<float> ensNn = (*iData[i].second)(iIens, iJens);
       float valueNn = Util::calculateStat(ensNn, Util::StatTypeMean);
       if(Util::isValid(obs) && Util::isValid(valueNn)) {
-         float range = 0;
+         float gradient = 0;
          if(Util::isValid(valueMin) && Util::isValid(valueMax))
-            range = valueMax - valueMin;
-         y.push_back(obs);
+            gradient = (valueMax - valueMin)/(maxLsm - minLsm);
+         y.push_back(obs-valueNn);
          x[0].push_back(1);
-         x[1].push_back(valueNn);
-         x[2].push_back(range);
+         x[1].push_back(gradient);
+         if(iIobs == 54 && iJobs == 16) {
+            std::cout << obs-valueNn << " " << gradient << std::endl;
+         }
       }
    }
 
@@ -140,7 +154,35 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
       Util::error(ss.str());
    }
 
-   std::vector<float> values = Util::regression(y, x, false);
+   // a + 1*Tnn + c * range
+   if(useRange) {
+      std::vector<float> values2 = Util::regression(y, x, false);
+      values.push_back(values2[0]);
+      values.push_back(1);
+      values.push_back(values2[1]);
+      // values.push_back(0);
+      // values.push_back(1);
+      // values.push_back(0);
+   }
+   // a + 1*Tnn + 0 * range
+   else {
+      float total = 0;
+      int counter = 0;
+      for(int i = 0; i < y.size(); i++) {
+         if(Util::isValid(y[i])) {
+            total += y[i];
+            counter++;
+         }
+      }
+      float a = 0;
+      if(counter > 0)
+         a = total / counter;
+      values.push_back(a);
+      values.push_back(1);
+      values.push_back(0);
+      assert(Util::isValid(a));
+   }
+
    Parameters par(values);
 
    return par;
@@ -150,6 +192,6 @@ std::string CalibratorCoastal::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c coastal", "Weights land and sea forecasts") << std::endl;
    ss << Util::formatDescription("   searchRadius=3", "") << std::endl;
-   ss << Util::formatDescription("   minLsmDiff=0.4", "Minimum difference in LSM in order to use the  land and sea points") << std::endl;
+   ss << Util::formatDescription("   minLsmDiff=0.1", "Minimum difference in LSM in order to use the  land and sea points") << std::endl;
    return ss.str();
 }

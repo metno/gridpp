@@ -62,19 +62,31 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
                // Diagnose wind speed from U and V
-               if(mOutputVariable == Variable::W) {
+               if(mOutputVariable == Variable::W && iFile.hasVariable(Variable::U)) {
+                  const Field& fieldU = *iFile.getField(Variable::U, t);
+                  const Field& fieldV = *iFile.getField(Variable::V, t);
+                  if(Util::isValid(fieldU(i,j,e)) && Util::isValid(fieldV(i,j,e)))
+                     output(i,j,e) = sqrt(fieldU(i,j,e)*fieldU(i,j,e) + fieldV(i,j,e)*fieldV(i,j,e));
+               }
+               else if(mOutputVariable == Variable::W && iFile.hasVariable(Variable::Xwind)) {
+                  const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
+                  const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
+                  if(Util::isValid(fieldXwind(i,j,e)) && Util::isValid(fieldYwind(i,j,e)))
+                     output(i,j,e) = sqrt(fieldXwind(i,j,e)*fieldXwind(i,j,e) + fieldYwind(i,j,e)*fieldYwind(i,j,e));
                }
                // Diagnose U from W and WD
                else if(mOutputVariable == Variable::U || mOutputVariable == Variable::Xwind) {
                   const Field& fieldW = *iFile.getField(Variable::W, t);
                   const Field& fieldWD = *iFile.getField(Variable::WD, t);
-                  output(i,j,e) = - fieldW(i,j,e) * sin(fieldWD(i,j,e) / 180.0 * Util::pi);
+                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e)))
+                     output(i,j,e) = - fieldW(i,j,e) * sin(fieldWD(i,j,e) / 180.0 * Util::pi);
                }
                // Diagnose V from W and WD
                else if(mOutputVariable == Variable::V || mOutputVariable == Variable::Ywind) {
                   const Field& fieldW = *iFile.getField(Variable::W, t);
                   const Field& fieldWD = *iFile.getField(Variable::WD, t);
-                  output(i,j,e) = - fieldW(i,j,e) * cos(fieldWD(i,j,e) / 180.0 * Util::pi);
+                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e)))
+                     output(i,j,e) = - fieldW(i,j,e) * cos(fieldWD(i,j,e) / 180.0 * Util::pi);
                }
             }
          }

@@ -39,7 +39,9 @@ namespace {
       calW.calibrate(from, NULL);
       calWD.calibrate(from, NULL);
 
+      // Diagnose W
       FieldPtr fieldW = from.getField(Variable::W, 0);
+      EXPECT_FLOAT_EQ(1.8898070623831842, (*fieldW)(5,2,0));
       (*fieldW)(5,2,0) = 13;
 
       // Re-diagnose the new U and V
@@ -52,10 +54,10 @@ namespace {
       FieldPtr fieldV = from.getField(Variable::V, 0);
       FieldPtr fieldXwind = from.getField(Variable::Xwind, 0);
       FieldPtr fieldYwind = from.getField(Variable::Ywind, 0);
-      EXPECT_FLOAT_EQ(-12.978647, (*fieldU)(5,2,0)); 
-      EXPECT_FLOAT_EQ(-0.74479485, (*fieldV)(5,2,0)); 
-      EXPECT_FLOAT_EQ(-12.978647, (*fieldXwind)(5,2,0)); 
-      EXPECT_FLOAT_EQ(-0.74479485, (*fieldYwind)(5,2,0)); 
+      EXPECT_FLOAT_EQ(-12.978647, (*fieldU)(5,2,0));
+      EXPECT_FLOAT_EQ(-0.74479485, (*fieldV)(5,2,0));
+      EXPECT_FLOAT_EQ(-12.978647, (*fieldXwind)(5,2,0));
+      EXPECT_FLOAT_EQ(-0.74479485, (*fieldYwind)(5,2,0));
    }
    TEST_F(TestCalibratorDiagnose, DontKnowHow) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

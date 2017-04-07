@@ -1,6 +1,7 @@
 #include "Diagnose.h"
 #include "../Util.h"
 #include "../File/File.h"
+#include <cmath>
 CalibratorDiagnose::CalibratorDiagnose(Variable::Type iVariable, const Options& iOptions) :
       Calibrator(iOptions),
       mOutputVariable(iVariable) {
@@ -46,7 +47,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
    }
 
    for(int i = 0; i < requiredVariables.size(); i++) {
-      if(!iFile.hasVariable(requiredVariables[i])) {
+      if(!iFile.hasVariableWithoutDeriving(requiredVariables[i])) {
          std::stringstream ss;
          ss << "Cannot diagnose " << Variable::getTypeName(mOutputVariable)
             << " because " << Variable::getTypeName(requiredVariables[i]) << " is missing";
@@ -57,39 +58,106 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
    // Get all fields
    for(int t = 0; t < nTime; t++) {
       Field& output = *iFile.getField(mOutputVariable, t);
-      #pragma omp parallel for
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            for(int e = 0; e < nEns; e++) {
-               // Diagnose wind speed from U and V
-               if(mOutputVariable == Variable::W && iFile.hasVariable(Variable::U)) {
-                  const Field& fieldU = *iFile.getField(Variable::U, t);
-                  const Field& fieldV = *iFile.getField(Variable::V, t);
+      // Diagnose W from U and V
+      if(mOutputVariable == Variable::W && iFile.hasVariableWithoutDeriving(Variable::U)) {
+         const Field& fieldU = *iFile.getField(Variable::U, t);
+         const Field& fieldV = *iFile.getField(Variable::V, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
                   if(Util::isValid(fieldU(i,j,e)) && Util::isValid(fieldV(i,j,e)))
                      output(i,j,e) = sqrt(fieldU(i,j,e)*fieldU(i,j,e) + fieldV(i,j,e)*fieldV(i,j,e));
                }
-               else if(mOutputVariable == Variable::W && iFile.hasVariable(Variable::Xwind)) {
-                  const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
-                  const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
-                  if(Util::isValid(fieldXwind(i,j,e)) && Util::isValid(fieldYwind(i,j,e)))
-                     output(i,j,e) = sqrt(fieldXwind(i,j,e)*fieldXwind(i,j,e) + fieldYwind(i,j,e)*fieldYwind(i,j,e));
-               }
-               // Diagnose U from W and WD
-               else if(mOutputVariable == Variable::U || mOutputVariable == Variable::Xwind) {
-                  const Field& fieldW = *iFile.getField(Variable::W, t);
-                  const Field& fieldWD = *iFile.getField(Variable::WD, t);
-                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e)))
-                     output(i,j,e) = - fieldW(i,j,e) * sin(fieldWD(i,j,e) / 180.0 * Util::pi);
-               }
-               // Diagnose V from W and WD
-               else if(mOutputVariable == Variable::V || mOutputVariable == Variable::Ywind) {
-                  const Field& fieldW = *iFile.getField(Variable::W, t);
-                  const Field& fieldWD = *iFile.getField(Variable::WD, t);
-                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e)))
-                     output(i,j,e) = - fieldW(i,j,e) * cos(fieldWD(i,j,e) / 180.0 * Util::pi);
+            }
+         }
+      }
+      // Diagnose W from Xwind and Ywind
+      else if(mOutputVariable == Variable::W && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
+         const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
+         const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid(fieldXwind(i,j,e)) && Util::isValid(fieldYwind(i,j,e))) {
+                      output(i,j,e) = sqrt(fieldXwind(i,j,e)*fieldXwind(i,j,e) + fieldYwind(i,j,e)*fieldYwind(i,j,e));
+                  }
                }
             }
          }
+      }
+      // Diagnose WD from U and V
+      else if(mOutputVariable == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::U)) {
+         const Field& fieldU = *iFile.getField(Variable::U, t);
+         const Field& fieldV = *iFile.getField(Variable::V, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid(fieldU(i,j,e)) && Util::isValid(fieldV(i,j,e))) {
+                     float dir = std::atan2(-fieldU(i,j,e), -fieldV(i,j,e)) * 180 / Util::pi;
+                     if(dir < 0)
+                        dir += 360;
+                     output(i,j,e) = dir;
+                  }
+               }
+            }
+         }
+      }
+      // Diagnose WD from Xwind and Ywind
+      else if(mOutputVariable == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
+         const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
+         const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid(fieldXwind(i,j,e)) && Util::isValid(fieldYwind(i,j,e))) {
+                     float dir = std::atan2(-fieldXwind(i,j,e), -fieldYwind(i,j,e)) * 180 / Util::pi;
+                     if(dir < 0)
+                        dir += 360;
+                     output(i,j,e) = dir;
+                  }
+               }
+            }
+         }
+      }
+      // Diagnose U from W and WD
+      else if(mOutputVariable == Variable::U || mOutputVariable == Variable::Xwind) {
+         const Field& fieldW = *iFile.getField(Variable::W, t);
+         const Field& fieldWD = *iFile.getField(Variable::WD, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e))) {
+                     output(i,j,e) = -fieldW(i,j,e) * sin(fieldWD(i,j,e) / 180.0 * Util::pi);
+                  }
+               }
+            }
+         }
+      }
+      // Diagnose V from W and WD
+      else if(mOutputVariable == Variable::V || mOutputVariable == Variable::Ywind) {
+         const Field& fieldW = *iFile.getField(Variable::W, t);
+         const Field& fieldWD = *iFile.getField(Variable::WD, t);
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid(fieldW(i,j,e)) && Util::isValid(fieldWD(i,j,e))) {
+                     output(i,j,e) = - fieldW(i,j,e) * cos(fieldWD(i,j,e) / 180.0 * Util::pi);
+                  }
+               }
+            }
+         }
+      }
+      else {
+         // This part should never happen, since it should have been caught ealier
+         std::stringstream ss;
+         ss << "Cannot diagnose " << Variable::getTypeName(mOutputVariable);
+         Util::error(ss.str());
       }
    }
    return true;

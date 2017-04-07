@@ -49,6 +49,9 @@ class File {
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(Variable::Type iVariable) const;
 
+      //! Does this file provide the variable (without deriving it)?
+      bool hasVariableWithoutDeriving(Variable::Type iVariable) const;
+
       std::string getFilename() const;
 
       bool hasSameDimensions(const File& iOther) const;

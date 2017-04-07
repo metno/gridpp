@@ -39,6 +39,11 @@ namespace {
       EXPECT_FLOAT_EQ(0.911191, (*precip)(5,5,0));
       EXPECT_FLOAT_EQ(0,        (*precipAcc)(5,5,0));
    }
+   TEST_F(FileTest, hasVariableWithoutDeriving) {
+      FileArome from("testing/files/10x10.nc");
+      EXPECT_FALSE(from.hasVariableWithoutDeriving(Variable::PrecipAcc)); // Derivable
+      EXPECT_TRUE(from.hasVariableWithoutDeriving(Variable::Precip));
+   }
    TEST_F(FileTest, hasSameDimensions) {
       FileArome f1("testing/files/10x10.nc");
       FileArome f2("testing/files/10x10_copy.nc");
@@ -92,6 +97,14 @@ namespace {
       EXPECT_FLOAT_EQ(0,        (*acc0)(0,0,0));
       EXPECT_FLOAT_EQ(4.6,      (*acc1)(0,0,0));
       EXPECT_FLOAT_EQ(10.7,     (*acc2)(0,0,0));
+   }
+   TEST_F(FileTest, diagnoseW) {
+      FileArome file("testing/files/10x10.nc");
+      ASSERT_FALSE(file.hasVariableWithoutDeriving(Variable::W));
+      ASSERT_TRUE(file.hasVariableWithoutDeriving(Variable::Xwind));
+      ASSERT_TRUE(file.hasVariableWithoutDeriving(Variable::Ywind));
+      FieldPtr field = file.getField(Variable::W, 0);
+      EXPECT_FLOAT_EQ(1.8898070623831842, (*field)(5,2,0));
    }
    TEST_F(FileTest, impossibleDerive) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";

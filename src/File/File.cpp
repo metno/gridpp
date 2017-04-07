@@ -156,7 +156,9 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                      for(int e = 0; e < getNumEns(); e++) {
                         float currU = (*u)(lat,lon,e);
                         float currV = (*v)(lat,lon,e);
-                        (*windSpeed)(lat,lon,e) = sqrt(currU*currU + currV*currV);
+                        if(Util::isValid(currU) && Util::isValid(currV)) {
+                           (*windSpeed)(lat,lon,e) = sqrt(currU*currU + currV*currV);
+                        }
                      }
                   }
                }
@@ -173,7 +175,9 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                      for(int e = 0; e < getNumEns(); e++) {
                         float currX = (*x)(lat,lon,e);
                         float currY = (*y)(lat,lon,e);
-                        (*windSpeed)(lat,lon,e) = sqrt(currX*currX + currY*currY);
+                        if(Util::isValid(currX) && Util::isValid(currY)) {
+                           (*windSpeed)(lat,lon,e) = sqrt(currX*currX + currY*currY);
+                        }
                      }
                   }
                }
@@ -195,10 +199,12 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                      for(int e = 0; e < getNumEns(); e++) {
                         float currU = (*u)(lat,lon,e);
                         float currV = (*v)(lat,lon,e);
-                        float dir = std::atan2(-currU,-currV) * 180 / Util::pi;
-                        if(dir < 0)
-                           dir += 360;
-                        (*windDir)(lat,lon,e) = dir;
+                        if(Util::isValid(currU) && Util::isValid(currV)) {
+                           float dir = std::atan2(-currU,-currV) * 180 / Util::pi;
+                           if(dir < 0)
+                              dir += 360;
+                           (*windDir)(lat,lon,e) = dir;
+                        }
                      }
                   }
                }
@@ -215,10 +221,12 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
                      for(int e = 0; e < getNumEns(); e++) {
                         float currX = (*x)(lat,lon,e);
                         float currY = (*y)(lat,lon,e);
-                        float dir = std::atan2(-currX,-currY) * 180 / Util::pi;
-                        if(dir < 0)
-                           dir += 360;
-                        (*windDir)(lat,lon,e) = dir;
+                        if(Util::isValid(currX) && Util::isValid(currY)) {
+                           float dir = std::atan2(-currX,-currY) * 180 / Util::pi;
+                           if(dir < 0)
+                              dir += 360;
+                           (*windDir)(lat,lon,e) = dir;
+                        }
                      }
                   }
                }
@@ -323,10 +331,14 @@ bool File::hasVariable(Variable::Type iVariable) const {
       return (hasVariableCore(Variable::V) && hasVariableCore(Variable::U)) ||
              (hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind));
    }
-   
+
    // Check if field has been initialized
    std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    return it != mFields.end();
+}
+
+bool File::hasVariableWithoutDeriving(Variable::Type iVariable) const {
+   return hasVariableCore(iVariable);
 }
 void File::clear() {
    mFields.clear();

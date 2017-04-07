@@ -338,7 +338,13 @@ bool File::hasVariable(Variable::Type iVariable) const {
 }
 
 bool File::hasVariableWithoutDeriving(Variable::Type iVariable) const {
-   return hasVariableCore(iVariable);
+   bool status = hasVariableCore(iVariable);
+   if(status)
+      return true;
+
+   // Check if field has been initialized
+   std::map<Variable::Type, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
+   return it != mFields.end();
 }
 void File::clear() {
    mFields.clear();

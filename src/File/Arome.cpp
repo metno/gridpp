@@ -526,8 +526,8 @@ bool FileArome::isValid(std::string iFilename) {
                (hasDim(file, "y") || hasDim(file, "rlat")) &&
                !hasDim(file, "ensemble_member") &&
                hasVar(file, "latitude") && hasVar(file, "longitude");
+      nc_close(file);
    }
-   nc_close(file);
    return isValid;
 }
 

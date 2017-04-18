@@ -76,6 +76,12 @@ FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
       needsReading = mFields[iVariable][iTime] == NULL;
    }
    else {
+      if(getNumTime() <= iTime) {
+         std::stringstream ss;
+         ss << "Attempted to access variable '" << Variable::getTypeName(iVariable) << "' for time " << iTime
+            << " in file '" << getFilename() << "'";
+         Util::error(ss.str());
+      }
       mFields[iVariable].resize(getNumTime());
    }
 

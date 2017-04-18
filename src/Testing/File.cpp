@@ -124,6 +124,16 @@ namespace {
       FileArome f1("testing/files/10x10.nc");
       EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
    }
+   TEST_F(FileTest, getFieldInvalidTimeAfterValidAccess) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+
+      FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
+      f0.getField(Variable::T, 0);
+      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
+      FileArome f1("testing/files/10x10.nc");
+      EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
+   }
    TEST_F(FileTest, getFieldInvalidTimePreviouslyRead) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

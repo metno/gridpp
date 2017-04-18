@@ -157,6 +157,15 @@ Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
 
       return c;
    }
+   else if(iName == "mask") {
+      std::string variable;
+      if(!iOptions.getValue("variable", variable)) {
+         Util::error("Calibrator 'mask' needs variable");
+      }
+      CalibratorMask* c = new CalibratorMask(Variable::getType(variable), iOptions);
+
+      return c;
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
@@ -213,6 +222,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorNeighbourhood::description() << std::endl;
+   ss << CalibratorMask::description() << std::endl;
    ss << CalibratorPhase::description() << std::endl;
    ss << CalibratorQc::description() << std::endl;
    ss << CalibratorQnh::description() << std::endl;

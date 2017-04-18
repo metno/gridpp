@@ -534,9 +534,9 @@ bool FileArome::isValid(std::string iFilename) {
 std::string FileArome::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=arome", "AROME file") << std::endl;
-   ss << Util::formatDescription("lat=latitude", "Name of the variable representing latitudes") << std::endl;
-   ss << Util::formatDescription("lon=longitude", "Name of the variable representing longitudes") << std::endl;
-   ss << Util::formatDescription("x=undef", "Name of dimension in the x-direction. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("y=undef", "Name of dimension in the y-direction. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   lat=latitude", "Name of the variable representing latitudes") << std::endl;
+   ss << Util::formatDescription("   lon=longitude", "Name of the variable representing longitudes") << std::endl;
+   ss << Util::formatDescription("   x=undef", "Name of dimension in the x-direction. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   y=undef", "Name of dimension in the y-direction. If unspecified, the name is auto-detected.") << std::endl;
    return ss.str();
 }

@@ -1,3 +1,9 @@
+gridpp (0.2.8) precise; urgency=low
+
+  * Fixes bug with -c diagnose in multi-thread mode
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Mon, 18 Apr 2017 15:14:00 +0100
+
 gridpp (0.2.7) precise; urgency=low
 
   * Adds -c mask

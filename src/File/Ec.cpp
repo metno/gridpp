@@ -220,6 +220,9 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::TMax) {
       return "air_temperature_2m_max6h";
    }
+   else if(iVariable == Variable::TD) {
+      return "dew_point_temperature_2m";
+   }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
    }

@@ -27,6 +27,8 @@ std::string Variable::getTypeName(Type iType) {
       return "TMin";
    else if(iType == TMax)
       return "TMax";
+   else if(iType == TD)
+      return "TD";
    else if(iType == U)
       return "U";
    else if(iType == Xwind)
@@ -84,6 +86,8 @@ Variable::Type Variable::getType(std::string iName) {
       return TMin;
    else if(iName == "TMax")
       return TMax;
+   else if(iName == "TD")
+      return TD;
    else if(iName == "U")
       return U;
    else if(iName == "Xwind")
@@ -121,6 +125,7 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v T", "Temperature") << std::endl;
    ss << Util::formatDescription("-v TMin", "Minimum temperature") << std::endl;
    ss << Util::formatDescription("-v TMax", "Maximum temperature") << std::endl;
+   ss << Util::formatDescription("-v TD", "Dew point temperature") << std::endl;
    ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;
    ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
    ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
@@ -185,6 +190,8 @@ float Variable::getMin(Type iType) {
          return 0;
       case TMax:
          return 0;
+      case TD:
+         return 0;
       case Precip:
          return 0;
       case PrecipAcc:
@@ -242,6 +249,8 @@ float Variable::getMax(Type iType) {
          return Util::MV;
       case TMax:
          return Util::MV;
+      case TD:
+         return Util::MV;
       case Precip:
          return Util::MV;
       case PrecipAcc:
@@ -297,6 +306,8 @@ std::string Variable::getUnits(Type iType) {
       case TMin:
          return "K";
       case TMax:
+         return "K";
+      case TD:
          return "K";
       case Precip:
          return "kg/m^2";
@@ -354,6 +365,8 @@ std::string Variable::getStandardName(Type iType) {
          return "air_temperature";
       case TMax:
          return "air_temperature";
+      case TD:
+         return "dew_point_temperature";
       case Precip:
          return "precipitation_amount";
       case PrecipAcc:

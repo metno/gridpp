@@ -59,6 +59,21 @@ namespace {
       EXPECT_FLOAT_EQ(-12.978647, (*fieldXwind)(5,2,0));
       EXPECT_FLOAT_EQ(-0.74479485, (*fieldYwind)(5,2,0));
    }
+   TEST_F(TestCalibratorDiagnose, dewpoint2RH) {
+      // EXPECT_FLOAT_EQ(0.9, CalibratorDiagnose::dewpoint2RH(273.15, 273.15-1.27));
+      EXPECT_FLOAT_EQ(1, CalibratorDiagnose::dewpoint2RH(273.15, 273.15));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnose::dewpoint2RH(Util::MV, 273.15-1.27));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnose::dewpoint2RH(273.15, Util::MV));
+   }
+   TEST_F(TestCalibratorDiagnose, RH2dewpoint) {
+      // EXPECT_FLOAT_EQ(273.15-1.27, CalibratorDiagnose::RH2dewpoint(273.15, 0.9));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnose::RH2dewpoint(Util::MV, 0.9));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnose::RH2dewpoint(273.15, Util::MV));
+   }
+   TEST_F(TestCalibratorDiagnose, both) {
+      // EXPECT_FLOAT_EQ(0.9, CalibratorDiagnose::dewpoint2RH(273.15, CalibratorDiagnose::RH2dewpoint(273.15, 0.9)));
+      // EXPECT_FLOAT_EQ(1, CalibratorDiagnose::dewpoint2RH(273.15, CalibratorDiagnose::RH2dewpoint(273.15, 1)));
+   }
    TEST_F(TestCalibratorDiagnose, DontKnowHow) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);

@@ -76,6 +76,30 @@ namespace {
       EXPECT_FLOAT_EQ(33, (*temp)(0,2,1));
    }
 
+   TEST_F(FileEcTest, multidim_altitude) {
+      // In this test, the altitude field has extra surface and ensemble dimension
+      Util::setShowWarning(true);
+      FileEc file1("testing/files/validEc_multidim_altitude.nc");
+      vec2 lats = file1.getLats();
+      vec2 lons = file1.getLons();
+      vec2 elevs = file1.getElevs();
+      ASSERT_EQ(3, lats.size());
+      ASSERT_EQ(3, lons.size());
+      ASSERT_EQ(3, elevs.size());
+      ASSERT_EQ(2, file1.getNumEns());
+      ASSERT_EQ(2, file1.getNumTime());
+      EXPECT_FLOAT_EQ(1, lats[1][1]);
+      EXPECT_FLOAT_EQ(2, lats[2][2]);
+      EXPECT_FLOAT_EQ(1, lons[1][1]);
+      EXPECT_FLOAT_EQ(2, lons[0][2]);
+      EXPECT_FLOAT_EQ(-1.716614e-05, elevs[1][1]);
+      EXPECT_FLOAT_EQ(11.73094, elevs[0][1]);
+      EXPECT_FLOAT_EQ(3, lons.size());
+      FieldPtr temp = file1.getField(Variable::T, 1);
+      EXPECT_FLOAT_EQ(21, (*temp)(0,0,0));
+      EXPECT_FLOAT_EQ(33, (*temp)(0,2,1));
+   }
+
    TEST_F(FileEcTest, validFiles) {
       // Valid lat/lon ec file
       FileEc file1("testing/files/validEc1.nc");

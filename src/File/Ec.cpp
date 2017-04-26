@@ -308,7 +308,8 @@ vec2 FileEc::getGridValues(int iVar) const {
    // We have a projected grid, where lat and lons are provided for each grid point
    else {
       int N = getNumDims(iVar);
-      long count[N];
+      size_t count[N];
+      size_t start[N];
       int size = 1;
       int indexLat = Util::MV;
       int indexLon = Util::MV;
@@ -326,8 +327,16 @@ vec2 FileEc::getGridValues(int iVar) const {
             indexLon = i;
          }
          else {
+            size_t dimsize = 1;
+            nc_inq_dimlen(mFile, dims[i], &dimsize);
+            if(dimsize > 1){
+               std::stringstream ss;
+               ss << "Lat/lon/elev has an extra non-singleton dimension (dim " << i << ") of length " << dimsize << ". Using index 0 to extract lat/lon/elev.";
+               Util::warning(ss.str());
+            }
             count[i] = 1;
          }
+         start[i] = 0;
       }
       if(!Util::isValid(indexLat) || !Util::isValid(indexLon)) {
          std::stringstream ss;
@@ -335,7 +344,7 @@ vec2 FileEc::getGridValues(int iVar) const {
          Util::error(ss.str());
       }
       float* values = new float[size];
-      nc_get_var_float(mFile, iVar, values);
+      nc_get_vara_float(mFile, iVar, start, count, values);
       for(int i = 0; i < getNumLat(); i++) {
          for(int j = 0; j < getNumLon(); j++) {
             // Latitude dimension is ordered first

@@ -418,7 +418,8 @@ void FileEc::writeAltitude() const {
    }
 
    int N = getNumDims(vElev);
-   long count[N];
+   size_t count[N];
+   size_t start[N];
    int size = 1;
    int indexLat = Util::MV;
    int indexLon = Util::MV;
@@ -436,8 +437,16 @@ void FileEc::writeAltitude() const {
          indexLon = i;
       }
       else {
+         size_t dimsize = 1;
+         nc_inq_dimlen(mFile, dims[i], &dimsize);
+         if(dimsize > 1){
+            std::stringstream ss;
+            ss << "Lat/lon/elev has an extra non-singleton dimension (dim " << i << ") of length " << dimsize << ". Using index 0 to write lat/lon/elev.";
+            Util::warning(ss.str());
+         }
          count[i] = 1;
       }
+      start[i] = 0;
    }
    float MV = getMissingValue(vElev);
    float* values = new float[size];
@@ -457,6 +466,7 @@ void FileEc::writeAltitude() const {
          }
       }
    }
-   nc_put_var_float(mFile, vElev, values);
+   bool status = nc_put_vara_float(mFile, vElev, start, count, values);
+   handleNetcdfError(status, "could not write altitude");
    delete[] values;
 }

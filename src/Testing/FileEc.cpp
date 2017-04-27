@@ -78,8 +78,10 @@ namespace {
 
    TEST_F(FileEcTest, multidim_altitude) {
       // In this test, the altitude field has extra surface and ensemble dimension
-      Util::setShowWarning(true);
       FileEc file1("testing/files/validEc_multidim_altitude.nc");
+      std::string output_filename =  "testing/files/validEc_multidim_altitude_copy.nc";
+      Util::copy("testing/files/validEc_multidim_altitude.nc", output_filename);
+      FileEc to(output_filename);
       vec2 lats = file1.getLats();
       vec2 lons = file1.getLons();
       vec2 elevs = file1.getElevs();
@@ -98,6 +100,10 @@ namespace {
       FieldPtr temp = file1.getField(Variable::T, 1);
       EXPECT_FLOAT_EQ(21, (*temp)(0,0,0));
       EXPECT_FLOAT_EQ(33, (*temp)(0,2,1));
+      std::vector<Variable::Type> variables;
+      variables.push_back(Variable::T);
+      to.write(variables);
+      Util::remove(output_filename);
    }
 
    TEST_F(FileEcTest, validFiles) {

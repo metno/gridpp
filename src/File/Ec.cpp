@@ -132,6 +132,18 @@ FieldPtr FileEc::getFieldCore(std::string iVariable, int iTime) const {
 void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
    startDefineMode();
 
+   // check if altitudes are valid
+   bool isAltitudeValid = false;
+   vec2 elevs = getElevs();
+   for(int i = 0; i < elevs.size(); i++) {
+      for(int j = 0; j < elevs[i].size(); j++) {
+         isAltitudeValid = isAltitudeValid || Util::isValid(elevs[i][j]);
+      }
+   }
+   if(isAltitudeValid && !hasVar("altitude")) {
+      defineAltitude();
+   }
+
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
@@ -167,7 +179,9 @@ void FileEc::writeCore(std::vector<Variable::Type> iVariables) {
 
    writeTimes();
    writeReferenceTime();
-   writeAltitude();
+   if(isAltitudeValid) {
+      writeAltitude();
+   }
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
       std::string variable = getVariableName(varType);
@@ -423,15 +437,45 @@ std::string FileEc::description() {
    return ss.str();
 }
 
-void FileEc::writeAltitude() const {
-   if(!hasVar("altitude")) {
-      return;
+void FileEc::defineAltitude() {
+   // Define the variable if it does not exist in the file
+   int vLat = getLatVar();
+   int N = getNumDims(vLat);
+   int dimsLat[N];
+   int indexLat = Util::MV;
+   int indexLon = Util::MV;
+   int dLat = getLatDim();
+   int dLon = getLonDim();
+   nc_inq_vardimid(mFile, vLat, dimsLat);
+   for(int i = 0; i < N; i++) {
+      if(dimsLat[i] == getLatDim())
+         indexLat = i;
+      if(dimsLat[i] == getLonDim())
+         indexLon = i;
    }
+   assert(Util::isValid(indexLat));
+   assert(Util::isValid(indexLon));
+   int dims[2];
+   if(indexLat < indexLon) {
+      dims[0]  = dLat;
+      dims[1]  = dLon;
+   }
+   else {
+      dims[0]  = dLon;
+      dims[1]  = dLat;
+   }
+   int var = Util::MV;
+   int status = nc_def_var(mFile, "altitude", NC_FLOAT, 2, dims, &var);
+   handleNetcdfError(status, "could not define altitude");
+}
+
+void FileEc::writeAltitude() const {
    int vElev = getVar("altitude");
    int numDims = getNumDims(vElev);
    if(numDims == 1) {
       Util::error("Cannot write altitude when the variable only has one dimension");
    }
+   vec2 elevs = getElevs();
 
    int N = getNumDims(vElev);
    size_t count[N];
@@ -466,7 +510,6 @@ void FileEc::writeAltitude() const {
    }
    float MV = getMissingValue(vElev);
    float* values = new float[size];
-   vec2 elevs = getElevs();
    for(int i = 0; i < getNumLat(); i++) {
       for(int j = 0; j < getNumLon(); j++) {
          float elev = elevs[i][j];

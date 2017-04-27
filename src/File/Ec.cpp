@@ -26,6 +26,18 @@ FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) :
       int vElev = getVar("altitude");
       mElevs = getGridValues(vElev);
    }
+   else if(hasVar("surface_geopotential")) {
+      FieldPtr elevField = getFieldCore("surface_geopotential", 0);
+      mElevs.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mElevs[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            float value = (*elevField)(i,j,0) / 9.81;
+            mElevs[i][j] = value;
+         }
+      }
+      std::cout << "Deriving altitude from geopotential height in " << getFilename() << std::endl;
+   }
    else {
       mElevs.resize(getNumLat());
       for(int i = 0; i < getNumLat(); i++) {
@@ -72,10 +84,14 @@ FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) :
 }
 
 FieldPtr FileEc::getFieldCore(Variable::Type iVariable, int iTime) const {
+   std::string variableName = getVariableName(iVariable);
+   return getFieldCore(variableName, iTime);
+}
+
+FieldPtr FileEc::getFieldCore(std::string iVariable, int iTime) const {
    startDataMode();
-   std::string variable = getVariableName(iVariable);
    // Not cached, retrieve data
-   int var = getVar(variable);
+   int var = getVar(iVariable);
    int nTime = mNTime;
    int nEns  = mNEns;
    int nLat  = mNLat;

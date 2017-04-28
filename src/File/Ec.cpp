@@ -22,31 +22,91 @@ FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) :
    mLats  = getGridValues(vLat);
    mLons  = getGridValues(vLon);
 
+   // Elevations are set in this order:
+   // - use altitude if it is in the file
+   // - Use surface geopotential if it is available and if it has lat/lon dimensions
+   //   and ignore any other dimensions
+   // - Set elevations to missing
    if(hasVar("altitude")) {
       int vElev = getVar("altitude");
       mElevs = getGridValues(vElev);
    }
-   else if(hasVar("surface_geopotential")) {
-      FieldPtr elevField = getFieldCore("surface_geopotential", 0);
-      mElevs.resize(getNumLat());
-      for(int i = 0; i < getNumLat(); i++) {
-         mElevs[i].resize(getNumLon());
-         for(int j = 0; j < getNumLon(); j++) {
-            float value = (*elevField)(i,j,0) / 9.81;
-            mElevs[i][j] = value;
-         }
-      }
-      std::cout << "Deriving altitude from geopotential height in " << getFilename() << std::endl;
-   }
    else {
-      mElevs.resize(getNumLat());
-      for(int i = 0; i < getNumLat(); i++) {
-         mElevs[i].resize(getNumLon());
-         for(int j = 0; j < getNumLon(); j++) {
-            mElevs[i][j] = Util::MV;
+      bool hasValidGeopotential = false;
+      if(hasVar("surface_geopotential")) {
+         // Check if geopotential is a valid field and if so convert to altitude
+         // Can't use getFieldCore here since the field might not have the time dimension. Therefore
+         // manually parse the variable.
+         int vGeopotential = getVar("surface_geopotential");
+         int N = getNumDims(vGeopotential);
+         size_t count[N];
+         size_t start[N];
+         int size = 1;
+         int dims[N];
+         int indexLat = Util::MV;
+         int indexLon = Util::MV;
+         nc_inq_vardimid(mFile, vGeopotential, dims);
+         for(int i = 0; i < N; i++) {
+            if(dims[i] == getLatDim()) {
+               count[i] = getNumLat();
+               size *= count[i];
+               indexLat = i;
+            }
+            else if(dims[i] == getLonDim()) {
+               count[i] = getNumLon();
+               size *= count[i];
+               indexLon = i;
+            }
+            else {
+               size_t dimsize = 1;
+               nc_inq_dimlen(mFile, dims[i], &dimsize);
+               if(dimsize > 1){
+                  std::stringstream ss;
+                  ss << "surface_geopotential has an extra non-singleton dimension (dim " << i << ") of length " << dimsize << ". Using index 0 to extract lat/lon/elev.";
+                  Util::warning(ss.str());
+               }
+               count[i] = 1;
+            }
+            start[i] = 0;
+         }
+         hasValidGeopotential = Util::isValid(indexLat) && Util::isValid(indexLon);
+         if(hasValidGeopotential) {
+            float* values = new float[size];
+            nc_get_vara_float(mFile, vGeopotential, start, count, values);
+            mElevs.resize(getNumLat());
+            for(int i = 0; i < getNumLat(); i++) {
+               mElevs[i].resize(getNumLon());
+               for(int j = 0; j < getNumLon(); j++) {
+                  // Latitude dimension is ordered first
+                  float value = Util::MV;
+                  if(indexLat < indexLon) {
+                     value = values[i*getNumLon() + j];
+                  }
+                  // Longitude dimension is ordered first
+                  else {
+                     value = values[j*getNumLat() + i];
+                  }
+                  mElevs[i][j] = value / 9.81;
+               }
+            }
+            std::stringstream ss;
+            ss << "Deriving altitude from geopotential height in " << getFilename();
+            Util::warning(ss.str());
+         }
+         else {
+            Util::warning("Surface geopotential does not have lat/lon dimensions. Cannot compute altitude.");
          }
       }
-      Util::warning("No altitude field available in " + getFilename());
+      if(!hasValidGeopotential) {
+         mElevs.resize(getNumLat());
+         for(int i = 0; i < getNumLat(); i++) {
+            mElevs[i].resize(getNumLon());
+            for(int j = 0; j < getNumLon(); j++) {
+               mElevs[i][j] = Util::MV;
+            }
+         }
+         Util::warning("No altitude field available in " + getFilename());
+      }
    }
 
    // TODO: No land fraction info in EC files?

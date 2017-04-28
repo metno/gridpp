@@ -130,6 +130,30 @@ namespace {
       Util::remove(output_filename);
    }
 
+   TEST_F(FileEcTest, geopotential_no_x) {
+      // Check that no elevations are read when geopotential doesn't have x dim
+      std::string output_filename =  "testing/files/validEc_gph_no_x_copy.nc";
+      // In this test, the altitude field should be derived from geopotential
+      FileEc file1("testing/files/validEc_gph_no_x.nc");
+      Util::copy("testing/files/validEc_gph_no_x.nc", output_filename);
+      vec2 elevs = file1.getElevs();
+      {
+         FileEc to(output_filename);
+         ASSERT_EQ(3, elevs.size());
+         ASSERT_EQ(2, file1.getNumEns());
+         ASSERT_EQ(2, file1.getNumTime());
+         EXPECT_FLOAT_EQ(Util::MV, elevs[1][1]);
+         EXPECT_FLOAT_EQ(Util::MV, elevs[0][1]);
+         std::vector<Variable::Type> variables;
+         to.write(variables);
+      }
+
+      FileEc file2(output_filename);
+      vec2 new_elevs = file2.getElevs();
+      ASSERT_EQ(elevs, new_elevs);
+      Util::remove(output_filename);
+   }
+
    TEST_F(FileEcTest, validFiles) {
       // Valid lat/lon ec file
       FileEc file1("testing/files/validEc1.nc");

@@ -438,24 +438,38 @@ std::string FileEc::description() {
 }
 
 void FileEc::defineAltitude() {
-   // Define the variable if it does not exist in the file
-   int vLat = getLatVar();
-   int N = getNumDims(vLat);
-   int dimsLat[N];
+   // Determine the order of lat and lon dimensions in altitude field
    int indexLat = Util::MV;
    int indexLon = Util::MV;
+
+   // First check if latitude variable has two dimensions
+   int vUseDims = Util::MV;
+   if(getNumDims(getLatVar()) >= 2) {
+      vUseDims = getLatVar();
+   }
+   else if(hasVar("surface_geopotential")) {
+      vUseDims = getVar("surface_geopotential");
+   }
+   if(Util::isValid(vUseDims)) {
+      int N = getNumDims(vUseDims);
+      int dimsLat[N];
+      nc_inq_vardimid(mFile, vUseDims, dimsLat);
+      for(int i = 0; i < N; i++) {
+         if(dimsLat[i] == getLatDim())
+            indexLat = i;
+         if(dimsLat[i] == getLonDim())
+            indexLon = i;
+      }
+   }
+   else {
+      Util::warning("Could not determine lat/lon ordering when creating altitude variable. Using [lat, lon]");
+      indexLat = 0;
+      indexLon = 1;
+   }
+
+   int dims[2];
    int dLat = getLatDim();
    int dLon = getLonDim();
-   nc_inq_vardimid(mFile, vLat, dimsLat);
-   for(int i = 0; i < N; i++) {
-      if(dimsLat[i] == getLatDim())
-         indexLat = i;
-      if(dimsLat[i] == getLonDim())
-         indexLon = i;
-   }
-   assert(Util::isValid(indexLat));
-   assert(Util::isValid(indexLon));
-   int dims[2];
    if(indexLat < indexLon) {
       dims[0]  = dLat;
       dims[1]  = dLon;

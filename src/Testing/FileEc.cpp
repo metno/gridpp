@@ -78,9 +78,10 @@ namespace {
 
    TEST_F(FileEcTest, multidim_altitude) {
       // In this test, the altitude field has extra surface and ensemble dimension
-      FileEc file1("testing/files/validEc_multidim_altitude.nc");
-      std::string output_filename =  "testing/files/validEc_multidim_altitude_copy.nc";
-      Util::copy("testing/files/validEc_multidim_altitude.nc", output_filename);
+      std::string input_filename = "testing/files/validEc_multidim_altitude.nc";
+      std::string output_filename = "testing/files/validEc_multidim_altitude_copy.nc";
+      FileEc file1(input_filename);
+      Util::copy(input_filename, output_filename);
       FileEc to(output_filename);
       vec2 lats = file1.getLats();
       vec2 lons = file1.getLons();
@@ -107,10 +108,11 @@ namespace {
    }
 
    TEST_F(FileEcTest, geopotential) {
-      std::string output_filename =  "testing/files/validEc_geopotential_height_copy.nc";
+      std::string input_filename = "testing/files/validEc_gph.nc";
+      std::string output_filename = "testing/files/validEc_gph_copy.nc";
       // In this test, the altitude field should be derived from geopotential
-      FileEc file1("testing/files/validEc_geopotential_height.nc");
-      Util::copy("testing/files/validEc_geopotential_height.nc", output_filename);
+      FileEc file1(input_filename);
+      Util::copy(input_filename, output_filename);
       vec2 elevs = file1.getElevs();
       {
          FileEc to(output_filename);
@@ -132,10 +134,11 @@ namespace {
 
    TEST_F(FileEcTest, geopotential_no_x) {
       // Check that no elevations are read when geopotential doesn't have x dim
-      std::string output_filename =  "testing/files/validEc_gph_no_x_copy.nc";
+      std::string input_filename = "testing/files/validEc_gph_no_x.nc";
+      std::string output_filename = "testing/files/validEc_gph_no_x_copy.nc";
       // In this test, the altitude field should be derived from geopotential
-      FileEc file1("testing/files/validEc_gph_no_x.nc");
-      Util::copy("testing/files/validEc_gph_no_x.nc", output_filename);
+      FileEc file1(input_filename);
+      Util::copy(input_filename, output_filename);
       vec2 elevs = file1.getElevs();
       {
          FileEc to(output_filename);

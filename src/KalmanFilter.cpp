@@ -14,7 +14,7 @@ KalmanFilter::KalmanFilter(Variable::Type iVariable, const Options& iOptions) :
       mVariable(iVariable),
       mHourlyCorr(0.93),
       mV(2.0),
-      mRatio(0.06),
+      mRatio(0.15),
       mPinit(0.5),
       mElevGradient(-0.0065),
       mDim(8) {
@@ -122,7 +122,7 @@ vec2 KalmanFilter::getW() const {
          for(int j = 0; j < mDim; j++) {
             int diff = std::min(abs(i-j), mDim - abs(i-j));
             float weight = pow(mHourlyCorr, (float) diff*hoursBetween);
-            mW[i][j] = weight * factor;
+            mW[i][j] = weight * factor * factor;
          }
          // assert(mW[i][i] ==  1);
       }
@@ -231,7 +231,7 @@ KalmanParameters KalmanFilter::update(float iBias, int iTimeStep, const KalmanPa
 
       // Compute Kt
       for(int i = 0; i < mDim; i++) {
-         k[i] = P[dindex][i] / (P[dindex][dindex] + mV);
+         k[i] = P[dindex][i] / (P[dindex][dindex] + mV*mV);
       }
       // Compute Pt|t
       for(int i = 0; i < mDim; i++) {

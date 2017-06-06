@@ -1,31 +1,26 @@
 sudo: required
+os: linux
+language: cpp
 
 env:
  - DIST=precise
  - DIST=trusty
  - DIST=xenial
 
-before_install:
+install:
  - sudo apt-get update -qq
- - sudo apt-get install pbuilder aptitude ubuntu-dev-tools libgsl0-dev libblas-dev
-# Temporary hack to get pbuilder to work
- - sudo sed '286,289d' /usr/bin/pbuilder-dist > temp
- - sudo mv temp /usr/bin/pbuilder-dist
- - sudo chmod a+x /usr/bin/pbuilder-dist
- - for CHAR in $(seq 0 9) a b c d e f; do sudo mkdir -p /var/cache/pbuilder/ccache/${CHAR}; done
- - pbuilder-dist ${DIST} create --debootstrapopts --variant=buildd
+ - sudo apt-get install libgsl0-dev libblas-dev
+ - sudo apt-get install libboost-all-dev
+ - sudo apt-get install netcdf-bin libnetcdf-dev
+ - sudo apt-get install libgtest-dev
  - sudo pip install cpp-coveralls
 
 script:
- - sed -i "s:precise:${DIST}:g" debian/changelog
- - debuild -S -uc
- - pbuilder-dist ${DIST} build ../*.dsc
-# Rebuild so that coverage stats can be collected
- - sudo debuild-pbuilder -us -uc
+ - make test
+ - make
 
-after_success: coveralls --gcov-options '\-lp'
-
-os: linux
+after_success:
+ - coveralls --gcov-options '\-lp'
 
 #deploy:
 #  provider: launchpad

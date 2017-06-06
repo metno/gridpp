@@ -1,3 +1,11 @@
+gridpp (0.2.9) precise; urgency=low
+
+  * Adds -c diagnose for dewpoint temperature and RH
+  * Diagnoses altitude from geopotential height for EC files
+  * Fixes bug in Kalman Filter formulation
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
+
 gridpp (0.2.8) precise; urgency=low
 
   * Fixes bug with -c diagnose in multi-thread mode

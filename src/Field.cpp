@@ -13,18 +13,6 @@ Field::Field(int nLat, int nLon, int nEns, float iFillValue) :
    }
 }
 
-float& Field::operator()(unsigned int i, unsigned int j, unsigned int k) {
-   return mValues[getIndex(i,j,k)];
-}
-float const& Field::operator()(unsigned int i, unsigned int j, unsigned int k) const {
-   return mValues[getIndex(i,j,k)];
-}
-int Field::getIndex(unsigned int i, unsigned int j, unsigned int k) const {
-   if(i >= mNLat || j >= mNLon || k >= mNEns)
-      Util::error("Cannot access element");
-   return k + j*mNEns + i*mNLon*mNEns;
-}
-
 std::vector<float> Field::operator()(unsigned int i, unsigned int j) const {
    std::vector<float> values(mValues.begin()+getIndex(i, j, 0), mValues.begin()+getIndex(i, j, mNEns-1)+1);
    return values;

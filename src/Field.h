@@ -17,13 +17,21 @@ class Field {
       //! @param iFillValue initialize all values in field with this
       Field(int nLat, int nLon, int nEns, float iFillValue=Util::MV);
 
-      //! Access to data
+      //! Access to data. Inlined for improved performance on some systems
       //! @param i latitude index
       //! @param j longitude index
       //! @param k ensemble index
       //! @return data at specified coordinate
-      float      & operator()(unsigned int i, unsigned int j, unsigned int k);
-      float const& operator()(unsigned int i, unsigned int j, unsigned int k) const;
+      float      & operator()(unsigned int i, unsigned int j, unsigned int k) {
+         int index = getIndex(i, j, k);
+         // int index = k + j*mNEns + i*mNLon*mNEns;
+         return mValues[index];
+      };
+      float const& operator()(unsigned int i, unsigned int j, unsigned int k) const {
+         int index = getIndex(i, j, k);
+         // int index = k + j*mNEns + i*mNLon*mNEns;
+         return mValues[index];
+      };
 
       //! Access to an ensemble for a specific grid point
       //! @param i latitude index
@@ -43,15 +51,19 @@ class Field {
 
       //! Number of ensemble members
       int getNumEns() const;
-
    private:
       //! Data values stored in a flat array. Index for ensemble changes fastest.
       std::vector<float> mValues;
       int mNLat;
       int mNLon;
       int mNEns;
-      //! Index into flat array that corresponds to coordinate
-      int getIndex(unsigned int i, unsigned int j, unsigned int k) const;
+      //! Index into flat array that corresponds to coordinate. Inlined for performance reasons
+      int getIndex(unsigned int i, unsigned int j, unsigned int k) const {
+         // Don't use an if statement, since this seems to be slow
+         assert(i < mNLat && j < mNLon && k < mNEns);
+         int index = k + j*mNEns + i*mNLon*mNEns;
+         return index;
+      };
 };
 typedef boost::shared_ptr<Field> FieldPtr;
 #endif

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <cmath>
 
 typedef std::vector<std::vector<float> > vec2; // Lat, Lon
 
@@ -31,9 +32,12 @@ class Util {
       //! Missing value indicator
       static float MV;
 
-      //! \brief Checks if a value is valid
+      //! \brief Checks if a value is valid. Inlined for improved performance on some systems
       //! @return false if iValue equals Util::MV or is +-inf or nan. Returns true otherwise.
-      static bool isValid(float iValue);
+      inline static bool isValid(float iValue) {
+         return !std::isnan(iValue) && !std::isinf(iValue) && iValue != Util::MV;
+      }
+
 
       //! Checks if the file exists
       static bool exists(const std::string& iFilename);

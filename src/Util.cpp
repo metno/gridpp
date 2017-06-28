@@ -81,10 +81,6 @@ void Util::setShowStatus(bool flag) {
    mShowStatus = flag;
 }
 
-bool Util::isValid(float iValue) {
-   return !std::isnan(iValue) && !std::isinf(iValue) && iValue != Util::MV;
-}
-
 bool Util::exists(const std::string& iFilename) {
    std::ifstream infile(iFilename.c_str());
    return infile.good();

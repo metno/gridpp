@@ -52,118 +52,58 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
             for(int e = 0; e < nEns; e++) {
                float currLaf = olafs[i][j];
                float nearestLaf = ilafs[Icenter][Jcenter];
+               float nearestValue = ifield(Icenter,Jcenter,e);
                if(!Util::isValid(currLaf) || !Util::isValid(nearestLaf)) {
                   // Can't adjust if we don't have LAF, use nearest neighbour
-                  ofield(i,j,e) = ifield(Icenter,Jcenter,e);
+                  ofield(i,j,e) = nearestValue;
                }
                else {
-                  float gradient = Util::MV;
-                  float totalValue = 0;
-                  float totalLaf = 0;
-                  int counter = 0;
-                  int averagingRadius = 0;
                   /* Here is the formula:
-                     T = Tmin + (Tmax  - Tmin) / (LAFmax - LAFmin) * (LAF - Tmin)
+                     value = minT + (maxT  - minT) / (maxLaf - minLaf) * (laf - minLaf)
+                     value = minT + gradient * dLaf
                   */
                   // Compute the average temperature and LAF in a small radius
-                  float lafMin = Util::MV;
-                  float lafMax = Util::MV;
-                  float tempMin = Util::MV;
-                  float tempMax = Util::MV;
-                  for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
+                  float minLaf = Util::MV;
+                  float maxLaf = Util::MV;
+                  float minT = Util::MV;
+                  float maxT = Util::MV;
+                  for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
+                     for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
                         float currValue = ifield(ii,jj,e);
                         float currLaf  = ilafs[ii][jj];
                         if(Util::isValid(currValue) && Util::isValid(currLaf)) {
-                           totalValue += currValue;
-                           totalLaf  += currLaf;
-                           counter++;
+                           if(!Util::isValid(minLaf) || currLaf < minLaf) {
+                              minLaf = currLaf;
+                              minT = currValue;
+                           }
+                           if(!Util::isValid(maxLaf) || currLaf > maxLaf) {
+                              maxLaf = currLaf;
+                              maxT = currValue;
+                           }
                         }
                      }
                   }
-                  float baseValue = Util::MV;
-                  float baseLaf  = Util::MV;
-                  if(counter > 0) {
-                     baseValue = totalValue / counter;
-                     baseLaf  = totalLaf  / counter;
-                  }
-                  float dLaf = currLaf - baseLaf;
-
-                  /* Compute the model's gradient:
-                     The gradient is computed by using linear regression on forecast ~ laf
-                     using all forecasts within a neighbourhood. To produce stable results, there
-                     is a requirement that the elevation within the neighbourhood has a large
-                     range (see mMinLafDiff).
-
-                     For bounded variables (e.g. wind speed), the gradient approach could cause
-                     forecasts to go outside its domain (e.g. negative winds). If this occurs,
-                     the nearest neighbour is used.
-                  */
-                  float meanXY  = 0; // elev*T
-                  float meanX   = 0; // elev
-                  float meanY   = 0; // T
-                  float meanXX  = 0; // elev*elev
-
-                  counter = 0;
-                  float min = Util::MV;
-                  float max = Util::MV;
-                  for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
-                        assert(ii < ilafs.size());
-                        assert(jj < ilafs[ii].size());
-                        float x = ilafs[ii][jj];
-                        float y = ifield(ii,jj,e);
-                        if(Util::isValid(x) && Util::isValid(y)) {
-                           meanXY += x*y;
-                           meanX  += x;
-                           meanY  += y;
-                           meanXX += x*x;
-                           counter++;
-                           // Found a new min
-                           if(!Util::isValid(min) || x < min)
-                              min = x;
-                           // Found a new max
-                           if(!Util::isValid(max) || x > max)
-                              max = x;
-                        }
-                     }
-                  }
-                  // Compute laf difference within neighbourhood
-                  float lafDiff = Util::MV;
-                  if(Util::isValid(min) && Util::isValid(max)) {
-                     assert(max >= min);
-                     lafDiff = max - min;
-                  }
-
-                  // Use model gradient if:
-                  // 1) sufficient laf difference in neighbourhood
-                  // 2) regression parameters are stable enough
-                  if(counter > 0 && Util::isValid(lafDiff) && lafDiff >= mMinLafDiff && meanXX != meanX*meanX) {
-                     // Estimate lapse rate
-                     meanXY /= counter;
-                     meanX  /= counter;
-                     meanY  /= counter;
-                     meanXX /= counter;
-                     gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
-                  }
-                  // Safety check
-                  if(!Util::isValid(gradient))
-                     gradient = 0;
-                  // Check against minimum and maximum gradients
-                  if(Util::isValid(mMinGradient) && gradient < mMinGradient)
-                     gradient = mMinGradient;
-                  if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
-                     gradient = mMaxGradient;
+                  // std::cout << minLaf << " " << maxLaf << " " << minT << " " << maxT << std::endl;
                   float value = Util::MV;
-                  value = baseValue + dLaf * gradient;
-                  if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
-                     // Use nearest neighbour if the gradient put us outside the bounds of the variable
-                     ofield(i,j,e) = baseValue;
+                  if(Util::isValid(maxLaf) && Util::isValid(minLaf) && (maxLaf - minLaf) >= mMinLafDiff) {
+                     float gradient = (maxT - minT) / (maxLaf - minLaf);
+                     float dLaf = currLaf - minLaf;
+                     // std::cout << gradient << std::endl;
+                     // Safety check
+                     if(!Util::isValid(gradient))
+                        gradient = 0;
+                     // Check against minimum and maximum gradients
+                     if(Util::isValid(mMinGradient) && gradient < mMinGradient)
+                        gradient = mMinGradient;
+                     if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
+                        gradient = mMaxGradient;
+                     // std::cout << gradient << std::endl;
+                     value = nearestValue + dLaf * gradient;
                   }
-                  else {
-                     // ofield(i,j,e)  = gradient + 273.15;
-                     ofield(i,j,e)  = value;
+                  if(!Util::isValid(value) || (Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
+                     value = nearestValue;
                   }
+                  ofield(i,j,e)  = value;
                }
             }
          }

@@ -5,15 +5,29 @@
 
 DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iOptions) :
       Downscaler(iVariable, iOptions),
-      mSearchRadius(3),
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),
+      mLafRadius(1),
       mMinLafDiff(0.1) {
+
+   if(!iOptions.getValues("searchRadii", mSearchRadii)) {
+      mSearchRadii.push_back(1);
+      mSearchRadii.push_back(2);
+      mSearchRadii.push_back(3);
+   }
+
+   if(!iOptions.getValues("weights", mWeights)) {
+      mWeights.push_back(0.5);
+      mWeights.push_back(0.3);
+      mWeights.push_back(0.2);
+   }
+
+   assert(mSearchRadii.size() == mWeights.size());
 
    iOptions.getValue("minGradient", mMinGradient);
    iOptions.getValue("maxGradient", mMaxGradient);
-   iOptions.getValue("searchRadius", mSearchRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
+   iOptions.getValue("lafRadius", mLafRadius);
 }
 
 void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
@@ -51,6 +65,20 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {
                float currLaf = olafs[i][j];
+               if(mLafRadius > 0) {
+                  float total = 0;
+                  int counter = 0;
+                  for(int ii = std::max(0, i-mLafRadius); ii <= std::min(nLat-1, i+mLafRadius); ii++) {
+                     for(int jj = std::max(0, j-mLafRadius); jj <= std::min(nLon-1, j+mLafRadius); jj++) {
+                        if(Util::isValid(olafs[ii][jj])) {
+                           total += olafs[ii][jj];
+                           counter++;
+                        }
+                     }
+                  }
+                  if(counter > 0)
+                     currLaf = total / counter;
+               }
                float nearestLaf = ilafs[Icenter][Jcenter];
                float nearestValue = ifield(Icenter,Jcenter,e);
                if(!Util::isValid(currLaf) || !Util::isValid(nearestLaf)) {
@@ -67,41 +95,62 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                   float maxLaf = Util::MV;
                   float minT = Util::MV;
                   float maxT = Util::MV;
-                  for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
-                        float currValue = ifield(ii,jj,e);
-                        float currLaf  = ilafs[ii][jj];
-                        if(Util::isValid(currValue) && Util::isValid(currLaf)) {
-                           if(!Util::isValid(minLaf) || currLaf < minLaf) {
-                              minLaf = currLaf;
-                              minT = currValue;
-                           }
-                           if(!Util::isValid(maxLaf) || currLaf > maxLaf) {
-                              maxLaf = currLaf;
-                              maxT = currValue;
+                  // std::vector<float> values(mSearchRadii.size(), Util::MV);
+                  float value = 0;
+                  int counter = 0;
+                  float totalWeight = 0;
+                  for(int r = 0; r < mSearchRadii.size(); r++) {
+                     int searchRadius = mSearchRadii[r];
+                     for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+searchRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+searchRadius); jj++) {
+                           float currValue = ifield(ii,jj,e);
+                           float currLaf  = ilafs[ii][jj];
+                           if(Util::isValid(currValue) && Util::isValid(currLaf)) {
+                              if(!Util::isValid(minLaf) || currLaf < minLaf) {
+                                 minLaf = currLaf;
+                                 minT = currValue;
+                              }
+                              if(!Util::isValid(maxLaf) || currLaf > maxLaf) {
+                                 maxLaf = currLaf;
+                                 maxT = currValue;
+                              }
                            }
                         }
                      }
+                     // std::cout << minLaf << " " << maxLaf << " " << minT << " " << maxT << std::endl;
+                     if(Util::isValid(maxLaf) && Util::isValid(minLaf) && (maxLaf - minLaf) >= mMinLafDiff) {
+                        float gradient = (maxT - minT) / (maxLaf - minLaf);
+                        float dLaf = currLaf - minLaf;
+                        // std::cout << gradient << std::endl;
+                        // Safety check
+                        if(!Util::isValid(gradient))
+                           gradient = 0;
+                        // Check against minimum and maximum gradients
+                        if(Util::isValid(mMinGradient) && gradient < mMinGradient)
+                           gradient = mMinGradient;
+                        if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
+                           gradient = mMaxGradient;
+                        // std::cout << gradient << std::endl;
+                        // float currValue = nearestValue + dLaf * gradient;
+                        float currValue = minT + dLaf * gradient;
+                        // std::cout << currValue << std::endl;
+                        value += currValue * mWeights[r];
+                        totalWeight += mWeights[r];
+                        counter++;
+                        if(j == 43 && i == 56 && t == 0) {
+                           std::cout << minLaf << " " << maxLaf << " " << currLaf << " "
+                                     << minT << " " << maxT << " "
+                                     << currValue << " " << nearestValue << " " << value << " "
+                                     << gradient << std::endl;
+                        }
+                     }
                   }
-                  // std::cout << minLaf << " " << maxLaf << " " << minT << " " << maxT << std::endl;
-                  float value = Util::MV;
-                  if(Util::isValid(maxLaf) && Util::isValid(minLaf) && (maxLaf - minLaf) >= mMinLafDiff) {
-                     float gradient = (maxT - minT) / (maxLaf - minLaf);
-                     float dLaf = currLaf - minLaf;
-                     // std::cout << gradient << std::endl;
-                     // Safety check
-                     if(!Util::isValid(gradient))
-                        gradient = 0;
-                     // Check against minimum and maximum gradients
-                     if(Util::isValid(mMinGradient) && gradient < mMinGradient)
-                        gradient = mMinGradient;
-                     if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
-                        gradient = mMaxGradient;
-                     // std::cout << gradient << std::endl;
-                     value = nearestValue + dLaf * gradient;
-                  }
-                  if(!Util::isValid(value) || (Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
+                  // std::cout << value << std::endl;
+                  if(counter == 0 || !Util::isValid(value) || (Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
                      value = nearestValue;
+                  }
+                  else {
+                     value = value / totalWeight;
                   }
                   ofield(i,j,e)  = value;
                }
@@ -110,8 +159,8 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
       }
    }
 }
-int DownscalerCoastal::getSearchRadius() const {
-   return mSearchRadius;
+std::vector<int> DownscalerCoastal::getSearchRadii() const {
+   return mSearchRadii;
 }
 float DownscalerCoastal::getMinLafDiff() const {
    return mMinLafDiff;

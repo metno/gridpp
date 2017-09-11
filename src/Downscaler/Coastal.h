@@ -8,7 +8,7 @@ class DownscalerCoastal : public Downscaler {
    public:
       //! Downscale the specified variable
       DownscalerCoastal(Variable::Type iVariable, const Options& iOptions);
-      int   getSearchRadius() const;
+      std::vector<int> getSearchRadii() const;
       float getMinLafDiff() const;
       float getMinGradient() const;
       float getMaxGradient() const;
@@ -16,7 +16,9 @@ class DownscalerCoastal : public Downscaler {
       std::string name() const {return "coastal";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int   mSearchRadius;
+      std::vector<int>  mSearchRadii;
+      std::vector<float>  mWeights;
+      int mLafRadius;
       float mMinLafDiff; // Minimum elevation difference within neighbourhood to use gradient
       float mMinGradient;
       float mMaxGradient;

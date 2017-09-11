@@ -54,4 +54,5 @@ class Downscaler : public Scheme {
 #include "Smart.h"
 #include "Bypass.h"
 #include "Pressure.h"
+#include "Coastal.h"
 #endif

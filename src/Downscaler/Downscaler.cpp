@@ -51,6 +51,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       DownscalerPressure* d = new DownscalerPressure(iVariable, iOptions);
       return d;
    }
+   else if(iName == "coastal") {
+      DownscalerCoastal* d = new DownscalerCoastal(iVariable, iOptions);
+      return d;
+   }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;
@@ -197,6 +201,7 @@ std::string Downscaler::getDescriptions() {
    ss << DownscalerGradient::description();
    ss << DownscalerSmart::description();
    ss << DownscalerPressure::description();
+   ss << DownscalerCoastal::description();
    ss << DownscalerBypass::description();
    return ss.str();
 }

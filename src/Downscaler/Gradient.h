@@ -34,5 +34,6 @@ class DownscalerGradient : public Downscaler {
       float mDefaultGradient;
       bool mAverageNeighbourhood;
       mutable bool mHasIssuedWarningUnstable;
+      bool mSaveGradient;
 };
 #endif

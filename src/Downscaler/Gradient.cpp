@@ -13,6 +13,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mDefaultGradient(0),
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
+      mSaveGradient(false),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
@@ -23,6 +24,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("constantGradient", mConstantGradient);
    iOptions.getValue("minElevDiff", mMinElevDiff);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
+   iOptions.getValue("saveGradient", mSaveGradient);
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -64,7 +66,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   ofield(i,j,e) = ifield(Icenter,Jcenter,e);
                }
                else {
-                  float gradient = mDefaultGradient;
+                  float gradient = Util::MV;
                   float totalValue = 0;
                   float totalElev = 0;
                   int counter = 0;
@@ -117,6 +119,9 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                            assert(jj < ielevs[ii].size());
                            float x = ielevs[ii][jj];
                            float y = ifield(ii,jj,e);
+                           if(i == 772 && j == 659 && t == 0) {
+                              std::cout << x << " " << y << std::endl;
+                           }
                            if(mLogTransform) {
                               y = log(y);
                            }
@@ -151,7 +156,12 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                         meanX  /= counter;
                         meanY  /= counter;
                         meanXX /= counter;
-                        gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+                        if(meanXX - meanX*meanX != 0) {
+                           gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+                           if(i == 772 && j == 659 && t == 0) {
+                              std::cout << olats[i][j] << " " << olons[i][j] << " " << counter << " " << meanX << " " << meanY << " " << meanXX << " " << gradient << std::endl;
+                           }
+                        }
                      }
                      else if(!mHasIssuedWarningUnstable) {
                         std::stringstream ss;
@@ -159,29 +169,34 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                         Util::warning(ss.str());
                         mHasIssuedWarningUnstable = true;
                      }
+                  }
+                  float value = Util::MV;
+                  if(mSaveGradient) {
+                     ofield(i, j, e) = gradient;
+                  }
+                  else {
                      // Safety check
                      if(!Util::isValid(gradient))
-                        gradient = 0;
+                        gradient = mDefaultGradient;
                      // Check against minimum and maximum gradients
                      if(Util::isValid(mMinGradient) && gradient < mMinGradient)
                         gradient = mMinGradient;
                      if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
                         gradient = mMaxGradient;
 
-                  }
-                  float value = Util::MV;
-                  if(mLogTransform) {
-                     value = baseValue * exp(gradient * dElev);
-                  }
-                  else {
-                     value = baseValue + dElev * gradient;
-                  }
-                  if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
-                     // Use nearest neighbour if the gradient put us outside the bounds of the variable
-                     ofield(i,j,e) = baseValue;
-                  }
-                  else {
-                     ofield(i,j,e)  = value;
+                     if(mLogTransform) {
+                        value = baseValue * exp(gradient * dElev);
+                     }
+                     else {
+                        value = baseValue + dElev * gradient;
+                     }
+                     if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
+                        // Use nearest neighbour if the gradient put us outside the bounds of the variable
+                        ofield(i,j,e) = baseValue;
+                     }
+                     else {
+                        ofield(i,j,e)  = value;
+                     }
                   }
                }
             }
@@ -221,6 +236,7 @@ std::string DownscalerGradient::description() {
    ss << Util::formatDescription("   minGradient=undef", "Do not allow gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   maxGradient=undef", "Do not allow gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast and elevation within the search radius be used when determining what value to apply the gradient to?") << std::endl;
+   ss << Util::formatDescription("   saveGradient=0", "Store the gradient instead of the value for debugging purposes.") << std::endl;
    return ss.str();
 }
 

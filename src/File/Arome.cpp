@@ -313,6 +313,12 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::TD) {
       return "dew_point_temperature_2m";
    }
+   else if(iVariable == Variable::Tlevel0) {
+      return "dew_point_temperature_ml";
+   }
+   else if(iVariable == Variable::Tlevel1) {
+      return "dew_point_temperature_ml";
+   }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
    }

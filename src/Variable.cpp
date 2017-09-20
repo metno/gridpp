@@ -23,6 +23,10 @@ std::string Variable::getTypeName(Type iType) {
       return "Cloud";
    else if(iType == T)
       return "T";
+   else if(iType == Tlevel0)
+      return "Tlevel0";
+   else if(iType == Tlevel1)
+      return "Tlevel1";
    else if(iType == TMin)
       return "TMin";
    else if(iType == TMax)
@@ -82,6 +86,10 @@ Variable::Type Variable::getType(std::string iName) {
       return Cloud;
    else if(iName == "T")
       return T;
+   else if(iName == "Tlevel0")
+      return Tlevel0;
+   else if(iName == "Tlevel1")
+      return Tlevel1;
    else if(iName == "TMin")
       return TMin;
    else if(iName == "TMax")
@@ -126,6 +134,8 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v TMin", "Minimum temperature") << std::endl;
    ss << Util::formatDescription("-v TMax", "Maximum temperature") << std::endl;
    ss << Util::formatDescription("-v TD", "Dew point temperature") << std::endl;
+   ss << Util::formatDescription("-v Tlevel0", "Temperature lowest model level") << std::endl;
+   ss << Util::formatDescription("-v Tlevel1", "Temperature second lowest model level") << std::endl;
    ss << Util::formatDescription("-v Precip", "Hourly precip") << std::endl;
    ss << Util::formatDescription("-v PrecipAcc", "Accumulated precip") << std::endl;
    ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
@@ -154,6 +164,8 @@ std::string Variable::getDescriptions() {
 std::vector<Variable::Type> Variable::getAllVariables() {
    std::vector<Type> variables;
    variables.push_back(Variable::T);
+   variables.push_back(Variable::Tlevel0);
+   variables.push_back(Variable::Tlevel1);
    variables.push_back(Variable::PrecipAcc);
    variables.push_back(Variable::Pop);
    variables.push_back(Variable::Pop6h);
@@ -191,6 +203,10 @@ float Variable::getMin(Type iType) {
       case TMax:
          return 0;
       case TD:
+         return 0;
+      case Tlevel0:
+         return 0;
+      case Tlevel1:
          return 0;
       case Precip:
          return 0;
@@ -250,6 +266,10 @@ float Variable::getMax(Type iType) {
       case TMax:
          return Util::MV;
       case TD:
+         return Util::MV;
+      case Tlevel0:
+         return Util::MV;
+      case Tlevel1:
          return Util::MV;
       case Precip:
          return Util::MV;
@@ -367,6 +387,10 @@ std::string Variable::getStandardName(Type iType) {
          return "air_temperature";
       case TD:
          return "dew_point_temperature";
+      case Tlevel0:
+         return "air_temperature";
+      case Tlevel1:
+         return "air_temperature";
       case Precip:
          return "precipitation_amount";
       case PrecipAcc:

@@ -22,5 +22,6 @@ class DownscalerCoastal : public Downscaler {
       float mMinLafDiff; // Minimum elevation difference within neighbourhood to use gradient
       float mMinGradient;
       float mMaxGradient;
+      float mElevGradient;
 };
 #endif

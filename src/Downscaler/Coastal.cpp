@@ -8,6 +8,7 @@ DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iO
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),
       mLafRadius(1),
+      mElevGradient(-0.0065),
       mMinLafDiff(0.1) {
 
    if(!iOptions.getValues("searchRadii", mSearchRadii)) {
@@ -28,6 +29,7 @@ DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iO
    iOptions.getValue("maxGradient", mMaxGradient);
    iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("lafRadius", mLafRadius);
+   iOptions.getValue("elevGradient", mElevGradient);
 }
 
 void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
@@ -65,6 +67,7 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {
                float currLaf = olafs[i][j];
+               float currElev = oelevs[i][j];
                if(mLafRadius > 0) {
                   float total = 0;
                   int counter = 0;
@@ -93,6 +96,8 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                   // Compute the average temperature and LAF in a small radius
                   float minLaf = Util::MV;
                   float maxLaf = Util::MV;
+                  float minElev = Util::MV;
+                  float maxElev = Util::MV;
                   float minT = Util::MV;
                   float maxT = Util::MV;
                   // std::vector<float> values(mSearchRadii.size(), Util::MV);
@@ -103,15 +108,18 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                      int searchRadius = mSearchRadii[r];
                      for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+searchRadius); ii++) {
                         for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+searchRadius); jj++) {
-                           float currValue = ifield(ii,jj,e);
                            float currLaf  = ilafs[ii][jj];
+                           float currElev = ielevs[ii][jj];
+                           float currValue = ifield(ii,jj,e);
                            if(Util::isValid(currValue) && Util::isValid(currLaf)) {
                               if(!Util::isValid(minLaf) || currLaf < minLaf) {
                                  minLaf = currLaf;
+                                 minElev = currElev;
                                  minT = currValue;
                               }
                               if(!Util::isValid(maxLaf) || currLaf > maxLaf) {
                                  maxLaf = currLaf;
+                                 maxElev = currElev;
                                  maxT = currValue;
                               }
                            }
@@ -119,29 +127,43 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                      }
                      // std::cout << minLaf << " " << maxLaf << " " << minT << " " << maxT << std::endl;
                      if(Util::isValid(maxLaf) && Util::isValid(minLaf) && (maxLaf - minLaf) >= mMinLafDiff) {
-                        float gradient = (maxT - minT) / (maxLaf - minLaf);
+                        float lafGradient = (maxT - minT) / (maxLaf - minLaf);
+                        // Altitude-adjust maxT so that it is on the same elevation as minT
+                        // Before computing the gradient
+                        if(Util::isValid(maxElev) && Util::isValid(minElev)) {
+                           float maxTcorr = maxT + mElevGradient * (maxElev - minElev);
+                           lafGradient = (maxTcorr - minT) / (maxLaf - minLaf);
+                        }
                         float dLaf = currLaf - minLaf;
-                        // std::cout << gradient << std::endl;
                         // Safety check
-                        if(!Util::isValid(gradient))
-                           gradient = 0;
+                        if(!Util::isValid(lafGradient))
+                           lafGradient = 0;
                         // Check against minimum and maximum gradients
-                        if(Util::isValid(mMinGradient) && gradient < mMinGradient)
-                           gradient = mMinGradient;
-                        if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
-                           gradient = mMaxGradient;
-                        // std::cout << gradient << std::endl;
-                        // float currValue = nearestValue + dLaf * gradient;
-                        float currValue = minT + dLaf * gradient;
+                        if(Util::isValid(mMinGradient) && lafGradient < mMinGradient)
+                           lafGradient = mMinGradient;
+                        if(Util::isValid(mMaxGradient) && lafGradient > mMaxGradient)
+                           lafGradient = mMaxGradient;
+                        // std::cout << lafGradient << std::endl;
+                        // float currValue = nearestValue + dLaf * lafGradient;
+                        float currValue = minT + dLaf * lafGradient;
+
+                        // Altitude-adjust the current point
+                        if(Util::isValid(currElev) && Util::isValid(minElev)) {
+                           float dElev = currElev - minElev;
+                           currValue = currValue + dElev * mElevGradient;
+                        }
                         // std::cout << currValue << std::endl;
                         value += currValue * mWeights[r];
                         totalWeight += mWeights[r];
                         counter++;
                         if(j == 43 && i == 56 && t == 0) {
-                           std::cout << minLaf << " " << maxLaf << " " << currLaf << " "
-                                     << minT << " " << maxT << " "
-                                     << currValue << " " << nearestValue << " " << value << " "
-                                     << gradient << std::endl;
+                           float dElev = currElev - minElev;
+                           float elevCorrection = dElev * mElevGradient;
+                           std::cout << minLaf << " " << maxLaf << " " << currLaf << "\n"
+                                     << minT << " " << maxT << " " << nearestValue << "\n"
+                                     << minElev << " " << maxElev << " " << currElev << "\n"
+                                     << currValue << " " << nearestValue << " " << value << "\n"
+                                     << lafGradient << " " << elevCorrection << std::endl;
                         }
                      }
                   }

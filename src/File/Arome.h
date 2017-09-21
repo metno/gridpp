@@ -28,6 +28,8 @@ class FileArome : public FileNetcdf {
       void writeLatLonVariable(std::string iVariable);
       void defineLatLonVariable(std::string iVariable);
       int mDate;
+      // What model level does this variable come from?
+      int getLevel(std::string iVariable) const;
       std::string mXName;
       std::string mYName;
       std::string mLatName;

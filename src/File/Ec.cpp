@@ -314,10 +314,10 @@ std::string FileEc::getVariableName(Variable::Type iVariable) const {
       return "dew_point_temperature_2m";
    }
    else if(iVariable == Variable::Tlevel0) {
-      return "dew_point_temperature_ml";
+      return "air_temperature_ml";
    }
    else if(iVariable == Variable::Tlevel1) {
-      return "dew_point_temperature_ml";
+      return "air_temperature_ml";
    }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";

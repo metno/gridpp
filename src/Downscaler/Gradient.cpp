@@ -14,6 +14,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
       mSaveGradient(false),
+      mGradientVariable(Variable::None),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
@@ -25,6 +26,13 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("minElevDiff", mMinElevDiff);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
+   std::string gradientVariable;
+   if(iOptions.getValue("gradientVariable", gradientVariable)) {
+      mGradientVariable = Variable::getType(gradientVariable);
+   }
+   else {
+      mGradientVariable = mVariable;
+   }
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -46,10 +54,16 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
+   if(!iInput.hasVariable(mGradientVariable)) {
+      std::stringstream ss;
+     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mGradientVariable);
+      Util::error(ss.str());
+   }
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mVariable, t);
       Field& ofield = *iOutput.getField(mVariable, t);
+      Field& gfield = *iInput.getField(mGradientVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
@@ -118,7 +132,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                            assert(ii < ielevs.size());
                            assert(jj < ielevs[ii].size());
                            float x = ielevs[ii][jj];
-                           float y = ifield(ii,jj,e);
+                           float y = gfield(ii,jj,e);
                            if(i == 772 && j == 659 && t == 0) {
                               std::cout << x << " " << y << std::endl;
                            }
@@ -237,6 +251,7 @@ std::string DownscalerGradient::description() {
    ss << Util::formatDescription("   maxGradient=undef", "Do not allow gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast and elevation within the search radius be used when determining what value to apply the gradient to?") << std::endl;
    ss << Util::formatDescription("   saveGradient=0", "Store the gradient instead of the value for debugging purposes.") << std::endl;
+   ss << Util::formatDescription("   gradientVariable=T", "Which variable to use for the gradient?") << std::endl;
    return ss.str();
 }
 

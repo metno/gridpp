@@ -35,5 +35,6 @@ class DownscalerGradient : public Downscaler {
       bool mAverageNeighbourhood;
       mutable bool mHasIssuedWarningUnstable;
       bool mSaveGradient;
+      Variable::Type mGradientVariable;
 };
 #endif

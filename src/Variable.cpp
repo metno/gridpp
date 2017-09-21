@@ -141,7 +141,7 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v Pop", "Probability of precip") << std::endl;
    ss << Util::formatDescription("-v Pop6h", "Probability of precip for the last 6 hours") << std::endl;
    ss << Util::formatDescription("-v PrecipLow", "Low estimate of precipitation") << std::endl;
-   ss << Util::formatDescription("-v PrecipMiddl", "Middle estimate of precipitation") << std::endl;
+   ss << Util::formatDescription("-v PrecipMiddle", "Middle estimate of precipitation") << std::endl;
    ss << Util::formatDescription("-v PrecipHigh", "High estimate of precipitation") << std::endl;
    ss << Util::formatDescription("-v PrecipRate", "Precipitation rate") << std::endl;
    ss << Util::formatDescription("-v W", "Wind speed") << std::endl;

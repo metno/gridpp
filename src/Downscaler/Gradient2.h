@@ -42,7 +42,7 @@ class DownscalerGradient2 : public Downscaler {
       float mMinLafDiff; // Minimum elevation difference within neighbourhood to use gradient
       bool mAverageNeighbourhood;
       mutable bool mHasIssuedWarningUnstable;
-      bool mSaveGradient;
+      std::string mSaveGradient;
       Variable::Type mGradientVariable;
       float calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const;
       float calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const;

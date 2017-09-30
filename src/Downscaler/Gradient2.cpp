@@ -13,7 +13,7 @@ DownscalerGradient2::DownscalerGradient2(Variable::Type iVariable, const Options
       mDefaultGradient(0),
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
-      mSaveGradient(false),
+      mSaveGradient(""),
       mMinLafForElevGradient(0),
       mMinLafDiff(0.1),
       mLafRadius(1),
@@ -110,8 +110,11 @@ void DownscalerGradient2::downscaleCore(const File& iInput, File& iOutput) const
                float lafGradient = Util::MV;
                if(mLafSearchRadii.size() > 0)
                   lafGradient = calcLafGradient(i, j, e, Icenter, Jcenter, ifield, ilafs, ielevs, elevGradient);
-               if(mSaveGradient) {
+               if(mSaveGradient == "elev") {
                   ofield(i, j, e) = elevGradient;
+               }
+               else if(mSaveGradient == "laf") {
+                  ofield(i, j, e) = lafGradient;
                }
                else {
                   /* General approach
@@ -650,8 +653,9 @@ std::string DownscalerGradient2::description() {
    ss << Util::formatDescription("   minGradient=undef", "Do not allow gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   maxGradient=undef", "Do not allow gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
    ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast and elevation within the search radius be used when determining what value to apply the gradient to?") << std::endl;
-   ss << Util::formatDescription("   saveGradient=0", "Store the gradient instead of the value for debugging purposes.") << std::endl;
+   ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
    ss << Util::formatDescription("   minNumPoints=2", "Minimum number of points needed to compute an elevation gradient.") << std::endl;
+   ss << Util::formatDescription("   minFracSeaPoints=0", "Minimum fraction of points in neighbourhood with a LAF < 0.5 to compute a LAF gradient.") << std::endl;
    ss << Util::formatDescription("   gradientVariable=T", "Which variable to use for the gradient?") << std::endl;
    return ss.str();
 }

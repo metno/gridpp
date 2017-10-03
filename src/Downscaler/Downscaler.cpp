@@ -23,8 +23,8 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iVariable, iOptions);
    }
-   else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
+   else if(iName == "gradientold") {
+      DownscalerGradientOld* d = new DownscalerGradientOld(iVariable, iOptions);
       return d;
    }
    else if(iName == "smart") {
@@ -206,7 +206,7 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, fl
 std::string Downscaler::getDescriptions() {
    std::stringstream ss;
    ss << DownscalerNearestNeighbour::description();
-   ss << DownscalerGradient::description();
+   ss << DownscalerGradientOld::description();
    ss << DownscalerGradient2::description();
    ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();

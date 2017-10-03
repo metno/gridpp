@@ -1,5 +1,5 @@
-#ifndef DOWNSCALER_GRADIENT_H
-#define DOWNSCALER_GRADIENT_H
+#ifndef DOWNSCALER_GRADIENT_OLD_H
+#define DOWNSCALER_GRADIENT_OLD_H
 #include "Downscaler.h"
 #include "../Variable.h"
 #include "../Util.h"
@@ -10,10 +10,10 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! If the variable is log transformed, then use:
 //! T(p) = T(nn) * exp(gradient*(elev(p) - elev(nn)))
 //! Uses nearest neighbour when the lookup location does not have an elevation
-class DownscalerGradient : public Downscaler {
+class DownscalerGradientOld : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
+      DownscalerGradientOld(Variable::Type iVariable, const Options& iOptions);
       float getConstantGradient() const;
       int   getSearchRadius() const;
       float getMinElevDiff() const;

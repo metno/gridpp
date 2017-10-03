@@ -50,7 +50,7 @@ class Downscaler : public Scheme {
       static std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
 };
 #include "NearestNeighbour.h"
-#include "Gradient.h"
+#include "GradientOld.h"
 #include "Gradient2.h"
 #include "Bilinear.h"
 #include "Smart.h"

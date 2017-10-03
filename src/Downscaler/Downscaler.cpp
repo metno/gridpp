@@ -55,8 +55,8 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       DownscalerCoastal* d = new DownscalerCoastal(iVariable, iOptions);
       return d;
    }
-   else if(iName == "gradient2") {
-      DownscalerGradient2* d = new DownscalerGradient2(iVariable, iOptions);
+   else if(iName == "gradient") {
+      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
       return d;
    }
    else if(iName == "bilinear") {
@@ -207,7 +207,7 @@ std::string Downscaler::getDescriptions() {
    std::stringstream ss;
    ss << DownscalerNearestNeighbour::description();
    ss << DownscalerGradientOld::description();
-   ss << DownscalerGradient2::description();
+   ss << DownscalerGradient::description();
    ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();
    ss << DownscalerPressure::description();

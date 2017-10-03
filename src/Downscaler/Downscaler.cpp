@@ -59,6 +59,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       DownscalerGradient2* d = new DownscalerGradient2(iVariable, iOptions);
       return d;
    }
+   else if(iName == "bilinear") {
+      DownscalerBilinear* d = new DownscalerBilinear(iVariable, iOptions);
+      return d;
+   }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;
@@ -204,6 +208,7 @@ std::string Downscaler::getDescriptions() {
    ss << DownscalerNearestNeighbour::description();
    ss << DownscalerGradient::description();
    ss << DownscalerGradient2::description();
+   ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();
    ss << DownscalerPressure::description();
    ss << DownscalerCoastal::description();

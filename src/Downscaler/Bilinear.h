@@ -19,7 +19,13 @@ class DownscalerBilinear : public Downscaler {
       //! @param y Interpolate to this y-coordinate
       //! Two or more points cannot be colocated
       static float bilinear(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float v0, float v1, float v2, float v3);
-      static bool bilinear(const Field& iInput, Field& iOutput,
+      static float bilinear(const Field& iInput, int I, int J, int e, float lat, float lon,
+            const vec2& iInputLats, const vec2& iInputLons);
+      static void bilinear(const Field& iInput, Field& iOutput,
+            const vec2& iInputLats, const vec2& iInputLons,
+            const vec2& iOutputLats, const vec2& iOutputLons,
+            const vec2Int& nearestI, const vec2Int& nearestJ);
+      static void bilinear(const vec2& iInput, vec2& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);

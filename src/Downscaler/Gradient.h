@@ -11,31 +11,33 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! If the variable is log transformed, then use:
 //! T(p) = T(nn) * exp(gradient*(elev(p) - elev(nn)))
 //! Uses nearest neighbour when the lookup location does not have an elevation
-class DownscalerGradient2 : public Downscaler {
+class DownscalerGradient : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradient2(Variable::Type iVariable, const Options& iOptions);
-      float getConstantGradient() const;
-      int   getSearchRadius() const;
+      DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
+      float getConstantElevGradient() const;
+      int   getElevRadius() const;
       float getMinElevDiff() const;
       bool  getLogTransform() const;
-      float getMinGradient() const;
-      float getMaxGradient() const;
-      float getDefaultGradient() const;
+      float getMinElevGradient() const;
+      float getMaxElevGradient() const;
+      float getDefaultElevGradient() const;
       static std::string description();
       std::string name() const {return "gradient";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int   mSearchRadius;
-      float mConstantGradient;
+      int   mElevRadius;
+      float mConstantElevGradient;
       float mMinElevDiff; // Minimum elevation difference within neighbourhood to use gradient
       bool  mLogTransform;
-      float mMinGradient;
-      float mMaxGradient;
+      float mMinElevGradient;
+      float mMaxElevGradient;
+      float mMinLafGradient;
+      float mMaxLafGradient;
       float mMinLafForElevGradient;
       int mMinNumPoints;
       float mMinFracSeaPoints;
-      float mDefaultGradient;
+      float mDefaultElevGradient;
       int mLafRadius;
       std::vector<int>  mLafSearchRadii;
       std::vector<float>  mLafWeights;
@@ -43,7 +45,7 @@ class DownscalerGradient2 : public Downscaler {
       bool mAverageNeighbourhood;
       mutable bool mHasIssuedWarningUnstable;
       std::string mSaveGradient;
-      Variable::Type mGradientVariable;
+      Variable::Type mElevGradientVariable;
       float calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const;
       float calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const;
       bool calcNeighbourhoodMean(const Field& iField, const vec2& iElevs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean) const;

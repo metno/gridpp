@@ -3,14 +3,14 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerGradient2::DownscalerGradient2(Variable::Type iVariable, const Options& iOptions) :
+DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& iOptions) :
       Downscaler(iVariable, iOptions),
-      mSearchRadius(3),
-      mMinGradient(Util::MV),
-      mMaxGradient(Util::MV),
+      mElevRadius(3),
+      mMinElevGradient(Util::MV),
+      mMaxElevGradient(Util::MV),
       mLogTransform(false),
-      mConstantGradient(Util::MV),
-      mDefaultGradient(0),
+      mConstantElevGradient(Util::MV),
+      mDefaultElevGradient(0),
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
       mSaveGradient(""),
@@ -19,48 +19,50 @@ DownscalerGradient2::DownscalerGradient2(Variable::Type iVariable, const Options
       mLafRadius(1),
       mMinNumPoints(2),
       mMinFracSeaPoints(0),
-      mGradientVariable(Variable::None),
+      mElevGradientVariable(Variable::None),
       mHasIssuedWarningUnstable(false) {
 
-   iOptions.getValue("minGradient", mMinGradient);
-   iOptions.getValue("maxGradient", mMaxGradient);
-   iOptions.getValue("defaultGradient", mDefaultGradient);
-   iOptions.getValue("searchRadius", mSearchRadius);
-   iOptions.getValue("logTransform", mLogTransform);
-   iOptions.getValue("minLafDiff", mMinLafDiff);
-   iOptions.getValue("lafRadius", mLafRadius);
-   iOptions.getValue("minLafForElevGradient", mMinLafForElevGradient);
-   iOptions.getValue("constantGradient", mConstantGradient);
+   iOptions.getValue("constantElevGradient", mConstantElevGradient);
+   iOptions.getValue("elevRadius", mElevRadius);
    iOptions.getValue("minElevDiff", mMinElevDiff);
-   iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
-   iOptions.getValue("saveGradient", mSaveGradient);
+   iOptions.getValue("defaultElevGradient", mDefaultElevGradient);
+   iOptions.getValue("minElevGradient", mMinElevGradient);
+   iOptions.getValue("maxElevGradient", mMaxElevGradient);
+   iOptions.getValue("minLafForElevGradient", mMinLafForElevGradient);
    iOptions.getValue("minNumPoints", mMinNumPoints);
-   iOptions.getValue("minFracSeaPoints", mMinFracSeaPoints);
    std::string gradientVariable;
-   if(iOptions.getValue("gradientVariable", gradientVariable)) {
-      mGradientVariable = Variable::getType(gradientVariable);
+   if(iOptions.getValue("elevGradientVariable", gradientVariable)) {
+      mElevGradientVariable = Variable::getType(gradientVariable);
    }
    else {
-      mGradientVariable = mVariable;
+      mElevGradientVariable = mVariable;
    }
-
+   iOptions.getValue("lafRadius", mLafRadius);
+   iOptions.getValue("minLafDiff", mMinLafDiff);
+   iOptions.getValue("minFracSeaPoints", mMinFracSeaPoints);
+   iOptions.getValue("minLafGradient", mMinLafGradient);
+   iOptions.getValue("maxLafGradient", mMaxLafGradient);
    iOptions.getValues("lafSearchRadii", mLafSearchRadii);
    iOptions.getValues("lafWeights", mLafWeights);
-   // if(!iOptions.getValues("lafSearchRadii", mLafSearchRadii)) {
-   //    mLafSearchRadii.push_back(1);
-   //    mLafSearchRadii.push_back(2);
-   //    mLafSearchRadii.push_back(3);
-   // }
 
-   // if(!iOptions.getValues("lafWeights", mLafWeights)) {
-   //    mLafWeights.push_back(0.5);
-   //    mLafWeights.push_back(0.3);
-   //    mLafWeights.push_back(0.2);
-   // }
+   iOptions.getValue("logTransform", mLogTransform);
+   iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
+   iOptions.getValue("saveGradient", mSaveGradient);
+   if(!iOptions.getValues("lafSearchRadii", mLafSearchRadii)) {
+      mLafSearchRadii.push_back(1);
+      mLafSearchRadii.push_back(2);
+      mLafSearchRadii.push_back(3);
+   }
+
+   if(!iOptions.getValues("lafWeights", mLafWeights)) {
+      for(int i = 0; i < mLafSearchRadii.size(); i++) {
+         mLafWeights.push_back(1.0/mLafSearchRadii.size());
+      }
+   }
    assert(mLafSearchRadii.size() == mLafWeights.size());
 }
 
-void DownscalerGradient2::downscaleCore(const File& iInput, File& iOutput) const {
+void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
    int nLat = iOutput.getNumLat();
    int nLon = iOutput.getNumLon();
    int nEns = iOutput.getNumEns();
@@ -81,16 +83,16 @@ void DownscalerGradient2::downscaleCore(const File& iInput, File& iOutput) const
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   if(!iInput.hasVariable(mGradientVariable)) {
+   if(!iInput.hasVariable(mElevGradientVariable)) {
       std::stringstream ss;
-     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mGradientVariable);
+     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mElevGradientVariable);
       Util::error(ss.str());
    }
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mVariable, t);
       Field& ofield = *iOutput.getField(mVariable, t);
-      Field& gfield = *iInput.getField(mGradientVariable, t);
+      Field& gfield = *iInput.getField(mElevGradientVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
@@ -123,7 +125,7 @@ void DownscalerGradient2::downscaleCore(const File& iInput, File& iOutput) const
                      3) Adjust the point with the lower LAF by adding on the LAF gradient and elevation gradient
                   */
                   // Compute elevation and value to extrapolate from
-                  int averagingRadius = mAverageNeighbourhood * mSearchRadius;
+                  int averagingRadius = mAverageNeighbourhood * mElevRadius;
                   float baseValue = Util::MV;
                   float baseElev = Util::MV;
                   float baseLaf = Util::MV;
@@ -152,7 +154,7 @@ void DownscalerGradient2::downscaleCore(const File& iInput, File& iOutput) const
    }
 }
 
-bool DownscalerGradient2::calcBaseValues(const Field& iField, const vec2& iElevs, const vec2& iLafs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean, float& iLafMean) const {
+bool DownscalerGradient::calcBaseValues(const Field& iField, const vec2& iElevs, const vec2& iLafs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean, float& iLafMean) const {
    float totalValue = 0;
    float totalElev = 0;
    float totalLaf = 0;
@@ -179,7 +181,7 @@ bool DownscalerGradient2::calcBaseValues(const Field& iField, const vec2& iElevs
 
    return counter > 0;
 }
-bool DownscalerGradient2::calcNeighbourhoodMean(const Field& iField, const vec2& iElevs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean) const {
+bool DownscalerGradient::calcNeighbourhoodMean(const Field& iField, const vec2& iElevs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean) const {
    float totalValue = 0;
    float totalElev = 0;
    int counter = 0;
@@ -205,7 +207,7 @@ bool DownscalerGradient2::calcNeighbourhoodMean(const Field& iField, const vec2&
 
    return counter > 0;
 }
-float DownscalerGradient2::calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const {
+float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const {
    /* Here is the formula:
       value = minT + (maxT  - minT) / (maxLaf - minLaf) * (laf - minLaf)
       value = minT + gradient * dLaf
@@ -267,10 +269,10 @@ float DownscalerGradient2::calcLafGradient(int i, int j, int e, int Icenter, int
          if(!Util::isValid(lafGradient))
             lafGradient = 0;
          // Check against minimum and maximum gradients
-         if(Util::isValid(mMinGradient) && lafGradient < mMinGradient)
-            lafGradient = mMinGradient;
-         if(Util::isValid(mMaxGradient) && lafGradient > mMaxGradient)
-            lafGradient = mMaxGradient;
+         if(Util::isValid(mMinElevGradient) && lafGradient < mMinElevGradient)
+            lafGradient = mMinElevGradient;
+         if(Util::isValid(mMaxElevGradient) && lafGradient > mMaxElevGradient)
+            lafGradient = mMaxElevGradient;
          // std::cout << lafGradient << std::endl;
          // float currValue = nearestValue + dLaf * lafGradient;
          float currValue = minT + dLaf * lafGradient;
@@ -306,10 +308,10 @@ float DownscalerGradient2::calcLafGradient(int i, int j, int e, int Icenter, int
    }
    return gradient;
 }
-float DownscalerGradient2::calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const {
+float DownscalerGradient::calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const {
    float elevGradient = Util::MV;
-   if(Util::isValid(mConstantGradient)) {
-      elevGradient = mConstantGradient;
+   if(Util::isValid(mConstantElevGradient)) {
+      elevGradient = mConstantElevGradient;
    }
    else {
       /* Compute the model's gradient:
@@ -329,8 +331,8 @@ float DownscalerGradient2::calcElevGradient(int i, int j, int e, int Icenter, in
       int   counter = 0;
       float min = Util::MV;
       float max = Util::MV;
-      for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iField.getNumLat()-1, Icenter+mSearchRadius); ii++) {
-         for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
+      for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iField.getNumLat()-1, Icenter+mElevRadius); ii++) {
+         for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+mElevRadius); jj++) {
             assert(ii < iElevs.size());
             assert(jj < iElevs[ii].size());
             float x = iElevs[ii][jj];
@@ -384,16 +386,16 @@ float DownscalerGradient2::calcElevGradient(int i, int j, int e, int Icenter, in
 
    // Safety check
    if(!Util::isValid(elevGradient))
-      elevGradient = mDefaultGradient;
+      elevGradient = mDefaultElevGradient;
    // Check against minimum and maximum gradients
-   if(Util::isValid(mMinGradient) && elevGradient < mMinGradient)
-      elevGradient = mMinGradient;
-   if(Util::isValid(mMaxGradient) && elevGradient > mMaxGradient)
-      elevGradient = mMaxGradient;
+   if(Util::isValid(mMinElevGradient) && elevGradient < mMinElevGradient)
+      elevGradient = mMinElevGradient;
+   if(Util::isValid(mMaxElevGradient) && elevGradient > mMaxElevGradient)
+      elevGradient = mMaxElevGradient;
    return elevGradient;
 }
 #if 0
-float DownscalerGradient2::get_laf_gradient(float iLaf, int iIcenter, int iJcenter, int e, vec2 iLafs, vec2 iElevs, const Field& iField, const File& iInput) const {
+float DownscalerGradient::get_laf_gradient(float iLaf, int iIcenter, int iJcenter, int e, vec2 iLafs, vec2 iElevs, const Field& iField, const File& iInput) const {
    // Compute the average temperature and LAF in a small radius
    float minLaf = Util::MV;
    float maxLaf = Util::MV;
@@ -440,10 +442,10 @@ float DownscalerGradient2::get_laf_gradient(float iLaf, int iIcenter, int iJcent
          if(!Util::isValid(lafGradient))
             lafGradient = 0;
          // Check against minimum and maximum gradients
-         if(Util::isValid(mMinGradient) && lafGradient < mMinGradient)
-            lafGradient = mMinGradient;
-         if(Util::isValid(mMaxGradient) && lafGradient > mMaxGradient)
-            lafGradient = mMaxGradient;
+         if(Util::isValid(mMinElevGradient) && lafGradient < mMinElevGradient)
+            lafGradient = mMinElevGradient;
+         if(Util::isValid(mMaxElevGradient) && lafGradient > mMaxElevGradient)
+            lafGradient = mMaxElevGradient;
          // std::cout << lafGradient << std::endl;
          // float currValue = nearestValue + dLaf * lafGradient;
          float currValue = minT + dLaf * lafGradient;
@@ -478,7 +480,7 @@ float DownscalerGradient2::get_laf_gradient(float iLaf, int iIcenter, int iJcent
 
 }
 
-float DownscalerGradient2::calcElevationGradient() const {
+float DownscalerGradient::calcElevationGradient() const {
    if(!Util::isValid(currElev) || !Util::isValid(nearestElev)) {
       // Can't adjust if we don't have an elevation, use nearest neighbour
       ofield(i,j,e) = ifield(Icenter,Jcenter,e);
@@ -490,7 +492,7 @@ float DownscalerGradient2::calcElevationGradient() const {
       int counter = 0;
       int averagingRadius = 0;
       if(mAverageNeighbourhood)
-         averagingRadius = mSearchRadius;
+         averagingRadius = mElevRadius;
       for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
          for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
             float currValue = ifield(ii,jj,e);
@@ -510,8 +512,8 @@ float DownscalerGradient2::calcElevationGradient() const {
       }
       float dElev = currElev - baseElev;
 
-      if(Util::isValid(mConstantGradient)) {
-         gradient = mConstantGradient;
+      if(Util::isValid(mConstantElevGradient)) {
+         gradient = mConstantElevGradient;
       }
       else {
          /* Compute the model's gradient:
@@ -531,8 +533,8 @@ float DownscalerGradient2::calcElevationGradient() const {
          int   counter = 0;
          float min = Util::MV;
          float max = Util::MV;
-         for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
-            for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
+         for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mElevRadius); ii++) {
+            for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mElevRadius); jj++) {
                assert(ii < ielevs.size());
                assert(jj < ielevs[ii].size());
                float x = ielevs[ii][jj];
@@ -583,7 +585,7 @@ float DownscalerGradient2::calcElevationGradient() const {
          }
          else if(!mHasIssuedWarningUnstable) {
             std::stringstream ss;
-            ss << "DownscalerGradient2 cannot compute gradient (unstable regression). Reverting to default gradient. Warning issued only once.";
+            ss << "DownscalerGradient cannot compute gradient (unstable regression). Reverting to default gradient. Warning issued only once.";
             Util::warning(ss.str());
             mHasIssuedWarningUnstable = true;
          }
@@ -595,12 +597,12 @@ float DownscalerGradient2::calcElevationGradient() const {
       else {
          // Safety check
          if(!Util::isValid(gradient))
-            gradien t= mDefaultGradient;
+            gradien t= mDefaultElevGradient;
          // Check against minimum and maximum gradients
-         if(Util::isValid(mMinGradient) && gradient < mMinGradient)
-            gradient = mMinGradient;
-         if(Util::isValid(mMaxGradient) && gradient > mMaxGradient)
-            gradient = mMaxGradient;
+         if(Util::isValid(mMinElevGradient) && gradient < mMinElevGradient)
+            gradient = mMinElevGradient;
+         if(Util::isValid(mMaxElevGradient) && gradient > mMaxElevGradient)
+            gradient = mMaxElevGradient;
 
          if(mLogTransform) {
             value = baseValue * exp(gradient * dElev);
@@ -619,44 +621,50 @@ float DownscalerGradient2::calcElevationGradient() const {
    }
 }
 #endif
-float DownscalerGradient2::getConstantGradient() const {
-   return mConstantGradient;
+float DownscalerGradient::getConstantElevGradient() const {
+   return mConstantElevGradient;
 }
-int DownscalerGradient2::getSearchRadius() const {
-   return mSearchRadius;
+int DownscalerGradient::getElevRadius() const {
+   return mElevRadius;
 }
-float DownscalerGradient2::getMinElevDiff() const {
+float DownscalerGradient::getMinElevDiff() const {
    return mMinElevDiff;
 }
-bool DownscalerGradient2::getLogTransform() const {
+bool DownscalerGradient::getLogTransform() const {
    return mLogTransform;
 }
-float DownscalerGradient2::getMinGradient() const {
-   return mMinGradient;
+float DownscalerGradient::getMinElevGradient() const {
+   return mMinElevGradient;
 }
-float DownscalerGradient2::getMaxGradient() const {
-   return mMaxGradient;
+float DownscalerGradient::getMaxElevGradient() const {
+   return mMaxElevGradient;
 }
-float DownscalerGradient2::getDefaultGradient() const {
-   return mDefaultGradient;
+float DownscalerGradient::getDefaultElevGradient() const {
+   return mDefaultElevGradient;
 }
-std::string DownscalerGradient2::description() {
+std::string DownscalerGradient::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-d gradient2", "Combines -d gradient and -d coastal.") << std::endl;
-   ss << Util::formatDescription("   constantGradient=undef", "Fix gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
-   ss << Util::formatDescription("   searchRadius=3", "Compute gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
+   ss << Util::formatDescription("-d gradient", "Adjusts the nearest neighbour based on elevation or coastal gradients in a neighbourhood. The gradient is applied using the difference of the elevation and /or land-area fraction of the output gridpoint to the nearest neighbour: T = T(nn) + elev_gradient * dElev + laf_gradient * dLaf. If the gradient puts the forecast outside the domain of the variable (e.g. negative precipitation) then the nearest neighbour is used.") << std::endl;
+   ss << Util::formatDescription("   constantElevGradient=undef", "Fix elevation gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
+   ss << Util::formatDescription("   elevRadius=3", "Compute elevation gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
    ss << Util::formatDescription("   minElevDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
-   ss << Util::formatDescription("   lafRadius=3", "Compute gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
-   ss << Util::formatDescription("   minLafDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
-   ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev). Useful for pressure variables. Can be used together with constantGradient.") << std::endl;
-   ss << Util::formatDescription("   defaultGradient=0", "If the gradient is not computable (too unstable), use this default gradient.") << std::endl;
-   ss << Util::formatDescription("   minGradient=undef", "Do not allow gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   maxGradient=undef", "Do not allow gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast and elevation within the search radius be used when determining what value to apply the gradient to?") << std::endl;
-   ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
-   ss << Util::formatDescription("   minNumPoints=2", "Minimum number of points needed to compute an elevation gradient.") << std::endl;
+   ss << Util::formatDescription("   defaultElevGradient=0", "If the elevation gradient is not computable (too unstable), use this default gradient.") << std::endl;
+   ss << Util::formatDescription("   minElevGradient=undef", "Do not allow elevation gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
+   ss << Util::formatDescription("   maxElevGradient=undef", "Do not allow elevation gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
+   ss << Util::formatDescription("   minLafForElevGradient=0", "When computing the elevation gradient, only include points with a LAF above this value.") << std::endl;
+   ss << Util::formatDescription("   minNumPoints=2", "Minimum number of points needed to compute elevation gradient.") << std::endl;
+   ss << Util::formatDescription("   elevGradientVariable=undef", "Which variable to use for the gradient? If undefined, use the same variables as the forecast variable.") << std::endl;
+
+   ss << Util::formatDescription("   lafRadius=1", "Smoothen the LAF output with this neighbourhood radius.") << std::endl;
+   ss << Util::formatDescription("   minLafDiff=0.1", "Minimum LAF range (between 0 and 1) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
    ss << Util::formatDescription("   minFracSeaPoints=0", "Minimum fraction of points in neighbourhood with a LAF < 0.5 to compute a LAF gradient.") << std::endl;
-   ss << Util::formatDescription("   gradientVariable=T", "Which variable to use for the gradient?") << std::endl;
+   ss << Util::formatDescription("   minLafGradient=undef", "Do not allow LAF gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
+   ss << Util::formatDescription("   maxLafGradient=undef", "Do not allow LAF gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
+   ss << Util::formatDescription("   lafSearchRadii=1,2,3", "Compute LAF gradients using neighbourhoods with these sizes.") << std::endl;
+   ss << Util::formatDescription("   lafWeights=undef", "Weights when computing the average LAF gradient in different neighbourhoods.") << std::endl;
+
+   ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev) * exp(gradient * dLaf). Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
+   ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
+   ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
    return ss.str();
 }
-

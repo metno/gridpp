@@ -4,6 +4,7 @@
 #include "Downscaler.h"
 #include "../Variable.h"
 #include "../Util.h"
+#include "../Field.h"
 class File;
 class DownscalerBilinear : public Downscaler {
    public:
@@ -18,6 +19,10 @@ class DownscalerBilinear : public Downscaler {
       //! @param y Interpolate to this y-coordinate
       //! Two or more points cannot be colocated
       static float bilinear(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float v0, float v1, float v2, float v3);
+      static bool bilinear(const Field& iInput, Field& iOutput,
+            const vec2& iInputLats, const vec2& iInputLons,
+            const vec2& iOutputLats, const vec2& iOutputLons,
+            const vec2Int& nearestI, const vec2Int& nearestJ);
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
 };

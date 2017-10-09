@@ -66,7 +66,7 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    return value;
 }
 
-void DownscalerBilinear::bilinear(const vec2& iInput, vec2& iOutput,
+void DownscalerBilinear::downscale(const vec2& iInput, vec2& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
@@ -131,7 +131,7 @@ void DownscalerBilinear::bilinear(const vec2& iInput, vec2& iOutput,
    }
 }
 
-void DownscalerBilinear::bilinear(const Field& iInput, Field& iOutput,
+void DownscalerBilinear::downscale(const Field& iInput, Field& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {

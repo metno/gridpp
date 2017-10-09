@@ -48,11 +48,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("logTransform", mLogTransform);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
-   if(!iOptions.getValues("lafSearchRadii", mLafSearchRadii)) {
-      mLafSearchRadii.push_back(1);
-      mLafSearchRadii.push_back(2);
-      mLafSearchRadii.push_back(3);
-   }
+   iOptions.getValues("lafSearchRadii", mLafSearchRadii);
 
    if(!iOptions.getValues("lafWeights", mLafWeights)) {
       for(int i = 0; i < mLafSearchRadii.size(); i++) {
@@ -94,6 +90,9 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       Field& ofield = *iOutput.getField(mVariable, t);
       Field& gfield = *iInput.getField(mElevGradientVariable, t);
 
+      DownscalerBilinear::downscale(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      vec2 elevsbilinear;
+      DownscalerBilinear::downscale(ielevs, elevsbilinear, ilats, ilons, olats, olons, nearestI, nearestJ);
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -107,6 +106,7 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                float nearestElev = ielevs[Icenter][Jcenter];
                float nearestLaf = ilafs[Icenter][Jcenter];
                float nearestValue = ifield(Icenter, Jcenter, e);
+               // float nearestValue = DownscalerBilinear::bilinear(ifield, Icenter, Jcenter, e, olats[i][j], olons[i][j], ilats, ilons);
 
                float elevGradient = calcElevGradient(i, j, e, Icenter, Jcenter, ifield, gfield, ielevs, ilafs);
                float lafGradient = Util::MV;

@@ -3,9 +3,7 @@ os: linux
 language: cpp
 
 env:
- - DIST=precise
  - DIST=trusty
- - DIST=xenial
 
 install:
  - sudo apt-get update -qq

@@ -1,3 +1,16 @@
+gridpp (0.3.0) precise; urgency=low
+
+  * New features:
+    - Gradient downscaler can ues temperature at model levels (instead of T2m)
+      when computing gradient
+    - Gradient downscaler can use gradients in land-area fraction
+    - Bilinear downscaler added
+  * Backwards-incompatible changes:
+    - Gradient downscaler options are different. Use -d gradientOld to get
+      previous behaviour.
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
+
 gridpp (0.2.9) precise; urgency=low
 
   * Adds -c diagnose for dewpoint temperature and RH

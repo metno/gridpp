@@ -23,7 +23,7 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iVariable, iOptions);
    }
-   else if(iName == "gradientold") {
+   else if(iName == "gradientOld") {
       DownscalerGradientOld* d = new DownscalerGradientOld(iVariable, iOptions);
       return d;
    }

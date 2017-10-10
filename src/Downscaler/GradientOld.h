@@ -22,7 +22,7 @@ class DownscalerGradientOld : public Downscaler {
       float getMaxGradient() const;
       float getDefaultGradient() const;
       static std::string description();
-      std::string name() const {return "gradient";};
+      std::string name() const {return "gradientOld";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
       int   mSearchRadius;

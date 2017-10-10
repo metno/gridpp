@@ -23,7 +23,7 @@ void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mVariable, t);
       Field& ofield = *iOutput.getField(mVariable, t);
-      downscale(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
    }
 }
 
@@ -66,7 +66,7 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    return value;
 }
 
-void DownscalerBilinear::downscale(const vec2& iInput, vec2& iOutput,
+void DownscalerBilinear::downscaleVec(const vec2& iInput, vec2& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
@@ -131,7 +131,7 @@ void DownscalerBilinear::downscale(const vec2& iInput, vec2& iOutput,
    }
 }
 
-void DownscalerBilinear::downscale(const Field& iInput, Field& iOutput,
+void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {

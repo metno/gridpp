@@ -23,12 +23,12 @@ class DownscalerBilinear : public Downscaler {
       static float bilinear(const Field& iInput, int I, int J, int e, float lat, float lon,
             const vec2& iInputLats, const vec2& iInputLons);
       // Interpolate a whole field
-      static void downscale(const Field& iInput, Field& iOutput,
+      static void downscaleField(const Field& iInput, Field& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);
       // Interpolate a whole vec2
-      static void downscale(const vec2& iInput, vec2& iOutput,
+      static void downscaleVec(const vec2& iInput, vec2& iOutput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);

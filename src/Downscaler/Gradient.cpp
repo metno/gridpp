@@ -90,9 +90,9 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       Field& ofield = *iOutput.getField(mVariable, t);
       Field& gfield = *iInput.getField(mElevGradientVariable, t);
 
-      DownscalerBilinear::downscale(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
       vec2 elevsbilinear;
-      DownscalerBilinear::downscale(ielevs, elevsbilinear, ilats, ilons, olats, olons, nearestI, nearestJ);
+      DownscalerBilinear::downscaleVec(ielevs, elevsbilinear, ilats, ilons, olats, olons, nearestI, nearestJ);
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {

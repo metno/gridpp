@@ -5,7 +5,7 @@
 #include <boost/assign/list_of.hpp>
 
 namespace {
-   class TestDownscalerGradient : public ::testing::Test {
+   class TestDownscalerGradientOld : public ::testing::Test {
       public:
          void SetUp() {
             mFrom = new FileArome("testing/files/10x10.nc");
@@ -59,9 +59,9 @@ namespace {
          FileFake* mTo;
    };
 
-   TEST_F(TestDownscalerGradient, 10x10) {
+   TEST_F(TestDownscalerGradientOld, 10x10) {
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -76,7 +76,7 @@ namespace {
 
       // Fix the gradient
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 constantGradient=0.01"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 constantGradient=0.01"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -90,9 +90,9 @@ namespace {
       }
    }
    // Check that logTransform works
-   TEST_F(TestDownscalerGradient, 10x10log) {
+   TEST_F(TestDownscalerGradientOld, 10x10log) {
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 logTransform=1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 logTransform=1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -104,7 +104,7 @@ namespace {
 
       // Fix the gradient
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 logTransform=1 constantGradient=-0.01"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 logTransform=1 constantGradient=-0.01"));
          d.downscale(*mFrom, *mTo);
          const Field& toT  = *mTo->getField(Variable::T, 0);
          ASSERT_EQ(1, toT.getNumLat());
@@ -113,9 +113,9 @@ namespace {
          EXPECT_FLOAT_EQ(447.3916, toT(0,0,0));
       }
    }
-   TEST_F(TestDownscalerGradient, 10x10minElevDiff) {
+   TEST_F(TestDownscalerGradientOld, 10x10minElevDiff) {
       {
-         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=1500"));
+         DownscalerGradientOld d(Variable::T ,Options("searchRadius=1 minElevDiff=1500"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -131,7 +131,7 @@ namespace {
       // Fix the gradient
       // This should not be affected by the minElevDiff
       {
-         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=1500 constantGradient=0.01"));
+         DownscalerGradientOld d(Variable::T ,Options("searchRadius=1 minElevDiff=1500 constantGradient=0.01"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -144,11 +144,11 @@ namespace {
          EXPECT_FLOAT_EQ(299.53052, toT(0,3,0));
       }
    }
-   TEST_F(TestDownscalerGradient, 10x10negativeTemperatures) {
+   TEST_F(TestDownscalerGradientOld, 10x10negativeTemperatures) {
       setLatLonElev(*mTo, (const float[]) {5}, (const float[]){2,2,2,2}, (const float[]){100000, 10000, 0, 0});
       {
          // When the gradient goes outside the domain of the variable, use nearest neightbour
-         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0"));
+         DownscalerGradientOld d(Variable::T ,Options("searchRadius=1 minElevDiff=0"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -162,7 +162,7 @@ namespace {
 
       // Fix the gradient
       {
-         DownscalerGradient d(Variable::T ,Options("searchRadius=1 minElevDiff=0 constantGradient=-0.1"));
+         DownscalerGradientOld d(Variable::T ,Options("searchRadius=1 minElevDiff=0 constantGradient=-0.1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -173,8 +173,8 @@ namespace {
          EXPECT_FLOAT_EQ(316.96323, toT(0,2,0));
       }
    }
-   TEST_F(TestDownscalerGradient, minGradient) {
-      DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=-0.01"));
+   TEST_F(TestDownscalerGradientOld, minGradient) {
+      DownscalerGradientOld d(Variable::T, Options("searchRadius=1 minGradient=-0.01"));
       bool status = d.downscale(*mFrom, *mTo);
       EXPECT_TRUE(status);
       const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -185,9 +185,9 @@ namespace {
       // Gradient is too negative (-0.01068):
       EXPECT_FLOAT_EQ(301.4695,  toT(0,2,0)); // 304 - 0.01 * (600-346.9477)
    }
-   TEST_F(TestDownscalerGradient, minmaxGradient) {
+   TEST_F(TestDownscalerGradientOld, minmaxGradient) {
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=-0.01 maxGradient=-0.008"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 minGradient=-0.01 maxGradient=-0.008"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -199,7 +199,7 @@ namespace {
          EXPECT_FLOAT_EQ(301.4695,  toT(0,2,0)); // 304 - 0.01 * (600-346.9477)
       }
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 minGradient=0.001 logTransform=1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 minGradient=0.001 logTransform=1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -209,7 +209,7 @@ namespace {
          EXPECT_FLOAT_EQ(289.3039, toT(0,0,0)); // 301 * exp(0.001 * (120-159.6324))
       }
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=1 maxGradient=-0.01 logTransform=1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=1 maxGradient=-0.01 logTransform=1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -219,9 +219,9 @@ namespace {
          EXPECT_FLOAT_EQ(447.3916, toT(0,0,0)); // 301 * exp(-0.01 * (120-159.63))
       }
    }
-   TEST_F(TestDownscalerGradient, defaultGradient) {
+   TEST_F(TestDownscalerGradientOld, defaultGradient) {
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=0 defaultGradient=0.1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=0 defaultGradient=0.1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -229,7 +229,7 @@ namespace {
          EXPECT_FLOAT_EQ(329.3052,  toT(0,2,0)); // 304 + 0.1 * (600-346.9477)
       }
       {
-         DownscalerGradient d(Variable::T, Options("searchRadius=0 defaultGradient=-0.1"));
+         DownscalerGradientOld d(Variable::T, Options("searchRadius=0 defaultGradient=-0.1"));
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(Variable::T, 0);
@@ -237,8 +237,8 @@ namespace {
          EXPECT_FLOAT_EQ(278.6948,  toT(0,2,0)); // 304 - 0.1 * (600-346.9477)
       }
    }
-   TEST_F(TestDownscalerGradient, options) {
-      DownscalerGradient d(Variable::T, Options("searchRadius=3 defaultGradient=0.1 constantGradient=0.3 minGradient=0 maxGradient=0.2 logTransform=1 minElevDiff=1500"));
+   TEST_F(TestDownscalerGradientOld, options) {
+      DownscalerGradientOld d(Variable::T, Options("searchRadius=3 defaultGradient=0.1 constantGradient=0.3 minGradient=0 maxGradient=0.2 logTransform=1 minElevDiff=1500"));
       EXPECT_FLOAT_EQ(3, d.getSearchRadius());
       EXPECT_FLOAT_EQ(0.1, d.getDefaultGradient());
       EXPECT_FLOAT_EQ(0.3, d.getConstantGradient());
@@ -247,11 +247,11 @@ namespace {
       EXPECT_FLOAT_EQ(1, d.getLogTransform());
       EXPECT_FLOAT_EQ(1500, d.getMinElevDiff());
    }
-   TEST_F(TestDownscalerGradient, missingValues) {
+   TEST_F(TestDownscalerGradientOld, missingValues) {
 
    }
-   TEST_F(TestDownscalerGradient, description) {
-      DownscalerGradient::description();
+   TEST_F(TestDownscalerGradientOld, description) {
+      DownscalerGradientOld::description();
    }
 }
 int main(int argc, char **argv) {

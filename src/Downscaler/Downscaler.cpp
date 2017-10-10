@@ -23,8 +23,8 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iVariable, iOptions);
    }
-   else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
+   else if(iName == "gradientold") {
+      DownscalerGradientOld* d = new DownscalerGradientOld(iVariable, iOptions);
       return d;
    }
    else if(iName == "smart") {
@@ -49,6 +49,18 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
    }
    else if(iName == "pressure") {
       DownscalerPressure* d = new DownscalerPressure(iVariable, iOptions);
+      return d;
+   }
+   else if(iName == "coastal") {
+      DownscalerCoastal* d = new DownscalerCoastal(iVariable, iOptions);
+      return d;
+   }
+   else if(iName == "gradient") {
+      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
+      return d;
+   }
+   else if(iName == "bilinear") {
+      DownscalerBilinear* d = new DownscalerBilinear(iVariable, iOptions);
       return d;
    }
    else {
@@ -194,9 +206,12 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, fl
 std::string Downscaler::getDescriptions() {
    std::stringstream ss;
    ss << DownscalerNearestNeighbour::description();
+   ss << DownscalerGradientOld::description();
    ss << DownscalerGradient::description();
+   ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();
    ss << DownscalerPressure::description();
+   ss << DownscalerCoastal::description();
    ss << DownscalerBypass::description();
    return ss.str();
 }

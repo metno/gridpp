@@ -21,6 +21,8 @@ class Variable {
          TMin         = 21,   // 2m temperature minimum temperature (K)
          TMax         = 22,   // 2m temperature maximum temperature (K)
          TD           = 23,   // 2m dew point temperature (K)
+         Tlevel0      = 24,   // temperature at the lowest model level (K)
+         Tlevel1      = 25,   // temperature at the second lowest model level (K)
          U            = 30,   // 10m U-wind (m/s)
          Xwind        = 31,   // 10m X-wind (m/s)
          V            = 40,   // 10m V-wind (m/s)

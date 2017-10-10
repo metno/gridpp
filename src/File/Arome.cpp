@@ -126,6 +126,8 @@ FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
    size_t* start;
    long totalCount = nLat*nLon;
    if(numDims == 4) {
+      int level = getLevel(iVariable);
+
       // Variable has a surface dimension
       count = new size_t[4];
       count[0] = 1;
@@ -134,7 +136,7 @@ FieldPtr FileArome::getFieldCore(std::string iVariable, int iTime) const {
       count[3] = nLon;
       start = new size_t[4];
       start[0] = iTime;
-      start[1] = 0;
+      start[1] = level;
       start[2] = 0;
       start[3] = 0;
    }
@@ -312,6 +314,12 @@ std::string FileArome::getVariableName(Variable::Type iVariable) const {
    }
    else if(iVariable == Variable::TD) {
       return "dew_point_temperature_2m";
+   }
+   else if(iVariable == Variable::Tlevel0) {
+      return "air_temperature_ml";
+   }
+   else if(iVariable == Variable::Tlevel1) {
+      return "air_temperature_ml";
    }
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
@@ -532,6 +540,17 @@ bool FileArome::isValid(std::string iFilename) {
       nc_close(file);
    }
    return isValid;
+}
+
+int FileArome::getLevel(std::string iVariable) const {
+   if(iVariable == "Tlevel0") {
+      return 1;
+   }
+   else if(iVariable == "Tlevel1") {
+      return 0;
+   }
+   return 0;
+
 }
 
 std::string FileArome::description() {

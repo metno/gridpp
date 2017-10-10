@@ -23,7 +23,7 @@ void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mVariable, t);
       Field& ofield = *iOutput.getField(mVariable, t);
-      bilinear(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      downscale(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
    }
 }
 

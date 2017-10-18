@@ -1,9 +1,10 @@
 sudo: required
 os: linux
 language: cpp
-
-env:
- - DIST=trusty
+matrix:
+   include:
+      - os: linux
+        dist: trusty
 
 install:
  - sudo apt-get update -qq

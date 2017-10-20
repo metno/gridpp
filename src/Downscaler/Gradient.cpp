@@ -17,6 +17,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mMinLafForElevGradient(0),
       mMinLafDiff(0.1),
       mLafRadius(1),
+      mDownscalerName("nearestNeighbour"),
       mMinNumPoints(2),
       mMinFracSeaPoints(0),
       mElevGradientVariable(Variable::None),
@@ -48,6 +49,9 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("logTransform", mLogTransform);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
+   iOptions.getValue("downscaler", mDownscalerName);
+   // mDownscaler = Downscaler::getScheme(downscalerName, iVariable, Options());
+
    iOptions.getValues("lafSearchRadii", mLafSearchRadii);
 
    if(!iOptions.getValues("lafWeights", mLafWeights)) {
@@ -56,6 +60,10 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       }
    }
    assert(mLafSearchRadii.size() == mLafWeights.size());
+}
+
+DownscalerGradient::~DownscalerGradient() {
+   // delete mDownscaler;
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -90,9 +98,15 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       Field& ofield = *iOutput.getField(mVariable, t);
       Field& gfield = *iInput.getField(mElevGradientVariable, t);
 
-      DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
-      vec2 elevsbilinear;
-      DownscalerBilinear::downscaleVec(ielevs, elevsbilinear, ilats, ilons, olats, olons, nearestI, nearestJ);
+      vec2 elevsInterp;
+      if(mDownscalerName == "nearestNeighbour") {
+         elevsInterp = DownscalerNearestNeighbour::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerNearestNeighbour::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      }
+      else if (mDownscalerName == "bilinear") {
+         elevsInterp = DownscalerBilinear::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      }
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -103,9 +117,11 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             for(int e = 0; e < nEns; e++) {
                float currElev = oelevs[i][j];
                float currLaf = olafs[i][j];
-               float nearestElev = ielevs[Icenter][Jcenter];
+               // float nearestElev = ielevs[Icenter][Jcenter];
                float nearestLaf = ilafs[Icenter][Jcenter];
-               float nearestValue = ifield(Icenter, Jcenter, e);
+               // float nearestValue = ifield(Icenter, Jcenter, e);
+               float nearestValue = ofield(i, j, e);
+               float nearestElev = elevsInterp[i][j];
                // float nearestValue = DownscalerBilinear::bilinear(ifield, Icenter, Jcenter, e, olats[i][j], olons[i][j], ilats, ilons);
 
                float elevGradient = calcElevGradient(i, j, e, Icenter, Jcenter, ifield, gfield, ielevs, ilafs);
@@ -666,5 +682,6 @@ std::string DownscalerGradient::description() {
    ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev) * exp(gradient * dLaf). Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
    ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
    ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
+   ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;
    return ss.str();
 }

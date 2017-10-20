@@ -66,18 +66,18 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    return value;
 }
 
-void DownscalerBilinear::downscaleVec(const vec2& iInput, vec2& iOutput,
+vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
 
-   int nLat = iOutput.size();
-   int nLon = iOutput[0].size();
+   int nLat = iOutputLats.size();
+   int nLon = iOutputLats[0].size();
 
-   iOutput.clear();
-   iOutput.resize(nLat);
+   vec2 output;
+   output.resize(nLat);
    for(int i = 0; i < nLat; i++)
-      iOutput[i].resize(nLon);
+      output[i].resize(nLon);
 
    // Algorithm from here:
    // https://stackoverflow.com/questions/23920976/bilinear-interpolation-with-non-aligned-input-points
@@ -123,12 +123,13 @@ void DownscalerBilinear::downscaleVec(const vec2& iInput, vec2& iOutput,
             float v3 = iInput[I2][J2];
             float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
             // std::cout << v0 << " " << v1 << " " << v2 << " " << v3 << " " << value << std::endl;
-            iOutput[i][j] = value;
+            output[i][j] = value;
          }
          else
-            iOutput[i][j] = Util::MV;
+            output[i][j] = Util::MV;
       }
    }
+   return output;
 }
 
 void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,

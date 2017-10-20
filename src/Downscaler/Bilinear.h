@@ -28,7 +28,7 @@ class DownscalerBilinear : public Downscaler {
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);
       // Interpolate a whole vec2
-      static void downscaleVec(const vec2& iInput, vec2& iOutput,
+      static vec2 downscaleVec(const vec2& iInput,
             const vec2& iInputLats, const vec2& iInputLons,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);

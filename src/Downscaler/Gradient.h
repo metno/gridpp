@@ -15,6 +15,7 @@ class DownscalerGradient : public Downscaler {
    public:
       //! Downscale the specified variable
       DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
+      ~DownscalerGradient();
       float getConstantElevGradient() const;
       int   getElevRadius() const;
       float getMinElevDiff() const;
@@ -43,6 +44,8 @@ class DownscalerGradient : public Downscaler {
       std::vector<float>  mLafWeights;
       float mMinLafDiff; // Minimum elevation difference within neighbourhood to use gradient
       bool mAverageNeighbourhood;
+      Downscaler* mDownscaler;
+      std::string mDownscalerName;
       mutable bool mHasIssuedWarningUnstable;
       std::string mSaveGradient;
       Variable::Type mElevGradientVariable;

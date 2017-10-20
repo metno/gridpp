@@ -99,14 +99,18 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       Field& gfield = *iInput.getField(mElevGradientVariable, t);
 
       vec2 elevsInterp;
+      vec2 lafsInterp;
       if(mDownscalerName == "nearestNeighbour") {
          elevsInterp = DownscalerNearestNeighbour::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         lafsInterp = DownscalerNearestNeighbour::downscaleVec(ilafs, ilats, ilons, olats, olons, nearestI, nearestJ);
          DownscalerNearestNeighbour::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
       }
       else if (mDownscalerName == "bilinear") {
          elevsInterp = DownscalerBilinear::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         lafsInterp = DownscalerBilinear::downscaleVec(ilafs, ilats, ilons, olats, olons, nearestI, nearestJ);
          DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
       }
+
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -117,17 +121,25 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             for(int e = 0; e < nEns; e++) {
                float currElev = oelevs[i][j];
                float currLaf = olafs[i][j];
+
+               // TODO: What base value do we use? For elevation gradient, we want to use the nearest
+               // neighbour, but for LAF gradient, we want to use the lowest LAF point?
                // float nearestElev = ielevs[Icenter][Jcenter];
-               float nearestLaf = ilafs[Icenter][Jcenter];
+               // float nearestLaf = ilafs[Icenter][Jcenter];
                // float nearestValue = ifield(Icenter, Jcenter, e);
-               float nearestValue = ofield(i, j, e);
-               float nearestElev = elevsInterp[i][j];
-               // float nearestValue = DownscalerBilinear::bilinear(ifield, Icenter, Jcenter, e, olats[i][j], olons[i][j], ilats, ilons);
+               float baseElev = elevsInterp[i][j];
+               float baseLaf = lafsInterp[i][j];
+               float baseValue = ofield(i, j, e);
+
+               // Alternatively, use a neighbourhood mean
+               // int averagingRadius = mAverageNeighbourhood * mElevRadius;
+               // calcNeighbourhoodMean(ifield, ielevs, i, j, e, Icenter, Jcenter, averagingRadius, baseValue, baseElev, baseLaf);
 
                float elevGradient = calcElevGradient(i, j, e, Icenter, Jcenter, ifield, gfield, ielevs, ilafs);
                float lafGradient = Util::MV;
                if(mLafSearchRadii.size() > 0)
                   lafGradient = calcLafGradient(i, j, e, Icenter, Jcenter, ifield, ilafs, ielevs, elevGradient);
+
                if(mSaveGradient == "elev") {
                   ofield(i, j, e) = elevGradient;
                }
@@ -140,22 +152,10 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      2) Compute the LAF gradient, by adjusting neighbourhood using elevation gradient
                      3) Adjust the point with the lower LAF by adding on the LAF gradient and elevation gradient
                   */
-                  // Compute elevation and value to extrapolate from
-                  int averagingRadius = mAverageNeighbourhood * mElevRadius;
-                  float baseValue = Util::MV;
-                  float baseElev = Util::MV;
-                  float baseLaf = Util::MV;
-                  // calcNeighbourhoodMean(ifield, ielevs, i, j, e, Icenter, Jcenter, averagingRadius, baseValue, baseElev);
-                  baseValue = nearestValue;
-                  baseElev = nearestElev;
-                  baseLaf = nearestLaf;
                   float dElev = currElev - baseElev;
                   float dLaf = currLaf - baseLaf;
 
-                  float value = baseValue;
-                  // What base value do we use? For elevation gradient, we want to use the nearest
-                  // neighbour, but for LAF gradient, we want to use the lowest LAF point.
-                  value = baseValue + dElev * elevGradient;
+                  float value = baseValue + dElev * elevGradient;
                   if(Util::isValid(lafGradient))
                      value += dLaf * lafGradient;
 
@@ -175,14 +175,20 @@ bool DownscalerGradient::calcBaseValues(const Field& iField, const vec2& iElevs,
    float totalElev = 0;
    float totalLaf = 0;
    int counter = 0;
+   int counterLaf = 0;
    for(int ii = std::max(0, Icenter-iRadius); ii <= std::min(iField.getNumLat()-1, Icenter+iRadius); ii++) {
       for(int jj = std::max(0, Jcenter-iRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+iRadius); jj++) {
          float currValue = iField(ii,jj,e);
          float currElev  = iElevs[ii][jj];
+         float currLaf  = iLafs[ii][jj];
          if(Util::isValid(currValue) && Util::isValid(currElev)) {
             totalValue += currValue;
             totalElev  += currElev;
             counter++;
+         }
+         if(Util::isValid(currLaf)) {
+            totalLaf += currLaf;
+            counterLaf++;
          }
       }
    }
@@ -193,6 +199,12 @@ bool DownscalerGradient::calcBaseValues(const Field& iField, const vec2& iElevs,
    else {
       iValueMean = totalValue / counter;
       iElevMean = totalElev / counter;
+   }
+   if(counterLaf == 0) {
+      iLafMean = Util::MV;
+   }
+   else {
+      iLafMean = totalLaf / counter;
    }
 
    return counter > 0;

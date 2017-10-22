@@ -286,7 +286,7 @@ float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int 
          // Altitude-adjust maxT so that it is on the same elevation as minT
          // Before computing the gradient
          if(Util::isValid(maxElev) && Util::isValid(minElev)) {
-            float maxTcorr = maxT + iElevGradient * (maxElev - minElev);
+            float maxTcorr = maxT - iElevGradient * (maxElev - minElev);
             lafGradient = (maxTcorr - minT) / (maxLaf - minLaf);
             value += lafGradient;
             totalWeight += mLafWeights[r];

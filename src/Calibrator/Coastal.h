@@ -16,5 +16,6 @@ class CalibratorCoastal : public Calibrator {
       Variable::Type mVariable;
       int mSearchRadius;
       float mMinLsmDiff;
+      bool mUseNN;
 };
 #endif

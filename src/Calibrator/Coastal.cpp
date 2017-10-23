@@ -9,9 +9,11 @@ CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iO
       Calibrator(iOptions),
       mVariable(iVariable),
       mSearchRadius(3),
-      mMinLsmDiff(0.1) {
+      mMinLsmDiff(0.1),
+      mUseNN(false) {
    iOptions.getValue("searchRadius", mSearchRadius);
    iOptions.getValue("minLsmDiff", mMinLsmDiff);
+   iOptions.getValue("useNN", mUseNN);
 }
 bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
@@ -74,7 +76,11 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
                assert(Util::isValid(gradient));
                assert(Util::isValid(nearestNeighbour));
 
-               float value = a + b * nearestNeighbour + c * gradient;
+               float value = Util::MV;
+               if(mUseNN)
+                  value = a + b * nearestNeighbour + c * gradient;
+               else
+                  value = a + b * lowerValue + c * gradient;
                assert(Util::isValid(value));
                (*field)(i,j,e) = value;
             }
@@ -134,16 +140,19 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
       std::vector<float> ensMax = (*iData[i].second)(Imax, Jmax);
       float valueMax = Util::calculateStat(ensMax, Util::StatTypeMean);
       std::vector<float> ensNn = (*iData[i].second)(iIens, iJens);
-      float valueNn = Util::calculateStat(ensNn, Util::StatTypeMean);
-      if(Util::isValid(obs) && Util::isValid(valueNn)) {
+      float valueNN = Util::calculateStat(ensNn, Util::StatTypeMean);
+      if(Util::isValid(obs) && Util::isValid(valueNN)) {
          float gradient = 0;
          if(Util::isValid(valueMin) && Util::isValid(valueMax))
             gradient = (valueMax - valueMin)/(maxLsm - minLsm);
-         y.push_back(obs-valueNn);
+         if(mUseNN)
+            y.push_back(obs-valueNN);
+         else
+            y.push_back(obs-valueMin);
          x[0].push_back(1);
          x[1].push_back(gradient);
          if(iIobs == 54 && iJobs == 16) {
-            std::cout << obs-valueNn << " " << gradient << std::endl;
+            std::cout << obs-valueNN << " " << gradient << std::endl;
          }
       }
    }
@@ -155,6 +164,7 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
    }
 
    // a + 1*Tnn + c * range
+   // a + 1*Tsea + c * range
    if(useRange) {
       std::vector<float> values2 = Util::regression(y, x, false);
       values.push_back(values2[0]);
@@ -192,6 +202,7 @@ std::string CalibratorCoastal::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c coastal", "Weights land and sea forecasts") << std::endl;
    ss << Util::formatDescription("   searchRadius=3", "") << std::endl;
+   ss << Util::formatDescription("   useNN=False", "Use the nearest neighbour as the basevalue, instead of the point with the lowest LAF.") << std::endl;
    ss << Util::formatDescription("   minLsmDiff=0.1", "Minimum difference in LSM in order to use the  land and sea points") << std::endl;
    return ss.str();
 }

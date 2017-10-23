@@ -15,7 +15,7 @@ class CalibratorCoastal : public Calibrator {
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       Variable::Type mVariable;
       int mSearchRadius;
-      float mMinLsmDiff;
+      float mMinLafDiff;
       bool mUseNN;
 };
 #endif

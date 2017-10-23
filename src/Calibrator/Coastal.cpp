@@ -9,10 +9,10 @@ CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iO
       Calibrator(iOptions),
       mVariable(iVariable),
       mSearchRadius(3),
-      mMinLsmDiff(0.1),
+      mMinLafDiff(0.1),
       mUseNN(false) {
    iOptions.getValue("searchRadius", mSearchRadius);
-   iOptions.getValue("minLsmDiff", mMinLsmDiff);
+   iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("useNN", mUseNN);
 }
 bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -23,7 +23,7 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
-   vec2 lsm = iFile.getLandFractions();
+   vec2 laf = iFile.getLandFractions();
 
    if(iParameterFile->getNumParameters() == 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one dataacolumns");
@@ -47,20 +47,20 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
             for(int e = 0; e < nEns; e++) {
                float lowerValue = Util::MV;
                float upperValue = Util::MV;
-               float minLsm = 2;
-               float maxLsm = -1;
+               float minLaf = 2;
+               float maxLaf = -1;
                float nearestNeighbour = (*field)(i,j,e);
                // Find the range within a neighbourhood
                for(int ii = std::max(0, i-mSearchRadius); ii <= std::min(nLat-1, i+mSearchRadius); ii++) {
                   for(int jj = std::max(0, j-mSearchRadius); jj <= std::min(nLon-1, j+mSearchRadius); jj++) {
-                     float currLsm = lsm[ii][jj];
-                     if(currLsm < minLsm) {
+                     float currLaf = laf[ii][jj];
+                     if(currLaf < minLaf) {
                         lowerValue = (*field)(ii,jj,e);
-                        minLsm = currLsm;
+                        minLaf = currLaf;
                      }
-                     if(currLsm > maxLsm) {
+                     if(currLaf > maxLaf) {
                         upperValue = (*field)(ii,jj,e);
-                        maxLsm = currLsm;
+                        maxLaf = currLaf;
                      }
                   }
                }
@@ -71,8 +71,8 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
                // If there is not sufficient variability in LSM in the neighbourhood, then
                // force don't use the range in the regression
                float gradient = 0;
-               if(Util::isValid(lowerValue) && Util::isValid(upperValue) && (maxLsm - minLsm > mMinLsmDiff))
-                  gradient = (upperValue - lowerValue) / (maxLsm - minLsm);
+               if(Util::isValid(lowerValue) && Util::isValid(upperValue) && (maxLaf - minLaf > mMinLafDiff))
+                  gradient = (upperValue - lowerValue) / (maxLaf - minLaf);
                assert(Util::isValid(gradient));
                assert(Util::isValid(nearestNeighbour));
 
@@ -94,7 +94,7 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
    std::vector<float> y;
    int nLat = iData[0].second->getNumLat();
    int nLon = iData[0].second->getNumLon();
-   vec2 lsm = iEnsGrid.landFractions();
+   vec2 laf = iEnsGrid.landFractions();
 
    // Find nearest land and sea point
    float lowerValue = Util::MV;
@@ -103,28 +103,28 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
    int Imax = Util::MV;
    int Jmin = Util::MV;
    int Jmax = Util::MV;
-   float minLsm = 2;
-   float maxLsm = -1;
+   float minLaf = 2;
+   float maxLaf = -1;
    // Find the range within a neighbourhood
    for(int ii = std::max(0, iIens-mSearchRadius); ii <= std::min(nLat-1, iIens+mSearchRadius); ii++) {
       for(int jj = std::max(0, iJens-mSearchRadius); jj <= std::min(nLon-1, iJens+mSearchRadius); jj++) {
-         float currLsm = lsm[ii][jj];
-         if(currLsm < minLsm) {
+         float currLaf = laf[ii][jj];
+         if(currLaf < minLaf) {
             Imin = ii;
             Jmin = jj;
-            minLsm = currLsm;
+            minLaf = currLaf;
          }
-         if(currLsm > maxLsm) {
+         if(currLaf > maxLaf) {
             Imax = ii;
             Jmax = jj;
-            maxLsm = currLsm;
+            maxLaf = currLaf;
          }
       }
    }
 
-   bool useRange = (maxLsm - minLsm) > mMinLsmDiff;
+   bool useRange = (maxLaf - minLaf) > mMinLafDiff;
    if(!useRange && 0)
-      std::cout << "not using range for " << iIens << "," << iJens << " range = " << (maxLsm - minLsm) << std::endl;
+      std::cout << "not using range for " << iIens << "," << iJens << " range = " << (maxLaf - minLaf) << std::endl;
    // useRange = 0;
 
    assert(Util::isValid(Imax));
@@ -144,7 +144,7 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
       if(Util::isValid(obs) && Util::isValid(valueNN)) {
          float gradient = 0;
          if(Util::isValid(valueMin) && Util::isValid(valueMax))
-            gradient = (valueMax - valueMin)/(maxLsm - minLsm);
+            gradient = (valueMax - valueMin)/(maxLaf - minLaf);
          if(mUseNN)
             y.push_back(obs-valueNN);
          else
@@ -201,8 +201,8 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
 std::string CalibratorCoastal::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c coastal", "Weights land and sea forecasts") << std::endl;
-   ss << Util::formatDescription("   searchRadius=3", "") << std::endl;
+   ss << Util::formatDescription("   searchRadius=3", "Radius (in number of gridpoints) to search for land and sea points.") << std::endl;
+   ss << Util::formatDescription("   minLafDiff=0.1", "Minimum difference in land area fraction in order to use the  land and sea points") << std::endl;
    ss << Util::formatDescription("   useNN=False", "Use the nearest neighbour as the basevalue, instead of the point with the lowest LAF.") << std::endl;
-   ss << Util::formatDescription("   minLsmDiff=0.1", "Minimum difference in LSM in order to use the  land and sea points") << std::endl;
    return ss.str();
 }

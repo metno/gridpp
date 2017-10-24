@@ -288,7 +288,7 @@ float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int 
          if(Util::isValid(maxElev) && Util::isValid(minElev)) {
             float maxTcorr = maxT - iElevGradient * (maxElev - minElev);
             lafGradient = (maxTcorr - minT) / (maxLaf - minLaf);
-            value += lafGradient;
+            value += lafGradient * mLafWeights[r];
             totalWeight += mLafWeights[r];
             counter++;
          }

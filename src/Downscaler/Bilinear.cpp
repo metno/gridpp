@@ -3,8 +3,6 @@
 #include "../Util.h"
 #include <math.h>
 
-// std::map<const File*, std::map<const File*, std::pair<vec2Int, vec2Int> > > DownscalerBilinear::mNeighbourCache;
-
 DownscalerBilinear::DownscalerBilinear(Variable::Type iVariable, const Options& iOptions) :
       Downscaler(iVariable, iOptions) {
 }
@@ -36,8 +34,6 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    float f = -y0 + y1;
    float g = y0 - y1 - y2 + y3;
    float h = y - y0;
-   // std::cout << y0 << " " << y1 << " " << y2 << " " << y3 << std::endl;
-   // std::cout << a << " " << b << " " << c << " " << d << " " << e << " " << f << " " << g << " " << h << std::endl;
    float alpha = 0;
    float beta  = 0;
    if(c*e == a*g || c*f == b*g) {
@@ -54,14 +50,6 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
       alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
       beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
    }
-#if 0
-   if(alpha < 0 || alpha > 1 || beta < 0 || beta > 1) {
-      // alpha = (-b * e + a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
-      // beta  = -((-b * e + a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g));
-      alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
-      beta  = (b * e - a * f - d * g + c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
-      }
-#endif
    float value = (1 - alpha) * ((1 - beta) * v0 + beta * v1) + alpha * ((1 - beta) * v2 + beta * v3);
    return value;
 }
@@ -94,8 +82,6 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
          int J2 = J;
          float lat = iOutputLats[i][j];
          float lon = iOutputLons[i][j];
-         // std::cout << ilons[I][J] << " " << ilons[I][J-1] << " " << ilons[I][J+1] << std::endl;
-         // std::cout << ilats[I][J] << " " << ilats[I][J-1] << " " << ilats[I][J+1] << std::endl;
          if(iInputLons[I][J] < lon) {
             J1 = J;
             J2 = J + 1;
@@ -104,29 +90,28 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
             I1 = I;
             I2 = I + 1;
          }
-         // std::cout << I << " " << J << " " << I1 << " " << I2 << " " << J1 << " " << J2 << std::endl;
-         float x0 = iInputLons[I1][J1];
-         float x1 = iInputLons[I2][J1];
-         float x2 = iInputLons[I1][J2];
-         float x3 = iInputLons[I2][J2];
-         float y0 = iInputLats[I1][J1];
-         float y1 = iInputLats[I2][J1];
-         float y2 = iInputLats[I1][J2];
-         float y3 = iInputLats[I2][J2];
-         // std::cout << x0 << " " << x1 << " " << x2 << " " << x3 << " " << lon << std::endl;
-         // std::cout << y0 << " " << y1 << " " << y2 << " " << y3 << " " << lat << std::endl;
+         if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
+            float x0 = iInputLons[I1][J1];
+            float x1 = iInputLons[I2][J1];
+            float x2 = iInputLons[I1][J2];
+            float x3 = iInputLons[I2][J2];
+            float y0 = iInputLats[I1][J1];
+            float y1 = iInputLats[I2][J1];
+            float y2 = iInputLats[I1][J2];
+            float y3 = iInputLats[I2][J2];
 
-         if(Util::isValid(I) && Util::isValid(J)) {
             float v0 = iInput[I1][J1];
             float v1 = iInput[I2][J1];
             float v2 = iInput[I1][J2];
             float v3 = iInput[I2][J2];
             float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
-            // std::cout << v0 << " " << v1 << " " << v2 << " " << v3 << " " << value << std::endl;
             output[i][j] = value;
          }
-         else
-            output[i][j] = Util::MV;
+         else {
+            // The point is outside the input domain. Revert to nearest neighbour
+            // Util::warning("Point is outside domain, cannot bilinearly interpolate");
+            output[i][j] = iInput[I][J];
+         }
       }
    }
    return output;
@@ -141,13 +126,9 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
    int nLon = iOutput.getNumLon();
    int nEns = iOutput.getNumEns();
 
-   // Algorithm from here:
-   // https://stackoverflow.com/questions/23920976/bilinear-interpolation-with-non-aligned-input-points
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
       for(int j = 0; j < nLon; j++) {
-         // Use the four points surrounding the lookup point. Use the nearest neighbour
-         // and then figure out what side of this point the other there points are.
          int I = nearestI[i][j];
          int J = nearestJ[i][j];
          int I1 = I-1;
@@ -156,8 +137,6 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
          int J2 = J;
          float lat = iOutputLats[i][j];
          float lon = iOutputLons[i][j];
-         // std::cout << ilons[I][J] << " " << ilons[I][J-1] << " " << ilons[I][J+1] << std::endl;
-         // std::cout << ilats[I][J] << " " << ilats[I][J-1] << " " << ilats[I][J+1] << std::endl;
          if(iInputLons[I][J] < lon) {
             J1 = J;
             J2 = J + 1;
@@ -166,78 +145,38 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
             I1 = I;
             I2 = I + 1;
          }
-         float x0 = iInputLons[I1][J1];
-         float x1 = iInputLons[I2][J1];
-         float x2 = iInputLons[I1][J2];
-         float x3 = iInputLons[I2][J2];
-         float y0 = iInputLats[I1][J1];
-         float y1 = iInputLats[I2][J1];
-         float y2 = iInputLats[I1][J2];
-         float y3 = iInputLats[I2][J2];
-         // std::cout << x0 << " " << x1 << " " << x2 << " " << x3 << " " << lon << std::endl;
-         // std::cout << y0 << " " << y1 << " " << y2 << " " << y3 << " " << lat << std::endl;
+         if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
+            float x0 = iInputLons[I1][J1];
+            float x1 = iInputLons[I2][J1];
+            float x2 = iInputLons[I1][J2];
+            float x3 = iInputLons[I2][J2];
+            float y0 = iInputLats[I1][J1];
+            float y1 = iInputLats[I2][J1];
+            float y2 = iInputLats[I1][J2];
+            float y3 = iInputLats[I2][J2];
 
-         // std::cout << I << " " << J << " " << I1 << " " << I2 << " " << J1 << " " << J2 << std::endl;
-         for(int ee = 0; ee < nEns; ee++) {
-            if(Util::isValid(I) && Util::isValid(J)) {
+            for(int ee = 0; ee < nEns; ee++) {
                float v0 = iInput(I1, J1, ee);
                float v1 = iInput(I2, J1, ee);
                float v2 = iInput(I1, J2, ee);
                float v3 = iInput(I2, J2, ee);
                float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
-               // std::cout << v0 << " " << v1 << " " << v2 << " " << v3 << " " << value << std::endl;
                iOutput(i,j,ee) = value;
             }
-            else
-               iOutput(i,j,ee) = Util::MV;
+         }
+         else {
+            // The point is outside the input domain. Revert to nearest neighbour
+            // Util::warning("Point is outside domain, cannot bilinearly interpolate");
+            for(int ee = 0; ee < nEns; ee++) {
+               iOutput(i,j,ee) = iInput(I, J, ee);
+            }
          }
       }
    }
 }
-float DownscalerBilinear::bilinear(const Field& iInput, int I, int J, int e, float lat, float lon,
-      const vec2& iInputLats, const vec2& iInputLons) {
-   // Use the four points surrounding the lookup point. Use the nearest neighbour
-   // and then figure out what side of this point the other there points are.
-   int I1 = I-1;
-   int I2 = I;
-   int J1 = J-1;
-   int J2 = J;
-   // std::cout << ilons[I][J] << " " << ilons[I][J-1] << " " << ilons[I][J+1] << std::endl;
-   // std::cout << ilats[I][J] << " " << ilats[I][J-1] << " " << ilats[I][J+1] << std::endl;
-   if(iInputLons[I][J] < lon) {
-      J1 = J;
-      J2 = J + 1;
-   }
-   if(iInputLats[I][J] < lat) {
-      I1 = I;
-      I2 = I + 1;
-   }
-   float x0 = iInputLons[I1][J1];
-   float x1 = iInputLons[I2][J1];
-   float x2 = iInputLons[I1][J2];
-   float x3 = iInputLons[I2][J2];
-   float y0 = iInputLats[I1][J1];
-   float y1 = iInputLats[I2][J1];
-   float y2 = iInputLats[I1][J2];
-   float y3 = iInputLats[I2][J2];
-   // std::cout << x0 << " " << x1 << " " << x2 << " " << x3 << " " << lon << std::endl;
-   // std::cout << y0 << " " << y1 << " " << y2 << " " << y3 << " " << lat << std::endl;
-
-   if(Util::isValid(I) && Util::isValid(J)) {
-      float v0 = iInput(I1, J1, e);
-      float v1 = iInput(I2, J1, e);
-      float v2 = iInput(I1, J2, e);
-      float v3 = iInput(I2, J2, e);
-      float value = DownscalerBilinear::bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
-      // std::cout << v0 << " " << v1 << " " << v2 << " " << v3 << " " << value << std::endl;
-      return value;
-   }
-   else
-      return Util::MV;
-}
 
 std::string DownscalerBilinear::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-d bilinear", "Uses bilinear interpolation") << std::endl;
+   ss << Util::formatDescription("-d bilinear", "Bilinear interpolation using the 4 points surrounding the lookup point. If the lookup point is outside the input domain, then the nearest neighbour is used.") << std::endl;
    return ss.str();
 }

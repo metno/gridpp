@@ -25,6 +25,7 @@ namespace Cglob {
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #ifdef DEBUG
 extern "C" void __gcov_flush();
 #endif
@@ -490,6 +491,94 @@ float Util::interpolate(float x, const std::vector<float>& iX, const std::vector
 
    return y;
 
+}
+
+std::vector<float> Util::regression(const std::vector<float>& iPredictand, const std::vector<std::vector<float> >& iPredictors, bool iAddConst) {
+   int N = iPredictors.size() + iAddConst; // Number of predictors
+   int T = iPredictand.size();
+
+   if(T < 2) {
+      Util::error("Cannot do regression with only one data point");
+   }
+   // Check that we have the right number of rows
+   for(int i = 0; i < iPredictors.size(); i++) {
+      if(iPredictors[i].size() != T) {
+         Util::error("One (or more) of the predictors does not have the same number of items as the predictand");
+      }
+   }
+
+   boost::numeric::ublas::matrix<double> A(T,N);
+   boost::numeric::ublas::matrix<double> y(T,1);
+   for(int t = 0; t < T; t++) {
+      for(int n = 0; n < N; n++) {
+         if(iAddConst) {
+            if(n == 0)
+               A(t, n) = 1;
+            else
+               A(t, n) = iPredictors[n-1][t];
+         }
+         else {
+            A(t,n) = iPredictors[n][t];
+         }
+         y(t,0) = iPredictand[t];
+      }
+   }
+
+#if 0
+   std::cout << "\nX" << std::endl;
+   for(int i = 0; i < A.size1(); i++) {
+      for(int j = 0; j < A.size2(); j++) {
+         std::cout << A(i,j) << " ";
+      }
+      std::cout << std::endl;
+   }
+#endif
+
+   using namespace boost::numeric::ublas;
+   matrix<double> solution(T,1);
+   matrix<double> XTX(T,T);
+   matrix<double> XT = trans(A);
+   XTX = prod(XT, A);
+
+# if 0
+   std::cout << "\nXTX" << std::endl;
+   for(int i = 0; i < XTX.size1(); i++) {
+      for(int j = 0; j < XTX.size2(); j++) {
+         std::cout << XTX(i,j) << " ";
+      }
+      std::cout << std::endl;
+   }
+#endif
+   matrix<double> XTXinv(N,N);
+   XTXinv.assign(identity_matrix<double>(N)); 
+
+   typedef permutation_matrix<std::size_t> pmatrix; 
+   pmatrix pm(XTX.size1());
+   int res = lu_factorize(XTX,pm);
+   assert(res == 0);
+
+#if 0
+   std::cout << "\npm" << std::endl;
+   for(int i = 0; i < XTX.size1(); i++) {
+      std::cout << pm(i) << " ";
+   }
+   std::cout << std::endl;
+#endif
+
+   lu_substitute(XTX, pm, XTXinv);
+   matrix<double> XTXinvXTy(N,N);
+   matrix<double> XTXinvXT = prod(XTXinv,XT);
+   solution = prod(XTXinvXT, y);
+
+   //boost::numeric::ublas::identity_matrix<float> Ainv(A.size1());
+   //boost::numeric::ublas::permutation_matrix<size_t> pm(A.size1());
+   //boost::numeric::ublas::lu_factorize(A, pm);
+   //boost::numeric::ublas::lu_substitute(A, pm, y);
+   std::vector<float> values(N, 0);
+   for(int n = 0; n < N; n++) {
+      values[n] = solution(n,0);
+   }
+   return values;
 }
 
 int Util::getLowerIndex(float iX, const std::vector<float>& iValues) {

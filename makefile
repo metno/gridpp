@@ -110,7 +110,7 @@ clean:
 		coverage/* coverage.* build/gtest gridpp gridpp_kf gridpp_debug gridpp_kf_debug build/*/libgridpp.a build/*/libgridpp.so
 
 tags:
-	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags ./*.h ./*.cpp */*.h */*.cpp
+	ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags src/*.h src/*.cpp src/*/*.h src/*/*.cpp
 
 install:
 	install -D gridpp $(BINDIR)/gridpp

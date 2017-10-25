@@ -1,10 +1,12 @@
 gridpp (0.3.0) precise; urgency=low
 
   * New features:
-    - Gradient downscaler can ues temperature at model levels (instead of T2m)
+    - Gradient downscaler can use temperature at model levels (instead of T2m)
       when computing gradient
     - Gradient downscaler can use gradients in land-area fraction
     - Bilinear downscaler added
+    - Coastal bias-correction scheme added that weights land and sea
+      tempatures from a neighbourhood
   * Backwards-incompatible changes:
     - Gradient downscaler options are different. Use -d gradientOld to get
       previous behaviour.

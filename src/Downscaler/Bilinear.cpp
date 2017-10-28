@@ -104,8 +104,12 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
             float v1 = iInput[I2][J1];
             float v2 = iInput[I1][J2];
             float v3 = iInput[I2][J2];
-            float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
-            output[i][j] = value;
+            if(Util::isValid(v0) && Util::isValid(v1) &&Util::isValid(v2) &&Util::isValid(v3)) {
+               float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
+               output[i][j] = value;
+            }
+            else
+               output[i][j] = iInput[I][J];
          }
          else {
             // The point is outside the input domain. Revert to nearest neighbour
@@ -160,8 +164,12 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
                float v1 = iInput(I2, J1, ee);
                float v2 = iInput(I1, J2, ee);
                float v3 = iInput(I2, J2, ee);
-               float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
-               iOutput(i,j,ee) = value;
+               if(Util::isValid(v0) && Util::isValid(v1) &&Util::isValid(v2) &&Util::isValid(v3)) {
+                  float value = bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
+                  iOutput(i,j,ee) = value;
+               }
+               else
+                  iOutput(i,j,ee) = Util::MV;
             }
          }
          else {

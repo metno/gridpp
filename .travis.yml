@@ -1,10 +1,15 @@
 sudo: required
 os: linux
 language: cpp
+
 matrix:
-   include:
-      - os: linux
-        dist: trusty
+  include:
+    - os: linux
+      dist: trusty
+      env: BUILD_TYPE=RELEASE
+    - os: linux
+      dist: trusty
+      env: BUILD_TYPE=DEBUG
 
 install:
  - sudo apt-get update -qq
@@ -14,12 +19,21 @@ install:
  - sudo apt-get install libgtest-dev
  - sudo pip install cpp-coveralls
 
+before_script:
+  - GRIDPP_BUILD_DIR="${TRAVIS_BUILD_DIR}/build"
+  - mkdir -p "${GRIDPP_BUILD_DIR}"
+  - cd "${GRIDPP_BUILD_DIR}"
+  - cmake -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DGTEST_DIR=/usr/src/gtest ..
+
 script:
- - make test
- - make
+  - cd "${GRIDPP_BUILD_DIR}"
+  - cmake --build .
+  - cmake --build . --target test
 
 after_success:
- - coveralls --gcov-options '\-lp'
+  - |
+    cd "${GRIDPP_BUILD_DIR}"
+    [[ "${BUILD_TYPE}" == "DEBUG" ]] && coveralls --gcov-options '\-lp'
 
 #deploy:
 #  provider: launchpad

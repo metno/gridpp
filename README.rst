@@ -55,13 +55,37 @@ Installation Instructions
    * Netcdf c++ library
    * libgsl0
    * libblas
+   * cmake (version 3 or above)
    * (Optional) Google test library (if developing new code)
 
 2. Download the source code from a release: https://github.com/metno/gridpp/releases
 
-3. Edit CXX, CFLAGS_O, IFLAGS, and LFLAGS in makefile
+3. Create build directory at the root of the repository
 
-4. Run 'make'
+.. code-block:: bash
+
+   mkdir build
+
+4. Run cmake to set up installation
+
+.. code-block:: bash
+
+   cd build
+   cmake ..
+
+This will set up gridpp to be installed in /usr/local/bin on Ubuntu. To specify a custom installation path, use:
+
+.. code-block:: bash
+
+   cmake .. -DCMAKE_INSTALL_PREFIX=<custom path>
+
+5. Run cmake to install
+
+.. code-block:: bash
+
+   cmake --build .
+   cmake --build . --target install
+
 
 **From debian packages**
 
@@ -74,13 +98,13 @@ To see program options, run:
 
 .. code-block:: bash
 
-   ./gridpp
+   gridpp
 
 To test the program on a fake dataset, run:
 
 .. code-block:: bash
 
-   ./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc\
+   gridpp testing/files/10x10.nc testing/files/10x10_copy.nc\
       -v T -d gradient\
       -v Precip -d smart numSmart=3 searchRadius=3
    ncview testing/files/10x10_copy.nc
@@ -94,7 +118,7 @@ To run using 8 threads:
 .. code-block:: bash
 
    export OMP_NUM_THREADS=8
-   ./gridpp ...
+   gridpp ...
 
 
 
@@ -104,9 +128,9 @@ Run the program in sequence for each variable:
 
 .. code-block:: bash
 
-   ./gridpp input output -v T ...
-   ./gridpp input output -v Precip ...
-   ./gridpp input output -v RH ...
+   gridpp input output -v T ...
+   gridpp input output -v Precip ...
+   gridpp input output -v RH ...
 
 
 

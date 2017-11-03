@@ -35,6 +35,12 @@ after_success:
     cd "${GRIDPP_BUILD_DIR}"
     [[ "${BUILD_TYPE}" == "DEBUG" ]] && coveralls --gcov-options '\-lp'
 
+after_failure:
+  - |
+    cd "${GRIDPP_BUILD_DIR}"
+    LOGFILE=Testing/Temporary/LastTest.log
+    [[ -f "${LOGFILE}" ]] && cat "${LOGFILE}"
+
 #deploy:
 #  provider: launchpad
 #  slug: "~christian-skarby/gridpp/master"

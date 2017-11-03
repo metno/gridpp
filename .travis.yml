@@ -23,7 +23,7 @@ before_script:
   - GRIDPP_BUILD_DIR="${TRAVIS_BUILD_DIR}/build"
   - mkdir -p "${GRIDPP_BUILD_DIR}"
   - cd "${GRIDPP_BUILD_DIR}"
-  - cmake -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DGTEST_DIR=/usr/src/gtest ..
+  - cmake -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DGTEST_DIR=/usr/src/gtest -DENABLE_TESTS=ON ..
 
 script:
   - cd "${GRIDPP_BUILD_DIR}"

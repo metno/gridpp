@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(ENABLE_TESTS "build test suite" ON)
+option(ENABLE_TESTS "build test suite" OFF)
 if (NOT CMAKE_BUILD_TYPE)
    message(STATUS "CMAKE_BUILD_TYPE is not set, switching to RELEASE")
    set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING

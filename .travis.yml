@@ -18,7 +18,7 @@ install:
  - sudo apt-get install netcdf-bin libnetcdf-dev
  - sudo apt-get install libgtest-dev
  - sudo apt-get install python3-pip
- - sudo python3 -m pip install cpp-coveralls
+ - sudo python3 -m pip install -U cpp-coveralls
 
 before_script:
   - GRIDPP_BUILD_DIR="${TRAVIS_BUILD_DIR}/build"

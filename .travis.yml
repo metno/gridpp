@@ -19,6 +19,7 @@ install:
  - sudo apt-get install libgtest-dev
  - sudo apt-get install python3-pip
  - sudo python3 -m pip install -U cpp-coveralls
+ - sudo gem install coveralls-lcov
 
 before_script:
   - GRIDPP_BUILD_DIR="${TRAVIS_BUILD_DIR}/build"
@@ -34,7 +35,12 @@ script:
 after_success:
   - |
     cd "${GRIDPP_BUILD_DIR}"
-    [[ "${BUILD_TYPE}" == "DEBUG" ]] && coveralls --gcov-options '\-lp'
+    if [[ "${BUILD_TYPE}" == "DEBUG" ]]; then
+       lcov --directory . --capture --output-file coverage.info
+       lcov --remove coverage.info '*/src/Testing/*' '/usr/*' --output-file coverage.info # filter out system and test code
+       lcov --list coverage.info # debug before upload
+       coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info # uploads to coveralls
+    fi
 
 after_failure:
   - |

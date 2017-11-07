@@ -39,7 +39,8 @@ after_success:
        lcov --remove coverage.info '*/src/Testing/*' '/usr/*' --output-file coverage.info # filter out system and test code
        lcov --list coverage.info # debug before upload
        sed -r "s|${TRAVIS_BUILD_DIR}/?||g" coverage.info > coverage.info.stripped
-       coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info.stripped # uploads to coveralls
+       cd ${TRAVIS_BUILD_DIR}
+       coveralls-lcov --repo-token ${COVERALLS_TOKEN} ${GRIDPP_BUILD_DIR}/coverage.info.stripped # uploads to coveralls
     fi
 
 after_failure:

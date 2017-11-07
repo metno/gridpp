@@ -17,8 +17,7 @@ install:
  - sudo apt-get install libboost-all-dev
  - sudo apt-get install netcdf-bin libnetcdf-dev
  - sudo apt-get install libgtest-dev
- - sudo apt-get install python3-pip
- - sudo python3 -m pip install -U cpp-coveralls
+ - sudo apt-get install lcov
  - sudo gem install coveralls-lcov
 
 before_script:

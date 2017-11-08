@@ -104,6 +104,7 @@ class File {
       std::vector<double> mTimes;
       static Uuid mNextTag;
 };
+#include "Netcdf.h"
 #include "NetcdfBase.h"
 #include "Fake.h"
 #include "Point.h"

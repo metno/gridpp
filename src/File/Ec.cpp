@@ -615,3 +615,13 @@ void FileEc::writeAltitude() const {
    handleNetcdfError(status, "could not write altitude");
    delete[] values;
 }
+int FileNetcdf::getDim(std::string iDim) const {
+   int dim;
+   int status = nc_inq_dimid(mFile, iDim.c_str(), &dim);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
+      Util::error(ss.str());
+   }
+   return dim;
+}

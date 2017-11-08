@@ -86,6 +86,9 @@ class Options {
          }
          return false;
       };
+      //! Check that a value is present for the key
+      bool hasValue(const std::string& iKey) const;
+
    private:
       //! Parse a string with a single option "key=value"
       void addOption(std::string iOptionString);

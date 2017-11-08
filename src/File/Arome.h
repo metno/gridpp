@@ -3,12 +3,12 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include "Netcdf.h"
+#include "NetcdfBase.h"
 #include "../Variable.h"
 #include "../Options.h"
 
 //! Represents a Netcdf data file
-class FileArome : public FileNetcdf {
+class FileArome : public FileNetcdfBase {
    public:
       FileArome(std::string iFilename, const Options& iOptions=Options(), bool iReadOnly=false);
       ~FileArome();

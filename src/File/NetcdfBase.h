@@ -1,5 +1,5 @@
-#ifndef FILE_NETCDF_H
-#define FILE_NETCDF_H
+#ifndef FILE_NETCDF_BASE_H
+#define FILE_NETCDF_BASE_H
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
@@ -7,10 +7,10 @@
 #include "../Variable.h"
 
 //! Represents a Netcdf data file
-class FileNetcdf : public File {
+class FileNetcdfBase : public File {
    public:
-      FileNetcdf(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
-      ~FileNetcdf();
+      FileNetcdfBase(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
+      ~FileNetcdfBase();
 
       virtual std::string getVariableName(Variable::Type iVariable) const = 0;
 

@@ -21,7 +21,7 @@ namespace {
    };
    // Mask out values
    TEST_F(TestCalibratorMask, 10x10_mask_out) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       // One point at 3,5 with 223 km radius and one point at 4,6 with 336 km radius
       ParameterFileText par(Options("file=testing/files/mask0.txt spatial=1"));
       CalibratorMask cal = CalibratorMask(Variable::T, Options("keep=0"));
@@ -42,7 +42,7 @@ namespace {
    }
    // Mask in values
    TEST_F(TestCalibratorMask, 10x10_mask_in) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/mask0.txt spatial=1"));
       CalibratorMask cal = CalibratorMask(Variable::T, Options("mask=1"));
 
@@ -63,7 +63,7 @@ namespace {
    // Missing parameter file
    TEST_F(TestCalibratorMask, invalid2) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-	  FileArome from("testing/files/10x10.nc");
+	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
       CalibratorMask calibrator(Variable::T, Options());
       EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");

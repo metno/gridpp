@@ -20,7 +20,7 @@ namespace {
    TEST_F(TestCalibratorAccumlate, 1x1) {
       Variable::Type var = Variable::T;
       Variable::Type varAcc = Variable::T;
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorAccumulate cal = CalibratorAccumulate(var, Options("outputVariable=T"));
       cal.calibrate(from);
 
@@ -38,7 +38,7 @@ namespace {
    TEST_F(TestCalibratorAccumlate, 10x10) {
       Variable::Type var = Variable::Precip;
       Variable::Type varAcc = Variable::PrecipAcc;
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorAccumulate cal = CalibratorAccumulate(var, Options(""));
       cal.calibrate(from);
 
@@ -52,7 +52,7 @@ namespace {
    TEST_F(TestCalibratorAccumlate, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       // File does not contain QNH so it should not be possible to accumulate
       CalibratorAccumulate cal = CalibratorAccumulate(Variable::QNH, Options(""));
       EXPECT_DEATH(cal.calibrate(from), ".*");

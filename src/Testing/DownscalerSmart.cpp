@@ -71,7 +71,7 @@ namespace {
       DownscalerSmart d(Variable::T, Options());
       d.setSearchRadius(3);
       d.setNumSmart(2);
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       std::stringstream ss;
       ss << "nLat=1 nLon=5 nEns=1 nTime=" << from.getNumTime();
@@ -109,7 +109,7 @@ namespace {
       d.setSearchRadius(3);
       d.setNumSmart(2);
       d.setMinElevDiff(109);
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       std::stringstream ss;
       ss << "nLat=1 nLon=3 nEns=1 nTime=" << from.getNumTime();

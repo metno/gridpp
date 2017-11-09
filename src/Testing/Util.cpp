@@ -1,5 +1,5 @@
 #include "../Util.h"
-#include "../File/Arome.h"
+#include "../File/Netcdf.h"
 #include "../Variable.h"
 #include "../Calibrator/Calibrator.h"
 #include <algorithm>
@@ -266,8 +266,8 @@ namespace {
       EXPECT_TRUE(status);
       // Change 10x10_copy.nc
       CalibratorNeighbourhood neighbourhood(Variable::T, Options(""));
-      FileArome f1("testing/files/10x10.nc");
-      FileArome f2("testing/files/10x10_copy.nc");
+      FileNetcdf f1("testing/files/10x10.nc");
+      FileNetcdf f2("testing/files/10x10_copy.nc");
       FieldPtr field1 = f1.getField(Variable::T, 0);
       FieldPtr field2 = f2.getField(Variable::T, 0);
       EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
@@ -280,7 +280,7 @@ namespace {
       // Use copy. Values should be the same afterwards
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
-      FileArome f3("testing/files/10x10_copy.nc");
+      FileNetcdf f3("testing/files/10x10_copy.nc");
       FieldPtr field3 = f3.getField(Variable::T, 0);
       EXPECT_EQ(f1.getNumLat(), f2.getNumLat());
       EXPECT_EQ(f1.getNumLon(), f2.getNumLon());
@@ -337,7 +337,7 @@ namespace {
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
    }
    TEST_F(UtilTest, compute) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
 
       // Odd-sized neighbourhood
       std::vector<float> hood = getHood(3,0,2);

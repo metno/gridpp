@@ -21,7 +21,7 @@ namespace {
    };
    // Constant correction to 0.3
    TEST_F(TestCalibratorRegression, 10x10_0order) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression0order.txt"));
       CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
@@ -36,7 +36,7 @@ namespace {
       EXPECT_FLOAT_EQ(0.3, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, 10x10_1order) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression1order.txt"));
       CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
@@ -51,7 +51,7 @@ namespace {
       EXPECT_FLOAT_EQ(384.3, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, 10x10_2order) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression2order.txt"));
       CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
@@ -66,7 +66,7 @@ namespace {
       EXPECT_FLOAT_EQ(-81593.90, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, missing_parameters) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regressionMissing.txt"));
       CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
 
@@ -83,7 +83,7 @@ namespace {
    // Incorrect number of data columns
    TEST_F(TestCalibratorRegression, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-	  FileArome from("testing/files/10x10.nc");
+	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
       ParameterFileText par(Options("file=testing/files/regressionInvalid1.txt"));
       CalibratorRegression calibrator(Variable::T, Options());
@@ -92,7 +92,7 @@ namespace {
    // Missing parameter file
    TEST_F(TestCalibratorRegression, invalid2) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-	  FileArome from("testing/files/10x10.nc");
+	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
       CalibratorRegression calibrator(Variable::T, Options());
       EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");
@@ -100,7 +100,7 @@ namespace {
    TEST_F(TestCalibratorRegression, training) {
       // R code:
       // data = data.frame(x=c(4,5,9),y=c(3.2,5,14))
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       std::vector<ObsEns> obsens;
       Ens ens(3,0);
       ens[0] = 4;

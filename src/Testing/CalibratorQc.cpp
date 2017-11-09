@@ -17,7 +17,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorQc, 10x10) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=304 max=305.8"));
 
       cal.calibrate(from);
@@ -28,7 +28,7 @@ namespace {
       EXPECT_FLOAT_EQ(305.8, (*after)(0,9,0)); // 320
    }
    TEST_F(TestCalibratorQc, 10x10_nomax) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorQc cal = CalibratorQc(Variable::T ,Options("max=307"));
 
       cal.calibrate(from);
@@ -39,7 +39,7 @@ namespace {
       EXPECT_FLOAT_EQ(307, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorQc, 10x10_nomin) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=303"));
 
       cal.calibrate(from);
@@ -50,7 +50,7 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorQc, 10x10_no) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorQc cal = CalibratorQc(Variable::T ,Options(""));
 
       cal.calibrate(from);
@@ -61,7 +61,7 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorQc, 10x10_missingValue) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=303 max=307"));
 
       FieldPtr after = from.getField(Variable::T, 0);

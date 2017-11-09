@@ -71,7 +71,7 @@ namespace {
       EXPECT_FLOAT_EQ(0, cal.calcCovar(Location(60,10,100),Location(61,10,100)));
    }
    TEST_F(TestCalibratorKriging, 10x10) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       // Kriging when each observation only affects one grid point at a time (radius 1m)
       ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=1 maxElevDiff=100 efoldDist=200000"));
@@ -97,7 +97,7 @@ namespace {
    /*
    TEST_F(TestCalibratorKriging, radius) {
       {
-         FileArome from("testing/files/10x10.nc");
+         FileNetcdf from("testing/files/10x10.nc");
          CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=120000 efoldDist=2e10 maxElevDiff=1000 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
          cal.calibrate(from, parFile);
@@ -123,7 +123,7 @@ namespace {
          EXPECT_NEAR(300.7,   (*after0)(9,7,0), 1e-3); // Influenced by -0.3 only
       }
       {
-         FileArome from("testing/files/10x10.nc");
+         FileNetcdf from("testing/files/10x10.nc");
          CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=0 efoldDist=2e10 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
          cal.calibrate(from, parFile);
@@ -142,7 +142,7 @@ namespace {
       }
    }
    TEST_F(TestCalibratorKriging, aux) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=1 maxElevDiff=1000 efoldDist=1e10 auxVariable=Precip range=0,1 parameters=testing/files/parametersKriging.txt fileType=textSpatial"));
 
       cal.calibrate(from, parFile);

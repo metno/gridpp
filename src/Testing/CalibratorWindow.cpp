@@ -17,7 +17,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorWindow, radius0) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=0 stat=mean"));
       cal.calibrate(from);
 
@@ -33,7 +33,7 @@ namespace {
       EXPECT_FLOAT_EQ(23, (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, radius2) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=mean"));
       cal.calibrate(from);
 
@@ -49,7 +49,7 @@ namespace {
       EXPECT_FLOAT_EQ(21,        (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, min) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=min"));
       cal.calibrate(from);
 
@@ -65,7 +65,7 @@ namespace {
       EXPECT_FLOAT_EQ(19, (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, max) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=max"));
       cal.calibrate(from);
 
@@ -81,7 +81,7 @@ namespace {
       EXPECT_FLOAT_EQ(23, (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, std) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=std"));
       cal.calibrate(from);
 
@@ -92,7 +92,7 @@ namespace {
       EXPECT_FLOAT_EQ(2,         (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, quantile) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=quantile quantile=0.5"));
       cal.calibrate(from);
 
@@ -103,7 +103,7 @@ namespace {
       EXPECT_FLOAT_EQ(21,   (*from.getField(Variable::T, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, median) {
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=2 stat=median"));
       cal.calibrate(from);
 
@@ -115,7 +115,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, radius100) {
       // A large radius forces all values to be the same
-      FileArome from("testing/files/1x1.nc");
+      FileNetcdf from("testing/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(Variable::T ,Options("radius=100 stat=mean"));
       cal.calibrate(from);
 

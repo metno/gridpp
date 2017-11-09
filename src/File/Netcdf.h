@@ -18,6 +18,7 @@
 class FileNetcdf : public File {
    public:
       FileNetcdf(std::string iFilename, const Options& iOptions=Options(), bool iReadOnly=false);
+      ~FileNetcdf();
 
       std::string getVariableName(Variable::Type iVariable) const;
       static bool isValid(std::string iFilename, const Options& iOptions);

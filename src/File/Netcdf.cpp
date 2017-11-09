@@ -136,6 +136,10 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
 }
 
+FileNetcdf::~FileNetcdf() {
+   nc_close(mFile);
+}
+
 FieldPtr FileNetcdf::getFieldCore(Variable::Type iVariable, int iTime) const {
    std::string variableName = getVariableName(iVariable);
    return getFieldCore(variableName, iTime);

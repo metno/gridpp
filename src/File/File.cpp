@@ -21,7 +21,7 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    std::string type = "";
    if(!iOptions.getValue("type", type)) {
       // Autodetect type based on content
-      if(FileNetcdf::isValid(iFilename)) {
+      if(FileNetcdf::isValid(iFilename, iOptions)) {
          type = "netcdf";
       }
       else if(FileArome::isValid(iFilename)) {

@@ -393,6 +393,21 @@ std::string FileNetcdf::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::Precip) {
       return "precipitation_amount";
    }
+   else if(iVariable == Variable::Pop) {
+      return "precipitation_amount_prob_low";
+   }
+   else if(iVariable == Variable::Pop6h) {
+      return "precipitation_amount_prob_low_6h";
+   }
+   else if(iVariable == Variable::PrecipLow) {
+      return "precipitation_amount_low_estimate";
+   }
+   else if(iVariable == Variable::PrecipMiddle) {
+      return "precipitation_amount_middle_estimate";
+   }
+   else if(iVariable == Variable::PrecipHigh) {
+      return "precipitation_amount_high_estimate";
+   }
    else if(iVariable == Variable::PrecipRate) {
       return "lwe_precipitation_rate";
    }
@@ -411,11 +426,38 @@ std::string FileNetcdf::getVariableName(Variable::Type iVariable) const {
    else if(iVariable == Variable::W) {
       return "windspeed_10m";
    }
+   else if(iVariable == Variable::WD) {
+      // TODO: Correct name?
+      return "winddirection_10m";
+   }
    else if(iVariable == Variable::MSLP) {
-      return "sea_level_pressure";
+      return "air_pressure_at_sea_level";
    }
    else if(iVariable == Variable::RH) {
       return "relative_humidity_2m";
+   }
+   else if(iVariable == Variable::Phase) {
+      // TODO: Correct name?
+      return "phase";
+   }
+   else if(iVariable == Variable::P) {
+      return "surface_air_pressure";
+   }
+   else if(iVariable == Variable::MSLP) {
+      return "air_pressure_at_sea_level";
+   }
+   else if(iVariable == Variable::QNH) {
+      // TODO: What name to use?
+      return "qnh";
+   }
+   else if(iVariable == Variable::SwinAcc) {
+      return "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time";
+   }
+   else if(iVariable == Variable::LwinAcc) {
+      return "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time";
+   }
+   else if(iVariable == Variable::Fake) {
+      return "fake";
    }
    return "";
 }

@@ -76,19 +76,32 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
          // and then figure out what side of this point the other there points are.
          int I = nearestI[i][j];
          int J = nearestJ[i][j];
-         int I1 = I-1;
-         int I2 = I;
-         int J1 = J-1;
-         int J2 = J;
          float lat = iOutputLats[i][j];
          float lon = iOutputLons[i][j];
-         if(iInputLons[I][J] < lon) {
+         // Find out if current lookup point is right/above the nearest neighbour
+         bool isRight = lon > iInputLons[I][J];
+         bool isAbove = lat > iInputLats[I][J];
+         int I1 = Util::MV;
+         int I2 = Util::MV;
+         int J1 = Util::MV;
+         int J2 = Util::MV;
+         // Find out which Is to use
+         if((isAbove && iInputLats[I+1][J] > iInputLats[I][J]) || (!isAbove && iInputLats[I+1][J] < iInputLats[I][J])) {
+            I1 = I;
+            I2 = I + 1;
+         }
+         else {
+            I1 = I - 1;
+            I2 = I;
+         }
+         // Find out which Js to use
+         if((isRight && iInputLons[I][J+1] > iInputLons[I][J]) || (!isRight && iInputLons[I][J+1] < iInputLons[I][J])) {
             J1 = J;
             J2 = J + 1;
          }
-         if(iInputLats[I][J] < lat) {
-            I1 = I;
-            I2 = I + 1;
+         else {
+            J1 = J - 1;
+            J2 = J;
          }
          if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
             float x0 = iInputLons[I1][J1];
@@ -135,19 +148,32 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
       for(int j = 0; j < nLon; j++) {
          int I = nearestI[i][j];
          int J = nearestJ[i][j];
-         int I1 = I-1;
-         int I2 = I;
-         int J1 = J-1;
-         int J2 = J;
          float lat = iOutputLats[i][j];
          float lon = iOutputLons[i][j];
-         if(iInputLons[I][J] < lon) {
+         // Find out if current lookup point is right/above the nearest neighbour
+         bool isRight = lon > iInputLons[I][J];
+         bool isAbove = lat > iInputLats[I][J];
+         int I1 = Util::MV;
+         int I2 = Util::MV;
+         int J1 = Util::MV;
+         int J2 = Util::MV;
+         // Find out which Is to use
+         if((isAbove && iInputLats[I+1][J] > iInputLats[I][J]) || (!isAbove && iInputLats[I+1][J] < iInputLats[I][J])) {
+            I1 = I;
+            I2 = I + 1;
+         }
+         else {
+            I1 = I - 1;
+            I2 = I;
+         }
+         // Find out which Js to use
+         if((isRight && iInputLons[I][J+1] > iInputLons[I][J]) || (!isRight && iInputLons[I][J+1] < iInputLons[I][J])) {
             J1 = J;
             J2 = J + 1;
          }
-         if(iInputLats[I][J] < lat) {
-            I1 = I;
-            I2 = I + 1;
+         else {
+            J1 = J - 1;
+            J2 = J;
          }
          if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
             float x0 = iInputLons[I1][J1];

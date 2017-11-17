@@ -78,31 +78,11 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
          int J = nearestJ[i][j];
          float lat = iOutputLats[i][j];
          float lon = iOutputLons[i][j];
-         // Find out if current lookup point is right/above the nearest neighbour
-         bool isRight = lon > iInputLons[I][J];
-         bool isAbove = lat > iInputLats[I][J];
          int I1 = Util::MV;
          int I2 = Util::MV;
          int J1 = Util::MV;
          int J2 = Util::MV;
-         // Find out which Is to use
-         if((isAbove && iInputLats[I+1][J] > iInputLats[I][J]) || (!isAbove && iInputLats[I+1][J] < iInputLats[I][J])) {
-            I1 = I;
-            I2 = I + 1;
-         }
-         else {
-            I1 = I - 1;
-            I2 = I;
-         }
-         // Find out which Js to use
-         if((isRight && iInputLons[I][J+1] > iInputLons[I][J]) || (!isRight && iInputLons[I][J+1] < iInputLons[I][J])) {
-            J1 = J;
-            J2 = J + 1;
-         }
-         else {
-            J1 = J - 1;
-            J2 = J;
-         }
+         find_coords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
          if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
             float x0 = iInputLons[I1][J1];
             float x1 = iInputLons[I2][J1];
@@ -157,24 +137,7 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
          int I2 = Util::MV;
          int J1 = Util::MV;
          int J2 = Util::MV;
-         // Find out which Is to use
-         if((isAbove && iInputLats[I+1][J] > iInputLats[I][J]) || (!isAbove && iInputLats[I+1][J] < iInputLats[I][J])) {
-            I1 = I;
-            I2 = I + 1;
-         }
-         else {
-            I1 = I - 1;
-            I2 = I;
-         }
-         // Find out which Js to use
-         if((isRight && iInputLons[I][J+1] > iInputLons[I][J]) || (!isRight && iInputLons[I][J+1] < iInputLons[I][J])) {
-            J1 = J;
-            J2 = J + 1;
-         }
-         else {
-            J1 = J - 1;
-            J2 = J;
-         }
+         find_coords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
          if(I2 < iInputLons.size() && J2 < iInputLons[I].size()) {
             float x0 = iInputLons[I1][J1];
             float x1 = iInputLons[I2][J1];
@@ -207,6 +170,33 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
          }
       }
    }
+}
+
+bool DownscalerBilinear::find_coords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2) {
+   // Use the four points surrounding the lookup point. Use the nearest neighbour
+   // and then figure out what side of this point the other there points are.
+   // Find out if current lookup point is right/above the nearest neighbour
+   bool isRight = iLon > iLons[I][J];
+   bool isAbove = iLat > iLats[I][J];
+   // Find out which Is to use
+   if((isAbove && iLats[I+1][J] > iLats[I][J]) || (!isAbove && iLats[I+1][J] < iLats[I][J])) {
+      I1 = I;
+      I2 = I + 1;
+   }
+   else {
+      I1 = I - 1;
+      I2 = I;
+   }
+   // Find out which Js to use
+   if((isRight && iLons[I][J+1] > iLons[I][J]) || (!isRight && iLons[I][J+1] < iLons[I][J])) {
+      J1 = J;
+      J2 = J + 1;
+   }
+   else {
+      J1 = J - 1;
+      J2 = J;
+   }
+   return true;
 }
 
 std::string DownscalerBilinear::description() {

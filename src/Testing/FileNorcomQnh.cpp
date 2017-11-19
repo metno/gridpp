@@ -26,7 +26,7 @@ namespace {
       EXPECT_FLOAT_EQ(120, elevs[0][1]);
    }
    TEST_F(FileNorcomQnhTest, asOutput) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       FileNorcomQnh to("testing/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=1"));
       DownscalerNearestNeighbour d = DownscalerNearestNeighbour(Variable::P, Options());
       bool status = d.downscale(from, to);

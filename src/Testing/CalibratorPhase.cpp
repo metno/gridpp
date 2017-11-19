@@ -44,7 +44,7 @@ namespace {
    };
 
    TEST_F(TestCalibratorPhase, 10x10) {
-      FileArome file("testing/files/10x10.nc");
+      FileNetcdf file("testing/files/10x10.nc");
       ParameterFileText parFile(Options("file=testing/files/parametersPhase.txt"));
       Parameters parameters = parFile.getParameters(0);
       ASSERT_EQ(2, parameters.size());
@@ -110,7 +110,7 @@ namespace {
       EXPECT_FLOAT_EQ(Variable::PhaseSnow, (*phase)(0,0,0));
    }
    TEST_F(TestCalibratorPhase, missingParameters) {
-      FileArome file("testing/files/10x10.nc");
+      FileNetcdf file("testing/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(Util::MV,1.5);
       CalibratorPhase cal = CalibratorPhase(Options());
 

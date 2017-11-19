@@ -17,7 +17,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorAltitude, arome) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
       CalibratorAltitude cal = CalibratorAltitude(Options());
 
@@ -60,7 +60,7 @@ namespace {
    TEST_F(TestCalibratorAltitude, locationIndependent) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/parametersSingleTime.txt spatial=0"));
       CalibratorAltitude cal = CalibratorAltitude(Options());
       EXPECT_DEATH(cal.calibrate(from, &par), ".*");

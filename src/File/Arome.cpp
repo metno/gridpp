@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileArome::FileArome(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdf(iFilename, iOptions, iReadOnly),
+FileArome::FileArome(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdfBase(iFilename, iOptions, iReadOnly),
       mXName(""),
       mYName(""),
       mLatName("latitude"),

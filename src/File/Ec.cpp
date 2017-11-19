@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "../Util.h"
 
-FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdf(iFilename, iOptions, iReadOnly) {
+FileEc::FileEc(std::string iFilename, const Options& iOptions, bool iReadOnly) : FileNetcdfBase(iFilename, iOptions, iReadOnly) {
    // Set dimensions
    int dTime = getDim("time");
    int dEns  = getDim("ensemble_member");
@@ -614,4 +614,14 @@ void FileEc::writeAltitude() const {
    bool status = nc_put_vara_float(mFile, vElev, start, count, values);
    handleNetcdfError(status, "could not write altitude");
    delete[] values;
+}
+int FileNetcdf::getDim(std::string iDim) const {
+   int dim;
+   int status = nc_inq_dimid(mFile, iDim.c_str(), &dim);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
+      Util::error(ss.str());
+   }
+   return dim;
 }

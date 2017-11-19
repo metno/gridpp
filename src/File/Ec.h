@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include "Netcdf.h"
+#include "NetcdfBase.h"
 #include "../Variable.h"
 #include "../Options.h"
 
@@ -15,7 +15,7 @@
 //!    Latitude var:  lat, latitude, y. With the latitude dim, and possibly the lon dim
 //!    Longitude var: lon, longitude, x. With the longitude dim, and possibly the lat dim
 //!    5 dimensional variables (time, *, ensemble_member, <lat dim>, <lon dim>)
-class FileEc : public FileNetcdf {
+class FileEc : public FileNetcdfBase {
    public:
       FileEc(std::string iFilename, const Options& iOptions=Options(), bool iReadOnly=false);
 

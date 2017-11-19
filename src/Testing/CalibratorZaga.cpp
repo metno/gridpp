@@ -245,7 +245,7 @@ namespace {
    /*
    TEST_F(TestCalibratorZaga, aromeVariables) {
       {
-         FileArome to("testing/files/10x10_copy.nc");
+         FileNetcdf to("testing/files/10x10_copy.nc");
          for(int t = 0; t < to.getNumTime(); t++) {
             to.addField(to.getEmptyField(), Variable::PrecipLow, t);
             to.addField(to.getEmptyField(), Variable::PrecipMiddle, t);
@@ -265,8 +265,8 @@ namespace {
          to.write(variables);
       }
 
-      FileArome from("testing/files/10x10.nc");
-      FileArome to("testing/files/10x10_copy.nc");
+      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf to("testing/files/10x10_copy.nc");
       ASSERT_TRUE(to.hasVariable(Variable::PrecipMiddle));
       FieldPtr p0 = from.getField(Variable::PrecipMiddle, 1);
       FieldPtr p1 = to.getField(Variable::PrecipMiddle, 1);

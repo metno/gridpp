@@ -55,3 +55,10 @@ void Options::addOption(std::string iOptionString) {
       addOption(key, value);
    }
 }
+bool Options::hasValue(const std::string& iKey) const {
+   for(int i = 0; i < mPairs.size(); i++) {
+      if(mPairs[i].first == iKey)
+         return true;
+   }
+   return false;
+}

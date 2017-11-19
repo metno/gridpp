@@ -21,7 +21,10 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    std::string type = "";
    if(!iOptions.getValue("type", type)) {
       // Autodetect type based on content
-      if(FileArome::isValid(iFilename)) {
+      if(FileNetcdf::isValid(iFilename, iOptions)) {
+         type = "netcdf";
+      }
+      else if(FileArome::isValid(iFilename)) {
          type = "arome";
       }
       else if(FileEc::isValid(iFilename)) {
@@ -45,6 +48,9 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    }
    else if(type == "ec") {
       file = new FileEc(iFilename, iOptions, iReadOnly);
+   }
+   else if(type == "netcdf") {
+      file = new FileNetcdf(iFilename, iOptions, iReadOnly);
    }
    else if(type == "point") {
       file = new FilePoint(iFilename, iOptions);

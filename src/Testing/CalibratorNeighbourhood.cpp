@@ -17,7 +17,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorNeighbourhood, 10x10_double) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1"));
 
       cal.calibrate(from);
@@ -36,7 +36,7 @@ namespace {
       EXPECT_FLOAT_EQ(305.35556, (*after)(5,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, 10x10_missingValues) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T, Options("radius=1"));
       FieldPtr field = from.getField(Variable::T, 0);
       (*field)(4,1,0) = Util::MV;
@@ -64,7 +64,7 @@ namespace {
       EXPECT_FLOAT_EQ(12, cal12.getRadius());
    }
    TEST_F(TestCalibratorNeighbourhood, mean) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=mean"));
 
       cal.calibrate(from);
@@ -75,7 +75,7 @@ namespace {
       EXPECT_FLOAT_EQ(308.25,   (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, min) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=min"));
 
       cal.calibrate(from);
@@ -86,7 +86,7 @@ namespace {
       EXPECT_FLOAT_EQ(302, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, max) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=max"));
 
       cal.calibrate(from);
@@ -97,7 +97,7 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, std) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=std"));
 
       cal.calibrate(from);
@@ -108,7 +108,7 @@ namespace {
       EXPECT_FLOAT_EQ(7.0133801, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, median) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=median"));
 
       cal.calibrate(from);
@@ -119,7 +119,7 @@ namespace {
       EXPECT_FLOAT_EQ(305.5, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, quantile) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(Variable::T ,Options("radius=1 stat=quantile quantile=0.9"));
 
       cal.calibrate(from);

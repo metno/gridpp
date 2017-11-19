@@ -17,7 +17,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorDiagnose, WindSpeed) {
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorDiagnose cal(Variable::W ,Options(""));
 
       cal.calibrate(from, NULL);
@@ -28,7 +28,7 @@ namespace {
    TEST_F(TestCalibratorDiagnose, U_V) {
       // Diagnose windspeed and direction from u and v. Then change the windspeed to
       // 13 and check that rediagnosis of U/V yields correct winds
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorDiagnose calW(Variable::W,Options(""));
       CalibratorDiagnose calWD(Variable::WD,Options(""));
       CalibratorDiagnose calU(Variable::U,Options(""));
@@ -77,7 +77,7 @@ namespace {
    TEST_F(TestCalibratorDiagnose, DontKnowHow) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       CalibratorDiagnose cal(Variable::T ,Options(""));
       EXPECT_DEATH(cal.calibrate(from, NULL), ".*");
    }

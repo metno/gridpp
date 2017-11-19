@@ -58,7 +58,7 @@ namespace {
    }
    TEST_F(TestDownscalerNearestNeighbour, 10x10) {
       DownscalerNearestNeighbour d(Variable::T, Options());
-      FileArome from("testing/files/10x10.nc");
+      FileNetcdf from("testing/files/10x10.nc");
       const Field& fromT  = *from.getField(Variable::T, 0);
       std::stringstream ss;
       ss << "nLat=2 nLon=2 nEns=1 nTime=" << from.getNumTime();

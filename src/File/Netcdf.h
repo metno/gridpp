@@ -22,8 +22,6 @@ class FileNetcdf : public File {
 
       std::string getVariableName(Variable::Type iVariable) const;
       static bool isValid(std::string iFilename, const Options& iOptions);
-      static std::string description();
-      std::string name() const {return "netcdf";};
 
       //! Add attribute to a variable (overwrite if existing). Variable must exist
       void setAttribute(std::string iVariable, std::string iName, std::string iValue);
@@ -44,6 +42,9 @@ class FileNetcdf : public File {
 
       //! Get global string attribute. Returns "" if non-existant.
       std::string getGlobalAttribute(std::string iName);
+
+      static std::string description();
+      std::string name() const {return "netcdf";};
 
    protected:
       float getScale(int iVar) const;

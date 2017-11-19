@@ -72,7 +72,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    std::string elevVar;
    mElevVar = Util::MV;
    float elevScale = 1;
-   if(!iOptions.getValue("latVar", elevVar)) {
+   if(!iOptions.getValue("elevVar", elevVar)) {
       if(hasVar("altitude")) {
          mElevVar = getVar("altitude");
       }
@@ -103,6 +103,24 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       Util::warning("No altitude field available in " + getFilename());
    }
 
+   std::string lafVar;
+   if(!iOptions.getValue("lafVar", lafVar)) {
+      lafVar = "land_area_fraction";
+   }
+
+   if(hasVar(lafVar)) {
+      int land_area_fraction = getVar(lafVar);
+      mLandFractions = getLatLonVariable(land_area_fraction);
+   }
+   else {
+      mLandFractions.resize(getNumLat());
+      for(int i = 0; i < getNumLat(); i++) {
+         mLandFractions[i].resize(getNumLon());
+         for(int j = 0; j < getNumLon(); j++) {
+            mLandFractions[i][j] = Util::MV;
+         }
+      }
+   }
 
    // Compute times
    if(hasVar("forecast_reference_time")) {
@@ -639,11 +657,6 @@ int FileNetcdf::getLonVar() const {
    }
    return var;
 }
-std::string FileNetcdf::description() {
-   std::stringstream ss;
-   ss << Util::formatDescription("type=ec", "ECMWF ensemble file") << std::endl;
-   return ss.str();
-}
 
 void FileNetcdf::defineAltitude() {
    // Determine the order of lat and lon dimensions in altitude field
@@ -1112,7 +1125,7 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    }
 
    if(dims.size() == 1) {
-      // 1D, try to expand vector onto a gri
+      // 1D, try to expand vector onto a grid
       float* values;
       if(dims[0] == mLonDim)
          values = new float[getNumLon()];
@@ -1181,4 +1194,19 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
       delete[] values;
    }
    return grid;
+}
+
+std::string FileNetcdf::description() {
+   std::stringstream ss;
+   ss << Util::formatDescription("type=netcdf", "Netcdf file") << std::endl;
+   ss << Util::formatDescription("   latDim=undef", "Name of the y-axis dimension. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   lonDim=undef", "Name of the x-axis dimension. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   timeDim=undef", "Name of the time dimension. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   ensDim=undef", "Name of the ensemble dimension. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   latVar=undef", "Name of the variable representing latitudes. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   lonVar=undef", "Name of the variable representing longitudes. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   timeVar=undef", "Name of the variable representing time. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   elevVar=undef", "Name of altitude variable. If unspecified, 'altitude' or 'surface_geopotential' is used.") << std::endl;
+   ss << Util::formatDescription("   lafVar=undef", "Name of land-area-fraction variable. If unspecified, the name is auto-detected.") << std::endl;
+   return ss.str();
 }

@@ -251,6 +251,9 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
       defineAltitude();
    }
 
+   defineTimes();
+   defineReferenceTime();
+   defineGlobalAttributes();
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
       Variable::Type varType = iVariables[v];
@@ -293,9 +296,6 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
       setAttribute(var, "units", Variable::getUnits(varType));
       setAttribute(var, "standard_name", Variable::getStandardName(varType));
    }
-   defineTimes();
-   defineReferenceTime();
-   defineGlobalAttributes();
    startDataMode();
 
    writeTimes();
@@ -1037,10 +1037,10 @@ void FileNetcdf::defineTimes() {
          handleNetcdfError(status, "creating time variable");
       }
       else {
-         int id;
-         int status = nc_def_var(mFile, "time", NC_DOUBLE, 0, NULL, &id);
+         int status = nc_def_dim(mFile, "time", NULL, &mTimeDim);
+         handleNetcdfError(status, "creating time dimension");
+         status = nc_def_var(mFile, "time", NC_DOUBLE, 1, &mTimeDim, &mTimeVar);
          handleNetcdfError(status, "creating time variable");
-
       }
    }
    int vTime = getVar("time");
@@ -1068,7 +1068,10 @@ void FileNetcdf::writeTimes() {
    for(int t = 0; t < getNumTime(); t++) {
       timesArr[t] = times[t];
    }
-   int status = nc_put_var_double(mFile, vTime, timesArr);
+
+   size_t start = 0;
+   size_t count = getNumTime();
+   int status = nc_put_vara_double(mFile, vTime, &start, &count, timesArr);
    handleNetcdfError(status, "could not write times");
 }
 void FileNetcdf::defineReferenceTime() {

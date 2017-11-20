@@ -461,6 +461,7 @@ void File::setTimes(std::vector<double> iTimes) {
       ss << "Setting times array in '" << getFilename() << "' with " << iTimes.size()
          << " elements when the time dimension is " << getNumTime();
       Util::warning(ss.str());
+      mNTime = iTimes.size();
    }
    mTimes = iTimes;
 }

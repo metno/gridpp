@@ -38,6 +38,76 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
       }
    }
 }
+void DownscalerNearestNeighbour::downscaleField(const Field& iInput, Field& iOutput,
+            const vec2& iInputLats, const vec2& iInputLons,
+            const vec2& iOutputLats, const vec2& iOutputLons,
+            const vec2Int& nearestI, const vec2Int& nearestJ) {
+
+   int nLat = iOutput.getNumLat();
+   int nLon = iOutput.getNumLon();
+   int nEns = iOutput.getNumEns();
+
+   #pragma omp parallel for
+   for(int i = 0; i < nLat; i++) {
+      for(int j = 0; j < nLon; j++) {
+         int I = nearestI[i][j];
+         int J = nearestJ[i][j];
+         for(int e = 0; e < nEns; e++) {
+            if(Util::isValid(I) && Util::isValid(J)) {
+               iOutput(i,j,e) = iInput(I, J, e);
+            }
+            else
+               iOutput(i,j,e) = Util::MV;
+         }
+      }
+   }
+}
+
+vec2 DownscalerNearestNeighbour::downscaleVec(const vec2& iInput,
+            const vec2& iInputLats, const vec2& iInputLons,
+            const vec2& iOutputLats, const vec2& iOutputLons,
+            const vec2Int& nearestI, const vec2Int& nearestJ) {
+
+   int nLat = iOutputLats.size();
+   int nLon = iOutputLats[0].size();
+
+   assert(nearestI.size() == iOutputLats.size());
+   assert(nearestJ.size() == iOutputLats.size());
+   assert(nearestI[0].size() == iOutputLats[0].size());
+   assert(nearestJ[0].size() == iOutputLats[0].size());
+
+   vec2 output;
+   output.resize(nLat);
+   for(int i = 0; i < nLat; i++)
+      output[i].resize(nLon);
+
+   #pragma omp parallel for
+   for(int i = 0; i < nLat; i++) {
+      for(int j = 0; j < nLon; j++) {
+         assert(i < nearestI.size());
+         assert(j < nearestI[i].size());
+         assert(i < nearestJ.size());
+         assert(j < nearestJ[i].size());
+         int I = nearestI[i][j];
+         int J = nearestJ[i][j];
+         assert(I < iInput.size());
+         assert(J < iInput[I].size());
+         assert(I >= 0);
+         assert(J >= 0);
+         assert(i < output.size());
+         assert(j < output[i].size());
+         assert(i >= 0);
+         assert(j >= 0);
+         if(Util::isValid(I) && Util::isValid(J)) {
+            output[i][j] = iInput[I][J];
+         }
+         else
+            output[i][j] = Util::MV;
+      }
+   }
+   return output;
+}
+
 
 std::string DownscalerNearestNeighbour::description() {
    std::stringstream ss;

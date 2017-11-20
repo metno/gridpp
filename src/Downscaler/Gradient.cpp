@@ -13,6 +13,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mDefaultGradient(0),
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
+      mDownscalerName("nearestNeighbour"),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
@@ -23,6 +24,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("constantGradient", mConstantGradient);
    iOptions.getValue("minElevDiff", mMinElevDiff);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
+   iOptions.getValue("downscaler", mDownscalerName);
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
@@ -49,6 +51,17 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       Field& ifield = *iInput.getField(mVariable, t);
       Field& ofield = *iOutput.getField(mVariable, t);
 
+      vec2 elevsInterp;
+      vec2 lafsInterp;
+      if(mDownscalerName == "nearestNeighbour") {
+         elevsInterp = DownscalerNearestNeighbour::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerNearestNeighbour::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      }
+      else if (mDownscalerName == "bilinear") {
+         elevsInterp = DownscalerBilinear::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
+      }
+
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
@@ -58,35 +71,34 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {
                float currElev = oelevs[i][j];
-               float nearestElev = ielevs[Icenter][Jcenter];
-               if(!Util::isValid(currElev) || !Util::isValid(nearestElev)) {
-                  // Can't adjust if we don't have an elevation, use nearest neighbour
-                  ofield(i,j,e) = ifield(Icenter,Jcenter,e);
+               float baseElev = elevsInterp[i][j];
+               float baseValue = ofield(i, j, e);
+               if(!Util::isValid(currElev) || !Util::isValid(baseElev)) {
+                  // Can't adjust if we don't have an elevation, use uncorrected value
                }
                else {
                   float gradient = mDefaultGradient;
                   float totalValue = 0;
                   float totalElev = 0;
                   int counter = 0;
-                  int averagingRadius = 0;
-                  if(mAverageNeighbourhood)
-                     averagingRadius = mSearchRadius;
-                  for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
-                        float currValue = ifield(ii,jj,e);
-                        float currElev  = ielevs[ii][jj];
-                        if(Util::isValid(currValue) && Util::isValid(currElev)) {
-                           totalValue += currValue;
-                           totalElev  += currElev;
-                           counter++;
+
+                  // Compute the average elevation and value within the neighbourhood
+                  if(mAverageNeighbourhood) {
+                     for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
+                           float currValue = ifield(ii,jj,e);
+                           float currElev  = ielevs[ii][jj];
+                           if(Util::isValid(currValue) && Util::isValid(currElev)) {
+                              totalValue += currValue;
+                              totalElev  += currElev;
+                              counter++;
+                           }
                         }
                      }
-                  }
-                  float baseValue = Util::MV;
-                  float baseElev  = Util::MV;
-                  if(counter > 0) {
-                     baseValue = totalValue / counter;
-                     baseElev  = totalElev  / counter;
+                     if(counter > 0) {
+                        baseValue = totalValue / counter;
+                        baseElev  = totalElev  / counter;
+                     }
                   }
                   float dElev = currElev - baseElev;
 

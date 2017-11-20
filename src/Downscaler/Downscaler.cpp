@@ -27,6 +27,10 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
       return d;
    }
+   else if(iName == "bilinear") {
+      DownscalerBilinear* d = new DownscalerBilinear(iVariable, iOptions);
+      return d;
+   }
    else if(iName == "smart") {
       DownscalerSmart* d = new DownscalerSmart(iVariable, iOptions);
       float searchRadius = Util::MV;

@@ -471,6 +471,7 @@ std::vector<double> File::getTimes() const {
 
 std::string File::getDescriptions() {
    std::stringstream ss;
+   ss << FileNetcdf::description();
    ss << FileArome::description();
    ss << FileEc::description();
    ss << FilePoint::description();

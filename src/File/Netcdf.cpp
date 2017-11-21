@@ -1202,14 +1202,14 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
 std::string FileNetcdf::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=netcdf", "Netcdf file") << std::endl;
-   ss << Util::formatDescription("   latDim=undef", "Name of the y-axis dimension. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   lonDim=undef", "Name of the x-axis dimension. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   timeDim=undef", "Name of the time dimension. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   ensDim=undef", "Name of the ensemble dimension. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   latVar=undef", "Name of the variable representing latitudes. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   lonVar=undef", "Name of the variable representing longitudes. If unspecified, the name is auto-detected.") << std::endl;
-   ss << Util::formatDescription("   timeVar=undef", "Name of the variable representing time. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   latDim=undef", "Name of y-axis dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   lonDim=undef", "Name of x-axis dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   timeDim=undef", "Name of time dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   ensDim=undef", "Name of ensemble dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   latVar=undef", "Name of variable with latitudes. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   lonVar=undef", "Name of variable with longitudes. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   timeVar=undef", "Name of variable with time. Auto-detected if unspecified.") << std::endl;
    ss << Util::formatDescription("   elevVar=undef", "Name of altitude variable. If unspecified, 'altitude' or 'surface_geopotential' is used.") << std::endl;
-   ss << Util::formatDescription("   lafVar=undef", "Name of land-area-fraction variable. If unspecified, the name is auto-detected.") << std::endl;
+   ss << Util::formatDescription("   lafVar=undef", "Name of land-area-fraction variable. Auto-detected if unspecified.") << std::endl;
    return ss.str();
 }

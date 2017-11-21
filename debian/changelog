@@ -13,6 +13,13 @@ gridpp (0.3.0) precise; urgency=low
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
 
+gridpp (0.2.10) precise; urgency=low
+
+  * Adds -d bilinear
+  * Adds bilinear interpolation to -d gradient
+
+ -- Thomas Nipen <thomas.nipen@met.no>  Mon, 20 Nov 2017 21:41:25 +0200
+
 gridpp (0.2.9) precise; urgency=low
 
   * Adds -c diagnose for dewpoint temperature and RH

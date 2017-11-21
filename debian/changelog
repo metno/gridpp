@@ -11,6 +11,7 @@ gridpp (0.3.0) precise; urgency=low
     - Gradient downscaler options are different. Use -d gradientOld to get
       previous behaviour.
     - Parameter text files must contain header
+    - Parameter files are specified differently: -p <filename> type=<type>
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
 

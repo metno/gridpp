@@ -426,10 +426,18 @@ Setup::Setup(const std::vector<std::string>& argv) {
 
          ParameterFile* p = NULL;
          if(parameterFile != "") {
-            p = ParameterFile::getScheme(parameterFile, pOptions);
-            if(!p->isReadable()) {
+            std::string schemeName;
+            if(!pOptions.getValue("type", schemeName)) {
                state = ERROR;
-               errorMessage = "Could not open parameter file: " + pOptions.toString();
+               errorMessage = "Parameter file missing 'type': " + pOptions.toString();
+            }
+            else {
+               pOptions.addOption("file", parameterFile);
+               p = ParameterFile::getScheme(schemeName, pOptions);
+               if(!p->isReadable()) {
+                  state = ERROR;
+                  errorMessage = "Could not open parameter file: " + pOptions.toString();
+               }
             }
          }
          if(state != ERROR) {

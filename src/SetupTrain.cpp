@@ -71,7 +71,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
 
    Options oOptions;
    Options mOptions;
-   std::string outputType = "";
+   std::string outputFilename = "";
    std::string methodType = "";
    std::string errorMessage = "";
    while(true) {
@@ -107,12 +107,12 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            if(outputType != "") {
+            if(outputFilename != "") {
                state = ERROR;
                errorMessage = "Duplicate '-p'";
             }
             else {
-               outputType = argv[index];
+               outputFilename = argv[index];
                index++;
                state = OUTPUTOPT;
             }
@@ -219,8 +219,16 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
       else if(state == END) {
          mOptions.addOption("variable", Variable::getTypeName(variable));
          method = Calibrator::getScheme(methodType, mOptions);
-         output = ParameterFile::getScheme(outputType, oOptions, true);
-         break;
+         oOptions.addOption("file", outputFilename);
+         std::string schemeName;
+         if(!oOptions.getValue("type", schemeName)) {
+            state = ERROR;
+            errorMessage = "Parameter file missing 'type': " + oOptions.toString();
+         }
+         else {
+            output = ParameterFile::getScheme(schemeName, oOptions, true);
+            break;
+         }
       }
       else if(state == ERROR) {
          std::stringstream ss;

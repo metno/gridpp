@@ -7,7 +7,7 @@ typedef Setup MetSetup;
 namespace {
 
    TEST(SetupTest, test1) {
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -c zaga -p text file=testing/files/parameters.txt -c accumulate -d smart searchRadius=11"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -c zaga -p testing/files/parameters.txt type=text -c accumulate -d smart searchRadius=11"));
       EXPECT_EQ(1,           setup.variableConfigurations.size());
       EXPECT_EQ(2,           setup.variableConfigurations[0].calibrators.size());
       EXPECT_EQ(Variable::T, setup.variableConfigurations[0].variable);
@@ -28,7 +28,7 @@ namespace {
       EXPECT_EQ(0,            setup.variableConfigurations[0].calibrators.size());
    }
    TEST(SetupTest, downscaler_parameters) {
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -c zaga -p text file=testing/files/parameters.txt"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -c zaga -p testing/files/parameters.txt type=text"));
       ASSERT_EQ(1,            setup.variableConfigurations.size());
       EXPECT_EQ(Variable::T,  setup.variableConfigurations[0].variable);
       EXPECT_EQ(1,            setup.variableConfigurations[0].calibrators.size());
@@ -49,7 +49,7 @@ namespace {
       EXPECT_EQ("nearestNeighbour", setup.variableConfigurations[0].downscaler->name());
    }
    TEST(SetupTest, complicated) {
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d nearestNeighbour -d smart -c neighbourhood -c accumulate -c neighbourhood -v Precip -c zaga -p text file=testing/files/parameters.txt -d gradient"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d nearestNeighbour -d smart -c neighbourhood -c accumulate -c neighbourhood -v Precip -c zaga -p testing/files/parameters.txt type=text -d gradient"));
       ASSERT_EQ(2,            setup.variableConfigurations.size());
       VariableConfiguration varconf = setup.variableConfigurations[0];
       EXPECT_EQ(Variable::T,  varconf.variable);
@@ -136,10 +136,10 @@ namespace {
       MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v T -d smart numSmart=2 -v Precip -d smart"));
       MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d smart numSmart=2 -v Precip -d smart"));
 
-      MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v Precip -c zaga -p text file=testing/files/parameters.txt -c zaga -p text file=testing/files/parameters.txt -d nearestNeighbour"));
+      MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -v Precip -c zaga -p testing/files/parameters.txt type=text -c zaga -p testing/files/parameters.txt type=text -d nearestNeighbour"));
 
       // Multiple inputs and outputs
-      MetSetup(Util::split("testing/files/10x10.nc,testing/files/10x10_copy.nc testing/files/10x10.nc,testing/files/10x10_copy.nc -v Precip -c zaga -p text file=testing/files/parameters.txt -c zaga -p text file=testing/files/parameters.txt -d nearestNeighbour"));
+      MetSetup(Util::split("testing/files/10x10.nc,testing/files/10x10_copy.nc testing/files/10x10.nc,testing/files/10x10_copy.nc -v Precip -c zaga -p testing/files/parameters.txt type=text -c zaga -p testing/files/parameters.txt type=text -d nearestNeighbour"));
    }
    TEST(SetupTest, shouldBeInValid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -166,19 +166,22 @@ namespace {
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c -d nearest")), ".*");
 
       // Parameters before other schemes
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -p text file=testing/files/parameters.txt -v Precip -c zaga")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -p text file=testing/files/parameters.txt -c zaga")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -p testing/files/parameters.txt type=text -v Precip -c zaga")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -p testing/files/parameters.txt type=text -c zaga")), ".*");
 
       // Invalid parameter file
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p text file=testing/files/parametersInvalidTime.txt")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p netcdf file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=text")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=text")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p testing/files/parametersInvalidTime.txt type=text")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=netcdf")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
 
       // Different number of input and output files
-      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v Precip -c zaga -p metnoKalman file=testing/files/parametersw8e9yhd89hywe89d.txt")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v Precip -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
+
+      // Missing type
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v Precip -c zaga -p testing/files/parameters.txt")), ".*");
    }
    TEST(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();

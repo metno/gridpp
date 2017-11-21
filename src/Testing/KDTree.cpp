@@ -150,9 +150,25 @@ namespace {
       lons.push_back(lon);
       KDTree tree(lats, lons);
       KDTree other = tree;
+
       tree.getNearestNeighbour(2,1, I, J);
       EXPECT_EQ(0, I);
       EXPECT_EQ(0, J);
+      other.getNearestNeighbour(2,1, I, J);
+      EXPECT_EQ(0, I);
+      EXPECT_EQ(0, J);
+   }
+   // Check that the copy constructor works on empty trees
+   TEST_F(KDTreeTest, copyConstructorEmpty) {
+      KDTree tree;
+      KDTree other = tree;
+
+      std::vector<float> lat(1,3), lon(1,2);
+      vec2 lats, lons;
+      lats.push_back(lat);
+      lons.push_back(lon);
+      other.build(lats, lons);
+      int I, J;
       other.getNearestNeighbour(2,1, I, J);
       EXPECT_EQ(0, I);
       EXPECT_EQ(0, J);

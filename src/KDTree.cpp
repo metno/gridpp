@@ -16,9 +16,11 @@ KDTree& KDTree::operator=(KDTree other) {
 }
 
 KDTree::KDTree(const KDTree& other) {
-   mLats = other.mLats;
-   mLons = other.mLons;
-   mRoot.reset(new KDTree::TreeNode(*other.mRoot));
+   if(other.mRoot != NULL) {
+      mLats = other.mLats;
+      mLons = other.mLons;
+      mRoot.reset(new KDTree::TreeNode(*other.mRoot));
+   }
 }
 
 void KDTree::build(const vec2& iLats, const vec2& iLons) {

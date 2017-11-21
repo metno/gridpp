@@ -1106,6 +1106,17 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    return grid;
 }
 
+int FileNetcdf::getDim(std::string iDim) const {
+   int dim;
+   int status = nc_inq_dimid(mFile, iDim.c_str(), &dim);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
+      Util::error(ss.str());
+   }
+   return dim;
+}
+
 std::string FileNetcdf::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=netcdf", "Netcdf file") << std::endl;

@@ -61,7 +61,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/parametersSingleTime.txt spatial=0"));
+      ParameterFileText par(Options("file=testing/files/parametersSingleTime.txt"));
       CalibratorAltitude cal = CalibratorAltitude(Options());
       EXPECT_DEATH(cal.calibrate(from, &par), ".*");
    }

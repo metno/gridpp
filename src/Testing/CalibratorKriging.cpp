@@ -73,7 +73,7 @@ namespace {
    TEST_F(TestCalibratorKriging, 10x10) {
       FileNetcdf from("testing/files/10x10.nc");
       // Kriging when each observation only affects one grid point at a time (radius 1m)
-      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
+      ParameterFile* parFile = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt"));
       CalibratorKriging cal = CalibratorKriging(Variable::T, Options("radius=1 maxElevDiff=100 efoldDist=200000"));
 
       // Prior to kriging

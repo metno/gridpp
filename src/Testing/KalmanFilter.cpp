@@ -25,7 +25,7 @@ namespace {
 
    TEST_F(KalmanFilterTest, default) {
       KalmanFilter kf(Variable::T, Options());
-      ParameterFileText data(Options("file=testing/files/sampleObsFcst.txt spatial=1"));
+      ParameterFileText data(Options("file=testing/files/sampleObsFcst.txt"));
    }
    TEST_F(KalmanFilterTest, simple) {
       KalmanFilter kfSlow(Variable::T, Options("ratio=0.1"));

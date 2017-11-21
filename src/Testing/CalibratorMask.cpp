@@ -23,7 +23,7 @@ namespace {
    TEST_F(TestCalibratorMask, 10x10_mask_out) {
       FileNetcdf from("testing/files/10x10.nc");
       // One point at 3,5 with 223 km radius and one point at 4,6 with 336 km radius
-      ParameterFileText par(Options("file=testing/files/mask0.txt spatial=1"));
+      ParameterFileText par(Options("file=testing/files/mask0.txt"));
       CalibratorMask cal = CalibratorMask(Variable::T, Options("keep=0"));
 
       cal.calibrate(from, &par);
@@ -43,7 +43,7 @@ namespace {
    // Mask in values
    TEST_F(TestCalibratorMask, 10x10_mask_in) {
       FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/mask0.txt spatial=1"));
+      ParameterFileText par(Options("file=testing/files/mask0.txt"));
       CalibratorMask cal = CalibratorMask(Variable::T, Options("mask=1"));
 
       cal.calibrate(from, &par);

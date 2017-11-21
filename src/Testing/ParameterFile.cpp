@@ -21,7 +21,7 @@ namespace {
       ParameterFile* p0 = ParameterFile::getScheme("text", Options("file=testing/files/parameters.txt"));
       EXPECT_EQ("text", p0->name());
       EXPECT_FALSE(p0->isLocationDependent());
-      ParameterFile* p1 = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
+      ParameterFile* p1 = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt"));
       EXPECT_EQ("text", p1->name());
       EXPECT_TRUE(p1->isLocationDependent());
       ParameterFile* p2 = ParameterFile::getScheme("metnoKalman", Options("file=testing/files/kalmanOutput.txt"));
@@ -30,7 +30,7 @@ namespace {
       EXPECT_EQ("netcdf", p3->name());
    }
    TEST_F(ParameterFileTest, nearestNeighbour) {
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt spatial=1"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt"));
       // Nearest neighbour is 5,5
       Parameters par = p->getParameters(0, Location(4.9,4.9,0));
       ASSERT_EQ(1, par.size());
@@ -63,7 +63,7 @@ namespace {
    TEST_F(ParameterFileTest, setParameters) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=1"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt"));
       Location loc = Location(0,0,0);
       Parameters par;
       p->setParameters(createParameters(1,2,3),    0, Location(0,0,0));
@@ -97,7 +97,7 @@ namespace {
    TEST_F(ParameterFileTest, timeIndependent) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=1"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt"));
       Location loc = Location(0,0,0);
       Parameters par;
       p->setParameters(createParameters(1,2,3),    0, Location(0,0,0));
@@ -121,8 +121,7 @@ namespace {
    }
    // No locations
    TEST_F(ParameterFileTest, locationIndependent) {
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));
-      Location loc = Location(0,0,0);
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt"));
       p->setParameters(createParameters(1,2,3), 0);
       p->setParameters(createParameters(4,5,6), 1);
 
@@ -150,7 +149,7 @@ namespace {
    } 
    // No locations, one time
    TEST_F(ParameterFileTest, noLocationsOneTime) {
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt spatial=0"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/temp1231.txt"));
       Location loc = Location(0,0,0);
       p->setParameters(createParameters(1,2,3), 0);
       p->recomputeTree();

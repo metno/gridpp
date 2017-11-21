@@ -7,6 +7,8 @@ gridpp (0.3.0) precise; urgency=low
     - Bilinear downscaler added
     - Coastal bias-correction scheme added that weights land and sea
       tempatures from a neighbourhood
+    - Added compilation with cmake
+    - Variable names can be overridden by passing in a variable map file
   * Backwards-incompatible changes:
     - Gradient downscaler options are different. Use -d gradientOld to get
       previous behaviour.

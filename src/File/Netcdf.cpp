@@ -50,6 +50,12 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    else
       mTimeDim = getDim(timeDim);
 
+   std::string variablesFile;
+   if(!iOptions.getValue("variables", variablesFile))
+      mVariableMap.loadDefaults();
+   else
+      mVariableMap.load(variablesFile);
+
    // Determine dimension sizes
    mNEns = 1;
    mNLat = 1;
@@ -384,100 +390,10 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
 
 
 std::string FileNetcdf::getVariableName(Variable::Type iVariable) const {
-   if(iVariable == Variable::PrecipAcc) {
-      return "precipitation_amount_acc";
-   }
-   else if(iVariable == Variable::Cloud) {
-      return "cloud_area_fraction";
-   }
-   else if(iVariable == Variable::T) {
-      return "air_temperature_2m";
-   }
-   else if(iVariable == Variable::TMin) {
-      return "air_temperature_2m_min6h";
-   }
-   else if(iVariable == Variable::TMax) {
-      return "air_temperature_2m_max6h";
-   }
-   else if(iVariable == Variable::TD) {
-      return "dew_point_temperature_2m";
-   }
-   else if(iVariable == Variable::Tlevel0) {
-      return "air_temperature_ml";
-   }
-   else if(iVariable == Variable::Tlevel1) {
-      return "air_temperature_ml";
-   }
-   else if(iVariable == Variable::Precip) {
-      return "precipitation_amount";
-   }
-   else if(iVariable == Variable::Pop) {
-      return "precipitation_amount_prob_low";
-   }
-   else if(iVariable == Variable::Pop6h) {
-      return "precipitation_amount_prob_low_6h";
-   }
-   else if(iVariable == Variable::PrecipLow) {
-      return "precipitation_amount_low_estimate";
-   }
-   else if(iVariable == Variable::PrecipMiddle) {
-      return "precipitation_amount_middle_estimate";
-   }
-   else if(iVariable == Variable::PrecipHigh) {
-      return "precipitation_amount_high_estimate";
-   }
-   else if(iVariable == Variable::PrecipRate) {
-      return "lwe_precipitation_rate";
-   }
-   else if(iVariable == Variable::U) {
-      return "eastward_wind_10m";
-   }
-   else if(iVariable == Variable::Xwind) {
-      return "x_wind_10m";
-   }
-   else if(iVariable == Variable::V) {
-      return "northward_wind_10m";
-   }
-   else if(iVariable == Variable::Ywind) {
-      return "y_wind_10m";
-   }
-   else if(iVariable == Variable::W) {
-      return "windspeed_10m";
-   }
-   else if(iVariable == Variable::WD) {
-      // TODO: Correct name?
-      return "winddirection_10m";
-   }
-   else if(iVariable == Variable::MSLP) {
-      return "air_pressure_at_sea_level";
-   }
-   else if(iVariable == Variable::RH) {
-      return "relative_humidity_2m";
-   }
-   else if(iVariable == Variable::Phase) {
-      // TODO: Correct name?
-      return "phase";
-   }
-   else if(iVariable == Variable::P) {
-      return "surface_air_pressure";
-   }
-   else if(iVariable == Variable::MSLP) {
-      return "air_pressure_at_sea_level";
-   }
-   else if(iVariable == Variable::QNH) {
-      // TODO: What name to use?
-      return "qnh";
-   }
-   else if(iVariable == Variable::SwinAcc) {
-      return "integral_of_surface_downwelling_shortwave_flux_in_air_wrt_time";
-   }
-   else if(iVariable == Variable::LwinAcc) {
-      return "integral_of_surface_downwelling_longwave_flux_in_air_wrt_time";
-   }
-   else if(iVariable == Variable::Fake) {
-      return "fake";
-   }
-   return "";
+   if(mVariableMap.has(iVariable))
+      return mVariableMap.get(iVariable);
+   else
+      return "";
 }
 
 bool FileNetcdf::isValid(std::string iFilename, const Options& iOptions) {
@@ -1215,5 +1131,6 @@ std::string FileNetcdf::description() {
    ss << Util::formatDescription("   timeVar=undef", "Name of variable with time. Auto-detected if unspecified.") << std::endl;
    ss << Util::formatDescription("   elevVar=undef", "Name of altitude variable. If unspecified, 'altitude' or 'surface_geopotential' is used.") << std::endl;
    ss << Util::formatDescription("   lafVar=undef", "Name of land-area-fraction variable. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   variables=undef", "Variable definition file.") << std::endl;
    return ss.str();
 }

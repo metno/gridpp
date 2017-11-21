@@ -6,6 +6,7 @@
 #include "File.h"
 #include "../Variable.h"
 #include "../Options.h"
+#include "../VariableMap.h"
 
 //! Represents an ensemble Netcdf data file from ECMWF
 //! Must have:
@@ -105,6 +106,7 @@ class FileNetcdf : public File {
       vec2 getLatLonVariable(int iVariable) const;
       static bool hasDim(int iFile, std::string iDim);
       const static int mMaxAttributeLength = 100000000;
+      VariableMap mVariableMap;
 
 };
 #endif

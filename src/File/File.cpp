@@ -30,12 +30,6 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
       if(FileNetcdf::isValid(iFilename, iOptions)) {
          type = "netcdf";
       }
-      else if(FileArome::isValid(iFilename)) {
-         type = "arome";
-      }
-      else if(FileEc::isValid(iFilename)) {
-         type = "ec";
-      }
    }
 
    // Instantiate the file
@@ -48,12 +42,6 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
          Util::warning("Could not find suitable parser for '" + iFilename + "'");
          return NULL;
       }
-   }
-   else if(type == "arome") {
-      file = new FileArome(iFilename, iOptions, iReadOnly);
-   }
-   else if(type == "ec") {
-      file = new FileEc(iFilename, iOptions, iReadOnly);
    }
    else if(type == "netcdf") {
       file = new FileNetcdf(iFilename, iOptions, iReadOnly);
@@ -486,8 +474,6 @@ std::string File::getVariableName(Variable::Type iVariable) const {
 std::string File::getDescriptions() {
    std::stringstream ss;
    ss << FileNetcdf::description();
-   ss << FileArome::description();
-   ss << FileEc::description();
    ss << FilePoint::description();
    ss << FileNorcomQnh::description();
    ss << FileText::description();

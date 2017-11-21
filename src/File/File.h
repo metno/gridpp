@@ -109,7 +109,6 @@ class File {
       VariableMap mVariableMap;
 };
 #include "Netcdf.h"
-#include "NetcdfBase.h"
 #include "Fake.h"
 #include "Point.h"
 #include "NorcomQnh.h"

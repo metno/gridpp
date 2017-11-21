@@ -1,4 +1,4 @@
-#include "Ec.h"
+#include "Netcdf.h"
 #include <math.h>
 #include <netcdf.h>
 #include <assert.h>

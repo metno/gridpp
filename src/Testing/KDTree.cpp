@@ -1,5 +1,4 @@
 #include "../KDTree.h"
-#include "../File/Arome.h"
 #include "../Variable.h"
 #include "../Calibrator/Calibrator.h"
 #include <algorithm>

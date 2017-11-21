@@ -14,23 +14,23 @@ namespace {
    }
    /*
    TEST_F(FileNetcdfTest, overwriteAttribute) {
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.setGlobalAttribute("history", "test512");
       EXPECT_EQ("test512", file.getGlobalAttribute("history"));
    }
    TEST_F(FileNetcdfTest, addAttribute) {
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.setGlobalAttribute("history2", "test123");
       EXPECT_EQ("test123", file.getGlobalAttribute("history2"));
    }
    TEST_F(FileNetcdfTest, missingAttribute) {
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       std::string att = file.getGlobalAttribute("qowhoiqfhoiqhdow");
       EXPECT_EQ("", att);
    }
    TEST_F(FileNetcdfTest, appendAttribute) {
       // Check that appending and prepending works
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.setGlobalAttribute("history", "empty");
       file.prependGlobalAttribute("history",  "testing");
       file.appendGlobalAttribute("history",  "testing2");
@@ -42,7 +42,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, appendAttributeEmpty) {
       // Check that appending and prepending to an empty attribute works
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.prependGlobalAttribute("history71623",  "value321");
       file.appendGlobalAttribute("history99311",  "value15");
       EXPECT_EQ("value321", file.getGlobalAttribute("history71623"));
@@ -50,7 +50,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, setAttribute) {
       // Check that appending and prepending to an empty attribute works
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.setGlobalAttribute("att1",     "value93824");
       file.appendGlobalAttribute("att1",  "append");
       file.setGlobalAttribute("att1",     "value321192839819");
@@ -63,7 +63,7 @@ namespace {
       std::vector<Variable::Type> vars;
       vars.push_back(Variable::T);
       file.write(vars);
-      FileArome file2 = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file2 = FileNetcdf("testing/files/10x10_copy.nc");
       EXPECT_EQ("value321192839819", file.getGlobalAttribute("att1"));
       EXPECT_EQ("value15",  file.getGlobalAttribute("att2"));
       EXPECT_EQ("value73",  file.getAttribute("air_temperature_2m", "att1"));
@@ -71,7 +71,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, inandoutOfDataMode) {
       // Check that we can go in and out of data mode without error
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       // Define attributes
       file.setAttribute("air_temperature_2m", "att1", "value71");
       EXPECT_EQ("value71",  file.getAttribute("air_temperature_2m", "att1"));
@@ -89,7 +89,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
 
       // Variable do not exist
       EXPECT_DEATH(file.setAttribute("nonvalid_variable", "units", "value93824"), ".*");
@@ -98,7 +98,7 @@ namespace {
    TEST_F(FileNetcdfTest, setLongAttribute) {
       // Attempt to create a really long attribute
       {
-         FileArome file = FileArome("testing/files/10x10_copy.nc");
+         FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
          std::stringstream ss;
          for(int i = 0; i < 1e7; i++) {
             ss << "1234567890";
@@ -110,12 +110,12 @@ namespace {
          file.write(vars);
       }
       // Make sure the attribute hasn't been set to the really long value
-      FileArome file = FileArome("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       std::string value = file.getGlobalAttribute("history");
       EXPECT_TRUE(value.size() < 1e8);
    }
    TEST_F(FileNetcdfTest, createNewVariable) {
-      FileArome file("testing/files/10x10_copy.nc");
+      FileNetcdf file("testing/files/10x10_copy.nc");
       std::vector<Variable::Type> vars;
       vars.push_back(Variable::Pop6h);
       std::vector<float> pars(8,0);

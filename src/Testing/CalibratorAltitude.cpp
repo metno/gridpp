@@ -37,7 +37,7 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorAltitude, ec) {
-      FileEc from("testing/files/10x10_ec.nc");
+      FileNetcdf from("testing/files/10x10_ec.nc");
       ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
       CalibratorAltitude cal = CalibratorAltitude(Options());
 

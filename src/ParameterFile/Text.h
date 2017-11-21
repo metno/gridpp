@@ -8,9 +8,10 @@
 
 //! Represents a collection of parameters, one set for each forecast time
 //! Parameters are read from a specified text file with the following format:
-//! 0 3.4 2.1 5.2 12 41
-//! 1 3.4 2.1 5.2 12 41
-//! 2 3.4 2.1 5.2 12 41
+//! time lat lon elev param1 param2 param3
+//! 0 60 10 3.1 3.4 2.1 5.2 12 41
+//! 1 60 10 3.1 3.4 2.1 5.2 12 41
+//! 2 60 10 3.1 3.4 2.1 5.2 12 41
 //! Each line represents one forecast time. The first column is the forecast timestep (an index
 //! not the number of hours), starting at 0. The remaning columns are parameters that can be used
 //! in post-processing methods. The number of columns most be constant. If a file has only one
@@ -34,7 +35,6 @@ class ParameterFileText : public ParameterFile {
       static std::string description();
       std::string name() const {return "text";};
    private:
-      bool mIsSpatial;
       std::vector<int> mTimes;
 };
 #endif

@@ -16,6 +16,18 @@ namespace {
       EXPECT_EQ(file.getParameters(3).getValues(), file.getParameters(25).getValues());
    }
 
+   TEST(ParameterFileTextTest, noTime) {
+      ParameterFileText file(Options("file=testing/files/parametersNoTime.txt"));
+      ASSERT_EQ(1, file.getTimes().size());
+      Parameters par = file.getParameters(0);
+      ASSERT_EQ(9, par.size());
+      EXPECT_FLOAT_EQ(-1.2021, par[0]);
+      EXPECT_FLOAT_EQ(0.0007985, par[8]);
+
+      EXPECT_EQ(file.getParameters(0).getValues(), file.getParameters(10).getValues());
+      EXPECT_EQ(file.getParameters(3).getValues(), file.getParameters(25).getValues());
+   }
+
    TEST(ParameterFileTextTest, multipleTime) {
       ParameterFileText file(Options("file=testing/files/parametersMultipleTime.txt"));
       ASSERT_EQ(8, file.getTimes().size());

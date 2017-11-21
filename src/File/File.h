@@ -6,6 +6,7 @@
 #include "../Variable.h"
 #include "../Uuid.h"
 #include "../Field.h"
+#include "../VariableMap.h"
 
 class Options;
 
@@ -31,6 +32,8 @@ class File {
 
       // Write these variables to file
       void write(std::vector<Variable::Type> iVariables);
+
+      std::string getVariableName(Variable::Type iVariable) const;
 
       // Dimension sizes
       int getNumLat() const;
@@ -103,6 +106,7 @@ class File {
       double mReferenceTime;
       std::vector<double> mTimes;
       static Uuid mNextTag;
+      VariableMap mVariableMap;
 };
 #include "Netcdf.h"
 #include "NetcdfBase.h"

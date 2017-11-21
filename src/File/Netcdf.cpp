@@ -50,12 +50,6 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    else
       mTimeDim = getDim(timeDim);
 
-   std::string variablesFile;
-   if(!iOptions.getValue("variables", variablesFile))
-      mVariableMap.loadDefaults();
-   else
-      mVariableMap.load(variablesFile);
-
    // Determine dimension sizes
    mNEns = 1;
    mNLat = 1;
@@ -388,13 +382,6 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
    }
 }
 
-
-std::string FileNetcdf::getVariableName(Variable::Type iVariable) const {
-   if(mVariableMap.has(iVariable))
-      return mVariableMap.get(iVariable);
-   else
-      return "";
-}
 
 bool FileNetcdf::isValid(std::string iFilename, const Options& iOptions) {
    bool isValid = true;

@@ -12,6 +12,12 @@ File::File(std::string iFilename, const Options& iOptions) :
       mFilename(iFilename),
       mReferenceTime(Util::MV) {
    createNewTag();
+
+   std::string variablesFile;
+   if(!iOptions.getValue("variables", variablesFile))
+      mVariableMap.loadDefaults();
+   else
+      mVariableMap.load(variablesFile);
 }
 
 File* File::getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly) {
@@ -468,6 +474,14 @@ void File::setTimes(std::vector<double> iTimes) {
 std::vector<double> File::getTimes() const {
    return mTimes;
 }
+
+std::string File::getVariableName(Variable::Type iVariable) const {
+   if(mVariableMap.has(iVariable))
+      return mVariableMap.get(iVariable);
+   else
+      return "";
+}
+
 
 std::string File::getDescriptions() {
    std::stringstream ss;

@@ -15,38 +15,38 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    // Get defaults
    std::string latVar, lonVar, timeVar, ensDim, latDim, lonDim, timeDim;
    if(!iOptions.getValue("latVar", latVar))
-      mLatVar = getLatVar();
+      mLatVar = detectLatVar();
    else
       mLatVar = getVar(latVar);
 
    if(!iOptions.getValue("lonVar", lonVar))
-      mLonVar = getLonVar();
+      mLonVar = detectLonVar();
    else
       mLonVar = getVar(lonVar);
 
    if(!iOptions.getValue("timeVar", timeVar))
-      mTimeVar = getTimeVar();
+      mTimeVar = detectTimeVar();
    else
       mLonVar = getVar(lonVar);
 
    // Dimensions
    if(!iOptions.getValue("ensDim", ensDim))
-      mEnsDim = getEnsDim();
+      mEnsDim = detectEnsDim();
    else
       mEnsDim = getDim(ensDim);
 
    if(!iOptions.getValue("latDim", latDim))
-      mLatDim = getLatDim();
+      mLatDim = detectLatDim();
    else
       mLatDim = getDim(latDim);
 
    if(!iOptions.getValue("lonDim", lonDim))
-      mLonDim = getLonDim();
+      mLonDim = detectLonDim();
    else
       mLonDim = getDim(lonDim);
 
    if(!iOptions.getValue("timeDim", timeDim))
-      mTimeDim = getTimeDim();
+      mTimeDim = detectTimeDim();
    else
       mTimeDim = getDim(timeDim);
 
@@ -520,7 +520,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       float* values = new float[size];
       nc_get_var_float(mFile, iVar, values);
       // Latitude variable
-      if(dim == getLatDim()) {
+      if(dim == mLatDim) {
          for(int i = 0; i < getNumLat(); i++) {
             for(int j = 0; j < getNumLon(); j++) {
                grid[i][j] = values[i];
@@ -528,7 +528,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
          }
       }
       // Longitude variable
-      else if(dim == getLonDim()) {
+      else if(dim == mLonDim) {
          for(int i = 0; i < getNumLat(); i++) {
             for(int j = 0; j < getNumLon(); j++) {
                grid[i][j] = values[j];
@@ -553,12 +553,12 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       int dims[N];
       nc_inq_vardimid(mFile, iVar, dims);
       for(int i = 0; i < N; i++) {
-         if(dims[i] == getLatDim()) {
+         if(dims[i] == mLatDim) {
             count[i] = getNumLat();
             size *= count[i];
             indexLat = i;
          }
-         else if(dims[i] == getLonDim()) {
+         else if(dims[i] == mLonDim) {
             count[i] = getNumLon();
             size *= count[i];
             indexLon = i;
@@ -599,7 +599,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
    return grid;
 }
 
-int FileNetcdf::getLatDim() const {
+int FileNetcdf::detectLatDim() const {
    int dim = Util::MV;
    if(hasDim("y"))
       dim = getDim("y");
@@ -609,7 +609,7 @@ int FileNetcdf::getLatDim() const {
       dim = getDim("lat");
    return dim;
 }
-int FileNetcdf::getLonDim() const {
+int FileNetcdf::detectLonDim() const {
    int dim = Util::MV;
    if(hasDim("x"))
       dim = getDim("x");
@@ -619,13 +619,13 @@ int FileNetcdf::getLonDim() const {
       dim = getDim("lon");
    return dim;
 }
-int FileNetcdf::getTimeDim() const {
+int FileNetcdf::detectTimeDim() const {
    int dim = Util::MV;
    if(hasDim("time"))
       dim = getDim("time");
    return dim;
 }
-int FileNetcdf::getLatVar() const {
+int FileNetcdf::detectLatVar() const {
    int var = Util::MV;
    if(hasVar("latitude"))
       var = getVar("latitude");
@@ -638,13 +638,13 @@ int FileNetcdf::getLatVar() const {
    }
    return var;
 }
-int FileNetcdf::getTimeVar() const {
+int FileNetcdf::detectTimeVar() const {
    int var = Util::MV;
    if(hasVar("time"))
       var = getVar("time");
    return var;
 }
-int FileNetcdf::getLonVar() const {
+int FileNetcdf::detectLonVar() const {
    int var = Util::MV;
    if(hasVar("longitude"))
       var = getVar("longitude");
@@ -665,8 +665,8 @@ void FileNetcdf::defineAltitude() {
 
    // First check if latitude variable has two dimensions
    int vUseDims = Util::MV;
-   if(getNumDims(getLatVar()) >= 2) {
-      vUseDims = getLatVar();
+   if(getNumDims(mLatVar) >= 2) {
+      vUseDims = mLatVar;
    }
    else if(hasVar("surface_geopotential")) {
       vUseDims = getVar("surface_geopotential");
@@ -676,9 +676,9 @@ void FileNetcdf::defineAltitude() {
       int dimsLat[N];
       nc_inq_vardimid(mFile, vUseDims, dimsLat);
       for(int i = 0; i < N; i++) {
-         if(dimsLat[i] == getLatDim())
+         if(dimsLat[i] == mLatDim)
             indexLat = i;
-         if(dimsLat[i] == getLonDim())
+         if(dimsLat[i] == mLonDim)
             indexLon = i;
       }
    }
@@ -689,8 +689,8 @@ void FileNetcdf::defineAltitude() {
    }
 
    int dims[2];
-   int dLat = getLatDim();
-   int dLon = getLonDim();
+   int dLat = mLatDim;
+   int dLon = mLonDim;
    if(indexLat < indexLon) {
       dims[0]  = dLat;
       dims[1]  = dLon;
@@ -707,8 +707,13 @@ void FileNetcdf::defineAltitude() {
 void FileNetcdf::writeAltitude() const {
    int vElev = getVar("altitude");
    int numDims = getNumDims(vElev);
-   if(numDims == 1) {
-      Util::error("Cannot write altitude when the variable only has one dimension");
+   int numHorizontalDims = Util::isValid(mLatDim) + Util::isValid(mLonDim);
+
+   if(numDims != numHorizontalDims) {
+      std::stringstream ss;
+      ss << "Altitude variable has " << numDims << " dimension. However, the file has "
+         << numHorizontalDims << " horizontal dimensions. Cannot write altitude.";
+      Util::error(ss.str());
    }
    vec2 elevs = getElevs();
 
@@ -721,12 +726,12 @@ void FileNetcdf::writeAltitude() const {
    int dims[N];
    nc_inq_vardimid(mFile, vElev, dims);
    for(int i = 0; i < N; i++) {
-      if(dims[i] == getLatDim()) {
+      if(dims[i] == mLatDim) {
          count[i] = getNumLat();
          size *= count[i];
          indexLat = i;
       }
-      else if(dims[i] == getLonDim()) {
+      else if(dims[i] == mLonDim) {
          count[i] = getNumLon();
          size *= count[i];
          indexLon = i;
@@ -760,7 +765,7 @@ void FileNetcdf::writeAltitude() const {
          }
       }
    }
-   bool status = nc_put_vara_float(mFile, vElev, start, count, values);
+   int status = nc_put_vara_float(mFile, vElev, start, count, values);
    handleNetcdfError(status, "could not write altitude");
    delete[] values;
 }
@@ -795,7 +800,7 @@ int FileNetcdf::getNumDims(int iVar) const {
    int status = nc_inq_varndims(mFile, iVar, &len);
    return len;
 }
-int FileNetcdf::getEnsDim() const {
+int FileNetcdf::detectEnsDim() const {
    int dim = Util::MV;
    if(hasDim("ensemble_member"))
       dim = getDim("ensemble_member");
@@ -1118,7 +1123,6 @@ bool FileNetcdf::hasVariableCore(std::string iVariable) const {
 }
 vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    float MV = getMissingValue(iVar);
-   int numDims;
    std::vector<int> dims = getDims(iVar);
    // Initialize grid
    vec2 grid;

@@ -16,17 +16,19 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
 }
 
 void ParameterFile::recomputeTree() const {
-   vec2 lats, lons;
-   LocationParameters::const_iterator it = mParameters.begin();
-   for(it = mParameters.begin(); it != mParameters.end(); it++) {
-      const Location loc = it->first;
-      std::vector<float> lat(1, loc.lat());
-      std::vector<float> lon(1, loc.lon());
-      lats.push_back(lat);
-      lons.push_back(lon);
-      mLocations.push_back(loc);
+   if(isLocationDependent()) {
+      vec2 lats, lons;
+      LocationParameters::const_iterator it = mParameters.begin();
+      for(it = mParameters.begin(); it != mParameters.end(); it++) {
+         const Location loc = it->first;
+         std::vector<float> lat(1, loc.lat());
+         std::vector<float> lon(1, loc.lon());
+         lats.push_back(lat);
+         lons.push_back(lon);
+         mLocations.push_back(loc);
+      }
+      mNearestNeighbourTree.build(lats, lons);
    }
-   mNearestNeighbourTree.build(lats, lons);
 }
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {
@@ -183,7 +185,7 @@ void ParameterFile::setParameters(Parameters iParameters, int iTime, const Locat
    mIsTimeDependent = mIsTimeDependent || iTime > 0;
 }
 void ParameterFile::setParameters(Parameters iParameters, int iTime) {
-   setParameters(iParameters, iTime, Location(0,0,0));
+   setParameters(iParameters, iTime, Location(Util::MV,Util::MV,Util::MV));
 }
 
 std::string ParameterFile::getFilename() const {
@@ -206,7 +208,13 @@ std::vector<int> ParameterFile::getTimes() const {
 }
 
 bool ParameterFile::isLocationDependent() const {
-   return mParameters.size() > 1;
+   bool locationDependent = mParameters.size() > 1;
+   if(!locationDependent) {
+      Location location = mParameters.begin()->first;
+      if(Util::isValid(location.lat()) && Util::isValid(location.lon()))
+         locationDependent = true;
+   }
+   return locationDependent;
 }
 // TODO
 bool ParameterFile::isTimeDependent() const {

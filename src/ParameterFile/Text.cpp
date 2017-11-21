@@ -52,7 +52,9 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
             std::vector<float> values;
             int currCounter = 0;
             int time = 0;
-            float lat, lon, elev;
+            float lat = Util::MV;
+            float lon = Util::MV;
+            float elev = Util::MV;
             while(ss.good()) {
                if(currCounter == timePos) {
                   bool status = ss >> time;
@@ -89,7 +91,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
                currCounter++;
             }
             times.insert(time);
-            Location location(0,0,0);
+            Location location(Util::MV, Util::MV, Util::MV);
             if(Util::isValid(lat) && Util::isValid(lon) && Util::isValid(elev)) {
                location = Location(lat, lon, elev);
             }
@@ -185,7 +187,13 @@ void ParameterFileText::write(const std::string& iFilename) const {
 }
 
 bool ParameterFileText::isLocationDependent() const {
-   return mParameters.size() > 1;
+   bool locationDependent = mParameters.size() > 1;
+   if(!locationDependent) {
+      Location location = mParameters.begin()->first;
+      if(Util::isValid(location.lat()) && Util::isValid(location.lon()))
+         locationDependent = true;
+   }
+   return locationDependent;
 }
 
 std::string ParameterFileText::description() {

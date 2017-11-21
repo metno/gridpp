@@ -7,7 +7,7 @@
 #include <fstream>
 
 ParameterFileSimple::ParameterFileSimple(Parameters iParameters) : ParameterFile(Options()) {
-   Location defaultLocation(0,0,0);
+   Location defaultLocation(Util::MV,Util::MV,Util::MV);
    setParameters(iParameters, 0, defaultLocation);
 
    recomputeTree();

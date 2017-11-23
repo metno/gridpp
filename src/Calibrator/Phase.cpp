@@ -9,6 +9,18 @@ CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOpti
       mMinPrecip(0.2),
       mEstimatePressure(true),
       mUseWetbulb(1) {
+   if(!iOptions.getValue("temperatureVariable", mTemperatureVariable)) {
+      Util::error("CalibratorPhase: 'temperatureVariable' missing");
+   }
+   if(!iOptions.getValue("precipitationVariable", mPrecipitationVariable)) {
+      Util::error("CalibratorPhase: 'precipitationVariable' missing");
+   }
+   if(!iOptions.getValue("pressureVariable", mPressureVariable)) {
+      Util::error("CalibratorPhase: 'pressureVariable' missing");
+   }
+   if(!iOptions.getValue("rhVariable", mRhVariable)) {
+      Util::error("CalibratorPhase: 'rhVariable' missing");
+   }
 }
 bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() != 2) {
@@ -32,16 +44,16 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
          par = iParameterFile->getParameters(t);
       float snowSleetThreshold = par[0];
       float sleetRainThreshold = par[1];
-      const FieldPtr temp = iFile.getField(Variable::T, t);
-      const FieldPtr precip = iFile.getField(Variable::Precip, t);
+      const FieldPtr temp = iFile.getField(mTemperatureVariable, t);
+      const FieldPtr precip = iFile.getField(mPrecipitationVariable, t);
       FieldPtr phase = iFile.getEmptyField();
       FieldPtr pressure;
       FieldPtr rh;
-      if(mUseWetbulb) {
+      if(mRhVariable != "" && mPressureVariable != "") {
          // Only load these fields if they are to be used, to save memory
-         rh = iFile.getField(Variable::RH, t);
+         rh = iFile.getField(mRhVariable, t);
          if(!mEstimatePressure)
-            pressure = iFile.getField(Variable::P, t);
+            pressure = iFile.getField(mPressureVariable, t);
       }
 
       #pragma omp parallel for
@@ -70,15 +82,15 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
                }
                if(Util::isValid(snowSleetThreshold) && Util::isValid(sleetRainThreshold) && Util::isValid(currTemp)) {
                   if(currPrecip <= mMinPrecip)
-                     (*phase)(i,j,e)  = Variable::PhaseNone;
+                     (*phase)(i,j,e)  = PhaseNone;
                   else if(!Util::isValid(currTemp))
                      (*phase)(i,j,e)  = Util::MV;
                   else if(currTemp <= snowSleetThreshold)
-                     (*phase)(i,j,e)  = Variable::PhaseSnow;
+                     (*phase)(i,j,e)  = PhaseSnow;
                   else if(currTemp <= sleetRainThreshold)
-                     (*phase)(i,j,e)  = Variable::PhaseSleet;
+                     (*phase)(i,j,e)  = PhaseSleet;
                   else
-                     (*phase)(i,j,e)  = Variable::PhaseRain;
+                     (*phase)(i,j,e)  = PhaseRain;
                }
                else {
                   (*phase)(i,j,e) = Util::MV;
@@ -87,10 +99,7 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
          }
       }
       Variable variable;
-      bool found = iFile.getVariable(Variable::Phase, variable);
-      if(!found)
-         Util::error("File does not have phase field defined");
-      iFile.addField(phase, variable, t);
+      iFile.addField(phase, mVariable, t);
    }
    return true;
 }
@@ -116,7 +125,10 @@ std::string CalibratorPhase::description() {
    ss << Util::formatDescription("", "* 2 = sleet (a < T <= b)") << std::endl;
    ss << Util::formatDescription("", "* 3 = snow (T < a)") << std::endl;
    ss << Util::formatDescription("", "T can be either regular temperature or wetbulb temperature. Precip, and Temperature must be available to determine phase. If using wetbulb, then relative humidity must also be available. Pressure is currently not needed because a standard atmosphere is used. A parameter file is required with values [a b]") << std::endl;
-   ss << Util::formatDescription("   useWetbulb=1", "If 1 use the wetbulb temperature to determine phase. If 0 use regular temperature.") << std::endl;
+   ss << Util::formatDescription("   temperatureVariable=required", "Name of temperature variable to use.") << std::endl;
+   ss << Util::formatDescription("   precipitationVariable=required", "Name of precipitation variable to use.") << std::endl;
+   ss << Util::formatDescription("   rhVariable=undef", "Name of relative humidity variable to use. If both RH and pressure is provided, then the wetbulb temperature is instead of temperature.") << std::endl;
+   ss << Util::formatDescription("   pressureVariable=undef", "Name of pressure variable to use.") << std::endl;
    ss << Util::formatDescription("   minPrecip=0.2", "Minimum precip (in mm) needed to be considered as precipitation.") << std::endl;
    return ss.str();
 }

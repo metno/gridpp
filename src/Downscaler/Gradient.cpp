@@ -32,7 +32,7 @@ DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Var
    iOptions.getValue("minLafForElevGradient", mMinLafForElevGradient);
    iOptions.getValue("minNumPoints", mMinNumPoints);
    if(!iOptions.getValue("elevGradientVariable", mElevGradientVariableName)) {
-      mElevGradientVariableName = mInputVariable.getName();
+      mElevGradientVariableName = mInputVariable.name();
    }
    iOptions.getValue("lafRadius", mLafRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
@@ -77,8 +77,8 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = mOutputVariable.getMin();
-   float maxAllowed = mOutputVariable.getMax();
+   float minAllowed = mOutputVariable.min();
+   float maxAllowed = mOutputVariable.max();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;

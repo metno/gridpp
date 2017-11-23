@@ -10,7 +10,7 @@
 #include <math.h>
 #include <assert.h>
 
-KalmanFilter::KalmanFilter(Variable::Type iVariable, const Options& iOptions) :
+KalmanFilter::KalmanFilter(const Variable& iVariable, const Options& iOptions) :
       mVariable(iVariable),
       mHourlyCorr(0.93),
       mV(2.0),

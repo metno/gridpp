@@ -83,7 +83,6 @@ Setup::Setup(const std::vector<std::string>& argv) {
    State prevState = START;
 
    std::string variableName = "";
-   std::string variableGridppName = "";
    Options vOptions;
    Options dOptions;
    Options cOptions;
@@ -117,7 +116,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            variableGridppName = argv[index];
+            variableName = argv[index];
             index++;
             if(argv.size() <= index) {
                state = NEWVAR;
@@ -171,25 +170,23 @@ Setup::Setup(const std::vector<std::string>& argv) {
          // Check that we haven't added the variable before
          bool alreadyExists = false;
          for(int i = 0; i < variableConfigurations.size(); i++) {
-            if(variableConfigurations[i].inputVariable.getName() == variableGridppName)
+            if(variableConfigurations[i].inputVariable.name() == variableName)
                alreadyExists = true;
          }
 
          if(!alreadyExists) {
             VariableConfiguration varconf;
             varconf.parameterFileDownscaler = parameterFileDownscaler;
-            // TODO: 0
-            bool found = inputFiles[0]->getVariable(Variable::getType(variableGridppName), varconf.inputVariable);
+            // TODO: ii0
+            bool found = inputFiles[0]->getVariable(variableName, varconf.inputVariable);
             if(!found) {
                std::stringstream ss;
-               ss << "Input format does not define variable of type '" << variableGridppName << "'";
+               ss << "Input format does not define variable of type '" << variableName << "'";
                Util::error(ss.str());
             }
-            found = outputFiles[0]->getVariable(Variable::getType(variableGridppName), varconf.outputVariable);
+            found = outputFiles[0]->getVariable(variableName, varconf.outputVariable);
             if(!found) {
-               std::stringstream ss;
-               ss << "Output format does not define variable of type '" << variableGridppName << "'";
-               Util::error(ss.str());
+               varconf.outputVariable = varconf.inputVariable;
             }
             std::vector<Calibrator*> calibrators;
             for(int c = 0; c < calibratorNames.size(); c++) {
@@ -205,7 +202,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
          else {
             std:: stringstream ss;
-            ss << "Variable '" << variableGridppName << "' already read. Using first instance.";
+            ss << "Variable '" << variableName << "' already read. Using first instance.";
             Util::warning(ss.str());
          }
 

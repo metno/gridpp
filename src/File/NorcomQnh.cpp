@@ -63,22 +63,22 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
 FileNorcomQnh::~FileNorcomQnh() {
 }
 
-FieldPtr FileNorcomQnh::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FileNorcomQnh::getFieldCore(const Variable& iVariable, int iTime) const {
    FieldPtr field = getEmptyField();
    return field;
 }
 
-void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
+void FileNorcomQnh::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    if(iVariables.size() == 0) {
       Util::warning("No variables to write");
       return;
    }
-   Variable::Type variable = iVariables[0];
+   Variable variable = iVariables[0];
    if(iVariables.size() > 1) {
       std::stringstream ss;
       ss <<"Output NorcomQnh can only write one variables, several given. Will write variable ";
-      ss << Variable::getTypeName(variable);
+      ss << variable.name();
       Util::warning(ss.str());
    }
 

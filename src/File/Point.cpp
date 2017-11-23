@@ -80,7 +80,7 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
 FilePoint::~FilePoint() {
 }
 
-FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FilePoint::getFieldCore(const Variable& iVariable, int iTime) const {
    std::ifstream ifs(getFilename().c_str());
    FieldPtr field = getEmptyField();
 
@@ -119,7 +119,7 @@ FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
    return field;
 }
 
-void FilePoint::writeCore(std::vector<Variable::Type> iVariables) {
+void FilePoint::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
    if(iVariables.size() == 0) {

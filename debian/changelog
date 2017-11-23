@@ -14,6 +14,8 @@ gridpp (0.3.0) precise; urgency=low
       previous behaviour.
     - Parameter text files must contain header
     - Parameter files are specified differently: -p <filename> type=<type>
+    - Names as they appear in the file are used to identify variables. I.e.
+      use -v air_temperture_2m instead of -v T.
 
  -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
 

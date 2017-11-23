@@ -152,24 +152,33 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    }
 
    Util::status( "File '" + iFilename + " 'has dimensions " + getDimenionString());
+
+   // Load variables
+   int numVars = Util::MV;
+   status = nc_inq_nvars(mFile, &numVars);
+   int vars[numVars];
+   status = nc_inq_varids(mFile, &numVars, vars);
+   handleNetcdfError(status, "could not get list of variables");
+   for(int v = 0; v < numVars; v++) {
+      char nameChar[10000];
+      status = nc_inq_varname (mFile, vars[v], nameChar);
+      std::string name(nameChar);
+      std::string units = getAttribute(vars[v], "units");
+      std::string standardName = getAttribute(vars[v], "standard_name");
+
+      Variable variable(name, units, standardName);
+      mVariables.push_back(variable);
+   }
 }
 
 FileNetcdf::~FileNetcdf() {
    nc_close(mFile);
 }
 
-FieldPtr FileNetcdf::getFieldCore(Variable::Type iVariable, int iTime) const {
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getType() == iVariable)
-         return getFieldCore(mVariables[i], iTime);
-   }
-   Util::error("Could not get variable");
-}
-
 FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
    double s = Util::clock();
    startDataMode();
-   std::string variableName = iVariable.getName();
+   std::string variableName = iVariable.name();
    int var = getVar(variableName);
    std::vector<int> dims = getDims(var);
 
@@ -214,7 +223,6 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
 
    FieldPtr field = getEmptyField();
    std::vector<int> countVector(count, count + dims.size());
-   double start_time = Util::clock();
    int nEns = 1;
    if(Util::isValid(ensPos))
       nEns = count[ensPos];
@@ -276,8 +284,6 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
       (*field)(lat,lon,e) = value;
    }
   */
-   double e = Util::clock();
-   std::cout << "Loop time: " << e - start_time << std::endl;
    delete[] values;
    return field;
 }
@@ -303,7 +309,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
       Variable variable = iVariables[v];
-      std::string variableName = variable.getName();
+      std::string variableName = variable.name();
 
       if(!hasVariableCore(variable)) {
          // Create variable
@@ -335,8 +341,8 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       float MV = getMissingValue(var); // The output file's missing value indicator
       // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
       setAttribute(var, "coordinates", "lon lat");
-      setAttribute(var, "units", variable.getUnits());
-      setAttribute(var, "standard_name", variable.getStandardName());
+      setAttribute(var, "units", variable.units());
+      setAttribute(var, "standard_name", variable.standardName());
    }
    startDataMode();
 
@@ -347,7 +353,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
    }
    for(int v = 0; v < iVariables.size(); v++) {
       Variable variable = iVariables[v];
-      std::string variableName = variable.getName();
+      std::string variableName = variable.name();
       assert(hasVariableCore(variable));
       int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
@@ -1077,7 +1083,7 @@ bool FileNetcdf::hasDim(std::string iDim) const {
    return hasDim(mFile, iDim);
 }
 bool FileNetcdf::hasVariableCore(const Variable& iVariable) const {
-   std::string name = iVariable.getName();
+   std::string name = iVariable.name();
    int var=Util::MV;
    int status = nc_inq_varid(mFile, name.c_str(), &var);
    return status == NC_NOERR;

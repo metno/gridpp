@@ -13,11 +13,6 @@ File::File(std::string iFilename, const Options& iOptions) :
       mReferenceTime(Util::MV) {
    createNewTag();
 
-   std::string variablesFile;
-   if(!iOptions.getValue("variables", variablesFile))
-      mVariables = VariableMap::loadDefaults();
-   else
-      mVariables = VariableMap::load(variablesFile);
 }
 
 File* File::getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly) {
@@ -64,19 +59,9 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    return file;
 }
 
-FieldPtr File::getField(Variable::Type iVariable, int iTime) const {
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getType() == iVariable) {
-         return getField(mVariables[i], iTime);
-      }
-   }
-   // TODO:
-   Util::error("Could not get field");
-}
-
 FieldPtr File::getField(std::string iVariable, int iTime) const {
    for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getName() == iVariable) {
+      if(mVariables[i].name() == iVariable) {
          return getField(mVariables[i], iTime);
       }
    }
@@ -91,7 +76,7 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    if(!needsReading) {
       if(mFields[iVariable].size() <= iTime) {
          std::stringstream ss;
-         ss << "Attempted to access variable '" << iVariable.getName() << "' for time " << iTime
+         ss << "Attempted to access variable '" << iVariable.name() << "' for time " << iTime
             << " in file '" << getFilename() << "'";
          Util::error(ss.str());
       }
@@ -101,7 +86,7 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    else {
       if(getNumTime() <= iTime) {
          std::stringstream ss;
-         ss << "Attempted to access variable '" << iVariable.getName() << "' for time " << iTime
+         ss << "Attempted to access variable '" << iVariable.name() << "' for time " << iTime
             << " in file '" << getFilename() << "'";
          Util::error(ss.str());
       }
@@ -113,169 +98,8 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
       if(hasVariableCore(iVariable)) {
          mFields[iVariable][iTime] = getFieldCore(iVariable, iTime);
       }
-      // Try to derive the field
-      else if(iVariable.getType() == Variable::Precip) {
-         Variable outputVariable;
-         bool status = getVariable(Variable::PrecipAcc, outputVariable);
-         if(!status) {
-            Util::error("Cannot derive Precip");
-         }
-         // Deaccumulate
-         FieldPtr field = getEmptyField();
-         addField(field, iVariable, 0); // First offset is 0
-
-         for(int t = 1; t < getNumTime(); t++) {
-            FieldPtr field = getEmptyField();
-            const FieldPtr acc0  = getField(outputVariable, t-1);
-            const FieldPtr acc1  = getField(outputVariable, t);
-            for(int lat = 0; lat < getNumLat(); lat++) {
-               for(int lon = 0; lon < getNumLon(); lon++) {
-                  for(int e = 0; e < getNumEns(); e++) {
-                     float a1 = (*acc1)(lat,lon,e);
-                     float a0 = (*acc0)(lat,lon,e);
-                     float value = Util::MV;
-                     if(Util::isValid(a1) && Util::isValid(a0)) {
-                         value = a1 - a0;
-                         if(value < 0)
-                            value = 0;
-                     }
-                     (*field)(lat,lon,e) = value;
-                  }
-               }
-            }
-            addField(field, iVariable, t);
-         }
-      }
-      else if(iVariable.getType() == Variable::PrecipAcc) {
-         Variable outputVariable;
-         bool status = getVariable(Variable::Precip, outputVariable);
-         if(!status) {
-            Util::error("Cannot derive PrecipAcc");
-         }
-         // Accumulate
-         FieldPtr prevAccum = getEmptyField(0);
-         addField(prevAccum, iVariable, 0); // First offset is 0
-
-         for(int t = 1; t < getNumTime(); t++) {
-            FieldPtr currAccum = getEmptyField();
-            const FieldPtr currPrecip  = getField(outputVariable, t);
-            for(int lat = 0; lat < getNumLat(); lat++) {
-               for(int lon = 0; lon < getNumLon(); lon++) {
-                  for(int e = 0; e < getNumEns(); e++) {
-                     float a = (*prevAccum)(lat,lon,e);
-                     float p = (*currPrecip)(lat,lon,e);
-                     float value = Util::MV;
-                     if(Util::isValid(a) && Util::isValid(p)) {
-                         value = a + p;
-                         if(value < 0)
-                            value = 0;
-                     }
-                     (*currAccum)(lat,lon,e) = value;
-                  }
-               }
-            }
-            addField(currAccum, iVariable, t);
-            prevAccum = currAccum;
-         }
-      }
-      else if(iVariable.getType() == Variable::W) {
-         if(hasVariableCore(Variable::U) && hasVariableCore(Variable::V)) {
-            for(int t = 0; t < getNumTime(); t++) {
-               FieldPtr windSpeed = getEmptyField();
-               const FieldPtr u = getField(Variable::U, t);
-               const FieldPtr v = getField(Variable::V, t);
-               for(int lat = 0; lat < getNumLat(); lat++) {
-                  for(int lon = 0; lon < getNumLon(); lon++) {
-                     for(int e = 0; e < getNumEns(); e++) {
-                        float currU = (*u)(lat,lon,e);
-                        float currV = (*v)(lat,lon,e);
-                        if(Util::isValid(currU) && Util::isValid(currV)) {
-                           (*windSpeed)(lat,lon,e) = sqrt(currU*currU + currV*currV);
-                        }
-                     }
-                  }
-               }
-               addField(windSpeed, iVariable, t);
-            }
-         }
-         else if(hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind)) {
-            for(int t = 0; t < getNumTime(); t++) {
-               FieldPtr windSpeed = getEmptyField();
-               const FieldPtr x = getField(Variable::Xwind, t);
-               const FieldPtr y = getField(Variable::Ywind, t);
-               for(int lat = 0; lat < getNumLat(); lat++) {
-                  for(int lon = 0; lon < getNumLon(); lon++) {
-                     for(int e = 0; e < getNumEns(); e++) {
-                        float currX = (*x)(lat,lon,e);
-                        float currY = (*y)(lat,lon,e);
-                        if(Util::isValid(currX) && Util::isValid(currY)) {
-                           (*windSpeed)(lat,lon,e) = sqrt(currX*currX + currY*currY);
-                        }
-                     }
-                  }
-               }
-               addField(windSpeed, iVariable, t);
-            }
-         }
-         else {
-            Util::error("Cannot derive wind speed from variables in file");
-         }
-      }
-      else if(iVariable.getType() == Variable::WD) {
-         if(hasVariableCore(Variable::U) && hasVariableCore(Variable::V)) {
-            for(int t = 0; t < getNumTime(); t++) {
-               FieldPtr windDir = getEmptyField();
-               const FieldPtr u = getField(Variable::U, t);
-               const FieldPtr v = getField(Variable::V, t);
-               for(int lat = 0; lat < getNumLat(); lat++) {
-                  for(int lon = 0; lon < getNumLon(); lon++) {
-                     for(int e = 0; e < getNumEns(); e++) {
-                        float currU = (*u)(lat,lon,e);
-                        float currV = (*v)(lat,lon,e);
-                        if(Util::isValid(currU) && Util::isValid(currV)) {
-                           float dir = std::atan2(-currU,-currV) * 180 / Util::pi;
-                           if(dir < 0)
-                              dir += 360;
-                           (*windDir)(lat,lon,e) = dir;
-                        }
-                     }
-                  }
-               }
-               addField(windDir, iVariable, t);
-            }
-         }
-         else if(hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind)) {
-            for(int t = 0; t < getNumTime(); t++) {
-               FieldPtr windDir = getEmptyField();
-               const FieldPtr x = getField(Variable::Xwind, t);
-               const FieldPtr y = getField(Variable::Ywind, t);
-               for(int lat = 0; lat < getNumLat(); lat++) {
-                  for(int lon = 0; lon < getNumLon(); lon++) {
-                     for(int e = 0; e < getNumEns(); e++) {
-                        float currX = (*x)(lat,lon,e);
-                        float currY = (*y)(lat,lon,e);
-                        if(Util::isValid(currX) && Util::isValid(currY)) {
-                           float dir = std::atan2(-currX,-currY) * 180 / Util::pi;
-                           if(dir < 0)
-                              dir += 360;
-                           (*windDir)(lat,lon,e) = dir;
-                        }
-                     }
-                  }
-               }
-               addField(windDir, iVariable, t);
-            }
-         }
-         else {
-            Util::warning("Cannot derive wind speed from variables in file");
-            for(int t = 0; t < getNumTime(); t++) {
-               FieldPtr field = getEmptyField();
-               addField(field, iVariable, t);
-            }
-         }
-      }
       else {
-         std::string variableType = iVariable.getName();
+         std::string variableType = iVariable.name();
          Util::warning(variableType + " not available in '" + getFilename() + "'");
          for(int t = 0; t < getNumTime(); t++) {
             FieldPtr field = getEmptyField();
@@ -285,7 +109,7 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    }
    if(mFields[iVariable].size() <= iTime) {
       std::stringstream ss;
-      ss << "Attempted to access variable '" << iVariable.getName() << "' for time " << iTime
+      ss << "Attempted to access variable '" << iVariable.name() << "' for time " << iTime
          << " in file '" << getFilename() << "'";
       Util::error(ss.str());
    }
@@ -351,46 +175,23 @@ void File::setVariables(std::vector<Variable> iVariables) {
 bool File::hasVariable(std::string iVariable) const {
    // TODO: Check derived variables
    for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getName() == iVariable)
+      if(mVariables[i].name() == iVariable)
          return true;
    }
    return false;
 
 }
-bool File::hasVariable(Variable::Type iVariable) const {
-   // TODO
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getType() == iVariable)
-         return true;
-   }
-   return false;
-}
 bool File::hasVariable(const Variable& iVariable) const {
    bool status = hasVariableCore(iVariable);
    if(status)
       return true;
-// Check if field is derivable
-   if(iVariable.getType() == Variable::Precip) {
-      return hasVariableCore(Variable::PrecipAcc);
-   }
-   else if(iVariable.getType() == Variable::PrecipAcc) {
-      return hasVariableCore(Variable::Precip);
-   }
-   else if(iVariable.getType() == Variable::W) {
-      return (hasVariableCore(Variable::V) && hasVariableCore(Variable::U)) ||
-             (hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind));
-   }
-   else if(iVariable.getType() == Variable::WD) {
-      return (hasVariableCore(Variable::V) && hasVariableCore(Variable::U)) ||
-             (hasVariableCore(Variable::Xwind) && hasVariableCore(Variable::Ywind));
-   }
 
    // Check if field has been initialized
    std::map<Variable, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    return it != mFields.end();
 }
 
-bool File::hasVariableWithoutDeriving(Variable::Type iVariable) const {
+bool File::hasVariableWithoutDeriving(std::string iVariable) const {
    bool status = hasVariableCore(iVariable);
    if(status)
       return true;
@@ -398,7 +199,7 @@ bool File::hasVariableWithoutDeriving(Variable::Type iVariable) const {
    // Check if field has been initialized
    std::map<Variable, std::vector<FieldPtr> >::const_iterator it;
    for(it == mFields.begin(); it != mFields.end(); it++) {
-      if(it->first.getType() == iVariable)
+      if(it->first.name() == iVariable)
          return true;
    }
    return false;
@@ -514,35 +315,18 @@ std::vector<double> File::getTimes() const {
    return mTimes;
 }
 
-bool File::hasVariableCore(Variable::Type iVariable) const {
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getType() == iVariable) {
-         return true;
-      }
-   }
-   return false;
-}
-
 bool File::hasVariableCore(std::string iVariable) const {
    for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getName() == iVariable) {
+      if(mVariables[i].name() == iVariable) {
          return true;
       }
    }
    return false;
 }
 
-std::string File::getVariableName(const Variable& iVariable) const {
-   // TODO:
-   //if(mVariableMap.has(iVariable))
-   //   return mVariableMap.get(iVariable);
-   //else
-      return "";
-}
-
-bool File::getVariable(Variable::Type iVariableType, Variable& iVariable) const {
+bool File::getVariable(std::string iVariableName, Variable& iVariable) const {
    for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].getType() == iVariableType) {
+      if(mVariables[i].name() == iVariableName) {
          iVariable = mVariables[i];
          return true;
       }

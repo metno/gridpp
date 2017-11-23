@@ -19,7 +19,6 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
    vec2Int nearestI, nearestJ;
    double s = Util::clock();
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   std::cout << Util::clock() - s << std::endl;
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);

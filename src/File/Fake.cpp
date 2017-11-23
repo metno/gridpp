@@ -52,7 +52,7 @@ FileFake::FileFake(const Options& iOptions) :
    }
 }
 
-FieldPtr FileFake::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FileFake::getFieldCore(const Variable& iVariable, int iTime) const {
 
    FieldPtr field = getEmptyField();
 
@@ -65,15 +65,12 @@ FieldPtr FileFake::getFieldCore(Variable::Type iVariable, int iTime) const {
    }
    return field;
 }
-void FileFake::writeCore(std::vector<Variable::Type> iVariables) {
+void FileFake::writeCore(std::vector<Variable> iVariables) {
    Util::warning("Cannot write file using the 'Fake' format");
 }
 
-bool FileFake::hasVariableCore(Variable::Type iVariable) const {
-   if(iVariable == Variable::PrecipAcc)
-      return false;
-   else
-      return true;
+bool FileFake::hasVariableCore(const Variable& iVariable) const {
+   return true;
 }
 std::string FileFake::description() {
    std::stringstream ss;

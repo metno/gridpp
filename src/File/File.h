@@ -6,7 +6,6 @@
 #include "../Variable.h"
 #include "../Uuid.h"
 #include "../Field.h"
-#include "../VariableMap.h"
 
 class Options;
 
@@ -26,7 +25,6 @@ class File {
 
       FieldPtr getField(const Variable& iVariable, int iTime) const;
       FieldPtr getField(std::string iVariable, int iTime) const;
-      FieldPtr getField(Variable::Type iVariable, int iTime) const;
 
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
@@ -36,8 +34,6 @@ class File {
 
       // Write these variables to file
       void write(std::vector<Variable> iVariables);
-
-      std::string getVariableName(const Variable& iVariable) const;
 
       // Dimension sizes
       int getNumLat() const;
@@ -56,10 +52,9 @@ class File {
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(const Variable& iVariable) const;
       bool hasVariable(std::string iVariable) const;
-      bool hasVariable(Variable::Type iVariable) const;
 
       //! Does this file provide the variable (without deriving it)?
-      bool hasVariableWithoutDeriving(Variable::Type iVariable) const;
+      bool hasVariableWithoutDeriving(std::string iVariable) const;
 
       std::string getFilename() const;
 
@@ -86,7 +81,7 @@ class File {
       //! @ param iTimes vector of number of seconds since 1970-01-01 00:00:00 +00:00
       void setTimes(std::vector<double> iTimes);
       std::vector<double> getTimes() const;
-      bool getVariable(Variable::Type iVariableType, Variable& iVariable) const;
+      bool getVariable(std::string iVariableName, Variable& iVariable) const;
       static std::string getDescriptions();
    protected:
       virtual FieldPtr getFieldCore(const Variable& iVariable, int iTime) const = 0;
@@ -94,7 +89,6 @@ class File {
       virtual void writeCore(std::vector<Variable> iVariables) = 0;
       //! Does the subclass provide this variable without deriving it?
       virtual bool hasVariableCore(const Variable& iVariable) const = 0;
-      bool hasVariableCore(Variable::Type iVariable) const;
       bool hasVariableCore(std::string iVariable) const;
 
       // Subclasses must fill these fields in the constructor:
@@ -106,6 +100,8 @@ class File {
       int mNLat;
       int mNLon;
       int mNEns;
+
+      //! These must be populated on initialization by subclass
       std::vector<Variable> mVariables;
    private:
       std::string mFilename;

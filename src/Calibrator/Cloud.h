@@ -12,6 +12,6 @@ class CalibratorCloud : public Calibrator {
       bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
-      Variable::Type mPrecipType;
+      std::string mPrecipVariable;
 };
 #endif

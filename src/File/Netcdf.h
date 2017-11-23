@@ -49,7 +49,6 @@ class FileNetcdf : public File {
       float getScale(int iVar) const;
       float getOffset(int iVar) const;
       void writeCore(std::vector<Variable> iVariables);
-      FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
       FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
       bool hasVariableCore(const Variable& iVariable) const;
 

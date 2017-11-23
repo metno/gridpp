@@ -19,5 +19,6 @@ class CalibratorWindDirection : public Calibrator {
       static float getFactor(float iWindDirection, const Parameters& iPar);
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      std::string mDirectionVariable;
 };
 #endif

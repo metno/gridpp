@@ -4,7 +4,9 @@
 #include <math.h>
 CalibratorQnh::CalibratorQnh(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions) {
-
+   if(!iOptions.getValue("pressureVariable", mPressureVariable)) {
+      Util::error("CalibratorQnh: 'pressureVariable' missing");
+   }
 }
 bool CalibratorQnh::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
@@ -18,8 +20,8 @@ bool CalibratorQnh::calibrateCore(File& iFile, const ParameterFile* iParameterFi
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      const Field& input = *iFile.getField(Variable::P, t);
-      Field& output      = *iFile.getField(Variable::QNH, t);
+      const Field& input = *iFile.getField(mPressureVariable, t);
+      Field& output      = *iFile.getField(mVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

@@ -27,7 +27,7 @@ DownscalerGradientOld::DownscalerGradientOld(const Variable& iInputVariable, con
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
    if(!iOptions.getValue("gradientVariable", mGradientVariableName)) {
-      mGradientVariableName = mInputVariable.getName();
+      mGradientVariableName = mInputVariable.name();
    }
 }
 
@@ -44,8 +44,8 @@ void DownscalerGradientOld::downscaleCore(const File& iInput, File& iOutput) con
    vec2 olons  = iOutput.getLons();
    vec2 oelevs = iOutput.getElevs();
 
-   float minAllowed = mOutputVariable.getMin();
-   float maxAllowed = mOutputVariable.getMax();
+   float minAllowed = mOutputVariable.min();
+   float maxAllowed = mOutputVariable.max();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;

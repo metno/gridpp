@@ -2,12 +2,7 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorAccumulate::CalibratorAccumulate(const Variable& iVariable, const Options& iOptions) :
-      Calibrator(iVariable, iOptions),
-      mOutputVariable(Variable::PrecipAcc) {
-   std::string outputVariable;
-   if(iOptions.getValue("outputVariable", outputVariable)) {
-      mOutputVariable = Variable::getType(outputVariable);
-   }
+      Calibrator(iVariable, iOptions) {
 }
 bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();
@@ -15,7 +10,7 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    if(!iFile.hasVariable(mVariable)) {
-      Util::error("File '" + iFile.getFilename() + "' does not have variable '" + mVariable.getName() + "'-");
+      Util::error("File '" + iFile.getFilename() + "' does not have variable '" + mVariable.name() + "'-");
    }
 
    // Get all fields
@@ -48,17 +43,12 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
          }
       }
 
-      Variable variable;
-      bool found = iFile.getVariable(mOutputVariable, variable);
-      if(!found)
-         Util::error("File does not have accumulated field defined");
-      iFile.addField(fieldsAcc[t], variable, t);
+      iFile.addField(fieldsAcc[t], mVariable, t);
    }
    return true;
 }
 std::string CalibratorAccumulate::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c accumulate","Accumlates a value over time. Used to accumulate precipitation. It is assumed that the raw value for time t is the precip on the interval [t-1,t]. After accumulation, the value for time t is then the sum over the interval [0,t]. Thus, the accumulated value for the first timestep will be missing and the raw value for time t=0 will never be used.") << std::endl;
-   ss << Util::formatDescription("   outputVariable=PrecipAcc","Which variable should the accumulate be written to?") << std::endl;
    return ss.str();
 }

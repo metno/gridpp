@@ -27,7 +27,6 @@ class CalibratorZaga : public Calibrator {
       static float getPdf(float iThreshold, float iEnsMean, float iEnsFrac, const Parameters& iParameters);
 
       float getFracThreshold() {return mFracThreshold;};
-      bool  getOutputPop() {return mOutputPop;};
       float getPopThreshold() {return mPopThreshold;};
       int   getNeighbourhoodSize() {return mNeighbourhoodSize;};
       float getMaxEnsMean() {return mMaxEnsMean;};
@@ -43,7 +42,6 @@ class CalibratorZaga : public Calibrator {
       // static void my_fdf(const gsl_vector *x, void *params, double *f, gsl_vector *df);
       //! What precip threshold should be used to count members with no precip?
       float mFracThreshold;
-      bool mOutputPop;
       int  mNeighbourhoodSize;
       float mPopThreshold;
       float mPrecipLowQuantile;
@@ -52,5 +50,9 @@ class CalibratorZaga : public Calibrator {
       float mMaxEnsMean;
       bool m6h;
       float mLogLikelihoodTolerance;
+      std::string mPopVariable;
+      std::string mPrecipLowVariable;
+      std::string mPrecipMiddleVariable;
+      std::string mPrecipHighVariable;
 };
 #endif

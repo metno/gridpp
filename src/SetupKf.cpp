@@ -76,7 +76,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
             Util::error("-d before -v");
          }
          assert(fcstFile != NULL);
-         bool found = fcstFile->getVariable(Variable::getType(variableName), variable);
+         bool found = fcstFile->getVariable(variableName, variable);
          if(!found) {
             // TODO
             Util::error("Cannot find variable in KF");
@@ -90,7 +90,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          Options opt;
          index++;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             opt.addOptions(argv[index]);
             index++;
@@ -103,7 +103,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          Options opt;
          index++;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             opt.addOptions(argv[index]);
             index++;
@@ -116,7 +116,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          index++;
          Options opt;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             opt.addOptions(argv[index]);
             index++;

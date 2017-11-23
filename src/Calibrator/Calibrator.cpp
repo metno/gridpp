@@ -57,11 +57,6 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
 
       return c;
    }
-   else if(iName == "diagnose") {
-      CalibratorDiagnose* c = new CalibratorDiagnose(iVariable, iOptions);
-
-      return c;
-   }
    else if(iName == "window") {
       CalibratorWindow* c = new CalibratorWindow(iVariable, iOptions);
 
@@ -180,7 +175,6 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorBct::description() << std::endl;
    ss << CalibratorCloud::description() << std::endl;
    ss << CalibratorCoastal::description() << std::endl;
-   ss << CalibratorDiagnose::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorNeighbourhood::description() << std::endl;

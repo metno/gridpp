@@ -18,7 +18,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    State state = START;
    State prevState = START;
 
-   downscaler = Downscaler::getScheme("nearestNeighbour", variable, variable, Options());
+   std::string variableName = "";
 
    // Process obs/fcst filenames and options
    Options obsOptions, fcstOptions;
@@ -192,7 +192,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
                errorMessage = "Duplicate '-v'";
             }
             else {
-               variable = VariableMap::getDefault(Variable::getType(argv[index]));
+               variableName = argv[index];
                index++;
                if(argv.size() <= index) {
                   state = END;
@@ -217,7 +217,22 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
          }
       }
       else if(state == END) {
-         method = Calibrator::getScheme(methodType, variable, mOptions);
+         Variable inputVariable, outputVariable;
+         bool found = forecasts[0]->getVariable(variableName, inputVariable);
+         if(!found) {
+            std::stringstream ss;
+            ss << "Forecast files do not define variable of type '" << variableName << "'";
+            Util::error(ss.str());
+         }
+         found = observations[0]->getVariable(variableName, outputVariable);
+         if(!found) {
+            std::stringstream ss;
+            ss << "Observation files do not define variable of type '" << variableName << "'";
+            Util::error(ss.str());
+         }
+
+         downscaler = Downscaler::getScheme("nearestNeighbour", inputVariable, outputVariable, Options());
+         method = Calibrator::getScheme(methodType, outputVariable, mOptions);
          oOptions.addOption("file", outputFilename);
          std::string schemeName;
          if(!oOptions.getValue("type", schemeName)) {

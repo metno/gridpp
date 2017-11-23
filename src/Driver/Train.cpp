@@ -27,9 +27,6 @@ void writeUsage() {
    std::cout << "Obs/fcst files" << std::endl;
    std::cout << "   Obs/fcst file types are autodetected, but can be specified using:" << std::endl;
    std::cout << File::getDescriptions();
-   std::cout << "Variables:" << std::endl;
-   std::cout << Variable::getDescriptions();
-   std::cout << std::endl;
    std::cout << "Calibrators with options (and default values):" << std::endl;
    std::cout << Calibrator::getDescriptions();
    std::cout << std::endl;

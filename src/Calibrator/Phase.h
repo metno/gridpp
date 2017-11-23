@@ -27,5 +27,17 @@ class CalibratorPhase : public Calibrator {
       //! If true compute pressure based on standard atmosphere (instead of using forecasted data)
       //! This is likely a good enough approximation when computing wetbulb temperature and saves memory.
       bool mEstimatePressure;
+
+      //! Precipitation phase
+      enum Phase {
+         PhaseNone  = 0,
+         PhaseRain  = 1,
+         PhaseSleet = 2,
+         PhaseSnow  = 3
+      };
+      std::string mTemperatureVariable;
+      std::string mPrecipitationVariable;
+      std::string mPressureVariable;
+      std::string mRhVariable;
 };
 #endif

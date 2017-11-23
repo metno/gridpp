@@ -47,8 +47,8 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = mOutputVariable.getMin();
-   float maxAllowed = mOutputVariable.getMax();
+   float minAllowed = mOutputVariable.min();
+   float maxAllowed = mOutputVariable.max();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;

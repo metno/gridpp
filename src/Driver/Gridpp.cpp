@@ -44,9 +44,6 @@ void writeUsage() {
    std::cout << "   I/O types are autodetected, but can be specified using:" << std::endl;
    std::cout << File::getDescriptions();
    std::cout << std::endl;
-   std::cout << "Variables:" << std::endl;
-   std::cout << Variable::getDescriptions();
-   std::cout << std::endl;
    std::cout << "Variable options (and default values):" << std::endl;
    std::cout << Util::formatDescription("write=1", "Set to 0 to prevent the variable to be written to output") << std::endl;
    std::cout << std::endl;
@@ -110,7 +107,7 @@ int main(int argc, const char *argv[]) {
          }
          setup.outputFiles[f]->initNewVariable(outputVariable);
 
-         std::cout << "Processing " << outputVariable.getName() << std::endl;
+         std::cout << "Processing " << outputVariable.name() << std::endl;
 
          // Downscale
          std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;

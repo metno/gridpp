@@ -92,6 +92,7 @@ class FileNetcdf : public File {
       void  setMissingValue(int iVar, float iValue) const;
       //! Convert linear index 'i' to vector 'iInidices'. 'iCount' specifies the size of the data
       //! Using row-major ordering (last index varies fastest)
+      int getIndex(const std::vector<int>& iCount, const std::vector<int>& iIndices) const;
       void getIndices(int i, const std::vector<int>& iCount, std::vector<int>& iIndices) const;
       void setAttribute(int iVar, std::string iName, std::string iValue);
       void defineTimes();

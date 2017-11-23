@@ -208,8 +208,46 @@ FieldPtr FileNetcdf::getFieldCore(std::string iVariable, int iTime) const {
    float scale = getScale(var);
 
    FieldPtr field = getEmptyField();
-   std::vector<int> indices;
    std::vector<int> countVector(count, count + dims.size());
+   double start_time = Util::clock();
+   int nEns = 1;
+   if(Util::isValid(ensPos))
+      nEns = count[ensPos];
+   int nLat = 1;
+   if(Util::isValid(latPos))
+      nLat = count[latPos];
+   int nLon = 1;
+   if(Util::isValid(lonPos))
+      nLon = count[lonPos];
+   std::vector<int> indices(dims.size(), 0);
+   for(int e = 0; e < nEns; e++) {
+      if(Util::isValid(ensPos))
+         indices[ensPos] = e;
+      for(int lat = 0; lat < nLat; lat++) {
+         if(Util::isValid(latPos))
+            indices[latPos] = lat;
+         for(int lon = 0; lon < nLon; lon++) {
+            if(Util::isValid(lonPos))
+               indices[lonPos] = lon;
+            int i = getIndex(countVector, indices);
+            float value = values[i];
+            if(Util::isValid(MV) && value == MV) {
+               // Field has missing value indicator and the value is missing
+               // Save values using our own internal missing value indicator
+               value = Util::MV;
+            }
+            else {
+               value = scale*value + offset;
+            }
+            (*field)(lat,lon,e) = value;
+            // std::cout << e << " " << lat << " " << lon << " " << i << " " << value << std::endl;
+         }
+      }
+   }
+   // Alternative, but slower way. This loops over the vector and fills values into
+   // the 3D array, instead of the otherway around.
+   /*
+   std::vector<int> indices(dims.size(), 0);
    for(int i = 0; i < size; i++) {
       getIndices(i, countVector, indices);
       int e = 0;
@@ -232,6 +270,7 @@ FieldPtr FileNetcdf::getFieldCore(std::string iVariable, int iTime) const {
       }
       (*field)(lat,lon,e) = value;
    }
+   */
    delete[] values;
    return field;
 }
@@ -349,31 +388,41 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
          float scale = getScale(var);
          FieldPtr field = getField(varType, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
-            std::vector<int> indices;
             std::vector<int> countVector(count, count + dims.size());
-            for(int i = 0; i < size; i++) {
-               getIndices(i, countVector, indices);
-               int e = 0;
-               int lat = 0;
-               int lon = 0;
-               if(Util::isValid(ensPos))
-                  e = indices[ensPos];
-               if(Util::isValid(latPos))
-                  lat = indices[latPos];
-               if(Util::isValid(lonPos))
-                  lon = indices[lonPos];
-               float value = (*field)(lat, lon, e);
-               if(Util::isValid(MV) && !Util::isValid(value)) {
-                  // Field has missing value indicator and the value is missing
-                  // Save values using the file's missing indicator value
-                  value = MV;
-               }
-               else {
-                  value = ((*field)(lat,lon,e) - offset)/scale;
-               }
-               values[i] = value;
-            }
 
+            int nEns = 1;
+            if(Util::isValid(ensPos))
+               nEns = count[ensPos];
+            int nLat = 1;
+            if(Util::isValid(latPos))
+               nLat = count[latPos];
+            int nLon = 1;
+            if(Util::isValid(lonPos))
+               nLon = count[lonPos];
+            std::vector<int> indices(dims.size(), 0);
+            for(int e = 0; e < nEns; e++) {
+               if(Util::isValid(ensPos))
+                  indices[ensPos] = e;
+               for(int lat = 0; lat < nLat; lat++) {
+                  if(Util::isValid(latPos))
+                     indices[latPos] = lat;
+                  for(int lon = 0; lon < nLon; lon++) {
+                     if(Util::isValid(lonPos))
+                        indices[lonPos] = lon;
+                     int i = getIndex(countVector, indices);
+                     float value = (*field)(lat, lon, e);
+                     if(Util::isValid(MV) && !Util::isValid(value)) {
+                        // Field has missing value indicator and the value is missing
+                        // Save values using the file's missing indicator value
+                        value = MV;
+                     }
+                     else {
+                        value = (value - offset)/scale;
+                     }
+                     values[i] = value;
+                  }
+               }
+            }
             int status = nc_put_vara_float(mFile, var, start, count, values);
             handleNetcdfError(status, "could not write variable " + variable);
          }
@@ -791,15 +840,24 @@ float FileNetcdf::getOffset(int iVar) const {
    return offset;
 }
 
-void FileNetcdf::getIndices(int i, const std::vector<int>& iCount, std::vector<int>& iIndices) const {
-   // The last index changes fastest, the first slowest
+int FileNetcdf::getIndex(const std::vector<int>& iCount, const std::vector<int>& iIndices) const {
    int numDims = iCount.size();
-   iIndices.resize(numDims);
+   int index = 0;
    int sizeSoFar = 1;
    for(int k = numDims-1; k >= 0; k--) {
-      int index = floor(i / sizeSoFar);
-      index     = index % iCount[k];
-      iIndices[k] = index;
+      index += iIndices[k] * sizeSoFar;
+      sizeSoFar *= iCount[k];
+   }
+   return index ;
+}
+void FileNetcdf::getIndices(int i, const std::vector<int>& iCount, std::vector<int>& iIndices) const {
+   // This is a bottleneck
+   // The last index changes fastest, the first slowest
+   int numDims = iCount.size();
+   // iIndices.resize(numDims);
+   int sizeSoFar = 1;
+   for(int k = numDims-1; k >= 0; k--) {
+      iIndices[k] = int(i / sizeSoFar) % iCount[k];
       sizeSoFar *= iCount[k];
    }
 }

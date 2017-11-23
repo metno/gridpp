@@ -4,8 +4,8 @@
 #include <math.h>
 const float DownscalerPressure::mConstant = -1.21e-4;
 
-DownscalerPressure::DownscalerPressure(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerPressure::DownscalerPressure(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {
@@ -26,8 +26,8 @@ void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const 
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

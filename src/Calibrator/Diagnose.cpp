@@ -2,9 +2,8 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include <cmath>
-CalibratorDiagnose::CalibratorDiagnose(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mOutputVariable(iVariable) {
+CalibratorDiagnose::CalibratorDiagnose(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions) {
    /*
    std::vector<std::string> usingVariables;
    iOptions.getValues("using", usingVariables);
@@ -21,7 +20,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
 
    // Check that we have the required variables
    std::vector<Variable::Type> requiredVariables;
-   if(mOutputVariable == Variable::W || mOutputVariable == Variable::WD) {
+   if(mVariable.getType() == Variable::W || mVariable.getType() == Variable::WD) {
       if(iFile.hasVariable(Variable::U)) {
          requiredVariables.push_back(Variable::U);
          requiredVariables.push_back(Variable::V);
@@ -31,25 +30,25 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          requiredVariables.push_back(Variable::Ywind);
       }
    }
-   else if(mOutputVariable == Variable::U || mOutputVariable == Variable::V) {
+   else if(mVariable.getType() == Variable::U || mVariable.getType() == Variable::V) {
       requiredVariables.push_back(Variable::W);
       requiredVariables.push_back(Variable::WD);
    }
-   else if(mOutputVariable == Variable::Xwind || mOutputVariable == Variable::Ywind) {
+   else if(mVariable.getType() == Variable::Xwind || mVariable.getType() == Variable::Ywind) {
       requiredVariables.push_back(Variable::W);
       requiredVariables.push_back(Variable::WD);
    }
-   else if(mOutputVariable == Variable::RH) {
+   else if(mVariable.getType() == Variable::RH) {
       requiredVariables.push_back(Variable::T);
       requiredVariables.push_back(Variable::TD);
    }
-   else if(mOutputVariable == Variable::TD) {
+   else if(mVariable.getType() == Variable::TD) {
       requiredVariables.push_back(Variable::T);
       requiredVariables.push_back(Variable::RH);
    }
    else {
       std::stringstream ss;
-      ss << "Cannot diagnose " << Variable::getTypeName(mOutputVariable)
+      ss << "Cannot diagnose " << Variable::getTypeName(mVariable.getType())
          << " because no conversion has been implemented";
       Util::error(ss.str());
    }
@@ -57,7 +56,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
    for(int i = 0; i < requiredVariables.size(); i++) {
       if(!iFile.hasVariableWithoutDeriving(requiredVariables[i])) {
          std::stringstream ss;
-         ss << "Cannot diagnose " << Variable::getTypeName(mOutputVariable)
+         ss << "Cannot diagnose " << Variable::getTypeName(mVariable.getType())
             << " because " << Variable::getTypeName(requiredVariables[i]) << " is missing";
          Util::error(ss.str());
       }
@@ -65,9 +64,9 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
 
    // Get all fields
    for(int t = 0; t < nTime; t++) {
-      Field& output = *iFile.getField(mOutputVariable, t);
+      Field& output = *iFile.getField(mVariable, t);
       // Diagnose W from U and V
-      if(mOutputVariable == Variable::W && iFile.hasVariableWithoutDeriving(Variable::U)) {
+      if(mVariable.getType() == Variable::W && iFile.hasVariableWithoutDeriving(Variable::U)) {
          const Field& fieldU = *iFile.getField(Variable::U, t);
          const Field& fieldV = *iFile.getField(Variable::V, t);
          #pragma omp parallel for
@@ -81,7 +80,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose W from Xwind and Ywind
-      else if(mOutputVariable == Variable::W && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
+      else if(mVariable.getType() == Variable::W && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
          const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
          const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
          #pragma omp parallel for
@@ -96,7 +95,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose WD from U and V
-      else if(mOutputVariable == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::U)) {
+      else if(mVariable.getType() == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::U)) {
          const Field& fieldU = *iFile.getField(Variable::U, t);
          const Field& fieldV = *iFile.getField(Variable::V, t);
          #pragma omp parallel for
@@ -114,7 +113,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose WD from Xwind and Ywind
-      else if(mOutputVariable == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
+      else if(mVariable.getType() == Variable::WD && iFile.hasVariableWithoutDeriving(Variable::Xwind)) {
          const Field& fieldXwind = *iFile.getField(Variable::Xwind, t);
          const Field& fieldYwind = *iFile.getField(Variable::Ywind, t);
          #pragma omp parallel for
@@ -132,7 +131,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose U from W and WD
-      else if(mOutputVariable == Variable::U || mOutputVariable == Variable::Xwind) {
+      else if(mVariable.getType() == Variable::U || mVariable.getType() == Variable::Xwind) {
          const Field& fieldW = *iFile.getField(Variable::W, t);
          const Field& fieldWD = *iFile.getField(Variable::WD, t);
          #pragma omp parallel for
@@ -147,7 +146,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose V from W and WD
-      else if(mOutputVariable == Variable::V || mOutputVariable == Variable::Ywind) {
+      else if(mVariable.getType() == Variable::V || mVariable.getType() == Variable::Ywind) {
          const Field& fieldW = *iFile.getField(Variable::W, t);
          const Field& fieldWD = *iFile.getField(Variable::WD, t);
          #pragma omp parallel for
@@ -162,7 +161,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose RH from T and TD
-      else if(mOutputVariable == Variable::RH) {
+      else if(mVariable.getType() == Variable::RH) {
          const Field& fieldT = *iFile.getField(Variable::T, t);
          const Field& fieldTD = *iFile.getField(Variable::TD, t);
          #pragma omp parallel for
@@ -177,7 +176,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
          }
       }
       // Diagnose TD from T and RH
-      else if(mOutputVariable == Variable::TD) {
+      else if(mVariable.getType() == Variable::TD) {
          const Field& fieldT = *iFile.getField(Variable::T, t);
          const Field& fieldRH = *iFile.getField(Variable::RH, t);
          #pragma omp parallel for
@@ -194,7 +193,7 @@ bool CalibratorDiagnose::calibrateCore(File& iFile, const ParameterFile* iParame
       else {
          // This part should never happen, since it should have been caught ealier
          std::stringstream ss;
-         ss << "Cannot diagnose " << Variable::getTypeName(mOutputVariable);
+         ss << "Cannot diagnose " << Variable::getTypeName(mVariable.getType());
          Util::error(ss.str());
       }
    }

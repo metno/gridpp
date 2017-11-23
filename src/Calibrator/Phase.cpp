@@ -4,8 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorPhase::CalibratorPhase(const Options& iOptions) :
-      Calibrator(iOptions),
+CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mMinPrecip(0.2),
       mEstimatePressure(true),
       mUseWetbulb(1) {
@@ -21,12 +21,12 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    int nTime = iFile.getNumTime();
-   iFile.initNewVariable(Variable::Phase);
    vec2 elevs = iFile.getElevs();
 
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
+
       Parameters par;
       if(!iParameterFile->isLocationDependent())
          par = iParameterFile->getParameters(t);
@@ -34,7 +34,7 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
       float sleetRainThreshold = par[1];
       const FieldPtr temp = iFile.getField(Variable::T, t);
       const FieldPtr precip = iFile.getField(Variable::Precip, t);
-      FieldPtr phase = iFile.getField(Variable::Phase, t);
+      FieldPtr phase = iFile.getEmptyField();
       FieldPtr pressure;
       FieldPtr rh;
       if(mUseWetbulb) {
@@ -86,6 +86,11 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
             }
          }
       }
+      Variable variable;
+      bool found = iFile.getVariable(Variable::Phase, variable);
+      if(!found)
+         Util::error("File does not have phase field defined");
+      iFile.addField(phase, variable, t);
    }
    return true;
 }

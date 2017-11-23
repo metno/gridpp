@@ -4,9 +4,8 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorQc::CalibratorQc(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorQc::CalibratorQc(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mMin(Util::MV),
       mMax(Util::MV) {
    iOptions.getValue("min", mMin);

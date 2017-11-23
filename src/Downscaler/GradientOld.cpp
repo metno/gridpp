@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerGradientOld::DownscalerGradientOld(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerGradientOld::DownscalerGradientOld(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mSearchRadius(3),
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),
@@ -14,7 +14,7 @@ DownscalerGradientOld::DownscalerGradientOld(Variable::Type iVariable, const Opt
       mMinElevDiff(30),
       mAverageNeighbourhood(false),
       mSaveGradient(false),
-      mGradientVariable(Variable::None),
+      mGradientVariableName(""),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("minGradient", mMinGradient);
@@ -26,12 +26,8 @@ DownscalerGradientOld::DownscalerGradientOld(Variable::Type iVariable, const Opt
    iOptions.getValue("minElevDiff", mMinElevDiff);
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
-   std::string gradientVariable;
-   if(iOptions.getValue("gradientVariable", gradientVariable)) {
-      mGradientVariable = Variable::getType(gradientVariable);
-   }
-   else {
-      mGradientVariable = mVariable;
+   if(!iOptions.getValue("gradientVariable", mGradientVariableName)) {
+      mGradientVariableName = mInputVariable.getName();
    }
 }
 
@@ -48,22 +44,22 @@ void DownscalerGradientOld::downscaleCore(const File& iInput, File& iOutput) con
    vec2 olons  = iOutput.getLons();
    vec2 oelevs = iOutput.getElevs();
 
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
+   float minAllowed = mOutputVariable.getMin();
+   float maxAllowed = mOutputVariable.getMax();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   if(!iInput.hasVariable(mGradientVariable)) {
+   if(!iInput.hasVariable(mGradientVariableName)) {
       std::stringstream ss;
-     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mGradientVariable);
+     ss <<"Cannot compute gradient, since file does not have " << mGradientVariableName;
       Util::error(ss.str());
    }
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
-      Field& gfield = *iInput.getField(mGradientVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
+      Field& gfield = *iInput.getField(mGradientVariableName, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

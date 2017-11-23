@@ -7,8 +7,9 @@
 
 std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
 
-Downscaler::Downscaler(Variable::Type iVariable, const Options& iOptions) : Scheme(iOptions),
-      mVariable(iVariable) {
+Downscaler::Downscaler(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) : Scheme(iOptions),
+      mInputVariable(iInputVariable),
+      mOutputVariable(iOutputVariable) {
 }
 
 bool Downscaler::downscale(const File& iInput, File& iOutput) const {
@@ -19,16 +20,16 @@ bool Downscaler::downscale(const File& iInput, File& iOutput) const {
    return true;
 }
 
-Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions) {
+Downscaler* Downscaler::getScheme(std::string iName, const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) {
    if(iName == "nearestNeighbour") {
-      return new DownscalerNearestNeighbour(iVariable, iOptions);
+      return new DownscalerNearestNeighbour(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "gradientOld") {
-      DownscalerGradientOld* d = new DownscalerGradientOld(iVariable, iOptions);
+      DownscalerGradientOld* d = new DownscalerGradientOld(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else if(iName == "smart") {
-      DownscalerSmart* d = new DownscalerSmart(iVariable, iOptions);
+      DownscalerSmart* d = new DownscalerSmart(iInputVariable, iOutputVariable, iOptions);
       float searchRadius = Util::MV;
       if(iOptions.getValue("searchRadius", searchRadius)) {
          d->setSearchRadius(searchRadius);
@@ -44,23 +45,23 @@ Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, c
       return d;
    }
    else if(iName == "bypass") {
-      DownscalerBypass* d = new DownscalerBypass(iVariable, iOptions);
+      DownscalerBypass* d = new DownscalerBypass(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else if(iName == "pressure") {
-      DownscalerPressure* d = new DownscalerPressure(iVariable, iOptions);
+      DownscalerPressure* d = new DownscalerPressure(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else if(iName == "coastal") {
-      DownscalerCoastal* d = new DownscalerCoastal(iVariable, iOptions);
+      DownscalerCoastal* d = new DownscalerCoastal(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
+      DownscalerGradient* d = new DownscalerGradient(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else if(iName == "bilinear") {
-      DownscalerBilinear* d = new DownscalerBilinear(iVariable, iOptions);
+      DownscalerBilinear* d = new DownscalerBilinear(iInputVariable, iOutputVariable, iOptions);
       return d;
    }
    else {

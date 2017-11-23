@@ -14,7 +14,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerGradient : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradient(Variable::Type iVariable, const Options& iOptions);
+      DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       ~DownscalerGradient();
       float getConstantElevGradient() const;
       int   getElevRadius() const;
@@ -48,7 +48,7 @@ class DownscalerGradient : public Downscaler {
       std::string mDownscalerName;
       mutable bool mHasIssuedWarningUnstable;
       std::string mSaveGradient;
-      Variable::Type mElevGradientVariable;
+      std::string mElevGradientVariableName;
       float calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const;
       float calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const;
       bool calcNeighbourhoodMean(const Field& iField, const vec2& iElevs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean) const;

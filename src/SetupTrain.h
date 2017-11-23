@@ -19,7 +19,7 @@ class SetupTrain {
       std::vector<File*> observations;
       Calibrator* method;
       Downscaler* downscaler;
-      Variable::Type variable;
+      Variable variable;
       SetupTrain(const std::vector<std::string>& argv);
       ~SetupTrain();
 };

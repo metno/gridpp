@@ -4,9 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorRegression::CalibratorRegression(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorRegression::CalibratorRegression(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mOrder(1),
       mIntercept(true) {
    iOptions.getValue("order", mOrder);

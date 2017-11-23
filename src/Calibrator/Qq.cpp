@@ -4,9 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorQq::CalibratorQq(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mLowerQuantile(0),
       mUpperQuantile(1),
       mPolicy(ExtrapolationPolicy::OneToOne) {

@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerSmart::DownscalerSmart(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerSmart::DownscalerSmart(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mSearchRadius(3),
       mNumSmart(5),
       mMinElevDiff(Util::MV) {
@@ -28,8 +28,8 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
    getSmartNeighbours(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

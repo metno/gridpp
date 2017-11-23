@@ -13,7 +13,8 @@ class ParameterFile;
 //! Represents the post-processing of one variable
 struct VariableConfiguration {
    //! Which variable should be post-processed?
-   Variable::Type variable;
+   Variable inputVariable;
+   Variable outputVariable;
    //! Which downscaler should be used
    Downscaler* downscaler;
    //! Which calibrators should be use

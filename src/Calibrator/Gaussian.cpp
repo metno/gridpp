@@ -6,9 +6,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorGaussian::CalibratorGaussian(Variable::Type iMainPredictor, const Options& iOptions):
-      Calibrator(iOptions),
-      mMainPredictor(iMainPredictor),
+CalibratorGaussian::CalibratorGaussian(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mNeighbourhoodSize(0), 
       mLogLikelihoodTolerance(1e-5) {
 
@@ -31,7 +30,7 @@ bool CalibratorGaussian::calibrateCore(File& iFile, const ParameterFile* iParame
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      Field& field = *iFile.getField(mMainPredictor, t);
+      Field& field = *iFile.getField(mVariable, t);
 
       Parameters parameters;
       if(!iParameterFile->isLocationDependent())

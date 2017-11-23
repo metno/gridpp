@@ -8,7 +8,7 @@ class Parameters;
 
 class CalibratorKriging : public Calibrator {
    public:
-      CalibratorKriging(Variable::Type iVariable, const Options& iOptions);
+      CalibratorKriging(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       float calcCovar(const Location& loc1, const Location& loc2) const;
       enum Type {
@@ -20,7 +20,6 @@ class CalibratorKriging : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
 
-      Variable::Type mVariable;
       float mRadius;
       float mMaxElevDiff;
       float mEfoldDist;

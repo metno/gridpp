@@ -13,19 +13,20 @@ class File;
 class Options;
 class ParameterFile;
 class Grid;
+class Variable;
 
 //! Abstract calibration class
 class Calibrator : public Scheme {
    public:
       //! The calibrator does not free the memory of iParameterFile
-      Calibrator(const Options& iOptions);
+      Calibrator(const Variable& iVariable, const Options& iOptions);
       virtual ~Calibrator() {};
       //! \brief Calibrate one or more fields in iFile
       //! @return true if calibration was successful, false otherwise
       bool calibrate(File& iFile, const ParameterFile* iParameterFile=NULL) const;
 
       //! Instantiates a calibrator with name iName
-      static Calibrator* getScheme(std::string iName, const Options& iOptions);
+      static Calibrator* getScheme(std::string iName, Variable iVariable, const Options& iOptions);
 
       //! \brief Ensure that values in iAfter are in the same order as in iBefore.
       //! If missing values are encountered in iBefore or iAfter, then iAfter is left unchanged.
@@ -45,6 +46,7 @@ class Calibrator : public Scheme {
       virtual bool requiresParameterFile() const { return true;};
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
+      const Variable& mVariable;
    private:
 };
 // #include "Wind.h"

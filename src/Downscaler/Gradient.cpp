@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mElevRadius(3),
       mMinElevGradient(Util::MV),
       mMaxElevGradient(Util::MV),
@@ -20,7 +20,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mDownscalerName("nearestNeighbour"),
       mMinNumPoints(2),
       mMinFracSeaPoints(0),
-      mElevGradientVariable(Variable::None),
+      mElevGradientVariableName(""),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("constantElevGradient", mConstantElevGradient);
@@ -31,12 +31,8 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("maxElevGradient", mMaxElevGradient);
    iOptions.getValue("minLafForElevGradient", mMinLafForElevGradient);
    iOptions.getValue("minNumPoints", mMinNumPoints);
-   std::string gradientVariable;
-   if(iOptions.getValue("elevGradientVariable", gradientVariable)) {
-      mElevGradientVariable = Variable::getType(gradientVariable);
-   }
-   else {
-      mElevGradientVariable = mVariable;
+   if(!iOptions.getValue("elevGradientVariable", mElevGradientVariableName)) {
+      mElevGradientVariableName = mInputVariable.getName();
    }
    iOptions.getValue("lafRadius", mLafRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
@@ -81,22 +77,22 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
+   float minAllowed = mOutputVariable.getMin();
+   float maxAllowed = mOutputVariable.getMax();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   if(!iInput.hasVariable(mElevGradientVariable)) {
+   if(!iInput.hasVariable(mElevGradientVariableName)) {
       std::stringstream ss;
-     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mElevGradientVariable);
+     ss <<"Cannot compute gradient, since file does not have " << mElevGradientVariableName;
       Util::error(ss.str());
    }
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
-      Field& gfield = *iInput.getField(mElevGradientVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
+      Field& gfield = *iInput.getField(mElevGradientVariableName, t);
 
       vec2 elevsInterp;
       vec2 lafsInterp;
@@ -241,8 +237,6 @@ float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int 
       value = minT + gradient * dLaf
    */
    // Compute the average temperature and LAF in a small radius
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
    float minLaf = Util::MV;
    float maxLaf = Util::MV;
    float minElev = Util::MV;

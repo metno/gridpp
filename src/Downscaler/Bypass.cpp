@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerBypass::DownscalerBypass(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerBypass::DownscalerBypass(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
 }
 
 void DownscalerBypass::downscaleCore(const File& iInput, File& iOutput) const {

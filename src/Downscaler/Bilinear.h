@@ -8,7 +8,7 @@
 class File;
 class DownscalerBilinear : public Downscaler {
    public:
-      DownscalerBilinear(Variable::Type iVariable, const Options& iOptions);
+      DownscalerBilinear(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
 
       //! Bilinearly interpolate four irregularly placed points:
       //! v1 v3

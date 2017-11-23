@@ -2,6 +2,25 @@
 #include "Util.h"
 #include <sstream>
 
+Variable::Variable(std::string iName, Variable::Type iType) :
+   mName(iName),
+   mType(iType) {
+
+}
+/*
+Variable& Variable::operator=(Variable other) {
+   std::swap(mName, other.mName);
+   std::swap(mType, other.mType);
+   // TODO: Copy other fields too
+
+   return *this;
+}
+
+Variable::Variable(const Variable& other) {
+   mName = other.mName;
+   mType = other.mType;
+}
+  */
 std::string Variable::getTypeName(Type iType) {
    if(iType == Precip)
       return "Precip";
@@ -63,6 +82,10 @@ std::string Variable::getTypeName(Type iType) {
       return "Fake";
    else
       return "Unknown";
+}
+
+Variable::Type Variable::getType() const {
+   return mType;
 }
 
 Variable::Type Variable::getType(std::string iName) {
@@ -160,6 +183,13 @@ std::string Variable::getDescriptions() {
    ss << Util::formatDescription("-v LwinAcc", "Accumulated incoming longwave radiation") << std::endl;
    return ss.str();
 }
+std::string Variable::getName() const {
+   return mName;
+}
+
+bool Variable::operator<(const Variable &right) const {
+   return mName < right.getName();
+}
 
 std::vector<Variable::Type> Variable::getAllVariables() {
    std::vector<Type> variables;
@@ -194,8 +224,8 @@ std::vector<Variable::Type> Variable::getAllVariables() {
    return variables;
 }
 
-float Variable::getMin(Type iType) {
-   switch(iType) {
+float Variable::getMin() const {
+   switch(mType) {
       case T:
          return 0;
       case TMin:
@@ -256,9 +286,9 @@ float Variable::getMin(Type iType) {
          return Util::MV;
    }
 }
-float Variable::getMax(Type iType) {
+float Variable::getMax() const {
 
-   switch(iType) {
+   switch(mType) {
       case T:
          return Util::MV;
       case TMin:
@@ -319,8 +349,8 @@ float Variable::getMax(Type iType) {
          return Util::MV;
    }
 }
-std::string Variable::getUnits(Type iType) {
-   switch(iType) {
+std::string Variable::getUnits() const {
+   switch(mType) {
       case T:
          return "K";
       case TMin:
@@ -377,8 +407,8 @@ std::string Variable::getUnits(Type iType) {
          return "no_units";
    }
 }
-std::string Variable::getStandardName(Type iType) {
-   switch(iType) {
+std::string Variable::getStandardName() const {
+   switch(mType) {
       case T:
          return "air_temperature";
       case TMin:

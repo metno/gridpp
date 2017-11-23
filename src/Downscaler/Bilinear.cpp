@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerBilinear::DownscalerBilinear(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerBilinear::DownscalerBilinear(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
 }
 
 void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const {
@@ -19,8 +19,8 @@ void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const 
    Downscaler::getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
       downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
    }
 }

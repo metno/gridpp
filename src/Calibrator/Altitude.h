@@ -7,7 +7,7 @@ class Parameters;
 //! Changes the altitudes in iFile to the altitudes in the parameter file
 class CalibratorAltitude : public Calibrator {
    public:
-      CalibratorAltitude(const Options& iOptions);
+      CalibratorAltitude(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "altitude";};
    private:

@@ -8,7 +8,7 @@
 class File;
 class DownscalerNearestNeighbour : public Downscaler {
    public:
-      DownscalerNearestNeighbour(Variable::Type iVariable, const Options& iOptions);
+      DownscalerNearestNeighbour(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
 
       // Interpolate a whole field
       static void downscaleField(const Field& iInput, Field& iOutput,

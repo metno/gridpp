@@ -6,7 +6,7 @@ class ParameterFile;
 //! Creates a precipitation-phase field
 class CalibratorPhase : public Calibrator {
    public:
-      CalibratorPhase(const Options& iOptions);
+      CalibratorPhase(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "phase";};
       //! Compute wetbulb temperature

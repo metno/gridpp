@@ -3,9 +3,8 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
-CalibratorMask::CalibratorMask(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorMask::CalibratorMask(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mUseNearestOnly(false),
       mKeep(true) {
    iOptions.getValue("keep", mKeep);

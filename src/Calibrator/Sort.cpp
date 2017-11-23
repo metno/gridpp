@@ -4,9 +4,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorSort::CalibratorSort(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable) {
+CalibratorSort::CalibratorSort(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions) {
 }
 bool CalibratorSort::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumLat();

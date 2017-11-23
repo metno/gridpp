@@ -5,9 +5,8 @@
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
 
-CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorKriging::CalibratorKriging(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mEfoldDist(30000),
       mMaxElevDiff(Util::MV),
       mAuxVariable(Variable::None),

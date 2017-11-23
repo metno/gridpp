@@ -96,20 +96,21 @@ int main(int argc, const char *argv[]) {
       setup.outputFiles[f]->setReferenceTime(setup.inputFiles[f]->getReferenceTime());
 
       // Post-process file
-      std::vector<Variable::Type> writeVariables;
+      std::vector<Variable> writeVariables;
       for(int v = 0; v < setup.variableConfigurations.size(); v++) {
          double s = Util::clock();
          VariableConfiguration varconf = setup.variableConfigurations[v];
-         Variable::Type variable = varconf.variable;
+         Variable inputVariable = varconf.inputVariable;
+         Variable outputVariable = varconf.outputVariable;
 
          bool write = 1;
          varconf.variableOptions.getValue("write", write);
          if(write) {
-            writeVariables.push_back(variable);
+            writeVariables.push_back(outputVariable);
          }
-         setup.outputFiles[f]->initNewVariable(variable);
+         setup.outputFiles[f]->initNewVariable(outputVariable);
 
-         std::cout << "Processing " << Variable::getTypeName(variable) << std::endl;
+         std::cout << "Processing " << outputVariable.getName() << std::endl;
 
          // Downscale
          std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;

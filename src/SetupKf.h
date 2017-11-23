@@ -19,7 +19,7 @@ class SetupKf {
       File* obsFile;
       Calibrator* method;
       Downscaler* downscaler; // Not used
-      Variable::Type variable;
+      Variable variable;
       ParameterFile* dbin;
       ParameterFile* dbout;
       Options options;

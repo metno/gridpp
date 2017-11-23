@@ -48,11 +48,10 @@ class FileNetcdf : public File {
    protected:
       float getScale(int iVar) const;
       float getOffset(int iVar) const;
-      void writeCore(std::vector<Variable::Type> iVariables);
+      void writeCore(std::vector<Variable> iVariables);
       FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
-      FieldPtr getFieldCore(std::string iVariable, int iTime) const;
-      bool hasVariableCore(Variable::Type iVariable) const;
-      bool hasVariableCore(std::string iVariable) const;
+      FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
+      bool hasVariableCore(const Variable& iVariable) const;
 
       vec2 getGridValues(int iVariable) const;
       void writeAltitude() const;

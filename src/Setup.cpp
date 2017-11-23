@@ -82,7 +82,8 @@ Setup::Setup(const std::vector<std::string>& argv) {
    State state = START;
    State prevState = START;
 
-   Variable::Type variable = Variable::None;
+   std::string variableName = "";
+   std::string variableGridppName = "";
    Options vOptions;
    Options dOptions;
    Options cOptions;
@@ -92,7 +93,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
    std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
    std::string parameterFile = "";
-   std::vector<Calibrator*> calibrators;
+   std::vector<std::string> calibratorNames;
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler = NULL;
    while(true) {
@@ -116,7 +117,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            variable = Variable::getType(argv[index]);
+            variableGridppName = argv[index];
             index++;
             if(argv.size() <= index) {
                state = NEWVAR;
@@ -170,24 +171,42 @@ Setup::Setup(const std::vector<std::string>& argv) {
          // Check that we haven't added the variable before
          bool alreadyExists = false;
          for(int i = 0; i < variableConfigurations.size(); i++) {
-            if(variableConfigurations[i].variable == variable)
+            if(variableConfigurations[i].inputVariable.getName() == variableGridppName)
                alreadyExists = true;
          }
 
          if(!alreadyExists) {
-            dOptions.addOption("variable", Variable::getTypeName(variable));
-            Downscaler* d = Downscaler::getScheme(downscaler, variable, dOptions);
             VariableConfiguration varconf;
-            varconf.variable = variable;
-            varconf.downscaler = d;
             varconf.parameterFileDownscaler = parameterFileDownscaler;
+            // TODO: 0
+            bool found = inputFiles[0]->getVariable(Variable::getType(variableGridppName), varconf.inputVariable);
+            if(!found) {
+               std::stringstream ss;
+               ss << "Input format does not define variable of type '" << variableGridppName << "'";
+               Util::error(ss.str());
+            }
+            found = outputFiles[0]->getVariable(Variable::getType(variableGridppName), varconf.outputVariable);
+            if(!found) {
+               std::stringstream ss;
+               ss << "Output format does not define variable of type '" << variableGridppName << "'";
+               Util::error(ss.str());
+            }
+            std::vector<Calibrator*> calibrators;
+            for(int c = 0; c < calibratorNames.size(); c++) {
+               Calibrator* calibrator = Calibrator::getScheme(calibratorNames[c], varconf.outputVariable, cOptions);
+               calibrators.push_back(calibrator);
+            }
             varconf.calibrators = calibrators;
             varconf.parameterFileCalibrators = parameterFileCalibrators;
             varconf.variableOptions = vOptions;
+            Downscaler* d = Downscaler::getScheme(downscaler, varconf.inputVariable, varconf.outputVariable, dOptions);
+            varconf.downscaler = d;
             variableConfigurations.push_back(varconf);
          }
          else {
-            Util::warning("Variable '" + Variable::getTypeName(variable) + "' already read. Using first instance.");
+            std:: stringstream ss;
+            ss << "Variable '" << variableGridppName << "' already read. Using first instance.";
+            Util::warning(ss.str());
          }
 
          // Reset to defaults
@@ -195,7 +214,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
          downscaler = defaultDownscaler();
          parameterFileDownscaler = NULL;
          dOptions.clear();
-         calibrators.clear();
+         calibratorNames.clear();
          parameterFileCalibrators.clear();
 
          if(argv.size() <= index) {
@@ -441,9 +460,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
             }
          }
          if(state != ERROR) {
-            cOptions.addOption("variable", Variable::getTypeName(variable));
-            Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
-            calibrators.push_back(c);
+            calibratorNames.push_back(calibrator);
             parameterFileCalibrators.push_back(p);
 
             // Reset

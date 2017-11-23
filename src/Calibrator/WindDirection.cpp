@@ -6,9 +6,8 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorWindDirection::CalibratorWindDirection(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable) {
+CalibratorWindDirection::CalibratorWindDirection(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions) {
 }
 
 bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

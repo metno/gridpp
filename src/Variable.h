@@ -40,29 +40,43 @@ class Variable {
          None         = -999  // Non-existant variable
       };
 
+      Variable() {};
+      Variable(std::string iName, float iMin, float iMax, std::string iUnits, std::string iStandardName);
+      Variable(std::string iName, Variable::Type iType);
+      bool operator==(const Variable& iRight) const;
+      //Variable& operator=(Variable other);
+      //Variable(const Variable& other);
+
       //! Convert type to string
       static std::string getTypeName(Type iType);
 
       //! Get the minimum possible attainable value for this variable
-      static float getMin(Type iType);
+      float getMin() const;
+
+      std::string getName() const;
 
       //! Get the maximum possible attainable value for this variable
-      static float getMax(Type iType);
+      float getMax() const;
+
+      //! Convert string to type
+      Type getType() const;
 
       //! Convert string to type
       static Type getType(std::string iName);
 
       //! Returns the units of the variable
-      static std::string getUnits(Type iType);
+      std::string getUnits() const;
 
       //! Returns the NetcdfCF standard name
-      static std::string getStandardName(Type iType);
+      std::string getStandardName() const;
 
       //! Description of all defined variables
       static std::string getDescriptions();
 
       //! Vector of all defined variables
       static std::vector<Type> getAllVariables();
+
+      bool operator<(const Variable &right) const;
 
       //! Precipitation phase
       enum Phase {
@@ -71,5 +85,13 @@ class Variable {
          PhaseSleet = 2,
          PhaseSnow  = 3
       };
+
+   private:
+      float mMin;
+      float mMax;
+      std::string mUnits;
+      std::string mStandardName;
+      std::string mName;
+      Variable::Type mType;
 };
 #endif

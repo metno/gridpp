@@ -13,7 +13,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerGradientOld : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerGradientOld(Variable::Type iVariable, const Options& iOptions);
+      DownscalerGradientOld(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       float getConstantGradient() const;
       int   getSearchRadius() const;
       float getMinElevDiff() const;
@@ -35,6 +35,6 @@ class DownscalerGradientOld : public Downscaler {
       bool mAverageNeighbourhood;
       mutable bool mHasIssuedWarningUnstable;
       bool mSaveGradient;
-      Variable::Type mGradientVariable;
+      std::string mGradientVariableName;
 };
 #endif

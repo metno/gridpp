@@ -14,7 +14,7 @@ class Parameters;
 //! Designed for precip
 class CalibratorZaga : public Calibrator {
    public:
-      CalibratorZaga(Variable::Type iMainPredictor, const Options& iOptions);
+      CalibratorZaga(const Variable& iVariable, const Options& iOptions);
       //! Get probability mass at 0 mm (i.e probability of no precipitation)
       //! If any input has missing values, the end result is missing
       static float getP0(float iEnsMean, float iEnsFrac, const Parameters& iParameters);
@@ -43,7 +43,6 @@ class CalibratorZaga : public Calibrator {
       // static void my_fdf(const gsl_vector *x, void *params, double *f, gsl_vector *df);
       //! What precip threshold should be used to count members with no precip?
       float mFracThreshold;
-      Variable::Type mMainPredictor;
       bool mOutputPop;
       int  mNeighbourhoodSize;
       float mPopThreshold;

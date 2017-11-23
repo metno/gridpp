@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerCoastal::DownscalerCoastal(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),
       mLafRadius(1),
@@ -47,16 +47,16 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
+   float minAllowed = mOutputVariable.getMin();
+   float maxAllowed = mOutputVariable.getMax();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

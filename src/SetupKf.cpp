@@ -10,7 +10,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
    }
 
    // Set initial non-working values
-   variable = Variable::None;
+   std::string variableName = "";
    output = NULL;
    fcstFile = NULL;
    obsFile = NULL;
@@ -32,7 +32,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
    while(index < argv.size()) {
       if(argv[index] == "-v") {
          index++;
-         variable = Variable::getType(argv[index]);
+         variableName = argv[index];
          index++;
       }
       else if(argv[index] == "-o") {
@@ -41,7 +41,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          Options opt;
          index++;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             opt.addOptions(argv[index]);
             index++;
@@ -54,7 +54,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          Options opt;
          index++;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             opt.addOptions(argv[index]);
             index++;
@@ -67,15 +67,22 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
          Options dOptions;
          index++;
          while(index < argv.size()) {
-            if(argv[index][0] == '-') 
+            if(argv[index][0] == '-')
                break;
             dOptions.addOptions(argv[index]);
             index++;
          }
-         if(variable == Variable::None) {
+         if(variableName == "") {
             Util::error("-d before -v");
          }
-         downscaler = Downscaler::getScheme(downscalerName, variable, dOptions);
+         assert(fcstFile != NULL);
+         bool found = fcstFile->getVariable(Variable::getType(variableName), variable);
+         if(!found) {
+            // TODO
+            Util::error("Cannot find variable in KF");
+         }
+         // TODO: Don't repeat the variable
+         downscaler = Downscaler::getScheme(downscalerName, variable, variable, dOptions);
       }
       else if(argv[index] == "-dbin") {
          index++;
@@ -126,7 +133,7 @@ SetupKf::SetupKf(const std::vector<std::string>& argv) {
       Util::error("Missing obsFile");
    // if(downscaler == NULL)
    //    Util::error("Missing downscaler");
-   if(variable == Variable::None)
+   if(variableName == "")
       Util::error("Missing variable");
    if(output == NULL)
       Util::error("Missing output");

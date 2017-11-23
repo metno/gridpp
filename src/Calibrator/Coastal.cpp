@@ -5,9 +5,8 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 #include "../Grid.h"
-CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorCoastal::CalibratorCoastal(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mSearchRadius(3),
       mMinLafDiff(0.1),
       mUseNN(false) {

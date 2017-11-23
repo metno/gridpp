@@ -63,7 +63,7 @@ int main(int argc, const char *argv[]) {
    vec2 lons = ogrid->getLons();
    vec2 elevs = ogrid->getElevs();
 
-   Variable::Type variable = setup.variable;
+   Variable variable = setup.variable;
    std::vector<double> offsets = forecast->getTimes();
    int D = setup.forecasts.size();
 

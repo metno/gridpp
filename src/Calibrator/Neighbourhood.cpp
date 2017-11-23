@@ -4,10 +4,9 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
+CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mRadius(3),
-      mVariable(iVariable),
       mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);

@@ -159,13 +159,18 @@ FileNetcdf::~FileNetcdf() {
 }
 
 FieldPtr FileNetcdf::getFieldCore(Variable::Type iVariable, int iTime) const {
-   std::string variableName = getVariableName(iVariable);
-   return getFieldCore(variableName, iTime);
+   for(int i = 0; i < mVariables.size(); i++) {
+      if(mVariables[i].getType() == iVariable)
+         return getFieldCore(mVariables[i], iTime);
+   }
+   Util::error("Could not get variable");
 }
 
-FieldPtr FileNetcdf::getFieldCore(std::string iVariable, int iTime) const {
+FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
+   double s = Util::clock();
    startDataMode();
-   int var = getVar(iVariable);
+   std::string variableName = iVariable.getName();
+   int var = getVar(variableName);
    std::vector<int> dims = getDims(var);
 
    // Determine which slice to retrieve
@@ -270,12 +275,14 @@ FieldPtr FileNetcdf::getFieldCore(std::string iVariable, int iTime) const {
       }
       (*field)(lat,lon,e) = value;
    }
-   */
+  */
+   double e = Util::clock();
+   std::cout << "Loop time: " << e - start_time << std::endl;
    delete[] values;
    return field;
 }
 
-void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
+void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
    startDefineMode();
 
    // check if altitudes are valid
@@ -295,14 +302,10 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
    defineGlobalAttributes();
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
-      Variable::Type varType = iVariables[v];
-      std::string variable = getVariableName(varType);
-      std::string typeName = Variable::getTypeName(varType);
+      Variable variable = iVariables[v];
+      std::string variableName = variable.getName();
 
-      if(variable == "") {
-         Util::error("Cannot write variable '" + typeName + "' because there EC output file has no definition for it");
-      }
-      if(!hasVariableCore(varType)) {
+      if(!hasVariableCore(variable)) {
          // Create variable
          int numDims = Util::isValid(mLatDim) + Util::isValid(mLonDim) + Util::isValid(mEnsDim) + Util::isValid(mTimeDim);
          int dims[numDims];
@@ -325,15 +328,15 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
          }
 
          int var = Util::MV;
-         int status = nc_def_var(mFile, variable.c_str(), NC_FLOAT, numDims, dims, &var);
-         handleNetcdfError(status, "could not define variable '" + variable + "'");
+         int status = nc_def_var(mFile, variableName.c_str(), NC_FLOAT, numDims, dims, &var);
+         handleNetcdfError(status, "could not define variable '" + variableName + "'");
       }
-      int var = getVar(variable);
+      int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
       // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
       setAttribute(var, "coordinates", "lon lat");
-      setAttribute(var, "units", Variable::getUnits(varType));
-      setAttribute(var, "standard_name", Variable::getStandardName(varType));
+      setAttribute(var, "units", variable.getUnits());
+      setAttribute(var, "standard_name", variable.getStandardName());
    }
    startDataMode();
 
@@ -343,10 +346,10 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
       writeAltitude();
    }
    for(int v = 0; v < iVariables.size(); v++) {
-      Variable::Type varType = iVariables[v];
-      std::string variable = getVariableName(varType);
-      assert(hasVariableCore(varType));
-      int var = getVar(variable);
+      Variable variable = iVariables[v];
+      std::string variableName = variable.getName();
+      assert(hasVariableCore(variable));
+      int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
       size_t size = 1*1*mNEns*mNLat*mNLon;
       float* values = new float[size];
@@ -386,7 +389,7 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
 
          float offset = getOffset(var);
          float scale = getScale(var);
-         FieldPtr field = getField(varType, t);
+         FieldPtr field = getField(variable, t);
          if(field != NULL) { // TODO: Can't be null if coming from reference
             std::vector<int> countVector(count, count + dims.size());
 
@@ -424,7 +427,7 @@ void FileNetcdf::writeCore(std::vector<Variable::Type> iVariables) {
                }
             }
             int status = nc_put_vara_float(mFile, var, start, count, values);
-            handleNetcdfError(status, "could not write variable " + variable);
+            handleNetcdfError(status, "could not write variable " + variableName);
          }
       }
       delete[] values;
@@ -1073,13 +1076,10 @@ bool FileNetcdf::hasDim(int iFile, std::string iDim) {
 bool FileNetcdf::hasDim(std::string iDim) const {
    return hasDim(mFile, iDim);
 }
-bool FileNetcdf::hasVariableCore(Variable::Type iVariable) const {
-   std::string variable = getVariableName(iVariable);
-   return hasVariableCore(variable);
-}
-bool FileNetcdf::hasVariableCore(std::string iVariable) const {
+bool FileNetcdf::hasVariableCore(const Variable& iVariable) const {
+   std::string name = iVariable.getName();
    int var=Util::MV;
-   int status = nc_inq_varid(mFile, iVariable.c_str(), &var);
+   int status = nc_inq_varid(mFile, name.c_str(), &var);
    return status == NC_NOERR;
 }
 vec2 FileNetcdf::getLatLonVariable(int iVar) const {

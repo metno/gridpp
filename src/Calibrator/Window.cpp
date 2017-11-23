@@ -1,10 +1,9 @@
 #include "Window.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
+CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mRadius(3),
-      mVariable(iVariable),
       mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);

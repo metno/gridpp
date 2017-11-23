@@ -1,9 +1,8 @@
 #include "Accumulate.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorAccumulate::CalibratorAccumulate(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mInputVariable(iVariable),
+CalibratorAccumulate::CalibratorAccumulate(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mOutputVariable(Variable::PrecipAcc) {
    std::string outputVariable;
    if(iOptions.getValue("outputVariable", outputVariable)) {
@@ -15,15 +14,15 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
    int nLon = iFile.getNumLon();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
-   if(!iFile.hasVariable(mInputVariable)) {
-      Util::error("File '" + iFile.getFilename() + "' does not have variable '" + Variable::getTypeName(mInputVariable) + "'-");
+   if(!iFile.hasVariable(mVariable)) {
+      Util::error("File '" + iFile.getFilename() + "' does not have variable '" + mVariable.getName() + "'-");
    }
 
    // Get all fields
    std::vector<FieldPtr> fields(nTime);
    std::vector<FieldPtr> fieldsAcc(nTime);
    for(int t = 0; t < nTime; t++) {
-      fields[t]    = iFile.getField(mInputVariable, t);
+      fields[t]    = iFile.getField(mVariable, t);
       fieldsAcc[t] = iFile.getEmptyField();
    }
 
@@ -49,7 +48,11 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
          }
       }
 
-      iFile.addField(fieldsAcc[t], mOutputVariable, t);
+      Variable variable;
+      bool found = iFile.getVariable(mOutputVariable, variable);
+      if(!found)
+         Util::error("File does not have accumulated field defined");
+      iFile.addField(fieldsAcc[t], variable, t);
    }
    return true;
 }

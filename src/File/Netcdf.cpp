@@ -341,8 +341,10 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       float MV = getMissingValue(var); // The output file's missing value indicator
       // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
       setAttribute(var, "coordinates", "lon lat");
-      setAttribute(var, "units", variable.units());
-      setAttribute(var, "standard_name", variable.standardName());
+      if(variable.units() != "")
+         setAttribute(var, "units", variable.units());
+      if(variable.standardName() != "")
+         setAttribute(var, "standard_name", variable.standardName());
    }
    startDataMode();
 

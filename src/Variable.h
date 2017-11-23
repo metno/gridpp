@@ -9,7 +9,7 @@ class Variable {
 
       Variable();
       Variable(std::string iName, float iMin, float iMax, std::string iUnits, std::string iStandardName);
-      Variable(std::string iName, std::string iUnits, std::string iStandardName);
+      Variable(std::string iName, std::string iUnits="", std::string iStandardName="");
 
       // Name of variable
       std::string name() const;
@@ -27,6 +27,7 @@ class Variable {
       std::string standardName() const;
 
       bool operator<(const Variable &right) const;
+      bool operator==(const Variable &right) const;
 
    private:
       float mMin;

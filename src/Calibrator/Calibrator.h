@@ -5,6 +5,7 @@
 #include "../Scheme.h"
 #include "../Parameters.h"
 #include "../Field.h"
+#include "../Variable.h"
 
 typedef std::vector<float> Ens;
 typedef std::pair<float,Ens> ObsEns;
@@ -13,7 +14,6 @@ class File;
 class Options;
 class ParameterFile;
 class Grid;
-class Variable;
 
 //! Abstract calibration class
 class Calibrator : public Scheme {
@@ -46,7 +46,7 @@ class Calibrator : public Scheme {
       virtual bool requiresParameterFile() const { return true;};
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
-      const Variable& mVariable;
+      Variable mVariable;
    private:
 };
 // #include "Wind.h"

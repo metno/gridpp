@@ -53,7 +53,6 @@ FileFake::FileFake(const Options& iOptions) :
 }
 
 FieldPtr FileFake::getFieldCore(const Variable& iVariable, int iTime) const {
-
    FieldPtr field = getEmptyField();
 
    for(int i = 0; i < getNumLat(); i++) {

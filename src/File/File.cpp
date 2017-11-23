@@ -41,8 +41,6 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    else if(type == "netcdf") {
       file = new FileNetcdf(iFilename, iOptions, iReadOnly);
    }
-   /*
-    * TODO:
    else if(type == "point") {
       file = new FilePoint(iFilename, iOptions);
    }
@@ -52,7 +50,6 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    else if(type == "norcomQnh") {
       file = new FileNorcomQnh(iFilename, iOptions);
    }
-  */
    else {
       Util::error("Could not understand file type " + type);
    }
@@ -96,7 +93,8 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    if(needsReading) {
       // Load non-derived variable from file
       if(hasVariableCore(iVariable)) {
-         mFields[iVariable][iTime] = getFieldCore(iVariable, iTime);
+         // mFields[iVariable][iTime] = getFieldCore(iVariable, iTime);
+         addField(getFieldCore(iVariable, iTime), iVariable, iTime);
       }
       else {
          std::string variableType = iVariable.name();
@@ -114,6 +112,8 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
       Util::error(ss.str());
    }
    FieldPtr field = mFields[iVariable][iTime];
+   if(!hasDefinedVariable(iVariable))
+      mVariables.push_back(iVariable);
    return field;
 }
 
@@ -139,6 +139,8 @@ void File::addField(FieldPtr iField, const Variable& iVariable, int iTime) const
    if(it == mFields.end()) {
       mFields[iVariable].resize(getNumTime());
    }
+   if(!hasDefinedVariable(iVariable))
+      mVariables.push_back(iVariable);
 
    mFields[iVariable][iTime] = iField;
 }
@@ -328,6 +330,15 @@ bool File::getVariable(std::string iVariableName, Variable& iVariable) const {
    for(int i = 0; i < mVariables.size(); i++) {
       if(mVariables[i].name() == iVariableName) {
          iVariable = mVariables[i];
+         return true;
+      }
+   }
+   return false;
+}
+
+bool File::hasDefinedVariable(Variable iVariable) const {
+   for(int i = 0; i < mVariables.size(); i++) {
+      if(mVariables[i] == iVariable) {
          return true;
       }
    }

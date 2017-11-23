@@ -16,9 +16,9 @@ class FileText : public File {
       static std::string description();
       std::string name() const {return "text";};
    protected:
-      FieldPtr getFieldCore(Variable iVariable, int iTime) const;
+      FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
       void writeCore(std::vector<Variable> iVariables);
-      bool hasVariableCore(Variable iVariable) const {return true;};
+      bool hasVariableCore(const Variable& iVariable) const {return true;};
       std::vector<FieldPtr> mLocalFields;
 };
 #endif

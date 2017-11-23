@@ -23,7 +23,7 @@ namespace {
             vec2 lat;
             vec2 lon;
             vec2 elev;
-            int nLat = iFile.getNumLat(); 
+            int nLat = iFile.getNumLat();
             int nLon = iFile.getNumLon();
             lat.resize(nLat);
             lon.resize(nLat);
@@ -43,10 +43,16 @@ namespace {
             iFile.setElevs(elev);
          };
       protected:
+         virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(TestDownscalerPressure, 10x10) {
-      DownscalerPressure d(Variable::T, Options());
+      DownscalerPressure d(mVariable, mVariable, Options());
       FileNetcdf from("testing/files/10x10.nc");
       std::stringstream ss;
       ss << "nLat=1 nLon=4 nEns=1 nTime=" << from.getNumTime();
@@ -54,7 +60,7 @@ namespace {
       setLatLonElev(to, (const float[]) {5}, (const float[]){2,2,12,20}, (const float[]){120, 1500, 600, -100});
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
-      const Field& toT   = *to.getField(Variable::T, 0);
+      const Field& toT   = *to.getField(mVariable, 0);
       ASSERT_EQ(1, toT.getNumLat());
       ASSERT_EQ(4, toT.getNumLon());
       // T = T(nn) * exp(-1.21e-4 * (elev - elev(nn)))

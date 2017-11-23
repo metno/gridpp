@@ -12,9 +12,11 @@ namespace {
          virtual ~TestCalibratorMask() {
          }
          virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
          }
          virtual void TearDown() {
          }
+         Variable mVariable;
          std::vector<float> getVector(float iArray[]) {
             return std::vector<float>(iArray, iArray + sizeof(iArray)/sizeof(float));
          }
@@ -24,10 +26,10 @@ namespace {
       FileNetcdf from("testing/files/10x10.nc");
       // One point at 3,5 with 223 km radius and one point at 4,6 with 336 km radius
       ParameterFileText par(Options("file=testing/files/mask0.txt"));
-      CalibratorMask cal = CalibratorMask(Variable::T, Options("keep=0"));
+      CalibratorMask cal = CalibratorMask(mVariable, Options("keep=0"));
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -44,10 +46,10 @@ namespace {
    TEST_F(TestCalibratorMask, 10x10_mask_in) {
       FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/mask0.txt"));
-      CalibratorMask cal = CalibratorMask(Variable::T, Options("mask=1"));
+      CalibratorMask cal = CalibratorMask(mVariable, Options("mask=1"));
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -65,7 +67,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
-      CalibratorMask calibrator(Variable::T, Options());
+      CalibratorMask calibrator(mVariable, Options());
       EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");
    }
    TEST_F(TestCalibratorMask, description) {

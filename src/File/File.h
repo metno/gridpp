@@ -57,6 +57,7 @@ class File {
       bool hasVariableWithoutDeriving(std::string iVariable) const;
 
       std::string getFilename() const;
+      bool hasDefinedVariable(Variable iVariable) const;
 
       bool hasSameDimensions(const File& iOther) const;
       std::string getDimenionString() const;
@@ -102,7 +103,7 @@ class File {
       int mNEns;
 
       //! These must be populated on initialization by subclass
-      std::vector<Variable> mVariables;
+      mutable std::vector<Variable> mVariables;
    private:
       std::string mFilename;
       mutable std::map<Variable, std::vector<FieldPtr> > mFields;  // Variable, offset

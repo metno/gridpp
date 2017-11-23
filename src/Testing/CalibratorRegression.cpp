@@ -12,9 +12,11 @@ namespace {
          virtual ~TestCalibratorRegression() {
          }
          virtual void SetUp() {
+            mVariable = Variable("air_temperature_2m");
          }
          virtual void TearDown() {
          }
+         Variable mVariable;
          std::vector<float> getVector(float iArray[]) {
             return std::vector<float>(iArray, iArray + sizeof(iArray)/sizeof(float));
          }
@@ -23,10 +25,10 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_0order) {
       FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression0order.txt"));
-      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -38,10 +40,10 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_1order) {
       FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression1order.txt"));
-      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -53,10 +55,10 @@ namespace {
    TEST_F(TestCalibratorRegression, 10x10_2order) {
       FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regression2order.txt"));
-      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -68,10 +70,10 @@ namespace {
    TEST_F(TestCalibratorRegression, missing_parameters) {
       FileNetcdf from("testing/files/10x10.nc");
       ParameterFileText par(Options("file=testing/files/regressionMissing.txt"));
-      CalibratorRegression cal = CalibratorRegression(Variable::T, Options());
+      CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       ASSERT_EQ(10, after->getNumLat());
       ASSERT_EQ(10, after->getNumLon());
       ASSERT_EQ(1,  after->getNumEns());
@@ -86,7 +88,7 @@ namespace {
 	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
       ParameterFileText par(Options("file=testing/files/regressionInvalid1.txt"));
-      CalibratorRegression calibrator(Variable::T, Options());
+      CalibratorRegression calibrator(mVariable, Options());
       EXPECT_DEATH(calibrator.calibrate(from, &par), ".*");
    }
    // Missing parameter file
@@ -94,7 +96,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 	  FileNetcdf from("testing/files/10x10.nc");
       Util::setShowError(false);
-      CalibratorRegression calibrator(Variable::T, Options());
+      CalibratorRegression calibrator(mVariable, Options());
       EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");
    }
    TEST_F(TestCalibratorRegression, training) {
@@ -117,14 +119,14 @@ namespace {
       obsens.push_back(ObsEns(14, ens));
 
       // glm(y ~ x)$coefficients
-      CalibratorRegression cal = CalibratorRegression(Variable::T, Options("order=1"));
+      CalibratorRegression cal = CalibratorRegression(mVariable, Options("order=1"));
       Parameters par = cal.train(obsens);
       ASSERT_EQ(2, par.size());
       EXPECT_FLOAT_EQ(-5.7142825, par[0]);
       EXPECT_FLOAT_EQ(2.185714286, par[1]);
 
       // glm(y ~ x-1)$coefficients
-      cal = CalibratorRegression(Variable::T, Options("order=1 intercept=0"));
+      cal = CalibratorRegression(mVariable, Options("order=1 intercept=0"));
       par = cal.train(obsens);
       ASSERT_EQ(2, par.size());
       EXPECT_FLOAT_EQ(0, par[0]);

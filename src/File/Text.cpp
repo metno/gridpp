@@ -112,7 +112,7 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    }
 }
 
-FieldPtr FileText::getFieldCore(Variable iVariable, int iTime) const {
+FieldPtr FileText::getFieldCore(const Variable& iVariable, int iTime) const {
    return mLocalFields[iTime];
 }
 

@@ -40,10 +40,6 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
       if(iOptions.getValue("minPrecip", minPrecip)) {
          c->setMinPrecip(minPrecip);
       }
-      bool useWetbulb;
-      if(iOptions.getValue("useWetbulb", useWetbulb)) {
-         c->setUseWetbulb(useWetbulb);
-      }
 
       return c;
    }

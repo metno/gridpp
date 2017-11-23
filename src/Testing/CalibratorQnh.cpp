@@ -17,15 +17,17 @@ namespace {
          }
    };
    TEST_F(TestCalibratorQnh, 10x10) {
+      Variable variableQnh = Variable("qnh");
+      Variable variableP = Variable("surface_air_pressure");
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQnh cal = CalibratorQnh(Options());
-      FieldPtr p = from.getField(Variable::P, 0);
+      CalibratorQnh cal = CalibratorQnh(variableQnh, Options("pressureVariable=surface_air_pressure"));
+      FieldPtr p = from.getField(variableP, 0);
 
       for(int i = 0; i < from.getNumTime(); i++)
-         from.addField(from.getEmptyField(), Variable::QNH, i);
+         from.addField(from.getEmptyField(), variableQnh, i);
       cal.calibrate(from);
       EXPECT_FLOAT_EQ(98334.44, (*p)(5,2,0));
-      FieldPtr qnh = from.getField(Variable::QNH, 0);
+      FieldPtr qnh = from.getField(variableQnh, 0);
       ASSERT_EQ(10, qnh->getNumLat());
       ASSERT_EQ(10, qnh->getNumLon());
       ASSERT_EQ(1,  qnh->getNumEns());

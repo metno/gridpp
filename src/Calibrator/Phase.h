@@ -18,15 +18,6 @@ class CalibratorPhase : public Calibrator {
 
       float getMinPrecip() const;
       void  setMinPrecip(float iMinPrecip);
-      void  setUseWetbulb(bool iUseWetbulb);
-      bool  getUseWetbulb();
-   private:
-      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
-      float mMinPrecip;
-      bool mUseWetbulb;
-      //! If true compute pressure based on standard atmosphere (instead of using forecasted data)
-      //! This is likely a good enough approximation when computing wetbulb temperature and saves memory.
-      bool mEstimatePressure;
 
       //! Precipitation phase
       enum Phase {
@@ -35,6 +26,13 @@ class CalibratorPhase : public Calibrator {
          PhaseSleet = 2,
          PhaseSnow  = 3
       };
+   private:
+      bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      float mMinPrecip;
+      //! If true compute pressure based on standard atmosphere (instead of using forecasted data)
+      //! This is likely a good enough approximation when computing wetbulb temperature and saves memory.
+      bool mEstimatePressure;
+      bool mUseWetbulb;
       std::string mTemperatureVariable;
       std::string mPrecipitationVariable;
       std::string mPressureVariable;

@@ -21,15 +21,21 @@ namespace {
             parValues[7] = a8;
             return Parameters (parValues);
          }
+         virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(KalmanFilterTest, default) {
-      KalmanFilter kf(Variable::T, Options());
+      KalmanFilter kf(mVariable, Options());
       ParameterFileText data(Options("file=testing/files/sampleObsFcst.txt"));
    }
    TEST_F(KalmanFilterTest, simple) {
-      KalmanFilter kfSlow(Variable::T, Options("ratio=0.1"));
-      KalmanFilter kfFast(Variable::T, Options("ratio=0.2"));
+      KalmanFilter kfSlow(mVariable, Options("ratio=0.1"));
+      KalmanFilter kfFast(mVariable, Options("ratio=0.2"));
       float bias = 3;
       int   time = 0;
       KalmanParameters par0 = kfFast.initialize();
@@ -59,12 +65,12 @@ namespace {
    }
    /*
    TEST_F(KalmanFilterTest, calcBias) {
-      KalmanFilter kf(Variable::T, 0.1);
+      KalmanFilter kf(mVariable, 0.1);
       Parameters par = getParameters(0,1,2,3,4,5,6,7);
       kf.calcBias(par);
    }
    TEST_F(KalmanFilterTest, update) {
-      KalmanFilter kf(Variable::T, 0.1);
+      KalmanFilter kf(mVariable, 0.1);
       Parameters oldPar = getParameters(0,1,2,3,4,5,6,7);
       float obs = 3;
       float fcst = 2;

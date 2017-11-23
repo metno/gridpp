@@ -14,9 +14,9 @@ CalibratorZaga::CalibratorZaga(const Variable& iVariable, const Options& iOption
       mPrecipLowQuantile(Util::MV),
       mPrecipMiddleQuantile(Util::MV),
       mPrecipHighQuantile(Util::MV),
-      mPrecipLowVariable(""),
-      mPrecipMiddleVariable(""),
-      mPrecipHighVariable(""),
+      mLowVariable(""),
+      mMiddleVariable(""),
+      mHighVariable(""),
       mMaxEnsMean(100),
       mLogLikelihoodTolerance(1e-4),
       m6h(false) {
@@ -25,9 +25,9 @@ CalibratorZaga::CalibratorZaga(const Variable& iVariable, const Options& iOption
    iOptions.getValue("precipLowQuantile", mPrecipLowQuantile);
    iOptions.getValue("precipMiddleQuantile", mPrecipMiddleQuantile);
    iOptions.getValue("precipHighQuantile", mPrecipHighQuantile);
-   iOptions.getValue("precipLowVariable", mPrecipLowVariable);
-   iOptions.getValue("precipMiddleVariable", mPrecipMiddleVariable);
-   iOptions.getValue("precipHighVariable", mPrecipHighVariable);
+   iOptions.getValue("lowVariable", mLowVariable);
+   iOptions.getValue("middleVariable", mMiddleVariable);
+   iOptions.getValue("highVariable", mHighVariable);
    iOptions.getValue("popVariable", mPopVariable);
    iOptions.getValue("neighbourhoodSize", mNeighbourhoodSize);
    iOptions.getValue("popThreshold", mPopThreshold);
@@ -80,15 +80,15 @@ bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterF
       }
       FieldPtr precipLow;
       if(Util::isValid(mPrecipLowQuantile)) {
-         precipLow = iFile.getField(mPrecipLowVariable, t);
+         precipLow = iFile.getField(mLowVariable, t);
       }
       FieldPtr precipMiddle;
       if(Util::isValid(mPrecipMiddleQuantile)) {
-         precipMiddle = iFile.getField(mPrecipMiddleVariable, t);
+         precipMiddle = iFile.getField(mMiddleVariable, t);
       }
       FieldPtr precipHigh;
       if(Util::isValid(mPrecipHighQuantile)) {
-         precipHigh = iFile.getField(mPrecipHighVariable, t);
+         precipHigh = iFile.getField(mHighVariable, t);
       }
 
       #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal)
@@ -664,9 +664,9 @@ std::string CalibratorZaga::description() {
    ss << Util::formatDescription("   precipLowQuantile=undef", "If set, write values to the PrecipLow variable using this quantile (number between 0 and 1)") << std::endl;
    ss << Util::formatDescription("   precipMiddleQuantile=undef", "If set, write values to the PrecipMiddle variable using this quantile (number between 0 and 1)") << std::endl;
    ss << Util::formatDescription("   precipHighQuantile=undef", "If set, write values to the PrecipHigh variable using this quantile (number between 0 and 1)") << std::endl;
-   ss << Util::formatDescription("   precipLowVariable=undef", "If set, write precip low values to this variable") << std::endl;
-   ss << Util::formatDescription("   precipMiddleVariable=undef", "If set, write precip middle values to this variable name.") << std::endl;
-   ss << Util::formatDescription("   precipHighVariable=undef", "If set, write precip high values to this variablei name.") << std::endl;
+   ss << Util::formatDescription("   lowVariable=undef", "If set, write precip low values to this variable") << std::endl;
+   ss << Util::formatDescription("   middleVariable=undef", "If set, write precip middle values to this variable name.") << std::endl;
+   ss << Util::formatDescription("   highVariable=undef", "If set, write precip high values to this variablei name.") << std::endl;
    ss << Util::formatDescription("   popVariable=undef", "iF set, write POP values to this variable name.") << std::endl;
    ss << Util::formatDescription("   popThreshold=0.5", "If POP is written, what threshold should be used?") << std::endl;
    ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution to yield very high values.") << std::endl;

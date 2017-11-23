@@ -8,6 +8,12 @@ DownscalerBypass::DownscalerBypass(const Variable& iInputVariable, const Variabl
 }
 
 void DownscalerBypass::downscaleCore(const File& iInput, File& iOutput) const {
+   if(!iOutput.hasVariable(mOutputVariable)) {
+      // int nTime = iInput.getNumTime();
+      // for(int t = 0; t < nTime; t++) {
+      iOutput.initNewVariable(mOutputVariable);
+      // }
+   }
 }
 
 std::string DownscalerBypass::description() {

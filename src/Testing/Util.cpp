@@ -265,23 +265,24 @@ namespace {
       bool status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
       // Change 10x10_copy.nc
-      CalibratorNeighbourhood neighbourhood(Variable::T, Options(""));
+      Variable variable("air_temperature_2m");
+      CalibratorNeighbourhood neighbourhood(variable, Options(""));
       FileNetcdf f1("testing/files/10x10.nc");
       FileNetcdf f2("testing/files/10x10_copy.nc");
-      FieldPtr field1 = f1.getField(Variable::T, 0);
-      FieldPtr field2 = f2.getField(Variable::T, 0);
+      FieldPtr field1 = f1.getField(variable, 0);
+      FieldPtr field2 = f2.getField(variable, 0);
       EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
       neighbourhood.calibrate(f2);
       // Values should be different now
       EXPECT_NE((*field2)(1,1,0), (*field1)(1,1,0));
-      std::vector<Variable::Type> vars(1,Variable::T);
+      std::vector<Variable> vars(1,variable);
       f2.write(vars);
 
       // Use copy. Values should be the same afterwards
       status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
       EXPECT_TRUE(status);
       FileNetcdf f3("testing/files/10x10_copy.nc");
-      FieldPtr field3 = f3.getField(Variable::T, 0);
+      FieldPtr field3 = f3.getField(variable, 0);
       EXPECT_EQ(f1.getNumLat(), f2.getNumLat());
       EXPECT_EQ(f1.getNumLon(), f2.getNumLon());
       EXPECT_EQ(f1.getNumEns(), f2.getNumEns());

@@ -5,6 +5,13 @@
 
 namespace {
    class FileNorcomQnhTest : public ::testing::Test {
+      protected:
+         virtual void SetUp() {
+             mVariable = Variable("surface_air_pressure");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(FileNorcomQnhTest, options) {
@@ -28,13 +35,13 @@ namespace {
    TEST_F(FileNorcomQnhTest, asOutput) {
       FileNetcdf from("testing/files/10x10.nc");
       FileNorcomQnh to("testing/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=1"));
-      DownscalerNearestNeighbour d = DownscalerNearestNeighbour(Variable::P, Options());
+      DownscalerNearestNeighbour d = DownscalerNearestNeighbour(mVariable, mVariable, Options());
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
-      std::vector<Variable::Type> variables(1, Variable::P);
+      std::vector<Variable> variables(1, mVariable);
       to.write(variables);
 
-      // FieldPtr field = to.getField(Variable::P, 0);
+      // FieldPtr field = to.getField(mVariable, 0);
       // EXPECT_FLOAT_EQ(1, (*field)(0,0,0));
    }
    TEST_F(FileNorcomQnhTest, description) {

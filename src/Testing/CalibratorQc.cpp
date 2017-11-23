@@ -12,27 +12,29 @@ namespace {
          virtual ~TestCalibratorQc() {
          }
          virtual void SetUp() {
+            mVariable = Variable("air_temperature_2m");
          }
          virtual void TearDown() {
          }
+         Variable mVariable;
    };
    TEST_F(TestCalibratorQc, 10x10) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=304 max=305.8"));
+      CalibratorQc cal = CalibratorQc(mVariable, Options("min=304 max=305.8"));
 
       cal.calibrate(from);
 
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       EXPECT_FLOAT_EQ(304, (*after)(5,2,0)); // 301 (row,col)
       EXPECT_FLOAT_EQ(304, (*after)(5,9,0)); // 304
       EXPECT_FLOAT_EQ(305.8, (*after)(0,9,0)); // 320
    }
    TEST_F(TestCalibratorQc, 10x10_nomax) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQc cal = CalibratorQc(Variable::T ,Options("max=307"));
+      CalibratorQc cal = CalibratorQc(mVariable ,Options("max=307"));
 
       cal.calibrate(from);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
 
       EXPECT_FLOAT_EQ(301, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(304, (*after)(5,9,0));
@@ -40,10 +42,10 @@ namespace {
    }
    TEST_F(TestCalibratorQc, 10x10_nomin) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=303"));
+      CalibratorQc cal = CalibratorQc(mVariable ,Options("min=303"));
 
       cal.calibrate(from);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
 
       EXPECT_FLOAT_EQ(303, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(304, (*after)(5,9,0));
@@ -51,10 +53,10 @@ namespace {
    }
    TEST_F(TestCalibratorQc, 10x10_no) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQc cal = CalibratorQc(Variable::T ,Options(""));
+      CalibratorQc cal = CalibratorQc(mVariable ,Options(""));
 
       cal.calibrate(from);
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
 
       EXPECT_FLOAT_EQ(301, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(304, (*after)(5,9,0));
@@ -62,9 +64,9 @@ namespace {
    }
    TEST_F(TestCalibratorQc, 10x10_missingValue) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorQc cal = CalibratorQc(Variable::T ,Options("min=303 max=307"));
+      CalibratorQc cal = CalibratorQc(mVariable ,Options("min=303 max=307"));
 
-      FieldPtr after = from.getField(Variable::T, 0);
+      FieldPtr after = from.getField(mVariable, 0);
       (*after)(5,2,0) = Util::MV;
       (*after)(5,9,0) = Util::MV;
       (*after)(0,9,0) = Util::MV;

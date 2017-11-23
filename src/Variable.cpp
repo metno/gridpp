@@ -42,3 +42,7 @@ std::string Variable::standardName() const {
 bool Variable::operator<(const Variable &right) const {
    return mName < right.name();
 }
+
+bool Variable::operator==(const Variable &right) const {
+   return mName == right.name();
+}

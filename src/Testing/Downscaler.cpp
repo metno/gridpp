@@ -38,14 +38,20 @@ namespace {
             iFile.setLons(lon);
          };
       protected:
+         virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(TestDownscaler, validDownscalers) {
-      Downscaler* d0 = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
-      Downscaler* d1 = Downscaler::getScheme("smart", Variable::T, Options("searchRadius=3 numSmart=2 minElevDiff=400"));
-      Downscaler* d2 = Downscaler::getScheme("gradientOld", Variable::T, Options("searchRadius=5 constantGradient=0.04 minElevDiff=213.2"));
-      Downscaler* d3 = Downscaler::getScheme("pressure", Variable::T, Options(""));
-      Downscaler* d4 = Downscaler::getScheme("bypass", Variable::T, Options(""));
+      Downscaler* d0 = Downscaler::getScheme("nearestNeighbour", mVariable, mVariable, Options());
+      Downscaler* d1 = Downscaler::getScheme("smart", mVariable, mVariable, Options("searchRadius=3 numSmart=2 minElevDiff=400"));
+      Downscaler* d2 = Downscaler::getScheme("gradientOld", mVariable, mVariable, Options("searchRadius=5 constantGradient=0.04 minElevDiff=213.2"));
+      Downscaler* d3 = Downscaler::getScheme("pressure", mVariable, mVariable, Options(""));
+      Downscaler* d4 = Downscaler::getScheme("bypass", mVariable, mVariable, Options(""));
       EXPECT_EQ(3, ((DownscalerSmart*) d1)->getSearchRadius());
       EXPECT_EQ(2, ((DownscalerSmart*) d1)->getNumSmart());
       EXPECT_EQ(400, ((DownscalerSmart*) d1)->getMinElevDiff());
@@ -61,8 +67,8 @@ namespace {
    TEST_F(TestDownscaler, invalidDownscalers) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", Variable::T, Options("searchRadius=5")), ".*");
-      EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", Variable::T, Options()), ".*");
+      EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", mVariable, mVariable, Options("searchRadius=5")), ".*");
+      EXPECT_DEATH(Downscaler::getScheme("woehiowciwofew", mVariable, mVariable, Options()), ".*");
    }
    TEST_F(TestDownscaler, validNearestNeighbours) {
       FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));

@@ -7,20 +7,16 @@
 CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
       mMinPrecip(0.2),
-      mEstimatePressure(true),
-      mUseWetbulb(1) {
+      mEstimatePressure(true) {
    if(!iOptions.getValue("temperatureVariable", mTemperatureVariable)) {
       Util::error("CalibratorPhase: 'temperatureVariable' missing");
    }
    if(!iOptions.getValue("precipitationVariable", mPrecipitationVariable)) {
       Util::error("CalibratorPhase: 'precipitationVariable' missing");
    }
-   if(!iOptions.getValue("pressureVariable", mPressureVariable)) {
-      Util::error("CalibratorPhase: 'pressureVariable' missing");
-   }
-   if(!iOptions.getValue("rhVariable", mRhVariable)) {
-      Util::error("CalibratorPhase: 'rhVariable' missing");
-   }
+   iOptions.getValue("pressureVariable", mPressureVariable);
+   iOptions.getValue("rhVariable", mRhVariable);
+   mUseWetbulb = mPressureVariable != "" && mRhVariable != "";
 }
 bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() != 2) {
@@ -46,7 +42,7 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
       float sleetRainThreshold = par[1];
       const FieldPtr temp = iFile.getField(mTemperatureVariable, t);
       const FieldPtr precip = iFile.getField(mPrecipitationVariable, t);
-      FieldPtr phase = iFile.getEmptyField();
+      FieldPtr phase = iFile.getField(mVariable, t);
       FieldPtr pressure;
       FieldPtr rh;
       if(mRhVariable != "" && mPressureVariable != "") {
@@ -109,12 +105,6 @@ float CalibratorPhase::getMinPrecip() const {
 }
 void CalibratorPhase::setMinPrecip(float iMinPrecip) {
    mMinPrecip = iMinPrecip;
-}
-void CalibratorPhase::setUseWetbulb(bool iUseWetbulb) {
-   mUseWetbulb = iUseWetbulb;
-}
-bool CalibratorPhase::getUseWetbulb() {
-   return mUseWetbulb;
 }
 
 std::string CalibratorPhase::description() {

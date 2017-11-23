@@ -51,8 +51,8 @@ class CalibratorZaga : public Calibrator {
       bool m6h;
       float mLogLikelihoodTolerance;
       std::string mPopVariable;
-      std::string mPrecipLowVariable;
-      std::string mPrecipMiddleVariable;
-      std::string mPrecipHighVariable;
+      std::string mLowVariable;
+      std::string mMiddleVariable;
+      std::string mHighVariable;
 };
 #endif

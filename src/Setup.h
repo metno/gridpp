@@ -19,7 +19,8 @@ struct VariableConfiguration {
    Downscaler* downscaler;
    //! Which calibrators should be use
    std::vector<Calibrator*> calibrators;
-   Options variableOptions;
+   Options inputVariableOptions;
+   Options outputVariableOptions;
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler;
 };

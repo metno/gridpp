@@ -101,7 +101,7 @@ int main(int argc, const char *argv[]) {
          Variable outputVariable = varconf.outputVariable;
 
          bool write = 1;
-         varconf.variableOptions.getValue("write", write);
+         varconf.outputVariableOptions.getValue("write", write);
          if(write) {
             writeVariables.push_back(outputVariable);
          }

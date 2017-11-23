@@ -72,12 +72,20 @@ namespace {
       ASSERT_EQ(1,            setup.variableConfigurations[1].calibrators.size());
       EXPECT_EQ("zaga",       setup.variableConfigurations[1].calibrators[0]->name());
    }
+   TEST_F(SetupTest, differentInputOutputVariables) {
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -vi precipitation_amount -v air_temperature_2m"));
+      ASSERT_EQ(1, setup.variableConfigurations.size());
+      VariableConfiguration varconf = setup.variableConfigurations[0];
+
+      EXPECT_EQ("precipitation_amount", varconf.inputVariable.name());
+      EXPECT_EQ("air_temperature_2m", varconf.outputVariable.name());
+   }
    TEST_F(SetupTest, variableOptionsSingle) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m write=0"));
       ASSERT_EQ(1,            setup.variableConfigurations.size());
       VariableConfiguration varconf = setup.variableConfigurations[0];
 
-      Options vOptions = varconf.variableOptions;
+      Options vOptions = varconf.outputVariableOptions;
       bool doWrite = true;
       ASSERT_TRUE(vOptions.getValue("write", doWrite));
       ASSERT_FALSE(vOptions.getValue("-d", doWrite));
@@ -89,7 +97,7 @@ namespace {
       VariableConfiguration varconf = setup.variableConfigurations[0];
 
       EXPECT_EQ(mVariable, varconf.inputVariable);
-      Options vOptions = varconf.variableOptions;
+      Options vOptions = varconf.outputVariableOptions;
       bool doWrite = true;
       float value = -1;
       EXPECT_FALSE(vOptions.getValue("write", doWrite));
@@ -97,21 +105,21 @@ namespace {
 
       varconf = setup.variableConfigurations[1];
       EXPECT_EQ(Variable("surface_air_pressure"), varconf.inputVariable);
-      vOptions = varconf.variableOptions;
+      vOptions = varconf.outputVariableOptions;
       ASSERT_TRUE(vOptions.getValue("write", doWrite));
       EXPECT_EQ(0, doWrite);
       EXPECT_FALSE(vOptions.getValue("-v", value));
 
       varconf = setup.variableConfigurations[2];
       EXPECT_EQ(Variable("relative_humidity_2m"), varconf.inputVariable);
-      vOptions = varconf.variableOptions;
+      vOptions = varconf.outputVariableOptions;
       EXPECT_FALSE(vOptions.getValue("write", doWrite));
       EXPECT_FALSE(vOptions.getValue("-v", value));
 
       varconf = setup.variableConfigurations[3];
       EXPECT_EQ(Variable("x_wind_10m"), varconf.inputVariable);
       EXPECT_EQ("smart", varconf.downscaler->name());
-      vOptions = varconf.variableOptions;
+      vOptions = varconf.outputVariableOptions;
       EXPECT_FALSE(vOptions.getValue("write", doWrite));
       ASSERT_TRUE(vOptions.getValue("test", value));
       EXPECT_FLOAT_EQ(2, value);
@@ -119,13 +127,13 @@ namespace {
 
       varconf = setup.variableConfigurations[4];
       EXPECT_EQ(Variable("y_wind_10m"), varconf.inputVariable);
-      vOptions = varconf.variableOptions;
+      vOptions = varconf.outputVariableOptions;
       EXPECT_FALSE(vOptions.getValue("write", doWrite));
       EXPECT_FALSE(vOptions.getValue("-v", value));
 
       varconf = setup.variableConfigurations[5];
       EXPECT_EQ(Variable("precipitation_amount"), varconf.inputVariable);
-      vOptions = varconf.variableOptions;
+      vOptions = varconf.outputVariableOptions;
       ASSERT_TRUE(vOptions.getValue("new", value));
       EXPECT_FLOAT_EQ(2.1, value);
       EXPECT_FALSE(vOptions.getValue("-v", value));
@@ -187,6 +195,10 @@ namespace {
       // Different number of input and output files
       EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
       EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
+
+      // -vi but no -v
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -vi precipitation_amount")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -vi precipitation_amount -d nearestNeighbour")), ".*");
 
       // Missing type
       EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v precipitation_amount -c zaga -p testing/files/parameters.txt")), ".*");

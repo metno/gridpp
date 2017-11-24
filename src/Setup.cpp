@@ -130,9 +130,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-v") {
                state = NEWVAR;
             }
-            else if(argv[index] == "-vi") {
+            else if(variableInputName == "" && argv[index] == "-vi") {
                state = VARI;
                index++;
+            }
+            else if(argv[index] == "-vi") {
+               state = NEWVAR;
             }
             else if(argv[index] == "-d") {
                state = DOWN;
@@ -195,9 +198,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-vi") {
                state = NEWVAR;
             }
-            else if(argv[index] == "-v") {
+            else if(variableName == "" && argv[index] == "-v") {
                state = VAR;
                index++;
+            }
+            else if(argv[index] == "-v") {
+               state = NEWVAR;
             }
             else if(argv[index] == "-d") {
                state = DOWN;
@@ -318,8 +324,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
             if(argv.size() <= index) {
                state = END;
             }
-            else {
+            else if(argv[index] == "-v"){
                state = VAR;
+               index++;
+            }
+            else if(argv[index] == "-vi"){
+               state = VARI;
                index++;
             }
          }

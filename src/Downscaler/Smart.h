@@ -29,8 +29,8 @@ class DownscalerSmart : public Downscaler {
              int getNumSearchPoints() const;
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int mSearchRadius;
-      int mNumSmart;
+      int mRadius;
+      int mNum;
       float mMinElevDiff;
 };
 #endif

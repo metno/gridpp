@@ -5,9 +5,12 @@
 
 DownscalerSmart::DownscalerSmart(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
       Downscaler(iInputVariable, iOutputVariable, iOptions),
-      mSearchRadius(3),
-      mNumSmart(5),
+      mRadius(3),
+      mNum(5),
       mMinElevDiff(Util::MV) {
+   iOptions.getValue("radius", mRadius);
+   iOptions.getValue("num", mNum);
+   iOptions.getValue("minElevDiff", mMinElevDiff);
 }
 
 void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
@@ -67,7 +70,7 @@ void DownscalerSmart::setNumSmart(int iNumSmart) {
       ss << "DownscalerSmart: number of smart neighbours must be >= 1";
       Util::error(ss.str());
    }
-   mNumSmart = iNumSmart;
+   mNum = iNumSmart;
 }
 void DownscalerSmart::setSearchRadius(int iNumPoints) {
    if(!Util::isValid(iNumPoints) || iNumPoints < 0) {
@@ -75,7 +78,7 @@ void DownscalerSmart::setSearchRadius(int iNumPoints) {
       ss << "DownscalerSmart: search radius must be >= 0";
       Util::error(ss.str());
    }
-   mSearchRadius = iNumPoints;
+   mRadius = iNumPoints;
 }
 void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const {
    vec2 ilats  = iFrom.getLats();
@@ -86,7 +89,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
    vec2 oelevs = iTo.getElevs();
    int nLon    = iTo.getNumX();
    int nLat    = iTo.getNumY();
-   int numSearch = getNumSearchPoints(mSearchRadius);
+   int numSearch = getNumSearchPoints(mRadius);
 
    vec2Int Icenter, Jcenter;
    getNearestNeighbour(iFrom, iTo, Icenter, Jcenter);
@@ -122,8 +125,8 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
             Jlookup.reserve(numSearch);
 
             int index = 0;
-            for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumY()-1, Ic+mSearchRadius); ii++) {
-               for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumX()-1, Jc+mSearchRadius); jj++) {
+            for(int ii = std::max(0, Ic-mRadius); ii <= std::min(iFrom.getNumY()-1, Ic+mRadius); ii++) {
+               for(int jj = std::max(0, Jc-mRadius); jj <= std::min(iFrom.getNumX()-1, Jc+mRadius); jj++) {
                   float ielev = ielevs[ii][jj];
                   float diff = 1e10;
                   if(Util::isValid(ielev) && Util::isValid(oelev))
@@ -147,7 +150,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
                iJ[i][j].push_back(Jc);
             }
             else {
-               int N = std::min((int) elevDiff.size(), mNumSmart);
+               int N = std::min((int) elevDiff.size(), mNum);
                iI[i][j].resize(N, Util::MV);
                iJ[i][j].resize(N, Util::MV);
 
@@ -166,7 +169,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
 }
 
 int DownscalerSmart::getNumSearchPoints() const {
-   return getNumSearchPoints(mSearchRadius);
+   return getNumSearchPoints(mRadius);
 }
 
 int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
@@ -174,10 +177,10 @@ int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
 }
 
 int  DownscalerSmart::getSearchRadius() const {
-   return mSearchRadius;
+   return mRadius;
 }
 int DownscalerSmart::getNumSmart() const {
-   return mNumSmart;
+   return mNum;
 }
 void DownscalerSmart::setMinElevDiff(float iMinElevDiff) {
    mMinElevDiff = iMinElevDiff;
@@ -189,8 +192,8 @@ float DownscalerSmart::getMinElevDiff() {
 std::string DownscalerSmart::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-d smart", "Use nearby neighbours that are at a similar elevation to the lookup point. If the lookup point has missing elevation, use the nearest neighbour.") << std::endl;
-   ss << Util::formatDescription("   searchRadius=3", "Search for smart neighbours within this radius (gridpoints)") << std::endl;
-   ss << Util::formatDescription("   numSmart=5", "Average this many smart neighbours") << std::endl;
+   ss << Util::formatDescription("   radius=3", "Search for smart neighbours within this radius (gridpoints)") << std::endl;
+   ss << Util::formatDescription("   num=5", "Average this many smart neighbours") << std::endl;
    ss << Util::formatDescription("   minElevDiff=-999", "Use the nearest neighbour if its elevation difference (in meters) is less or equal to this. Use -999 to turn this feature off.") << std::endl;
    return ss.str();
 }

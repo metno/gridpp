@@ -86,6 +86,7 @@ CalibratorKriging::CalibratorKriging(const Variable& iVariable, const Options& i
       }
    }
    iOptions.getValue("crossValidate", mCrossValidate);
+   iOptions.check();
 }
 
 bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

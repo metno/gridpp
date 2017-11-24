@@ -17,6 +17,7 @@ CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOpti
    iOptions.getValue("pressureVariable", mPressureVariable);
    iOptions.getValue("rhVariable", mRhVariable);
    mUseWetbulb = mPressureVariable != "" && mRhVariable != "";
+   iOptions.check();
 }
 bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() != 2) {

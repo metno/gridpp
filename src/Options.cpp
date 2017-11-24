@@ -62,3 +62,30 @@ bool Options::hasValue(const std::string& iKey) const {
    }
    return false;
 }
+
+bool Options::check() const {
+   std::vector<std::string> unChecked;
+   for(int i = 0; i < mPairs.size(); i++) {
+      std::string key = mPairs[i].first;
+      if(mHasBeenAccessed.find(key) == mHasBeenAccessed.end()) {
+         unChecked.push_back(key);
+      }
+   }
+   if(unChecked.size() > 0) {
+      std::stringstream ss;
+      if(unChecked.size() == 1) {
+         ss << "The key '" << unChecked[0] << "' has";
+      }
+      else {
+         ss << "The keys ";
+         for(int i = 0; i < unChecked.size()-1; i++) {
+            ss << "'" << unChecked[i] << "', ";
+         }
+         ss << "and '" << unChecked[unChecked.size()-1] << "' have";
+      }
+      ss <<  " never been used in '" << toString() << "'" << std::endl;
+      Util::warning(ss.str());
+      return false;
+   }
+   return true;
+}

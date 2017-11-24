@@ -17,6 +17,7 @@ CalibratorGaussian::CalibratorGaussian(const Variable& iVariable, const Options&
       ss << "CalibratorGaussian: neighbourhoodSize (" << mNeighbourhoodSize << ") must be >= 0";
       Util::error(ss.str());
    }
+   iOptions.check();
 }
 
 bool CalibratorGaussian::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

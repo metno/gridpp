@@ -5,6 +5,7 @@
 
 DownscalerBilinear::DownscalerBilinear(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
       Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const {

@@ -10,6 +10,7 @@ CalibratorRegression::CalibratorRegression(const Variable& iVariable, const Opti
       mIntercept(true) {
    iOptions.getValue("order", mOrder);
    iOptions.getValue("intercept", mIntercept);
+   iOptions.check();
 }
 bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <set>
 
 
 //! Container class for key-value pairs.
@@ -51,6 +52,7 @@ class Options {
             if(key == iKey) {
                std::stringstream ss(value);
                ss >> iValue;
+               mHasBeenAccessed.insert(iKey);
                return true;
             }
          }
@@ -81,6 +83,7 @@ class Options {
                   ss2 >> value;
                   iValues.push_back(value);
                }
+               mHasBeenAccessed.insert(iKey);
                return true;
             }
          }
@@ -89,11 +92,15 @@ class Options {
       //! Check that a value is present for the key
       bool hasValue(const std::string& iKey) const;
 
+     //! Returns true if all keys have been accessed. Useful when checking if a key in the options
+     //! was not recognized by a scheme.
+     bool check() const;
    private:
       //! Parse a string with a single option "key=value"
       void addOption(std::string iOptionString);
 
       typedef std::pair<std::string,std::string> KeyValue;  // key, value
       std::vector<KeyValue> mPairs;
+      mutable std::set<std::string> mHasBeenAccessed;
 };
 #endif

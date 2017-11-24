@@ -7,6 +7,7 @@ CalibratorQnh::CalibratorQnh(const Variable& iVariable, const Options& iOptions)
    if(!iOptions.getValue("pressureVariable", mPressureVariable)) {
       Util::error("CalibratorQnh: 'pressureVariable' missing");
    }
+   iOptions.check();
 }
 bool CalibratorQnh::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

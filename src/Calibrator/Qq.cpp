@@ -30,6 +30,7 @@ CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
    if(mExtraObs.size() != mExtraFcst.size()) {
       Util::error("extraObs must have the same length as extraFcst");
    }
+   iOptions.check();
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() % 2 != 0) {

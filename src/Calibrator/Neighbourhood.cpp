@@ -49,6 +49,7 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
          Util::error("CalibratorNeighbourhood: Unrecognized value for 'stat'");
       }
    }
+   iOptions.check();
 }
 
 bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

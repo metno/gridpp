@@ -3,6 +3,7 @@
 #include "../File/File.h"
 CalibratorAccumulate::CalibratorAccumulate(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions) {
+   iOptions.check();
 }
 bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

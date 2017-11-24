@@ -8,6 +8,7 @@ CalibratorMask::CalibratorMask(const Variable& iVariable, const Options& iOption
       mUseNearestOnly(false),
       mKeep(true) {
    iOptions.getValue("keep", mKeep);
+   iOptions.check();
 }
 bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(!iParameterFile->isLocationDependent()) {

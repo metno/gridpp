@@ -5,6 +5,7 @@ CalibratorCloud::CalibratorCloud(const Variable& iVariable, const Options& iOpti
       Calibrator(iVariable, iOptions),
       mPrecipVariable("precipitation_amount") {
    iOptions.getValue("precipitation_amount", mPrecipVariable);
+   iOptions.check();
 }
 bool CalibratorCloud::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

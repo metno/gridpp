@@ -56,6 +56,7 @@ DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Var
       }
    }
    assert(mLafSearchRadii.size() == mLafWeights.size());
+   iOptions.check();
 }
 
 DownscalerGradient::~DownscalerGradient() {

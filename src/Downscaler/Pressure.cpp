@@ -6,6 +6,7 @@ const float DownscalerPressure::mConstant = -1.21e-4;
 
 DownscalerPressure::DownscalerPressure(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
       Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {

@@ -11,6 +11,7 @@ CalibratorWindDirection::CalibratorWindDirection(const Variable& iVariable, cons
    if(!iOptions.getValue("directionVariable", mDirectionVariable)) {
       Util::error("CalibratorWindDirection: 'directionVariable' missing");
    }
+   iOptions.check();
 }
 
 bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

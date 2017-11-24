@@ -13,6 +13,7 @@ CalibratorCoastal::CalibratorCoastal(const Variable& iVariable, const Options& i
    iOptions.getValue("searchRadius", mSearchRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("useNN", mUseNN);
+   iOptions.check();
 }
 bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

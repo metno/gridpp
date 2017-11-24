@@ -46,6 +46,7 @@ CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOp
          Util::error("CalibratorWindow: Unrecognized value for 'stat'");
       }
    }
+   iOptions.check();
 }
 bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

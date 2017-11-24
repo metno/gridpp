@@ -6,6 +6,7 @@
 #include "../Downscaler/Pressure.h"
 CalibratorSort::CalibratorSort(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions) {
+   iOptions.check();
 }
 bool CalibratorSort::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nLat = iFile.getNumY();

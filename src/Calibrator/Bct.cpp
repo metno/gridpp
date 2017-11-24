@@ -9,6 +9,7 @@
 CalibratorBct::CalibratorBct(const Variable& iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mMaxEnsMean(100) {
+   iOptions.check();
 }
 
 bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

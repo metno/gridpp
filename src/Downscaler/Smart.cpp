@@ -11,6 +11,7 @@ DownscalerSmart::DownscalerSmart(const Variable& iInputVariable, const Variable&
    iOptions.getValue("radius", mRadius);
    iOptions.getValue("num", mNum);
    iOptions.getValue("minElevDiff", mMinElevDiff);
+   iOptions.check();
 }
 
 void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {

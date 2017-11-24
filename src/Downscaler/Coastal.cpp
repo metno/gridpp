@@ -30,6 +30,7 @@ DownscalerCoastal::DownscalerCoastal(const Variable& iInputVariable, const Varia
    iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("lafRadius", mLafRadius);
    iOptions.getValue("elevGradient", mElevGradient);
+   iOptions.check();
 }
 
 void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {

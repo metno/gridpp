@@ -5,6 +5,7 @@
 #include "../ParameterFile/ParameterFile.h"
 CalibratorAltitude::CalibratorAltitude(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions) {
+   iOptions.check();
 }
 bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(!iParameterFile->isLocationDependent()) {

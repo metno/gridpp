@@ -5,6 +5,7 @@
 
 DownscalerBypass::DownscalerBypass(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
       Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerBypass::downscaleCore(const File& iInput, File& iOutput) const {

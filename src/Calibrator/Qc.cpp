@@ -11,6 +11,7 @@ CalibratorQc::CalibratorQc(const Variable& iVariable, const Options& iOptions):
    iOptions.getValue("min", mMin);
    iOptions.getValue("max", mMax);
    Util::warning("CalibratorQc: both 'min' and 'max' are missing, therefore no correction is applied.");
+   iOptions.check();
 }
 
 bool CalibratorQc::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

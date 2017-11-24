@@ -41,6 +41,7 @@ CalibratorZaga::CalibratorZaga(const Variable& iVariable, const Options& iOption
       ss << "CalibratorZaga neighbourhoodSize (" << mNeighbourhoodSize << ") must be >= 0";
       Util::error(ss.str());
    }
+   iOptions.check();
 }
 
 bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

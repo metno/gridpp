@@ -56,8 +56,8 @@ class FileNetcdf : public File {
       void writeAltitude() const;
       void defineAltitude();
 
-      int mLatDim;
-      int mLonDim;
+      int mYDim;
+      int mXDim;
       int mEnsDim;
       int mTimeDim;
       int mLatVar;
@@ -73,10 +73,10 @@ class FileNetcdf : public File {
       int getDimSize(int iDim) const;
       int getNumDims(int iVar) const;
       int detectEnsDim() const;
-      int detectLatDim() const;
+      int detectYDim() const;
       int detectTimeDim() const;
       int detectTimeVar() const;
-      int detectLonDim() const;
+      int detectXDim() const;
       int detectLatVar() const;
       int detectLonVar() const;
       bool hasVar(std::string iVar) const;
@@ -99,7 +99,6 @@ class FileNetcdf : public File {
       void writeTimes();
       void writeReferenceTime();
       bool hasDim(std::string iDim) const;
-      // Must be one of "latitude", "longitude", or "altitude"
       vec2 getLatLonVariable(int iVariable) const;
       static bool hasDim(int iFile, std::string iDim);
       const static int mMaxAttributeLength = 100000000;

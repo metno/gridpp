@@ -13,7 +13,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       Util::error("Could not open NetCDF file " + getFilename());
    }
    // Get defaults
-   std::string latVar, lonVar, timeVar, ensDim, latDim, lonDim, timeDim;
+   std::string latVar, lonVar, timeVar, ensDim, yDim, xDim, timeDim;
    if(!iOptions.getValue("latVar", latVar))
       mLatVar = detectLatVar();
    else
@@ -35,15 +35,15 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    else
       mEnsDim = getDim(ensDim);
 
-   if(!iOptions.getValue("latDim", latDim))
-      mLatDim = detectLatDim();
+   if(!iOptions.getValue("yDim", yDim))
+      mYDim = detectYDim();
    else
-      mLatDim = getDim(latDim);
+      mYDim = getDim(yDim);
 
-   if(!iOptions.getValue("lonDim", lonDim))
-      mLonDim = detectLonDim();
+   if(!iOptions.getValue("xDim", xDim))
+      mXDim = detectXDim();
    else
-      mLonDim = getDim(lonDim);
+      mXDim = getDim(xDim);
 
    if(!iOptions.getValue("timeDim", timeDim))
       mTimeDim = detectTimeDim();
@@ -177,8 +177,8 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
    size_t count[dims.size()];
    size_t start[dims.size()];
    int ensPos = Util::MV;
-   int latPos = Util::MV;
-   int lonPos = Util::MV;
+   int yPos = Util::MV;
+   int xPos = Util::MV;
    for(int d = 0; d < dims.size(); d++) {
       int dim = dims[d];
       count[d] = 1;
@@ -190,13 +190,13 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
          count[d] = getDimSize(dim);
          ensPos = d;
       }
-      else if(dim == mLatDim) {
+      else if(dim == mYDim) {
          count[d] = getDimSize(dim);
-         latPos = d;
+         yPos = d;
       }
-      else if(dim == mLonDim) {
+      else if(dim == mXDim) {
          count[d] = getDimSize(dim);
-         lonPos = d;
+         xPos = d;
       }
    }
 
@@ -217,22 +217,22 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
    int nEns = 1;
    if(Util::isValid(ensPos))
       nEns = count[ensPos];
-   int nLat = 1;
-   if(Util::isValid(latPos))
-      nLat = count[latPos];
-   int nLon = 1;
-   if(Util::isValid(lonPos))
-      nLon = count[lonPos];
+   int nY = 1;
+   if(Util::isValid(yPos))
+      nY = count[yPos];
+   int nX = 1;
+   if(Util::isValid(xPos))
+      nX = count[xPos];
    std::vector<int> indices(dims.size(), 0);
    for(int e = 0; e < nEns; e++) {
       if(Util::isValid(ensPos))
          indices[ensPos] = e;
-      for(int lat = 0; lat < nLat; lat++) {
-         if(Util::isValid(latPos))
-            indices[latPos] = lat;
-         for(int lon = 0; lon < nLon; lon++) {
-            if(Util::isValid(lonPos))
-               indices[lonPos] = lon;
+      for(int y = 0; y < nY; y++) {
+         if(Util::isValid(yPos))
+            indices[yPos] = y;
+         for(int x = 0; x < nX; x++) {
+            if(Util::isValid(xPos))
+               indices[xPos] = x;
             int i = getIndex(countVector, indices);
             float value = values[i];
             if(Util::isValid(MV) && value == MV) {
@@ -243,8 +243,8 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
             else {
                value = scale*value + offset;
             }
-            (*field)(lat,lon,e) = value;
-            // std::cout << e << " " << lat << " " << lon << " " << i << " " << value << std::endl;
+            (*field)(y,x,e) = value;
+            // std::cout << e << " " << y << " " << x << " " << i << " " << value << std::endl;
          }
       }
    }
@@ -255,14 +255,14 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
    for(int i = 0; i < size; i++) {
       getIndices(i, countVector, indices);
       int e = 0;
-      int lat = 0;
-      int lon = 0;
+      int y = 0;
+      int x = 0;
       if(Util::isValid(ensPos))
          e = indices[ensPos];
-      if(Util::isValid(latPos))
-         lat = indices[latPos];
-      if(Util::isValid(lonPos))
-         lon = indices[lonPos];
+      if(Util::isValid(yPos))
+         y = indices[yPos];
+      if(Util::isValid(xPos))
+         x = indices[xPos];
       float value = values[i];
       if(Util::isValid(MV) && value == MV) {
          // Field has missing value indicator and the value is missing
@@ -272,7 +272,7 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
       else {
          value = scale*value + offset;
       }
-      (*field)(lat,lon,e) = value;
+      (*field)(y,x,e) = value;
    }
   */
    delete[] values;
@@ -304,7 +304,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
 
       if(!hasVariableCore(variable)) {
          // Create variable
-         int numDims = Util::isValid(mLatDim) + Util::isValid(mLonDim) + Util::isValid(mEnsDim) + Util::isValid(mTimeDim);
+         int numDims = Util::isValid(mYDim) + Util::isValid(mXDim) + Util::isValid(mEnsDim) + Util::isValid(mTimeDim);
          int dims[numDims];
          int counter = 0;
          if(Util::isValid(mTimeDim)) {
@@ -315,12 +315,12 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
             dims[counter] = mEnsDim;
             counter++;
          }
-         if(Util::isValid(mLatDim)) {
-            dims[counter] = mLatDim;
+         if(Util::isValid(mYDim)) {
+            dims[counter] = mYDim;
             counter++;
          }
-         if(Util::isValid(mLonDim)) {
-            dims[counter] = mLonDim;
+         if(Util::isValid(mXDim)) {
+            dims[counter] = mXDim;
             counter++;
          }
 
@@ -356,8 +356,8 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       std::vector<int> dims = getDims(var);
       size_t count[dims.size()];
       int ensPos = Util::MV;
-      int latPos = Util::MV;
-      int lonPos = Util::MV;
+      int yPos = Util::MV;
+      int xPos = Util::MV;
       int timePos = Util::MV;
       for(int d = 0; d < dims.size(); d++) {
          int dim = dims[d];
@@ -369,13 +369,13 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
             count[d] = getDimSize(dim);
             ensPos = d;
          }
-         else if(dim == mLatDim) {
+         else if(dim == mYDim) {
             count[d] = getDimSize(dim);
-            latPos = d;
+            yPos = d;
          }
-         else if(dim == mLonDim) {
+         else if(dim == mXDim) {
             count[d] = getDimSize(dim);
-            lonPos = d;
+            xPos = d;
          }
       }
 
@@ -395,24 +395,24 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
             int nEns = 1;
             if(Util::isValid(ensPos))
                nEns = count[ensPos];
-            int nLat = 1;
-            if(Util::isValid(latPos))
-               nLat = count[latPos];
-            int nLon = 1;
-            if(Util::isValid(lonPos))
-               nLon = count[lonPos];
+            int nY = 1;
+            if(Util::isValid(yPos))
+               nY = count[yPos];
+            int nX = 1;
+            if(Util::isValid(xPos))
+               nX = count[xPos];
             std::vector<int> indices(dims.size(), 0);
             for(int e = 0; e < nEns; e++) {
                if(Util::isValid(ensPos))
                   indices[ensPos] = e;
-               for(int lat = 0; lat < nLat; lat++) {
-                  if(Util::isValid(latPos))
-                     indices[latPos] = lat;
-                  for(int lon = 0; lon < nLon; lon++) {
-                     if(Util::isValid(lonPos))
-                        indices[lonPos] = lon;
+               for(int y = 0; y < nY; y++) {
+                  if(Util::isValid(yPos))
+                     indices[yPos] = y;
+                  for(int x = 0; x < nX; x++) {
+                     if(Util::isValid(xPos))
+                        indices[xPos] = x;
                      int i = getIndex(countVector, indices);
-                     float value = (*field)(lat, lon, e);
+                     float value = (*field)(y, x, e);
                      if(Util::isValid(MV) && !Util::isValid(value)) {
                         // Field has missing value indicator and the value is missing
                         // Save values using the file's missing indicator value
@@ -441,8 +441,8 @@ bool FileNetcdf::isValid(std::string iFilename, const Options& iOptions) {
    if(status == NC_NOERR) {
       // Check dimensions
       // isValid = isValid && (hasDim(file, "time") || iOptions.hasValue("timeDim"));
-      // isValid = isValid && (hasDim(file, "lat") || hasDim(file, "latitude") || hasDim(file, "y") || iOptions.hasValue("latDim"));
-      // isValid = isValid && (hasDim(file, "lon") || hasDim(file, "longitude") || hasDim(file, "x") || iOptions.hasValue("lonDim"));
+      // isValid = isValid && (hasDim(file, "lat") || hasDim(file, "latitude") || hasDim(file, "y") || iOptions.hasValue("yDim"));
+      // isValid = isValid && (hasDim(file, "lon") || hasDim(file, "longitude") || hasDim(file, "x") || iOptions.hasValue("xDim"));
       // isValid = isValid && (hasDim(file, "ensemble_member") || iOptions.hasValue("ensDim"));
 
       // Check variables
@@ -474,7 +474,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       float* values = new float[size];
       nc_get_var_float(mFile, iVar, values);
       // Latitude variable
-      if(dim == mLatDim) {
+      if(dim == mYDim) {
          for(int i = 0; i < getNumY(); i++) {
             for(int j = 0; j < getNumX(); j++) {
                grid[i][j] = values[i];
@@ -482,7 +482,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
          }
       }
       // Longitude variable
-      else if(dim == mLonDim) {
+      else if(dim == mXDim) {
          for(int i = 0; i < getNumY(); i++) {
             for(int j = 0; j < getNumX(); j++) {
                grid[i][j] = values[j];
@@ -502,20 +502,20 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       size_t count[N];
       size_t start[N];
       int size = 1;
-      int indexLat = Util::MV;
-      int indexLon = Util::MV;
+      int indexY = Util::MV;
+      int indexX = Util::MV;
       int dims[N];
       nc_inq_vardimid(mFile, iVar, dims);
       for(int i = 0; i < N; i++) {
-         if(dims[i] == mLatDim) {
+         if(dims[i] == mYDim) {
             count[i] = getNumY();
             size *= count[i];
-            indexLat = i;
+            indexY = i;
          }
-         else if(dims[i] == mLonDim) {
+         else if(dims[i] == mXDim) {
             count[i] = getNumX();
             size *= count[i];
-            indexLon = i;
+            indexX = i;
          }
          else {
             size_t dimsize = 1;
@@ -529,7 +529,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
          }
          start[i] = 0;
       }
-      if(!Util::isValid(indexLat) || !Util::isValid(indexLon)) {
+      if(!Util::isValid(indexY) || !Util::isValid(indexX)) {
          std::stringstream ss;
          ss << "Missing lat and/or lon dimensions";
          Util::error(ss.str());
@@ -539,7 +539,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       for(int i = 0; i < getNumY(); i++) {
          for(int j = 0; j < getNumX(); j++) {
             // Latitude dimension is ordered first
-            if(indexLat < indexLon) {
+            if(indexY < indexX) {
                grid[i][j] = values[i*getNumX() + j];
             }
             // Longitude dimension is ordered first
@@ -553,7 +553,7 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
    return grid;
 }
 
-int FileNetcdf::detectLatDim() const {
+int FileNetcdf::detectYDim() const {
    int dim = Util::MV;
    if(hasDim("y"))
       dim = getDim("y");
@@ -563,7 +563,7 @@ int FileNetcdf::detectLatDim() const {
       dim = getDim("lat");
    return dim;
 }
-int FileNetcdf::detectLonDim() const {
+int FileNetcdf::detectXDim() const {
    int dim = Util::MV;
    if(hasDim("x"))
       dim = getDim("x");
@@ -614,8 +614,8 @@ int FileNetcdf::detectLonVar() const {
 
 void FileNetcdf::defineAltitude() {
    // Determine the order of lat and lon dimensions in altitude field
-   int indexLat = Util::MV;
-   int indexLon = Util::MV;
+   int indexY = Util::MV;
+   int indexX = Util::MV;
 
    // First check if latitude variable has two dimensions
    int vUseDims = Util::MV;
@@ -627,25 +627,25 @@ void FileNetcdf::defineAltitude() {
    }
    if(Util::isValid(vUseDims)) {
       int N = getNumDims(vUseDims);
-      int dimsLat[N];
-      nc_inq_vardimid(mFile, vUseDims, dimsLat);
+      int dims[N];
+      nc_inq_vardimid(mFile, vUseDims, dims);
       for(int i = 0; i < N; i++) {
-         if(dimsLat[i] == mLatDim)
-            indexLat = i;
-         if(dimsLat[i] == mLonDim)
-            indexLon = i;
+         if(dims[i] == mYDim)
+            indexY = i;
+         if(dims[i] == mXDim)
+            indexX = i;
       }
    }
    else {
       Util::warning("Could not determine lat/lon ordering when creating altitude variable. Using [lat, lon]");
-      indexLat = 0;
-      indexLon = 1;
+      indexY = 0;
+      indexX = 1;
    }
 
    int dims[2];
-   int dLat = mLatDim;
-   int dLon = mLonDim;
-   if(indexLat < indexLon) {
+   int dLat = mYDim;
+   int dLon = mXDim;
+   if(indexY < indexX) {
       dims[0]  = dLat;
       dims[1]  = dLon;
    }
@@ -661,7 +661,7 @@ void FileNetcdf::defineAltitude() {
 void FileNetcdf::writeAltitude() const {
    int vElev = getVar("altitude");
    int numDims = getNumDims(vElev);
-   int numHorizontalDims = Util::isValid(mLatDim) + Util::isValid(mLonDim);
+   int numHorizontalDims = Util::isValid(mYDim) + Util::isValid(mXDim);
 
    if(numDims != numHorizontalDims) {
       std::stringstream ss;
@@ -675,20 +675,20 @@ void FileNetcdf::writeAltitude() const {
    size_t count[N];
    size_t start[N];
    int size = 1;
-   int indexLat = Util::MV;
-   int indexLon = Util::MV;
+   int indexY = Util::MV;
+   int indexX = Util::MV;
    int dims[N];
    nc_inq_vardimid(mFile, vElev, dims);
    for(int i = 0; i < N; i++) {
-      if(dims[i] == mLatDim) {
+      if(dims[i] == mYDim) {
          count[i] = getNumY();
          size *= count[i];
-         indexLat = i;
+         indexY = i;
       }
-      else if(dims[i] == mLonDim) {
+      else if(dims[i] == mXDim) {
          count[i] = getNumX();
          size *= count[i];
-         indexLon = i;
+         indexX = i;
       }
       else {
          size_t dimsize = 1;
@@ -710,7 +710,7 @@ void FileNetcdf::writeAltitude() const {
          if(Util::isValid(MV) && !Util::isValid(elev))
             elev = MV;
          // Latitude dimension is ordered first
-         if(indexLat < indexLon) {
+         if(indexY < indexX) {
             values[i*getNumX() + j] = elev;
          }
          // Longitude dimension is ordered first
@@ -1086,35 +1086,35 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    std::vector<int> dims = getDims(iVar);
    // Initialize grid
    vec2 grid;
-   int numLat = 1;
-   if(Util::isValid(mLatDim))
-      numLat = getDimSize(mLatDim);
-   int numLon = 1;
-   if(Util::isValid(mLonDim))
-      numLon = getDimSize(mLonDim);
+   int numY = 1;
+   if(Util::isValid(mYDim))
+      numY = getDimSize(mYDim);
+   int numX = 1;
+   if(Util::isValid(mXDim))
+      numX = getDimSize(mXDim);
 
-   grid.resize(numLat);
-   for(int i = 0; i < numLat; i++) {
-      grid[i].resize(numLon);
+   grid.resize(numY);
+   for(int i = 0; i < numY; i++) {
+      grid[i].resize(numX);
    }
 
    if(dims.size() == 1) {
       // 1D, try to expand vector onto a grid
       float* values;
-      if(dims[0] == mLonDim)
-         values = new float[numLon];
-      else if(dims[0] == mLatDim)
-         values = new float[numLat];
+      if(dims[0] == mXDim)
+         values = new float[numX];
+      else if(dims[0] == mYDim)
+         values = new float[numY];
       else
          Util::error("Could not load lat/lon. Variable does not have lat or lon dimensions.");
 
       bool status = nc_get_var_float(mFile, iVar, values);
       handleNetcdfError(status, "could not get data from lat/lon variable");
 
-      for(int i = 0; i < numLat; i++) {
-         for(int j = 0; j < numLon; j++) {
+      for(int i = 0; i < numY; i++) {
+         for(int j = 0; j < numX; j++) {
             float value = Util::MV;
-            if(dims[0] == mLonDim)
+            if(dims[0] == mXDim)
                value = values[j];
             else
                value = values[i];
@@ -1124,45 +1124,45 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
       delete[] values;
    }
    else {
-      int latPos = Util::MV;
-      int lonPos = Util::MV;
+      int yPos = Util::MV;
+      int xPos = Util::MV;
       size_t count[dims.size()];
       size_t start[dims.size()];
       for(int d = 0; d < dims.size(); d++) {
          count[d] = 1;
          start[d] = 0;
-         if(dims[d] == mLatDim) {
-            latPos = d;
-            count[d] = numLat;
+         if(dims[d] == mYDim) {
+            yPos = d;
+            count[d] = numY;
          }
-         else if(dims[d] == mLonDim) {
-            lonPos = d;
-            count[d] = numLon;
+         else if(dims[d] == mXDim) {
+            xPos = d;
+            count[d] = numX;
          }
       }
-      if(!Util::isValid(latPos) || !Util::isValid(lonPos)) {
+      if(!Util::isValid(yPos) || !Util::isValid(xPos)) {
          std::stringstream ss;
          ss << "lat/lon field does not have lat or lon dimension";
          Util::error(ss.str());
       }
 
-      float* values = new float[numLon*numLat];
+      float* values = new float[numX*numY];
       bool status = nc_get_vara_float(mFile, iVar, start, count, values);
       handleNetcdfError(status, "could not get data from lat/lon variable");
-      for(int i = 0; i < numLat; i++) {
-         for(int j = 0; j < numLon; j++) {
+      for(int i = 0; i < numY; i++) {
+         for(int j = 0; j < numX; j++) {
             int index = 0;
-            if(latPos < lonPos) {
-               index = i*numLon + j;
+            if(yPos < xPos) {
+               index = i*numX + j;
             }
             else {
-               index = j*numLat + i;
+               index = j*numY + i;
             }
             float value = values[index];
             if(values[index] == MV)
                value = Util::MV;
             grid[i][j] = value;
-            assert(index < numLon*numLat);
+            assert(index < numX*numY);
          }
       }
       delete[] values;
@@ -1184,8 +1184,8 @@ int FileNetcdf::getDim(std::string iDim) const {
 std::string FileNetcdf::description() {
    std::stringstream ss;
    ss << Util::formatDescription("type=netcdf", "Netcdf file") << std::endl;
-   ss << Util::formatDescription("   latDim=undef", "Name of y-axis dimension. Auto-detected if unspecified.") << std::endl;
-   ss << Util::formatDescription("   lonDim=undef", "Name of x-axis dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   yDim=undef", "Name of y-axis dimension. Auto-detected if unspecified.") << std::endl;
+   ss << Util::formatDescription("   xDim=undef", "Name of x-axis dimension. Auto-detected if unspecified.") << std::endl;
    ss << Util::formatDescription("   timeDim=undef", "Name of time dimension. Auto-detected if unspecified.") << std::endl;
    ss << Util::formatDescription("   ensDim=undef", "Name of ensemble dimension. Auto-detected if unspecified.") << std::endl;
    ss << Util::formatDescription("   latVar=undef", "Name of variable with latitudes. Auto-detected if unspecified.") << std::endl;

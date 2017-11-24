@@ -120,8 +120,8 @@ void File::write(std::vector<Variable> iVariables) {
 FieldPtr File::getEmptyField(float iFillValue) const {
    return getEmptyField(getNumY(), getNumX(), getNumEns(), iFillValue);
 }
-FieldPtr File::getEmptyField(int nLat, int nLon, int nEns, float iFillValue) const {
-   FieldPtr field = FieldPtr(new Field(nLat, nLon, nEns, iFillValue));
+FieldPtr File::getEmptyField(int nY, int nX, int nEns, float iFillValue) const {
+   FieldPtr field = FieldPtr(new Field(nY, nX, nEns, iFillValue));
    return field;
 }
 

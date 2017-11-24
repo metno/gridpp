@@ -9,8 +9,8 @@
 
 class Options;
 
-// 3D array of data: [lat][lon][ensemble_member]
-typedef std::vector<std::vector<float> > vec2; // Lat, Lon
+// 3D array of data: [y][x][ensemble_member]
+typedef std::vector<std::vector<float> > vec2; // Y, X
 
 //! Represents a data file containing spatial and temporal data initialized at one particular time
 class File {
@@ -100,7 +100,7 @@ class File {
       mutable std::map<Variable, std::vector<FieldPtr> > mFields;  // Variable, offset
       mutable Uuid mTag;
       void createNewTag() const;
-      FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
+      FieldPtr getEmptyField(int nY, int nX, int nEns, float iFillValue=Util::MV) const;
       double mReferenceTime;
       std::vector<double> mTimes;
       static Uuid mNextTag;

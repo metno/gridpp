@@ -21,6 +21,27 @@ namespace {
       EXPECT_EQ(mVariable, setup.variableConfigurations[0].inputVariable);
       EXPECT_EQ(11, ((DownscalerSmart*) setup.variableConfigurations[0].downscaler)->getSearchRadius());
    }
+   TEST_F(SetupTest, calibratorOptions) {
+      // Test that the calibrator picks up the right options
+      std::vector<std::string> lines;
+      lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -c neighbourhood radius=3 -p testing/files/parameters.txt type=text opt=1");
+      lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c neighbourhood radius=2 -v air_temperature_2m -c neighbourhood radius=3 -p testing/files/parameters.txt type=text opt=1");
+      for(int i = 0; i < lines.size(); i++) {
+         MetSetup setup(Util::split(lines[i]));
+         int last = setup.variableConfigurations.size() - 1;
+         EXPECT_EQ(1, setup.variableConfigurations[last].calibrators.size());
+         EXPECT_EQ(1, setup.variableConfigurations[last].parameterFileCalibrators.size());
+         Options options = setup.variableConfigurations[last].calibrators[0]->getOptions();
+         int radius = Util::MV;
+         options.getValue("radius", radius);
+         EXPECT_EQ(3, radius);
+
+         options = setup.variableConfigurations[last].parameterFileCalibrators[0]->getOptions();
+         int opt = Util::MV;
+         options.getValue("opt", opt);
+         EXPECT_EQ(1, opt);
+      }
+   }
    TEST_F(SetupTest, variableOnly) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m"));
       ASSERT_EQ(1,                          setup.variableConfigurations.size());

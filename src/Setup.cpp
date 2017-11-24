@@ -343,6 +343,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-v") {
                state = NEWVAR;
             }
+            else if(argv[index] == "-vi") {
+               state = NEWVAR;
+            }
             else if(argv[index] == "-d") {
                // Two downscalers defined for one variable
                state = DOWN;
@@ -365,6 +368,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             index++;
          }
          else if(argv[index] == "-v") {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-vi") {
             state = NEWVAR;
          }
          else if(argv[index] == "-p") {
@@ -395,6 +401,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-v") {
                state = NEWVAR;
             }
+            else if(argv[index] == "-vi") {
+               state = NEWVAR;
+            }
             else if(argv[index] == "-d") {
                // Two downscalers defined for one variable
                state = DOWN;
@@ -422,6 +431,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
          else if(argv[index] == "-v") {
             state = NEWVAR;
          }
+         else if(argv[index] == "-vi") {
+            state = NEWVAR;
+         }
          else if(argv[index] == "-p") {
             errorMessage = "Two or more -p used for one calibrator";
             state = ERROR;
@@ -447,6 +459,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-v") {
                state = NEWCAL;
             }
+            else if(argv[index] == "-vi") {
+               state = NEWCAL;
+            }
             else if(argv[index] == "-c") {
                state = NEWCAL;
             }
@@ -469,6 +484,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = NEWCAL;
          }
          else if(argv[index] == "-v") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-vi") {
             state = NEWCAL;
          }
          else if(argv[index] == "-d") {
@@ -499,6 +517,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
                state = NEWCAL;
                index++;
             }
+            else if(argv[index] == "-vi") {
+               state = NEWCAL;
+               index++;
+            }
             else if(argv[index] == "-c") {
                state = NEWCAL;
                index++;
@@ -524,6 +546,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = NEWCAL;
          }
          else if(argv[index] == "-v") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-vi") {
             state = NEWCAL;
          }
          else if(argv[index] == "-d") {
@@ -565,8 +590,6 @@ Setup::Setup(const std::vector<std::string>& argv) {
             // Reset
             calibrator = "";
             parameterFile = "";
-            cOptions.clear();
-            pOptions.clear();
             if(argv.size() <= index) {
                state = NEWVAR;
             }
@@ -575,6 +598,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
                index++;
             }
             else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWVAR;
             }
             else if(argv[index] == "-d") {

@@ -58,6 +58,7 @@ class ParameterFile : public Scheme {
 
       // Return the number of bytes in cache
       long getCacheSize() const;
+      Options getOptions() const;
    protected:
 
       // Store all location-dependent parameters here
@@ -80,6 +81,7 @@ class ParameterFile : public Scheme {
       mutable KDTree mNearestNeighbourTree;
       // Locations in the tree
       mutable std::vector<Location> mLocations;
+      Options mOptions;
 };
 #include "MetnoKalman.h"
 #include "Text.h"

@@ -44,10 +44,12 @@ class Calibrator : public Scheme {
 
       // Does this calibrator require a parameter file?
       virtual bool requiresParameterFile() const { return true;};
+      Options getOptions() const;
    protected:
       virtual bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const = 0;
       Variable mVariable;
    private:
+      Options mOptions;
 };
 // #include "Wind.h"
 #include "Temperature.h"

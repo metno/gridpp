@@ -9,6 +9,7 @@
 ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       Scheme(iOptions),
       mFilename(""),
+      mOptions(iOptions),
       mIsTimeDependent(false),
       mMaxTime(0),
       mIsNew(iIsNew) {
@@ -292,4 +293,8 @@ void ParameterFile::setMaxTime(int iMaxTime) {
 
 int ParameterFile::getMaxTime() const {
    return mMaxTime;
+}
+
+Options ParameterFile::getOptions() const {
+   return mOptions;
 }

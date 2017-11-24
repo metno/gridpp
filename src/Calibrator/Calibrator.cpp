@@ -8,7 +8,8 @@
 #include "../File/File.h"
 
 Calibrator::Calibrator(const Variable& iVariable, const Options& iOptions) : Scheme(iOptions),
-      mVariable(iVariable) {
+      mVariable(iVariable),
+      mOptions(iOptions) {
 
 }
 Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const Options& iOptions) {
@@ -162,6 +163,10 @@ Parameters Calibrator::train(const std::vector<ObsEnsField>& iData, const Grid& 
 
    Parameters par = train(data);
    return par;
+}
+
+Options Calibrator::getOptions() const {
+   return mOptions;
 }
 
 std::string Calibrator::getDescriptions() {

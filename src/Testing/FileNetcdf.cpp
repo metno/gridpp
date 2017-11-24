@@ -37,6 +37,16 @@ namespace {
       EXPECT_EQ(1, file.getNumEns());
       EXPECT_EQ(1, file.getNumTime());
    }
+   TEST_F(FileNetcdfTest, missingXandTime) {
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdf4.nc");
+      EXPECT_EQ(10, file.getNumLat());
+      EXPECT_EQ(1, file.getNumLon());
+      EXPECT_EQ(1, file.getNumEns());
+      EXPECT_EQ(1, file.getNumTime());
+      FieldPtr field = file.getField(Variable("air_temperature_2m"), 0);
+      EXPECT_FLOAT_EQ(21, (*field)(0, 0, 0));
+      EXPECT_FLOAT_EQ(26, (*field)(5, 0, 0));
+   }
 
    TEST_F(FileNetcdfTest, overwriteAttribute) {
       FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");

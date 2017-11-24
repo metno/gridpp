@@ -30,11 +30,8 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    mLons.push_back(lon0);
    mElevs.push_back(elev0);
    mLandFractions.push_back(landFraction0);
-   mNLat = 1;
-   mNLon = 1;
    mNEns = 1;
    std::vector<double> times;
-   mNTime = Util::MV;
    mNEns = Util::MV;
 
    // Determine time and ensemble dimension if possible
@@ -54,21 +51,21 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
                mNEns++;
             }
          }
-         mNTime = times.size();
       }
    }
 
    // Otherwise get the time or ensemble dimension from options
    iOptions.getValue("ens", mNEns);
-   if(iOptions.getValue("time", mNTime)) {
+   int numTimes;
+   if(iOptions.getValue("time", numTimes)) {
       times.clear();
       // Empty file, probably used as output only
-      for(int i = 0; i < mNTime; i++)
+      for(int i = 0; i < numTimes; i++)
          times.push_back(i);
    }
 
    // Check that we got time and ensemble dimension
-   if(!Util::isValid(mNTime)) {
+   if(!Util::isValid(numTimes)) {
       Util::error("Missing 'time' option for empty file '" + iFilename + "'");
    }
    if(!Util::isValid(mNEns)) {

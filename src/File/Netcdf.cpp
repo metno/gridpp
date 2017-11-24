@@ -52,17 +52,8 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 
    // Determine dimension sizes
    mNEns = 1;
-   mNLat = 1;
-   mNLon = 1;
-   mNTime = 1;
    if(Util::isValid(mEnsDim))
       mNEns = getDimSize(mEnsDim);
-   if(Util::isValid(mLatDim))
-      mNLat = getDimSize(mLatDim);
-   if(Util::isValid(mLonDim))
-      mNLon = getDimSize(mLonDim);
-   if(Util::isValid(mTimeDim))
-      mNTime = getDimSize(mTimeDim);
 
    // Retrieve lat/lon grid
    mLats = getLatLonVariable(mLatVar);
@@ -132,10 +123,11 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    }
 
    if(Util::isValid(mTimeVar)) {
-      double* times = new double[mNTime];
+      int size = getDimSize(mTimeDim);
+      double* times = new double[size];
       int status = nc_get_var_double(mFile, mTimeVar, times);
       handleNetcdfError(status, "could not get times");
-      setTimes(std::vector<double>(times, times+mNTime));
+      setTimes(std::vector<double>(times, times+size));
       delete[] times;
    }
    else if(Util::isValid(getReferenceTime())) {
@@ -176,7 +168,6 @@ FileNetcdf::~FileNetcdf() {
 }
 
 FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
-   double s = Util::clock();
    startDataMode();
    std::string variableName = iVariable.name();
    int var = getVar(variableName);
@@ -359,7 +350,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       assert(hasVariableCore(variable));
       int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
-      size_t size = 1*1*mNEns*mNLat*mNLon;
+      size_t size = 1*1*mNEns*getNumLat()*getNumLon();
       float* values = new float[size];
 
       std::vector<int> dims = getDims(var);
@@ -388,7 +379,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
          }
       }
 
-      for(int t = 0; t < mNTime; t++) {
+      for(int t = 0; t < getNumTime(); t++) {
          size_t start[dims.size()];
          for(int d = 0; d < dims.size(); d++)
             start[d] = 0;
@@ -1095,26 +1086,29 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    std::vector<int> dims = getDims(iVar);
    // Initialize grid
    vec2 grid;
-   grid.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      grid[i].resize(getNumLon());
+   int numLat = getDimSize(mLatDim);
+   int numLon = getDimSize(mLatDim);
+
+   grid.resize(numLat);
+   for(int i = 0; i < numLat; i++) {
+      grid[i].resize(numLon);
    }
 
    if(dims.size() == 1) {
       // 1D, try to expand vector onto a grid
       float* values;
       if(dims[0] == mLonDim)
-         values = new float[getNumLon()];
+         values = new float[numLon];
       else if(dims[0] == mLatDim)
-         values = new float[getNumLat()];
+         values = new float[numLat];
       else
          Util::error("Could not load lat/lon. Variable does not have lat or lon dimensions.");
 
       bool status = nc_get_var_float(mFile, iVar, values);
       handleNetcdfError(status, "could not get data from lat/lon variable");
 
-      for(int i = 0; i < getNumLat(); i++) {
-         for(int j = 0; j < getNumLon(); j++) {
+      for(int i = 0; i < numLat; i++) {
+         for(int j = 0; j < numLon; j++) {
             float value = Util::MV;
             if(dims[0] == mLonDim)
                value = values[j];
@@ -1135,11 +1129,11 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
          start[d] = 0;
          if(dims[d] == mLatDim) {
             latPos = d;
-            count[d] = mNLat;
+            count[d] = numLat;
          }
          else if(dims[d] == mLonDim) {
             lonPos = d;
-            count[d] = mNLon;
+            count[d] = numLon;
          }
       }
       if(!Util::isValid(latPos) || !Util::isValid(lonPos)) {
@@ -1148,23 +1142,23 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
          Util::error(ss.str());
       }
 
-      float* values = new float[getNumLon()*getNumLat()];
+      float* values = new float[numLon*numLat];
       bool status = nc_get_vara_float(mFile, iVar, start, count, values);
       handleNetcdfError(status, "could not get data from lat/lon variable");
-      for(int i = 0; i < getNumLat(); i++) {
-         for(int j = 0; j < getNumLon(); j++) {
+      for(int i = 0; i < numLat; i++) {
+         for(int j = 0; j < numLon; j++) {
             int index = 0;
             if(latPos < lonPos) {
-               index = i*getNumLon() + j;
+               index = i*numLon + j;
             }
             else {
-               index = j*getNumLat() + i;
+               index = j*numLat + i;
             }
             float value = values[index];
             if(values[index] == MV)
                value = Util::MV;
             grid[i][j] = value;
-            assert(index < getNumLon()*getNumLat());
+            assert(index < numLon*numLat);
          }
       }
       delete[] values;

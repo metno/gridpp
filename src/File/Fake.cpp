@@ -1,55 +1,59 @@
 #include "Fake.h"
 FileFake::FileFake(const Options& iOptions) :
       File("", iOptions) {
-   mNLat = 10;
-   mNLon = 10;
+   int nLat = 10;
+   int nLon = 10;
    mNEns = 2;
-   mNTime = 10;
+   int nTime = 10;
 
-   iOptions.getValue("nLat", mNLat);
-   iOptions.getValue("nLon", mNLon);
+   iOptions.getValue("nLat", nLat);
+   iOptions.getValue("nLon", nLon);
    iOptions.getValue("nEns", mNEns);
-   iOptions.getValue("nTime", mNTime);
-   if(!Util::isValid(mNLat) || mNLat <= 0) {
+   iOptions.getValue("nTime", nTime);
+   if(!Util::isValid(nLat) || nLat <= 0) {
       Util::error("FileFake: Invalid number of latitudes");
    }
-   if(!Util::isValid(mNLon) || mNLon <= 0) {
+   if(!Util::isValid(nLat) || nLon <= 0) {
       Util::error("FileFake: Invalid number of longitudes");
    }
    if(!Util::isValid(mNEns) || mNEns <= 0) {
       Util::error("FileFake: Invalid number of ensemble members");
    }
-   if(!Util::isValid(mNTime) || mNTime <= 0) {
+   if(!Util::isValid(nTime) || nTime <= 0) {
       Util::error("FileFake: Invalid number of times");
    }
-   mLats.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mLats[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         mLats[i][j] = 50 + 10.0 * i / getNumLat();
+   mLats.resize(nLat);
+   for(int i = 0; i < nLat; i++) {
+      mLats[i].resize(nLon);
+      for(int j = 0; j < nLon; j++) {
+         mLats[i][j] = 50 + 10.0 * i / nLat;
       }
    }
-   mLons.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mLons[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         mLons[i][j] = 0 + 10.0 * j / getNumLon();
+   mLons.resize(nLat);
+   for(int i = 0; i < nLat; i++) {
+      mLons[i].resize(nLon);
+      for(int j = 0; j < nLon; j++) {
+         mLons[i][j] = 0 + 10.0 * j / nLon;
       }
    }
    mElevs.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mElevs[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
+   for(int i = 0; i < nLat; i++) {
+      mElevs[i].resize(nLon);
+      for(int j = 0; j < nLon; j++) {
          mElevs[i][j] = 0;
       }
    }
-   mLandFractions.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      mLandFractions[i].resize(getNumLon());
-      for(int j = 0; j < getNumLon(); j++) {
-         mLandFractions[i][j] = (float) i / getNumLat() / 2 + (float) j / getNumLon();
+   mLandFractions.resize(nLat);
+   for(int i = 0; i < nLat; i++) {
+      mLandFractions[i].resize(nLon);
+      for(int j = 0; j < nLon; j++) {
+         mLandFractions[i][j] = (float) i / nLat / 2 + (float) j / nLon;
       }
    }
+   std::vector<double> times(nTime, 0);
+   for(int i = 0; i < nTime; i++)
+      times[i] = i;
+   setTimes(times);
 }
 
 FieldPtr FileFake::getFieldCore(const Variable& iVariable, int iTime) const {

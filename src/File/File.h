@@ -24,7 +24,6 @@ class File {
       static File* getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
 
       FieldPtr getField(const Variable& iVariable, int iTime) const;
-      FieldPtr getField(std::string iVariable, int iTime) const;
 
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
@@ -51,10 +50,6 @@ class File {
 
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(const Variable& iVariable) const;
-      bool hasVariable(std::string iVariable) const;
-
-      //! Does this file provide the variable (without deriving it)?
-      bool hasVariableWithoutDeriving(std::string iVariable) const;
 
       std::string getFilename() const;
       bool hasDefinedVariable(Variable iVariable) const;
@@ -90,16 +85,12 @@ class File {
       virtual void writeCore(std::vector<Variable> iVariables) = 0;
       //! Does the subclass provide this variable without deriving it?
       virtual bool hasVariableCore(const Variable& iVariable) const = 0;
-      bool hasVariableCore(std::string iVariable) const;
 
       // Subclasses must fill these fields in the constructor:
       vec2 mLats;
       vec2 mLons;
       vec2 mElevs;
       vec2 mLandFractions;
-      int mNTime;
-      int mNLat;
-      int mNLon;
       int mNEns;
 
       //! These must be populated on initialization by subclass

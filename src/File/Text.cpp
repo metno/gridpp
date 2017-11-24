@@ -90,9 +90,6 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    }
 
    setTimes(times);
-   mNTime = times.size();
-   mNLat = locations.size();
-   mNLon = 1;
 
    // Put data into mLocalFields
    mLocalFields.resize(times.size());

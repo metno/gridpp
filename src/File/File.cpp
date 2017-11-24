@@ -56,15 +56,6 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
    return file;
 }
 
-FieldPtr File::getField(std::string iVariable, int iTime) const {
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].name() == iVariable) {
-         return getField(mVariables[i], iTime);
-      }
-   }
-   // TODO:
-   Util::error("Could not get field");
-}
 
 FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    // Determine if values have been cached
@@ -174,15 +165,6 @@ void File::initNewVariable(const Variable& iVariable) {
 void File::setVariables(std::vector<Variable> iVariables) {
    mVariables = iVariables;
 }
-bool File::hasVariable(std::string iVariable) const {
-   // TODO: Check derived variables
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].name() == iVariable)
-         return true;
-   }
-   return false;
-
-}
 bool File::hasVariable(const Variable& iVariable) const {
    bool status = hasVariableCore(iVariable);
    if(status)
@@ -193,19 +175,6 @@ bool File::hasVariable(const Variable& iVariable) const {
    return it != mFields.end();
 }
 
-bool File::hasVariableWithoutDeriving(std::string iVariable) const {
-   bool status = hasVariableCore(iVariable);
-   if(status)
-      return true;
-
-   // Check if field has been initialized
-   std::map<Variable, std::vector<FieldPtr> >::const_iterator it;
-   for(it == mFields.begin(); it != mFields.end(); it++) {
-      if(it->first.name() == iVariable)
-         return true;
-   }
-   return false;
-}
 void File::clear() {
    mFields.clear();
 }
@@ -223,7 +192,7 @@ Uuid File::getUniqueTag() const {
    return mTag;
 }
 bool File::setLats(vec2 iLats) {
-   if(iLats.size() != mNLat || iLats[0].size() != mNLon)
+   if(iLats.size() != getNumLat() || iLats[0].size() != getNumLon())
       return false;
    if(mLats != iLats)
       createNewTag();
@@ -231,7 +200,7 @@ bool File::setLats(vec2 iLats) {
    return true;
 }
 bool File::setLons(vec2 iLons) {
-   if(iLons.size() != mNLat || iLons[0].size() != mNLon)
+   if(iLons.size() != getNumLat() || iLons[0].size() != getNumLon())
       return false;
    if(mLons != iLons)
       createNewTag();
@@ -258,13 +227,13 @@ bool File::setLons(vec2 iLons) {
    return true;
 }
 bool File::setElevs(vec2 iElevs) {
-   if(iElevs.size() != mNLat || iElevs[0].size() != mNLon)
+   if(iElevs.size() != getNumLat() || iElevs[0].size() != getNumLon())
       return false;
    mElevs = iElevs;
    return true;
 }
 bool File::setLandFractions(vec2 iLandFractions) {
-   if(iLandFractions.size() != mNLat || iLandFractions[0].size() != mNLon)
+   if(iLandFractions.size() != getNumLat() || iLandFractions[0].size() != getNumLon())
       return false;
    mLandFractions = iLandFractions;
    return true;
@@ -282,16 +251,16 @@ vec2 File::getLandFractions() const {
    return mLandFractions;
 }
 int File::getNumLat() const {
-   return mNLat;
+   return mLats.size();
 }
 int File::getNumLon() const {
-   return mNLon;
+   return mLats[0].size();
 }
 int File::getNumEns() const {
    return mNEns;
 }
 int File::getNumTime() const {
-   return mNTime;
+   return mTimes.size();
 }
 void File::createNewTag() const {
    mTag = mNextTag; //boost::uuids::random_generator()();
@@ -309,21 +278,11 @@ void File::setTimes(std::vector<double> iTimes) {
       ss << "Setting times array in '" << getFilename() << "' with " << iTimes.size()
          << " elements when the time dimension is " << getNumTime();
       Util::warning(ss.str());
-      mNTime = iTimes.size();
    }
    mTimes = iTimes;
 }
 std::vector<double> File::getTimes() const {
    return mTimes;
-}
-
-bool File::hasVariableCore(std::string iVariable) const {
-   for(int i = 0; i < mVariables.size(); i++) {
-      if(mVariables[i].name() == iVariable) {
-         return true;
-      }
-   }
-   return false;
 }
 
 bool File::getVariable(std::string iVariableName, Variable& iVariable) const {

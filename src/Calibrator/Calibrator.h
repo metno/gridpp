@@ -69,6 +69,7 @@ class Calibrator : public Scheme {
 #include "Regression.h"
 #include "Sort.h"
 #include "WindDirection.h"
+#include "DiagnoseWindSpeed.h"
 #include "Window.h"
 #include "Zaga.h"
 #endif

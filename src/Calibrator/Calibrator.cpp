@@ -35,6 +35,10 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
       CalibratorNeighbourhood* c = new CalibratorNeighbourhood(iVariable, iOptions);
       return c;
    }
+   else if(iName == "diagnoseWindSpeed") {
+      CalibratorDiagnoseWindSpeed* c = new CalibratorDiagnoseWindSpeed(iVariable, iOptions);
+      return c;
+   }
    else if(iName == "phase") {
       CalibratorPhase* c = new CalibratorPhase(iVariable, iOptions);
       float minPrecip;
@@ -176,10 +180,11 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorBct::description() << std::endl;
    ss << CalibratorCloud::description() << std::endl;
    ss << CalibratorCoastal::description() << std::endl;
+   ss << CalibratorDiagnoseWindSpeed::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
-   ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorMask::description() << std::endl;
+   ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorPhase::description() << std::endl;
    ss << CalibratorQc::description() << std::endl;
    ss << CalibratorQnh::description() << std::endl;

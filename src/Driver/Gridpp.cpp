@@ -46,6 +46,8 @@ void writeUsage() {
    std::cout << std::endl;
    std::cout << "Variable options (and default values):" << std::endl;
    std::cout << Util::formatDescription("write=1", "Set to 0 to prevent the variable to be written to output") << std::endl;
+   std::cout << Util::formatDescription("units=undef", "Write this to the units attribute in the output.") << std::endl;
+   std::cout << Util::formatDescription("standardName=1", "Write this to the standard_name attribute in the output.") << std::endl;
    std::cout << std::endl;
    std::cout << "Downscalers with options (and default values):" << std::endl;
    std::cout << Downscaler::getDescriptions();

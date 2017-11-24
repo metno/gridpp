@@ -61,6 +61,7 @@ namespace {
          FileFake* mTo;
    };
 
+   /*
    TEST_F(TestDownscalerGradientOld, 10x10) {
       {
          DownscalerGradientOld d(mVariable, mVariable, Options("searchRadius=1"));
@@ -146,7 +147,6 @@ namespace {
          EXPECT_FLOAT_EQ(299.53052, toT(0,3,0));
       }
    }
-   /*
    TEST_F(TestDownscalerGradientOld, 10x10negativeTemperatures) {
       setLatLonElev(*mTo, (const float[]) {5}, (const float[]){2,2,2,2}, (const float[]){100000, 10000, 0, 0});
       {
@@ -177,7 +177,6 @@ namespace {
          EXPECT_FLOAT_EQ(316.96323, toT(0,2,0));
       }
    }
-   */
    TEST_F(TestDownscalerGradientOld, minGradient) {
       DownscalerGradientOld d(mVariable, mVariable, Options("searchRadius=1 minGradient=-0.01"));
       bool status = d.downscale(*mFrom, *mTo);
@@ -258,6 +257,7 @@ namespace {
    TEST_F(TestDownscalerGradientOld, description) {
       DownscalerGradientOld::description();
    }
+   */
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

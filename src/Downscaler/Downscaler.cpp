@@ -24,10 +24,6 @@ Downscaler* Downscaler::getScheme(std::string iName, const Variable& iInputVaria
    if(iName == "nearestNeighbour") {
       return new DownscalerNearestNeighbour(iInputVariable, iOutputVariable, iOptions);
    }
-   else if(iName == "gradientOld") {
-      DownscalerGradientOld* d = new DownscalerGradientOld(iInputVariable, iOutputVariable, iOptions);
-      return d;
-   }
    else if(iName == "smart") {
       DownscalerSmart* d = new DownscalerSmart(iInputVariable, iOutputVariable, iOptions);
       float searchRadius = Util::MV;
@@ -207,7 +203,6 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, fl
 std::string Downscaler::getDescriptions() {
    std::stringstream ss;
    ss << DownscalerNearestNeighbour::description();
-   ss << DownscalerGradientOld::description();
    ss << DownscalerGradient::description();
    ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();

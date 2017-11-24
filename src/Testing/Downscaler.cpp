@@ -48,19 +48,19 @@ namespace {
 
    TEST_F(TestDownscaler, validDownscalers) {
       Downscaler* d0 = Downscaler::getScheme("nearestNeighbour", mVariable, mVariable, Options());
-      Downscaler* d1 = Downscaler::getScheme("smart", mVariable, mVariable, Options("searchRadius=3 numSmart=2 minElevDiff=400"));
-      Downscaler* d2 = Downscaler::getScheme("gradientOld", mVariable, mVariable, Options("searchRadius=5 constantGradient=0.04 minElevDiff=213.2"));
+      Downscaler* d1 = Downscaler::getScheme("smart", mVariable, mVariable, Options("elevRadius=3 numSmart=2 minElevDiff=400"));
+      Downscaler* d2 = Downscaler::getScheme("gradient", mVariable, mVariable, Options("elevRadius=5 constantElevGradient=0.04 minElevDiff=213.2"));
       Downscaler* d3 = Downscaler::getScheme("pressure", mVariable, mVariable, Options(""));
       Downscaler* d4 = Downscaler::getScheme("bypass", mVariable, mVariable, Options(""));
       EXPECT_EQ(3, ((DownscalerSmart*) d1)->getSearchRadius());
       EXPECT_EQ(2, ((DownscalerSmart*) d1)->getNumSmart());
       EXPECT_EQ(400, ((DownscalerSmart*) d1)->getMinElevDiff());
-      EXPECT_EQ(5, ((DownscalerGradientOld*) d2)->getSearchRadius());
-      EXPECT_FLOAT_EQ(213.2, ((DownscalerGradientOld*) d2)->getMinElevDiff());
-      EXPECT_FLOAT_EQ(0.04, ((DownscalerGradientOld*) d2)->getConstantGradient());
+      EXPECT_EQ(5, ((DownscalerGradient*) d2)->getElevRadius());
+      EXPECT_FLOAT_EQ(213.2, ((DownscalerGradient*) d2)->getMinElevDiff());
+      EXPECT_FLOAT_EQ(0.04, ((DownscalerGradient*) d2)->getConstantElevGradient());
       EXPECT_EQ("nearestNeighbour", d0->name());
       EXPECT_EQ("smart", d1->name());
-      EXPECT_EQ("gradientOld", d2->name());
+      EXPECT_EQ("gradient", d2->name());
       EXPECT_EQ("pressure", d3->name());
       EXPECT_EQ("bypass", d4->name());
    }

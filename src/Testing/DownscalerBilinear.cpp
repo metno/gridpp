@@ -21,8 +21,8 @@ namespace {
          void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
-            int nLat = iFile.getNumLat();
-            int nLon = iFile.getNumLon();
+            int nLat = iFile.getNumY();
+            int nLon = iFile.getNumX();
             lat.resize(nLat);
             lon.resize(nLat);
             for(int i = 0; i < nLat; i++) {

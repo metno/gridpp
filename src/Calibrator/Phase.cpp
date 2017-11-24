@@ -23,8 +23,8 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' does not have two datacolumns");
    }
 
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();

@@ -36,8 +36,8 @@ namespace {
             vec2 lat;
             vec2 lon;
             vec2 elev;
-            int nLat = iFile.getNumLat();
-            int nLon = iFile.getNumLon();
+            int nLat = iFile.getNumY();
+            int nLon = iFile.getNumX();
             lat.resize(nLat);
             lon.resize(nLat);
             elev.resize(nLat);
@@ -67,8 +67,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) + gradient * (elev - elev(nn))
          EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-160)
          EXPECT_FLOAT_EQ(290.34964, toT(0,1,0));
@@ -82,8 +82,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) + gradient * (elev - elev(nn))
          EXPECT_FLOAT_EQ(300.60367, toT(0,0,0));
          EXPECT_FLOAT_EQ(314.40369, toT(0,1,0));
@@ -98,8 +98,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) * exp(gradient * (elev - elev(nn)))
          EXPECT_FLOAT_EQ(301.30985, toT(0,0,0)); // 301 * exp(-2.59620e-5 * (120-159.63))
       }
@@ -109,8 +109,8 @@ namespace {
          DownscalerGradientOld d(mVariable, mVariable, Options("searchRadius=1 logTransform=1 constantGradient=-0.01"));
          d.downscale(*mFrom, *mTo);
          const Field& toT  = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) * exp(gradient * (elev - elev(nn)))
          EXPECT_FLOAT_EQ(447.3916, toT(0,0,0));
       }
@@ -121,8 +121,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) + gradient * (elev - elev(nn))
          EXPECT_FLOAT_EQ(301, toT(0,0,0));
          EXPECT_FLOAT_EQ(301, toT(0,1,0));
@@ -137,8 +137,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // T = T(nn) + gradient * (elev - elev(nn))
          EXPECT_FLOAT_EQ(300.60367, toT(0,0,0));
          EXPECT_FLOAT_EQ(314.40369, toT(0,1,0));
@@ -156,8 +156,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // Gradient = -0.00797
          EXPECT_FLOAT_EQ(301,   toT(0,0,0)); // nearest neighbour
          EXPECT_FLOAT_EQ(222.80988, toT(0,1,0));
@@ -170,8 +170,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          EXPECT_FLOAT_EQ(301, toT(0,0,0)); // nearest neighbour
          EXPECT_FLOAT_EQ(301, toT(0,1,0)); // nearest neighbour
          EXPECT_FLOAT_EQ(316.96323, toT(0,2,0));
@@ -183,8 +183,8 @@ namespace {
       bool status = d.downscale(*mFrom, *mTo);
       EXPECT_TRUE(status);
       const Field& toT   = *mTo->getField(mVariable, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(4, toT.getNumLon());
+      ASSERT_EQ(1, toT.getNumY());
+      ASSERT_EQ(4, toT.getNumX());
       // Gradient within range:
       EXPECT_FLOAT_EQ(301.31491, toT(0,0,0)); // 301 - 0.00797 * (120-159.6324)
       // Gradient is too negative (-0.01068):
@@ -196,8 +196,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // Gradient too large (-0.00797):
          EXPECT_FLOAT_EQ(301.3171, toT(0,0,0)); // 301 - 0.008 * (120-159.6324)
          // Gradient is too negative (-0.01068):
@@ -208,8 +208,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // Gradient too low (-2.59620e-5)
          EXPECT_FLOAT_EQ(289.3039, toT(0,0,0)); // 301 * exp(0.001 * (120-159.6324))
       }
@@ -218,8 +218,8 @@ namespace {
          bool status = d.downscale(*mFrom, *mTo);
          EXPECT_TRUE(status);
          const Field& toT   = *mTo->getField(mVariable, 0);
-         ASSERT_EQ(1, toT.getNumLat());
-         ASSERT_EQ(4, toT.getNumLon());
+         ASSERT_EQ(1, toT.getNumY());
+         ASSERT_EQ(4, toT.getNumX());
          // Gradient too high (-2.59620e-5)
          EXPECT_FLOAT_EQ(447.3916, toT(0,0,0)); // 301 * exp(-0.01 * (120-159.63))
       }

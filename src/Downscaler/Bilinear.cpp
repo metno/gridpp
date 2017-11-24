@@ -119,8 +119,8 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
 
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
 
    #pragma omp parallel for

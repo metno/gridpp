@@ -53,8 +53,8 @@ int main(int argc, const char *argv[]) {
    File* forecast = setup.forecasts[0];
    File* observation = setup.observations[0];
    File* ogrid = observation;
-   int nLat = ogrid->getNumLat();
-   int nLon = ogrid->getNumLon();
+   int nLat = ogrid->getNumY();
+   int nLon = ogrid->getNumX();
    int nTime = ogrid->getNumTime();
    vec2 lats = ogrid->getLats();
    vec2 lons = ogrid->getLons();

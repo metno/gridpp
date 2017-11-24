@@ -120,8 +120,8 @@ namespace {
 
       cal.calibrate(file, &parFile);
       FieldPtr phase = file.getField(Variable("phase"), 0);
-      for(int i = 0; i < file.getNumLat(); i++) {
-         for(int j = 0; j < file.getNumLon(); j++) {
+      for(int i = 0; i < file.getNumY(); i++) {
+         for(int j = 0; j < file.getNumX(); j++) {
             for(int e = 0; e < file.getNumEns(); e++) {
                EXPECT_FLOAT_EQ(Util::MV, (*phase)(i,j,e));
             }

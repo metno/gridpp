@@ -18,8 +18,8 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
       Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
    }
 
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

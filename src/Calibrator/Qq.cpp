@@ -36,8 +36,8 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
    }
 
-   const int nLat = iFile.getNumLat();
-   const int nLon = iFile.getNumLon();
+   const int nLat = iFile.getNumY();
+   const int nLon = iFile.getNumX();
    const int nEns = iFile.getNumEns();
    const int nTime = iFile.getNumTime();
    const vec2 lats = iFile.getLats();

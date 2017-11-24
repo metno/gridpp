@@ -181,8 +181,8 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
 
    vec2 olats = iTo.getLats();
    vec2 olons = iTo.getLons();
-   size_t nLon = iTo.getNumLon();
-   size_t nLat = iTo.getNumLat();
+   size_t nLon = iTo.getNumX();
+   size_t nLat = iTo.getNumY();
 
    iI.resize(nLat);
    iJ.resize(nLat);

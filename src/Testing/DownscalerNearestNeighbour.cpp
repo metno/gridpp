@@ -21,8 +21,8 @@ namespace {
          void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
-            int nLat = iFile.getNumLat();
-            int nLon = iFile.getNumLon();
+            int nLat = iFile.getNumY();
+            int nLon = iFile.getNumX();
             lat.resize(nLat);
             lon.resize(nLat);
             for(int i = 0; i < nLat; i++) {
@@ -77,8 +77,8 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(mVariable, 0);
-      ASSERT_EQ(2, toT.getNumLat());
-      ASSERT_EQ(2, toT.getNumLon());
+      ASSERT_EQ(2, toT.getNumY());
+      ASSERT_EQ(2, toT.getNumX());
       EXPECT_FLOAT_EQ(301, toT(0,0,0));
       EXPECT_FLOAT_EQ(302, toT(0,1,0));
       EXPECT_FLOAT_EQ(309, toT(1,0,0));

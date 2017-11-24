@@ -5,8 +5,8 @@ CalibratorAccumulate::CalibratorAccumulate(const Variable& iVariable, const Opti
       Calibrator(iVariable, iOptions) {
 }
 bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    if(!iFile.hasVariable(mVariable)) {

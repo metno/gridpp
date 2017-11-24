@@ -118,7 +118,7 @@ void File::write(std::vector<Variable> iVariables) {
 
 
 FieldPtr File::getEmptyField(float iFillValue) const {
-   return getEmptyField(getNumLat(), getNumLon(), getNumEns(), iFillValue);
+   return getEmptyField(getNumY(), getNumX(), getNumEns(), iFillValue);
 }
 FieldPtr File::getEmptyField(int nLat, int nLon, int nEns, float iFillValue) const {
    FieldPtr field = FieldPtr(new Field(nLat, nLon, nEns, iFillValue));
@@ -137,8 +137,8 @@ void File::addField(FieldPtr iField, const Variable& iVariable, int iTime) const
 }
 
 bool File::hasSameDimensions(const File& iOther) const {
-   if(getNumLat() == iOther.getNumLat()
-         && getNumLon() == iOther.getNumLon()
+   if(getNumY() == iOther.getNumY()
+         && getNumX() == iOther.getNumX()
          && getNumEns() == iOther.getNumEns()
          && getNumTime() == iOther.getNumTime())
       return true;
@@ -147,7 +147,7 @@ bool File::hasSameDimensions(const File& iOther) const {
 
 std::string File::getDimenionString() const {
    std::stringstream ss;
-   ss << "[" << getNumTime() << " " << getNumEns() << " " << getNumLat() << " " << getNumLon()<< "]";
+   ss << "[" << getNumTime() << " " << getNumEns() << " " << getNumY() << " " << getNumX()<< "]";
    return ss.str();
 }
 
@@ -183,7 +183,7 @@ long File::getCacheSize() const {
    long size = 0;
    std::map<Variable, std::vector<FieldPtr> >::const_iterator it;
    for(it = mFields.begin(); it != mFields.end(); it++) {
-      size += it->second.size() * getNumLat()*getNumLon()*getNumEns()*sizeof(float);
+      size += it->second.size() * getNumY()*getNumX()*getNumEns()*sizeof(float);
    }
    return size;
 }
@@ -192,7 +192,7 @@ Uuid File::getUniqueTag() const {
    return mTag;
 }
 bool File::setLats(vec2 iLats) {
-   if(iLats.size() != getNumLat() || iLats[0].size() != getNumLon())
+   if(iLats.size() != getNumY() || iLats[0].size() != getNumX())
       return false;
    if(mLats != iLats)
       createNewTag();
@@ -200,7 +200,7 @@ bool File::setLats(vec2 iLats) {
    return true;
 }
 bool File::setLons(vec2 iLons) {
-   if(iLons.size() != getNumLat() || iLons[0].size() != getNumLon())
+   if(iLons.size() != getNumY() || iLons[0].size() != getNumX())
       return false;
    if(mLons != iLons)
       createNewTag();
@@ -227,13 +227,13 @@ bool File::setLons(vec2 iLons) {
    return true;
 }
 bool File::setElevs(vec2 iElevs) {
-   if(iElevs.size() != getNumLat() || iElevs[0].size() != getNumLon())
+   if(iElevs.size() != getNumY() || iElevs[0].size() != getNumX())
       return false;
    mElevs = iElevs;
    return true;
 }
 bool File::setLandFractions(vec2 iLandFractions) {
-   if(iLandFractions.size() != getNumLat() || iLandFractions[0].size() != getNumLon())
+   if(iLandFractions.size() != getNumY() || iLandFractions[0].size() != getNumX())
       return false;
    mLandFractions = iLandFractions;
    return true;
@@ -250,10 +250,10 @@ vec2 File::getElevs() const {
 vec2 File::getLandFractions() const {
    return mLandFractions;
 }
-int File::getNumLat() const {
+int File::getNumY() const {
    return mLats.size();
 }
-int File::getNumLon() const {
+int File::getNumX() const {
    return mLats[0].size();
 }
 int File::getNumEns() const {

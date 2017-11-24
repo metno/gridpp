@@ -7,8 +7,8 @@ CalibratorCloud::CalibratorCloud(const Variable& iVariable, const Options& iOpti
    iOptions.getValue("precipitation_amount", mPrecipVariable);
 }
 bool CalibratorCloud::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 

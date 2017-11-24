@@ -28,8 +28,8 @@ namespace {
       cal.calibrate(from);
       EXPECT_FLOAT_EQ(98334.44, (*p)(5,2,0));
       FieldPtr qnh = from.getField(variableQnh, 0);
-      ASSERT_EQ(10, qnh->getNumLat());
-      ASSERT_EQ(10, qnh->getNumLon());
+      ASSERT_EQ(10, qnh->getNumY());
+      ASSERT_EQ(10, qnh->getNumX());
       ASSERT_EQ(1,  qnh->getNumEns());
 
       // Altitude: 159.6324 Pressure: 98334.44

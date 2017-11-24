@@ -77,17 +77,17 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 
    if(Util::isValid(mElevVar)) {
       mElevs = getLatLonVariable(mElevVar);
-      for(int i = 0; i < getNumLat(); i++) {
-         for(int j = 0; j < getNumLon(); j++) {
+      for(int i = 0; i < getNumY(); i++) {
+         for(int j = 0; j < getNumX(); j++) {
             mElevs[i][j] *= elevScale;
          }
       }
    }
    else {
-      mElevs.resize(getNumLat());
-      for(int i = 0; i < getNumLat(); i++) {
-         mElevs[i].resize(getNumLon());
-         for(int j = 0; j < getNumLon(); j++) {
+      mElevs.resize(getNumY());
+      for(int i = 0; i < getNumY(); i++) {
+         mElevs[i].resize(getNumX());
+         for(int j = 0; j < getNumX(); j++) {
             mElevs[i][j] = Util::MV;
          }
       }
@@ -104,10 +104,10 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       mLandFractions = getLatLonVariable(land_area_fraction);
    }
    else {
-      mLandFractions.resize(getNumLat());
-      for(int i = 0; i < getNumLat(); i++) {
-         mLandFractions[i].resize(getNumLon());
-         for(int j = 0; j < getNumLon(); j++) {
+      mLandFractions.resize(getNumY());
+      for(int i = 0; i < getNumY(); i++) {
+         mLandFractions[i].resize(getNumX());
+         for(int j = 0; j < getNumX(); j++) {
             mLandFractions[i][j] = Util::MV;
          }
       }
@@ -350,7 +350,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       assert(hasVariableCore(variable));
       int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
-      size_t size = 1*1*mNEns*getNumLat()*getNumLon();
+      size_t size = 1*1*mNEns*getNumY()*getNumX();
       float* values = new float[size];
 
       std::vector<int> dims = getDims(var);
@@ -459,9 +459,9 @@ bool FileNetcdf::isValid(std::string iFilename, const Options& iOptions) {
 vec2 FileNetcdf::getGridValues(int iVar) const {
    // Initialize values
    vec2 grid;
-   grid.resize(getNumLat());
-   for(int i = 0; i < getNumLat(); i++) {
-      grid[i].resize(getNumLon(), Util::MV);
+   grid.resize(getNumY());
+   for(int i = 0; i < getNumY(); i++) {
+      grid[i].resize(getNumX(), Util::MV);
    }
 
    // We have a lat/lon grid, where lat/lons are only provided along the pertinent dimension
@@ -475,16 +475,16 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       nc_get_var_float(mFile, iVar, values);
       // Latitude variable
       if(dim == mLatDim) {
-         for(int i = 0; i < getNumLat(); i++) {
-            for(int j = 0; j < getNumLon(); j++) {
+         for(int i = 0; i < getNumY(); i++) {
+            for(int j = 0; j < getNumX(); j++) {
                grid[i][j] = values[i];
             }
          }
       }
       // Longitude variable
       else if(dim == mLonDim) {
-         for(int i = 0; i < getNumLat(); i++) {
-            for(int j = 0; j < getNumLon(); j++) {
+         for(int i = 0; i < getNumY(); i++) {
+            for(int j = 0; j < getNumX(); j++) {
                grid[i][j] = values[j];
             }
          }
@@ -508,12 +508,12 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       nc_inq_vardimid(mFile, iVar, dims);
       for(int i = 0; i < N; i++) {
          if(dims[i] == mLatDim) {
-            count[i] = getNumLat();
+            count[i] = getNumY();
             size *= count[i];
             indexLat = i;
          }
          else if(dims[i] == mLonDim) {
-            count[i] = getNumLon();
+            count[i] = getNumX();
             size *= count[i];
             indexLon = i;
          }
@@ -536,15 +536,15 @@ vec2 FileNetcdf::getGridValues(int iVar) const {
       }
       float* values = new float[size];
       nc_get_vara_float(mFile, iVar, start, count, values);
-      for(int i = 0; i < getNumLat(); i++) {
-         for(int j = 0; j < getNumLon(); j++) {
+      for(int i = 0; i < getNumY(); i++) {
+         for(int j = 0; j < getNumX(); j++) {
             // Latitude dimension is ordered first
             if(indexLat < indexLon) {
-               grid[i][j] = values[i*getNumLon() + j];
+               grid[i][j] = values[i*getNumX() + j];
             }
             // Longitude dimension is ordered first
             else {
-               grid[i][j] = values[j*getNumLat() + i];
+               grid[i][j] = values[j*getNumY() + i];
             }
          }
       }
@@ -681,12 +681,12 @@ void FileNetcdf::writeAltitude() const {
    nc_inq_vardimid(mFile, vElev, dims);
    for(int i = 0; i < N; i++) {
       if(dims[i] == mLatDim) {
-         count[i] = getNumLat();
+         count[i] = getNumY();
          size *= count[i];
          indexLat = i;
       }
       else if(dims[i] == mLonDim) {
-         count[i] = getNumLon();
+         count[i] = getNumX();
          size *= count[i];
          indexLon = i;
       }
@@ -704,18 +704,18 @@ void FileNetcdf::writeAltitude() const {
    }
    float MV = getMissingValue(vElev);
    float* values = new float[size];
-   for(int i = 0; i < getNumLat(); i++) {
-      for(int j = 0; j < getNumLon(); j++) {
+   for(int i = 0; i < getNumY(); i++) {
+      for(int j = 0; j < getNumX(); j++) {
          float elev = elevs[i][j];
          if(Util::isValid(MV) && !Util::isValid(elev))
             elev = MV;
          // Latitude dimension is ordered first
          if(indexLat < indexLon) {
-            values[i*getNumLon() + j] = elev;
+            values[i*getNumX() + j] = elev;
          }
          // Longitude dimension is ordered first
          else {
-            values[j*getNumLat() + i] = elev;
+            values[j*getNumY() + i] = elev;
          }
       }
    }

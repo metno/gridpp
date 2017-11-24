@@ -33,8 +33,8 @@ DownscalerCoastal::DownscalerCoastal(const Variable& iInputVariable, const Varia
 }
 
 void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -106,8 +106,8 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                   float totalWeight = 0;
                   for(int r = 0; r < mSearchRadii.size(); r++) {
                      int searchRadius = mSearchRadii[r];
-                     for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+searchRadius); ii++) {
-                        for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+searchRadius); jj++) {
+                     for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumY()-1, Icenter+searchRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+searchRadius); jj++) {
                            float currLaf  = ilafs[ii][jj];
                            float currElev = ielevs[ii][jj];
                            float currValue = ifield(ii,jj,e);

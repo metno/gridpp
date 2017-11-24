@@ -10,8 +10,8 @@ bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParame
    if(!iParameterFile->isLocationDependent()) {
       Util::error("Cannot use a location independent parameter file to update the altitudes");
    }
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();

@@ -32,8 +32,8 @@ DownscalerGradientOld::DownscalerGradientOld(const Variable& iInputVariable, con
 }
 
 void DownscalerGradientOld::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -83,8 +83,8 @@ void DownscalerGradientOld::downscaleCore(const File& iInput, File& iOutput) con
                   int averagingRadius = 0;
                   if(mAverageNeighbourhood)
                      averagingRadius = mSearchRadius;
-                  for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
-                     for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
+                  for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumY()-1, Icenter+averagingRadius); ii++) {
+                     for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+averagingRadius); jj++) {
                         float currValue = ifield(ii,jj,e);
                         float currElev  = ielevs[ii][jj];
                         if(Util::isValid(currValue) && Util::isValid(currElev)) {
@@ -123,8 +123,8 @@ void DownscalerGradientOld::downscaleCore(const File& iInput, File& iOutput) con
                      int   counter = 0;
                      float min = Util::MV;
                      float max = Util::MV;
-                     for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mSearchRadius); ii++) {
-                        for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mSearchRadius); jj++) {
+                     for(int ii = std::max(0, Icenter-mSearchRadius); ii <= std::min(iInput.getNumY()-1, Icenter+mSearchRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-mSearchRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+mSearchRadius); jj++) {
                            assert(ii < ielevs.size());
                            assert(jj < ielevs[ii].size());
                            float x = ielevs[ii][jj];

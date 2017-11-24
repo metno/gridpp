@@ -25,22 +25,22 @@ namespace {
    }
    TEST_F(FileNetcdfTest, missingY) {
       FileNetcdf file = FileNetcdf("testing/files/validNetcdf2.nc");
-      EXPECT_EQ(1, file.getNumLat());
-      EXPECT_EQ(10, file.getNumLon());
+      EXPECT_EQ(1, file.getNumY());
+      EXPECT_EQ(10, file.getNumX());
       EXPECT_EQ(10, file.getNumEns());
       EXPECT_EQ(2, file.getNumTime());
    }
    TEST_F(FileNetcdfTest, missingTime) {
       FileNetcdf file = FileNetcdf("testing/files/validNetcdf3.nc");
-      EXPECT_EQ(10, file.getNumLat());
-      EXPECT_EQ(10, file.getNumLon());
+      EXPECT_EQ(10, file.getNumY());
+      EXPECT_EQ(10, file.getNumX());
       EXPECT_EQ(1, file.getNumEns());
       EXPECT_EQ(1, file.getNumTime());
    }
    TEST_F(FileNetcdfTest, missingXandTime) {
       FileNetcdf file = FileNetcdf("testing/files/validNetcdf4.nc");
-      EXPECT_EQ(10, file.getNumLat());
-      EXPECT_EQ(1, file.getNumLon());
+      EXPECT_EQ(10, file.getNumY());
+      EXPECT_EQ(1, file.getNumX());
       EXPECT_EQ(1, file.getNumEns());
       EXPECT_EQ(1, file.getNumTime());
       FieldPtr field = file.getField(Variable("air_temperature_2m"), 0);

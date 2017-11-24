@@ -24,8 +24,8 @@ namespace {
             vec2 lat;
             vec2 lon;
             vec2 elev;
-            int nLat = iFile.getNumLat(); 
-            int nLon = iFile.getNumLon();
+            int nLat = iFile.getNumY(); 
+            int nLon = iFile.getNumX();
             lat.resize(nLat);
             lon.resize(nLat);
             elev.resize(nLat);
@@ -93,8 +93,8 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(mT, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(5, toT.getNumLon());
+      ASSERT_EQ(1, toT.getNumY());
+      ASSERT_EQ(5, toT.getNumX());
       EXPECT_FLOAT_EQ(303,   toT(0,0,0));
       EXPECT_FLOAT_EQ(304.5, toT(0,1,0));
       EXPECT_FLOAT_EQ(305.5, toT(0,2,0));
@@ -127,8 +127,8 @@ namespace {
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
       const Field& toT   = *to.getField(mT, 0);
-      ASSERT_EQ(1, toT.getNumLat());
-      ASSERT_EQ(3, toT.getNumLon());
+      ASSERT_EQ(1, toT.getNumY());
+      ASSERT_EQ(3, toT.getNumX());
       EXPECT_FLOAT_EQ(301, toT(0,0,0)); // Nearest neighbour
       EXPECT_FLOAT_EQ(304, toT(0,1,0));
       EXPECT_FLOAT_EQ(301, toT(0,2,0)); // Nearest neighbour

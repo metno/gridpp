@@ -283,8 +283,8 @@ namespace {
       EXPECT_TRUE(status);
       FileNetcdf f3("testing/files/10x10_copy.nc");
       FieldPtr field3 = f3.getField(variable, 0);
-      EXPECT_EQ(f1.getNumLat(), f2.getNumLat());
-      EXPECT_EQ(f1.getNumLon(), f2.getNumLon());
+      EXPECT_EQ(f1.getNumY(), f2.getNumY());
+      EXPECT_EQ(f1.getNumX(), f2.getNumX());
       EXPECT_EQ(f1.getNumEns(), f2.getNumEns());
       EXPECT_EQ((*field3)(1,1,0), (*field1)(1,1,0));
    }

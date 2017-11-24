@@ -24,8 +24,8 @@ namespace {
 
       cal.calibrate(from);
       FieldPtr after = from.getField(mVariable, 0);
-      ASSERT_EQ(10, after->getNumLat());
-      ASSERT_EQ(10, after->getNumLon());
+      ASSERT_EQ(10, after->getNumY());
+      ASSERT_EQ(10, after->getNumX());
       ASSERT_EQ(1,  after->getNumEns());
 
       EXPECT_FLOAT_EQ(304.6667, (*after)(5,2,0));

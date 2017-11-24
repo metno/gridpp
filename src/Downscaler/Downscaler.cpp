@@ -80,14 +80,14 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iT
    vec2 ilons = iFrom.getLons();
    vec2 olats = iTo.getLats();
    vec2 olons = iTo.getLons();
-   int nLon = iTo.getNumLon();
-   int nLat = iTo.getNumLat();
+   int nLon = iTo.getNumX();
+   int nLat = iTo.getNumY();
 
    iI.resize(nLat);
    iJ.resize(nLat);
 
    // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+   if(iFrom.getNumY() == iTo.getNumY() && iFrom.getNumX() == iTo.getNumX()) {
       if(ilats == olats && ilons == olons) {
          for(int i = 0; i < nLat; i++) {
             iI[i].resize(nLon, 0);
@@ -123,15 +123,15 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
    }
 
    // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+   if(iFrom.getNumY() == iTo.getNumY() && iFrom.getNumX() == iTo.getNumX()) {
       vec2 ilats = iFrom.getLats();
       vec2 ilons = iFrom.getLons();
       vec2 olats = iTo.getLats();
       vec2 olons = iTo.getLons();
 
       if(ilats == olats && ilons == olons) {
-         int nLon = iTo.getNumLon();
-         int nLat = iTo.getNumLat();
+         int nLon = iTo.getNumX();
+         int nLat = iTo.getNumY();
 
          iI.resize(nLat);
          iJ.resize(nLat);

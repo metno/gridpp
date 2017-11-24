@@ -10,8 +10,8 @@ DownscalerNearestNeighbour::DownscalerNearestNeighbour(const Variable& iInputVar
 }
 
 void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -44,8 +44,8 @@ void DownscalerNearestNeighbour::downscaleField(const Field& iInput, Field& iOut
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
 
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
 
    #pragma omp parallel for

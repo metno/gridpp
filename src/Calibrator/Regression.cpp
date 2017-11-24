@@ -12,8 +12,8 @@ CalibratorRegression::CalibratorRegression(const Variable& iVariable, const Opti
    iOptions.getValue("intercept", mIntercept);
 }
 bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

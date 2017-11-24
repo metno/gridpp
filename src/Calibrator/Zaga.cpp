@@ -44,8 +44,8 @@ CalibratorZaga::CalibratorZaga(const Variable& iVariable, const Options& iOption
 }
 
 bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

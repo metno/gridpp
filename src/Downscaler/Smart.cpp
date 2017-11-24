@@ -11,8 +11,8 @@ DownscalerSmart::DownscalerSmart(const Variable& iInputVariable, const Variable&
 }
 
 void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -84,8 +84,8 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
    vec2 olats  = iTo.getLats();
    vec2 olons  = iTo.getLons();
    vec2 oelevs = iTo.getElevs();
-   int nLon    = iTo.getNumLon();
-   int nLat    = iTo.getNumLat();
+   int nLon    = iTo.getNumX();
+   int nLat    = iTo.getNumY();
    int numSearch = getNumSearchPoints(mSearchRadius);
 
    vec2Int Icenter, Jcenter;
@@ -122,8 +122,8 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
             Jlookup.reserve(numSearch);
 
             int index = 0;
-            for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumLat()-1, Ic+mSearchRadius); ii++) {
-               for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumLon()-1, Jc+mSearchRadius); jj++) {
+            for(int ii = std::max(0, Ic-mSearchRadius); ii <= std::min(iFrom.getNumY()-1, Ic+mSearchRadius); ii++) {
+               for(int jj = std::max(0, Jc-mSearchRadius); jj <= std::min(iFrom.getNumX()-1, Jc+mSearchRadius); jj++) {
                   float ielev = ielevs[ii][jj];
                   float diff = 1e10;
                   if(Util::isValid(ielev) && Util::isValid(oelev))

@@ -9,8 +9,8 @@ DownscalerPressure::DownscalerPressure(const Variable& iInputVariable, const Var
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 

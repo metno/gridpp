@@ -35,8 +35,8 @@ class File {
       void write(std::vector<Variable> iVariables);
 
       // Dimension sizes
-      int getNumLat() const;
-      int getNumLon() const;
+      int getNumY() const;
+      int getNumX() const;
       int getNumEns() const;
       int getNumTime() const;
       vec2 getLats() const;

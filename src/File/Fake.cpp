@@ -36,7 +36,7 @@ FileFake::FileFake(const Options& iOptions) :
          mLons[i][j] = 0 + 10.0 * j / nLon;
       }
    }
-   mElevs.resize(getNumLat());
+   mElevs.resize(getNumY());
    for(int i = 0; i < nLat; i++) {
       mElevs[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
@@ -59,8 +59,8 @@ FileFake::FileFake(const Options& iOptions) :
 FieldPtr FileFake::getFieldCore(const Variable& iVariable, int iTime) const {
    FieldPtr field = getEmptyField();
 
-   for(int i = 0; i < getNumLat(); i++) {
-      for(int j = 0; j < getNumLon(); j++) {
+   for(int i = 0; i < getNumY(); i++) {
+      for(int j = 0; j < getNumX(); j++) {
          for(int e = 0; e < getNumEns(); e++) {
             (*field)(i,j,e) = i + j + e;
          }

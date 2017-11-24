@@ -25,8 +25,8 @@ namespace {
       FileText file("testing/files/validText2.txt", Options("lat=1 lon=2 elev=3"));
       FieldPtr field0 = file.getField(mVariable, 0);
       ASSERT_EQ(3, field0->getNumEns());
-      ASSERT_EQ(2, field0->getNumLat());
-      ASSERT_EQ(1, field0->getNumLon());
+      ASSERT_EQ(2, field0->getNumY());
+      ASSERT_EQ(1, field0->getNumX());
       EXPECT_FLOAT_EQ(11, (*field0)(0,0,0));
       EXPECT_FLOAT_EQ(21, (*field0)(0,0,1));
       EXPECT_FLOAT_EQ(-1, (*field0)(0,0,2));

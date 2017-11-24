@@ -16,8 +16,8 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
    if(!iParameterFile->isFixedSize()) {
       Util::error("Cannot use a parameter file without a constant number of parameters");
    }
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

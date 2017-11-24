@@ -27,8 +27,8 @@ namespace {
 
       // Elevations should all be 0
       vec2 elevs = from.getElevs();
-      for(int i = 0; i < from.getNumLat(); i++) {
-         for(int j = 0; j < from.getNumLon(); j++) {
+      for(int i = 0; i < from.getNumY(); i++) {
+         for(int j = 0; j < from.getNumX(); j++) {
             EXPECT_FLOAT_EQ(0, elevs[i][j]);
          }
       }
@@ -47,8 +47,8 @@ namespace {
 
       // Elevations should all be 0
       vec2 elevs = from.getElevs();
-      for(int i = 0; i < from.getNumLat(); i++) {
-         for(int j = 0; j < from.getNumLon(); j++) {
+      for(int i = 0; i < from.getNumY(); i++) {
+         for(int j = 0; j < from.getNumX(); j++) {
             EXPECT_FLOAT_EQ(0, elevs[i][j]);
          }
       }

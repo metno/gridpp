@@ -134,7 +134,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       std::stringstream ss;
       ss << "File does not contain times, using forecast reference time as the output time";
       Util::warning(ss.str());
-      std::vector<double> times(getNumTime(), getReferenceTime());
+      std::vector<double> times(1, getReferenceTime());
       setTimes(times);
    }
    else {
@@ -1086,8 +1086,12 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
    std::vector<int> dims = getDims(iVar);
    // Initialize grid
    vec2 grid;
-   int numLat = getDimSize(mLatDim);
-   int numLon = getDimSize(mLatDim);
+   int numLat = 1;
+   if(Util::isValid(mLatDim))
+      numLat = getDimSize(mLatDim);
+   int numLon = 1;
+   if(Util::isValid(mLonDim))
+      numLon = getDimSize(mLonDim);
 
    grid.resize(numLat);
    for(int i = 0; i < numLat; i++) {

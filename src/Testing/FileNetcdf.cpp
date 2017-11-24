@@ -1,18 +1,43 @@
 #include "../File/Netcdf.h"
 #include "../Util.h"
+#include "../Calibrator/Calibrator.h"
 #include <gtest/gtest.h>
 
 // For each test it is safe to assume that 10x10_copy.nc is identical to 10x10.nc
 // After the test is done, it is safe to assume that 10x10_copy.nc is again reverted.
 namespace {
    class FileNetcdfTest : public ::testing::Test {
+      protected:
+         void reset10x10() const {
+            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+         };
+         virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+             reset10x10();
+         }
+         Variable mVariable;
    };
 
-   TEST_F(FileNetcdfTest, isValid1) {
+   TEST_F(FileNetcdfTest, isValid) {
       FileNetcdf file = FileNetcdf("testing/files/validNetcdf1.nc");
-
    }
-   /*
+   TEST_F(FileNetcdfTest, missingY) {
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdf2.nc");
+      EXPECT_EQ(1, file.getNumLat());
+      EXPECT_EQ(10, file.getNumLon());
+      EXPECT_EQ(10, file.getNumEns());
+      EXPECT_EQ(2, file.getNumTime());
+   }
+   TEST_F(FileNetcdfTest, missingTime) {
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdf3.nc");
+      EXPECT_EQ(10, file.getNumLat());
+      EXPECT_EQ(10, file.getNumLon());
+      EXPECT_EQ(1, file.getNumEns());
+      EXPECT_EQ(1, file.getNumTime());
+   }
+
    TEST_F(FileNetcdfTest, overwriteAttribute) {
       FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
       file.setGlobalAttribute("history", "test512");
@@ -37,7 +62,7 @@ namespace {
       EXPECT_EQ("testing\nempty\ntesting2", file.getGlobalAttribute("history"));
 
       // Writing should not thrown an error
-      std::vector<Variable::Type> vars;
+      std::vector<Variable> vars;
       file.write(vars);
    }
    TEST_F(FileNetcdfTest, appendAttributeEmpty) {
@@ -60,8 +85,8 @@ namespace {
       file.setAttribute("air_temperature_2m", "att1", "value73");
 
       file.setGlobalAttribute("att2",  "value15");
-      std::vector<Variable::Type> vars;
-      vars.push_back(Variable::T);
+      std::vector<Variable> vars;
+      vars.push_back(mVariable);
       file.write(vars);
       FileNetcdf file2 = FileNetcdf("testing/files/10x10_copy.nc");
       EXPECT_EQ("value321192839819", file.getGlobalAttribute("att1"));
@@ -76,8 +101,8 @@ namespace {
       file.setAttribute("air_temperature_2m", "att1", "value71");
       EXPECT_EQ("value71",  file.getAttribute("air_temperature_2m", "att1"));
       // Read data
-      FieldPtr field = file.getField(Variable::T, 0);
-      std::vector<Variable::Type> vars(1,Variable::T);
+      FieldPtr field = file.getField(mVariable, 0);
+      std::vector<Variable> vars(1, mVariable);
       // Write data
       file.write(vars);
 
@@ -106,7 +131,7 @@ namespace {
          ss << "1234";
          std::string value = ss.str();
          file.appendGlobalAttribute("history", value);
-         std::vector<Variable::Type> vars(1,Variable::T);
+         std::vector<Variable> vars(1, mVariable);
          file.write(vars);
       }
       // Make sure the attribute hasn't been set to the really long value
@@ -114,19 +139,23 @@ namespace {
       std::string value = file.getGlobalAttribute("history");
       EXPECT_TRUE(value.size() < 1e8);
    }
+   TEST_F(FileNetcdfTest, noTimeDimension) {
+      FileNetcdf file("testing/files/validNetcdf3.nc");
+      EXPECT_EQ(1, file.getNumTime());
+   }
    TEST_F(FileNetcdfTest, createNewVariable) {
       FileNetcdf file("testing/files/10x10_copy.nc");
-      std::vector<Variable::Type> vars;
-      vars.push_back(Variable::Pop6h);
+      std::vector<Variable> vars;
+      Variable var("pop");
+      vars.push_back(var);
       std::vector<float> pars(8,0);
       Parameters par(pars);
       ParameterFileSimple parFile(par);
-      file.initNewVariable(Variable::Pop6h);
-      CalibratorZaga cal(Variable::Pop6h, Options("outputPop=1 neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5 6h=1"));
+      file.initNewVariable(var);
+      CalibratorZaga cal(var, Options("popVariable=pop neighbourhoodSize=1 fracThreshold=0.4 popThreshold=0.5 6h=1"));
       cal.calibrate(file, &parFile);
       file.write(vars);
    }
-   */
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

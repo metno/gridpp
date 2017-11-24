@@ -8,12 +8,8 @@ CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOpti
       Calibrator(iVariable, iOptions),
       mMinPrecip(0.2),
       mEstimatePressure(true) {
-   if(!iOptions.getValue("temperatureVariable", mTemperatureVariable)) {
-      Util::error("CalibratorPhase: 'temperatureVariable' missing");
-   }
-   if(!iOptions.getValue("precipitationVariable", mPrecipitationVariable)) {
-      Util::error("CalibratorPhase: 'precipitationVariable' missing");
-   }
+   iOptions.getRequiredValue("temperatureVariable", mTemperatureVariable);
+   iOptions.getRequiredValue("precipitationVariable", mPrecipitationVariable);
    iOptions.getValue("pressureVariable", mPressureVariable);
    iOptions.getValue("rhVariable", mRhVariable);
    mUseWetbulb = mPressureVariable != "" && mRhVariable != "";

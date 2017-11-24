@@ -4,9 +4,7 @@
 #include <math.h>
 CalibratorQnh::CalibratorQnh(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions) {
-   if(!iOptions.getValue("pressureVariable", mPressureVariable)) {
-      Util::error("CalibratorQnh: 'pressureVariable' missing");
-   }
+   iOptions.getRequiredValue("pressureVariable", mPressureVariable);
    iOptions.check();
 }
 bool CalibratorQnh::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {

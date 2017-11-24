@@ -8,9 +8,7 @@
 #include "../Parameters.h"
 CalibratorWindDirection::CalibratorWindDirection(const Variable& iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions) {
-   if(!iOptions.getValue("directionVariable", mDirectionVariable)) {
-      Util::error("CalibratorWindDirection: 'directionVariable' missing");
-   }
+   iOptions.getValue("directionVariable", mDirectionVariable);
    iOptions.check();
 }
 

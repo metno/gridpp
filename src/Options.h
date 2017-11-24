@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <set>
+#include "Util.h"
 
 
 //! Container class for key-value pairs.
@@ -59,6 +60,18 @@ class Options {
          return false;
       };
 
+      //! \brief Find value corresponding to key, throw error if not found
+      //! @param iKey find this key
+      //! @param iValue places the value in this variable. If key does not exist, this is unchanged.
+      template <class T> void getRequiredValue(std::string iKey, T& iValue) const {
+         bool status = getValue(iKey, iValue);
+         if(!status) {
+            std::stringstream ss;
+            ss << "Required key '" << iKey << "' missing in: " << toString();
+            Util::error(ss.str());
+         }
+      };
+
       //! \brief Find vector values corresponding to key
       //! @param iKey find this key
       //! @param iValues places the values in this variable (variable cleared first). If key does
@@ -89,6 +102,16 @@ class Options {
          }
          return false;
       };
+
+     template <class T> void getRequiredValues(const std::string& iKey, std::vector<T>& iValues) const {
+        bool status = getValues(iKey, iValues);
+        if(!status) {
+           std::stringstream ss;
+           ss << "Required key '" << iKey << "' missing in: " << toString();
+           Util::error(ss.str());
+        }
+     };
+
       //! Check that a value is present for the key
       bool hasValue(const std::string& iKey) const;
 

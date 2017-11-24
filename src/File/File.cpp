@@ -273,12 +273,6 @@ double File::getReferenceTime() const {
    return mReferenceTime;
 }
 void File::setTimes(std::vector<double> iTimes) {
-   if(iTimes.size() != getNumTime()) {
-      std::stringstream ss;
-      ss << "Setting times array in '" << getFilename() << "' with " << iTimes.size()
-         << " elements when the time dimension is " << getNumTime();
-      Util::warning(ss.str());
-   }
    mTimes = iTimes;
 }
 std::vector<double> File::getTimes() const {

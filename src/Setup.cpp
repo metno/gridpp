@@ -267,19 +267,24 @@ Setup::Setup(const std::vector<std::string>& argv) {
             if(!alreadyExists) {
                VariableConfiguration varconf;
                varconf.parameterFileDownscaler = parameterFileDownscaler;
-               // TODO: ii0
+               // Find input variable
                bool found = inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
                if(!found) {
                   std::stringstream ss;
                   ss << "Input file does not contain variable with name '" << useVariableInputName << "'";
                   Util::error(ss.str());
                }
+               varconf.inputVariable.add(useVariableInputOptions);
+
+               // Find output variable
                found = outputFiles[0]->getVariable(variableName, varconf.outputVariable);
                if(!found) {
                   found = inputFiles[0]->getVariable(variableName, varconf.outputVariable);
                   if(!found)
                      varconf.outputVariable = Variable(variableName);
                }
+               varconf.outputVariable.add(vOptions);
+
                std::vector<Calibrator*> calibrators;
                for(int c = 0; c < calibratorNames.size(); c++) {
                   Calibrator* calibrator = Calibrator::getScheme(calibratorNames[c], varconf.outputVariable, cOptions);

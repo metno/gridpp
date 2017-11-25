@@ -103,6 +103,7 @@ namespace {
       EXPECT_EQ(1, file.getNumTime());
       std::vector<double> times = file.getTimes();
       EXPECT_EQ(1, times.size());
+      // Use forecast_reference_time
       EXPECT_FLOAT_EQ(1414130400, times[0]);
 
       FieldPtr field = file.getField(Variable("air_temperature_2m"), 0);
@@ -110,6 +111,14 @@ namespace {
       EXPECT_FLOAT_EQ(303, (*field)(2, 1, 0));
       EXPECT_FLOAT_EQ(307, (*field)(2, 0, 1));
       EXPECT_FLOAT_EQ(Util::MV, (*field)(0, 0, 1));
+   }
+
+   TEST_F(FileNetcdfTest, scalarTime) {
+      // Test that an analysis file can use a time variable without a dimension
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdfAnalysis2.nc");
+      EXPECT_EQ(1, file.getNumTime());
+      std::vector<double> times = file.getTimes();
+      EXPECT_FLOAT_EQ(1414130400, times[0]);
    }
 
    TEST_F(FileNetcdfTest, overwriteAttribute) {

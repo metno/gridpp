@@ -127,11 +127,21 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 
    if(Util::isValid(mTimeVar)) {
       int size = getDimSize(mTimeDim);
-      double* times = new double[size];
-      int status = nc_get_var_double(mFile, mTimeVar, times);
-      handleNetcdfError(status, "could not get times");
-      setTimes(std::vector<double>(times, times+size));
-      delete[] times;
+      if(Util::isValid(size)) {
+         double* times = new double[size];
+         int status = nc_get_var_double(mFile, mTimeVar, times);
+         handleNetcdfError(status, "could not get times");
+         setTimes(std::vector<double>(times, times+size));
+         delete[] times;
+      }
+      else {
+         // Time is a scalar
+         double time = Util::MV;
+         int status = nc_get_var_double(mFile, mTimeVar, &time);
+         handleNetcdfError(status, "could not get time");
+         std::vector<double> times(1, time);
+         setTimes(times);
+      }
    }
    else if(Util::isValid(getReferenceTime())) {
       std::stringstream ss;

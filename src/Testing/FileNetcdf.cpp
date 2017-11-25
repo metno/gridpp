@@ -47,6 +47,44 @@ namespace {
       EXPECT_FLOAT_EQ(21, (*field)(0, 0, 0));
       EXPECT_FLOAT_EQ(26, (*field)(5, 0, 0));
    }
+   TEST_F(FileNetcdfTest, dimNames) {
+      // Check that dim and var options are passed to the parser
+      // Altitudes have the x and y dimensions reversed, so test that this works.
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdfDimNames.nc", Options("xDim=h2 yDim=h1 timeDim=date ensDim=member latVar=latVar lonVar=lonVar timeVar=date"));
+      EXPECT_EQ(3, file.getNumY());
+      EXPECT_EQ(2, file.getNumX());
+      EXPECT_EQ(2, file.getNumEns());
+      EXPECT_EQ(2, file.getNumTime());
+      vec2 lats = file.getLats();
+      vec2 lons = file.getLons();
+      vec2 elevs = file.getElevs();
+      for(int i = 0; i < file.getNumY(); i++) {
+         for(int j = 0; j < file.getNumX(); j++) {
+            EXPECT_FLOAT_EQ(i, lats[i][j]);
+            EXPECT_FLOAT_EQ(j, lons[i][j]);
+         }
+      }
+      // Ncview doesn't show the correct elevation field since the field has the y/x
+      // dimensions flipped.
+      EXPECT_FLOAT_EQ(160, elevs[0][0]);
+      EXPECT_FLOAT_EQ(295, elevs[1][0]);
+      EXPECT_FLOAT_EQ(11, elevs[2][0]);
+      EXPECT_FLOAT_EQ(-13, elevs[0][1]);
+      EXPECT_FLOAT_EQ(168, elevs[1][1]);
+      EXPECT_FLOAT_EQ(-171, elevs[2][1]);
+
+      FieldPtr field = file.getField(Variable("air_temperature_2m"), 0);
+      EXPECT_FLOAT_EQ(1, (*field)(0, 0, 0));
+      EXPECT_FLOAT_EQ(27, (*field)(2, 0, 0));
+
+      EXPECT_FLOAT_EQ(28, (*field)(2, 0, 1));
+      EXPECT_FLOAT_EQ(32, (*field)(2, 1, 1));
+      field = file.getField(Variable("air_temperature_2m"), 1);
+      EXPECT_FLOAT_EQ(21, (*field)(1, 0, 0));
+      EXPECT_FLOAT_EQ(24, (*field)(1, 1, 0));
+      EXPECT_FLOAT_EQ(12, (*field)(0, 1, 1));
+      EXPECT_FLOAT_EQ(38, (*field)(2, 1, 1));
+   }
 
    TEST_F(FileNetcdfTest, overwriteAttribute) {
       FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");

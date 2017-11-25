@@ -27,7 +27,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    if(!iOptions.getValue("timeVar", timeVar))
       mTimeVar = detectTimeVar();
    else
-      mLonVar = getVar(lonVar);
+      mTimeVar = getVar(timeVar);
 
    // Dimensions
    if(!iOptions.getValue("ensDim", ensDim))
@@ -55,10 +55,6 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    if(Util::isValid(mEnsDim))
       mNEns = getDimSize(mEnsDim);
 
-   // Retrieve lat/lon grid
-   mLats = getLatLonVariable(mLatVar);
-   mLons = getLatLonVariable(mLonVar);
-
    // Compute elevations
    std::string elevVar;
    mElevVar = Util::MV;
@@ -74,6 +70,18 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    }
    else
       mElevVar = getVar(elevVar);
+
+   std::string lafVar;
+   if(!iOptions.getValue("lafVar", lafVar)) {
+      lafVar = "land_area_fraction";
+   }
+   iOptions.check();
+
+   // Done reading options
+
+   // Retrieve lat/lon grid
+   mLats = getLatLonVariable(mLatVar);
+   mLons = getLatLonVariable(mLonVar);
 
    if(Util::isValid(mElevVar)) {
       mElevs = getLatLonVariable(mElevVar);
@@ -92,11 +100,6 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
          }
       }
       Util::warning("No altitude field available in " + getFilename());
-   }
-
-   std::string lafVar;
-   if(!iOptions.getValue("lafVar", lafVar)) {
-      lafVar = "land_area_fraction";
    }
 
    if(hasVar(lafVar)) {

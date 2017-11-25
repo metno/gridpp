@@ -59,7 +59,7 @@ class Calibrator : public Scheme {
 #include "Coastal.h"
 #include "DiagnoseDewpoint.h"
 #include "DiagnoseRh.h"
-#include "DiagnoseWindSpeed.h"
+#include "DiagnoseWind.h"
 #include "Gaussian.h"
 #include "Kriging.h"
 #include "Mask.h"

@@ -43,8 +43,8 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
       CalibratorDiagnoseRh* c = new CalibratorDiagnoseRh(iVariable, iOptions);
       return c;
    }
-   else if(iName == "diagnoseWindSpeed") {
-      CalibratorDiagnoseWindSpeed* c = new CalibratorDiagnoseWindSpeed(iVariable, iOptions);
+   else if(iName == "diagnoseWind") {
+      CalibratorDiagnoseWind* c = new CalibratorDiagnoseWind(iVariable, iOptions);
       return c;
    }
    else if(iName == "phase") {
@@ -190,7 +190,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorCoastal::description() << std::endl;
    ss << CalibratorDiagnoseDewpoint::description() << std::endl;
    ss << CalibratorDiagnoseRh::description() << std::endl;
-   ss << CalibratorDiagnoseWindSpeed::description() << std::endl;
+   ss << CalibratorDiagnoseWind::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
    ss << CalibratorMask::description() << std::endl;

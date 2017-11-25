@@ -85,6 +85,32 @@ namespace {
       EXPECT_FLOAT_EQ(12, (*field)(0, 1, 1));
       EXPECT_FLOAT_EQ(38, (*field)(2, 1, 1));
    }
+   TEST_F(FileNetcdfTest, geopotential) {
+      // Test that altitude is computed from surface geopotential
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdfGeopotential.nc");
+      vec2 elevs = file.getElevs();
+      EXPECT_FLOAT_EQ(90/9.81, elevs[0][0]);
+      EXPECT_FLOAT_EQ(30/9.81, elevs[1][0]);
+      EXPECT_FLOAT_EQ(14/9.81, elevs[2][0]);
+      EXPECT_FLOAT_EQ(80/9.81, elevs[0][1]);
+      EXPECT_FLOAT_EQ(40/9.81, elevs[1][1]);
+      EXPECT_FLOAT_EQ(99/9.81, elevs[2][1]);
+   }
+
+   TEST_F(FileNetcdfTest, analysis) {
+      // Test that an analysis file is parsed correctly
+      FileNetcdf file = FileNetcdf("testing/files/validNetcdfAnalysis.nc");
+      EXPECT_EQ(1, file.getNumTime());
+      std::vector<double> times = file.getTimes();
+      EXPECT_EQ(1, times.size());
+      EXPECT_FLOAT_EQ(1414130400, times[0]);
+
+      FieldPtr field = file.getField(Variable("air_temperature_2m"), 0);
+      EXPECT_FLOAT_EQ(300, (*field)(0, 0, 0));
+      EXPECT_FLOAT_EQ(303, (*field)(2, 1, 0));
+      EXPECT_FLOAT_EQ(307, (*field)(2, 0, 1));
+      EXPECT_FLOAT_EQ(Util::MV, (*field)(0, 0, 1));
+   }
 
    TEST_F(FileNetcdfTest, overwriteAttribute) {
       FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");

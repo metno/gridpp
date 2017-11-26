@@ -52,12 +52,6 @@ namespace {
       Downscaler* d2 = Downscaler::getScheme("gradient", mVariable, mVariable, Options("elevRadius=5 constantElevGradient=0.04 minElevDiff=213.2"));
       Downscaler* d3 = Downscaler::getScheme("pressure", mVariable, mVariable, Options(""));
       Downscaler* d4 = Downscaler::getScheme("bypass", mVariable, mVariable, Options(""));
-      EXPECT_EQ(3, ((DownscalerSmart*) d1)->getSearchRadius());
-      EXPECT_EQ(2, ((DownscalerSmart*) d1)->getNumSmart());
-      EXPECT_EQ(400, ((DownscalerSmart*) d1)->getMinElevDiff());
-      EXPECT_EQ(5, ((DownscalerGradient*) d2)->getElevRadius());
-      EXPECT_FLOAT_EQ(213.2, ((DownscalerGradient*) d2)->getMinElevDiff());
-      EXPECT_FLOAT_EQ(0.04, ((DownscalerGradient*) d2)->getConstantElevGradient());
       EXPECT_EQ("nearestNeighbour", d0->name());
       EXPECT_EQ("smart", d1->name());
       EXPECT_EQ("gradient", d2->name());

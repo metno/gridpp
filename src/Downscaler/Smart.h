@@ -11,15 +11,6 @@ class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable
       DownscalerSmart(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
-      //! Use this many smart neighbours
-      void setNumSmart(int iNumSmart);
-      int getNumSmart() const;
-      //! Search for smart neighbours within a neighbourhood of points within +- iNumPoints
-      //! in each direction.
-      void setSearchRadius(int iNumPoints);
-      int  getSearchRadius() const;
-      void setMinElevDiff(float iMinElevDiff);
-      float getMinElevDiff();
       static std::string description();
       std::string name() const {return "smart";};
 

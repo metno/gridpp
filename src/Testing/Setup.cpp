@@ -15,11 +15,10 @@ namespace {
          Variable mVariable;
    };
    TEST_F(SetupTest, test1) {
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -c zaga -p testing/files/parameters.txt type=text -c accumulate -d smart searchRadius=11"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -c zaga -p testing/files/parameters.txt type=text -c accumulate -d smart radius=11"));
       EXPECT_EQ(1, setup.variableConfigurations.size());
       EXPECT_EQ(2, setup.variableConfigurations[0].calibrators.size());
       EXPECT_EQ(mVariable, setup.variableConfigurations[0].inputVariable);
-      EXPECT_EQ(11, ((DownscalerSmart*) setup.variableConfigurations[0].downscaler)->getSearchRadius());
    }
    TEST_F(SetupTest, test2) {
       std::vector<std::string> lines;

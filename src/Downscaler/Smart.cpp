@@ -65,22 +65,6 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
       }
    }
 }
-void DownscalerSmart::setNumSmart(int iNumSmart) {
-   if(!Util::isValid(iNumSmart) || iNumSmart <= 0) {
-      std::stringstream ss;
-      ss << "DownscalerSmart: number of smart neighbours must be >= 1";
-      Util::error(ss.str());
-   }
-   mNum = iNumSmart;
-}
-void DownscalerSmart::setSearchRadius(int iNumPoints) {
-   if(!Util::isValid(iNumPoints) || iNumPoints < 0) {
-      std::stringstream ss;
-      ss << "DownscalerSmart: search radius must be >= 0";
-      Util::error(ss.str());
-   }
-   mRadius = iNumPoints;
-}
 void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec3Int& iI, vec3Int& iJ) const {
    vec2 ilats  = iFrom.getLats();
    vec2 ilons  = iFrom.getLons();
@@ -175,19 +159,6 @@ int DownscalerSmart::getNumSearchPoints() const {
 
 int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
    return (iSearchRadius*2+1)*(iSearchRadius*2+1);
-}
-
-int  DownscalerSmart::getSearchRadius() const {
-   return mRadius;
-}
-int DownscalerSmart::getNumSmart() const {
-   return mNum;
-}
-void DownscalerSmart::setMinElevDiff(float iMinElevDiff) {
-   mMinElevDiff = iMinElevDiff;
-}
-float DownscalerSmart::getMinElevDiff() {
-   return mMinElevDiff;
 }
 
 std::string DownscalerSmart::description() {

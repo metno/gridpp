@@ -87,12 +87,13 @@ Setup::Setup(const std::vector<std::string>& argv) {
    Options vOptions;
    Options viOptions;
    Options dOptions;
-   Options cOptions;
+   std::vector<Options> cOptions;
    Options pOptions;
    std::string errorMessage = "";
 
    std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
+   Options cOpt;
    std::string parameterFile = "";
    std::vector<std::string> calibratorNames;
    std::vector<ParameterFile*> parameterFileCalibrators;
@@ -293,7 +294,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
 
                std::vector<Calibrator*> calibrators;
                for(int c = 0; c < calibratorNames.size(); c++) {
-                  Calibrator* calibrator = Calibrator::getScheme(calibratorNames[c], varconf.outputVariable, cOptions);
+                  Calibrator* calibrator = Calibrator::getScheme(calibratorNames[c], varconf.outputVariable, cOptions[c]);
                   calibrators.push_back(calibrator);
                }
                varconf.calibrators = calibrators;
@@ -507,7 +508,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
          else {
             // Process calibrator options
-            cOptions.addOptions(argv[index]);
+            cOpt.addOptions(argv[index]);
             index++;
          }
       }
@@ -595,10 +596,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
          if(state != ERROR) {
             calibratorNames.push_back(calibrator);
+            cOptions.push_back(cOpt);
             parameterFileCalibrators.push_back(p);
 
             // Reset
             calibrator = "";
+            cOpt.clear();
             parameterFile = "";
             if(argv.size() <= index) {
                state = NEWVAR;

@@ -90,9 +90,6 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    }
 
    setTimes(times);
-   mNTime = times.size();
-   mNLat = locations.size();
-   mNLon = 1;
 
    // Put data into mLocalFields
    mLocalFields.resize(times.size());
@@ -112,11 +109,11 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    }
 }
 
-FieldPtr FileText::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FileText::getFieldCore(const Variable& iVariable, int iTime) const {
    return mLocalFields[iTime];
 }
 
-void FileText::writeCore(std::vector<Variable::Type> iVariables) {
+void FileText::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
    if(iVariables.size() == 0) {

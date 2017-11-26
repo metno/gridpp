@@ -10,16 +10,7 @@ typedef std::vector<std::vector<std::vector<int> > > vec3Int; // lat, lon, neigh
 class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerSmart(Variable::Type iVariable, const Options& iOptions);
-      //! Use this many smart neighbours
-      void setNumSmart(int iNumSmart);
-      int getNumSmart() const;
-      //! Search for smart neighbours within a neighbourhood of points within +- iNumPoints
-      //! in each direction.
-      void setSearchRadius(int iNumPoints);
-      int  getSearchRadius() const;
-      void setMinElevDiff(float iMinElevDiff);
-      float getMinElevDiff();
+      DownscalerSmart(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "smart";};
 
@@ -29,8 +20,8 @@ class DownscalerSmart : public Downscaler {
              int getNumSearchPoints() const;
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      int mSearchRadius;
-      int mNumSmart;
+      int mRadius;
+      int mNum;
       float mMinElevDiff;
 };
 #endif

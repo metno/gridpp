@@ -78,30 +78,40 @@ Setup::Setup(const std::vector<std::string>& argv) {
    }
 
    // Implement a finite state machine
-   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, PARDOWN = 30, PAROPTDOWN = 35, PARCAL = 40, PAROPTCAL = 45, END = 90, ERROR = 100};
+   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, VARI = 4, VARIOPT = 5, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, PARDOWN = 30, PAROPTDOWN = 35, PARCAL = 40, PAROPTCAL = 45, END = 90, ERROR = 100};
    State state = START;
    State prevState = START;
 
-   Variable::Type variable = Variable::None;
+   std::string variableName = "";
+   std::string variableInputName = "";
    Options vOptions;
+   Options viOptions;
    Options dOptions;
-   Options cOptions;
+   std::vector<Options> cOptions;
    Options pOptions;
    std::string errorMessage = "";
 
    std::string downscaler = defaultDownscaler();
    std::string calibrator = "";
+   Options cOpt;
    std::string parameterFile = "";
-   std::vector<Calibrator*> calibrators;
+   std::vector<std::string> calibratorNames;
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler = NULL;
    while(true) {
-      // std::cout << state << std::endl;
+      std::stringstream ss;
+      ss << "State: " << state;
+      Util::info(ss.str());
+
       if(state != ERROR)
          prevState = state;
       if(state == START) {
          if(index < argv.size() && argv[index] == "-v") {
             state = VAR;
+            index++;
+         }
+         else if(index < argv.size() && argv[index] == "-vi") {
+            state = VARI;
             index++;
          }
          else {
@@ -115,13 +125,24 @@ Setup::Setup(const std::vector<std::string>& argv) {
             errorMessage = "No variable after '-v'";
             state = ERROR;
          }
+         else if(argv[index][0] == '-') {
+            errorMessage = "No variable name after '-v'";
+            state = ERROR;
+         }
          else {
-            variable = Variable::getType(argv[index]);
+            variableName = argv[index];
             index++;
             if(argv.size() <= index) {
                state = NEWVAR;
             }
             else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(variableInputName == "" && argv[index] == "-vi") {
+               state = VARI;
+               index++;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWVAR;
             }
             else if(argv[index] == "-d") {
@@ -156,6 +177,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
          else if(argv[index] == "-v") {
             state = NEWVAR;
          }
+         else if(argv[index] == "-vi") {
+               index++;
+            state = VARI;
+         }
          else if(argv[index] == "-p") {
             errorMessage = "-p must be after a -d or -c";
             state = ERROR;
@@ -166,44 +191,159 @@ Setup::Setup(const std::vector<std::string>& argv) {
             index++;
          }
       }
-      else if(state == NEWVAR) {
-         // Check that we haven't added the variable before
-         bool alreadyExists = false;
-         for(int i = 0; i < variableConfigurations.size(); i++) {
-            if(variableConfigurations[i].variable == variable)
-               alreadyExists = true;
-         }
-
-         if(!alreadyExists) {
-            dOptions.addOption("variable", Variable::getTypeName(variable));
-            Downscaler* d = Downscaler::getScheme(downscaler, variable, dOptions);
-            VariableConfiguration varconf;
-            varconf.variable = variable;
-            varconf.downscaler = d;
-            varconf.parameterFileDownscaler = parameterFileDownscaler;
-            varconf.calibrators = calibrators;
-            varconf.parameterFileCalibrators = parameterFileCalibrators;
-            varconf.variableOptions = vOptions;
-            variableConfigurations.push_back(varconf);
-         }
-         else {
-            Util::warning("Variable '" + Variable::getTypeName(variable) + "' already read. Using first instance.");
-         }
-
-         // Reset to defaults
-         vOptions.clear();
-         downscaler = defaultDownscaler();
-         parameterFileDownscaler = NULL;
-         dOptions.clear();
-         calibrators.clear();
-         parameterFileCalibrators.clear();
-
+      else if(state == VARI) {
          if(argv.size() <= index) {
-            state = END;
+            // -vi but nothing after it
+            errorMessage = "No variable after '-vi'";
+            state = ERROR;
+         }
+         else if(argv[index][0] == '-') {
+            errorMessage = "No variable name after '-v'";
+            state = ERROR;
          }
          else {
+            variableInputName = argv[index];
+            index++;
+            if(argv.size() <= index) {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-vi") {
+               state = NEWVAR;
+            }
+            else if(variableName == "" && argv[index] == "-v") {
+               state = VAR;
+               index++;
+            }
+            else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-d") {
+               state = DOWN;
+               index++;
+            }
+            else if(argv[index] == "-c") {
+               state = CAL;
+               index++;
+            }
+            else if(argv[index] == "-p") {
+               errorMessage = "-p must be after a -d or -c";
+               state = ERROR;
+            }
+            else {
+               state = VARIOPT;
+            }
+         }
+      }
+      else if(state == VARIOPT) {
+         if(argv.size() <= index) {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-d") {
+            state = DOWN;
+            index++;
+         }
+         else if(argv[index] == "-c") {
+            state = CAL;
+            index++;
+         }
+         else if(argv[index] == "-vi") {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-v") {
             state = VAR;
             index++;
+         }
+         else if(argv[index] == "-p") {
+            errorMessage = "-p must be after a -d or -c";
+            state = ERROR;
+         }
+         else {
+            // Process variable options
+            viOptions.addOptions(argv[index]);
+            index++;
+         }
+      }
+      else if(state == NEWVAR) {
+         // Check that we haven't added the variable before
+         if(variableName == "") {
+            errorMessage = "-vi but no -v";
+            state = ERROR;
+         }
+         else {
+            bool alreadyExists = false;
+            for(int i = 0; i < variableConfigurations.size(); i++) {
+               if(variableConfigurations[i].outputVariable.name() == variableName)
+                  alreadyExists = true;
+            }
+            std::string useVariableInputName = variableInputName;
+            Options useVariableInputOptions = viOptions;
+            if(useVariableInputName == "") {
+               useVariableInputName = variableName;
+               useVariableInputOptions = vOptions;
+            }
+
+            if(!alreadyExists) {
+               VariableConfiguration varconf;
+               varconf.parameterFileDownscaler = parameterFileDownscaler;
+               // Find input variable
+               bool found = inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
+               if(!found) {
+                  std::stringstream ss;
+                  ss << "Input file does not contain variable with name '" << useVariableInputName << "'";
+                  Util::warning(ss.str());
+               }
+               varconf.inputVariable.add(useVariableInputOptions);
+
+               // Find output variable
+               found = outputFiles[0]->getVariable(variableName, varconf.outputVariable);
+               if(!found) {
+                  found = inputFiles[0]->getVariable(variableName, varconf.outputVariable);
+                  if(!found)
+                     varconf.outputVariable = Variable(variableName);
+               }
+               varconf.outputVariable.add(vOptions);
+
+               std::vector<Calibrator*> calibrators;
+               for(int c = 0; c < calibratorNames.size(); c++) {
+                  Calibrator* calibrator = Calibrator::getScheme(calibratorNames[c], varconf.outputVariable, cOptions[c]);
+                  calibrators.push_back(calibrator);
+               }
+               varconf.calibrators = calibrators;
+               varconf.parameterFileCalibrators = parameterFileCalibrators;
+               varconf.inputVariableOptions = useVariableInputOptions;
+               varconf.outputVariableOptions = vOptions;
+               Downscaler* d = Downscaler::getScheme(downscaler, varconf.inputVariable, varconf.outputVariable, dOptions);
+               varconf.downscaler = d;
+               variableConfigurations.push_back(varconf);
+            }
+            else {
+               std:: stringstream ss;
+               ss << "Variable '" << variableName << "' already read. Using first instance.";
+               Util::warning(ss.str());
+            }
+
+            // Reset to defaults
+            vOptions.clear();
+            viOptions.clear();
+            variableName = "";
+            variableInputName = "";
+            downscaler = defaultDownscaler();
+            parameterFileDownscaler = NULL;
+            dOptions.clear();
+            calibratorNames.clear();
+            parameterFileCalibrators.clear();
+
+            if(argv.size() <= index) {
+               state = END;
+            }
+            else if(argv[index] == "-v"){
+               state = VAR;
+               index++;
+            }
+            else if(argv[index] == "-vi"){
+               state = VARI;
+               index++;
+            }
          }
       }
       else if(state == DOWN) {
@@ -223,6 +363,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
                index++;
             }
             else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWVAR;
             }
             else if(argv[index] == "-d") {
@@ -247,6 +390,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             index++;
          }
          else if(argv[index] == "-v") {
+            state = NEWVAR;
+         }
+         else if(argv[index] == "-vi") {
             state = NEWVAR;
          }
          else if(argv[index] == "-p") {
@@ -277,6 +423,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             else if(argv[index] == "-v") {
                state = NEWVAR;
             }
+            else if(argv[index] == "-vi") {
+               state = NEWVAR;
+            }
             else if(argv[index] == "-d") {
                // Two downscalers defined for one variable
                state = DOWN;
@@ -304,6 +453,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
          else if(argv[index] == "-v") {
             state = NEWVAR;
          }
+         else if(argv[index] == "-vi") {
+            state = NEWVAR;
+         }
          else if(argv[index] == "-p") {
             errorMessage = "Two or more -p used for one calibrator";
             state = ERROR;
@@ -327,6 +479,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
                state = NEWCAL;
             }
             else if(argv[index] == "-v") {
+               state = NEWCAL;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWCAL;
             }
             else if(argv[index] == "-c") {
@@ -353,6 +508,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
          else if(argv[index] == "-v") {
             state = NEWCAL;
          }
+         else if(argv[index] == "-vi") {
+            state = NEWCAL;
+         }
          else if(argv[index] == "-d") {
             state = NEWCAL;
          }
@@ -361,7 +519,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
          else {
             // Process calibrator options
-            cOptions.addOptions(argv[index]);
+            cOpt.addOptions(argv[index]);
             index++;
          }
       }
@@ -378,6 +536,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
                index++;
             }
             else if(argv[index] == "-v") {
+               state = NEWCAL;
+               index++;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWCAL;
                index++;
             }
@@ -406,6 +568,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = NEWCAL;
          }
          else if(argv[index] == "-v") {
+            state = NEWCAL;
+         }
+         else if(argv[index] == "-vi") {
             state = NEWCAL;
          }
          else if(argv[index] == "-d") {
@@ -441,16 +606,14 @@ Setup::Setup(const std::vector<std::string>& argv) {
             }
          }
          if(state != ERROR) {
-            cOptions.addOption("variable", Variable::getTypeName(variable));
-            Calibrator* c = Calibrator::getScheme(calibrator, cOptions);
-            calibrators.push_back(c);
+            calibratorNames.push_back(calibrator);
+            cOptions.push_back(cOpt);
             parameterFileCalibrators.push_back(p);
 
             // Reset
             calibrator = "";
+            cOpt.clear();
             parameterFile = "";
-            cOptions.clear();
-            pOptions.clear();
             if(argv.size() <= index) {
                state = NEWVAR;
             }
@@ -459,6 +622,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
                index++;
             }
             else if(argv[index] == "-v") {
+               state = NEWVAR;
+            }
+            else if(argv[index] == "-vi") {
                state = NEWVAR;
             }
             else if(argv[index] == "-d") {

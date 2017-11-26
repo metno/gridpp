@@ -7,178 +7,82 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../File/File.h"
 
-Calibrator::Calibrator(const Options& iOptions) : Scheme(iOptions) {
+Calibrator::Calibrator(const Variable& iVariable, const Options& iOptions) : Scheme(iOptions),
+      mVariable(iVariable),
+      mOptions(iOptions) {
 
 }
-Calibrator* Calibrator::getScheme(std::string iName, const Options& iOptions) {
+Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const Options& iOptions) {
+   Calibrator* c;
 
    if(iName == "zaga") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'zaga' needs variable");
-      }
-      CalibratorZaga* c = new CalibratorZaga(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorZaga(iVariable, iOptions);
    }
    else if(iName == "cloud") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'cloud' needs variable");
-      }
-      CalibratorCloud* c = new CalibratorCloud(Variable::getType(variable), iOptions);
-      return c;
+      c = new CalibratorCloud(iVariable, iOptions);
    }
    else if(iName == "accumulate") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'accumulate' needs variable");
-      }
-      CalibratorAccumulate* c = new CalibratorAccumulate(Variable::getType(variable), iOptions);
-      return c;
+      c = new CalibratorAccumulate(iVariable, iOptions);
+   }
+   else if(iName == "deaccumulate") {
+      c = new CalibratorDeaccumulate(iVariable, iOptions);
    }
    else if(iName == "gaussian") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'gaussian' needs variable");
-      }
-      CalibratorGaussian* c = new CalibratorGaussian(Variable::getType(variable), iOptions);
-      return c;
+      c = new CalibratorGaussian(iVariable, iOptions);
    }
    else if(iName == "neighbourhood") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'neighbourhood' needs variable");
-      }
-      CalibratorNeighbourhood* c = new CalibratorNeighbourhood(Variable::getType(variable), iOptions);
-      return c;
+      c = new CalibratorNeighbourhood(iVariable, iOptions);
+   }
+   else if(iName == "diagnoseHumidity") {
+      c = new CalibratorDiagnoseHumidity(iVariable, iOptions);
+   }
+   else if(iName == "diagnoseWind") {
+      c = new CalibratorDiagnoseWind(iVariable, iOptions);
    }
    else if(iName == "phase") {
-      CalibratorPhase* c = new CalibratorPhase(iOptions);
-      float minPrecip;
-      if(iOptions.getValue("minPrecip", minPrecip)) {
-         c->setMinPrecip(minPrecip);
-      }
-      bool useWetbulb;
-      if(iOptions.getValue("useWetbulb", useWetbulb)) {
-         c->setUseWetbulb(useWetbulb);
-      }
-
-      return c;
+      c = new CalibratorPhase(iVariable, iOptions);
    }
    else if(iName == "windDirection") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'windDirection' needs variable");
-      }
-      CalibratorWindDirection* c = new CalibratorWindDirection(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorWindDirection(iVariable, iOptions);
    }
    else if(iName == "kriging") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'kriging' needs variable");
-      }
-      CalibratorKriging* c = new CalibratorKriging(Variable::getType(variable), iOptions);
-
-      return c;
-   }
-   else if(iName == "diagnose") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'diagnose' needs variable");
-      }
-      CalibratorDiagnose* c = new CalibratorDiagnose(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorKriging(iVariable, iOptions);
    }
    else if(iName == "window") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'window' needs variable");
-      }
-      CalibratorWindow* c = new CalibratorWindow(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorWindow(iVariable, iOptions);
    }
    else if(iName == "qc") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'qc' needs variable");
-      }
-      CalibratorQc* c = new CalibratorQc(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorQc(iVariable, iOptions);
    }
    else if(iName == "qnh") {
-      CalibratorQnh* c = new CalibratorQnh(iOptions);
-
-      return c;
+      c = new CalibratorQnh(iVariable, iOptions);
    }
    else if(iName == "qq") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'regression' needs variable");
-      }
-      CalibratorQq* c = new CalibratorQq(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorQq(iVariable, iOptions);
    }
    else if(iName == "regression") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'regression' needs variable");
-      }
-      CalibratorRegression* c = new CalibratorRegression(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorRegression(iVariable, iOptions);
    }
    else if(iName == "bct") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'bct' needs variable");
-      }
-      CalibratorBct* c = new CalibratorBct(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorBct(iVariable, iOptions);
    }
    else if(iName == "sort") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'sort' needs variable");
-      }
-      CalibratorSort* c = new CalibratorSort(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorSort(iVariable, iOptions);
    }
    else if(iName == "altitude") {
-      CalibratorAltitude* c = new CalibratorAltitude(iOptions);
-
-      return c;
+      c = new CalibratorAltitude(iVariable, iOptions);
    }
    else if(iName == "mask") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'mask' needs variable");
-      }
-      CalibratorMask* c = new CalibratorMask(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorMask(iVariable, iOptions);
    }
    else if(iName == "coastal") {
-      std::string variable;
-      if(!iOptions.getValue("variable", variable)) {
-         Util::error("Calibrator 'sort' needs variable");
-      }
-      CalibratorCoastal* c = new CalibratorCoastal(Variable::getType(variable), iOptions);
-
-      return c;
+      c = new CalibratorCoastal(iVariable, iOptions);
    }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
    }
+   return c;
 }
 bool Calibrator::calibrate(File& iFile, const ParameterFile* iParameterFile) const {
    if(requiresParameterFile() && iParameterFile == NULL) {
@@ -236,6 +140,10 @@ Parameters Calibrator::train(const std::vector<ObsEnsField>& iData, const Grid& 
    return par;
 }
 
+Options Calibrator::getOptions() const {
+   return mOptions;
+}
+
 std::string Calibrator::getDescriptions() {
    std::stringstream ss;
    ss << CalibratorAccumulate::description() << std::endl;
@@ -243,11 +151,13 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorBct::description() << std::endl;
    ss << CalibratorCloud::description() << std::endl;
    ss << CalibratorCoastal::description() << std::endl;
-   ss << CalibratorDiagnose::description() << std::endl;
+   ss << CalibratorDeaccumulate::description() << std::endl;
+   ss << CalibratorDiagnoseHumidity::description() << std::endl;
+   ss << CalibratorDiagnoseWind::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;
-   ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorMask::description() << std::endl;
+   ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorPhase::description() << std::endl;
    ss << CalibratorQc::description() << std::endl;
    ss << CalibratorQnh::description() << std::endl;

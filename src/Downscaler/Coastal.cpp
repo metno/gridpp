@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerCoastal::DownscalerCoastal(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mMinGradient(Util::MV),
       mMaxGradient(Util::MV),
       mLafRadius(1),
@@ -30,11 +30,12 @@ DownscalerCoastal::DownscalerCoastal(Variable::Type iVariable, const Options& iO
    iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("lafRadius", mLafRadius);
    iOptions.getValue("elevGradient", mElevGradient);
+   iOptions.check();
 }
 
 void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -47,16 +48,16 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
+   float minAllowed = mOutputVariable.min();
+   float maxAllowed = mOutputVariable.max();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
@@ -106,8 +107,8 @@ void DownscalerCoastal::downscaleCore(const File& iInput, File& iOutput) const {
                   float totalWeight = 0;
                   for(int r = 0; r < mSearchRadii.size(); r++) {
                      int searchRadius = mSearchRadii[r];
-                     for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+searchRadius); ii++) {
-                        for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+searchRadius); jj++) {
+                     for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iInput.getNumY()-1, Icenter+searchRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+searchRadius); jj++) {
                            float currLaf  = ilafs[ii][jj];
                            float currElev = ielevs[ii][jj];
                            float currValue = ifield(ii,jj,e);

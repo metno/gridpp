@@ -4,10 +4,9 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
+CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mRadius(3),
-      mVariable(iVariable),
       mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
@@ -50,11 +49,12 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(Variable::Type iVariable, const
          Util::error("CalibratorNeighbourhood: Unrecognized value for 'stat'");
       }
    }
+   iOptions.check();
 }
 
 bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
@@ -98,10 +98,6 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
       }
    }
    return true;
-}
-
-int CalibratorNeighbourhood::getRadius() const {
-   return mRadius;
 }
 
 std::string CalibratorNeighbourhood::description() {

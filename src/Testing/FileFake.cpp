@@ -86,8 +86,8 @@ namespace {
    }
    TEST_F(FileFakeTest, getDimensionSizes) {
       FileFake file(Options("nLat=4 nLon=2 nEns=5 nTime=3"));
-      EXPECT_EQ(4, file.getNumLat());
-      EXPECT_EQ(2, file.getNumLon());
+      EXPECT_EQ(4, file.getNumY());
+      EXPECT_EQ(2, file.getNumX());
       EXPECT_EQ(5, file.getNumEns());
       EXPECT_EQ(3, file.getNumTime());
    }

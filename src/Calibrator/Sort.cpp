@@ -4,13 +4,13 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorSort::CalibratorSort(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable) {
+CalibratorSort::CalibratorSort(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions) {
+   iOptions.check();
 }
 bool CalibratorSort::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

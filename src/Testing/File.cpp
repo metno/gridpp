@@ -5,6 +5,13 @@
 
 namespace {
    class FileTest : public ::testing::Test {
+      protected:
+         virtual void SetUp() {
+            mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(FileTest, 10x10) {
@@ -15,33 +22,32 @@ namespace {
       {
          FileNetcdf from("testing/files/10x10.nc");
          FileNetcdf to("testing/files/10x10_copy.nc");
-         EXPECT_TRUE(from.hasVariable(Variable::T));
-         DownscalerSmart d(Variable::T, Options());
-         std::vector<Variable::Type> variables;
-         variables.push_back(Variable::T);
+         EXPECT_TRUE(from.hasVariable(mVariable));
+         DownscalerSmart d(mVariable, mVariable, Options());
+         std::vector<Variable> variables;
+         variables.push_back(mVariable);
          d.downscale(from, to);
 
          to.write(variables);
       }
       FileNetcdf f1("testing/files/10x10.nc");
       FileNetcdf f2("testing/files/10x10_copy.nc");
-      FieldPtr p1 = f1.getField(Variable::T, 0);
-      FieldPtr p2 = f2.getField(Variable::T, 0);
+      FieldPtr p1 = f1.getField(mVariable, 0);
+      FieldPtr p2 = f2.getField(mVariable, 0);
       EXPECT_NE(*p1, *p2);
    }
    TEST_F(FileTest, hasVariable) {
       FileNetcdf from("testing/files/10x10.nc");
-      EXPECT_TRUE(from.hasVariable(Variable::PrecipAcc)); // Derivable
-      EXPECT_TRUE(from.hasVariable(Variable::Precip));
-      FieldPtr precip = from.getField(Variable::Precip, 0);
-      FieldPtr precipAcc = from.getField(Variable::PrecipAcc, 0);
+      EXPECT_FALSE(from.hasVariable(Variable("precipitation_amount_acc"))); // Can't derive
+      EXPECT_TRUE(from.hasVariable(Variable("precipitation_amount")));
+      FieldPtr precip = from.getField(Variable("precipitation_amount"), 0);
       EXPECT_FLOAT_EQ(0.911191, (*precip)(5,5,0));
-      EXPECT_FLOAT_EQ(0,        (*precipAcc)(5,5,0));
    }
-   TEST_F(FileTest, hasVariableWithoutDeriving) {
+   TEST_F(FileTest, test) {
       FileNetcdf from("testing/files/10x10.nc");
-      EXPECT_FALSE(from.hasVariableWithoutDeriving(Variable::PrecipAcc)); // Derivable
-      EXPECT_TRUE(from.hasVariableWithoutDeriving(Variable::Precip));
+      EXPECT_FALSE(from.hasVariable(Variable("test")));
+      FieldPtr field = from.getField(Variable("test"), 0);
+      EXPECT_TRUE(from.hasVariable(Variable("test")));
    }
    TEST_F(FileTest, hasSameDimensions) {
       FileNetcdf f1("testing/files/10x10.nc");
@@ -54,17 +60,19 @@ namespace {
    }
    TEST_F(FileTest, initNewVariable) {
       FileNetcdf f1("testing/files/10x10.nc");
-      EXPECT_FALSE(f1.hasVariable(Variable::Fake));
-      f1.initNewVariable(Variable::Fake);
-      EXPECT_TRUE(f1.hasVariable(Variable::Fake));
-      FieldPtr field = f1.getField(Variable::Fake, 0);
+      Variable variable("fake");
+      EXPECT_FALSE(f1.hasVariable(variable));
+      f1.initNewVariable(variable);
+      EXPECT_TRUE(f1.hasVariable(variable));
+      FieldPtr field = f1.getField(variable, 0);
    }
    TEST_F(FileTest, deriveVariables) {
       FileFake file(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
-      ASSERT_TRUE(file.hasVariable(Variable::Precip));
-      FieldPtr p0 = file.getField(Variable::Precip, 0);
-      FieldPtr p1 = file.getField(Variable::Precip, 1);
-      FieldPtr p2 = file.getField(Variable::Precip, 2);
+      Variable variable("precipitation");
+      ASSERT_TRUE(file.hasVariable(variable));
+      FieldPtr p0 = file.getField(variable, 0);
+      FieldPtr p1 = file.getField(variable, 1);
+      FieldPtr p2 = file.getField(variable, 2);
       (*p0)(1,1,0) = 7.4;
       (*p1)(1,1,0) = 3.1;
       (*p2)(1,1,0) = 2.4;
@@ -81,66 +89,34 @@ namespace {
       (*p1)(0,0,0) = 4.6;
       (*p2)(0,0,0) = 6.1;
 
-      FieldPtr acc0 = file.getField(Variable::PrecipAcc, 0);
-      FieldPtr acc1 = file.getField(Variable::PrecipAcc, 1);
-      FieldPtr acc2 = file.getField(Variable::PrecipAcc, 2);
-      EXPECT_FLOAT_EQ(0,        (*acc0)(1,1,0));
-      EXPECT_FLOAT_EQ(3.1,      (*acc1)(1,1,0));
-      EXPECT_FLOAT_EQ(5.5,      (*acc2)(1,1,0));
-      EXPECT_FLOAT_EQ(0,        (*acc0)(1,2,0));
-      EXPECT_FLOAT_EQ(Util::MV, (*acc1)(1,2,0));
-      EXPECT_FLOAT_EQ(Util::MV, (*acc2)(1,2,0));
-      EXPECT_FLOAT_EQ(0,        (*acc0)(0,2,0));
-      EXPECT_FLOAT_EQ(Util::MV, (*acc1)(0,2,0));
-      EXPECT_FLOAT_EQ(Util::MV, (*acc2)(0,2,0));
-      EXPECT_FLOAT_EQ(0,        (*acc0)(0,0,0));
-      EXPECT_FLOAT_EQ(4.6,      (*acc1)(0,0,0));
-      EXPECT_FLOAT_EQ(10.7,     (*acc2)(0,0,0));
-   }
-   TEST_F(FileTest, diagnoseW) {
-      FileNetcdf file("testing/files/10x10.nc");
-      ASSERT_FALSE(file.hasVariableWithoutDeriving(Variable::W));
-      ASSERT_TRUE(file.hasVariableWithoutDeriving(Variable::Xwind));
-      ASSERT_TRUE(file.hasVariableWithoutDeriving(Variable::Ywind));
-      FieldPtr field = file.getField(Variable::W, 0);
-      EXPECT_FLOAT_EQ(1.8898070623831842, (*field)(5,2,0));
-   }
-   TEST_F(FileTest, impossibleDerive) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-
-      FileNetcdf file("testing/files/10x10_noPrecip.nc");
-      ASSERT_TRUE(!file.hasVariable(Variable::Precip));
-      EXPECT_DEATH(file.getField(Variable::Precip, 0), ".*");
-      EXPECT_DEATH(file.getField(Variable::PrecipAcc, 0), ".*");
    }
    TEST_F(FileTest, getFieldInvalidTime) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
-      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
+      EXPECT_DEATH(f0.getField(mVariable, 4), ".*");
       FileNetcdf f1("testing/files/10x10.nc");
-      EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
+      EXPECT_DEATH(f1.getField(mVariable, 100), ".*");
    }
    TEST_F(FileTest, getFieldInvalidTimeAfterValidAccess) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
-      f0.getField(Variable::T, 0);
-      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
+      f0.getField(mVariable, 0);
+      EXPECT_DEATH(f0.getField(mVariable, 4), ".*");
       FileNetcdf f1("testing/files/10x10.nc");
-      EXPECT_DEATH(f1.getField(Variable::T, 100), ".*");
+      EXPECT_DEATH(f1.getField(mVariable, 100), ".*");
    }
    TEST_F(FileTest, getFieldInvalidTimePreviouslyRead) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
-      f0.getField(Variable::T, 1);
-      EXPECT_DEATH(f0.getField(Variable::T, 4), ".*");
-      EXPECT_DEATH(f0.getField(Variable::T, 100), ".*");
+      f0.getField(mVariable, 1);
+      EXPECT_DEATH(f0.getField(mVariable, 4), ".*");
+      EXPECT_DEATH(f0.getField(mVariable, 100), ".*");
    }
    TEST_F(FileTest, setgetTimes) {
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
@@ -172,10 +148,11 @@ namespace {
       ASSERT_TRUE(f);
       EXPECT_EQ("norcom", f->name());
    }
+   /* TODO: Not implemented
    TEST_F(FileTest, deaccumulate) {
       // Create accumulation field
       FileNetcdf from("testing/files/1x1.nc");
-      Variable::Type var = Variable::Precip;
+      Variable var = Variable("precipitation_amount");
 
       // Accumulated    0, 3, 4, 4, 5.5,  10, _,12,12,20
       // Deaccumulated  _, 3, 1, 0, 1.5, 4.5, _, _, 0, 8
@@ -191,6 +168,7 @@ namespace {
       EXPECT_FLOAT_EQ(0, (*from.getField(var, 8))(0,0,0));
       EXPECT_FLOAT_EQ(8, (*from.getField(var, 9))(0,0,0));
    }
+   */
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

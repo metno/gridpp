@@ -3,11 +3,18 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerBypass::DownscalerBypass(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerBypass::DownscalerBypass(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerBypass::downscaleCore(const File& iInput, File& iOutput) const {
+   if(!iOutput.hasVariable(mOutputVariable)) {
+      // int nTime = iInput.getNumTime();
+      // for(int t = 0; t < nTime; t++) {
+      iOutput.initNewVariable(mOutputVariable);
+      // }
+   }
 }
 
 std::string DownscalerBypass::description() {

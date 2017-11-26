@@ -35,10 +35,6 @@ void writeUsage() {
    std::cout << KalmanFilter::description();
    std::cout << std::endl;
 
-   std::cout << "Variables:" << std::endl;
-   std::cout << Variable::getDescriptions();
-   std::cout << std::endl;
-
    std::cout << "Obs/fcst files:" << std::endl;
    std::cout << File::getDescriptions();
    std::cout << std::endl;
@@ -69,7 +65,7 @@ int main(int argc, const char *argv[]) {
    int time = 0;
    setup.options.getValue("time", time);
 
-   KalmanFilter kf(Variable::T, setup.options);
+   KalmanFilter kf(setup.variable, setup.options);
    kf.writeBiasFile(*setup.fcstFile, *setup.obsFile, time, setup.dbin, setup.dbout, setup.output);
 
 }

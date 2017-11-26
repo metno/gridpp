@@ -10,7 +10,7 @@
 #include <math.h>
 #include <assert.h>
 
-KalmanFilter::KalmanFilter(Variable::Type iVariable, const Options& iOptions) :
+KalmanFilter::KalmanFilter(const Variable& iVariable, const Options& iOptions) :
       mVariable(iVariable),
       mHourlyCorr(0.93),
       mV(2.0),
@@ -52,8 +52,8 @@ bool KalmanFilter::writeBiasFile(const File& iFcst,
    Downscaler::getNearestNeighbour(iFcst, iObs, I, J);
 
    // Loop over locations
-   for(int oi = 0; oi < iObs.getNumLat(); oi++) {
-      for(int oj = 0; oj < iObs.getNumLon(); oj++) {
+   for(int oi = 0; oi < iObs.getNumY(); oi++) {
+      for(int oj = 0; oj < iObs.getNumX(); oj++) {
          Location obsLoc(olats[oi][oj], olons[oi][oj], oelevs[oi][oj]);
          int Inearest = I[oi][oj];
          int Jnearest = J[oi][oj];

@@ -3,8 +3,9 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerBilinear::DownscalerBilinear(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerBilinear::DownscalerBilinear(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const {
@@ -19,8 +20,8 @@ void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const 
    Downscaler::getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
       downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
    }
 }
@@ -119,8 +120,8 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
 
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
 
    #pragma omp parallel for

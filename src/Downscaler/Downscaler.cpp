@@ -7,8 +7,9 @@
 
 std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
 
-Downscaler::Downscaler(Variable::Type iVariable, const Options& iOptions) : Scheme(iOptions),
-      mVariable(iVariable) {
+Downscaler::Downscaler(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) : Scheme(iOptions),
+      mInputVariable(iInputVariable),
+      mOutputVariable(iOutputVariable) {
 }
 
 bool Downscaler::downscale(const File& iInput, File& iOutput) const {
@@ -19,54 +20,34 @@ bool Downscaler::downscale(const File& iInput, File& iOutput) const {
    return true;
 }
 
-Downscaler* Downscaler::getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions) {
+Downscaler* Downscaler::getScheme(std::string iName, const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) {
+   Downscaler* d;
    if(iName == "nearestNeighbour") {
-      return new DownscalerNearestNeighbour(iVariable, iOptions);
-   }
-   else if(iName == "gradientOld") {
-      DownscalerGradientOld* d = new DownscalerGradientOld(iVariable, iOptions);
-      return d;
+      d = new DownscalerNearestNeighbour(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "smart") {
-      DownscalerSmart* d = new DownscalerSmart(iVariable, iOptions);
-      float searchRadius = Util::MV;
-      if(iOptions.getValue("searchRadius", searchRadius)) {
-         d->setSearchRadius(searchRadius);
-      }
-      float numSmart = Util::MV;
-      if(iOptions.getValue("numSmart", numSmart)) {
-         d->setNumSmart(numSmart);
-      }
-      float minElevDiff = Util::MV;
-      if(iOptions.getValue("minElevDiff", minElevDiff)) {
-         d->setMinElevDiff(minElevDiff);
-      }
-      return d;
+      d = new DownscalerSmart(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "bypass") {
-      DownscalerBypass* d = new DownscalerBypass(iVariable, iOptions);
-      return d;
+      d = new DownscalerBypass(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "pressure") {
-      DownscalerPressure* d = new DownscalerPressure(iVariable, iOptions);
-      return d;
+      d = new DownscalerPressure(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "coastal") {
-      DownscalerCoastal* d = new DownscalerCoastal(iVariable, iOptions);
-      return d;
+      d = new DownscalerCoastal(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iVariable, iOptions);
-      return d;
+      d = new DownscalerGradient(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "bilinear") {
-      DownscalerBilinear* d = new DownscalerBilinear(iVariable, iOptions);
-      return d;
+      d = new DownscalerBilinear(iInputVariable, iOutputVariable, iOptions);
    }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;
    }
+   return d;
 }
 
 void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {
@@ -79,14 +60,14 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iT
    vec2 ilons = iFrom.getLons();
    vec2 olats = iTo.getLats();
    vec2 olons = iTo.getLons();
-   int nLon = iTo.getNumLon();
-   int nLat = iTo.getNumLat();
+   int nLon = iTo.getNumX();
+   int nLat = iTo.getNumY();
 
    iI.resize(nLat);
    iJ.resize(nLat);
 
    // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+   if(iFrom.getNumY() == iTo.getNumY() && iFrom.getNumX() == iTo.getNumX()) {
       if(ilats == olats && ilons == olons) {
          for(int i = 0; i < nLat; i++) {
             iI[i].resize(nLon, 0);
@@ -96,7 +77,7 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iT
                iJ[i][j] = j;
             }
          }
-         Util::status("Grids are identical, short cut in finding nearest neighbours");
+         Util::info("Grids are identical, short cut in finding nearest neighbours");
          addToCache(iFrom, iTo, iI, iJ);
          return;
       }
@@ -122,15 +103,15 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
    }
 
    // Check if the grid is the same
-   if(iFrom.getNumLat() == iTo.getNumLat() && iFrom.getNumLon() == iTo.getNumLon()) {
+   if(iFrom.getNumY() == iTo.getNumY() && iFrom.getNumX() == iTo.getNumX()) {
       vec2 ilats = iFrom.getLats();
       vec2 ilons = iFrom.getLons();
       vec2 olats = iTo.getLats();
       vec2 olons = iTo.getLons();
 
       if(ilats == olats && ilons == olons) {
-         int nLon = iTo.getNumLon();
-         int nLat = iTo.getNumLat();
+         int nLon = iTo.getNumX();
+         int nLat = iTo.getNumY();
 
          iI.resize(nLat);
          iJ.resize(nLat);
@@ -143,7 +124,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
                iJ[i][j] = j;
             }
          }
-         Util::status("Grids are identical, short cut in finding nearest neighbours");
+         Util::info("Grids are identical, short cut in finding nearest neighbours");
          addToCache(iFrom, iTo, iI, iJ);
          return;
       }
@@ -206,7 +187,6 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, fl
 std::string Downscaler::getDescriptions() {
    std::stringstream ss;
    ss << DownscalerNearestNeighbour::description();
-   ss << DownscalerGradientOld::description();
    ss << DownscalerGradient::description();
    ss << DownscalerBilinear::description();
    ss << DownscalerSmart::description();

@@ -12,6 +12,7 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    mLons.resize(1);
    mElevs.resize(1);
    mLandFractions.resize(1);
+   mNEns = 1;
    if(!iOptions.getValues("lats", mLats[0])) {
       Util::error("Missing 'lats' option for '" + iFilename + "'");
    }
@@ -25,7 +26,8 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    if(!iOptions.getValues("names", mNames)) {
       Util::error("Missing 'names' option for '" + iFilename + "'");
    }
-   if(!iOptions.getValue("numTimes", mNTime)) {
+   int numTimes = Util::MV;
+   if(!iOptions.getValue("numTimes", numTimes)) {
       Util::error("Missing 'numTimes' option for '" + iFilename + "'");
    }
    if(mLats[0].size() != mLons[0].size() || mLats[0].size() != mElevs[0].size() || mLats[0].size() != mNames.size()) {
@@ -39,12 +41,9 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
          Util::error(ss.str());
       }
    }
-   mNLat = 1;
-   mNLon = mLats[0].size();
-   mNEns = 1;
 
    std::vector<double> times;
-   for(int i = 0; i < mNTime; i++)
+   for(int i = 0; i < numTimes; i++)
       times.push_back(i);
 
    // Determine the times for this filetype.
@@ -63,22 +62,22 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
 FileNorcomQnh::~FileNorcomQnh() {
 }
 
-FieldPtr FileNorcomQnh::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FileNorcomQnh::getFieldCore(const Variable& iVariable, int iTime) const {
    FieldPtr field = getEmptyField();
    return field;
 }
 
-void FileNorcomQnh::writeCore(std::vector<Variable::Type> iVariables) {
+void FileNorcomQnh::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    if(iVariables.size() == 0) {
       Util::warning("No variables to write");
       return;
    }
-   Variable::Type variable = iVariables[0];
+   Variable variable = iVariables[0];
    if(iVariables.size() > 1) {
       std::stringstream ss;
       ss <<"Output NorcomQnh can only write one variables, several given. Will write variable ";
-      ss << Variable::getTypeName(variable);
+      ss << variable.name();
       Util::warning(ss.str());
    }
 
@@ -126,7 +125,7 @@ std::string FileNorcomQnh::getNorcomTimeStamp(time_t iUnixTime) const {
    int date = Util::getDate(iUnixTime);
    int time = Util::getTime(iUnixTime);
    std::stringstream ss;
-   int day = date % 100; 
+   int day = date % 100;
    int HHMM = time / 100;
    ss << std::setfill('0') << std::right << std::setw(2) << day;
    ss << std::setfill('0') << std::right << std::setw(4) << HHMM;

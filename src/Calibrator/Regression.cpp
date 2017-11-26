@@ -4,17 +4,17 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
-CalibratorRegression::CalibratorRegression(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorRegression::CalibratorRegression(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mOrder(1),
       mIntercept(true) {
    iOptions.getValue("order", mOrder);
    iOptions.getValue("intercept", mIntercept);
+   iOptions.check();
 }
 bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();

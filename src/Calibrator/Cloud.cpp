@@ -1,21 +1,22 @@
 #include "Cloud.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorCloud::CalibratorCloud(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mCloudType(iVariable),
-      mPrecipType(Variable::Precip) {
+CalibratorCloud::CalibratorCloud(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
+      mPrecipVariable("precipitation_amount") {
+   iOptions.getValue("precipitation_amount", mPrecipVariable);
+   iOptions.check();
 }
 bool CalibratorCloud::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      const Field& precip = *iFile.getField(mPrecipType, t);
-      Field& cloud        = *iFile.getField(mCloudType, t);
+      const Field& precip = *iFile.getField(mPrecipVariable, t);
+      Field& cloud        = *iFile.getField(mVariable, t);
 
       // TODO: Figure out which cloudless members to use. Ideally, if more members
       // need precip, we should pick members that already have clouds, so that we minimize

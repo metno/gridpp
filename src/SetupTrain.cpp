@@ -10,7 +10,6 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    }
 
    // Set initial non-working values
-   variable = Variable::None;
    method = NULL;
    output = NULL;
 
@@ -19,7 +18,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
    State state = START;
    State prevState = START;
 
-   downscaler = Downscaler::getScheme("nearestNeighbour", Variable::T, Options());
+   std::string variableName = "";
 
    // Process obs/fcst filenames and options
    Options obsOptions, fcstOptions;
@@ -187,12 +186,13 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             state = ERROR;
          }
          else {
-            if(variable != Variable::None) {
+            // TODO
+            if(false) {
                state = ERROR;
                errorMessage = "Duplicate '-v'";
             }
             else {
-               variable = Variable::getType(argv[index]);
+               variableName = argv[index];
                index++;
                if(argv.size() <= index) {
                   state = END;
@@ -217,8 +217,22 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
          }
       }
       else if(state == END) {
-         mOptions.addOption("variable", Variable::getTypeName(variable));
-         method = Calibrator::getScheme(methodType, mOptions);
+         Variable inputVariable, outputVariable;
+         bool found = forecasts[0]->getVariable(variableName, inputVariable);
+         if(!found) {
+            std::stringstream ss;
+            ss << "Forecast files do not define variable of type '" << variableName << "'";
+            Util::error(ss.str());
+         }
+         found = observations[0]->getVariable(variableName, outputVariable);
+         if(!found) {
+            std::stringstream ss;
+            ss << "Observation files do not define variable of type '" << variableName << "'";
+            Util::error(ss.str());
+         }
+
+         downscaler = Downscaler::getScheme("nearestNeighbour", inputVariable, outputVariable, Options());
+         method = Calibrator::getScheme(methodType, outputVariable, mOptions);
          oOptions.addOption("file", outputFilename);
          std::string schemeName;
          if(!oOptions.getValue("type", schemeName)) {

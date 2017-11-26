@@ -4,19 +4,19 @@
 #include <boost/math/distributions/gamma.hpp>
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorQc::CalibratorQc(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorQc::CalibratorQc(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mMin(Util::MV),
       mMax(Util::MV) {
    iOptions.getValue("min", mMin);
    iOptions.getValue("max", mMax);
    Util::warning("CalibratorQc: both 'min' and 'max' are missing, therefore no correction is applied.");
+   iOptions.check();
 }
 
 bool CalibratorQc::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 

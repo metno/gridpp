@@ -5,19 +5,19 @@
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
 #include "../Grid.h"
-CalibratorCoastal::CalibratorCoastal(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorCoastal::CalibratorCoastal(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mSearchRadius(3),
       mMinLafDiff(0.1),
       mUseNN(false) {
    iOptions.getValue("searchRadius", mSearchRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
    iOptions.getValue("useNN", mUseNN);
+   iOptions.check();
 }
 bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();
@@ -92,8 +92,8 @@ bool CalibratorCoastal::calibrateCore(File& iFile, const ParameterFile* iParamet
 
 Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const Grid& iObsGrid, const Grid& iEnsGrid, int iIobs, int iJobs, int iIens, int iJens) const {
    std::vector<float> y;
-   int nLat = iData[0].second->getNumLat();
-   int nLon = iData[0].second->getNumLon();
+   int nLat = iData[0].second->getNumY();
+   int nLon = iData[0].second->getNumX();
    vec2 laf = iEnsGrid.landFractions();
 
    // Find nearest land and sea point

@@ -48,18 +48,16 @@ class FileNetcdf : public File {
    protected:
       float getScale(int iVar) const;
       float getOffset(int iVar) const;
-      void writeCore(std::vector<Variable::Type> iVariables);
-      FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const;
-      FieldPtr getFieldCore(std::string iVariable, int iTime) const;
-      bool hasVariableCore(Variable::Type iVariable) const;
-      bool hasVariableCore(std::string iVariable) const;
+      void writeCore(std::vector<Variable> iVariables);
+      FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
+      bool hasVariableCore(const Variable& iVariable) const;
 
       vec2 getGridValues(int iVariable) const;
       void writeAltitude() const;
       void defineAltitude();
 
-      int mLatDim;
-      int mLonDim;
+      int mYDim;
+      int mXDim;
       int mEnsDim;
       int mTimeDim;
       int mLatVar;
@@ -75,10 +73,10 @@ class FileNetcdf : public File {
       int getDimSize(int iDim) const;
       int getNumDims(int iVar) const;
       int detectEnsDim() const;
-      int detectLatDim() const;
+      int detectYDim() const;
       int detectTimeDim() const;
       int detectTimeVar() const;
-      int detectLonDim() const;
+      int detectXDim() const;
       int detectLatVar() const;
       int detectLonVar() const;
       bool hasVar(std::string iVar) const;
@@ -101,7 +99,6 @@ class FileNetcdf : public File {
       void writeTimes();
       void writeReferenceTime();
       bool hasDim(std::string iDim) const;
-      // Must be one of "latitude", "longitude", or "altitude"
       vec2 getLatLonVariable(int iVariable) const;
       static bool hasDim(int iFile, std::string iDim);
       const static int mMaxAttributeLength = 100000000;

@@ -5,12 +5,11 @@
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
 
-CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable),
+CalibratorKriging::CalibratorKriging(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mEfoldDist(30000),
       mMaxElevDiff(Util::MV),
-      mAuxVariable(Variable::None),
+      mAuxVariable(""),
       mLowerThreshold(Util::MV),
       mUpperThreshold(Util::MV),
       mCrossValidate(false),
@@ -68,8 +67,7 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
    }
 
    std::string auxVariable;
-   if(iOptions.getValue("auxVariable", auxVariable)) {
-      mAuxVariable = Variable::getType(auxVariable);
+   if(iOptions.getValue("auxVariable", mAuxVariable)) {
       std::vector<float> range;
       if(iOptions.getValues("range", range)) {
          if(range.size() != 2) {
@@ -88,11 +86,12 @@ CalibratorKriging::CalibratorKriging(Variable::Type iVariable, const Options& iO
       }
    }
    iOptions.getValue("crossValidate", mCrossValidate);
+   iOptions.check();
 }
 
 bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();
@@ -115,7 +114,7 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
 
    // Precompute weights from auxillary variable
    std::vector<std::vector<std::vector<std::vector<float> > > > auxWeights;
-   if(mAuxVariable != Variable::None) {
+   if(mAuxVariable != "") {
       // Initialize
       auxWeights.resize(nLat);
       for(int i = 0; i < nLat; i++) {
@@ -352,7 +351,7 @@ bool CalibratorKriging::calibrateCore(File& iFile, const ParameterFile* iParamet
                   float rawValue = (*field)(i,j,e);
 
                   // Adjust bias based on auxillary weight
-                  if(mAuxVariable != Variable::None) {
+                  if(mAuxVariable != "") {
                      float weight = auxWeights[i][j][e][t];
                      if(mOperator == Util::OperatorAdd || mOperator == Util::OperatorSubtract) {
                         finalBias = finalBias * weight;

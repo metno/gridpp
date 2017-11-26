@@ -3,15 +3,16 @@
 #include "../Util.h"
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
-CalibratorAltitude::CalibratorAltitude(const Options& iOptions) :
-      Calibrator(iOptions) {
+CalibratorAltitude::CalibratorAltitude(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions) {
+   iOptions.check();
 }
 bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(!iParameterFile->isLocationDependent()) {
       Util::error("Cannot use a location independent parameter file to update the altitudes");
    }
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();

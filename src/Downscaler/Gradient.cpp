@@ -3,8 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
-DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions),
+DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions),
       mElevRadius(3),
       mMinElevGradient(Util::MV),
       mMaxElevGradient(Util::MV),
@@ -20,7 +20,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       mDownscalerName("nearestNeighbour"),
       mMinNumPoints(2),
       mMinFracSeaPoints(0),
-      mElevGradientVariable(Variable::None),
+      mElevGradientVariableName(""),
       mHasIssuedWarningUnstable(false) {
 
    iOptions.getValue("constantElevGradient", mConstantElevGradient);
@@ -31,12 +31,8 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
    iOptions.getValue("maxElevGradient", mMaxElevGradient);
    iOptions.getValue("minLafForElevGradient", mMinLafForElevGradient);
    iOptions.getValue("minNumPoints", mMinNumPoints);
-   std::string gradientVariable;
-   if(iOptions.getValue("elevGradientVariable", gradientVariable)) {
-      mElevGradientVariable = Variable::getType(gradientVariable);
-   }
-   else {
-      mElevGradientVariable = mVariable;
+   if(!iOptions.getValue("elevGradientVariable", mElevGradientVariableName)) {
+      mElevGradientVariableName = mInputVariable.name();
    }
    iOptions.getValue("lafRadius", mLafRadius);
    iOptions.getValue("minLafDiff", mMinLafDiff);
@@ -60,6 +56,7 @@ DownscalerGradient::DownscalerGradient(Variable::Type iVariable, const Options& 
       }
    }
    assert(mLafSearchRadii.size() == mLafWeights.size());
+   iOptions.check();
 }
 
 DownscalerGradient::~DownscalerGradient() {
@@ -67,8 +64,8 @@ DownscalerGradient::~DownscalerGradient() {
 }
 
 void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
@@ -81,22 +78,22 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
+   float minAllowed = mOutputVariable.min();
+   float maxAllowed = mOutputVariable.max();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   if(!iInput.hasVariable(mElevGradientVariable)) {
+   if(!iInput.hasVariable(mElevGradientVariableName)) {
       std::stringstream ss;
-     ss <<"Cannot compute gradient, since file does not have " << Variable::getTypeName(mElevGradientVariable);
+     ss <<"Cannot compute gradient, since file does not have " << mElevGradientVariableName;
       Util::error(ss.str());
    }
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
-      Field& gfield = *iInput.getField(mElevGradientVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
+      Field& gfield = *iInput.getField(mElevGradientVariableName, t);
 
       vec2 elevsInterp;
       vec2 lafsInterp;
@@ -176,8 +173,8 @@ bool DownscalerGradient::calcBaseValues(const Field& iField, const vec2& iElevs,
    float totalLaf = 0;
    int counter = 0;
    int counterLaf = 0;
-   for(int ii = std::max(0, Icenter-iRadius); ii <= std::min(iField.getNumLat()-1, Icenter+iRadius); ii++) {
-      for(int jj = std::max(0, Jcenter-iRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+iRadius); jj++) {
+   for(int ii = std::max(0, Icenter-iRadius); ii <= std::min(iField.getNumY()-1, Icenter+iRadius); ii++) {
+      for(int jj = std::max(0, Jcenter-iRadius); jj <= std::min(iField.getNumX()-1, Jcenter+iRadius); jj++) {
          float currValue = iField(ii,jj,e);
          float currElev  = iElevs[ii][jj];
          float currLaf  = iLafs[ii][jj];
@@ -213,8 +210,8 @@ bool DownscalerGradient::calcNeighbourhoodMean(const Field& iField, const vec2& 
    float totalValue = 0;
    float totalElev = 0;
    int counter = 0;
-   for(int ii = std::max(0, Icenter-iRadius); ii <= std::min(iField.getNumLat()-1, Icenter+iRadius); ii++) {
-      for(int jj = std::max(0, Jcenter-iRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+iRadius); jj++) {
+   for(int ii = std::max(0, Icenter-iRadius); ii <= std::min(iField.getNumY()-1, Icenter+iRadius); ii++) {
+      for(int jj = std::max(0, Jcenter-iRadius); jj <= std::min(iField.getNumX()-1, Jcenter+iRadius); jj++) {
          float currValue = iField(ii,jj,e);
          float currElev  = iElevs[ii][jj];
          if(Util::isValid(currValue) && Util::isValid(currElev)) {
@@ -241,8 +238,6 @@ float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int 
       value = minT + gradient * dLaf
    */
    // Compute the average temperature and LAF in a small radius
-   float minAllowed = Variable::getMin(mVariable);
-   float maxAllowed = Variable::getMax(mVariable);
    float minLaf = Util::MV;
    float maxLaf = Util::MV;
    float minElev = Util::MV;
@@ -257,8 +252,8 @@ float DownscalerGradient::calcLafGradient(int i, int j, int e, int Icenter, int 
       int numSeaPoints = 0;
       int numPoints = 0;
       int searchRadius = mLafSearchRadii[r];
-      for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iField.getNumLat()-1, Icenter+searchRadius); ii++) {
-         for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+searchRadius); jj++) {
+      for(int ii = std::max(0, Icenter-searchRadius); ii <= std::min(iField.getNumY()-1, Icenter+searchRadius); ii++) {
+         for(int jj = std::max(0, Jcenter-searchRadius); jj <= std::min(iField.getNumX()-1, Jcenter+searchRadius); jj++) {
             float currLaf  = iLafs[ii][jj];
             float currElev = iElevs[ii][jj];
             float currValue = iField(ii,jj,e);
@@ -359,8 +354,8 @@ float DownscalerGradient::calcElevGradient(int i, int j, int e, int Icenter, int
       int   counter = 0;
       float min = Util::MV;
       float max = Util::MV;
-      for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iField.getNumLat()-1, Icenter+mElevRadius); ii++) {
-         for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iField.getNumLon()-1, Jcenter+mElevRadius); jj++) {
+      for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iField.getNumY()-1, Icenter+mElevRadius); ii++) {
+         for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iField.getNumX()-1, Jcenter+mElevRadius); jj++) {
             assert(ii < iElevs.size());
             assert(jj < iElevs[ii].size());
             float x = iElevs[ii][jj];
@@ -437,8 +432,8 @@ float DownscalerGradient::get_laf_gradient(float iLaf, int iIcenter, int iJcente
    float totalWeight = 0;
    for(int r = 0; r < mLafSearchRadii.size(); r++) {
       int searchRadius = mLafSearchRadii[r];
-      for(int ii = std::max(0, iIcenter-searchRadius); ii <= std::min(iInput.getNumLat()-1, iIcenter+searchRadius); ii++) {
-         for(int jj = std::max(0, iJcenter-searchRadius); jj <= std::min(iInput.getNumLon()-1, iJcenter+searchRadius); jj++) {
+      for(int ii = std::max(0, iIcenter-searchRadius); ii <= std::min(iInput.getNumY()-1, iIcenter+searchRadius); ii++) {
+         for(int jj = std::max(0, iJcenter-searchRadius); jj <= std::min(iInput.getNumX()-1, iJcenter+searchRadius); jj++) {
             float currLaf  = iLafs[ii][jj];
             float currElev = iElevs[ii][jj];
             float currValue = iField(ii,jj,e);
@@ -521,8 +516,8 @@ float DownscalerGradient::calcElevationGradient() const {
       int averagingRadius = 0;
       if(mAverageNeighbourhood)
          averagingRadius = mElevRadius;
-      for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+averagingRadius); ii++) {
-         for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+averagingRadius); jj++) {
+      for(int ii = std::max(0, Icenter-averagingRadius); ii <= std::min(iInput.getNumY()-1, Icenter+averagingRadius); ii++) {
+         for(int jj = std::max(0, Jcenter-averagingRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+averagingRadius); jj++) {
             float currValue = ifield(ii,jj,e);
             float currElev  = ielevs[ii][jj];
             if(Util::isValid(currValue) && Util::isValid(currElev)) {
@@ -561,8 +556,8 @@ float DownscalerGradient::calcElevationGradient() const {
          int   counter = 0;
          float min = Util::MV;
          float max = Util::MV;
-         for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iInput.getNumLat()-1, Icenter+mElevRadius); ii++) {
-            for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iInput.getNumLon()-1, Jcenter+mElevRadius); jj++) {
+         for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(iInput.getNumY()-1, Icenter+mElevRadius); ii++) {
+            for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(iInput.getNumX()-1, Jcenter+mElevRadius); jj++) {
                assert(ii < ielevs.size());
                assert(jj < ielevs[ii].size());
                float x = ielevs[ii][jj];

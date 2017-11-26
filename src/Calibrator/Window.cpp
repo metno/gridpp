@@ -1,10 +1,9 @@
 #include "Window.h"
 #include "../Util.h"
 #include "../File/File.h"
-CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOptions) :
-      Calibrator(iOptions),
+CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOptions) :
+      Calibrator(iVariable, iOptions),
       mRadius(3),
-      mVariable(iVariable),
       mStatType(Util::StatTypeMean),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
@@ -47,10 +46,11 @@ CalibratorWindow::CalibratorWindow(Variable::Type iVariable, const Options& iOpt
          Util::error("CalibratorWindow: Unrecognized value for 'stat'");
       }
    }
+   iOptions.check();
 }
 bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 

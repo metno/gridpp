@@ -6,15 +6,15 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorBct::CalibratorBct(Variable::Type iMainPredictor, const Options& iOptions):
-      Calibrator(iOptions),
-      mMainPredictor(iMainPredictor),
+CalibratorBct::CalibratorBct(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions),
       mMaxEnsMean(100) {
+   iOptions.check();
 }
 
 bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();
@@ -26,7 +26,7 @@ bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFi
       int numInvalidRaw = 0;
       int numInvalidCal = 0;
 
-      Field& field = *iFile.getField(mMainPredictor, t);
+      Field& field = *iFile.getField(mVariable, t);
 
       Parameters parameters;
       if(!iParameterFile->isLocationDependent())

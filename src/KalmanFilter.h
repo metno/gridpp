@@ -32,7 +32,7 @@ class KalmanParameters {
 
 class KalmanFilter {
    public:
-      KalmanFilter(Variable::Type iVariable, const Options& iOptions);
+      KalmanFilter(const Variable& iVariable, const Options& iOptions);
       // Run the KF on forecast and observation files for a specified timestep
       // @param iDbIn read KF parameters from this file. If NULL, initialize new ones.
       // @param iDbOut If not NULL, write KF parameters to this file.
@@ -54,7 +54,7 @@ class KalmanFilter {
       vec2 getW() const;
       int getParameterIndex(int iTime) const;
 
-      Variable::Type mVariable;
+      Variable mVariable;
       float mRatio; // std W / std V
       float mHourlyCorr; // Auto-correlation of bias measurements
       int mDim; // Number of observations to use per 24 hours

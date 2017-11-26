@@ -12,10 +12,10 @@ typedef std::vector<std::vector<int> > vec2Int;
 //! Converts fields from one grid to another
 class Downscaler : public Scheme {
    public:
-      Downscaler(Variable::Type iVariable, const Options& iOptions);
+      Downscaler(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       virtual ~Downscaler() {};
       bool downscale(const File& iInput, File& iOutput) const;
-      static Downscaler* getScheme(std::string iName, Variable::Type iVariable, const Options& iOptions);
+      static Downscaler* getScheme(std::string iName, const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       virtual std::string name() const = 0;
 
       //! Create a nearest-neighbour map. For each grid point in iTo, find the index into the grid
@@ -40,7 +40,8 @@ class Downscaler : public Scheme {
       static void clearCache();
    protected:
       virtual void downscaleCore(const File& iInput, File& iOutput) const = 0;
-      Variable::Type mVariable;
+      Variable mInputVariable;
+      Variable mOutputVariable;
    private:
       // Cache calls to nearest neighbour
       //! Is the nearest neighbours in @param iFrom for each point in @param iTo already computed?
@@ -50,7 +51,6 @@ class Downscaler : public Scheme {
       static std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > mNeighbourCache;
 };
 #include "NearestNeighbour.h"
-#include "GradientOld.h"
 #include "Gradient.h"
 #include "Bilinear.h"
 #include "Smart.h"

@@ -30,11 +30,8 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    mLons.push_back(lon0);
    mElevs.push_back(elev0);
    mLandFractions.push_back(landFraction0);
-   mNLat = 1;
-   mNLon = 1;
    mNEns = 1;
    std::vector<double> times;
-   mNTime = Util::MV;
    mNEns = Util::MV;
 
    // Determine time and ensemble dimension if possible
@@ -54,21 +51,21 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
                mNEns++;
             }
          }
-         mNTime = times.size();
       }
    }
 
    // Otherwise get the time or ensemble dimension from options
    iOptions.getValue("ens", mNEns);
-   if(iOptions.getValue("time", mNTime)) {
+   int numTimes;
+   if(iOptions.getValue("time", numTimes)) {
       times.clear();
       // Empty file, probably used as output only
-      for(int i = 0; i < mNTime; i++)
+      for(int i = 0; i < numTimes; i++)
          times.push_back(i);
    }
 
    // Check that we got time and ensemble dimension
-   if(!Util::isValid(mNTime)) {
+   if(!Util::isValid(numTimes)) {
       Util::error("Missing 'time' option for empty file '" + iFilename + "'");
    }
    if(!Util::isValid(mNEns)) {
@@ -80,7 +77,7 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
 FilePoint::~FilePoint() {
 }
 
-FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
+FieldPtr FilePoint::getFieldCore(const Variable& iVariable, int iTime) const {
    std::ifstream ifs(getFilename().c_str());
    FieldPtr field = getEmptyField();
 
@@ -119,7 +116,7 @@ FieldPtr FilePoint::getFieldCore(Variable::Type iVariable, int iTime) const {
    return field;
 }
 
-void FilePoint::writeCore(std::vector<Variable::Type> iVariables) {
+void FilePoint::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
    // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
    if(iVariables.size() == 0) {

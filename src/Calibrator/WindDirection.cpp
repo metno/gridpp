@@ -6,9 +6,10 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Parameters.h"
-CalibratorWindDirection::CalibratorWindDirection(Variable::Type iVariable, const Options& iOptions):
-      Calibrator(iOptions),
-      mVariable(iVariable) {
+CalibratorWindDirection::CalibratorWindDirection(const Variable& iVariable, const Options& iOptions):
+      Calibrator(iVariable, iOptions) {
+   iOptions.getValue("directionVariable", mDirectionVariable);
+   iOptions.check();
 }
 
 bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -16,8 +17,8 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
       Util::error("CalibratorWindDirection: ParameterFile must have 9 parameters");
    }
 
-   int nLat = iFile.getNumLat();
-   int nLon = iFile.getNumLon();
+   int nLat = iFile.getNumY();
+   int nLon = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
    vec2 lats = iFile.getLats();
@@ -27,7 +28,7 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       Field& wind      = *iFile.getField(mVariable, t);
-      Field& direction = *iFile.getField(Variable::WD, t);
+      Field& direction = *iFile.getField(mDirectionVariable, t);
 
       Parameters parameters;
       if(!iParameterFile->isLocationDependent())
@@ -55,6 +56,7 @@ std::string CalibratorWindDirection::description() {
    ss << "                                factor = a + b*sin(dir)   + c*cos(dir)   + d*sin(2*dir) + e*cos(2*dir)" << std::endl;
    ss << "                                           + f*sin(3*dir) + g*cos(3*dir) + h*sin(4*dir) + i*cos(4*dir)" << std::endl;
    ss << Util::formatDescription("", "A parameter file is required, with the values [a b c d e f g h i].") << std::endl;
+   ss << Util::formatDescription("   directionVariable=required", "Variable name to use as wind direction.") << std::endl;
    return ss.str();
 }
 

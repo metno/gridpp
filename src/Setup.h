@@ -13,12 +13,14 @@ class ParameterFile;
 //! Represents the post-processing of one variable
 struct VariableConfiguration {
    //! Which variable should be post-processed?
-   Variable::Type variable;
+   Variable inputVariable;
+   Variable outputVariable;
    //! Which downscaler should be used
    Downscaler* downscaler;
    //! Which calibrators should be use
    std::vector<Calibrator*> calibrators;
-   Options variableOptions;
+   Options inputVariableOptions;
+   Options outputVariableOptions;
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler;
 };

@@ -207,6 +207,49 @@ namespace {
       ASSERT_EQ(1, values.size());
       EXPECT_EQ("4", values[0]);
    }
+   TEST_F(OptionsTest, requiredValue) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      Options options = Options("test=3,1,2 new=4");
+      std::vector<int> values;
+      int value = Util::MV;
+      options.getRequiredValues("test", values);
+      ASSERT_EQ(3, values.size());
+      EXPECT_EQ(3, values[0]);
+      EXPECT_EQ(1, values[1]);
+      EXPECT_EQ(2, values[2]);
+      options.getValue("new", value);
+      EXPECT_EQ(4, value);
+
+      EXPECT_DEATH(options.getRequiredValues("missing", values), ".*");
+      EXPECT_DEATH(options.getRequiredValue("missing", value), ".*");
+   }
+   TEST_F(OptionsTest, check) {
+      std::vector<int> values;
+      int value = Util::MV;
+      Options options = Options("test=3,1,2 new=4 att1=1,2,3");
+      options.getValues("test", values);
+      options.getValue("new", value);
+      EXPECT_EQ(4, value);
+      EXPECT_FALSE(options.check());
+      options.getValue("new", value);
+      EXPECT_FALSE(options.check());
+      options.getValues("att1", values);
+      EXPECT_TRUE(options.check());
+   }
+   TEST_F(OptionsTest, checkRequired) {
+      std::vector<int> values;
+      int value = Util::MV;
+      Options options = Options("test=3,1,2 new=4 att1=1,2,3");
+      options.getRequiredValues("test", values);
+      options.getRequiredValue("new", value);
+      EXPECT_EQ(4, value);
+      EXPECT_FALSE(options.check());
+      options.getRequiredValue("new", value);
+      EXPECT_FALSE(options.check());
+      options.getRequiredValues("att1", values);
+      EXPECT_TRUE(options.check());
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

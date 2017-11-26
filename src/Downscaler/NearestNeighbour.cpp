@@ -5,23 +5,25 @@
 
 // std::map<const File*, std::map<const File*, std::pair<vec2Int, vec2Int> > > DownscalerNearestNeighbour::mNeighbourCache;
 
-DownscalerNearestNeighbour::DownscalerNearestNeighbour(Variable::Type iVariable, const Options& iOptions) :
-      Downscaler(iVariable, iOptions) {
+DownscalerNearestNeighbour::DownscalerNearestNeighbour(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
+   iOptions.check();
 }
 
 void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
+   double s = Util::clock();
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
-      Field& ifield = *iInput.getField(mVariable, t);
-      Field& ofield = *iOutput.getField(mVariable, t);
+      Field& ifield = *iInput.getField(mInputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
@@ -43,8 +45,8 @@ void DownscalerNearestNeighbour::downscaleField(const Field& iInput, Field& iOut
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ) {
 
-   int nLat = iOutput.getNumLat();
-   int nLon = iOutput.getNumLon();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
 
    #pragma omp parallel for

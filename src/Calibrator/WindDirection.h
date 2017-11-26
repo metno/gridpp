@@ -11,7 +11,7 @@ class Parameters;
 //!            + f*sin(3*dir) + g*cos(3*dir) + h*sin(4*dir) + i*cos(4*dir)
 class CalibratorWindDirection : public Calibrator {
    public:
-      CalibratorWindDirection(Variable::Type iVariable, const Options& iOptions);
+      CalibratorWindDirection(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "windDirection";};
       //! Get multiplication factor for given wind direction
@@ -19,6 +19,6 @@ class CalibratorWindDirection : public Calibrator {
       static float getFactor(float iWindDirection, const Parameters& iPar);
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
-      Variable::Type mVariable;
+      std::string mDirectionVariable;
 };
 #endif

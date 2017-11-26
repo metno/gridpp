@@ -6,12 +6,13 @@
 //! Creates the QNH field by using surface pressure
 class CalibratorQnh : public Calibrator {
    public:
-      CalibratorQnh(const Options& iOptions);
+      CalibratorQnh(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "qnh";};
       static float calcQnh(float iElev, float iPressure);
       bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      std::string mPressureVariable;
 };
 #endif

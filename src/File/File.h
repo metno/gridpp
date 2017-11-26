@@ -6,12 +6,11 @@
 #include "../Variable.h"
 #include "../Uuid.h"
 #include "../Field.h"
-#include "../VariableMap.h"
 
 class Options;
 
-// 3D array of data: [lat][lon][ensemble_member]
-typedef std::vector<std::vector<float> > vec2; // Lat, Lon
+// 3D array of data: [y][x][ensemble_member]
+typedef std::vector<std::vector<float> > vec2; // Y, X
 
 //! Represents a data file containing spatial and temporal data initialized at one particular time
 class File {
@@ -19,25 +18,25 @@ class File {
       File(std::string iFilename, const Options& iOptions);
       virtual ~File();
 
+      void setVariables(std::vector<Variable> iVariables);
+
       //! Insantiates a file. Returns null if file does not exist or cannot be parsed.
       static File* getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
 
-      FieldPtr getField(Variable::Type iVariable, int iTime) const;
+      FieldPtr getField(const Variable& iVariable, int iTime) const;
 
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
 
       // Add a field to the file, overwriting existing ones (if necessary)
-      void addField(FieldPtr iField, Variable::Type iVariable, int iTime) const;
+      void addField(FieldPtr iField, const Variable& iVariable, int iTime) const;
 
       // Write these variables to file
-      void write(std::vector<Variable::Type> iVariables);
-
-      std::string getVariableName(Variable::Type iVariable) const;
+      void write(std::vector<Variable> iVariables);
 
       // Dimension sizes
-      int getNumLat() const;
-      int getNumLon() const;
+      int getNumY() const;
+      int getNumX() const;
       int getNumEns() const;
       int getNumTime() const;
       vec2 getLats() const;
@@ -50,16 +49,14 @@ class File {
       bool setLandFractions(vec2 iLandFractions);
 
       //! Does this file provide the variable (deriving it if necessary)?
-      bool hasVariable(Variable::Type iVariable) const;
-
-      //! Does this file provide the variable (without deriving it)?
-      bool hasVariableWithoutDeriving(Variable::Type iVariable) const;
+      bool hasVariable(const Variable& iVariable) const;
 
       std::string getFilename() const;
+      bool hasDefinedVariable(Variable iVariable) const;
 
       bool hasSameDimensions(const File& iOther) const;
       std::string getDimenionString() const;
-      void initNewVariable(Variable::Type iVariable);
+      void initNewVariable(const Variable& iVariable);
       virtual std::string name() const = 0;
       //! Clear the retrieved/computed fields stored in cache
       void clear();
@@ -80,33 +77,33 @@ class File {
       //! @ param iTimes vector of number of seconds since 1970-01-01 00:00:00 +00:00
       void setTimes(std::vector<double> iTimes);
       std::vector<double> getTimes() const;
+      bool getVariable(std::string iVariableName, Variable& iVariable) const;
       static std::string getDescriptions();
    protected:
-      virtual FieldPtr getFieldCore(Variable::Type iVariable, int iTime) const = 0;
+      virtual FieldPtr getFieldCore(const Variable& iVariable, int iTime) const = 0;
       // File must save variables, but also altitudes, in case they got changed
-      virtual void writeCore(std::vector<Variable::Type> iVariables) = 0;
-      //! Can the subclass provide this variable?
-      virtual bool hasVariableCore(Variable::Type iVariable) const = 0;
+      virtual void writeCore(std::vector<Variable> iVariables) = 0;
+      //! Does the subclass provide this variable without deriving it?
+      virtual bool hasVariableCore(const Variable& iVariable) const = 0;
 
       // Subclasses must fill these fields in the constructor:
       vec2 mLats;
       vec2 mLons;
       vec2 mElevs;
       vec2 mLandFractions;
-      int mNTime;
-      int mNLat;
-      int mNLon;
       int mNEns;
+
+      //! These must be populated on initialization by subclass
+      mutable std::vector<Variable> mVariables;
    private:
       std::string mFilename;
-      mutable std::map<Variable::Type, std::vector<FieldPtr> > mFields;  // Variable, offset
+      mutable std::map<Variable, std::vector<FieldPtr> > mFields;  // Variable, offset
       mutable Uuid mTag;
       void createNewTag() const;
-      FieldPtr getEmptyField(int nLat, int nLon, int nEns, float iFillValue=Util::MV) const;
+      FieldPtr getEmptyField(int nY, int nX, int nEns, float iFillValue=Util::MV) const;
       double mReferenceTime;
       std::vector<double> mTimes;
       static Uuid mNextTag;
-      VariableMap mVariableMap;
 };
 #include "Netcdf.h"
 #include "Fake.h"

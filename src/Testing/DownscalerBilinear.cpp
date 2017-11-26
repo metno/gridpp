@@ -21,8 +21,8 @@ namespace {
          void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
-            int nLat = iFile.getNumLat(); 
-            int nLon = iFile.getNumLon();
+            int nLat = iFile.getNumY();
+            int nLon = iFile.getNumX();
             lat.resize(nLat);
             lon.resize(nLat);
             for(int i = 0; i < nLat; i++) {
@@ -37,6 +37,12 @@ namespace {
             iFile.setLons(lon);
          };
       protected:
+         virtual void SetUp() {
+             mVariable = Variable("air_temperature_2m");
+         }
+         virtual void TearDown() {
+         }
+         Variable mVariable;
    };
 
    TEST_F(TestDownscalerBilinear, description) {
@@ -73,19 +79,19 @@ namespace {
    }
    TEST_F(TestDownscalerBilinear, downscale) {
       // Same as above, but using an input file
-      DownscalerBilinear d(Variable::T, Options());
+      DownscalerBilinear d(mVariable, mVariable, Options());
       FileFake from(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
       FileFake to(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
       setLatLon(from, (const float[]) {0.3, 4.8}, (const float[]){1.1, 2.2});
       setLatLon(to,   (const float[]) {0.6},    (const float[]){1.3});
 
-      Field& fromT = *from.getField(Variable::T, 0);
+      Field& fromT = *from.getField(mVariable, 0);
       fromT(0,0,0) = 10;
       fromT(1,0,0) = 10.3;
       fromT(0,1,0) = 10.7;
       fromT(1,1,0) = 10.9;
       d.downscale(from, to);
-      const Field& toT   = *to.getField(Variable::T, 0);
+      const Field& toT   = *to.getField(mVariable, 0);
       EXPECT_FLOAT_EQ(10.14606060606061, toT(0,0,0));
    }
 }

@@ -7,7 +7,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerCoastal : public Downscaler {
    public:
       //! Downscale the specified variable
-      DownscalerCoastal(Variable::Type iVariable, const Options& iOptions);
+      DownscalerCoastal(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       std::vector<int> getSearchRadii() const;
       float getMinLafDiff() const;
       float getMinGradient() const;

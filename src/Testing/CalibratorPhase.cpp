@@ -29,10 +29,10 @@ namespace {
             return parFile;
          }
          CalibratorPhase getCalibratorWetbulb(Variable iVariable) {
-            return CalibratorPhase(iVariable, Options("temperatureVariable=air_temperature_2m precipitationVariable=precipitation_amount rhVariable=relative_humidity_2m pressureVariable=surface_air_pressure"));
+            return CalibratorPhase(iVariable, Options("temperature=air_temperature_2m precipitation=precipitation_amount rh=relative_humidity_2m pressure=surface_air_pressure"));
          }
          CalibratorPhase getCalibrator(Variable iVariable) {
-            return CalibratorPhase(iVariable, Options("temperatureVariable=air_temperature_2m precipitationVariable=precipitation_amount"));
+            return CalibratorPhase(iVariable, Options("temperature=air_temperature_2m precipitation=precipitation_amount"));
          }
          void setValues(const File& iFile, float iPrecip, float iTemp, float iRh, float iPressure) {
             FieldPtr precip   = iFile.getField(Variable("precipitation_amount"), 0);

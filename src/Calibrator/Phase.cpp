@@ -8,10 +8,10 @@ CalibratorPhase::CalibratorPhase(const Variable& iVariable, const Options& iOpti
       Calibrator(iVariable, iOptions),
       mMinPrecip(0.2),
       mEstimatePressure(true) {
-   iOptions.getRequiredValue("temperatureVariable", mTemperatureVariable);
-   iOptions.getRequiredValue("precipitationVariable", mPrecipitationVariable);
-   iOptions.getValue("pressureVariable", mPressureVariable);
-   iOptions.getValue("rhVariable", mRhVariable);
+   iOptions.getRequiredValue("temperature", mTemperatureVariable);
+   iOptions.getRequiredValue("precipitation", mPrecipitationVariable);
+   iOptions.getValue("pressure", mPressureVariable);
+   iOptions.getValue("rh", mRhVariable);
    mUseWetbulb = mPressureVariable != "" && mRhVariable != "";
    iOptions.check();
 }
@@ -112,10 +112,10 @@ std::string CalibratorPhase::description() {
    ss << Util::formatDescription("", "* 2 = sleet (a < T <= b)") << std::endl;
    ss << Util::formatDescription("", "* 3 = snow (T < a)") << std::endl;
    ss << Util::formatDescription("", "T can be either regular temperature or wetbulb temperature. Precip, and Temperature must be available to determine phase. If using wetbulb, then relative humidity must also be available. Pressure is currently not needed because a standard atmosphere is used. A parameter file is required with values [a b]") << std::endl;
-   ss << Util::formatDescription("   temperatureVariable=required", "Name of temperature variable to use.") << std::endl;
-   ss << Util::formatDescription("   precipitationVariable=required", "Name of precipitation variable to use.") << std::endl;
-   ss << Util::formatDescription("   rhVariable=undef", "Name of relative humidity variable to use. If both RH and pressure is provided, then the wetbulb temperature is instead of temperature.") << std::endl;
-   ss << Util::formatDescription("   pressureVariable=undef", "Name of pressure variable to use.") << std::endl;
+   ss << Util::formatDescription("   temperature=required", "Name of temperature variable to use.") << std::endl;
+   ss << Util::formatDescription("   precipitation=required", "Name of precipitation variable to use.") << std::endl;
+   ss << Util::formatDescription("   rh=undef", "Name of relative humidity variable to use. If both RH and pressure is provided, then the wetbulb temperature is instead of temperature.") << std::endl;
+   ss << Util::formatDescription("   pressure=undef", "Name of pressure variable to use.") << std::endl;
    ss << Util::formatDescription("   minPrecip=0.2", "Minimum precip (in mm) needed to be considered as precipitation.") << std::endl;
    return ss.str();
 }

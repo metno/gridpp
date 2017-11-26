@@ -21,49 +21,33 @@ bool Downscaler::downscale(const File& iInput, File& iOutput) const {
 }
 
 Downscaler* Downscaler::getScheme(std::string iName, const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) {
+   Downscaler* d;
    if(iName == "nearestNeighbour") {
-      return new DownscalerNearestNeighbour(iInputVariable, iOutputVariable, iOptions);
+      d = new DownscalerNearestNeighbour(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "smart") {
-      DownscalerSmart* d = new DownscalerSmart(iInputVariable, iOutputVariable, iOptions);
-      float searchRadius = Util::MV;
-      if(iOptions.getValue("searchRadius", searchRadius)) {
-         d->setSearchRadius(searchRadius);
-      }
-      float numSmart = Util::MV;
-      if(iOptions.getValue("numSmart", numSmart)) {
-         d->setNumSmart(numSmart);
-      }
-      float minElevDiff = Util::MV;
-      if(iOptions.getValue("minElevDiff", minElevDiff)) {
-         d->setMinElevDiff(minElevDiff);
-      }
-      return d;
+      d = new DownscalerSmart(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "bypass") {
-      DownscalerBypass* d = new DownscalerBypass(iInputVariable, iOutputVariable, iOptions);
-      return d;
+      d = new DownscalerBypass(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "pressure") {
-      DownscalerPressure* d = new DownscalerPressure(iInputVariable, iOutputVariable, iOptions);
-      return d;
+      d = new DownscalerPressure(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "coastal") {
-      DownscalerCoastal* d = new DownscalerCoastal(iInputVariable, iOutputVariable, iOptions);
-      return d;
+      d = new DownscalerCoastal(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "gradient") {
-      DownscalerGradient* d = new DownscalerGradient(iInputVariable, iOutputVariable, iOptions);
-      return d;
+      d = new DownscalerGradient(iInputVariable, iOutputVariable, iOptions);
    }
    else if(iName == "bilinear") {
-      DownscalerBilinear* d = new DownscalerBilinear(iInputVariable, iOutputVariable, iOptions);
-      return d;
+      d = new DownscalerBilinear(iInputVariable, iOutputVariable, iOptions);
    }
    else {
       Util::error("Could not instantiate downscaler of type '" + iName + "'");
       return NULL;
    }
+   return d;
 }
 
 void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iTo, vec2Int& iI, vec2Int& iJ) {

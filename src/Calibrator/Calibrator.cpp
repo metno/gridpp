@@ -13,108 +13,76 @@ Calibrator::Calibrator(const Variable& iVariable, const Options& iOptions) : Sch
 
 }
 Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const Options& iOptions) {
+   Calibrator* c;
 
    if(iName == "zaga") {
-      CalibratorZaga* c = new CalibratorZaga(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorZaga(iVariable, iOptions);
    }
    else if(iName == "cloud") {
-      CalibratorCloud* c = new CalibratorCloud(iVariable, iOptions);
-      return c;
+      c = new CalibratorCloud(iVariable, iOptions);
    }
    else if(iName == "accumulate") {
-      CalibratorAccumulate* c = new CalibratorAccumulate(iVariable, iOptions);
-      return c;
+      c = new CalibratorAccumulate(iVariable, iOptions);
    }
    else if(iName == "deaccumulate") {
-      CalibratorDeaccumulate* c = new CalibratorDeaccumulate(iVariable, iOptions);
-      return c;
+      c = new CalibratorDeaccumulate(iVariable, iOptions);
    }
    else if(iName == "gaussian") {
-      CalibratorGaussian* c = new CalibratorGaussian(iVariable, iOptions);
-      return c;
+      c = new CalibratorGaussian(iVariable, iOptions);
    }
    else if(iName == "neighbourhood") {
-      CalibratorNeighbourhood* c = new CalibratorNeighbourhood(iVariable, iOptions);
-      return c;
+      c = new CalibratorNeighbourhood(iVariable, iOptions);
    }
    else if(iName == "diagnoseHumidity") {
-      CalibratorDiagnoseHumidity* c = new CalibratorDiagnoseHumidity(iVariable, iOptions);
-      return c;
+      c = new CalibratorDiagnoseHumidity(iVariable, iOptions);
    }
    else if(iName == "diagnoseWind") {
-      CalibratorDiagnoseWind* c = new CalibratorDiagnoseWind(iVariable, iOptions);
-      return c;
+      c = new CalibratorDiagnoseWind(iVariable, iOptions);
    }
    else if(iName == "phase") {
-      CalibratorPhase* c = new CalibratorPhase(iVariable, iOptions);
-      return c;
+      c = new CalibratorPhase(iVariable, iOptions);
    }
    else if(iName == "windDirection") {
-      CalibratorWindDirection* c = new CalibratorWindDirection(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorWindDirection(iVariable, iOptions);
    }
    else if(iName == "kriging") {
-      CalibratorKriging* c = new CalibratorKriging(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorKriging(iVariable, iOptions);
    }
    else if(iName == "window") {
-      CalibratorWindow* c = new CalibratorWindow(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorWindow(iVariable, iOptions);
    }
    else if(iName == "qc") {
-      CalibratorQc* c = new CalibratorQc(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorQc(iVariable, iOptions);
    }
    else if(iName == "qnh") {
-      CalibratorQnh* c = new CalibratorQnh(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorQnh(iVariable, iOptions);
    }
    else if(iName == "qq") {
-      CalibratorQq* c = new CalibratorQq(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorQq(iVariable, iOptions);
    }
    else if(iName == "regression") {
-      CalibratorRegression* c = new CalibratorRegression(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorRegression(iVariable, iOptions);
    }
    else if(iName == "bct") {
-      CalibratorBct* c = new CalibratorBct(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorBct(iVariable, iOptions);
    }
    else if(iName == "sort") {
-      CalibratorSort* c = new CalibratorSort(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorSort(iVariable, iOptions);
    }
    else if(iName == "altitude") {
-      CalibratorAltitude* c = new CalibratorAltitude(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorAltitude(iVariable, iOptions);
    }
    else if(iName == "mask") {
-      CalibratorMask* c = new CalibratorMask(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorMask(iVariable, iOptions);
    }
    else if(iName == "coastal") {
-      CalibratorCoastal* c = new CalibratorCoastal(iVariable, iOptions);
-
-      return c;
+      c = new CalibratorCoastal(iVariable, iOptions);
    }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
    }
+   return c;
 }
 bool Calibrator::calibrate(File& iFile, const ParameterFile* iParameterFile) const {
    if(requiresParameterFile() && iParameterFile == NULL) {

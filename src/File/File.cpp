@@ -39,21 +39,20 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
       }
    }
    else if(type == "netcdf") {
-      file = new FileNetcdf(iFilename, iOptions, iReadOnly);
+      return new FileNetcdf(iFilename, iOptions, iReadOnly);
    }
    else if(type == "point") {
-      file = new FilePoint(iFilename, iOptions);
+      return new FilePoint(iFilename, iOptions);
    }
    else if(type == "text") {
-      file = new FileText(iFilename, iOptions);
+      return new FileText(iFilename, iOptions);
    }
    else if(type == "norcomQnh") {
-      file = new FileNorcomQnh(iFilename, iOptions);
+      return new FileNorcomQnh(iFilename, iOptions);
    }
    else {
       Util::error("Could not understand file type " + type);
    }
-   return file;
 }
 
 

@@ -122,10 +122,6 @@ namespace {
          c = Calibrator::getScheme("zaga", Variable("precipitation_amount"), Options("popThreshold=0.24 fracThreshold=0.34 neighbourhoodSize=24 maxEnsMean=90"));
          EXPECT_TRUE(c);
          EXPECT_EQ("zaga", c->name());
-         EXPECT_FLOAT_EQ(0.24, ((CalibratorZaga*) c)->getPopThreshold());
-         EXPECT_FLOAT_EQ(0.34, ((CalibratorZaga*) c)->getFracThreshold());
-         EXPECT_EQ(24,         ((CalibratorZaga*) c)->getNeighbourhoodSize());
-         EXPECT_FLOAT_EQ(90,          ((CalibratorZaga*) c)->getMaxEnsMean());
          delete c;
       }
       {
@@ -133,10 +129,6 @@ namespace {
          c = Calibrator::getScheme("zaga", mVariable, Options("popThreshold=-0.12 outputPop=0 fracThreshold=-0.92 neighbourhoodSize=6 maxEnsMean=40"));
          EXPECT_TRUE(c);
          EXPECT_EQ("zaga", c->name());
-         EXPECT_FLOAT_EQ(-0.12, ((CalibratorZaga*) c)->getPopThreshold());
-         EXPECT_FLOAT_EQ(-0.92, ((CalibratorZaga*) c)->getFracThreshold());
-         EXPECT_EQ(6,           ((CalibratorZaga*) c)->getNeighbourhoodSize());
-         EXPECT_FLOAT_EQ(40,          ((CalibratorZaga*) c)->getMaxEnsMean());
          delete c;
       }
    }
@@ -159,10 +151,6 @@ namespace {
       c = Calibrator::getScheme("phase", mVariable, Options("temperature=air_temperature_2m precipitation=precipitation_amount minPrecip=0.771 useWetbulb=0"));
       EXPECT_TRUE(c);
       EXPECT_EQ("phase", c->name());
-      Options options = c->getOptions();
-      float value = Util::MV;
-      options.getValue("minPrecip", value);
-      EXPECT_FLOAT_EQ(0.771, value);
       delete c;
    }
    TEST_F(TestCalibrator, factoryGaussian) {

@@ -55,16 +55,6 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*field)(5,2,0));
       EXPECT_FLOAT_EQ(304.6667, (*field)(5,1,0));
    }
-   TEST_F(TestCalibratorNeighbourhood, getRadius) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable, Options(""));
-      // Check that default is valid
-      EXPECT_GE(cal.getRadius(), 1);
-
-      CalibratorNeighbourhood cal12 = CalibratorNeighbourhood(mVariable, Options("radius=12"));
-      EXPECT_FLOAT_EQ(12, cal12.getRadius());
-   }
    TEST_F(TestCalibratorNeighbourhood, mean) {
       FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=mean"));

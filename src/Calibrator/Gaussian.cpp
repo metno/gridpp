@@ -8,7 +8,7 @@
 #include "../Parameters.h"
 CalibratorGaussian::CalibratorGaussian(const Variable& iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
-      mNeighbourhoodSize(0), 
+      mNeighbourhoodSize(0),
       mLogLikelihoodTolerance(1e-5) {
 
    iOptions.getValue("neighbourhoodSize", mNeighbourhoodSize);

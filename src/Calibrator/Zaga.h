@@ -26,11 +26,6 @@ class CalibratorZaga : public Calibrator {
       static float getCdf(float iThreshold, float iEnsMean, float iEnsFrac, const Parameters& iParameters);
       static float getPdf(float iThreshold, float iEnsMean, float iEnsFrac, const Parameters& iParameters);
 
-      float getFracThreshold() {return mFracThreshold;};
-      float getPopThreshold() {return mPopThreshold;};
-      int   getNeighbourhoodSize() {return mNeighbourhoodSize;};
-      float getMaxEnsMean() {return mMaxEnsMean;};
-
       static std::string description();
       std::string name() const {return "zaga";};
       Parameters train(const std::vector<ObsEns>& iData) const;

@@ -13,7 +13,6 @@ class CalibratorNeighbourhood : public Calibrator {
       CalibratorNeighbourhood(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "neighbourhood";};
-      int getRadius() const;
       bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

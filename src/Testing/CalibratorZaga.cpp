@@ -128,12 +128,6 @@ namespace {
          testInvCdf((float) i / 10, 0, 0, par, 0);
       }
    }
-   TEST_F(TestCalibratorZaga, getFracThreshold) {
-      ParameterFileSimple parFile = getParameterFile(-1.1,1.4,0.05,-0.05, 2.03, -0.05, Util::MV, -2.71);
-      CalibratorZaga cal = getCalibrator();
-      // Check that default is valid
-      EXPECT_GE(cal.getFracThreshold(), 0);
-   }
    TEST_F(TestCalibratorZaga, getInvCdfComplicated) {
       Parameters par = getParameters(-1.1,1.4,0.05,-0.05, 2.03, -0.05, 0.82, -2.71);
       // High precip case

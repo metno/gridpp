@@ -100,10 +100,6 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
    return true;
 }
 
-int CalibratorNeighbourhood::getRadius() const {
-   return mRadius;
-}
-
 std::string CalibratorNeighbourhood::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;

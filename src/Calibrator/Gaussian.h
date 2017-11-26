@@ -19,8 +19,6 @@ class CalibratorGaussian : public Calibrator {
       static float getCdf(float iThreshold, float iEnsMean, float iEnsSpread, const Parameters& iParameters);
       static float getPdf(float iThreshold, float iEnsMean, float iEnsSpread, const Parameters& iParameters);
 
-      int   getNeighbourhoodSize() {return mNeighbourhoodSize;};
-
       static std::string description();
       std::string name() const {return "gaussian";};
       Parameters train(const std::vector<ObsEns>& iData) const;

@@ -94,6 +94,14 @@ namespace {
       EXPECT_EQ(Setup::defaultDownscaler(), setup.variableConfigurations[0].downscaler->name());
       EXPECT_EQ(0,                          setup.variableConfigurations[0].calibrators.size());
    }
+   TEST_F(SetupTest, allowBypass) {
+      // Test that undefined variables can be passed down past the downscaler
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v wetbulb"));
+      ASSERT_EQ(1, setup.variableConfigurations.size());
+      EXPECT_EQ(Variable("wetbulb"), setup.variableConfigurations[0].outputVariable.name());
+      EXPECT_EQ(Setup::defaultDownscaler(), setup.variableConfigurations[0].downscaler->name());
+      EXPECT_EQ(0,                          setup.variableConfigurations[0].calibrators.size());
+   }
    TEST_F(SetupTest, valid) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -d smart"));
       ASSERT_EQ(1,            setup.variableConfigurations.size());

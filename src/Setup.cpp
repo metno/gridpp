@@ -99,7 +99,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler = NULL;
    while(true) {
-      // std::cout << state << std::endl;
+      std::stringstream ss;
+      ss << "State: " << state;
+      Util::info(ss.str());
+
       if(state != ERROR)
          prevState = state;
       if(state == START) {
@@ -120,6 +123,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
          if(argv.size() <= index) {
             // -v but nothing after it
             errorMessage = "No variable after '-v'";
+            state = ERROR;
+         }
+         else if(argv[index][0] == '-') {
+            errorMessage = "No variable name after '-v'";
             state = ERROR;
          }
          else {
@@ -188,6 +195,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
          if(argv.size() <= index) {
             // -vi but nothing after it
             errorMessage = "No variable after '-vi'";
+            state = ERROR;
+         }
+         else if(argv[index][0] == '-') {
+            errorMessage = "No variable name after '-v'";
             state = ERROR;
          }
          else {
@@ -279,7 +290,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
                if(!found) {
                   std::stringstream ss;
                   ss << "Input file does not contain variable with name '" << useVariableInputName << "'";
-                  Util::error(ss.str());
+                  Util::warning(ss.str());
                }
                varconf.inputVariable.add(useVariableInputOptions);
 

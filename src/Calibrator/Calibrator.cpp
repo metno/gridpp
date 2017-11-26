@@ -39,12 +39,8 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
       CalibratorNeighbourhood* c = new CalibratorNeighbourhood(iVariable, iOptions);
       return c;
    }
-   else if(iName == "diagnoseDewpoint") {
-      CalibratorDiagnoseDewpoint* c = new CalibratorDiagnoseDewpoint(iVariable, iOptions);
-      return c;
-   }
-   else if(iName == "diagnoseRh") {
-      CalibratorDiagnoseRh* c = new CalibratorDiagnoseRh(iVariable, iOptions);
+   else if(iName == "diagnoseHumidity") {
+      CalibratorDiagnoseHumidity* c = new CalibratorDiagnoseHumidity(iVariable, iOptions);
       return c;
    }
    else if(iName == "diagnoseWind") {
@@ -193,8 +189,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorCloud::description() << std::endl;
    ss << CalibratorCoastal::description() << std::endl;
    ss << CalibratorDeaccumulate::description() << std::endl;
-   ss << CalibratorDiagnoseDewpoint::description() << std::endl;
-   ss << CalibratorDiagnoseRh::description() << std::endl;
+   ss << CalibratorDiagnoseHumidity::description() << std::endl;
    ss << CalibratorDiagnoseWind::description() << std::endl;
    ss << CalibratorGaussian::description() << std::endl;
    ss << CalibratorKriging::description() << std::endl;

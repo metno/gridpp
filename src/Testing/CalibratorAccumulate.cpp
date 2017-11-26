@@ -5,11 +5,11 @@
 #include <gtest/gtest.h>
 
 namespace {
-   class TestCalibratorAccumlate : public ::testing::Test {
+   class TestCalibratorAccumulate : public ::testing::Test {
       protected:
-         TestCalibratorAccumlate() {
+         TestCalibratorAccumulate() {
          }
-         virtual ~TestCalibratorAccumlate() {
+         virtual ~TestCalibratorAccumulate() {
          }
          virtual void SetUp() {
             mTemperature = Variable("air_temperature_2m");
@@ -23,7 +23,7 @@ namespace {
          Variable mMissing;
    };
 
-   TEST_F(TestCalibratorAccumlate, 1x1) {
+   TEST_F(TestCalibratorAccumulate, 1x1) {
       FileNetcdf from("testing/files/1x1.nc");
       CalibratorAccumulate cal = CalibratorAccumulate(mTemperature, Options());
       cal.calibrate(from);
@@ -39,7 +39,7 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mTemperature, 8))(0,0,0));
       EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mTemperature, 9))(0,0,0));
    }
-   TEST_F(TestCalibratorAccumlate, 10x10) {
+   TEST_F(TestCalibratorAccumulate, 10x10) {
       FileNetcdf from("testing/files/10x10.nc");
       CalibratorAccumulate cal = CalibratorAccumulate(mPrecipitation, Options());
       cal.calibrate(from);
@@ -51,17 +51,7 @@ namespace {
       EXPECT_FLOAT_EQ(0, (*from.getField(mPrecipitation, 0))(0,9,0));
       EXPECT_FLOAT_EQ(5.442121, (*from.getField(mPrecipitation, 1))(0,9,0));
    }
-   TEST_F(TestCalibratorAccumlate, invalid) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-      FileNetcdf from("testing/files/1x1.nc");
-      // File does not contain QNH so it should not be possible to accumulate
-      CalibratorAccumulate cal = CalibratorAccumulate(mMissing, Options());
-      EXPECT_DEATH(cal.calibrate(from), ".*");
-      CalibratorAccumulate cal2 = CalibratorAccumulate(mMissing, Options());
-      EXPECT_DEATH(cal2.calibrate(from), ".*");
-   }
-   TEST_F(TestCalibratorAccumlate, description) {
+   TEST_F(TestCalibratorAccumulate, description) {
       CalibratorAccumulate::description();
    }
 }

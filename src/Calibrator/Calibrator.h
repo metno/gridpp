@@ -57,6 +57,7 @@ class Calibrator : public Scheme {
 #include "Bct.h"
 #include "Cloud.h"
 #include "Coastal.h"
+#include "Deaccumulate.h"
 #include "DiagnoseDewpoint.h"
 #include "DiagnoseRh.h"
 #include "DiagnoseWind.h"

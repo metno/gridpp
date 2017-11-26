@@ -6,13 +6,10 @@ CalibratorAccumulate::CalibratorAccumulate(const Variable& iVariable, const Opti
    iOptions.check();
 }
 bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumY();
-   int nLon = iFile.getNumX();
+   int nY = iFile.getNumY();
+   int nX = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
-   if(!iFile.hasVariable(mVariable)) {
-      Util::error("File '" + iFile.getFilename() + "' does not have variable '" + mVariable.name() + "'-");
-   }
 
    // Get all fields
    std::vector<FieldPtr> fields(nTime);
@@ -24,20 +21,20 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
 
    for(int t = 0; t < nTime; t++) {
       #pragma omp parallel for
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
+      for(int y = 0; y < nY; y++) {
+         for(int x = 0; x < nX; x++) {
             for(int e = 0; e < nEns; e++) {
                if(t == 0) {
-                  (*fieldsAcc[t])(i,j,e) = 0;
+                  (*fieldsAcc[t])(y, x, e) = 0;
                }
                else {
-                  float previous = (*fieldsAcc[t-1])(i,j,e);
-                  float current  = (*fields[t])(i,j,e);
+                  float previous = (*fieldsAcc[t - 1])(y, x, e);
+                  float current  = (*fields[t])(y, x, e);
                   if(Util::isValid(current) && Util::isValid(previous)) {
-                     (*fieldsAcc[t])(i,j,e) = current + previous;
+                     (*fieldsAcc[t])(y, x, e) = current + previous;
                   }
                   else {
-                     (*fieldsAcc[t])(i,j,e) = Util::MV;
+                     (*fieldsAcc[t])(y, x, e) = Util::MV;
                   }
                }
             }

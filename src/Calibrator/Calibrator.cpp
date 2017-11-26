@@ -27,6 +27,10 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
       CalibratorAccumulate* c = new CalibratorAccumulate(iVariable, iOptions);
       return c;
    }
+   else if(iName == "deaccumulate") {
+      CalibratorDeaccumulate* c = new CalibratorDeaccumulate(iVariable, iOptions);
+      return c;
+   }
    else if(iName == "gaussian") {
       CalibratorGaussian* c = new CalibratorGaussian(iVariable, iOptions);
       return c;
@@ -188,6 +192,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorBct::description() << std::endl;
    ss << CalibratorCloud::description() << std::endl;
    ss << CalibratorCoastal::description() << std::endl;
+   ss << CalibratorDeaccumulate::description() << std::endl;
    ss << CalibratorDiagnoseDewpoint::description() << std::endl;
    ss << CalibratorDiagnoseRh::description() << std::endl;
    ss << CalibratorDiagnoseWind::description() << std::endl;

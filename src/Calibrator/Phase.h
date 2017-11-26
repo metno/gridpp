@@ -9,15 +9,6 @@ class CalibratorPhase : public Calibrator {
       CalibratorPhase(const Variable& iVariable, const Options& iOptions);
       static std::string description();
       std::string name() const {return "phase";};
-      //! Compute wetbulb temperature
-      //! @param iTemperature Temperature in K
-      //! @param iPressure Pressure in pa
-      //! @param iRelativeHumidity Relative humidity (out of 1)
-      //! @return Wetbulb temperature in K
-      static float getWetbulb(float iTemperature, float iPressure, float iRelativeHumidity);
-
-      float getMinPrecip() const;
-      void  setMinPrecip(float iMinPrecip);
 
       //! Precipitation phase
       enum Phase {
@@ -29,13 +20,9 @@ class CalibratorPhase : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       float mMinPrecip;
-      //! If true compute pressure based on standard atmosphere (instead of using forecasted data)
-      //! This is likely a good enough approximation when computing wetbulb temperature and saves memory.
-      bool mEstimatePressure;
-      bool mUseWetbulb;
+      float mSnowThreshold;
+      float mRainThreshold;
       std::string mTemperatureVariable;
       std::string mPrecipitationVariable;
-      std::string mPressureVariable;
-      std::string mRhVariable;
 };
 #endif

@@ -34,15 +34,11 @@ namespace {
          CalibratorPhase getCalibrator(Variable iVariable) {
             return CalibratorPhase(iVariable, Options("temperature=air_temperature_2m precipitation=precipitation_amount"));
          }
-         void setValues(const File& iFile, float iPrecip, float iTemp, float iRh, float iPressure) {
+         void setValues(const File& iFile, float iPrecip, float iTemp) {
             FieldPtr precip   = iFile.getField(Variable("precipitation_amount"), 0);
             FieldPtr temp     = iFile.getField(Variable("air_temperature_2m"), 0);
-            FieldPtr rh       = iFile.getField(Variable("relative_humidity_2m"), 0);
-            FieldPtr pressure = iFile.getField(Variable("surface_air_pressure"), 0);
             (*precip)(0,0,0) = iPrecip;
             (*temp)(0,0,0) = iTemp;
-            (*rh)(0,0,0) = iRh;
-            (*pressure)(0,0,0) = iPressure;
          }
    };
 
@@ -77,71 +73,25 @@ namespace {
       FieldPtr phase = file.getField(Variable("phase"), 0);
       ParameterFileSimple parFile = getParameterFile(273.7,274.7);
       CalibratorPhase cal = getCalibratorWetbulb(Variable("phase"));
-      setValues(file, 5, 270, 0.95, 101325);
+      float wetbulb = CalibratorDiagnoseHumidity::computeWetbulb(270, 101325, 0.95);
+      setValues(file, 5, wetbulb);
       cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
 
-      setValues(file, 5, 274, 0.98, 101325);
+      wetbulb = CalibratorDiagnoseHumidity::computeWetbulb(274, 101325, 0.98);
+      setValues(file, 5, wetbulb);
       cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)(0,0,0));
 
-      setValues(file, 0, 274, 0.5, 101325);
+      wetbulb = CalibratorDiagnoseHumidity::computeWetbulb(274, 101325, 0.5);
+      setValues(file, 0, wetbulb);
       cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(CalibratorPhase::PhaseNone, (*phase)(0,0,0));
 
-      setValues(file, 5, 275, 0.5, 101325);
+      wetbulb = CalibratorDiagnoseHumidity::computeWetbulb(275, 101325, 0.5);
+      setValues(file, 5, wetbulb);
       cal.calibrate(file, &parFile);
       EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
-   }
-   TEST_F(TestCalibratorPhase, useWetbulb) {
-      FileFake file(Options("nLat=1 nLon=1 nEns=1 nTime=1"));
-      FieldPtr phase = file.getField(Variable("phase"), 0);
-      ParameterFileSimple parFile = getParameterFile(273.7,274.7);
-      CalibratorPhase calwet = getCalibratorWetbulb(Variable("phase"));
-      CalibratorPhase cal = getCalibrator(Variable("phase"));
-      setValues(file, 5, 275, 0.5, 101325);
-
-      cal.calibrate(file, &parFile);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseRain, (*phase)(0,0,0));
-
-      calwet.calibrate(file, &parFile);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
-
-      setValues(file, 5, 274, 0.5, 101325);
-      cal.calibrate(file, &parFile);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSleet, (*phase)(0,0,0));
-      calwet.calibrate(file, &parFile);
-      EXPECT_FLOAT_EQ(CalibratorPhase::PhaseSnow, (*phase)(0,0,0));
-   }
-   TEST_F(TestCalibratorPhase, missingParameters) {
-      FileNetcdf file("testing/files/10x10.nc");
-      ParameterFileSimple parFile = getParameterFile(Util::MV,1.5);
-      CalibratorPhase cal = getCalibrator(Variable("phase"));
-
-      cal.calibrate(file, &parFile);
-      FieldPtr phase = file.getField(Variable("phase"), 0);
-      for(int i = 0; i < file.getNumY(); i++) {
-         for(int j = 0; j < file.getNumX(); j++) {
-            for(int e = 0; e < file.getNumEns(); e++) {
-               EXPECT_FLOAT_EQ(Util::MV, (*phase)(i,j,e));
-            }
-         }
-      }
-   }
-   TEST_F(TestCalibratorPhase, getWetbulb) {
-      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-      Util::setShowError(false);
-                                                                                  // NOAA
-      EXPECT_FLOAT_EQ(269.02487, CalibratorPhase::getWetbulb(270, 100000, 0.80)); // 269.03
-      EXPECT_FLOAT_EQ(296.13763, CalibratorPhase::getWetbulb(300, 101000, 0.70)); // 295.95
-      EXPECT_FLOAT_EQ(269.92218, CalibratorPhase::getWetbulb(270, 100000, 1));    // 270
-      EXPECT_FLOAT_EQ(239.83798, CalibratorPhase::getWetbulb(240, 50000, 0.90));  // 239.89
-   }
-   TEST_F(TestCalibratorPhase, getWetbulbInvalid) {
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(Util::MV, 30000, 1));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, Util::MV, 1));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, 30000, Util::MV));
-      EXPECT_FLOAT_EQ(Util::MV, CalibratorPhase::getWetbulb(270, 100000, 0)); // No humidity
    }
    TEST_F(TestCalibratorPhase, description) {
       CalibratorPhase::description();

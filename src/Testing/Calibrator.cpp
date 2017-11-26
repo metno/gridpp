@@ -156,10 +156,13 @@ namespace {
    }
    TEST_F(TestCalibrator, factoryPhase) {
       Calibrator* c;
-      c = Calibrator::getScheme("phase", mVariable, Options("temperatureVariable=air_temperature_2m precipitationVariable=precipitation_amount minPrecip=0.771 useWetbulb=0"));
+      c = Calibrator::getScheme("phase", mVariable, Options("temperature=air_temperature_2m precipitation=precipitation_amount minPrecip=0.771 useWetbulb=0"));
       EXPECT_TRUE(c);
       EXPECT_EQ("phase", c->name());
-      EXPECT_FLOAT_EQ(0.771, ((CalibratorPhase*) c)->getMinPrecip());
+      Options options = c->getOptions();
+      float value = Util::MV;
+      options.getValue("minPrecip", value);
+      EXPECT_FLOAT_EQ(0.771, value);
       delete c;
    }
    TEST_F(TestCalibrator, factoryGaussian) {

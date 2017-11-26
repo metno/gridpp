@@ -49,11 +49,6 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
    }
    else if(iName == "phase") {
       CalibratorPhase* c = new CalibratorPhase(iVariable, iOptions);
-      float minPrecip;
-      if(iOptions.getValue("minPrecip", minPrecip)) {
-         c->setMinPrecip(minPrecip);
-      }
-
       return c;
    }
    else if(iName == "windDirection") {

@@ -44,6 +44,18 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeRh(Util::MV, 273.15-1.27));
       EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeRh(273.15, Util::MV));
    }
+   TEST_F(TestCalibratorDiagnoseHumidity, wetbulb) {
+      EXPECT_FLOAT_EQ(269.02487, CalibratorDiagnoseHumidity::computeWetbulb(270, 100000, 0.80)); // 269.03
+      EXPECT_FLOAT_EQ(296.13763, CalibratorDiagnoseHumidity::computeWetbulb(300, 101000, 0.70)); // 295.95
+      EXPECT_FLOAT_EQ(269.92218, CalibratorDiagnoseHumidity::computeWetbulb(270, 100000, 1));    // 270
+      EXPECT_FLOAT_EQ(239.83798, CalibratorDiagnoseHumidity::computeWetbulb(240, 50000, 0.90));  // 239.89
+   }
+   TEST_F(TestCalibratorDiagnoseHumidity, wetbulbInvalid) {
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeWetbulb(Util::MV, 30000, 1));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeWetbulb(270, Util::MV, 1));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeWetbulb(270, 30000, Util::MV));
+      EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeWetbulb(270, 100000, 0)); // No humidity
+   }
    TEST_F(TestCalibratorDiagnoseHumidity, description) {
       CalibratorDiagnoseHumidity::description();
    }

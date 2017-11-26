@@ -16,19 +16,25 @@ class Util {
       //! Issues a warning message to std::cout
       static void warning(std::string iMessage);
 
-      //! Issues a status message to std::cout
-      static void status(std::string iMessage);
+      //! Issues a status message to std::cout. Add new line to the end.
+      static void status(std::string iMessage, bool iNewLine=true);
+
+      //! Issues a info message to std::cout
+      static void info(std::string iMessage);
 
       //! True will force calls to Util::error to show error messages.
       //! Calls to errors will cause abort regardless of this setting.
       static void setShowError(bool flag);
-      
+
       //! True will force calls to Util::warning to show warning messages
       static void setShowWarning(bool flag);
-      
+
       //! True will force calls to Util::status to show status messages
       static void setShowStatus(bool flag);
-      
+
+      //! True will force calls to Util::info to show status messages
+      static void setShowInfo(bool flag);
+
       //! Missing value indicator
       static float MV;
 
@@ -187,8 +193,9 @@ class Util {
          }
       };
    private:
+      static bool mShowStatus;
       static bool mShowError;
       static bool mShowWarning;
-      static bool mShowStatus;
+      static bool mShowInfo;
 };
 #endif

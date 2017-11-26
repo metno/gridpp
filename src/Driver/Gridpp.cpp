@@ -29,7 +29,7 @@ void writeUsage() {
    std::cout << "   options       Options of the form key=value" << std::endl;
    std::cout << "   --version     Print the program's version" << std::endl;
    std::cout << "   --help        Print usage information" << std::endl;
-   std::cout << "   --debug lvl   Set debug level: quiet, error, warn (default), status" << std::endl;
+   std::cout << "   --debug lvl   Set debug level: quiet, error, warn (default), info" << std::endl;
    std::cout << std::endl;
    std::cout << "Notes:" << std::endl;
    std::cout << "   - At least one variable must be specified." << std::endl;
@@ -97,27 +97,30 @@ int main(int argc, const char *argv[]) {
    }
 
    // Set logging levels
-   Util::setShowWarning(true);
    Util::setShowStatus(true);
+   Util::setShowWarning(true);
+   Util::setShowInfo(true);
    if(debugMode == "quiet") {
       Util::setShowError(false);
-      Util::setShowWarning(false);
       Util::setShowStatus(false);
+      Util::setShowWarning(false);
+      Util::setShowInfo(false);
    }
    else if(debugMode == "error") {
-      Util::setShowWarning(false);
       Util::setShowStatus(false);
+      Util::setShowWarning(false);
+      Util::setShowInfo(false);
    }
    else if(debugMode == "warn") {
-      Util::setShowStatus(false);
+      Util::setShowInfo(false);
    }
-   else if(debugMode == "status") {
+   else if(debugMode == "info") {
    }
 
    Setup setup(args);
    for(int f = 0; f < setup.inputFiles.size(); f++) {
-      std::cout << "Input type:  " << setup.inputFiles[f]->name() << std::endl;
-      std::cout << "Output type: " << setup.outputFiles[f]->name() << std::endl;
+      Util::info("Input type:  " + setup.inputFiles[f]->name());
+      Util::info("Output type: " + setup.outputFiles[f]->name());
       setup.outputFiles[f]->setTimes(setup.inputFiles[f]->getTimes());
       setup.outputFiles[f]->setReferenceTime(setup.inputFiles[f]->getReferenceTime());
 
@@ -136,20 +139,39 @@ int main(int argc, const char *argv[]) {
          }
          setup.outputFiles[f]->initNewVariable(outputVariable);
 
-         std::cout << "Processing " << outputVariable.name() << std::endl;
+         Util::status("Processing " + outputVariable.name());
 
          // Downscale
-         std::cout << "   Downscaler " << varconf.downscaler->name() << std::endl;
+         Util::status("   Downscaler " +  varconf.downscaler->name() + ": ", false);
+         double ss = Util::clock();
          varconf.downscaler->downscale(*setup.inputFiles[f], *setup.outputFiles[f]);
+         double ee = Util::clock();
+         std::stringstream ss0;
+         ss0 << ee-ss << " seconds";
+         Util::status(ss0.str());
+
+         // Calibrate
          for(int c = 0; c < varconf.calibrators.size(); c++) {
-            // Calibrate
-            std::cout << "   Calibrator " << varconf.calibrators[c]->name() << std::endl;
+            double s = Util::clock();
+            Util::status("   Calibrator " + varconf.calibrators[c]->name() + ": ", false);
             varconf.calibrators[c]->calibrate(*setup.outputFiles[f], varconf.parameterFileCalibrators[c]);
+            double e = Util::clock();
+            std::stringstream ss;
+            ss << e-s << " seconds";
+            Util::status(ss.str());
          }
          double e = Util::clock();
-         std::cout << "   " << e-s << " seconds" << std::endl;
-         std::cout << "Current mem usage input: " << setup.inputFiles[f]->getCacheSize() / 1e6<< std::endl;
-         std::cout << "Current mem usage output: " << setup.outputFiles[f]->getCacheSize() / 1e6<< std::endl;
+         std::stringstream ss1;
+         ss1 << "   Total: " << e-s << " seconds";
+         Util::status(ss1.str());
+
+         std::stringstream ss2;
+         ss2 << "Mem usage input: " << setup.inputFiles[f]->getCacheSize() / 1e6;
+         Util::status(ss2.str());
+
+         std::stringstream ss3;
+         ss3 << "Mem usage output: " << setup.outputFiles[f]->getCacheSize() / 1e6;
+         Util::status(ss3.str());
          // setup.inputFile->clear();
       }
 
@@ -157,8 +179,13 @@ int main(int argc, const char *argv[]) {
       double s = Util::clock();
       setup.outputFiles[f]->write(writeVariables);
       double e = Util::clock();
-      std::cout << "Writing file: " << e-s << " seconds" << std::endl;
-      std::cout << "Total time:   " << e-start << " seconds" << std::endl;
+      std::stringstream ss1;
+      ss1 << "Writing file: " << e-s << " seconds";
+      Util::status(ss1.str());
+
+      std::stringstream ss2;
+      ss2 << "Total time:   " << e-start << " seconds";
+      Util::status(ss2.str());
       setup.inputFiles[f]->clear();
       setup.outputFiles[f]->clear();
    }

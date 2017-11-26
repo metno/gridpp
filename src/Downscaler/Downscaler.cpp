@@ -77,7 +77,7 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, const File& iT
                iJ[i][j] = j;
             }
          }
-         Util::status("Grids are identical, short cut in finding nearest neighbours");
+         Util::info("Grids are identical, short cut in finding nearest neighbours");
          addToCache(iFrom, iTo, iI, iJ);
          return;
       }
@@ -124,7 +124,7 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
                iJ[i][j] = j;
             }
          }
-         Util::status("Grids are identical, short cut in finding nearest neighbours");
+         Util::info("Grids are identical, short cut in finding nearest neighbours");
          addToCache(iFrom, iTo, iI, iJ);
          return;
       }

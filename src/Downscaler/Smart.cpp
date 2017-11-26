@@ -127,7 +127,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
 
             std::stringstream ss;
             ss << "Smart neighbours for " << i << " " << j << " " << oelev;
-            Util::status(ss.str());
+            Util::info(ss.str());
 
             // Use nearest neighbour if all fails
             if(elevDiff.size() == 0) {
@@ -145,7 +145,7 @@ void DownscalerSmart::getSmartNeighbours(const File& iFrom, const File& iTo, vec
                   iJ[i][j][n] = Jlookup[index];
                   std::stringstream ss;
                   ss << "   " << iI[i][j][n] << " " << iJ[i][j][n] << " " << elevDiff[n].second;
-                  Util::status(ss.str());
+                  Util::info(ss.str());
                }
             }
          }

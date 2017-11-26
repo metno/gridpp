@@ -222,6 +222,12 @@ namespace {
    TEST_F(UtilTest, status) {
       Util::setShowStatus(false);
       Util::status("test");
+      Util::status("test", false);
+      Util::status("test", true);
+   }
+   TEST_F(UtilTest, info) {
+      Util::setShowInfo(false);
+      Util::info("test");
    }
    TEST_F(UtilTest, getDate) {
       EXPECT_FLOAT_EQ(20150528, Util::getDate(1432816155));

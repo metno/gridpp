@@ -32,6 +32,7 @@ extern "C" void __gcov_flush();
 bool Util::mShowError = true;
 bool Util::mShowWarning = false;
 bool Util::mShowStatus = false;
+bool Util::mShowInfo = false;
 float Util::MV = -999;
 float Util::pi  = 3.14159265;
 double Util::radiusEarth = 6.378137e6;
@@ -57,9 +58,21 @@ void Util::warning(std::string iMessage) {
    if(mShowWarning)
       std::cout << "Warning: " << iMessage << std::endl;
 }
-void Util::status(std::string iMessage) {
-   if(mShowStatus)
-      std::cout << "Status: " << iMessage << std::endl;
+void Util::status(std::string iMessage, bool iNewLine) {
+   if(mShowStatus) {
+      std::cout << "" << iMessage;
+      if(iNewLine) {
+         std::cout << std::endl;
+      }
+      else {
+         std::fflush(stdout);
+      }
+   }
+}
+
+void Util::info(std::string iMessage) {
+   if(mShowInfo)
+      std::cout << "Info: " << iMessage << std::endl;
 }
 
 double Util::clock() {
@@ -80,6 +93,10 @@ void Util::setShowWarning(bool flag) {
 
 void Util::setShowStatus(bool flag) {
    mShowStatus = flag;
+}
+
+void Util::setShowInfo(bool flag) {
+   mShowInfo = flag;
 }
 
 bool Util::exists(const std::string& iFilename) {

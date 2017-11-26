@@ -12,7 +12,7 @@
 void writeUsage() {
    std::cout << "Post-processes gridded forecasts" << std::endl;
    std::cout << std::endl;
-   std::cout << "usage:  gridpp inputs [options] outputs [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+" << std::endl;
+   std::cout << "usage:  gridpp inputs [options] outputs [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+ [--debug <level>]" << std::endl;
    std::cout << "        gridpp [--version]" << std::endl;
    std::cout << "        gridpp [--help]" << std::endl;
    std::cout << std::endl;
@@ -29,6 +29,7 @@ void writeUsage() {
    std::cout << "   options       Options of the form key=value" << std::endl;
    std::cout << "   --version     Print the program's version" << std::endl;
    std::cout << "   --help        Print usage information" << std::endl;
+   std::cout << "   --debug lvl   Set debug level: quiet, error, warn (default), status" << std::endl;
    std::cout << std::endl;
    std::cout << "Notes:" << std::endl;
    std::cout << "   - At least one variable must be specified." << std::endl;
@@ -78,15 +79,41 @@ int main(int argc, const char *argv[]) {
       writeUsage();
       return 0;
    }
-   Util::setShowError(true);
-   Util::setShowWarning(true);
-   Util::setShowStatus(false);
-
    // Retrieve setup
    std::vector<std::string> args;
+   std::string debugMode = "warn";
+   Util::setShowError(true);
    for(int i = 1; i < argc; i++) {
-      args.push_back(std::string(argv[i]));
+      if(std::string(argv[i]) == "--debug") {
+         i++;
+         if(argc <= i) {
+            Util::error("Missing debug level");
+         }
+         debugMode = std::string(argv[i]);
+      }
+      else {
+         args.push_back(std::string(argv[i]));
+      }
    }
+
+   // Set logging levels
+   Util::setShowWarning(true);
+   Util::setShowStatus(true);
+   if(debugMode == "quiet") {
+      Util::setShowError(false);
+      Util::setShowWarning(false);
+      Util::setShowStatus(false);
+   }
+   else if(debugMode == "error") {
+      Util::setShowWarning(false);
+      Util::setShowStatus(false);
+   }
+   else if(debugMode == "warn") {
+      Util::setShowStatus(false);
+   }
+   else if(debugMode == "status") {
+   }
+
    Setup setup(args);
    for(int f = 0; f < setup.inputFiles.size(); f++) {
       std::cout << "Input type:  " << setup.inputFiles[f]->name() << std::endl;

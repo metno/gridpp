@@ -16,13 +16,6 @@ class DownscalerGradient : public Downscaler {
       //! Downscale the specified variable
       DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       ~DownscalerGradient();
-      float getConstantElevGradient() const;
-      int   getElevRadius() const;
-      float getMinElevDiff() const;
-      bool  getLogTransform() const;
-      float getMinElevGradient() const;
-      float getMaxElevGradient() const;
-      float getDefaultElevGradient() const;
       static std::string description();
       std::string name() const {return "gradient";};
    private:
@@ -46,7 +39,6 @@ class DownscalerGradient : public Downscaler {
       bool mAverageNeighbourhood;
       Downscaler* mDownscaler;
       std::string mDownscalerName;
-      mutable bool mHasIssuedWarningUnstable;
       std::string mSaveGradient;
       std::string mElevGradientVariableName;
       float calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const;

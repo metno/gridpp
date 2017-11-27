@@ -87,7 +87,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
    }
 
    // Implement a finite state machine
-   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, VARI = 4, VARIOPT = 5, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, PARDOWN = 30, PAROPTDOWN = 35, PARCAL = 40, PAROPTCAL = 45, END = 90, ERROR = 100};
+   enum State {START = 0, VAR = 1, VAROPT = 2, NEWVAR = 3, VARI = 4, VARIOPT = 5, VARALIAS = 6, VARALIASOPT = 7, NEWVARALIAS = 8, DOWN = 10, DOWNOPT = 15, CAL = 20, NEWCAL = 22, CALOPT = 25, PARDOWN = 30, PAROPTDOWN = 35, PARCAL = 40, PAROPTCAL = 45, END = 90, ERROR = 100};
    State state = START;
    State prevState = START;
 
@@ -107,6 +107,8 @@ Setup::Setup(const std::vector<std::string>& argv) {
    std::vector<std::string> calibratorNames;
    std::vector<ParameterFile*> parameterFileCalibrators;
    ParameterFile* parameterFileDownscaler = NULL;
+   std::string variableAlias = "";
+   Options aOptions;
    while(true) {
       std::stringstream ss;
       ss << "State: " << state;
@@ -121,6 +123,10 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
          else if(index < argv.size() && argv[index] == "-vi") {
             state = VARI;
+            index++;
+         }
+         else if(index < argv.size() && argv[index] == "-va") {
+            state = VARALIAS;
             index++;
          }
          else {
@@ -187,7 +193,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
             state = NEWVAR;
          }
          else if(argv[index] == "-vi") {
-               index++;
+            index++;
             state = VARI;
          }
          else if(argv[index] == "-p") {
@@ -273,12 +279,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
          }
       }
       else if(state == NEWVAR) {
-         // Check that we haven't added the variable before
          if(variableName == "") {
             errorMessage = "-vi but no -v";
             state = ERROR;
          }
          else {
+            // Check that we haven't added the variable before
             bool alreadyExists = false;
             for(int i = 0; i < variableConfigurations.size(); i++) {
                if(variableConfigurations[i].outputVariable.name() == variableName)
@@ -353,6 +359,66 @@ Setup::Setup(const std::vector<std::string>& argv) {
                state = VARI;
                index++;
             }
+         }
+      }
+      else if(state == VARALIAS) {
+         if(argv.size() <= index) {
+            // -va but nothing after it
+            errorMessage = "No variable after '-va'";
+            state = ERROR;
+         }
+         else if(argv[index][0] == '-') {
+            errorMessage = "No variable name after '-va'";
+            state = ERROR;
+         }
+         else {
+            variableAlias = argv[index];
+            index++;
+            state = VARALIASOPT;
+         }
+      }
+      else if(state == VARALIASOPT) {
+         if(argv.size() <= index) {
+            state = NEWVARALIAS;
+         }
+         else if(argv[index] == "-v") {
+            state = NEWVARALIAS;
+         }
+         else if(argv[index] == "-vi") {
+            state = NEWVARALIAS;
+         }
+         else {
+            aOptions.addOptions(argv[index]);
+            index++;
+         }
+      }
+      else if(state == NEWVARALIAS) {
+         // Check that we haven't added the variable before
+         std::map<std::string, Variable>::const_iterator it = variableAliases.find(variableAlias);
+         if(it == variableAliases.end()) {
+            std::string name = "";
+            if(!aOptions.getValue("name", name)) {
+               Util::error("Variable alias must have a name= option");
+            }
+            variableAliases[variableAlias] = Variable(aOptions);
+            variableAlias = "";
+            aOptions.clear();
+         }
+         else {
+            std:: stringstream ss;
+            ss << "Variable alias '" << variableAlias << "' already read. Using first instance.";
+            Util::warning(ss.str());
+         }
+         if(argv.size() <= index) {
+            state = END;
+         }
+         else if(argv[index] == "-v"){
+            state = VAR;
+            index++;
+         }
+         else if(argv[index] == "-vi"){
+            state = VARI;
+            index++;
          }
       }
       else if(state == DOWN) {
@@ -653,6 +719,14 @@ Setup::Setup(const std::vector<std::string>& argv) {
          std::stringstream ss;
          ss << "Invalid command line arguments: " << errorMessage << ".";
          Util::error(ss.str());
+      }
+   }
+
+   // Add aliases to input files
+   for(int i = 0; i < inputFiles.size(); i++) {
+      std::map<std::string, Variable>::const_iterator it = variableAliases.find(variableAlias);
+      for(it = variableAliases.begin(); it != variableAliases.end(); it++) {
+         inputFiles[i]->addVariableAlias(it->first, it->second);
       }
    }
 }

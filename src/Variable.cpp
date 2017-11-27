@@ -4,19 +4,36 @@
 
 Variable::Variable() {
 }
-Variable::Variable(std::string iName, float iMin, float iMax, std::string iUnits, std::string iStandardName):
+Variable::Variable(std::string iName, float iMin, float iMax, std::string iUnits, std::string iStandardName, int iLevel):
       mName(iName),
       mMin(iMin),
       mMax(iMax),
       mUnits(iUnits),
-      mStandardName(iStandardName) {
+      mStandardName(iStandardName),
+      mLevel(iLevel) {
 }
-Variable::Variable(std::string iName, std::string iUnits, std::string iStandardName):
+Variable::Variable(std::string iName, std::string iUnits, std::string iStandardName, int iLevel):
       mName(iName),
       mMin(Util::MV),
       mMax(Util::MV),
       mUnits(iUnits),
-      mStandardName(iStandardName) {
+      mStandardName(iStandardName),
+      mLevel(iLevel) {
+}
+Variable::Variable(const Options& iOptions):
+      mName(""),
+      mMin(Util::MV),
+      mMax(Util::MV),
+      mLevel(Util::MV),
+      mStandardName(""),
+      mUnits("") {
+   iOptions.getRequiredValue("name", mName);
+   iOptions.getValue("standardName", mStandardName);
+   iOptions.getValue("units", mUnits);
+   iOptions.getValue("min", mMin);
+   iOptions.getValue("max", mMax);
+   iOptions.getValue("level", mLevel);
+   iOptions.check();
 }
 
 float Variable::min() const {
@@ -31,6 +48,13 @@ float Variable::max() const {
 }
 void Variable::max(float iValue) {
    mMax = iValue;
+}
+
+float Variable::level() const {
+   return mLevel;
+}
+void Variable::level(int iValue) {
+   mLevel = iValue;
 }
 
 std::string Variable::name() const {

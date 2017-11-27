@@ -24,6 +24,7 @@ class File {
       static File* getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
 
       FieldPtr getField(const Variable& iVariable, int iTime) const;
+      FieldPtr getField(std::string iVariable, int iTime) const;
 
       //! Get a new field initialized with missing values
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
@@ -79,6 +80,7 @@ class File {
       std::vector<double> getTimes() const;
       bool getVariable(std::string iVariableName, Variable& iVariable) const;
       static std::string getDescriptions();
+      void addVariableAlias(std::string iAlias, Variable iVariable);
    protected:
       virtual FieldPtr getFieldCore(const Variable& iVariable, int iTime) const = 0;
       // File must save variables, but also altitudes, in case they got changed
@@ -95,6 +97,7 @@ class File {
 
       //! These must be populated on initialization by subclass
       mutable std::vector<Variable> mVariables;
+      std::map<std::string, Variable> mVariableAliases;
    private:
       std::string mFilename;
       mutable std::map<Variable, std::vector<FieldPtr> > mFields;  // Variable, offset

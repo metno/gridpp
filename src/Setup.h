@@ -9,6 +9,7 @@ class File;
 class Calibrator;
 class Downscaler;
 class ParameterFile;
+class Variable;
 
 //! Represents the post-processing of one variable
 struct VariableConfiguration {
@@ -39,6 +40,7 @@ class Setup {
       Setup(const std::vector<std::string>& argv);
       ~Setup();
       static std::string defaultDownscaler();
+      std::map<std::string, Variable> variableAliases;
    private:
       // In some cases, it is not possible to open the same file first as readonly and then writeable
       // (for NetCDF). Therefore, use the same filehandle for both if the files are the same. Remember

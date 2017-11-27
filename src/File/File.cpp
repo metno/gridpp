@@ -56,6 +56,25 @@ File* File::getScheme(std::string iFilename, const Options& iOptions, bool iRead
 }
 
 
+FieldPtr File::getField(std::string iVariable, int iTime) const {
+   // Check internal variables first
+   for(int i = 0; i < mVariables.size(); i++) {
+      if(mVariables[i].name() == iVariable)
+         return getField(mVariables[i], iTime);
+   }
+
+   // Check aliases
+   std::map<std::string, Variable>::const_iterator it = mVariableAliases.find(iVariable);
+   if(it != mVariableAliases.end()) {
+      std::stringstream ss;
+      ss << "Retrieving variable alias " << iVariable << " for timestep " << iTime;
+      Util::info(ss.str());
+      return getField(it->second, iTime);
+   }
+
+   // Create new variable
+   return getField(Variable(iVariable), iTime);
+}
 FieldPtr File::getField(const Variable& iVariable, int iTime) const {
    // Determine if values have been cached
    std::map<Variable, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
@@ -295,6 +314,10 @@ bool File::hasDefinedVariable(Variable iVariable) const {
       }
    }
    return false;
+}
+
+void File::addVariableAlias(std::string iAlias, Variable iVariable) {
+   mVariableAliases[iAlias] =  iVariable;
 }
 
 std::string File::getDescriptions() {

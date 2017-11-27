@@ -330,6 +330,14 @@ namespace {
       EXPECT_FALSE(setup0.outputOptions.getValue("write", i));
       EXPECT_EQ(2, i);
    }
+   TEST_F(SetupTest, alias) {
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -va tlevel1 name=air_temperature_2m level=1 -v air_temperature_2m -d smart numSmart=2"));
+      ASSERT_EQ(1, setup.variableAliases.size());
+      ASSERT_TRUE(setup.variableAliases.find("tlevel1") != setup.variableAliases.end());
+      Variable var = setup.variableAliases["tlevel1"];
+      EXPECT_EQ("air_temperature_2m", var.name());
+      EXPECT_EQ(1, var.level());
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

@@ -211,6 +211,25 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
          count[d] = getDimSize(dim);
          xPos = d;
       }
+      else {
+         int level = iVariable.level();
+         // Non-recognized dimension
+         if(Util::isValid(level)) {
+            int size = getDimSize(dim);
+            if(size > 1) {
+               if(level >= dim) {
+                  std::stringstream ss;
+                  char name[1000];
+                  int status = nc_inq_varname(mFile, dim, name);
+                  handleNetcdfError(status, "could not get dimension name of level dimension'");
+                  ss << "Could not get level " << level
+                     << " from dimension '" << name << "' since it only has a size of " << size;
+                  Util::error(ss.str());
+               }
+               start[d] = level;
+            }
+         }
+      }
    }
 
    // Initialize vector

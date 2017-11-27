@@ -154,6 +154,28 @@ namespace {
       EXPECT_EQ("precipitation_amount", varconf.inputVariable.name());
       EXPECT_EQ("air_temperature_2m", varconf.outputVariable.name());
    }
+   TEST_F(SetupTest, noOutput) {
+      // Check that when no output file is specified, the input is used as output
+      std::vector<std::string> lines;
+      lines.push_back("testing/files/10x10.nc -v air_temperature_2m");
+      lines.push_back("testing/files/10x10.nc -v air_temperature_2m -d bilinear");
+      for(int i = 0; i < lines.size(); i++) {
+         MetSetup setup(Util::split(lines[i]));
+         ASSERT_EQ(1, setup.variableConfigurations.size());
+         ASSERT_EQ("testing/files/10x10.nc", setup.inputFiles[0]->getFilename());
+         ASSERT_EQ("testing/files/10x10.nc", setup.outputFiles[0]->getFilename());
+      }
+      // Flip the dimensions
+      // std::string line("testing/files/10x10.nc xDim=latitude yDim=longitude -v air_temperature_2m -d bilinear");
+      std::string line("testing/files/3x3.nc xDim=y yDim=x -v air_temperature_2m -d bilinear");
+      MetSetup setup(Util::split(line));
+      ASSERT_EQ(1, setup.variableConfigurations.size());
+      ASSERT_EQ("testing/files/3x3.nc", setup.inputFiles[0]->getFilename());
+      ASSERT_EQ("testing/files/3x3.nc", setup.outputFiles[0]->getFilename());
+      vec2 ilats = setup.inputFiles[0]->getLats();
+      vec2 olats = setup.outputFiles[0]->getLats();
+      ASSERT_EQ(ilats, olats);
+   }
    TEST_F(SetupTest, variableOptionsSingle) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m write=0"));
       ASSERT_EQ(1,            setup.variableConfigurations.size());
@@ -277,6 +299,12 @@ namespace {
 
       // Missing type
       EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v precipitation_amount -c zaga -p testing/files/parameters.txt")), ".*");
+
+      // Missing dimension
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc xDim=test testing/files/10x10_copy.nc -v precipitation_amount -c zaga -p testing/files/parameters.txt")), ".*");
+
+      // Different input output options on the same file
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc xDim=y testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parameters.txt")), ".*");
    }
    TEST_F(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();
@@ -291,7 +319,7 @@ namespace {
       }
    }
    TEST_F(SetupTest, inputoutputOptions) {
-      MetSetup setup0(Util::split("testing/files/10x10.nc option1=1 testing/files/10x10.nc option2=2 -v air_temperature_2m write=1 -d smart numSmart=2"));
+      MetSetup setup0(Util::split("testing/files/10x10.nc option1=1 testing/files/10x10_copy.nc option2=2 -v air_temperature_2m write=1 -d smart numSmart=2"));
       int i;
       EXPECT_TRUE(setup0.inputOptions.getValue("option1", i));
       EXPECT_FALSE(setup0.inputOptions.getValue("option2", i));

@@ -115,9 +115,11 @@ class Options {
       //! Check that a value is present for the key
       bool hasValue(const std::string& iKey) const;
 
-     //! Returns true if all keys have been accessed. Useful when checking if a key in the options
-     //! was not recognized by a scheme.
-     bool check() const;
+      //! Returns true if all keys have been accessed. Useful when checking if a key in the options
+      //! was not recognized by a scheme.
+      bool check() const;
+      bool operator==(const Options &right) const;
+      bool operator!=(const Options &right) const;
    private:
       //! Parse a string with a single option "key=value"
       void addOption(std::string iOptionString);

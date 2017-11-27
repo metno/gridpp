@@ -89,3 +89,29 @@ bool Options::check() const {
    }
    return true;
 }
+bool Options::operator==(const Options &right) const {
+   for(int i = 0; i < mPairs.size(); i++) {
+      std::string key = mPairs[i].first;
+      std::string value = mPairs[i].second;
+      if(!right.hasValue(key))
+         return false;
+      std::string s = "";
+      right.getValue(key, s);
+      if(value != s)
+         return false;
+   }
+   for(int i = 0; i < right.mPairs.size(); i++) {
+      std::string key = right.mPairs[i].first;
+      std::string value = right.mPairs[i].second;
+      if(!hasValue(key))
+         return false;
+      std::string s = "";
+      getValue(key, s);
+      if(value != s)
+         return false;
+   }
+   return true;
+}
+bool Options::operator!=(const Options &right) const {
+   return !(*this == right);
+}

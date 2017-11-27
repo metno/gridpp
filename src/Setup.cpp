@@ -19,6 +19,12 @@ Setup::Setup(const std::vector<std::string>& argv) {
          if(Util::hasChar(arg, '=')) {
             inputOptions.addOptions(arg);
          }
+         else if(arg[0] == '-') {
+            // No output file specified, use the same input and output file
+            outputFilename = inputFilename;
+            outputOptions = inputOptions;
+            break;
+         }
          else {
             outputFilename = arg;
          }
@@ -72,6 +78,9 @@ Setup::Setup(const std::vector<std::string>& argv) {
          mFileMap[inputFilenames[f]] = inputFile;
       }
       else {
+         if(inputOptions != outputOptions) {
+            Util::error("Input and output options cannot be different if they apply to the same filename");
+         }
          inputFile = mFileMap[inputFilenames[f]];
       }
       inputFiles.push_back(inputFile);

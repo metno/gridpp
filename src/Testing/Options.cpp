@@ -250,6 +250,43 @@ namespace {
       options.getRequiredValues("att1", values);
       EXPECT_TRUE(options.check());
    }
+   TEST_F(OptionsTest, equality) {
+      Options options1("test=1 other=2");
+      Options options2("other=2 test=1");
+      EXPECT_TRUE(options1 == options2);
+      EXPECT_TRUE(options2 == options1);
+      EXPECT_FALSE(options1 != options2);
+      EXPECT_FALSE(options2 != options1);
+
+      Options options3("");
+      Options options4("");
+      EXPECT_TRUE(options3 == options4);
+      EXPECT_TRUE(options4 == options3);
+      EXPECT_FALSE(options3 != options4);
+      EXPECT_FALSE(options4 != options3);
+   }
+   TEST_F(OptionsTest, inequality) {
+      Options options1("test=1 other=2");
+      Options options2("other=2");
+      EXPECT_FALSE(options1 == options2);
+      EXPECT_FALSE(options2 == options1);
+      EXPECT_TRUE(options1 != options2);
+      EXPECT_TRUE(options2 != options1);
+
+      Options options3("test=1 other=2");
+      Options options4("test=1");
+      EXPECT_FALSE(options3 == options4);
+      EXPECT_FALSE(options4 == options3);
+      EXPECT_TRUE(options3 != options4);
+      EXPECT_TRUE(options4 != options3);
+
+      Options options5("test=1 other=2");
+      Options options6("test=1 new=2");
+      EXPECT_FALSE(options5 == options6);
+      EXPECT_FALSE(options6 == options5);
+      EXPECT_TRUE(options5 != options6);
+      EXPECT_TRUE(options6 != options5);
+   }
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

@@ -11,8 +11,10 @@ Gridpp is a command-line tool that post-processes weather forecasts in NetCDF fo
 performs two types of post-processing: Downscaling and calibration. Gridpp downscales forecast from
 a coars grid to a finer grid using a variety of interpolation methods. Gridpp then calibrates the
 forecasts by applying corrections to each gridpoint. Gridpp is modular, so any combination of
-downscaling and calibration can be selected. For information on how to use the
-software, check out the wiki page: https://github.com/metno/gridpp/wiki
+downscaling and calibration can be selected.
+
+For information on how to use the software, check out the wiki page:
+https://github.com/metno/gridpp/wiki
 
 
 Features
@@ -24,29 +26,39 @@ Features
 * Support for Netcdf files with great flexibility in variable names, number of dimensions, and names
   of dimensions.
 
-Installation Instructions
--------------------------
+Installing on Ubuntu
+---------------------
 
-**From source**
+**Install dependencies**
 
-1. Ensure the following libraries are installed:
+.. code-block:: bash
 
-   * Boost libraries
-   * Netcdf c++ library
-   * libgsl0
-   * libblas
-   * cmake (version 3 or above)
-   * (Optional) Google test library (if developing new code)
+  sudo apt-get update
+  sudo apt-get install libboost-all-dev
+  sudo apt-get install libgsl0-dev libblas-dev
+  sudo apt-get install netcdf-bin libnetcdf-dev
+  sudo apt-get install cmake
 
-2. Download the source code from a release: https://github.com/metno/gridpp/releases
+Optional: If you are developing the code, install the google test library:
 
-3. Create build directory at the root of the repository
+.. code-block:: bash
+
+  sudo apt-get install libgtest-dev
+  sudo apt-get install lcov
+  sudo sudo gem install coveralls-lcov
+
+**Installing from source**
+
+1. Download the source code from the latest release: https://github.com/metno/gridpp/releases. Unzip
+   the file and navigate into the extracted folder.
+
+2. Create a build directory
 
 .. code-block:: bash
 
    mkdir build
 
-4. Run cmake to set up installation
+3. Run cmake to set up installation
 
 .. code-block:: bash
 
@@ -59,15 +71,22 @@ This will set up gridpp to be installed in /usr/local/bin on Ubuntu. To specify 
 
    cmake .. -DCMAKE_INSTALL_PREFIX=<custom path>
 
-5. Run cmake to install
+If you are developing code, run the following instead:
+
+.. code-block:: bash
+
+   cmake .. -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_TESTS=ON -DGTEST_DIR=/usr/src/gtest
+
+where ``/usr/src/gtest`` is the location of the google test library code.
+
+4. Run cmake to install
 
 .. code-block:: bash
 
    cmake --build .
    cmake --build . --target install
 
-
-**From debian packages**
+**Installing from debian packages**
 
 Follow instructions here: https://launchpad.net/~metno/+archive/ubuntu/gridpp
 

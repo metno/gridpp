@@ -34,7 +34,7 @@ class DownscalerBilinear : public Downscaler {
       //! Find which I/J coordinates surround a lookup point
       //! Returns false if the lookup point is outside the grid. In this case, I1, I2, J1, J2 values
       //! cannot be used.
-      static bool find_coords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2);
+      static bool findCoords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2);
 
       static std::string description();
       std::string name() const {return "bilinear";};

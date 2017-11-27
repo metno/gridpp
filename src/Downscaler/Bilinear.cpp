@@ -83,7 +83,7 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
          int I2 = Util::MV;
          int J1 = Util::MV;
          int J2 = Util::MV;
-         bool inside = find_coords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
+         bool inside = findCoords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
          if(inside) {
             float x0 = iInputLons[I1][J1];
             float x1 = iInputLons[I2][J1];
@@ -136,7 +136,7 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
          int I2 = Util::MV;
          int J1 = Util::MV;
          int J2 = Util::MV;
-         bool inside = find_coords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
+         bool inside = findCoords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
          if(inside) {
             float x0 = iInputLons[I1][J1];
             float x1 = iInputLons[I2][J1];
@@ -171,34 +171,92 @@ void DownscalerBilinear::downscaleField(const Field& iInput, Field& iOutput,
    }
 }
 
-bool DownscalerBilinear::find_coords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2) {
+bool DownscalerBilinear::findCoords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2) {
    // Use the four points surrounding the lookup point. Use the nearest neighbour
    // and then figure out what side of this point the other there points are.
    // Find out if current lookup point is right/above the nearest neighbour
    bool isRight = iLon > iLons[I][J];
    bool isAbove = iLat > iLats[I][J];
+   int nI = iLats.size();
+   int nJ = iLats[0].size();
+
+   // Check if we are outside the grid
+   // 0 1 2 3 x
+   if(isAbove && I == nI-1 && iLats[I-1][J] < iLats[I][J])
+      return false;
+   // x 0 1 2 3
+   if(!isAbove && I == 0 && iLats[0][J] < iLats[1][J])
+      return false;
+   // 3 2 1 0 x
+   if(isAbove && I == 0 && iLats[0][J] > iLats[1][J])
+      return false;
+   // x 3 2 1 0
+   if(!isAbove && I == nI-1 && iLats[I-1][J] > iLats[I][J])
+      return false;
+
+   if(isRight && J == nJ-1 && iLons[I][J-1] < iLons[I][J])
+      return false;
+   // x 0 1 2 3
+   if(!isRight && J == 0 && iLons[I][0] < iLons[I][1])
+      return false;
+   // 3 2 1 0 x
+   if(isRight && J == 0 && iLons[I][0] > iLons[I][1])
+      return false;
+   // x 3 2 1 0
+   if(!isRight && I == nJ-1 && iLons[I][J-1] > iLons[I][J])
+      return false;
+
+   // Are the lats/lons increating when the index increases?
+   bool Iinc = (I == 0) || (iLats[I][J] > iLats[I-1][J]);
+   bool Jinc = (J == 0) || (iLons[I][J] > iLons[I][J-1]);
+
    // Find out which Is to use
-   if((isAbove && iLats[I+1][J] > iLats[I][J]) || (!isAbove && iLats[I+1][J] < iLats[I][J])) {
-      I1 = I;
-      I2 = I + 1;
+   if(isAbove) {
+      if(Iinc) {
+         I1 = I;
+         I2 = I + 1;
+      }
+      else {
+         I1 = I - 1;
+         I2 = I;
+      }
    }
    else {
-      I1 = I - 1;
-      I2 = I;
+      if(Iinc) {
+         I1 = I - 1;
+         I2 = I;
+      }
+      else {
+         I1 = I;
+         I2 = I + 1;
+      }
    }
+
    // Find out which Js to use
-   if((isRight && iLons[I][J+1] > iLons[I][J]) || (!isRight && iLons[I][J+1] < iLons[I][J])) {
-      J1 = J;
-      J2 = J + 1;
+   if(isRight) {
+      if(Jinc) {
+         J1 = J;
+         J2 = J + 1;
+      }
+      else {
+         J1 = J - 1;
+         J2 = J;
+      }
    }
    else {
-      J1 = J - 1;
-      J2 = J;
+      if(Jinc) {
+         J1 = J - 1;
+         J2 = J;
+      }
+      else {
+         J1 = J;
+         J2 = J + 1;
+      }
    }
-   if((I1 < 0 && I1 >= iLats.size()) ||
-      (I2 < 0 && I2 >= iLats.size()) ||
-      (J1 < 0 && J1 >= iLats[0].size()) ||
-      (J2 < 0 && J2 >= iLats[0].size())) {
+   if((I1 < 0 || I1 >= iLats.size()) ||
+      (I2 < 0 || I2 >= iLats.size()) ||
+      (J1 < 0 || J1 >= iLats[0].size()) ||
+      (J2 < 0 || J2 >= iLats[0].size())) {
       return false;
    }
    return true;

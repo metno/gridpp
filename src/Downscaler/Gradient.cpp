@@ -84,11 +84,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    // Get nearest neighbour
    vec2Int nearestI, nearestJ;
    getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-   if(!iInput.hasVariable(mElevGradientVariableName)) {
-      std::stringstream ss;
-     ss <<"Cannot compute gradient, since file does not have " << mElevGradientVariableName;
-      Util::error(ss.str());
-   }
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);

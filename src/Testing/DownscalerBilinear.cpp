@@ -18,6 +18,17 @@ namespace {
             }
             return grid;
          };
+         vec2 make2x2(int i00, int i01, int i10, int i11) {
+            vec2 grid;
+            grid.resize(2);
+            grid[0].resize(2);
+            grid[1].resize(2);
+            grid[0][0] = i00;
+            grid[0][1] = i01;
+            grid[1][0] = i10;
+            grid[1][1] = i11;
+            return grid;
+         };
          void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
@@ -93,6 +104,40 @@ namespace {
       d.downscale(from, to);
       const Field& toT   = *to.getField(mVariable, 0);
       EXPECT_FLOAT_EQ(10.14606060606061, toT(0,0,0));
+   }
+   TEST_F(TestDownscalerBilinear, outside) {
+      DownscalerBilinear d(mVariable, mVariable, Options());
+      vec2 lats = make2x2(0, 0, 1, 1);
+      vec2 lons = make2x2(0, 1, 0, 1);
+
+      int I1, I2, J1, J2;
+      int I = 1;
+      int J = 1;
+
+      EXPECT_FALSE(d.findCoords(-0.1, -0.1, lats, lons, 0, 0, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords(-0.1 , 0.5, lats, lons, 0, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords(-0.1 , 1.1, lats, lons, 0, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 1.1, -0.1, lats, lons, 1, 0, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 1.1,  0.5, lats, lons, 1, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 1.1,  1.1, lats, lons, 1, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords(-0.1, -0.1, lats, lons, 0, 0, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 0.5, -0.1, lats, lons, 1, 0, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 1.1, -0.1, lats, lons, 1, 0, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords(-0.1,  1.1, lats, lons, 0, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 0.5,  1.1, lats, lons, 1, 1, I1, J1, I2, J2));
+      EXPECT_FALSE(d.findCoords( 1.1,  1.1, lats, lons, 1, 1, I1, J1, I2, J2));
+
+      ASSERT_TRUE(d.findCoords(0.9, 0.99, lats, lons, I, J, I1, J1, I2, J2));
+      EXPECT_EQ(0, I1);
+      EXPECT_EQ(1, I2);
+      EXPECT_EQ(0, J1);
+      EXPECT_EQ(1, J2);
+
+      // Lats go backwards
+      lats = make2x2(1, 1, 0, 0);
+      lons = make2x2(0, 1, 0, 1);
+      I = 0;
+      EXPECT_FALSE(d.findCoords(1.1, 1, lats, lons, I, J, I1, J1, I2, J2));
    }
 }
 int main(int argc, char **argv) {

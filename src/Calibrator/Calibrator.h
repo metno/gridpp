@@ -64,6 +64,7 @@ class Calibrator : public Scheme {
 #include "Kriging.h"
 #include "Mask.h"
 #include "Neighbourhood.h"
+#include "Oi.h"
 #include "Phase.h"
 #include "Qc.h"
 #include "Qnh.h"

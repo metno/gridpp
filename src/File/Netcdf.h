@@ -65,6 +65,7 @@ class FileNetcdf : public File {
       int mElevVar;
       int mLafVar;
       int mTimeVar;
+      std::string mEnsDimName;
 
       int getDim(std::string iDim) const;
       std::vector<int> getDims(int iVar) const;
@@ -72,7 +73,7 @@ class FileNetcdf : public File {
       int getDimSize(std::string iDim) const;
       int getDimSize(int iDim) const;
       int getNumDims(int iVar) const;
-      int detectEnsDim() const;
+      std::string detectEnsDim() const;
       int detectYDim() const;
       int detectTimeDim() const;
       int detectTimeVar() const;
@@ -94,6 +95,7 @@ class FileNetcdf : public File {
       void getIndices(int i, const std::vector<int>& iCount, std::vector<int>& iIndices) const;
       void setAttribute(int iVar, std::string iName, std::string iValue);
       void defineTimes();
+      void defineEns();
       void defineReferenceTime();
       void defineGlobalAttributes();
       void writeTimes();

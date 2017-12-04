@@ -30,10 +30,13 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       mTimeVar = getVar(timeVar);
 
    // Dimensions
-   if(!iOptions.getValue("ensDim", ensDim))
-      mEnsDim = detectEnsDim();
+   if(!iOptions.getValue("ensDim", mEnsDimName))
+      mEnsDimName = detectEnsDim();
+
+   if(hasDim(mEnsDimName))
+      mEnsDim = getDim(mEnsDimName);
    else
-      mEnsDim = getDim(ensDim);
+      mEnsDim = Util::MV;
 
    if(!iOptions.getValue("yDim", yDim))
       mYDim = detectYDim();
@@ -51,7 +54,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       mTimeDim = getDim(timeDim);
 
    // Determine dimension sizes
-   mNEns = 1;
+   mNEns = 10;
    if(Util::isValid(mEnsDim))
       mNEns = getDimSize(mEnsDim);
 
@@ -327,6 +330,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
    }
 
    defineTimes();
+   defineEns();
    defineReferenceTime();
    defineGlobalAttributes();
    // Define variables
@@ -786,10 +790,10 @@ int FileNetcdf::getNumDims(int iVar) const {
    int status = nc_inq_varndims(mFile, iVar, &len);
    return len;
 }
-int FileNetcdf::detectEnsDim() const {
-   int dim = Util::MV;
+std::string FileNetcdf::detectEnsDim() const {
+   std::string dim = "ensemble_member";  // default
    if(hasDim("ensemble_member"))
-      dim = getDim("ensemble_member");
+      dim = "ensemble_member";
    return dim;
 }
 bool FileNetcdf::hasVar(int iFile, std::string iVar) {
@@ -1047,6 +1051,12 @@ void FileNetcdf::defineTimes() {
    setAttribute(vTime, "long_name", "time");
    setAttribute(vTime, "standard_name", "time");
    setAttribute(vTime, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+}
+void FileNetcdf::defineEns() {
+   if(!Util::isValid(mEnsDim) && mNEns > 1) {
+      int status = nc_def_dim(mFile, mEnsDimName.c_str(), 10, &mEnsDim);
+      handleNetcdfError(status, "creating '" + mEnsDimName + "' dimension");
+   }
 }
 void FileNetcdf::writeTimes() {
    std::vector<double> times = getTimes();

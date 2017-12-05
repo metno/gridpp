@@ -22,5 +22,10 @@ class CalibratorOi : public Calibrator {
       std::string mBiasVariable;
       int mMaxLocations;
       bool mSort;
+      float mSigma;
+      bool mObsOnly;
+      int mMinObs;
+      int mX;
+      int mY;
 };
 #endif

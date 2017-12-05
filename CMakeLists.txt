@@ -124,9 +124,10 @@ lookup_program(DOXYGEN_TOOL doxygen)
 if(NOT DOXYGEN_TOOL)
    message(STATUS "Documentation generation disabled")
 else()
+   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doxygen/config.in" "doxygen/config" @ONLY)
    add_custom_target(doxygen
       COMMAND doxygen doxygen/config
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 install(TARGETS gridpp-bin gridpp-train gridpp-kf

@@ -122,6 +122,11 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                float baseLaf = lafsInterp[i][j];
                float baseValue = ofield(i, j, e);
 
+               // Missing ensemble member
+               if(!Util::isValid(baseValue)) {
+                  continue;
+               }
+
                // Alternatively, use a neighbourhood mean
                // int averagingRadius = mAverageNeighbourhood * mElevRadius;
                // calcNeighbourhoodMean(ifield, ielevs, i, j, e, Icenter, Jcenter, averagingRadius, baseValue, baseElev, baseLaf);

@@ -9,12 +9,11 @@ class Parameters;
 class CalibratorOi : public Calibrator {
    public:
       CalibratorOi(Variable iVariable, const Options& iOptions);
-      static std::string description();
       float calcRho(float iHdist, float iVdist) const;
+      static std::string description();
+      std::string name() const {return "oi";};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
-      float calcCovar(const Location& loc1, const Location& loc2) const;
-      std::string name() const {return "oi";};
       float mVLength;
       float mHLength;
       float mMu;
@@ -23,9 +22,14 @@ class CalibratorOi : public Calibrator {
       int mMaxLocations;
       bool mSort;
       float mSigma;
+      float mDelta;
+      std::string mNumVariable;
       bool mObsOnly;
       int mMinObs;
       int mX;
       int mY;
+      float mMinRho;
+      float mMaxBytes;
+      bool mUseMeanBias;
 };
 #endif

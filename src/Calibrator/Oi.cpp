@@ -15,7 +15,9 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinObs(3),
       mSort(true),
       mMinRho(0.0013),
+      mUseRho(true),
       mObsOnly(false),
+      mMethod(Util::MV),
       mBiasVariable(""),
       mSigma(1),
       mDelta(1),
@@ -24,6 +26,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMaxLocations(20),
       mNumVariable(""),
       mUseMeanBias(false),
+      mMinValidEns(5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.9) {
    iOptions.getValue("bias", mBiasVariable);
@@ -38,7 +41,10 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("x", mX);
    iOptions.getValue("y", mY);
    iOptions.getValue("minRho", mMinRho);
+   iOptions.getValue("useRho", mUseRho);
    iOptions.getValue("maxBytes", mMaxBytes);
+   iOptions.getValue("method", mMethod);
+   iOptions.getValue("minEns", mMinValidEns);
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("useMeanBias", mUseMeanBias);
 }
@@ -193,8 +199,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             // Reduce the list of locations
             std::vector<int> useLocations;
             useLocations.reserve(useLocations0.size());
-            std::vector<std::pair<float,int> > rhos;
-            rhos.reserve(useLocations0.size());
+            std::vector<std::pair<float,int> > rhos0;
+            rhos0.reserve(useLocations0.size());
             for(int i = 0; i < useLocations0.size(); i++) {
                int index = useLocations0[i];
                float hdist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
@@ -203,57 +209,120 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int X = obsX[index];
                int Y = obsY[index];
                // Only include observations that are within the domain
-               if(X > 0 && X < lats[0].size() && Y > 0 && Y < lats.size()) {
+               if(X > 0 && X < lats[0].size()-1 && Y > 0 && Y < lats.size()-1) {
                   if(rho > mMinRho) {
-                     rhos.push_back(std::pair<float,int>(rho, i));
+                     rhos0.push_back(std::pair<float,int>(rho, i));
                   }
                }
             }
-            if(rhos.size() > mMaxLocations) {
+            arma::vec rhos;
+            if(rhos0.size() > mMaxLocations) {
                // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                // Otherwise, just use the last locations added
+               rhos = arma::vec(mMaxLocations);
                if(mSort) {
-                  std::sort(rhos.begin(), rhos.end(), Util::sort_pair_first<float,int>());
+                  std::sort(rhos0.begin(), rhos0.end(), Util::sort_pair_first<float,int>());
                }
                for(int i = 0; i < mMaxLocations; i++) {
                   // The best values start at the end of the array
-                  int index = rhos[rhos.size() - 1 - i].second;
+                  int index = rhos0[rhos0.size() - 1 - i].second;
                   useLocations.push_back(useLocations0[index]);
+                  rhos(i) = rhos0[rhos0.size() - 1 - i].first;
                }
             }
             else {
-               for(int i = 0; i < rhos.size(); i++) {
-                  int index = rhos[i].second;
+               rhos = arma::vec(rhos0.size());
+               for(int i = 0; i < rhos0.size(); i++) {
+                  int index = rhos0[i].second;
                   useLocations.push_back(useLocations0[index]);
+                  rhos(i) = rhos0[i].first;
                }
             }
 
             int nObs = useLocations.size();
 
+            if(nObs < mMinObs) {
+               // If we have too few observations though, then use the background
+               for(int e = 0; e < nEns; e++) {
+                  (*output)(y, x, e) = (*field)(y, x, e);
+               }
+               continue;
+            }
+
             if(mObsOnly) {
                // Here we don't run the OI algorithm but instead just use the median
                // of all observations
-               if(nObs < mMinObs) {
-                  // If we have too few observations though, then use the background
-                  for(int e = 0; e < nEns; e++) {
-                     (*output)(y, x, e) = (*field)(y, x, e);
+               std::vector<float> currObs(nObs, Util::MV);
+               for(int i = 0; i < nObs; i++) {
+                  int index = useLocations[i];
+                  currObs[i] = obs[index];
+               }
+               float value = Util::calculateStat(currObs, Util::StatTypeQuantile, 0.5);
+               for(int e = 0; e < nEns; e++) {
+                  (*output)(y, x, e) = value;
+               }
+               continue;
+            }
+            else if(mMethod == 1) {
+               mattype R(nObs, nObs);
+               for(int i = 0; i < nObs; i++) {
+                  for(int j = 0; j < nObs; j++) {
+                     if(i == j) {
+                        R(i, j) = 1;
+                     }
+                     else {
+                        int ii = useLocations[i];
+                        int jj = useLocations[j];
+                        float hdist = Util::getDistance(obsLocations[ii].lat(), obsLocations[ii].lon(), obsLocations[jj].lat(), obsLocations[jj].lon(), true);
+                        float vdist = obsLocations[ii].elev() - obsLocations[jj].elev();
+                        float rho = calcRho(hdist, vdist) / 2;
+                        R(i, j) = rho;
+                     }
                   }
                }
-               else {
-                  std::vector<float> currObs(nObs, Util::MV);
-                  for(int i = 0; i < nObs; i++) {
-                     int index = useLocations[i];
-                     currObs[i] = obs[index];
-                  }
-                  float value = Util::calculateStat(currObs, Util::StatTypeQuantile, 0.5);
-                  for(int e = 0; e < nEns; e++) {
-                     (*output)(y, x, e) = value;
+               mattype Rinv = arma::inv(R);
+               vectype diff = arma::vec(nObs);
+               vectype S = arma::vec(nObs);
+               for(int i = 0; i < nObs; i++) {
+                  int ii = useLocations[i];
+                  float hdist = Util::getDistance(obsLocations[ii].lat(), obsLocations[ii].lon(), lat, lon, true);
+                  float vdist = obsLocations[ii].elev() - elev;
+                  S(i) = calcRho(hdist, vdist);
+               }
+               for(int e = 0; e < nEns; e++) {
+                  if(Util::isValid((*field)(y, x, e))) {
+                     for(int i = 0; i < nObs; i++) {
+                        float f = (*field)(obsY[i], obsX[i], e);
+                        float o = obs[i];
+                        diff(i) = o - f;
+                     }
+                     float meanBias = arma::dot(Rinv * S, diff);
+                     (*output)(y, x, e) = (*field)(y, x, e) + meanBias;
+                     if(0 && (abs(meanBias) > 10 || (x == mX && y == mY))) {
+                        print_matrix<mattype>(diff);
+                        print_matrix<mattype>(R);
+                        print_matrix<mattype>(Rinv);
+                        print_matrix<mattype>(S);
+                        std::cout << "Rinv * S" << std::endl;
+                        print_matrix<mattype>(Rinv * S);
+                        std::cout << "meanBias: " << meanBias << std::endl;
+                        abort();
+                     }
                   }
                }
                continue;
             }
 
-            if(nObs < mMinObs) {
+            int nValidEns = 0;
+            std::vector<int> validEns;
+            for(int e = 0; e < nEns; e++) {
+               float value = (*field)(y, x, e);
+               if(Util::isValid(value)) {
+                  validEns.push_back(e);
+                  nValidEns++;
+               }
+            }
+            if(nValidEns < mMinValidEns) {
                for(int e = 0; e < nEns; e++) {
                   (*output)(y, x, e) = (*field)(y, x, e);
                }
@@ -276,21 +345,27 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int index = useLocations[i];
                float dist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
                float vdist = obsLocations[index].elev() - elev;
-               float rho = calcRho(dist, vdist);
                float r = sigma * ci[index];
-               Rinv(i, i) = 1 / r * rho;
+               if(mUseRho) {
+                  float rho = calcRho(dist, vdist);
+                  Rinv(i, i) = 1 / r * rho;
+               }
+               else {
+                  Rinv(i, i) = 1 / r;
+               }
             }
 
             // Compute Y (model at obs-locations)
-            mattype Y(nObs, nEns);
+            mattype Y(nObs, nValidEns);
             vectype Yhat(nObs);
 
             for(int i = 0; i < nObs; i++) {
                // Use the nearest neighbour for this location
                float total = 0;
                int count = 0;
-               for(int e = 0; e < nEns; e++) {
-                  float value = (*field)(obsY[i], obsX[i], e);
+               for(int e = 0; e < nValidEns; e++) {
+                  int ei = validEns[e];
+                  float value = (*field)(obsY[i], obsX[i], ei);
                   if(Util::isValid(value)) {
                      Y(i, e) = value;
                      total += value;
@@ -300,19 +375,19 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                // assert(count > 0);
                float mean = total / count;
                Yhat(i) = mean;
-               for(int e = 0; e < nEns; e++) {
+               for(int e = 0; e < nValidEns; e++) {
                   Y(i, e) -= mean;
                }
             }
 
             // Compute C matrix
             // k x S * S x S
-            mattype C(nEns, nObs);
+            mattype C(nValidEns, nObs);
             C = Y.t() * Rinv;
 
-            mattype Pinv(nEns, nEns);
-            float diag = 1 / mDelta / (1 + mGamma) * (nEns - 1);
-            Pinv = C * Y + diag * arma::eye<mattype>(nEns, nEns);
+            mattype Pinv(nValidEns, nValidEns);
+            float diag = 1 / mDelta / (1 + mGamma) * (nValidEns - 1);
+            Pinv = C * Y + diag * arma::eye<mattype>(nValidEns, nValidEns);
             float cond = arma::rcond(Pinv);
             if(cond <= 0) {
                std::stringstream ss;
@@ -325,8 +400,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
 
             mattype P = arma::inv(Pinv);
-            cxtype Wcx(nEns, nEns);
-            bool status = arma::sqrtmat(Wcx, (nEns - 1) * P);
+            cxtype Wcx(nValidEns, nValidEns);
+            bool status = arma::sqrtmat(Wcx, (nValidEns - 1) * P);
             if(!status) {
                std::cout << "Near singular matrix for sqrtmat:" << std::endl;
                std::cout << "Lat: " << lat << std::endl;
@@ -354,26 +429,27 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
 
             // Compute PC
-            mattype PC(nEns, nObs);
+            mattype PC(nValidEns, nObs);
             PC = P * C;
 
             // Compute w
-            vectype w(nEns);
+            vectype w(nValidEns);
             w = PC * (currObs - Yhat);
 
             // Add w to W. TODO: Is this done correctly?
-            for(int e = 0; e < nEns; e++) {
-               for(int e2 = 0; e2 < nEns; e2 ++) {
+            for(int e = 0; e < nValidEns; e++) {
+               for(int e2 = 0; e2 < nValidEns; e2 ++) {
                   W(e, e2) = W(e, e2) + w(e) ;
                }
             }
 
             // Compute X (perturbations about model mean)
-            vectype X(nEns);
+            vectype X(nValidEns);
             float total = 0;
             int count = 0;
-            for(int e = 0; e < nEns; e++) {
-               float value = (*field)(y, x, e);
+            for(int e = 0; e < nValidEns; e++) {
+               int ei = validEns[e];
+               float value = (*field)(y, x, ei);
                if(Util::isValid(value)) {
                   X(e) = value;
                   total += value;
@@ -384,52 +460,64 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                }
             }
             float mean = total / count;
-            for(int e = 0; e < nEns; e++) {
+            for(int e = 0; e < nValidEns; e++) {
                X(e) -= mean;
             }
 
+            // Write debugging information
+            if(x == mX && y == mY) {
+               std::cout << "Lat: " << lat << std::endl;
+               std::cout << "Lon: " << lon << std::endl;
+               std::cout << "Elev: " << elev << std::endl;
+               std::cout << "Num obs: " << nObs << std::endl;
+               std::cout << "Num ens: " << nValidEns << std::endl;
+               std::cout << "rhos" << std::endl;
+               print_matrix<mattype>(rhos);
+               std::cout << "P" << std::endl;
+               print_matrix<mattype>(P);
+               std::cout << "C" << std::endl;
+               print_matrix<mattype>(C);
+               std::cout << "PC" << std::endl;
+               print_matrix<mattype>(PC);
+               std::cout << "W" << std::endl;
+               print_matrix<mattype>(W);
+               std::cout << "w" << std::endl;
+               print_matrix<mattype>(w);
+               std::cout << "Y:" << std::endl;
+               print_matrix<mattype>(Y);
+               std::cout << "Yhat" << std::endl;
+               print_matrix<mattype>(Yhat);
+               std::cout << "currObs" << std::endl;
+               print_matrix<mattype>(currObs);
+               std::cout << "currObs - Yhat" << std::endl;
+               print_matrix<mattype>(currObs - Yhat);
+               std::cout << "X" << std::endl;
+               print_matrix<mattype>(X);
+               std::cout << "elevs" << std::endl;
+               print_matrix<mattype>(currElev);
+               std::cout << "Analaysis increment:" << std::endl;
+               print_matrix<mattype>(X.t() * W);
+               std::cout << "My: " << arma::mean(arma::dot(currObs - Yhat, rhos) / nObs) << std::endl;
+            }
+
             // Compute analysis
-            for(int e = 0; e < nEns; e++) {
+            for(int e = 0; e < nValidEns; e++) {
+               int ei = validEns[e];
                float total = 0;
-               for(int k = 0; k < nEns; k++) {
+               for(int k = 0; k < nValidEns; k++) {
                   total += X(k) * W(k, e);
+                  // total += X(k) * W(e, k);
                }
-               if(!mUseMeanBias)
-                  (*output)(y, x, e) = (*field)(y, x, e) + total;
-               else {
+               if(mUseMeanBias) {
                   float meanBias = arma::mean(currObs - Yhat);
-                  (*output)(y, x, e) = (*field)(y, x, e) + meanBias;
+                  (*output)(y, x, ei) = (*field)(y, x, ei) + meanBias;
+               }
+               else {
+                  (*output)(y, x, ei) = (*field)(y, x, ei) + total;
                }
 
                if(mNumVariable != "")
-                  (*num)(y, x, e) = nObs;
-
-               // Write debugging information
-               if(x == mX && y == mY) {
-                  std::cout << "Lat: " << lat << std::endl;
-                  std::cout << "Lon: " << lon << std::endl;
-                  std::cout << "Elev: " << elev << std::endl;
-                  std::cout << "P" << std::endl;
-                  print_matrix<mattype>(P);
-                  std::cout << "PC" << std::endl;
-                  print_matrix<mattype>(PC);
-                  std::cout << "W" << std::endl;
-                  print_matrix<mattype>(W);
-                  std::cout << "w" << std::endl;
-                  print_matrix<mattype>(w);
-                  std::cout << "Y:" << std::endl;
-                  print_matrix<mattype>(Y);
-                  std::cout << "Yhat" << std::endl;
-                  print_matrix<mattype>(Yhat);
-                  std::cout << "currObs" << std::endl;
-                  print_matrix<mattype>(currObs);
-                  std::cout << "X" << std::endl;
-                  print_matrix<mattype>(X);
-                  std::cout << "elevs" << std::endl;
-                  print_matrix<mattype>(currElev);
-                  std::cout << "Analaysis:" << std::endl;
-                  print_matrix<mattype>(X.t() * W);
-               }
+                  (*num)(y, x, ei) = nObs;
             }
          }
       }

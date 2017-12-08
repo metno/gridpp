@@ -31,5 +31,8 @@ class CalibratorOi : public Calibrator {
       float mMinRho;
       float mMaxBytes;
       bool mUseMeanBias;
+      int mMinValidEns;
+      bool mUseRho;
+      int mMethod;
 };
 #endif

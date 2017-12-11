@@ -11,24 +11,28 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mVLength(100),
       mHLength(30000),
-      mMu(0.25),
+      mMu(0.9),
       mMinObs(3),
       mSort(true),
       mMinRho(0.0013),
       mUseRho(true),
       mObsOnly(false),
+      mElevGradient(-0.0065),
       mMethod(Util::MV),
       mBiasVariable(""),
       mSigma(1),
+      mSaveDiff(false),
       mDelta(1),
+      // Add mDeltaVariable
       mX(Util::MV),
       mY(Util::MV),
       mMaxLocations(20),
       mNumVariable(""),
       mUseMeanBias(false),
+      // Default model error variance
       mMinValidEns(5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
-      mGamma(0.9) {
+      mGamma(0.25) {
    iOptions.getValue("bias", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
@@ -36,17 +40,24 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
    iOptions.getValue("delta", mDelta);
+   iOptions.getValue("gamma", mGamma);
    iOptions.getValue("obsOnly", mObsOnly);
+   iOptions.getValue("mu", mMu);
    iOptions.getValue("minObs", mMinObs);
    iOptions.getValue("x", mX);
    iOptions.getValue("y", mY);
    iOptions.getValue("minRho", mMinRho);
    iOptions.getValue("useRho", mUseRho);
+   iOptions.getValue("saveDiff", mSaveDiff);
    iOptions.getValue("maxBytes", mMaxBytes);
    iOptions.getValue("method", mMethod);
    iOptions.getValue("minEns", mMinValidEns);
    iOptions.getValue("numVariable", mNumVariable);
+   iOptions.getValue("elevGradient", mElevGradient);
    iOptions.getValue("useMeanBias", mUseMeanBias);
+   iOptions.check();
+
+   // Gamma: The error covariance of the bias is this fraction of the background error
 }
 
 // Set up convenient functions for debugging in gdb
@@ -124,9 +135,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    // Spread each observation out to this many gridpoints from the nearest neighbour
    int radius = 3.64 * mHLength / gridSize;
 
-   // getchar();
-   // 700 MB
-
    // When large radiuses are used, the process becomes memory-intensive. Try to fail here
    // if we expect to use more memory than desired. The true memory is roughly
    // 1 GB + expectedBytes * F
@@ -172,31 +180,24 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr field = iFile.getField(mVariable, t);
       FieldPtr output = iFile.getEmptyField();
       FieldPtr bias;
-      if(iFile.hasVariable(mBiasVariable))
+      bool useBias = iFile.hasVariable(mBiasVariable);
+      if(useBias)
          bias = iFile.getField(mBiasVariable, t);
       FieldPtr num;
       if(mNumVariable != "")
-         num = iFile.getField(mBiasVariable, t);
+         num = iFile.getField(mNumVariable, t);
 
-#if 0
-      // Parallelize both x and y. Can be useful if there is load imbalance on a particular
-      // y slice.
       #pragma omp parallel for
-      for(int yx = 0; yx < nY*nX; yx++) {
-         int y = yx / nX;
-         int x = yx % nX;
-         {
-#else
-      #pragma omp parallel for
-         for(int x = 0; x < nX; x++) {
-      for(int y = 0; y < nY; y++) {
-#endif
+      for(int x = 0; x < nX; x++) {
+         for(int y = 0; y < nY; y++) {
             float lat = lats[y][x];
             float lon = lons[y][x];
             float elev = elevs[y][x];
             std::vector<int> useLocations0 = obsIndices[y][x];
 
-            // Reduce the list of locations
+            //
+            // Create list of locations for this gridpoint
+            //
             std::vector<int> useLocations;
             useLocations.reserve(useLocations0.size());
             std::vector<std::pair<float,int> > rhos0;
@@ -244,7 +245,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             if(nObs < mMinObs) {
                // If we have too few observations though, then use the background
                for(int e = 0; e < nEns; e++) {
-                  (*output)(y, x, e) = (*field)(y, x, e);
+                  if(mSaveDiff)
+                     (*output)(y, x, e) = Util::MV;
+                  else
+                     (*output)(y, x, e) = (*field)(y, x, e);
                }
                continue;
             }
@@ -259,56 +263,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                }
                float value = Util::calculateStat(currObs, Util::StatTypeQuantile, 0.5);
                for(int e = 0; e < nEns; e++) {
-                  (*output)(y, x, e) = value;
-               }
-               continue;
-            }
-            else if(mMethod == 1) {
-               mattype R(nObs, nObs);
-               for(int i = 0; i < nObs; i++) {
-                  for(int j = 0; j < nObs; j++) {
-                     if(i == j) {
-                        R(i, j) = 1;
-                     }
-                     else {
-                        int ii = useLocations[i];
-                        int jj = useLocations[j];
-                        float hdist = Util::getDistance(obsLocations[ii].lat(), obsLocations[ii].lon(), obsLocations[jj].lat(), obsLocations[jj].lon(), true);
-                        float vdist = obsLocations[ii].elev() - obsLocations[jj].elev();
-                        float rho = calcRho(hdist, vdist) / 2;
-                        R(i, j) = rho;
-                     }
-                  }
-               }
-               mattype Rinv = arma::inv(R);
-               vectype diff = arma::vec(nObs);
-               vectype S = arma::vec(nObs);
-               for(int i = 0; i < nObs; i++) {
-                  int ii = useLocations[i];
-                  float hdist = Util::getDistance(obsLocations[ii].lat(), obsLocations[ii].lon(), lat, lon, true);
-                  float vdist = obsLocations[ii].elev() - elev;
-                  S(i) = calcRho(hdist, vdist);
-               }
-               for(int e = 0; e < nEns; e++) {
-                  if(Util::isValid((*field)(y, x, e))) {
-                     for(int i = 0; i < nObs; i++) {
-                        float f = (*field)(obsY[i], obsX[i], e);
-                        float o = obs[i];
-                        diff(i) = o - f;
-                     }
-                     float meanBias = arma::dot(Rinv * S, diff);
-                     (*output)(y, x, e) = (*field)(y, x, e) + meanBias;
-                     if(0 && (abs(meanBias) > 10 || (x == mX && y == mY))) {
-                        print_matrix<mattype>(diff);
-                        print_matrix<mattype>(R);
-                        print_matrix<mattype>(Rinv);
-                        print_matrix<mattype>(S);
-                        std::cout << "Rinv * S" << std::endl;
-                        print_matrix<mattype>(Rinv * S);
-                        std::cout << "meanBias: " << meanBias << std::endl;
-                        abort();
-                     }
-                  }
+                  if(mSaveDiff)
+                     (*output)(y, x, e) = value - (*field)(y, x, e);
+                  else
+                     (*output)(y, x, e) = value;
                }
                continue;
             }
@@ -347,6 +305,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                float vdist = obsLocations[index].elev() - elev;
                float r = sigma * ci[index];
                if(mUseRho) {
+                  // TODO: LAF
+                  // weight = 1 - (1-wmin) * dLaf
                   float rho = calcRho(dist, vdist);
                   Rinv(i, i) = 1 / r * rho;
                }
@@ -363,10 +323,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                // Use the nearest neighbour for this location
                float total = 0;
                int count = 0;
+               // TODO: 
+               float elevCorr = 0;
+               if(Util::isValid(mElevGradient))
+                  elevCorr = mElevGradient * (currElev[i] - elev);
                for(int e = 0; e < nValidEns; e++) {
                   int ei = validEns[e];
                   float value = (*field)(obsY[i], obsX[i], ei);
                   if(Util::isValid(value)) {
+                     value += elevCorr;
                      Y(i, e) = value;
                      total += value;
                      count++;
@@ -387,6 +352,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             mattype Pinv(nValidEns, nValidEns);
             float diag = 1 / mDelta / (1 + mGamma) * (nValidEns - 1);
+            if(!useBias)
+               diag = 1 / mDelta * (nValidEns - 1);
+
             Pinv = C * Y + diag * arma::eye<mattype>(nValidEns, nValidEns);
             float cond = arma::rcond(Pinv);
             if(cond <= 0) {
@@ -506,15 +474,16 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                float total = 0;
                for(int k = 0; k < nValidEns; k++) {
                   total += X(k) * W(k, e);
-                  // total += X(k) * W(e, k);
                }
-               if(mUseMeanBias) {
-                  float meanBias = arma::mean(currObs - Yhat);
-                  (*output)(y, x, ei) = (*field)(y, x, ei) + meanBias;
-               }
-               else {
-                  (*output)(y, x, ei) = (*field)(y, x, ei) + total;
-               }
+
+               float diff = total;
+               if(mUseMeanBias)
+                  diff = arma::mean(currObs - Yhat);
+
+               if(mSaveDiff)
+                  (*output)(y, x, ei) = diff;
+               else
+                  (*output)(y, x, ei) = (*field)(y, x, ei) + diff;
 
                if(mNumVariable != "")
                   (*num)(y, x, ei) = nObs;

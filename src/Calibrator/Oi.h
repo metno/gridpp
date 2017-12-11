@@ -34,5 +34,7 @@ class CalibratorOi : public Calibrator {
       int mMinValidEns;
       bool mUseRho;
       int mMethod;
+      bool mSaveDiff;
+      float mElevGradient;
 };
 #endif

@@ -31,6 +31,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mUseMeanBias(false),
       // Default model error variance
       mMinValidEns(5),
+      mTest(Util::MV),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
    iOptions.getValue("bias", mBiasVariable);
@@ -55,6 +56,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("elevGradient", mElevGradient);
    iOptions.getValue("useMeanBias", mUseMeanBias);
+   iOptions.getValue("test", mTest);
    iOptions.check();
 
    // Gamma: The error covariance of the bias is this fraction of the background error
@@ -303,7 +305,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int index = useLocations[i];
                float dist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
                float vdist = obsLocations[index].elev() - elev;
-               float r = sigma * ci[index];
+               float r = sigma * sigma * ci[index];
                if(mUseRho) {
                   // TODO: LAF
                   // weight = 1 - (1-wmin) * dLaf

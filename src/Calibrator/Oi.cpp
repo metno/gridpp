@@ -188,6 +188,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    double time_e = Util::clock();
    std::cout << "Assigning locations " << time_e - time_s << std::endl;
 
+
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
       FieldPtr field = iFile.getField(mVariable, t);
@@ -227,6 +228,37 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr num;
       if(mNumVariable != "")
          num = iFile.getField(mNumVariable, t);
+
+      // Compute Y
+      vec2 Yglobal(S);
+      for(int i = 0; i < S; i++) {
+         Yglobal[i].resize(nEns, 0);
+         float elevCorr = 0;
+         if(Util::isValid(mElevGradient)) {
+            float nnElev = elevs[obsY[i]][obsX[i]];
+            assert(Util::isValid(nnElev));
+            assert(Util::isValid(obsLocations[i].elev()));
+            elevCorr = mElevGradient * (obsLocations[i].elev() - nnElev);
+         }
+         float total = 0;
+         int count = 0;
+         for(int e = 0; e < nEns; e++) {
+            float value = (*field)(obsY[i], obsX[i], e);
+            if(Util::isValid(value)) {
+               value += elevCorr;
+               Yglobal[i][e] = value;
+               total += value;
+               count++;
+            }
+         }
+         float mean = total / count;
+         for(int e = 0; e < nEns; e++) {
+            float value = Yglobal[i][e];
+            if(Util::isValid(value)) {
+               Yglobal[i][e] -= mean;
+            }
+         }
+      }
 
       #pragma omp parallel for
       for(int x = 0; x < nX; x++) {
@@ -570,6 +602,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
 
             // Update delta
+            /*
             float deltaVar = mC - 1;
             float trace = arma::trace(Y * Y.t());
             float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
@@ -578,6 +611,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             float weightOld = deltaVar;
             float weightNew = mNewDeltaVar;
             (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
+            */
          }
       }
       std::cout << "Adding" << std::endl;
@@ -590,12 +624,27 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
       if(useDelta) {
          // Update delta
-         /*
-         float c = 1.03;
-         float deltaVar = c - 1;
-         float trace = arma::trace(Y * Y.t());
+         float deltaVar = mC - 1;
+         float trace = 0;
+         float numValidS = 0;
+         for(int s = 0; s < S; s++) {
+            // Compute value in coord s,s
+            float value = 0;
+            int count = 0;
+            for(int e = 0; e < nEns; e++) {
+               if(Util::isValid(Yglobal[s][e])) {
+                  value += Yglobal[s][e] * Yglobal[s][e];
+                  count++;
+               }
+            }
+            if(count > 1) {
+               value = value / (count-1);
+               trace += value;
+               numValidS++;
+            }
+         }
          float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
-         float denomenator = 1.0 / nObs / (nValidEns - 1) * trace;
+         float denomenator = 1.0 / numValidS * trace;
          float currDeltaEvidence = numerator / denomenator;
          float weightOld = deltaVar;
          float weightNew = mNewDeltaVar;
@@ -604,7 +653,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
             }
          }
-        */
 
          std::cout << "Adding delta field" << std::endl;
          iFile.addField(newdelta, Variable(mDeltaVariable), t);

@@ -22,8 +22,10 @@ class CalibratorOi : public Calibrator {
       int mMaxLocations;
       bool mSort;
       float mSigma;
-      float mDelta;
+      std::string mDeltaVariable;
       std::string mNumVariable;
+      float mC;
+      float mEpsilon;
       bool mObsOnly;
       int mMinObs;
       int mX;
@@ -38,5 +40,6 @@ class CalibratorOi : public Calibrator {
       float mElevGradient;
       int mTest;
       float mWMin;
+      float mNewDeltaVar;
 };
 #endif

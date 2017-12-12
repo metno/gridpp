@@ -15,14 +15,16 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinObs(3),
       mSort(true),
       mMinRho(0.0013),
+      mEpsilon(0.5),
       mUseRho(true),
       mObsOnly(false),
       mElevGradient(-0.0065),
       mMethod(Util::MV),
       mBiasVariable(""),
       mSigma(1),
+      mC(1.03),
       mSaveDiff(false),
-      mDelta(1),
+      mDeltaVariable(""),
       // Add mDeltaVariable
       mX(Util::MV),
       mY(Util::MV),
@@ -32,6 +34,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       // Default model error variance
       mMinValidEns(5),
       mTest(Util::MV),
+      mNewDeltaVar(1),
       mWMin(0.5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
@@ -41,7 +44,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
-   iOptions.getValue("delta", mDelta);
+   iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
    iOptions.getValue("obsOnly", mObsOnly);
    iOptions.getValue("mu", mMu);
@@ -58,7 +61,10 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("elevGradient", mElevGradient);
    iOptions.getValue("useMeanBias", mUseMeanBias);
    iOptions.getValue("wmin", mWMin);
+   iOptions.getValue("epsilon", mEpsilon);
    iOptions.getValue("test", mTest);
+   iOptions.getValue("c", mC);
+   iOptions.getValue("newDeltaVar", mNewDeltaVar);
    iOptions.check();
 
    // Gamma: The error covariance of the bias is this fraction of the background error
@@ -188,6 +194,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr output = iFile.getEmptyField();
       FieldPtr bias;
       FieldPtr newbias;
+      FieldPtr delta;
+      FieldPtr newdelta;
       bool useBias = mBiasVariable != "";
       if(useBias) {
          bias = iFile.getField(mBiasVariable, t);
@@ -203,6 +211,19 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          }
          newbias = iFile.getEmptyField(0);
       }
+      bool useDelta = mDeltaVariable != "";
+      if(useDelta) {
+         delta = iFile.getField(mDeltaVariable, t);
+         // Initialize if missing
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               if(!Util::isValid((*delta)(y, x, 0)))
+                  (*delta)(y, x, 0) = 1;
+            }
+         }
+         newdelta = iFile.getEmptyField(0);
+      }
+
       FieldPtr num;
       if(mNumVariable != "")
          num = iFile.getField(mNumVariable, t);
@@ -387,9 +408,13 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             C = Y.t() * Rinv;
 
             mattype Pinv(nValidEns, nValidEns);
-            float diag = 1 / mDelta * (nValidEns - 1);
+            float currDelta = 1;
+            if(useDelta) {
+               currDelta = (*delta)(y, x, 0);
+            }
+            float diag = 1 / currDelta * (nValidEns - 1);
             if(useBias)
-               diag = 1 / mDelta / (1 + mGamma) * (nValidEns - 1);
+               diag = 1 / currDelta / (1 + mGamma) * (nValidEns - 1);
 
             Pinv = C * Y + diag * arma::eye<mattype>(nValidEns, nValidEns);
             float cond = arma::rcond(Pinv);
@@ -542,8 +567,17 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int ei = validEns[e];
                biasTotal += (*field)(y, x, ei) * w(e);
             }
-
             (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
+
+            // Update delta
+            float deltaVar = mC - 1;
+            float trace = arma::trace(Y * Y.t());
+            float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
+            float denomenator = 1.0 / nObs / (nValidEns - 1) * trace;
+            float currDeltaEvidence = numerator / denomenator;
+            float weightOld = deltaVar;
+            float weightNew = mNewDeltaVar;
+            (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
          }
       }
       std::cout << "Adding" << std::endl;
@@ -553,6 +587,27 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       if(useBias) {
          std::cout << "Adding bias field" << std::endl;
          iFile.addField(newbias, Variable(mBiasVariable), t);
+      }
+      if(useDelta) {
+         // Update delta
+         /*
+         float c = 1.03;
+         float deltaVar = c - 1;
+         float trace = arma::trace(Y * Y.t());
+         float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
+         float denomenator = 1.0 / nObs / (nValidEns - 1) * trace;
+         float currDeltaEvidence = numerator / denomenator;
+         float weightOld = deltaVar;
+         float weightNew = mNewDeltaVar;
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
+            }
+         }
+        */
+
+         std::cout << "Adding delta field" << std::endl;
+         iFile.addField(newdelta, Variable(mDeltaVariable), t);
       }
    }
    return true;

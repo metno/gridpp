@@ -36,6 +36,9 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    int nLat   = getDimSize(mFile, dLat);
    int nLon   = getDimSize(mFile, dLon);
    int nCoeff = getDimSize(mFile, dCoeff);
+   std::stringstream ss;
+   ss << "Parameter file has " << nCoeff << " parameters";
+   Util::info(ss.str());
 
    // TODO: Deal with case where lat and lon are one-dimensional variables
    // Get latitudes

@@ -32,6 +32,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       // Default model error variance
       mMinValidEns(5),
       mTest(Util::MV),
+      mWMin(0.5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
    iOptions.getValue("bias", mBiasVariable);
@@ -56,6 +57,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("elevGradient", mElevGradient);
    iOptions.getValue("useMeanBias", mUseMeanBias);
+   iOptions.getValue("wmin", mWMin);
    iOptions.getValue("test", mTest);
    iOptions.check();
 
@@ -81,6 +83,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
+   vec2 lafs = iFile.getLandFractions();
 
    // Check if this method can be applied
    bool hasValidGridpoint = false;
@@ -129,6 +132,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    std::vector<std::vector<std::vector<int> > > obsIndices; // Y, X, obs indices
    std::vector<float> obsY(S);
    std::vector<float> obsX(S);
+   std::vector<float> obsLaf(S);
    obsIndices.resize(nY);
    for(int y = 0; y < nY; y++) {
       obsIndices[y].resize(nX);
@@ -172,6 +176,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          }
          obsY[i] = Y;
          obsX[i] = X;
+         obsLaf[i] = lafs[Y][X];
       }
    }
    double time_e = Util::clock();
@@ -195,6 +200,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             float lat = lats[y][x];
             float lon = lons[y][x];
             float elev = elevs[y][x];
+            float laf = lafs[y][x];
             std::vector<int> useLocations0 = obsIndices[y][x];
 
             //
@@ -208,7 +214,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int index = useLocations0[i];
                float hdist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
                float vdist = obsLocations[index].elev() - elev;
-               float rho = calcRho(hdist, vdist);
+               float lafdist = 1;
+               if(Util::isValid(obsLaf[i]) && Util::isValid(laf))
+                  lafdist = obsLaf[i] - laf;
+               float rho = calcRho(hdist, vdist, lafdist);
                int X = obsX[index];
                int Y = obsY[index];
                // Only include observations that are within the domain
@@ -291,25 +300,24 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             vectype currObs(nObs);
             vectype currElev(nObs);
+            vectype currLaf(nObs);
             for(int i = 0; i < useLocations.size(); i++) {
                int index = useLocations[i];
                float curr = obs[index];
                float elev = obselevs[index];
+               float laf = obsLaf[i];
                currObs[i] = curr;
                currElev[i] = elev;
+               currLaf[i] = laf;
             }
 
             // Compute Rinv
             mattype Rinv(nObs, nObs, arma::fill::zeros);
             for(int i = 0; i < nObs; i++) {
                int index = useLocations[i];
-               float dist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
-               float vdist = obsLocations[index].elev() - elev;
                float r = sigma * sigma * ci[index];
                if(mUseRho) {
-                  // TODO: LAF
-                  // weight = 1 - (1-wmin) * dLaf
-                  float rho = calcRho(dist, vdist);
+                  float rho = rhos[i];
                   Rinv(i, i) = 1 / r * rho;
                }
                else {
@@ -384,6 +392,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "Lat: " << lat << std::endl;
                std::cout << "Lon: " << lon << std::endl;
                std::cout << "Elev: " << elev << std::endl;
+               std::cout << "Laf: " << laf << std::endl;
                std::cout << "Pinv" << std::endl;
                print_matrix<mattype>(Pinv);
                std::cout << "P" << std::endl;
@@ -448,6 +457,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "Lat: " << lat << std::endl;
                std::cout << "Lon: " << lon << std::endl;
                std::cout << "Elev: " << elev << std::endl;
+               std::cout << "Laf: " << laf << std::endl;
                std::cout << "Num obs: " << nObs << std::endl;
                std::cout << "Num ens: " << nValidEns << std::endl;
                std::cout << "rhos" << std::endl;
@@ -474,6 +484,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                print_matrix<mattype>(X);
                std::cout << "elevs" << std::endl;
                print_matrix<mattype>(currElev);
+               std::cout << "lafs" << std::endl;
+               print_matrix<mattype>(currLaf);
                std::cout << "Analaysis increment:" << std::endl;
                print_matrix<mattype>(X.t() * W);
                std::cout << "My: " << arma::mean(arma::dot(currObs - Yhat, rhos) / nObs) << std::endl;
@@ -509,10 +521,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    return true;
 }
 
-float CalibratorOi::calcRho(float iHDist, float iVDist) const {
+float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {
    float h = (iHDist/mHLength);
    float v = (iVDist/mVLength);
-   float rho = exp(-0.5 * h * h) * exp(-0.5 * v * v);
+   float l = 1 - (1 - mWMin) * std::abs(iLDist);
+   float rho = exp(-0.5 * h * h) * exp(-0.5 * v * v) * l;
    return rho;
 }
 

@@ -9,7 +9,7 @@ class Parameters;
 class CalibratorOi : public Calibrator {
    public:
       CalibratorOi(Variable iVariable, const Options& iOptions);
-      float calcRho(float iHdist, float iVdist) const;
+      float calcRho(float iHdist, float iVdist, float iLdist) const;
       static std::string description();
       std::string name() const {return "oi";};
    private:
@@ -37,5 +37,6 @@ class CalibratorOi : public Calibrator {
       bool mSaveDiff;
       float mElevGradient;
       int mTest;
+      float mWMin;
 };
 #endif

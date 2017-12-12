@@ -35,7 +35,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mWMin(0.5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
-   iOptions.getValue("bias", mBiasVariable);
+   iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
    iOptions.getValue("maxLocations", mMaxLocations);
@@ -187,9 +187,22 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr field = iFile.getField(mVariable, t);
       FieldPtr output = iFile.getEmptyField();
       FieldPtr bias;
-      bool useBias = iFile.hasVariable(mBiasVariable);
-      if(useBias)
+      FieldPtr newbias;
+      bool useBias = mBiasVariable != "";
+      if(useBias) {
          bias = iFile.getField(mBiasVariable, t);
+
+         // Scale the bias
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               if(Util::isValid((*bias)(y, x, 0)))
+                  (*bias)(y, x, 0) *= mMu;
+               else
+                  (*bias)(y, x, 0) = 0;
+            }
+         }
+         newbias = iFile.getEmptyField(0);
+      }
       FieldPtr num;
       if(mNumVariable != "")
          num = iFile.getField(mNumVariable, t);
@@ -356,9 +369,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                }
                // assert(count > 0);
                float mean = total / count;
-               Yhat(i) = mean;
                for(int e = 0; e < nValidEns; e++) {
                   Y(i, e) -= mean;
+               }
+
+               // Bias correct
+               Yhat(i) = mean;
+               if(useBias) {
+                  float currBias = (*bias)(obsY[index], obsX[index], 0);
+                  Yhat(i) -= currBias;
                }
             }
 
@@ -368,9 +387,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             C = Y.t() * Rinv;
 
             mattype Pinv(nValidEns, nValidEns);
-            float diag = 1 / mDelta / (1 + mGamma) * (nValidEns - 1);
-            if(!useBias)
-               diag = 1 / mDelta * (nValidEns - 1);
+            float diag = 1 / mDelta * (nValidEns - 1);
+            if(useBias)
+               diag = 1 / mDelta / (1 + mGamma) * (nValidEns - 1);
 
             Pinv = C * Y + diag * arma::eye<mattype>(nValidEns, nValidEns);
             float cond = arma::rcond(Pinv);
@@ -505,18 +524,36 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
                if(mSaveDiff)
                   (*output)(y, x, ei) = diff;
-               else
-                  (*output)(y, x, ei) = (*field)(y, x, ei) + diff;
+               else {
+                  float raw = (*field)(y, x, ei);
+                  if(useBias) {
+                     raw -= (*bias)(y, x, 0);
+                  }
+                  (*output)(y, x, ei) = raw + diff;
+               }
 
                if(mNumVariable != "")
                   (*num)(y, x, ei) = nObs;
+
             }
+            // Update bias
+            float biasTotal = 0;
+            for(int e = 0; e < nValidEns; e++) {
+               int ei = validEns[e];
+               biasTotal += (*field)(y, x, ei) * w(e);
+            }
+
+            (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
          }
       }
       std::cout << "Adding" << std::endl;
       iFile.addField(output, mVariable, t);
       if(mNumVariable != "")
          iFile.addField(num, Variable(mNumVariable), t);
+      if(useBias) {
+         std::cout << "Adding bias field" << std::endl;
+         iFile.addField(newbias, Variable(mBiasVariable), t);
+      }
    }
    return true;
 }

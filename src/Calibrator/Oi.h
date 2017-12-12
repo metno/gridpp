@@ -36,5 +36,6 @@ class CalibratorOi : public Calibrator {
       int mMethod;
       bool mSaveDiff;
       float mElevGradient;
+      int mTest;
 };
 #endif

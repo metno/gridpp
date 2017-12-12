@@ -323,18 +323,25 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             for(int i = 0; i < nObs; i++) {
                // Use the nearest neighbour for this location
+               int index = useLocations[i];
                float total = 0;
                int count = 0;
                // TODO: 
                float elevCorr = 0;
-               if(Util::isValid(mElevGradient))
-                  elevCorr = mElevGradient * (currElev[i] - elev);
+               if(Util::isValid(mElevGradient)) {
+                  float nnElev = elevs[obsY[index]][obsX[index]];
+                  assert(Util::isValid(nnElev));
+                  assert(Util::isValid(currElev[i]));
+                  elevCorr = mElevGradient * (currElev[i] - nnElev);
+               }
                for(int e = 0; e < nValidEns; e++) {
                   int ei = validEns[e];
-                  float value = (*field)(obsY[i], obsX[i], ei);
+                  float value = (*field)(obsY[index], obsX[index], ei);
                   if(Util::isValid(value)) {
                      value += elevCorr;
                      Y(i, e) = value;
+                     if(!Util::isValid(value))
+                        abort();
                      total += value;
                      count++;
                   }
@@ -377,6 +384,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "Lat: " << lat << std::endl;
                std::cout << "Lon: " << lon << std::endl;
                std::cout << "Elev: " << elev << std::endl;
+               std::cout << "Pinv" << std::endl;
+               print_matrix<mattype>(Pinv);
                std::cout << "P" << std::endl;
                print_matrix<mattype>(P);
                std::cout << "Y:" << std::endl;

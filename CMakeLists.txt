@@ -42,6 +42,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
 endif()
 
 find_package(Boost  REQUIRED)
+find_package(Armadillo 6.5 REQUIRED)
 find_package(NetCDF REQUIRED)
 find_package(GSL REQUIRED)
 
@@ -65,6 +66,7 @@ function(add_gridpp_library target lib_type)
    target_include_directories(${target} PUBLIC "${Boost_INCLUDE_DIR}")
    target_include_directories(${target} PUBLIC "${NETCDF_INCLUDE_DIRS}")
    target_include_directories(${target} PUBLIC "${GSL_INCLUDE_DIRS}")
+   target_include_directories(${target} PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
 
    set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp)
 endfunction()
@@ -88,6 +90,7 @@ foreach(item gridpp-bin gridpp-kf gridpp-train)
    target_link_libraries(${item} "${Boost_LIBRARIES}")
    target_link_libraries(${item} "${NETCDF_LIBRARIES}")
    target_link_libraries(${item} "${GSL_LIBRARIES}")
+   target_link_libraries(${item} "${ARMADILLO_LIBRARIES}")
 endforeach(item)
 
 if (ENABLE_TESTS)

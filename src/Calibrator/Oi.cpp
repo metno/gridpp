@@ -594,12 +594,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             }
             // Update bias
-            float biasTotal = 0;
-            for(int e = 0; e < nValidEns; e++) {
-               int ei = validEns[e];
-               biasTotal += (*field)(y, x, ei) * w(e);
+            if(useBias) {
+               float biasTotal = 0;
+               for(int e = 0; e < nValidEns; e++) {
+                  int ei = validEns[e];
+                  biasTotal += (*field)(y, x, ei) * w(e);
+               }
+               (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
             }
-            (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
+
 
             // Update delta
             /*

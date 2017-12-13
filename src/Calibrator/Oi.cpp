@@ -282,7 +282,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                float vdist = obsLocations[index].elev() - elev;
                float lafdist = 1;
                if(Util::isValid(obsLaf[i]) && Util::isValid(laf))
-                  lafdist = obsLaf[i] - laf;
+                  lafdist = obsLaf[index] - laf;
                float rho = calcRho(hdist, vdist, lafdist);
                int X = obsX[index];
                int Y = obsY[index];
@@ -371,7 +371,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int index = useLocations[i];
                float curr = obs[index];
                float elev = obselevs[index];
-               float laf = obsLaf[i];
+               float laf = obsLaf[index];
                currObs[i] = curr;
                currElev[i] = elev;
                currLaf[i] = laf;

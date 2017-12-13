@@ -31,10 +31,12 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMaxLocations(20),
       mNumVariable(""),
       mUseMeanBias(false),
+      mMaxElevDiff(200),
       // Default model error variance
       mMinValidEns(5),
       mTest(Util::MV),
       mNewDeltaVar(1),
+      mDiagnose(false),
       mWMin(0.5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
@@ -64,7 +66,9 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("epsilon", mEpsilon);
    iOptions.getValue("test", mTest);
    iOptions.getValue("c", mC);
+   iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
+   iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
    iOptions.check();
 
    // Gamma: The error covariance of the bias is this fraction of the background error
@@ -172,13 +176,26 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       if(Util::isValid(obs[i])) {
          int Y, X;
          searchTree.getNearestNeighbour(obsLocations[i].lat(), obsLocations[i].lon(), Y, X);
-         for(int y = std::max(0, Y - radius); y < std::min(nY, Y + radius); y++) {
-            for(int x = std::max(0, X - radius); x < std::min(nX, X + radius); x++) {
-               if(mSort || obsIndices[y][x].size() < mMaxLocations) {
-                  obsIndices[y][x].push_back(i);
-                  count ++;
+         // Check if the elevation of the station against the reference grid
+         bool hasValidElev = Util::isValid(obsLocations[i].elev());
+         if(Util::isValid(mMaxElevDiff) && hasValidElev) {
+            float elevDiff = abs(obsLocations[i].elev() - elevs[Y][X]);
+            hasValidElev = elevDiff < mMaxElevDiff;
+         }
+         if(hasValidElev) {
+            for(int y = std::max(0, Y - radius); y < std::min(nY, Y + radius); y++) {
+               for(int x = std::max(0, X - radius); x < std::min(nX, X + radius); x++) {
+                  if(mSort || obsIndices[y][x].size() < mMaxLocations) {
+                     obsIndices[y][x].push_back(i);
+                     count ++;
+                  }
                }
             }
+         }
+         else {
+            std::stringstream ss;
+            ss << "Removing station because elevation (" << obsLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
+            Util::warning(ss.str());
          }
          obsY[i] = Y;
          obsX[i] = X;
@@ -231,6 +248,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
       // Compute Y
       vec2 Yglobal(S);
+      std::vector<float> Yhatglobal(S);
       for(int i = 0; i < S; i++) {
          Yglobal[i].resize(nEns, 0);
          float elevCorr = 0;
@@ -238,7 +256,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             float nnElev = elevs[obsY[i]][obsX[i]];
             assert(Util::isValid(nnElev));
             assert(Util::isValid(obsLocations[i].elev()));
-            elevCorr = mElevGradient * (obsLocations[i].elev() - nnElev);
+            float elevDiff = obsLocations[i].elev() - nnElev;
+            elevCorr = mElevGradient * elevDiff;
          }
          float total = 0;
          int count = 0;
@@ -257,6 +276,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             if(Util::isValid(value)) {
                Yglobal[i][e] -= mean;
             }
+         }
+         Yhatglobal[i] = mean;
+         if(useBias) {
+            float currBias = (*bias)(obsY[i], obsX[i], 0);
+            Yhatglobal[i] -= currBias;
          }
       }
 
@@ -398,40 +422,12 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             for(int i = 0; i < nObs; i++) {
                // Use the nearest neighbour for this location
                int index = useLocations[i];
-               float total = 0;
-               int count = 0;
-               // TODO: 
-               float elevCorr = 0;
-               if(Util::isValid(mElevGradient)) {
-                  float nnElev = elevs[obsY[index]][obsX[index]];
-                  assert(Util::isValid(nnElev));
-                  assert(Util::isValid(currElev[i]));
-                  elevCorr = mElevGradient * (currElev[i] - nnElev);
-               }
                for(int e = 0; e < nValidEns; e++) {
                   int ei = validEns[e];
-                  float value = (*field)(obsY[index], obsX[index], ei);
-                  if(Util::isValid(value)) {
-                     value += elevCorr;
-                     Y(i, e) = value;
-                     if(!Util::isValid(value))
-                        abort();
-                     total += value;
-                     count++;
-                  }
+                  Y(i, e) = Yglobal[index][ei];
                }
-               // assert(count > 0);
-               float mean = total / count;
-               for(int e = 0; e < nValidEns; e++) {
-                  Y(i, e) -= mean;
-               }
+               Yhat(i) = Yhatglobal[index];
 
-               // Bias correct
-               Yhat(i) = mean;
-               if(useBias) {
-                  float currBias = (*bias)(obsY[index], obsX[index], 0);
-                  Yhat(i) -= currBias;
-               }
             }
 
             // Compute C matrix
@@ -498,7 +494,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             // Compute w
             vectype w(nValidEns);
-            w = PC * (currObs - Yhat);
+            if(mDiagnose)
+               w = PC * (arma::ones<vectype>(nObs));
+            else
+               w = PC * (currObs - Yhat);
 
             // Add w to W. TODO: Is this done correctly?
             for(int e = 0; e < nValidEns; e++) {

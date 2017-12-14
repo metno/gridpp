@@ -4,7 +4,6 @@
 #include "../File/File.h"
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
-#include <armadillo>
 #include "/home/thomasn/local/include/armadillo"
 
 CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
@@ -79,11 +78,8 @@ template<class Matrix>
 void print_matrix(Matrix matrix) {
        matrix.print(std::cout);
 }
-typedef arma::mat mattype;
-typedef arma::vec vectype;
-typedef arma::cx_mat cxtype;
-template void print_matrix<mattype>(mattype matrix);
-template void print_matrix<cxtype>(cxtype matrix);
+template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
+template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
 
 bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    int nY = iFile.getNumY();
@@ -109,25 +105,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       return false;
    }
 
-   std::vector<Location> obsLocations = iParameterFile->getLocations();
+   std::vector<Location> gLocations = iParameterFile->getLocations();
    if(iParameterFile->getNumParameters() != 2) {
       std::stringstream ss;
       ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, not 2";
       Util::error(ss.str());
    }
 
-   // Retrieve parameters
-   std::vector<float> ci(obsLocations.size());
-   std::vector<float> obs(obsLocations.size());
-   std::vector<float> obselevs(obsLocations.size());
-   for(int i = 0; i < obsLocations.size(); i++) {
-      Parameters parameters = iParameterFile->getParameters(0, obsLocations[i]);
-      obs[i] = parameters[0];
-      obselevs[i] = obsLocations[i].elev();
-      ci[i] = parameters[1];
-   }
    float sigma = mSigma;
-   int S = obsLocations.size();
+   int gS = gLocations.size();
    // Find the spacing between each grid
    float gridSize = Util::getDistance(lats[0][0], lons[0][0], lats[1][0], lons[1][0]);
    std::stringstream ss;
@@ -138,14 +124,17 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    // in the vicinity of the nearest neighbour. This is only meant to be an approximation, but saves
    // considerable time instead of doing a loop over each grid point and each observation.
 
-   // Store the indicies (into the obsLocations array) that a gridpoint has available
-   std::vector<std::vector<std::vector<int> > > obsIndices; // Y, X, obs indices
-   std::vector<float> obsY(S);
-   std::vector<float> obsX(S);
-   std::vector<float> obsLaf(S);
-   obsIndices.resize(nY);
+   // Store the indicies (into the gLocations array) that a gridpoint has available
+   std::vector<std::vector<std::vector<int> > > gLocIndices; // Y, X, obs indices
+   std::vector<float> gYi(gS, Util::MV);
+   std::vector<float> gXi(gS, Util::MV);
+   std::vector<float> gLafs(gS, Util::MV);
+   std::vector<float> gElevs(gS, Util::MV);
+   std::vector<float> gCi(gS, Util::MV);
+   std::vector<float> gObs(gS, Util::MV);
+   gLocIndices.resize(nY);
    for(int y = 0; y < nY; y++) {
-      obsIndices[y].resize(nX);
+      gLocIndices[y].resize(nX);
    }
 
    // Spread each observation out to this many gridpoints from the nearest neighbour
@@ -155,7 +144,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    // if we expect to use more memory than desired. The true memory is roughly
    // 1 GB + expectedBytes * F
    int bytesPerValue = 4;
-   float expectedBytes = float(radius * radius) * 4 * bytesPerValue * S;
+   float expectedBytes = float(radius * radius) * 4 * bytesPerValue * gS;
    std::cout << "Expected MB: " << 1000 + expectedBytes / 1024 / 1024 << std::endl;
    if(Util::isValid(mMaxBytes) && expectedBytes > mMaxBytes) {
       std::stringstream ss;
@@ -167,26 +156,34 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    double time_s = Util::clock();
    KDTree searchTree(iFile.getLats(), iFile.getLons());
    int count = 0;
-   for(int i = 0; i < S; i++) {
+   for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
          std::stringstream ss;
          ss << i;
          Util::info(ss.str());
       }
-      if(Util::isValid(obs[i])) {
+      Parameters parameters = iParameterFile->getParameters(0, gLocations[i]);
+      gObs[i] = parameters[0];
+      gCi[i] = parameters[1];
+      gElevs[i] = gLocations[i].elev();
+      if(Util::isValid(gObs[i])) {
          int Y, X;
-         searchTree.getNearestNeighbour(obsLocations[i].lat(), obsLocations[i].lon(), Y, X);
-         // Check if the elevation of the station against the reference grid
-         bool hasValidElev = Util::isValid(obsLocations[i].elev());
+         searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);
+         gYi[i] = Y;
+         gXi[i] = X;
+         gLafs[i] = lafs[Y][X];
+
+         // Check if the elevation of the station roughly matches the reference grid elevation
+         bool hasValidElev = Util::isValid(gLocations[i].elev());
          if(Util::isValid(mMaxElevDiff) && hasValidElev) {
-            float elevDiff = abs(obsLocations[i].elev() - elevs[Y][X]);
+            float elevDiff = abs(gLocations[i].elev() - elevs[Y][X]);
             hasValidElev = elevDiff < mMaxElevDiff;
          }
          if(hasValidElev) {
             for(int y = std::max(0, Y - radius); y < std::min(nY, Y + radius); y++) {
                for(int x = std::max(0, X - radius); x < std::min(nX, X + radius); x++) {
-                  if(mSort || obsIndices[y][x].size() < mMaxLocations) {
-                     obsIndices[y][x].push_back(i);
+                  if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
+                     gLocIndices[y][x].push_back(i);
                      count ++;
                   }
                }
@@ -194,12 +191,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          }
          else {
             std::stringstream ss;
-            ss << "Removing station because elevation (" << obsLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
+            ss << "Removing station because elevation (" << gLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
             Util::warning(ss.str());
          }
-         obsY[i] = Y;
-         obsX[i] = X;
-         obsLaf[i] = lafs[Y][X];
       }
    }
    double time_e = Util::clock();
@@ -247,40 +241,40 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          num = iFile.getField(mNumVariable, t);
 
       // Compute Y
-      vec2 Yglobal(S);
-      std::vector<float> Yhatglobal(S);
-      for(int i = 0; i < S; i++) {
-         Yglobal[i].resize(nEns, 0);
+      vec2 gY(gS);
+      std::vector<float> gYhat(gS);
+      for(int i = 0; i < gS; i++) {
+         gY[i].resize(nEns, 0);
          float elevCorr = 0;
          if(Util::isValid(mElevGradient)) {
-            float nnElev = elevs[obsY[i]][obsX[i]];
+            float nnElev = elevs[gYi[i]][gXi[i]];
             assert(Util::isValid(nnElev));
-            assert(Util::isValid(obsLocations[i].elev()));
-            float elevDiff = obsLocations[i].elev() - nnElev;
+            assert(Util::isValid(gLocations[i].elev()));
+            float elevDiff = gLocations[i].elev() - nnElev;
             elevCorr = mElevGradient * elevDiff;
          }
          float total = 0;
          int count = 0;
          for(int e = 0; e < nEns; e++) {
-            float value = (*field)(obsY[i], obsX[i], e);
+            float value = (*field)(gYi[i], gXi[i], e);
             if(Util::isValid(value)) {
                value += elevCorr;
-               Yglobal[i][e] = value;
+               gY[i][e] = value;
                total += value;
                count++;
             }
          }
          float mean = total / count;
          for(int e = 0; e < nEns; e++) {
-            float value = Yglobal[i][e];
+            float value = gY[i][e];
             if(Util::isValid(value)) {
-               Yglobal[i][e] -= mean;
+               gY[i][e] -= mean;
             }
          }
-         Yhatglobal[i] = mean;
+         gYhat[i] = mean;
          if(useBias) {
-            float currBias = (*bias)(obsY[i], obsX[i], 0);
-            Yhatglobal[i] -= currBias;
+            float currBias = (*bias)(gYi[i], gXi[i], 0);
+            gYhat[i] -= currBias;
          }
       }
 
@@ -291,59 +285,59 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             float lon = lons[y][x];
             float elev = elevs[y][x];
             float laf = lafs[y][x];
-            std::vector<int> useLocations0 = obsIndices[y][x];
 
             //
             // Create list of locations for this gridpoint
             //
-            std::vector<int> useLocations;
-            useLocations.reserve(useLocations0.size());
-            std::vector<std::pair<float,int> > rhos0;
-            rhos0.reserve(useLocations0.size());
-            for(int i = 0; i < useLocations0.size(); i++) {
-               int index = useLocations0[i];
-               float hdist = Util::getDistance(obsLocations[index].lat(), obsLocations[index].lon(), lat, lon, true);
-               float vdist = obsLocations[index].elev() - elev;
+            std::vector<int> lLocIndices0 = gLocIndices[y][x];
+            std::vector<int> lLocIndices;
+            lLocIndices.reserve(lLocIndices0.size());
+            std::vector<std::pair<float,int> > lRhos0;
+            lRhos0.reserve(lLocIndices0.size());
+            for(int i = 0; i < lLocIndices0.size(); i++) {
+               int index = lLocIndices0[i];
+               float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), lat, lon, true);
+               float vdist = gLocations[index].elev() - elev;
                float lafdist = 1;
-               if(Util::isValid(obsLaf[i]) && Util::isValid(laf))
-                  lafdist = obsLaf[index] - laf;
+               if(Util::isValid(gLafs[index]) && Util::isValid(laf))
+                  lafdist = gLafs[index] - laf;
                float rho = calcRho(hdist, vdist, lafdist);
-               int X = obsX[index];
-               int Y = obsY[index];
+               int X = gXi[index];
+               int Y = gYi[index];
                // Only include observations that are within the domain
                if(X > 0 && X < lats[0].size()-1 && Y > 0 && Y < lats.size()-1) {
                   if(rho > mMinRho) {
-                     rhos0.push_back(std::pair<float,int>(rho, i));
+                     lRhos0.push_back(std::pair<float,int>(rho, i));
                   }
                }
             }
-            arma::vec rhos;
-            if(rhos0.size() > mMaxLocations) {
+            arma::vec lRhos;
+            if(lRhos0.size() > mMaxLocations) {
                // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                // Otherwise, just use the last locations added
-               rhos = arma::vec(mMaxLocations);
+               lRhos = arma::vec(mMaxLocations);
                if(mSort) {
-                  std::sort(rhos0.begin(), rhos0.end(), Util::sort_pair_first<float,int>());
+                  std::sort(lRhos0.begin(), lRhos0.end(), Util::sort_pair_first<float,int>());
                }
                for(int i = 0; i < mMaxLocations; i++) {
                   // The best values start at the end of the array
-                  int index = rhos0[rhos0.size() - 1 - i].second;
-                  useLocations.push_back(useLocations0[index]);
-                  rhos(i) = rhos0[rhos0.size() - 1 - i].first;
+                  int index = lRhos0[lRhos0.size() - 1 - i].second;
+                  lLocIndices.push_back(lLocIndices0[index]);
+                  lRhos(i) = lRhos0[lRhos0.size() - 1 - i].first;
                }
             }
             else {
-               rhos = arma::vec(rhos0.size());
-               for(int i = 0; i < rhos0.size(); i++) {
-                  int index = rhos0[i].second;
-                  useLocations.push_back(useLocations0[index]);
-                  rhos(i) = rhos0[i].first;
+               lRhos = arma::vec(lRhos0.size());
+               for(int i = 0; i < lRhos0.size(); i++) {
+                  int index = lRhos0[i].second;
+                  lLocIndices.push_back(lLocIndices0[index]);
+                  lRhos(i) = lRhos0[i].first;
                }
             }
 
-            int nObs = useLocations.size();
+            int lS = lLocIndices.size();
 
-            if(nObs < mMinObs) {
+            if(lS < mMinObs) {
                // If we have too few observations though, then use the background
                for(int e = 0; e < nEns; e++) {
                   if(mSaveDiff)
@@ -357,12 +351,12 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             if(mObsOnly) {
                // Here we don't run the OI algorithm but instead just use the median
                // of all observations
-               std::vector<float> currObs(nObs, Util::MV);
-               for(int i = 0; i < nObs; i++) {
-                  int index = useLocations[i];
-                  currObs[i] = obs[index];
+               std::vector<float> lObs(lS, Util::MV);
+               for(int i = 0; i < lS; i++) {
+                  int index = lLocIndices[i];
+                  lObs[i] = gObs[index];
                }
-               float value = Util::calculateStat(currObs, Util::StatTypeQuantile, 0.5);
+               float value = Util::calculateStat(lObs, Util::StatTypeQuantile, 0.5);
                for(int e = 0; e < nEns; e++) {
                   if(mSaveDiff)
                      (*output)(y, x, e) = value - (*field)(y, x, e);
@@ -388,26 +382,23 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                continue;
             }
 
-            vectype currObs(nObs);
-            vectype currElev(nObs);
-            vectype currLaf(nObs);
-            for(int i = 0; i < useLocations.size(); i++) {
-               int index = useLocations[i];
-               float curr = obs[index];
-               float elev = obselevs[index];
-               float laf = obsLaf[index];
-               currObs[i] = curr;
-               currElev[i] = elev;
-               currLaf[i] = laf;
+            vectype lObs(lS);
+            vectype lElevs(lS);
+            vectype lLafs(lS);
+            for(int i = 0; i < lLocIndices.size(); i++) {
+               int index = lLocIndices[i];
+               lObs[i] = gObs[index];
+               lElevs[i] = gElevs[index];
+               lLafs[i] = gLafs[index];
             }
 
             // Compute Rinv
-            mattype Rinv(nObs, nObs, arma::fill::zeros);
-            for(int i = 0; i < nObs; i++) {
-               int index = useLocations[i];
-               float r = sigma * sigma * ci[index];
+            mattype Rinv(lS, lS, arma::fill::zeros);
+            for(int i = 0; i < lS; i++) {
+               int index = lLocIndices[i];
+               float r = sigma * sigma * gCi[index];
                if(mUseRho) {
-                  float rho = rhos[i];
+                  float rho = lRhos[i];
                   Rinv(i, i) = 1 / r * rho;
                }
                else {
@@ -416,24 +407,24 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
 
             // Compute Y (model at obs-locations)
-            mattype Y(nObs, nValidEns);
-            vectype Yhat(nObs);
+            mattype lY(lS, nValidEns);
+            vectype lYhat(lS);
 
-            for(int i = 0; i < nObs; i++) {
+            for(int i = 0; i < lS; i++) {
                // Use the nearest neighbour for this location
-               int index = useLocations[i];
+               int index = lLocIndices[i];
                for(int e = 0; e < nValidEns; e++) {
                   int ei = validEns[e];
-                  Y(i, e) = Yglobal[index][ei];
+                  lY(i, e) = gY[index][ei];
                }
-               Yhat(i) = Yhatglobal[index];
+               lYhat(i) = gYhat[index];
 
             }
 
             // Compute C matrix
-            // k x S * S x S
-            mattype C(nValidEns, nObs);
-            C = Y.t() * Rinv;
+            // k x gS * gS x gS
+            mattype C(nValidEns, lS);
+            C = lY.t() * Rinv;
 
             mattype Pinv(nValidEns, nValidEns);
             float currDelta = 1;
@@ -444,7 +435,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             if(useBias)
                diag = 1 / currDelta / (1 + mGamma) * (nValidEns - 1);
 
-            Pinv = C * Y + diag * arma::eye<mattype>(nValidEns, nValidEns);
+            Pinv = C * lY + diag * arma::eye<mattype>(nValidEns, nValidEns);
             float cond = arma::rcond(Pinv);
             if(cond <= 0) {
                std::stringstream ss;
@@ -470,11 +461,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "P" << std::endl;
                print_matrix<mattype>(P);
                std::cout << "Y:" << std::endl;
-               print_matrix<mattype>(Y);
-               std::cout << "currObs:" << std::endl;
-               print_matrix<mattype>(currObs);
+               print_matrix<mattype>(lY);
+               std::cout << "lObs:" << std::endl;
+               print_matrix<mattype>(lObs);
                std::cout << "Yhat" << std::endl;
-               print_matrix<mattype>(Yhat);
+               print_matrix<mattype>(lYhat);
             }
 
             mattype W = arma::real(Wcx);
@@ -489,17 +480,17 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
 
             // Compute PC
-            mattype PC(nValidEns, nObs);
+            mattype PC(nValidEns, lS);
             PC = P * C;
 
             // Compute w
             vectype w(nValidEns);
             if(mDiagnose)
-               w = PC * (arma::ones<vectype>(nObs));
+               w = PC * (arma::ones<vectype>(lS));
             else
-               w = PC * (currObs - Yhat);
+               w = PC * (lObs - lYhat);
 
-            // Add w to W. TODO: Is this done correctly?
+            // Add w to W
             for(int e = 0; e < nValidEns; e++) {
                for(int e2 = 0; e2 < nValidEns; e2 ++) {
                   W(e, e2) = W(e, e2) + w(e) ;
@@ -533,10 +524,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "Lon: " << lon << std::endl;
                std::cout << "Elev: " << elev << std::endl;
                std::cout << "Laf: " << laf << std::endl;
-               std::cout << "Num obs: " << nObs << std::endl;
+               std::cout << "Num obs: " << lS << std::endl;
                std::cout << "Num ens: " << nValidEns << std::endl;
                std::cout << "rhos" << std::endl;
-               print_matrix<mattype>(rhos);
+               print_matrix<mattype>(lRhos);
                std::cout << "P" << std::endl;
                print_matrix<mattype>(P);
                std::cout << "C" << std::endl;
@@ -548,22 +539,22 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "w" << std::endl;
                print_matrix<mattype>(w);
                std::cout << "Y:" << std::endl;
-               print_matrix<mattype>(Y);
+               print_matrix<mattype>(lY);
                std::cout << "Yhat" << std::endl;
-               print_matrix<mattype>(Yhat);
-               std::cout << "currObs" << std::endl;
-               print_matrix<mattype>(currObs);
-               std::cout << "currObs - Yhat" << std::endl;
-               print_matrix<mattype>(currObs - Yhat);
+               print_matrix<mattype>(lYhat);
+               std::cout << "lObs" << std::endl;
+               print_matrix<mattype>(lObs);
+               std::cout << "lObs - Yhat" << std::endl;
+               print_matrix<mattype>(lObs - lYhat);
                std::cout << "X" << std::endl;
                print_matrix<mattype>(X);
                std::cout << "elevs" << std::endl;
-               print_matrix<mattype>(currElev);
+               print_matrix<mattype>(lElevs);
                std::cout << "lafs" << std::endl;
-               print_matrix<mattype>(currLaf);
+               print_matrix<mattype>(lLafs);
                std::cout << "Analaysis increment:" << std::endl;
                print_matrix<mattype>(X.t() * W);
-               std::cout << "My: " << arma::mean(arma::dot(currObs - Yhat, rhos) / nObs) << std::endl;
+               std::cout << "My: " << arma::mean(arma::dot(lObs - lYhat, lRhos) / lS) << std::endl;
             }
 
             // Compute analysis
@@ -576,7 +567,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
                float diff = total;
                if(mUseMeanBias)
-                  diff = arma::mean(currObs - Yhat);
+                  diff = arma::mean(lObs - lYhat);
 
                if(mSaveDiff)
                   (*output)(y, x, ei) = diff;
@@ -589,7 +580,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                }
 
                if(mNumVariable != "")
-                  (*num)(y, x, ei) = nObs;
+                  (*num)(y, x, ei) = lS;
 
             }
             // Update bias
@@ -606,9 +597,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             // Update delta
             /*
             float deltaVar = mC - 1;
-            float trace = arma::trace(Y * Y.t());
+            float trace = arma::trace(lY * lY.t());
             float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
-            float denomenator = 1.0 / nObs / (nValidEns - 1) * trace;
+            float denomenator = 1.0 / lS / (nValidEns - 1) * trace;
             float currDeltaEvidence = numerator / denomenator;
             float weightOld = deltaVar;
             float weightNew = mNewDeltaVar;
@@ -625,34 +616,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          iFile.addField(newbias, Variable(mBiasVariable), t);
       }
       if(useDelta) {
-         // Update delta
-         float deltaVar = mC - 1;
-         float trace = 0;
-         float numValidS = 0;
-         for(int s = 0; s < S; s++) {
-            // Compute value in coord s,s
-            float value = 0;
-            int count = 0;
-            for(int e = 0; e < nEns; e++) {
-               if(Util::isValid(Yglobal[s][e])) {
-                  value += Yglobal[s][e] * Yglobal[s][e];
-                  count++;
-               }
-            }
-            if(count > 1) {
-               value = value / (count-1);
-               trace += value;
-               numValidS++;
-            }
-         }
-         float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
-         float denomenator = 1.0 / numValidS * trace;
-         float currDeltaEvidence = numerator / denomenator;
-         float weightOld = deltaVar;
-         float weightNew = mNewDeltaVar;
+         float oldDelta = (*delta)(0, 0, 0);
+         float value = calcDelta(oldDelta, gY);
          for(int x = 0; x < nX; x++) {
             for(int y = 0; y < nY; y++) {
-               (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
+               (*newdelta)(y, x, 0) = value;
             }
          }
 
@@ -661,6 +629,36 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
    }
    return true;
+}
+
+float CalibratorOi::calcDelta(float iOldDelta, const vec2& iY) const {
+   float deltaVar = mC - 1;
+   float trace = 0;
+   float numValidS = 0;
+   int S = iY.size();
+   int nEns = iY[0].size();
+   for(int s = 0; s < S; s++) {
+      // Compute value in coord s,s
+      float value = 0;
+      int count = 0;
+      for(int e = 0; e < nEns; e++) {
+         if(Util::isValid(iY[s][e])) {
+            value += iY[s][e] * iY[s][e];
+            count++;
+         }
+      }
+      if(count > 1) {
+         value = value / (count-1);
+         trace += value;
+         numValidS++;
+      }
+   }
+   float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
+   float denomenator = 1.0 / numValidS * trace;
+   float currDeltaEvidence = numerator / denomenator;
+   float weightOld = deltaVar;
+   float weightNew = mNewDeltaVar;
+   return (iOldDelta * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
 }
 
 float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {

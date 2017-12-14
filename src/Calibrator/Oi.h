@@ -1,5 +1,6 @@
 #ifndef CALIBRATOR_OI_H
 #define CALIBRATOR_OI_H
+#include <armadillo>
 #include "Calibrator.h"
 #include "../ParameterFile/ParameterFile.h"
 class Obs;
@@ -43,5 +44,9 @@ class CalibratorOi : public Calibrator {
       float mNewDeltaVar;
       float mMaxElevDiff;
       bool mDiagnose;
+      typedef arma::mat mattype;
+      typedef arma::vec vectype;
+      typedef arma::cx_mat cxtype;
+      float calcDelta(float iOldDelta, const vec2& iY) const;
 };
 #endif

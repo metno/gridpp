@@ -4,7 +4,7 @@
 #include "../File/File.h"
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
-#include "/home/thomasn/local/include/armadillo"
+#include <armadillo>
 
 CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),

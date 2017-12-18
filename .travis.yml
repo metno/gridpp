@@ -12,6 +12,7 @@ matrix:
       env: BUILD_TYPE=DEBUG
 
 install:
+ - sudo add-apt-repository ppa:titas-chanda/armadillo -y
  - sudo apt-get update -qq
  - sudo apt-get install libgsl0-dev libblas-dev
  - sudo apt-get install libboost-all-dev
@@ -19,6 +20,7 @@ install:
  - sudo apt-get install libgtest-dev
  - sudo apt-get install lcov
  - sudo gem install coveralls-lcov
+ - sudo apt-get install libarmadillo6 libarmadillo-dev
 
 before_script:
   - GRIDPP_BUILD_DIR="${TRAVIS_BUILD_DIR}/build"

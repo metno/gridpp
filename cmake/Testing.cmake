@@ -64,6 +64,7 @@ foreach(test_src ${TESTS})
    target_link_libraries(${test} "${Boost_LIBRARIES}")
    target_link_libraries(${test} "${NETCDF_LIBRARIES}")
    target_link_libraries(${test} "${GSL_LIBRARIES}")
+   target_link_libraries(${test} "${ARMADILLO_LIBRARIES}")
 
    target_link_libraries(${test} "${GTEST_LIBRARIES}")
    target_link_libraries(${test} "${CMAKE_THREAD_LIBS_INIT}")

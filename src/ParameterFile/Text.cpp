@@ -118,7 +118,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    ss << "Reading " << mFilename << ". Found " << counter << " parameter sets.";
    Util::info(ss.str());
 
-   // recomputeTree();
+   recomputeTree();
 }
 
 std::vector<int> ParameterFileText::getTimes() const {

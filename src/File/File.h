@@ -48,6 +48,7 @@ class File {
       bool setLons(vec2 iLons);
       bool setElevs(vec2 iElevs);
       bool setLandFractions(vec2 iLandFractions);
+      bool setNumEns(int iNum);
 
       //! Does this file provide the variable (deriving it if necessary)?
       bool hasVariable(const Variable& iVariable) const;

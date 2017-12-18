@@ -54,7 +54,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       mTimeDim = getDim(timeDim);
 
    // Determine dimension sizes
-   mNEns = 10;
+   mNEns = 1;
    if(Util::isValid(mEnsDim))
       mNEns = getDimSize(mEnsDim);
 

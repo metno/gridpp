@@ -122,6 +122,7 @@ int main(int argc, const char *argv[]) {
       Util::info("Input type:  " + setup.inputFiles[f]->name());
       Util::info("Output type: " + setup.outputFiles[f]->name());
       setup.outputFiles[f]->setTimes(setup.inputFiles[f]->getTimes());
+      setup.outputFiles[f]->setNumEns(setup.inputFiles[f]->getNumEns());
       setup.outputFiles[f]->setReferenceTime(setup.inputFiles[f]->getReferenceTime());
 
       // Post-process file

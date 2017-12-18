@@ -293,6 +293,19 @@ double File::getReferenceTime() const {
 void File::setTimes(std::vector<double> iTimes) {
    mTimes = iTimes;
 }
+
+bool File::setNumEns(int iNum) {
+   std::stringstream ss;
+   ss << "Setting number of ensemble members to " << iNum;
+   // if(Util::isValid(mNEns)) {
+   //    ss << ". Already set.";
+   //    Util::info(ss.str());
+   //    return false;
+   // }
+   mNEns = iNum;
+   Util::info(ss.str());
+   return true;
+}
 std::vector<double> File::getTimes() const {
    return mTimes;
 }

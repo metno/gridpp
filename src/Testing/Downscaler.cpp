@@ -148,8 +148,8 @@ namespace {
       int nLon = 5;
       FileFake from(Options("nLat=1 nLon=5 nEns=1 nTime=1"));
       FileFake to(Options("nLat=1 nLon=5 nEns=1 nTime=1"));
-      setLatLon(from, (const float[]) {1}, (const float[]){0,1,2,3,4});
-      setLatLon(to,   (const float[]) {1}, (const float[]){0,2,2.5,3,4});
+      setLatLon(from, (const float[]) {1}, (const float[]){0, 1, 2, 3, 4});
+      setLatLon(to,   (const float[]) {1}, (const float[]){0, 2, 2.4, 3, 4});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);
@@ -172,8 +172,8 @@ namespace {
       int nLon = 1;
       FileFake from(Options("nLat=5 nLon=1 nEns=1 nTime=1"));
       FileFake to(Options("nLat=5 nLon=1 nEns=1 nTime=1"));
-      setLatLon(from, (const float[]) {0,1,2,3,4}, (const float[]){1});
-      setLatLon(to,   (const float[]) {0,2,2.5,3,4}, (const float[]){1});
+      setLatLon(from, (const float[]) {0, 1, 2, 3, 4}, (const float[]){1});
+      setLatLon(to,   (const float[]) {0, 2, 2.4, 3, 4}, (const float[]){1});
 
       vec2Int I, J, If, Jf;
       Downscaler::getNearestNeighbour(from, to, I, J);

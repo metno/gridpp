@@ -20,7 +20,11 @@ function(setup_googletest includes libs)
       externalproject_add(gtest
          URL ${GTEST_DIR}
          INSTALL_DIR ${CMAKE_BINARY_DIR}/auxiliary
-         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+         CMAKE_ARGS
+            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+         CMAKE_CACHE_ARGS
+            "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
+            "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
          )
       externalproject_get_property(gtest install_dir)
 
@@ -29,6 +33,9 @@ function(setup_googletest includes libs)
    else()
       externalproject_add(gtest
          URL ${GTEST_DIR}
+         CMAKE_CACHE_ARGS
+            "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
+            "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
          INSTALL_COMMAND ""
          )
       externalproject_get_property(gtest source_dir)

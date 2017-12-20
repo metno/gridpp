@@ -22,6 +22,7 @@ function(setup_googletest includes libs)
          INSTALL_DIR ${CMAKE_BINARY_DIR}/auxiliary
          CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+            -DCMAKE_INSTALL_LIBDIR:PATH=lib
          CMAKE_CACHE_ARGS
             "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
             "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"

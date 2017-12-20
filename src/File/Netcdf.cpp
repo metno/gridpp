@@ -10,7 +10,10 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 {
    int status = nc_open(getFilename().c_str(), iReadOnly ? NC_NOWRITE: NC_WRITE, &mFile);
    if(status != NC_NOERR) {
-      Util::error("Could not open NetCDF file " + getFilename());
+      if(iReadOnly)
+         Util::error("Could not open NetCDF file in read-only mode" + getFilename());
+      else
+         Util::error("Could not open NetCDF file in write mode" + getFilename());
    }
    // Get defaults
    std::string latVar, lonVar, timeVar, ensDim, yDim, xDim, timeDim;

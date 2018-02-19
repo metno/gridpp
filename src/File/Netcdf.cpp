@@ -369,8 +369,12 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
       }
       int var = getVar(variableName);
       float MV = getMissingValue(var); // The output file's missing value indicator
-      // TODO: Automatically determine if this should be "lon lat" or "longitude latitude"
-      setAttribute(var, "coordinates", "lon lat");
+
+      // Set the coordinate attribute based on the names of the lat lon variables
+      std::stringstream ss;
+      ss << getVarName(mLonVar) << " " << getVarName(mLatVar);
+      setAttribute(var, "coordinates", ss.str());
+
       if(variable.units() != "")
          setAttribute(var, "units", variable.units());
       if(variable.standardName() != "")
@@ -771,6 +775,17 @@ int FileNetcdf::getVar(std::string iVar) const {
       Util::error(ss.str());
    }
    return var;
+}
+
+std::string FileNetcdf::getVarName(int iVar) const {
+   char var[1000];
+   int status = nc_inq_varname(mFile, iVar, var);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have variable '" << iVar << "'";
+      Util::error(ss.str());
+   }
+   return std::string(var);
 }
 
 int FileNetcdf::getDimSize(std::string iDim) const {

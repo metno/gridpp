@@ -23,6 +23,7 @@ class CalibratorOi : public Calibrator {
       int mMaxLocations;
       bool mSort;
       float mSigma;
+      float mSigmaB;
       std::string mDeltaVariable;
       std::string mNumVariable;
       float mC;
@@ -36,6 +37,7 @@ class CalibratorOi : public Calibrator {
       bool mUseMeanBias;
       int mMinValidEns;
       bool mUseRho;
+      bool mUseBug;
       int mMethod;
       bool mSaveDiff;
       float mElevGradient;
@@ -44,6 +46,7 @@ class CalibratorOi : public Calibrator {
       float mNewDeltaVar;
       float mMaxElevDiff;
       bool mDiagnose;
+      bool mUseEns;
       typedef arma::mat mattype;
       typedef arma::vec vectype;
       typedef arma::cx_mat cxtype;

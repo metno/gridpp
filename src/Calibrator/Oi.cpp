@@ -19,11 +19,14 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mObsOnly(false),
       mElevGradient(-0.0065),
       mMethod(Util::MV),
+      mUseBug(false),
       mBiasVariable(""),
       mSigma(1),
+      mSigmaB(2),
       mC(1.03),
       mSaveDiff(false),
       mDeltaVariable(""),
+      mUseEns(true),
       // Add mDeltaVariable
       mX(Util::MV),
       mY(Util::MV),
@@ -45,6 +48,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
+   iOptions.getValue("sigmab", mSigmaB);
    iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
    iOptions.getValue("obsOnly", mObsOnly);
@@ -54,6 +58,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("y", mY);
    iOptions.getValue("minRho", mMinRho);
    iOptions.getValue("useRho", mUseRho);
+   iOptions.getValue("useBug", mUseBug);
    iOptions.getValue("saveDiff", mSaveDiff);
    iOptions.getValue("maxBytes", mMaxBytes);
    iOptions.getValue("method", mMethod);
@@ -61,6 +66,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("elevGradient", mElevGradient);
    iOptions.getValue("useMeanBias", mUseMeanBias);
+   iOptions.getValue("useEns", mUseEns);
    iOptions.getValue("wmin", mWMin);
    iOptions.getValue("epsilon", mEpsilon);
    iOptions.getValue("test", mTest);
@@ -237,8 +243,16 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
 
       FieldPtr num;
-      if(mNumVariable != "")
+      if(mNumVariable != "") {
          num = iFile.getField(mNumVariable, t);
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               for(int e = 0; e < nEns; e++) {
+                  (*num)(y, x, e) = 0;
+               }
+            }
+         }
+      }
 
       // Compute Y
       vec2 gY(gS);
@@ -375,12 +389,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   nValidEns++;
                }
             }
-            if(nValidEns < mMinValidEns) {
-               for(int e = 0; e < nEns; e++) {
-                  (*output)(y, x, e) = (*field)(y, x, e);
-               }
-               continue;
-            }
 
             vectype lObs(lS);
             vectype lElevs(lS);
@@ -390,20 +398,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                lObs[i] = gObs[index];
                lElevs[i] = gElevs[index];
                lLafs[i] = gLafs[index];
-            }
-
-            // Compute Rinv
-            mattype Rinv(lS, lS, arma::fill::zeros);
-            for(int i = 0; i < lS; i++) {
-               int index = lLocIndices[i];
-               float r = sigma * sigma * gCi[index];
-               if(mUseRho) {
-                  float rho = lRhos[i];
-                  Rinv(i, i) = 1 / r * rho;
-               }
-               else {
-                  Rinv(i, i) = 1 / r;
-               }
             }
 
             // Compute Y (model at obs-locations)
@@ -421,190 +415,263 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             }
 
-            // Compute C matrix
-            // k x gS * gS x gS
-            mattype C(nValidEns, lS);
-            C = lY.t() * Rinv;
-
-            mattype Pinv(nValidEns, nValidEns);
-            float currDelta = 1;
-            if(useDelta) {
-               currDelta = (*delta)(y, x, 0);
-            }
-            float diag = 1 / currDelta * (nValidEns - 1);
-            if(useBias)
-               diag = 1 / currDelta / (1 + mGamma) * (nValidEns - 1);
-
-            Pinv = C * lY + diag * arma::eye<mattype>(nValidEns, nValidEns);
-            float cond = arma::rcond(Pinv);
-            if(cond <= 0) {
-               std::stringstream ss;
-               ss << "Condition number of " << cond << ". Using raw values";
-               Util::warning(ss.str());
-               for(int e = 0; e < nEns; e++) {
-                  (*output)(y, x, e) = (*field)(y, x, e); // Util::MV;
-               }
-               continue;
-            }
-
-            mattype P = arma::inv(Pinv);
-            cxtype Wcx(nValidEns, nValidEns);
-            bool status = arma::sqrtmat(Wcx, (nValidEns - 1) * P);
-            if(!status) {
-               std::cout << "Near singular matrix for sqrtmat:" << std::endl;
-               std::cout << "Lat: " << lat << std::endl;
-               std::cout << "Lon: " << lon << std::endl;
-               std::cout << "Elev: " << elev << std::endl;
-               std::cout << "Laf: " << laf << std::endl;
-               std::cout << "Pinv" << std::endl;
-               print_matrix<mattype>(Pinv);
-               std::cout << "P" << std::endl;
-               print_matrix<mattype>(P);
-               std::cout << "Y:" << std::endl;
-               print_matrix<mattype>(lY);
-               std::cout << "lObs:" << std::endl;
-               print_matrix<mattype>(lObs);
-               std::cout << "Yhat" << std::endl;
-               print_matrix<mattype>(lYhat);
-            }
-
-            mattype W = arma::real(Wcx);
-            if(W.n_rows == 0) {
-               std::stringstream ss;
-               ss << "Could not find the real part of W. Using raw values.";
-               Util::warning(ss.str());
-               for(int e = 0; e < nEns; e++) {
-                  (*output)(y, x, e) = (*field)(y, x, e);
-               }
-               continue;
-            }
-
-            // Compute PC
-            mattype PC(nValidEns, lS);
-            PC = P * C;
-
-            // Compute w
-            vectype w(nValidEns);
-            if(mDiagnose)
-               w = PC * (arma::ones<vectype>(lS));
-            else
-               w = PC * (lObs - lYhat);
-
-            // Add w to W
-            for(int e = 0; e < nValidEns; e++) {
-               for(int e2 = 0; e2 < nValidEns; e2 ++) {
-                  W(e, e2) = W(e, e2) + w(e) ;
-               }
-            }
-
-            // Compute X (perturbations about model mean)
-            vectype X(nValidEns);
-            float total = 0;
-            int count = 0;
-            for(int e = 0; e < nValidEns; e++) {
-               int ei = validEns[e];
-               float value = (*field)(y, x, ei);
-               if(Util::isValid(value)) {
-                  X(e) = value;
-                  total += value;
-                  count++;
-               }
-               else {
-                  std::cout << "Invalid value " << y << " " << x << " " << e << std::endl;
-               }
-            }
-            float mean = total / count;
-            for(int e = 0; e < nValidEns; e++) {
-               X(e) -= mean;
-            }
-
-            // Write debugging information
-            if(x == mX && y == mY) {
-               std::cout << "Lat: " << lat << std::endl;
-               std::cout << "Lon: " << lon << std::endl;
-               std::cout << "Elev: " << elev << std::endl;
-               std::cout << "Laf: " << laf << std::endl;
-               std::cout << "Num obs: " << lS << std::endl;
-               std::cout << "Num ens: " << nValidEns << std::endl;
-               std::cout << "rhos" << std::endl;
-               print_matrix<mattype>(lRhos);
-               std::cout << "P" << std::endl;
-               print_matrix<mattype>(P);
-               std::cout << "C" << std::endl;
-               print_matrix<mattype>(C);
-               std::cout << "PC" << std::endl;
-               print_matrix<mattype>(PC);
-               std::cout << "W" << std::endl;
-               print_matrix<mattype>(W);
-               std::cout << "w" << std::endl;
-               print_matrix<mattype>(w);
-               std::cout << "Y:" << std::endl;
-               print_matrix<mattype>(lY);
-               std::cout << "Yhat" << std::endl;
-               print_matrix<mattype>(lYhat);
-               std::cout << "lObs" << std::endl;
-               print_matrix<mattype>(lObs);
-               std::cout << "lObs - Yhat" << std::endl;
-               print_matrix<mattype>(lObs - lYhat);
-               std::cout << "X" << std::endl;
-               print_matrix<mattype>(X);
-               std::cout << "elevs" << std::endl;
-               print_matrix<mattype>(lElevs);
-               std::cout << "lafs" << std::endl;
-               print_matrix<mattype>(lLafs);
-               std::cout << "Analaysis increment:" << std::endl;
-               print_matrix<mattype>(X.t() * W);
-               std::cout << "My: " << arma::mean(arma::dot(lObs - lYhat, lRhos) / lS) << std::endl;
-            }
-
-            // Compute analysis
-            for(int e = 0; e < nValidEns; e++) {
-               int ei = validEns[e];
-               float total = 0;
-               for(int k = 0; k < nValidEns; k++) {
-                  total += X(k) * W(k, e);
-               }
-
-               float diff = total;
-               if(mUseMeanBias)
-                  diff = arma::mean(lObs - lYhat);
-
-               if(mSaveDiff)
-                  (*output)(y, x, ei) = diff;
-               else {
-                  float raw = (*field)(y, x, ei);
-                  if(useBias) {
-                     raw -= (*bias)(y, x, 0);
+            // 
+            // Revert to static structure function when there is not enough ensemble information
+            // 
+            if(!mUseEns || nValidEns < mMinValidEns) {
+               // Current grid-point to station error covariance matrix
+               mattype lG(1, lS, arma::fill::zeros);
+               // Station to station error covariance matrix
+               mattype lP(lS, lS, arma::fill::zeros);
+               // Station variance
+               mattype lR(lS, lS, arma::fill::zeros);
+               for(int i = 0; i < lS; i++) {
+                  int index = lLocIndices[i];
+                  float r = sigma * sigma * gCi[index];
+                  if(mUseRho) {
+                     float rho = lRhos[i];
+                     lR(i, i) = r / rho;
                   }
-                  (*output)(y, x, ei) = raw + diff;
+                  else {
+                     lR(i, i) = r;
+                  }
+                  float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), lat, lon, true);
+                  float vdist = gLocations[index].elev() - elev;
+                  float lafdist = 1;
+                  if(Util::isValid(gLafs[index]) && Util::isValid(laf))
+                     lafdist = gLafs[index] - laf;
+                  float rho = calcRho(hdist, vdist, lafdist);
+                  lG(0, i) = rho / mSigmaB / mSigmaB;
+                  for(int j = 0; j < lS; j++) {
+                     int index_j = lLocIndices[j];
+                     float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), gLocations[index_j].lat(), gLocations[index_j].lon(), true);
+                     float vdist = gLocations[index].elev() - gLocations[index_j].elev();
+                     float lafdist = 1;
+                     if(Util::isValid(gLafs[index]) && Util::isValid(laf))
+                        lafdist = gLafs[index] - laf;
+                     lP(i, j) = calcRho(hdist, vdist, lafdist);
+                  }
+               }
+               mattype lGSR = lG * arma::inv(lP / mSigmaB / mSigmaB + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
+               vectype dx = lGSR * (lObs - lYhat);
+
+               for(int e = 0; e < nEns; e++) {
+                  // TODO: Which member?
+                  (*output)(y, x, e) = (*field)(y, x, e) + dx[0];
                }
 
-               if(mNumVariable != "")
-                  (*num)(y, x, ei) = lS;
-
+               // Update bias
+               if(useBias) {
+                  float biasTotal = 0;
+                  (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
+               }
             }
-            // Update bias
-            if(useBias) {
-               float biasTotal = 0;
+            else {
+               // Compute Rinv
+               mattype Rinv(lS, lS, arma::fill::zeros);
+               for(int i = 0; i < lS; i++) {
+                  int index = lLocIndices[i];
+                  float r = sigma * sigma * gCi[index];
+                  if(mUseRho) {
+                     float rho = lRhos[i];
+                     Rinv(i, i) = 1 / r * rho;
+                     if(x == mX && y == mY) {
+                        std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
+                     }
+                  }
+                  else {
+                     Rinv(i, i) = 1 / r;
+                  }
+               }
+
+               // Compute C matrix
+               // k x gS * gS x gS
+               mattype C(nValidEns, lS);
+               C = lY.t() * Rinv;
+
+               mattype Pinv(nValidEns, nValidEns);
+               float currDelta = 1;
+               if(useDelta) {
+                  currDelta = (*delta)(y, x, 0);
+               }
+               float diag = 1 / currDelta * (nValidEns - 1);
+               if(useBias)
+                  diag = 1 / currDelta / (1 + mGamma) * (nValidEns - 1);
+
+               Pinv = C * lY + diag * arma::eye<mattype>(nValidEns, nValidEns);
+               float cond = arma::rcond(Pinv);
+               if(cond <= 0) {
+                  std::stringstream ss;
+                  ss << "Condition number of " << cond << ". Using raw values";
+                  Util::warning(ss.str());
+                  for(int e = 0; e < nEns; e++) {
+                     (*output)(y, x, e) = (*field)(y, x, e); // Util::MV;
+                  }
+                  continue;
+               }
+
+               mattype P = arma::inv(Pinv);
+               cxtype Wcx(nValidEns, nValidEns);
+               bool status = arma::sqrtmat(Wcx, (nValidEns - 1) * P);
+               if(!status) {
+                  std::cout << "Near singular matrix for sqrtmat:" << std::endl;
+                  std::cout << "Lat: " << lat << std::endl;
+                  std::cout << "Lon: " << lon << std::endl;
+                  std::cout << "Elev: " << elev << std::endl;
+                  std::cout << "Laf: " << laf << std::endl;
+                  std::cout << "Pinv" << std::endl;
+                  print_matrix<mattype>(Pinv);
+                  std::cout << "P" << std::endl;
+                  print_matrix<mattype>(P);
+                  std::cout << "Y:" << std::endl;
+                  print_matrix<mattype>(lY);
+                  std::cout << "lObs:" << std::endl;
+                  print_matrix<mattype>(lObs);
+                  std::cout << "Yhat" << std::endl;
+                  print_matrix<mattype>(lYhat);
+               }
+
+               mattype W = arma::real(Wcx);
+               if(W.n_rows == 0) {
+                  std::stringstream ss;
+                  ss << "Could not find the real part of W. Using raw values.";
+                  Util::warning(ss.str());
+                  for(int e = 0; e < nEns; e++) {
+                     (*output)(y, x, e) = (*field)(y, x, e);
+                  }
+                  continue;
+               }
+
+               // Compute PC
+               mattype PC(nValidEns, lS);
+               PC = P * C;
+
+               // Compute w
+               vectype w(nValidEns);
+               if(mDiagnose)
+                  w = PC * (arma::ones<vectype>(lS));
+               else
+                  w = PC * (lObs - lYhat);
+
+               // Add w to W
+               for(int e = 0; e < nValidEns; e++) {
+                  for(int e2 = 0; e2 < nValidEns; e2 ++) {
+                     W(e, e2) = W(e, e2) + w(e) ;
+                  }
+               }
+
+               // Compute X (perturbations about model mean)
+               vectype X(nValidEns);
+               float total = 0;
+               int count = 0;
                for(int e = 0; e < nValidEns; e++) {
                   int ei = validEns[e];
-                  biasTotal += (*field)(y, x, ei) * w(e);
+                  float value = (*field)(y, x, ei);
+                  if(Util::isValid(value)) {
+                     X(e) = value;
+                     total += value;
+                     count++;
+                  }
+                  else {
+                     std::cout << "Invalid value " << y << " " << x << " " << e << std::endl;
+                  }
                }
-               (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
+               float mean = total / count;
+               for(int e = 0; e < nValidEns; e++) {
+                  X(e) -= mean;
+               }
+
+               // Write debugging information
+               if(x == mX && y == mY) {
+                  std::cout << "Lat: " << lat << std::endl;
+                  std::cout << "Lon: " << lon << " " << lat << " " << std::endl;
+                  std::cout << "Elev: " << elev << std::endl;
+                  std::cout << "Laf: " << laf << std::endl;
+                  std::cout << "Num obs: " << lS << std::endl;
+                  std::cout << "Num ens: " << nValidEns << std::endl;
+                  std::cout << "rhos" << std::endl;
+                  print_matrix<mattype>(lRhos);
+                  std::cout << "P" << std::endl;
+                  print_matrix<mattype>(P);
+                  std::cout << "C" << std::endl;
+                  print_matrix<mattype>(C);
+                  std::cout << "PC" << std::endl;
+                  print_matrix<mattype>(PC);
+                  std::cout << "W" << std::endl;
+                  print_matrix<mattype>(W);
+                  std::cout << "w" << std::endl;
+                  print_matrix<mattype>(w);
+                  std::cout << "Y:" << std::endl;
+                  print_matrix<mattype>(lY);
+                  std::cout << "Yhat" << std::endl;
+                  print_matrix<mattype>(lYhat);
+                  std::cout << "lObs" << std::endl;
+                  print_matrix<mattype>(lObs);
+                  std::cout << "lObs - Yhat" << std::endl;
+                  print_matrix<mattype>(lObs - lYhat);
+                  std::cout << "X" << std::endl;
+                  print_matrix<mattype>(X);
+                  std::cout << "elevs" << std::endl;
+                  print_matrix<mattype>(lElevs);
+                  std::cout << "lafs" << std::endl;
+                  print_matrix<mattype>(lLafs);
+                  std::cout << "Analaysis increment:" << std::endl;
+                  print_matrix<mattype>(X.t() * W);
+                  std::cout << "My: " << arma::mean(arma::dot(lObs - lYhat, lRhos) / lS) << std::endl;
+               }
+
+               // Compute analysis
+               for(int e = 0; e < nValidEns; e++) {
+                  int ei = validEns[e];
+                  float total = 0;
+                  for(int k = 0; k < nValidEns; k++) {
+                     total += X(k) * W(k, e);
+                  }
+
+                  float diff = total;
+                  if(mUseMeanBias)
+                     diff = arma::mean(lObs - lYhat);
+
+                  if(mSaveDiff)
+                     (*output)(y, x, ei) = diff;
+                  else {
+                     float raw = mean;
+                     if(useBias) {
+                        raw -= (*bias)(y, x, 0);
+                     }
+                     if(mUseBug) {
+                        raw = (*field)(y, x, ei);
+                     }
+                     (*output)(y, x, ei) = raw + diff;
+                  }
+
+                  if(mNumVariable != "") {
+                     (*num)(y, x, ei) = lS;
+                  }
+               }
+
+               // Update bias
+               if(useBias) {
+                  float biasTotal = 0;
+                  for(int e = 0; e < nValidEns; e++) {
+                     int ei = validEns[e];
+                     biasTotal += (*field)(y, x, ei) * w(e);
+                  }
+                  (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
+               }
+
+               // Update delta
+               /*
+               float deltaVar = mC - 1;
+               float trace = arma::trace(lY * lY.t());
+               float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
+               float denomenator = 1.0 / lS / (nValidEns - 1) * trace;
+               float currDeltaEvidence = numerator / denomenator;
+               float weightOld = deltaVar;
+               float weightNew = mNewDeltaVar;
+               (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
+               */
             }
-
-
-            // Update delta
-            /*
-            float deltaVar = mC - 1;
-            float trace = arma::trace(lY * lY.t());
-            float numerator = mSigma * mSigma / mEpsilon / mEpsilon;
-            float denomenator = 1.0 / lS / (nValidEns - 1) * trace;
-            float currDeltaEvidence = numerator / denomenator;
-            float weightOld = deltaVar;
-            float weightNew = mNewDeltaVar;
-            (*newdelta)(y, x, 0) = ((*delta)(y, x, 0) * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
-            */
          }
       }
       std::cout << "Adding" << std::endl;

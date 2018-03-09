@@ -42,6 +42,9 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
    else if(iName == "oi") {
       c = new CalibratorOi(iVariable, iOptions);
    }
+   else if(iName == "override") {
+      c = new CalibratorOverride(iVariable, iOptions);
+   }
    else if(iName == "phase") {
       c = new CalibratorPhase(iVariable, iOptions);
    }
@@ -162,6 +165,7 @@ std::string Calibrator::getDescriptions() {
    ss << CalibratorMask::description() << std::endl;
    ss << CalibratorNeighbourhood::description() << std::endl;
    ss << CalibratorOi::description() << std::endl;
+   ss << CalibratorOverride::description() << std::endl;
    ss << CalibratorPhase::description() << std::endl;
    ss << CalibratorQc::description() << std::endl;
    ss << CalibratorQnh::description() << std::endl;

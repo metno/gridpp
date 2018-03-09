@@ -23,6 +23,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mBiasVariable(""),
       mSigma(1),
       mSigmaB(2),
+      mDelta(-999),
       mC(1.03),
       mSaveDiff(false),
       mDeltaVariable(""),
@@ -49,6 +50,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
    iOptions.getValue("sigmab", mSigmaB);
+   iOptions.getValue("delta", mDelta);
    iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
    iOptions.getValue("obsOnly", mObsOnly);
@@ -491,7 +493,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
                mattype Pinv(nValidEns, nValidEns);
                float currDelta = 1;
-               if(useDelta) {
+               if(Util::isValid(mDelta))
+                  currDelta = mDelta;
+               else if(useDelta) {
                   currDelta = (*delta)(y, x, 0);
                }
                float diag = 1 / currDelta * (nValidEns - 1);

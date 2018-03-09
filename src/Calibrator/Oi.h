@@ -24,6 +24,7 @@ class CalibratorOi : public Calibrator {
       bool mSort;
       float mSigma;
       float mSigmaB;
+      float mDelta;
       std::string mDeltaVariable;
       std::string mNumVariable;
       float mC;

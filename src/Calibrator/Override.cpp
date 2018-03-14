@@ -6,8 +6,10 @@
 #include "../Downscaler/Pressure.h"
 CalibratorOverride::CalibratorOverride(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
-      mRadius(0) {
+      mRadius(0),
+      mMaxElevDiff(Util::MV) {
    iOptions.getValue("radius", mRadius);
+   iOptions.getValue("maxElevDiff", mMaxElevDiff);
    iOptions.check();
 }
 bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -42,27 +44,23 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
          int Inn = Is[k];
          int Jnn = Js[k];
          for(int e = 0; e < nEns; e++) {
-            if(Util::isValid(currElev) && mRadius > 0 && Inn >= mRadius && Inn < nX - mRadius && Jnn >= mRadius && Jnn < nY - mRadius) {
-               // Search in a neighbourhood
-               int Ibest = Inn;
-               int Jbest = Jnn;
-               float minElevDiff = Util::MV;
-               for(int I = Inn - mRadius; I <= Inn + mRadius; I++) {
-                  for(int J = Jnn - mRadius; J <= Jnn + mRadius; J++) {
-                     if(Util::isValid(elevs[I][J])) {
-                        float elevDiff = abs(elevs[I][J] - currElev);
-                        if(!Util::isValid(minElevDiff) || elevDiff < minElevDiff) {
-                           Ibest = I;
-                           Jbest = J;
-                           minElevDiff = elevDiff;
-                        }
+            for(int I = std::max(0, Inn - mRadius); I <= std::min(nX-1, Inn + mRadius); I++) {
+               for(int J = std::max(0, Jnn - mRadius); J <= std::min(nY-1, Jnn + mRadius); J++) {
+                  if(!Util::isValid(mMaxElevDiff)) {
+                     // Ignore elevation information
+                     (*field)(I, J, e) = value;
+                  }
+                  else if(Util::isValid(elevs[I][J]) && Util::isValid(currElev)) {
+                     // Check if within elevation bound
+                     float elevDiff = abs(elevs[I][J] - currElev);
+                     if(elevDiff < mMaxElevDiff) {
+                        (*field)(I, J, e) = value;
                      }
                   }
+                  else {
+                     // Do not update
+                  }
                }
-               (*field)(Ibest, Jbest, e) = value;
-            }
-            else {
-               (*field)(Inn, Jnn, e) = value;
             }
          }
       }
@@ -73,6 +71,7 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
 std::string CalibratorOverride::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c override", "Overrides certain points in the file based on parameter values at point locations.") << std::endl;
-   ss << Util::formatDescription("   radius=0", "Look in a square box with this radius (in number of gridpoints) around the point and override the gridpoint with the closest elevation to the elevation in the parameter file.") << std::endl;
+   ss << Util::formatDescription("   radius=0", "Write values into all gridpoints in a square box with this radius (in number of gridpoints).") << std::endl;
+   ss << Util::formatDescription("   maxElevDiff=undef", "Only write in gridpoints that are within this elevation difference to the point. If undefined, then do not do an elevation check.") << std::endl;
    return ss.str();
 }

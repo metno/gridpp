@@ -13,5 +13,6 @@ class CalibratorOverride : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       int mRadius;
+      float mMaxElevDiff;
 };
 #endif

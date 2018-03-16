@@ -28,10 +28,10 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
 
    std::vector<Location> pointLocations = iParameterFile->getLocations();
    KDTree searchTree(iFile.getLats(), iFile.getLons());
-   std::vector<int> Is(pointLocations.size(), 0);
-   std::vector<int> Js(pointLocations.size(), 0);
+   std::vector<int> Ys(pointLocations.size(), 0);
+   std::vector<int> Xs(pointLocations.size(), 0);
    for(int k = 0; k < pointLocations.size(); k++) {
-      searchTree.getNearestNeighbour(pointLocations[k].lat(), pointLocations[k].lon(), Is[k], Js[k]);
+      searchTree.getNearestNeighbour(pointLocations[k].lat(), pointLocations[k].lon(), Ys[k], Xs[k]);
    }
 
    // Loop over offsets
@@ -41,24 +41,29 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
          float currElev = pointLocations[k].elev();
          Parameters parameters = iParameterFile->getParameters(t, pointLocations[k]);
          float value = parameters[0];
-         int Inn = Is[k];
-         int Jnn = Js[k];
-         for(int e = 0; e < nEns; e++) {
-            for(int I = std::max(0, Inn - mRadius); I <= std::min(nX-1, Inn + mRadius); I++) {
-               for(int J = std::max(0, Jnn - mRadius); J <= std::min(nY-1, Jnn + mRadius); J++) {
-                  if(!Util::isValid(mMaxElevDiff)) {
-                     // Ignore elevation information
-                     (*field)(I, J, e) = value;
-                  }
-                  else if(Util::isValid(elevs[I][J]) && Util::isValid(currElev)) {
-                     // Check if within elevation bound
-                     float elevDiff = abs(elevs[I][J] - currElev);
-                     if(elevDiff < mMaxElevDiff) {
-                        (*field)(I, J, e) = value;
+         int Ynn = Ys[k];
+         int Xnn = Xs[k];
+         if(Ynn > 0 && Ynn < nY - 1 && Xnn > 0 && Xnn < nX - 1) {
+            // Don't do this for points that are on the boundary, because then it is possible that
+            // they are outside the domain. This means that some points that are ligitimately inside
+            // but near the boundary may be removed.
+            for(int e = 0; e < nEns; e++) {
+               for(int y = std::max(0, Ynn - mRadius); y <= std::min(nY-1, Ynn + mRadius); y++) {
+                  for(int x = std::max(0, Xnn - mRadius); x <= std::min(nX-1, Xnn + mRadius); x++) {
+                     if(!Util::isValid(mMaxElevDiff)) {
+                        // Ignore elevation information
+                        (*field)(y, x, e) = value;
                      }
-                  }
-                  else {
-                     // Do not update
+                     else if(Util::isValid(elevs[y][x]) && Util::isValid(currElev)) {
+                        // Check if within elevation bound
+                        float elevDiff = abs(elevs[y][x] - currElev);
+                        if(elevDiff < mMaxElevDiff) {
+                           (*field)(y, x, e) = value;
+                        }
+                     }
+                     else {
+                        // Do not update
+                     }
                   }
                }
             }

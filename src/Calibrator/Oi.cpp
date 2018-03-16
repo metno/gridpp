@@ -353,7 +353,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             int lS = lLocIndices.size();
 
-            if(lS < mMinObs) {
+            if(lS == 0 || lS < mMinObs) {
                // If we have too few observations though, then use the background
                for(int e = 0; e < nEns; e++) {
                   if(mSaveDiff)

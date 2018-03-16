@@ -43,26 +43,28 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
          float value = parameters[0];
          int Ynn = Ys[k];
          int Xnn = Xs[k];
-         if(Ynn > 0 && Ynn < nY - 1 && Xnn > 0 && Xnn < nX - 1) {
-            // Don't do this for points that are on the boundary, because then it is possible that
-            // they are outside the domain. This means that some points that are ligitimately inside
-            // but near the boundary may be removed.
-            for(int e = 0; e < nEns; e++) {
-               for(int y = std::max(0, Ynn - mRadius); y <= std::min(nY-1, Ynn + mRadius); y++) {
-                  for(int x = std::max(0, Xnn - mRadius); x <= std::min(nX-1, Xnn + mRadius); x++) {
-                     if(!Util::isValid(mMaxElevDiff)) {
-                        // Ignore elevation information
-                        (*field)(y, x, e) = value;
-                     }
-                     else if(Util::isValid(elevs[y][x]) && Util::isValid(currElev)) {
-                        // Check if within elevation bound
-                        float elevDiff = abs(elevs[y][x] - currElev);
-                        if(elevDiff < mMaxElevDiff) {
+         if(Util::isValid(value)) {
+            if(Ynn > 0 && Ynn < nY - 1 && Xnn > 0 && Xnn < nX - 1) {
+               // Don't do this for points that are on the boundary, because then it is possible that
+               // they are outside the domain. This means that some points that are ligitimately inside
+               // but near the boundary may be removed.
+               for(int e = 0; e < nEns; e++) {
+                  for(int y = std::max(0, Ynn - mRadius); y <= std::min(nY-1, Ynn + mRadius); y++) {
+                     for(int x = std::max(0, Xnn - mRadius); x <= std::min(nX-1, Xnn + mRadius); x++) {
+                        if(!Util::isValid(mMaxElevDiff)) {
+                           // Ignore elevation information
                            (*field)(y, x, e) = value;
                         }
-                     }
-                     else {
-                        // Do not update
+                        else if(Util::isValid(elevs[y][x]) && Util::isValid(currElev)) {
+                           // Check if within elevation bound
+                           float elevDiff = abs(elevs[y][x] - currElev);
+                           if(elevDiff < mMaxElevDiff) {
+                              (*field)(y, x, e) = value;
+                           }
+                        }
+                        else {
+                           // Do not update
+                        }
                      }
                   }
                }

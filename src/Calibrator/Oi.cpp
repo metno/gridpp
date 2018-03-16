@@ -22,7 +22,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mUseBug(false),
       mBiasVariable(""),
       mSigma(1),
-      mSigmaB(2),
       mDelta(-999),
       mC(1.03),
       mSaveDiff(false),
@@ -49,7 +48,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
-   iOptions.getValue("sigmab", mSigmaB);
    iOptions.getValue("delta", mDelta);
    iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
@@ -86,6 +84,7 @@ template<class Matrix>
 void print_matrix(Matrix matrix) {
        matrix.print(std::cout);
 }
+
 template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
 template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
 
@@ -429,37 +428,58 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                mattype lR(lS, lS, arma::fill::zeros);
                for(int i = 0; i < lS; i++) {
                   int index = lLocIndices[i];
-                  float r = sigma * sigma * gCi[index];
-                  if(mUseRho) {
-                     float rho = lRhos[i];
-                     lR(i, i) = r / rho;
-                  }
-                  else {
-                     lR(i, i) = r;
-                  }
+                  lR(i, i) = gCi[index];
                   float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), lat, lon, true);
                   float vdist = gLocations[index].elev() - elev;
                   float lafdist = 0;
                   if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                      lafdist = gLafs[index] - laf;
                   float rho = calcRho(hdist, vdist, lafdist);
-                  lG(0, i) = rho / mSigmaB / mSigmaB;
+                  lG(0, i) = rho;
                   for(int j = 0; j < lS; j++) {
                      int index_j = lLocIndices[j];
                      float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), gLocations[index_j].lat(), gLocations[index_j].lon(), true);
                      float vdist = gLocations[index].elev() - gLocations[index_j].elev();
                      float lafdist = 0;
                      if(Util::isValid(gLafs[index]) && Util::isValid(laf))
-                        lafdist = gLafs[index] - laf;
+                        lafdist = gLafs[index] - gLafs[index_j];
+
                      lP(i, j) = calcRho(hdist, vdist, lafdist);
                   }
                }
-               mattype lGSR = lG * arma::inv(lP / mSigmaB / mSigmaB + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
-               vectype dx = lGSR * (lObs - lYhat);
+               mattype lGSR;
+               if(useBias)
+                  lGSR = lG * arma::inv(lP + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
+               else
+                  lGSR = lG * arma::inv(lP + mEpsilon * mEpsilon * lR);
 
                for(int e = 0; e < nEns; e++) {
-                  // TODO: Which member?
-                  (*output)(y, x, e) = (*field)(y, x, e) + dx[0];
+                  if (Util::isValid((*field)(y, x, e))) {
+                     vectype currFcst = lY.col(e) + lYhat;
+                     vectype dx = lGSR * (lObs - currFcst);
+                     if(x == mX && y == mY) {
+                        std::cout << "Lat: " << lat << std::endl;
+                        std::cout << "Lon: " << lon << " " << lat << " " << std::endl;
+                        std::cout << "Elev: " << elev << std::endl;
+                        std::cout << "Elev: " << elev << std::endl;
+                        std::cout << "P:" << std::endl;
+                        print_matrix<mattype>(lP);
+                        std::cout << "R:" << std::endl;
+                        print_matrix<mattype>(lR);
+                        std::cout << "GSR:" << std::endl;
+                        print_matrix<mattype>(lGSR);
+                        std::cout << "Obs:" << std::endl;
+                        print_matrix<mattype>(lObs);
+                        std::cout << "Current forecast: " << std::endl;
+                        print_matrix<mattype>(currFcst);
+                        std::cout << "Increment" << std::endl;
+                        print_matrix<mattype>(lObs - currFcst);
+                        std::cout << "Yhat" << std::endl;
+                        print_matrix<mattype>(lYhat);
+                        std::cout << "dx: " << dx[0] << std::endl;
+                     }
+                     (*output)(y, x, e) = (*field)(y, x, e) + dx[0];
+                  }
                }
 
                // Update bias
@@ -599,6 +619,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   print_matrix<mattype>(P);
                   std::cout << "C" << std::endl;
                   print_matrix<mattype>(C);
+                  std::cout << "C * lY" << std::endl;
+                  print_matrix<mattype>(C * lY);
                   std::cout << "PC" << std::endl;
                   print_matrix<mattype>(PC);
                   std::cout << "W" << std::endl;
@@ -619,7 +641,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   print_matrix<mattype>(lElevs);
                   std::cout << "lafs" << std::endl;
                   print_matrix<mattype>(lLafs);
-                  std::cout << "Analaysis increment:" << std::endl;
+                  std::cout << "Analysis increment:" << std::endl;
                   print_matrix<mattype>(X.t() * W);
                   std::cout << "My: " << arma::mean(arma::dot(lObs - lYhat, lRhos) / lS) << std::endl;
                }
@@ -678,12 +700,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
          }
       }
-      std::cout << "Adding" << std::endl;
       iFile.addField(output, mVariable, t);
       if(mNumVariable != "")
          iFile.addField(num, Variable(mNumVariable), t);
       if(useBias) {
-         std::cout << "Adding bias field" << std::endl;
          iFile.addField(newbias, Variable(mBiasVariable), t);
       }
       if(useDelta) {
@@ -695,7 +715,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
          }
 
-         std::cout << "Adding delta field" << std::endl;
          iFile.addField(newdelta, Variable(mDeltaVariable), t);
       }
    }

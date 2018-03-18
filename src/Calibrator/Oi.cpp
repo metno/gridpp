@@ -38,6 +38,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinValidEns(5),
       mTest(Util::MV),
       mNewDeltaVar(1),
+      mExtrapolate(false),
       mDiagnose(false),
       mWMin(0.5),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
@@ -56,6 +57,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("minObs", mMinObs);
    iOptions.getValue("x", mX);
    iOptions.getValue("y", mY);
+   iOptions.getValue("extrapolate", mExtrapolate);
    iOptions.getValue("minRho", mMinRho);
    iOptions.getValue("useRho", mUseRho);
    iOptions.getValue("useBug", mUseBug);
@@ -600,9 +602,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      std::cout << "Invalid value " << y << " " << x << " " << e << std::endl;
                   }
                }
-               float mean = total / count;
+               float ensMean = total / count;
                for(int e = 0; e < nValidEns; e++) {
-                  X(e) -= mean;
+                  X(e) -= ensMean;
                }
 
                // Write debugging information
@@ -654,21 +656,54 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      total += X(k) * W(k, e);
                   }
 
-                  float diff = total;
+                  float currIncrement = total;
                   if(mUseMeanBias)
-                     diff = arma::mean(lObs - lYhat);
+                     currIncrement = arma::mean(lObs - lYhat);
 
                   if(mSaveDiff)
-                     (*output)(y, x, ei) = diff;
+                     (*output)(y, x, ei) = currIncrement;
                   else {
-                     float raw = mean;
+                     float raw = ensMean;
                      if(useBias) {
                         raw -= (*bias)(y, x, 0);
                      }
                      if(mUseBug) {
                         raw = (*field)(y, x, ei);
                      }
-                     (*output)(y, x, ei) = raw + diff;
+                     if(!mExtrapolate) {
+                        // Don't allow a final increment that is larger than any increment
+                        // at station points
+                        float maxInc = arma::max(lObs - (lY[e] + lYhat));
+                        float minInc = arma::min(lObs - (lY[e] + lYhat));
+                        if(x == mX && y == mY) {
+                           std::cout << "Increments: " << maxInc << " " << minInc << " " << currIncrement << std::endl;
+                        }
+
+                        // The increment for this member. currIncrement is the increment relative to
+                        // ensemble mean
+                        float memberIncrement = currIncrement - X(e);
+                        // Adjust increment if it gives a member increment that is outside the range
+                        // of the observation increments
+                        if(x == mX && y == mY) {
+                           std::cout << "Analysis increment: " << memberIncrement << " " << ensMean << " " << currIncrement << " " << X(e) << std::endl;
+                        }
+                        if(maxInc > 0 && memberIncrement > maxInc) {
+                           currIncrement = maxInc + X(e);
+                        }
+                        else if(maxInc < 0 && memberIncrement > 0) {
+                           currIncrement = 0 + X(e);
+                        }
+                        else if(minInc < 0 && memberIncrement < minInc) {
+                           currIncrement = minInc + X(e);
+                        }
+                        else if(minInc > 0 && memberIncrement < 0) {
+                           currIncrement = 0 + X(e);
+                        }
+                        if(x == mX && y == mY) {
+                           std::cout << "Final increment: " << currIncrement << " " << currIncrement - X(e) << std::endl;
+                        }
+                     }
+                     (*output)(y, x, ei) = ensMean + currIncrement;
                   }
 
                   if(mNumVariable != "") {

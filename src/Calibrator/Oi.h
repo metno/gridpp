@@ -42,6 +42,7 @@ class CalibratorOi : public Calibrator {
       bool mSaveDiff;
       float mElevGradient;
       int mTest;
+      bool mExtrapolate;
       float mWMin;
       float mNewDeltaVar;
       float mMaxElevDiff;

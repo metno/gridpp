@@ -16,7 +16,7 @@ DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Var
       mSaveGradient(""),
       mMinLafForElevGradient(0),
       mMinLafDiff(0.1),
-      mLafRadius(1),
+      mLafRadius(0),
       mDownscalerName("nearestNeighbour"),
       mMinNumPoints(2),
       mMinFracSeaPoints(0),
@@ -111,7 +111,25 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {
                float currElev = oelevs[i][j];
-               float currLaf = olafs[i][j];
+               float currLaf = Util::MV;
+               if(mLafRadius == 0) {
+                  currLaf = olafs[i][j];
+               }
+               else {
+                  // Find the average LAF in a neighbourhood
+                  int count = 0;
+                  float total = 0;
+                  for(int ii = std::max(0, i-mLafRadius); ii <= std::min(nLat-1, i+mLafRadius); ii++) {
+                     for(int jj = std::max(0, j-mLafRadius); jj <= std::min(nLon-1, j+mLafRadius); jj++) {
+                        if(Util::isValid(olafs[ii][jj])) {
+                           total += olafs[ii][jj];
+                           count++;
+                        }
+                     }
+                  }
+                  if(count > 0)
+                     currLaf = total / count;
+               }
 
                // TODO: What base value do we use? For elevation gradient, we want to use the nearest
                // neighbour, but for LAF gradient, we want to use the lowest LAF point?

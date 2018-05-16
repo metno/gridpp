@@ -455,8 +455,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                else
                   lGSR = lG * arma::inv(lP + mEpsilon * mEpsilon * lR);
 
-               for(int e = 0; e < nEns; e++) {
-                  if (Util::isValid((*field)(y, x, e))) {
+               // This should loop over nValidEns. And use ei.
+               for(int e = 0; e < nValidEns; e++) {
+                  int ei = validEns[e];
+                  if (Util::isValid((*field)(y, x, ei))) {
                      vectype currFcst = lY.col(e) + lYhat;
                      vectype dx = lGSR * (lObs - currFcst);
                      if(x == mX && y == mY) {
@@ -480,7 +482,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         print_matrix<mattype>(lYhat);
                         std::cout << "dx: " << dx[0] << std::endl;
                      }
-                     (*output)(y, x, e) = (*field)(y, x, e) + dx[0];
+                     (*output)(y, x, ei) = (*field)(y, x, ei) + dx[0];
                   }
                }
 

@@ -87,6 +87,21 @@ namespace {
          }
       }
    }
+   TEST_F(SetupTest, calibratorMultipleVariables) {
+      // Check that cal options for the first calibrator does not get used for a calibrator
+      // for a different variable
+      std::vector<std::string> lines;
+      lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -c accumulate -v surface_air_pressure -c diagnoseWind x=x_wind_10m y=y_wind_10m compute=speed");
+      for(int i = 0; i < lines.size(); i++) {
+         MetSetup setup(Util::split(lines[i]));
+         EXPECT_EQ(1, setup.variableConfigurations[0].calibrators.size());
+         EXPECT_EQ(1, setup.variableConfigurations[1].calibrators.size());
+         Calibrator* cal = setup.variableConfigurations[0].calibrators[0];
+         EXPECT_EQ(cal->name(), "accumulate");
+         cal = setup.variableConfigurations[1].calibrators[0];
+         EXPECT_EQ(cal->name(), "diagnoseWind");
+      }
+   }
    TEST_F(SetupTest, variableOnly) {
       MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m"));
       ASSERT_EQ(1,                          setup.variableConfigurations.size());

@@ -345,6 +345,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
             downscaler = defaultDownscaler();
             parameterFileDownscaler = NULL;
             dOptions.clear();
+            cOptions.clear();
             calibratorNames.clear();
             parameterFileCalibrators.clear();
 

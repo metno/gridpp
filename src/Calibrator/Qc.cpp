@@ -10,7 +10,8 @@ CalibratorQc::CalibratorQc(const Variable& iVariable, const Options& iOptions):
       mMax(Util::MV) {
    iOptions.getValue("min", mMin);
    iOptions.getValue("max", mMax);
-   Util::warning("CalibratorQc: both 'min' and 'max' are missing, therefore no correction is applied.");
+   if(!Util::isValid(mMin) && !Util::isValid(mMax))
+      Util::warning("CalibratorQc: both 'min' and 'max' are missing, therefore no correction is applied.");
    iOptions.check();
 }
 

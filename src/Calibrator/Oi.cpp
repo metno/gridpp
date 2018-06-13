@@ -11,7 +11,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mVLength(100),
       mHLength(30000),
       mMu(0.9),
-      mMinObs(3),
+      mMinObs(0),
       mSort(true),
       mMinRho(0.0013),
       mEpsilon(0.5),

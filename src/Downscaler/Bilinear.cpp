@@ -27,31 +27,36 @@ void DownscalerBilinear::downscaleCore(const File& iInput, File& iOutput) const 
 }
 
 float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float v0, float v1, float v2, float v3) {
-   float a = -x0 + x2;
-   float b = -x0 + x1;
-   float c = x0 - x1 - x2 + x3;
-   float d = x - x0;
-   float e = -y0 + y2;
-   float f = -y0 + y1;
-   float g = y0 - y1 - y2 + y3;
-   float h = y - y0;
-   float alpha = 0;
-   float beta  = 0;
-   if(c*e == a*g || c*f == b*g) {
-      alpha = (x - x0) / (x2 - x0);
-      beta = (y - y0) / (y1 - y0);
-      assert(x0 == x1);
-      assert(x2 == x3);
-      assert(y0 == y2);
-      assert(y1 == y3);
-   }
-   else {
-      assert(2 * c * e - 2 * a * g != 0);
-      assert(2 * c * f - 2 * b * g != 0);
-      alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
-      beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
-   }
-   float value = (1 - alpha) * ((1 - beta) * v0 + beta * v1) + alpha * ((1 - beta) * v2 + beta * v3);
+   float Y1 = y1;
+   float Y2 = y3;
+   float Y3 = y0;
+   float Y4 = y2;
+   float X1 = x1;
+   float X2 = x3;
+   float X3 = x0;
+   float X4 = x2;
+   float P1 = v1;
+   float P2 = v3;
+   float P3 = v0;
+   float P4 = v2;
+
+   // General method based on: https://stackoverflow.com/questions/23920976/bilinear-interpolation-with-non-aligned-input-points
+   // Parallelogram method based on: http://www.ahinson.com/algorithms_general/Sections/InterpolationRegression/InterpolationIrregularBilinear.pdf
+
+   float s = Util::MV, t = Util::MV;
+   bool rectangularGrid = (X1 == X3 && X2 == X4 && Y1 == Y2 && Y3 == Y4);
+   bool verticalParallel = fabs((X3 - X1)*(Y4 - Y2) - (X4 - X2)*(Y3 - Y1)) <= 1e-6;
+   bool horizontalParallel = fabs((X2 - X1)*(Y4 - Y3) - (X4 - X3)*(Y2 - Y1)) <= 1e-6;
+
+   // Compute s and t
+   if(verticalParallel && horizontalParallel)
+      calcParallelogram(x, y, X1, X2, X3, X4, Y1, Y2, Y3, Y4, t, s);
+   else
+      calcGeneral(x, y, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
+
+   assert(s >= 0 && s <= 1 && t >= 0 && t <= 1);
+   float value = P1 * (1 - s) * ( 1 - t) + P2 * s * (1 - t) + P3 * (1 - s) * t + P4 * s * t;
+
    return value;
 }
 
@@ -69,7 +74,6 @@ vec2 DownscalerBilinear::downscaleVec(const vec2& iInput,
       output[i].resize(nLon);
 
    // Algorithm from here:
-   // https://stackoverflow.com/questions/23920976/bilinear-interpolation-with-non-aligned-input-points
    #pragma omp parallel for
    for(int i = 0; i < nLat; i++) {
       for(int j = 0; j < nLon; j++) {
@@ -259,6 +263,91 @@ bool DownscalerBilinear::findCoords(float iLat, float iLon, const vec2& iLats, c
       (J2 < 0 || J2 >= iLats[0].size())) {
       return false;
    }
+   return true;
+}
+bool DownscalerBilinear::calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s) {
+   // std::cout << "Method 3: Parallelogram" << std::endl;
+   float X31 = X3 - X1;
+   float X21 = X2 - X1;
+   float Y42 = Y4 - Y2;
+   float Y21 = Y2 - Y1;
+   float Y31 = Y3 - Y1;
+   float Y43 = Y4 - Y3;
+   float X42 = X4 - X2;
+   float X43 = X4 - X3;
+
+   float A = X21;
+   float B = X31;
+   float C = Y21;
+   float D = Y31;
+   assert(A * D != B * C);
+   float det = 1 / (A * D - B * C);
+   s = det * ((x - X1) * (D) + (y - Y1) * (-B));
+   t = det * ((x - X1) * (-C) + (y - Y1) * (A));
+   return true;
+}
+
+bool DownscalerBilinear::calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
+   // std::cout << "Method general" << std::endl;
+   float a = -x0 + x2;
+   float b = -x0 + x1;
+   float c = x0 - x1 - x2 + x3;
+   float d = x - x0;
+   float e = -y0 + y2;
+   float f = -y0 + y1;
+   float g = y0 - y1 - y2 + y3;
+   float h = y - y0;
+   float alpha=Util::MV, beta=Util::MV;
+   float Y1 = y1;
+   float Y2 = y3;
+   float Y3 = y0;
+   float Y4 = y2;
+   float X1 = x1;
+   float X2 = x3;
+   float X3 = x0;
+   float X4 = x2;
+   float X31 = X3 - X1;
+   float X21 = X2 - X1;
+   float Y42 = Y4 - Y2;
+   float Y21 = Y2 - Y1;
+   float Y31 = Y3 - Y1;
+   float Y43 = Y4 - Y3;
+   float X42 = X4 - X2;
+   float X43 = X4 - X3;
+   if(2 * c * e - 2 * a * g != 0 && 2 * c * f - 2 * b * g != 0) {
+      alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+      beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+   }
+   else if(2 * c * f - 2 * b * g == 0) {
+      // std::cout << "Need to diagnose t" << std::endl;
+      alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+      float s = alpha;
+      float t;
+      if(Y3 + Y43 * s - Y1 - Y21 * s == 0) {
+         assert(X3 + X43 * s - X1 - X21 * s != 0);
+         t = (x - X1 - X21 * s) / (X3 + X43 * s - X1 - X21 * s);
+      }
+      else {
+         t = (y - Y1 - Y21 * s) / (Y3 + Y43 * s - Y1 - Y21 * s);
+      }
+      beta = 1 - t;
+   }
+   else if(2 * c * e - 2 * a * g == 0) {
+      // std::cout << "Need to diagnose s" << std::endl;
+      beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+      float t =  1 - beta;
+      float s;
+      if(Y2 + Y42 * t - Y1 - Y31 * t == 0) {
+         assert(X2 + X42 * t - X1 - X31 * t != 0);
+         s = (x - X1 - X31 * t) / (X2 + X42 * t - X1 - X31 * t);
+      }
+      else {
+         s = (y - Y1 - Y31 * t) / (Y2 + Y42 * t - Y1 - Y31 * t);
+      }
+      alpha = s;
+   }
+   s = alpha;
+   t = 1 - beta;
    return true;
 }
 

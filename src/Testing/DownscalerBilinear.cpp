@@ -59,35 +59,151 @@ namespace {
    TEST_F(TestDownscalerBilinear, description) {
       DownscalerBilinear::description();
    }
-   TEST_F(TestDownscalerBilinear, square) {
-      // Verifying against:
-      // https://www.ajdesigner.com/phpinterpolation/bilinear_interpolation_equation.php
-      // Using values:
-      // 1.1, 1.3, 2.2, 4.8, 0.6, 0.3, 10.3, 10.9, 10, 10.7
-      float x0 = 1.1;
-      float x1 = 2.2;
-      float y0 = 0.3;
-      float y1 = 4.8;
-      float v0 = 10;
-      float v1 = 10.3;
-      float v2 = 10.7;
-      float v3 = 10.9;
-      float value = DownscalerBilinear::bilinear(1.3, 0.6,
-            x0, x0, x1, x1,
-            y0, y1, y0, y1,
-            v0, v1, v2, v3);
-      EXPECT_FLOAT_EQ(10.146060606061, value);
-      // Test corners
-      EXPECT_FLOAT_EQ(10, DownscalerBilinear::bilinear(1.1, 0.3, 1.1, 1.1, 2.2, 2.2, 0.3, 4.8, 0.3, 4.8, 10,10.3,10.7,10.9));
-      EXPECT_FLOAT_EQ(10.3, DownscalerBilinear::bilinear(1.1, 4.8, 1.1, 1.1, 2.2, 2.2, 0.3, 4.8, 0.3, 4.8, 10,10.3,10.7,10.9));
-      EXPECT_FLOAT_EQ(10.7, DownscalerBilinear::bilinear(2.2, 0.3, 1.1, 1.1, 2.2, 2.2, 0.3, 4.8, 0.3, 4.8, 10,10.3,10.7,10.9));
-      EXPECT_FLOAT_EQ(10.9, DownscalerBilinear::bilinear(2.2, 4.8, 1.1, 1.1, 2.2, 2.2, 0.3, 4.8, 0.3, 4.8, 10,10.3,10.7,10.9));
-
-      // Now reverse the points, so that v2,v3 are to the left of v0,v1
-      EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x1,x1,x0,x0,y0,y1,y0,y1,v2,v3,v0,v1));
-      // Put v1,v3 below v0,v1
-      EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x0,x0,x1,x1,y1,y0,y1,y0,v1,v0,v3,v2));
+   TEST_F(TestDownscalerBilinear, rectangular) {
+      // Test in python
+      // i = scipy.interpolate.interp2d([0,0,2,2], [0,1,0,1],[0,1,2,3]); i(0.123,0.897)
+      float x0 = 0;
+      float x1 = 0;
+      float x2 = 2;
+      float x3 = 2;
+      float y0 = 0;
+      float y1 = 1;
+      float y2 = 0;
+      float y3 = 1;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      // 2x1 rectangle
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.5, DownscalerBilinear::bilinear(1,0.5, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.143, DownscalerBilinear::bilinear(0.246,0.897, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
    }
+   TEST_F(TestDownscalerBilinear, parallelogram) {
+      float x0 = 0;
+      float x1 = 0;
+      float x2 = 2;
+      float x3 = 2;
+      float y0 = 0;
+      float y1 = 1;
+      float y2 = 0;
+      float y3 = 1;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      x1 = 0.2;
+      x3 = 2.2;
+      // Parallellogram (half-rectangle)
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.5, DownscalerBilinear::bilinear(1.1,0.5, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(0.9636, DownscalerBilinear::bilinear(0.246,0.897, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      y2 = 0.5;
+      y3 = 1.5;
+      // Parallellogram
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.5, DownscalerBilinear::bilinear(1.1,0.75, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(0.94957895, DownscalerBilinear::bilinear(0.246,0.897, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+   }
+   TEST_F(TestDownscalerBilinear, diamond) {
+      float x0 = -1;
+      float x1 = 0;
+      float x2 = 0;
+      float x3 = 1;
+      float y0 = 0;
+      float y1 = 1;
+      float y2 = -1;
+      float y3 = 0;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.5, DownscalerBilinear::bilinear(0,0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(1.0825, DownscalerBilinear::bilinear(-0.146,0.397, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+   }
+   TEST_F(TestDownscalerBilinear, general) {
+      float x0 = 0;
+      float x1 = 1;
+      float x2 = 4;
+      float x3 = 5;
+      float y0 = 0;
+      float y1 = 3;
+      float y2 = 0;
+      float y3 = 5;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      float tol = 0.05;
+      // The following do not give identical results, maybe scipy uses a slightly different formulation
+      EXPECT_NEAR(1.68666667, DownscalerBilinear::bilinear(3,1.4, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+      EXPECT_NEAR(2.29005863, DownscalerBilinear::bilinear(3.87123,2.98321, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+
+      // EXPECT_NEAR(2.74033847, DownscalerBilinear::bilinear(4.87123,2.98321, x2, x3, x0, x1, y2, y3, y0, y1, v2, v3, v0, v1), tol);
+   }
+   TEST_F(TestDownscalerBilinear, trapezoidVerticalParallel) {
+      float x0 = 0;
+      float x1 = 0;
+      float x2 = 1;
+      float x3 = 1;
+      float y0 = 0;
+      float y1 = 1;
+      float y2 = 0.1;
+      float y3 = 0.9;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      float tol = 0.03;
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_NEAR(1.5, DownscalerBilinear::bilinear(0.5,0.5, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+      EXPECT_NEAR(1.95175825, DownscalerBilinear::bilinear(0.903,0.211, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+   }
+   TEST_F(TestDownscalerBilinear, trapezoidHorizontalParallel) {
+      float x0 = 0;
+      float x1 = 0.1;
+      float x2 = 1;
+      float x3 = 0.9;
+      float y0 = 0;
+      float y1 = 1;
+      float y2 = 0;
+      float y3 = 1;
+      float v0 = 0;
+      float v1 = 1;
+      float v2 = 2;
+      float v3 = 3;
+      EXPECT_FLOAT_EQ(v0, DownscalerBilinear::bilinear(x0,y0, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v1, DownscalerBilinear::bilinear(x1,y1, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_FLOAT_EQ(v2, DownscalerBilinear::bilinear(x2,y2, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      float tol = 0.03;
+      EXPECT_FLOAT_EQ(v3, DownscalerBilinear::bilinear(x3,y3, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3));
+      EXPECT_NEAR(1.5, DownscalerBilinear::bilinear(0.5,0.5, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+      EXPECT_NEAR(1.1945165, DownscalerBilinear::bilinear(0.211,0.903, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3), tol);
+   }
+   // // Now reverse the points, so that v2,v3 are to the left of v0,v1
+   // EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x1,x1,x0,x0,y0,y1,y0,y1,v2,v3,v0,v1));
+   // // Put v1,v3 below v0,v1
+   // EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x0,x0,x1,x1,y1,y0,y1,y0,v1,v0,v3,v2));
    TEST_F(TestDownscalerBilinear, downscale) {
       // Same as above, but using an input file
       DownscalerBilinear d(mVariable, mVariable, Options());

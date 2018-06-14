@@ -54,6 +54,16 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    else
       calcGeneral(x, y, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
 
+   if(t >= 1 && t <= 1.05)
+      t = 1;
+   if(t <= 0 && t >= -0.05)
+      t = 0;
+   if(s >= 1 && s <= 1.05)
+      s = 1;
+   if(s <= 0 && s >= -0.05)
+      s = 0;
+   if(!(s >= 0 && s <= 1 && t >= 0 && t <= 1))
+      std::cout << "s = " << s << " t = " << t << std::endl;
    assert(s >= 0 && s <= 1 && t >= 0 && t <= 1);
    float value = P1 * (1 - s) * ( 1 - t) + P2 * s * (1 - t) + P3 * (1 - s) * t + P4 * s * t;
 

@@ -46,8 +46,9 @@ namespace {
       // Test that the calibrator picks up the right options
       std::vector<std::string> lines;
       lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v air_temperature_2m -c neighbourhood radius=2 -p testing/files/parameters.txt type=text opt=1");
-      lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c neighbourhood radius=2 -v air_temperature_2m -c neighbourhood radius=3 -p testing/files/parameters.txt type=text opt=1");
+      lines.push_back("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c neighbourhood radius=11 -v air_temperature_2m -c neighbourhood radius=2 -p testing/files/parameters.txt type=text opt=1");
       for(int i = 0; i < lines.size(); i++) {
+         // The last calibrator should have a radius of 2
          MetSetup setup(Util::split(lines[i]));
          int last = setup.variableConfigurations.size() - 1;
          EXPECT_EQ(1, setup.variableConfigurations[last].calibrators.size());

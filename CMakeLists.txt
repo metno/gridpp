@@ -97,15 +97,41 @@ if (ENABLE_TESTS)
    include(Testing)
 endif()
 
-add_custom_target(count
-   COMMAND wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
-   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-add_custom_target(tags
-   COMMAND ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags src/*.h src/*.cpp src/*/*.h src/*/*.cpp
-   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-add_custom_target(doxygen
-   COMMAND doxygen doxygen/config
-   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+function(lookup_program result program)
+   message(STATUS "Looking for ${program}")
+   find_program(${result} "${program}")
+   if(${result})
+      message(STATUS "Looking for ${program} - found")
+   else()
+      message(STATUS "Looking for ${program} - not found")
+   endif()
+endfunction()
+
+lookup_program(WC_TOOL wc)
+if(NOT WC_TOOL)
+   message(STATUS "Line count statistics disabled")
+else()
+   add_custom_target(count
+      COMMAND wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+lookup_program(CTAGS_TOOL ctags)
+if(NOT CTAGS_TOOL)
+   message(STATUS "Tags generation disabled")
+else()
+   add_custom_target(tags
+      COMMAND ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags src/*.h src/*.cpp src/*/*.h src/*/*.cpp
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+lookup_program(DOXYGEN_TOOL doxygen)
+if(NOT DOXYGEN_TOOL)
+   message(STATUS "Documentation generation disabled")
+else()
+   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doxygen/config.in" "doxygen/config" @ONLY)
+   add_custom_target(doxygen
+      COMMAND doxygen doxygen/config
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 install(TARGETS gridpp-bin gridpp-train gridpp-kf
    RUNTIME DESTINATION bin)

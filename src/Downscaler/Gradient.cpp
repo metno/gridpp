@@ -19,6 +19,7 @@ DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Var
       mLafRadius(0),
       mDownscalerName("nearestNeighbour"),
       mMinNumPoints(2),
+      mLimit(false),
       mMinFracSeaPoints(0),
       mElevGradientVariableName("") {
 
@@ -45,6 +46,7 @@ DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Var
    iOptions.getValue("averageNeighbourhood", mAverageNeighbourhood);
    iOptions.getValue("saveGradient", mSaveGradient);
    iOptions.getValue("downscaler", mDownscalerName);
+   iOptions.getValue("limit", mLimit);
    // mDownscaler = Downscaler::getScheme(downscalerName, iVariable, Options());
 
    iOptions.getValues("lafSearchRadii", mLafSearchRadii);
@@ -175,6 +177,27 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
 
                   if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
                      value = baseValue;
+                  }
+
+                  // Ensure that the value is inside the range in the neighbourhood
+                  if(mLimit) {
+                     float min = Util::MV;
+                     float max = Util::MV;
+                     for(int ii = std::max(0, Icenter-mElevRadius); ii <= std::min(ifield.getNumY()-1, Icenter+mElevRadius); ii++) {
+                        for(int jj = std::max(0, Jcenter-mElevRadius); jj <= std::min(ifield.getNumX()-1, Jcenter+mElevRadius); jj++) {
+                           float curr = ifield(ii, jj, e);
+                           if(Util::isValid(curr)) {
+                              if(!Util::isValid(min) || curr < min)
+                                 min = curr;
+                              else if(!Util::isValid(max) || curr > max)
+                                 max = curr;
+                           }
+                        }
+                     }
+                     if(value > max)
+                        value = max;
+                     if(value < min)
+                        value = min;
                   }
                   ofield(i,j,e)  = value;
                }
@@ -453,5 +476,6 @@ std::string DownscalerGradient::description() {
    ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
    ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
    ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;
+   ss << Util::formatDescription("   limit=0", "Should the downscaled value be forced to be within the min/max range of the elevation neighbourhood?") << std::endl;
    return ss.str();
 }

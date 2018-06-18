@@ -41,6 +41,7 @@ class DownscalerGradient : public Downscaler {
       std::string mDownscalerName;
       std::string mSaveGradient;
       std::string mElevGradientVariableName;
+      bool mLimit;
       float calcLafGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const vec2& iLafs, const vec2& iElevs, float iElevGradient) const;
       float calcElevGradient(int i, int j, int e, int Icenter, int Jcenter, const Field& iField, const Field& iGfield, const vec2& iElevs, const vec2& iLafs) const;
       bool calcNeighbourhoodMean(const Field& iField, const vec2& iElevs, int i, int j, int e, int Icenter, int Jcenter, int iRadius, float& iValueMean, float& iElevMean) const;

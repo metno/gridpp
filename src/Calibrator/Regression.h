@@ -15,5 +15,6 @@ class CalibratorRegression : public Calibrator {
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       int mOrder;
       bool mIntercept;
+      std::vector<std::string> mVariables;
 };
 #endif

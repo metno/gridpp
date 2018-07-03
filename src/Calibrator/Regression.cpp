@@ -10,6 +10,7 @@ CalibratorRegression::CalibratorRegression(const Variable& iVariable, const Opti
       mIntercept(true) {
    iOptions.getValue("order", mOrder);
    iOptions.getValue("intercept", mIntercept);
+   iOptions.getValues("variables", mVariables);
    iOptions.check();
 }
 bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -24,6 +25,11 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
    if(iParameterFile->getNumParameters() == 0) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at least one dataacolumns");
    }
+   if(mVariables.size() > 0 && iParameterFile->getNumParameters() != mVariables.size()) {
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have at the same number of parameters as number of variables in regression");
+   }
+
+   bool multiVariate = mVariables.size() > 0;
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
@@ -31,25 +37,54 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
       if(!iParameterFile->isLocationDependent())
          parameters = iParameterFile->getParameters(t);
       const FieldPtr field = iFile.getField(mVariable, t);
+      std::vector<FieldPtr> fields;
+      if(multiVariate) {
+         for(int i = 0; i < mVariables.size(); i++) {
+            if(mVariables[i] != "1") {
+               fields.push_back(iFile.getField(mVariables[i], t));
+            }
+            else {
+               fields.push_back(iFile.getEmptyField(1));
+            }
+         }
+      }
+      else {
+         fields.push_back(field);
+      }
 
-      #pragma omp parallel for
+      #pragma omp parallel for private(parameters)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             if(iParameterFile->isLocationDependent())
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
             for(int e = 0; e < nEns; e++) {
                if(Util::isValid((*field)(i,j,e))) {
-                  float total = 0;
-                  // Accumulate a + b * fcst + c * fcst^2 ...
-                  for(int p = 0; p < parameters.size(); p++) {
-                     float coeff = parameters[p];
-                     if(!Util::isValid(coeff)) {
-                        total = Util::MV;
-                        break;
+                  if(multiVariate) {
+                     float total = 0;
+                     // Accumulate a + b * var1 + c * var2 ...
+                     for(int p = 0; p < parameters.size(); p++) {
+                        float coeff = parameters[p];
+                        if(!Util::isValid(coeff)) {
+                           total = Util::MV;
+                           break;
+                        }
+                        total += coeff*(*fields[p])(i,j,e);
                      }
-                     total += coeff*pow((*field)(i,j,e), p);
+                     (*field)(i,j,e)  = total;
                   }
-                  (*field)(i,j,e)  = total;
+                  else {
+                     float total = 0;
+                     // Accumulate a + b * fcst + c * fcst^2 ...
+                     for(int p = 0; p < parameters.size(); p++) {
+                        float coeff = parameters[p];
+                        if(!Util::isValid(coeff)) {
+                           total = Util::MV;
+                           break;
+                        }
+                        total += coeff*pow((*fields[0])(i,j,e), p);
+                     }
+                     (*field)(i,j,e)  = total;
+                  }
                }
                else {
                   (*field)(i,j,e)  = Util::MV;
@@ -65,6 +100,11 @@ Parameters CalibratorRegression::train(const std::vector<ObsEns>& iData) const {
    if(mOrder > 1) {
       std::stringstream ss;
       ss << "CalibratorRegression: Cannot train regression of order greater than 1 (i.e a + bx)";
+      Util::error(ss.str());
+   }
+   if(mVariables.size() > 0) {
+      std::stringstream ss;
+      ss << "CalibratorRegression: Cannot train multivariate regression models";
       Util::error(ss.str());
    }
 
@@ -126,8 +166,9 @@ Parameters CalibratorRegression::train(const std::vector<ObsEns>& iData) const {
 
 std::string CalibratorRegression::description() {
    std::stringstream ss;
-   ss << Util::formatDescription("-c regression", "Applies polynomial regression equation to forecasts: newForecast = a + b * forecast + c * forecast^2 ... . A parameter file is required with the values [a b c ... ]") << std::endl;
-   ss << Util::formatDescription("   order=1", "What order is the regression? 0th order: a; 1st order: a + bx; 2nd order a + bc + cx^2; etc.") << std::endl;
-   ss << Util::formatDescription("   intercept=1", "Should the regression include an intercept term? If 1, then yes. Only applied when training.") << std::endl;
+   ss << Util::formatDescription("-c regression", "Polynomial or multivariate regression equation. Set 'order' for polynomial regression and 'variables' for multivariate regression. Applies the following models: newForecast = a + b * forecast + c * forecast^2 ... or newForecast = a * var1 + b * var2.... A parameter file is required with the values [a b c ... ]") << std::endl;
+   ss << Util::formatDescription("   order=1", "What order is the polynomial regression? 0th order: a; 1st order: a + bx; 2nd order a + bc + cx^2; etc.") << std::endl;
+   ss << Util::formatDescription("   variables=undef", "Use these variables as predictors. Use '1' to represent a constant term.") << std::endl;
+   ss << Util::formatDescription("   intercept=1", "Applies only to training of coefficients for polynomial regression. Should the regression include an intercept term? If 1, then yes.") << std::endl;
    return ss.str();
 }

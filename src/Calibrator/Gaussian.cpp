@@ -37,7 +37,7 @@ bool CalibratorGaussian::calibrateCore(File& iFile, const ParameterFile* iParame
       if(!iParameterFile->isLocationDependent())
          parameters = iParameterFile->getParameters(t);
 
-      #pragma omp parallel for
+      #pragma omp parallel for private(parameters)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             if(iParameterFile->isLocationDependent())

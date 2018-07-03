@@ -23,16 +23,13 @@ bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFi
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      int numInvalidRaw = 0;
-      int numInvalidCal = 0;
-
       Field& field = *iFile.getField(mVariable, t);
 
       Parameters parameters;
       if(!iParameterFile->isLocationDependent())
          parameters = iParameterFile->getParameters(t);
 
-      #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal)
+      #pragma omp parallel for private(parameters)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             if(iParameterFile->isLocationDependent())
@@ -119,18 +116,6 @@ bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFi
                }
             }
          }
-      }
-      if(numInvalidRaw > 0) {
-         std::stringstream ss;
-         ss << "File '" << iFile.getFilename() << "' missing " << numInvalidRaw
-            << "/" << nLat * nLon << " ensembles for timestep " << t << ".";
-         Util::warning(ss.str());
-      }
-      if(numInvalidCal > 0) {
-         std::stringstream ss;
-         ss << "Calibrator produces '" << numInvalidRaw
-            << "/" << nLat * nLon << " invalid ensembles for timestep " << t << ".";
-         Util::warning(ss.str());
       }
    }
    return true;

@@ -28,11 +28,9 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    mInDefineMode = false;
    endDefineMode();
 
-   int dTime = getTimeDim(mFile);
    int dLon  = getLonDim(mFile);
    int dLat  = getLatDim(mFile);
    int dCoeff = getCoefficientDim(mFile);
-   int nTime  = getDimSize(mFile, dTime);
    int nLat   = getDimSize(mFile, dLat);
    int nLon   = getDimSize(mFile, dLon);
    int nCoeff = getDimSize(mFile, dCoeff);
@@ -77,10 +75,21 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
       }
    }
 
-   int vTime = getVar(mFile, "time");
+   int nTime = 1;
+   int dTime = Util::MV;
+   if(hasVar(mFile, "time")) {
+      dTime = getTimeDim(mFile);
+      nTime = getDimSize(mFile, dTime);
+   }
    double* times = new double[nTime];
-   status = nc_get_var_double(mFile, vTime, times);
-   handleNetcdfError(status, "could not get times");
+   if(hasVar(mFile, "time")) {
+      int vTime = getVar(mFile, "time");
+      status = nc_get_var_double(mFile, vTime, times);
+      handleNetcdfError(status, "could not get times");
+   }
+   else {
+      times[0] = 0;
+   }
 
    int var = getVar(mFile, mVarName);
    int totalNumParameters = nLat*nLon*nTime*nCoeff;

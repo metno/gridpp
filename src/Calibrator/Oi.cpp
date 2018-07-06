@@ -10,11 +10,13 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mVLength(100),
       mHLength(30000),
+      mRadarLength(10000),
       mMu(0.9),
       mMinObs(0),
       mSort(true),
       mMinRho(0.0013),
       mEpsilon(0.5),
+      mRadarEpsilon(0.54*0.54),
       mUseRho(true),
       mObsOnly(false),
       mElevGradient(-0.0065),
@@ -41,11 +43,14 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mExtrapolate(false),
       mDiagnose(false),
       mWMin(0.5),
+      mLambda(0.5),
+      mType(TypeTemperature),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
    iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
+   iOptions.getValue("dr", mRadarLength);
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
@@ -71,11 +76,21 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("useEns", mUseEns);
    iOptions.getValue("wmin", mWMin);
    iOptions.getValue("epsilon", mEpsilon);
+   iOptions.getValue("radarEpsilon", mRadarEpsilon);
    iOptions.getValue("test", mTest);
    iOptions.getValue("c", mC);
+   iOptions.getValue("lambda", mLambda);
    iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
+   std::string type;
+   if(iOptions.getValue("type", type)) {
+      if(type == "temperature")
+         mType = TypeTemperature;
+      else
+         mType = TypePrecipitation;
+   }
+
    iOptions.check();
 
    // Gamma: The error covariance of the bias is this fraction of the background error
@@ -115,9 +130,16 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    }
 
    std::vector<Location> gLocations = iParameterFile->getLocations();
-   if(iParameterFile->getNumParameters() != 2) {
+   int numRequiredParameters;
+   if(mType == TypeTemperature)
+      numRequiredParameters = 2;
+   else if(mType == TypePrecipitation)
+      numRequiredParameters = 3;
+   else
+      abort();
+   if(iParameterFile->getNumParameters() < numRequiredParameters) {
       std::stringstream ss;
-      ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, not 2";
+      ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, not " << numRequiredParameters;
       Util::error(ss.str());
    }
 
@@ -140,6 +162,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    std::vector<float> gLafs(gS, Util::MV);
    std::vector<float> gElevs(gS, Util::MV);
    std::vector<float> gCi(gS, Util::MV);
+   std::vector<float> gRadarL(gS, Util::MV);
    std::vector<float> gObs(gS, Util::MV);
    gLocIndices.resize(nY);
    for(int y = 0; y < nY; y++) {
@@ -157,8 +180,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    std::cout << "Expected MB: " << 1000 + expectedBytes / 1024 / 1024 << std::endl;
    if(Util::isValid(mMaxBytes) && expectedBytes > mMaxBytes) {
       std::stringstream ss;
-      ss << "Expected size (" << expectedBytes / 1024 / 1024 << " GB) is greater than "
-         << float(mMaxBytes) / 1024 / 1024 << " GB";
+      ss << "Expected size (" << expectedBytes / 1024 / 1024 << " MB) is greater than "
+         << float(mMaxBytes) / 1024 / 1024 << " MB";
       Util::error(ss.str());
    }
 
@@ -172,8 +195,19 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          Util::info(ss.str());
       }
       Parameters parameters = iParameterFile->getParameters(0, gLocations[i]);
-      gObs[i] = parameters[0];
-      gCi[i] = parameters[1];
+      if(mType == TypeTemperature) {
+         if(parameters.size() < 2)
+            Util::error("Temperature OI needs 2 parameters");
+         gObs[i] = parameters[0];
+         gCi[i] = parameters[1];
+      }
+      else if(mType == TypePrecipitation) {
+         if(parameters.size() < 3)
+            Util::error("Precipitation OI needs 3 parameters");
+         gObs[i] = transform(parameters[0]);
+         gCi[i] = parameters[1];
+         gRadarL[i] = parameters[2];
+      }
       gElevs[i] = gLocations[i].elev();
       int Y, X;
       searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);
@@ -217,6 +251,21 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr newbias;
       FieldPtr delta;
       FieldPtr newdelta;
+
+      // Transform
+      if(mType == TypePrecipitation) {
+         #pragma omp parallel for
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               for(int e = 0; e < nEns; e++) {
+                  float value = (*field)(y, x, e);
+                  if(Util::isValid(value))
+                     (*field)(y, x, e) = transform(value);
+               }
+            }
+         }
+      }
+
       bool useBias = mBiasVariable != "";
       if(useBias) {
          bias = iFile.getField(mBiasVariable, t);
@@ -355,6 +404,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
 
             int lS = lLocIndices.size();
+            if(x == mX && y == mY) {
+               std::cout << lS << std::endl;
+            }
 
             if(lS == 0 || lS < mMinObs) {
                // If we have too few observations though, then use the background
@@ -393,6 +445,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   validEns.push_back(e);
                   nValidEns++;
                }
+            }
+            if(x == mX && y == mY) {
+               std::cout << nValidEns << std::endl;
             }
 
             vectype lObs(lS);
@@ -456,6 +511,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   }
                }
                mattype lGSR;
+               // TODO: This will be different for precipitation
                if(useBias)
                   lGSR = lG * arma::inv(lP + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
                else
@@ -501,21 +557,103 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             else {
                // Compute Rinv
                mattype Rinv(lS, lS, arma::fill::zeros);
-               for(int i = 0; i < lS; i++) {
-                  int index = lLocIndices[i];
-                  float r = sigma * sigma * gCi[index];
-                  if(mUseRho) {
-                     float rho = lRhos[i];
-                     Rinv(i, i) = 1 / r * rho;
-                     if(x == mX && y == mY) {
-                        std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
+               if(mType == TypeTemperature) {
+                  for(int i = 0; i < lS; i++) {
+                     int index = lLocIndices[i];
+                     float r = sigma * sigma * gCi[index];
+                     if(mUseRho) {
+                        float rho = lRhos[i];
+                        Rinv(i, i) = 1 / r * rho;
+                        if(x == mX && y == mY) {
+                           std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
+                        }
+                     }
+                     else {
+                        Rinv(i, i) = 1 / r;
                      }
                   }
-                  else {
-                     Rinv(i, i) = 1 / r;
+               }
+               else if(mType == TypePrecipitation) {
+                  // Inverting the matrix is more complicated, since the radar observations
+                  // have covariances. Therefore invert the covariance matrix for the radar part and
+                  // insert the values into the big inverse matrix.
+                  // std::cout << "Computing R matrix" << std::endl;
+                  // R = get_precipitation_r(gRadarL, gCi, lLocIndices, lRhos);
+                  // Compute little R
+                  std::vector<int> gRadarIndices;
+                  gRadarIndices.reserve(lS);
+                  std::vector<int> lRadarIndices;
+                  lRadarIndices.reserve(lS);
+                  for(int i = 0; i < lS; i++) {
+                     int index = lLocIndices[i];
+                     if(gRadarL[index] > 0) {
+                        gRadarIndices.push_back(index);
+                        lRadarIndices.push_back(i);
+                     }
+                  }
+                  int lNumRadar = gRadarIndices.size();
+                  // std::cout << x << " " << y << " " << lS << " " << lNumRadar << std::endl;
+                  // if(lNumRadar > 0)
+                  //    std::cout << "Number of radar pixels: " << x << "," << y << " " << lNumRadar << std::endl;
+
+                  // Compute R tilde r
+                  mattype radarR(lNumRadar, lNumRadar, arma::fill::zeros);
+                  for(int i = 0; i < lNumRadar; i++) {
+                     for(int j = 0; j < lNumRadar; j++) {
+                        int index_i = gRadarIndices[i];
+                        int index_j = gRadarIndices[j];
+                        if(index_i == index_j) {
+                           radarR(i, j) = 1;
+                        }
+                        else {
+                           // Equation 5
+                           float dist = 1; //Util::getDistance(gLocations[index_i].lat(), gLocations[index_i].lon(), gLocations[index_j].lat(), gLocations[index_j].lon(), true);
+                           float rho = (1 + dist / mRadarLength) * exp(-dist / mRadarLength);
+                           radarR(i, j) = rho;
+                        }
+                     }
+                  }
+                  // TODO: Use a proper estimate
+                  // Could be computed based on lY
+                  // Need to have a lower bound (in transformed space)
+                  float ensembleVarianceEstimate = 0.1;
+
+                  mattype radarRinv(lNumRadar, lNumRadar, arma::fill::zeros); 
+                  radarRinv = arma::inv(radarR);
+                  for(int i = 0; i < lS; i++) {
+                     // TODO: At some point, include rho here
+                     Rinv(i, i) = lRhos[i] / (mEpsilon * mEpsilon * ensembleVarianceEstimate);
+                  }
+                  // Overwrite where we have radar pixels
+                  for(int i = 0; i < lNumRadar; i++) {
+                     int ii = lRadarIndices[i];
+                     for(int j = 0; j < lNumRadar; j++) {
+                        int jj = lRadarIndices[j];
+                        Rinv(ii, jj) = 1 / (mRadarEpsilon * mRadarEpsilon * ensembleVarianceEstimate) * radarRinv(i, j);
+                     }
+                  }
+                  if(false && lNumRadar > 5) {
+                     for(int i = 0; i < lNumRadar; i++) {
+                        for(int j = 0; j < lNumRadar; j++) {
+                           std::cout << radarR(i, j) << " ";
+                        }
+                        std::cout << std::endl;
+                     }
                   }
                }
+               else {
+                  abort();
+               }
 
+               if(x == mX && y == mY) {
+                  std::cout << "Rinv for " << mX << "," << mY << std::endl;
+                  for(int i = 0; i < lS; i++) {
+                     for(int j = 0; j < lS; j++) {
+                        std::cout << Rinv(i, j) << " " << std::endl;
+                     }
+                     std::cout << std::endl;
+                  }
+               }
                // Compute C matrix
                // k x gS * gS x gS
                mattype C(nValidEns, lS);
@@ -712,6 +850,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         }
                      }
                      (*output)(y, x, ei) = ensMean + currIncrement;
+                     // if(mType == TypePrecipitation && (*output)(y, x, ei) < -2) {
+                     //    (*output)(y, x, ei) = -2;
+                     // }
                   }
 
                   if(mNumVariable != "") {
@@ -743,6 +884,22 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             }
          }
       }
+
+      // Back-transform
+      if(mType == TypePrecipitation) {
+         #pragma omp parallel for
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               for(int e = 0; e < nEns; e++) {
+                  float value = (*output)(y, x, e);
+                  if(Util::isValid(value))
+                     (*output)(y, x, e) = invTransform(value);
+               }
+            }
+         }
+      }
+
+
       iFile.addField(output, mVariable, t);
       if(mNumVariable != "")
          iFile.addField(num, Variable(mNumVariable), t);
@@ -810,6 +967,31 @@ float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {
       rho *= 1 - (1 - mWMin) * std::abs(iLDist);
    }
    return rho;
+}
+
+float CalibratorOi::transform(float iValue) const {
+   if(iValue <= 0)
+      iValue = 0;
+   if(mLambda == 0)
+      return log(iValue);
+   else
+      return (pow(iValue, mLambda) - 1) / mLambda;
+}
+
+float CalibratorOi::invTransform(float iValue) const {
+   float rValue = 0;
+
+   if(mLambda == 0)
+      rValue = exp(iValue);
+   else {
+      if(iValue < -1.0 / mLambda) {
+         iValue = -1.0 / mLambda;
+      }
+      rValue = pow(1 + mLambda * iValue, 1 / mLambda);
+   }
+   if(rValue <= 0)
+      rValue = 0;
+   return rValue;
 }
 
 std::string CalibratorOi::description() {

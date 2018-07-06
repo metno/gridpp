@@ -10,13 +10,17 @@ class Parameters;
 class CalibratorOi : public Calibrator {
    public:
       CalibratorOi(Variable iVariable, const Options& iOptions);
+      // Compute rho. A rho of 0 is returned if a vertical distance is missing when the
+      // vertical scale is defined.
       float calcRho(float iHdist, float iVdist, float iLdist) const;
       static std::string description();
       std::string name() const {return "oi";};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
+      enum Type {TypeTemperature, TypePrecipitation};
       float mVLength;
       float mHLength;
+      float mRadarLength;
       float mMu;
       float mGamma;
       std::string mBiasVariable;
@@ -27,6 +31,7 @@ class CalibratorOi : public Calibrator {
       std::string mDeltaVariable;
       std::string mNumVariable;
       float mC;
+      float mRadarEpsilon;
       float mEpsilon;
       bool mObsOnly;
       int mMinObs;
@@ -51,6 +56,10 @@ class CalibratorOi : public Calibrator {
       typedef arma::mat mattype;
       typedef arma::vec vectype;
       typedef arma::cx_mat cxtype;
+      float mLambda;
+      Type mType;
       float calcDelta(float iOldDelta, const vec2& iY) const;
+      float transform(float iValue) const;
+      float invTransform(float iValue) const;
 };
 #endif

@@ -175,15 +175,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       gObs[i] = parameters[0];
       gCi[i] = parameters[1];
       gElevs[i] = gLocations[i].elev();
-      if(Util::isValid(gObs[i])) {
-         int Y, X;
-         searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);
-         gYi[i] = Y;
-         gXi[i] = X;
-         gLafs[i] = lafs[Y][X];
+      int Y, X;
+      searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);
+      gYi[i] = Y;
+      gXi[i] = X;
+      gLafs[i] = lafs[Y][X];
 
+      if(Util::isValid(gObs[i])) {
          // Check if the elevation of the station roughly matches the reference grid elevation
-         bool hasValidElev = Util::isValid(gLocations[i].elev());
+         bool hasValidElev = !Util::isValid(mMaxElevDiff) || Util::isValid(gLocations[i].elev());
          if(Util::isValid(mMaxElevDiff) && hasValidElev) {
             float elevDiff = abs(gLocations[i].elev() - elevs[Y][X]);
             hasValidElev = elevDiff < mMaxElevDiff;

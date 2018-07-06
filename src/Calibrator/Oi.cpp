@@ -314,7 +314,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             for(int i = 0; i < lLocIndices0.size(); i++) {
                int index = lLocIndices0[i];
                float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), lat, lon, true);
-               float vdist = gLocations[index].elev() - elev;
+               float vdist = Util::MV;
+               if(Util::isValid(gLocations[index].elev() && Util::isValid(elev)))
+                  vdist = gLocations[index].elev() - elev;
                float lafdist = 0;
                if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                   lafdist = gLafs[index] - laf;
@@ -432,7 +434,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   int index = lLocIndices[i];
                   lR(i, i) = gCi[index];
                   float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), lat, lon, true);
-                  float vdist = gLocations[index].elev() - elev;
+                  float vdist = Util::MV;
+                  if(Util::isValid(gLocations[index].elev() && Util::isValid(elev)))
+                     vdist = gLocations[index].elev() - elev;
                   float lafdist = 0;
                   if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                      lafdist = gLafs[index] - laf;
@@ -441,8 +445,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   for(int j = 0; j < lS; j++) {
                      int index_j = lLocIndices[j];
                      float hdist = Util::getDistance(gLocations[index].lat(), gLocations[index].lon(), gLocations[index_j].lat(), gLocations[index_j].lon(), true);
-                     float vdist = gLocations[index].elev() - gLocations[index_j].elev();
-                     float lafdist = 0;
+                     float vdist = Util::MV;
+                     if(Util::isValid(gLocations[index].elev() && Util::isValid(gLocations[index_j].elev())))
+                        vdist = gLocations[index].elev() - gLocations[index_j].elev();
+                           float lafdist = 0;
                      if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                         lafdist = gLafs[index] - gLafs[index_j];
 
@@ -790,9 +796,19 @@ float CalibratorOi::calcDelta(float iOldDelta, const vec2& iY) const {
 
 float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {
    float h = (iHDist/mHLength);
-   float v = (iVDist/mVLength);
-   float l = 1 - (1 - mWMin) * std::abs(iLDist);
-   float rho = exp(-0.5 * h * h) * exp(-0.5 * v * v) * l;
+   float rho = exp(-0.5 * h * h);
+   if(Util::isValid(mVLength)) {
+      if(!Util::isValid(iVDist)) {
+         rho = 0;
+      }
+      else {
+         float v = (iVDist/mVLength);
+         rho *= exp(-0.5 * v * v);
+      }
+   }
+   if(Util::isValid(mWMin)) {
+      rho *= 1 - (1 - mWMin) * std::abs(iLDist);
+   }
    return rho;
 }
 

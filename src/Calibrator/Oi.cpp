@@ -44,6 +44,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mDiagnose(false),
       mWMin(0.5),
       mLambda(0.5),
+      mCrossValidate(false),
       mType(TypeTemperature),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mGamma(0.25) {
@@ -80,6 +81,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("test", mTest);
    iOptions.getValue("c", mC);
    iOptions.getValue("lambda", mLambda);
+   iOptions.getValue("crossValidate", mCrossValidate);
    iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
@@ -409,6 +411,29 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   if(rho > mMinRho) {
                      lRhos0.push_back(std::pair<float,int>(rho, i));
                   }
+               }
+            }
+
+            // Don't include the best value if cross-validating
+            if(mCrossValidate) {
+               float maxRho = 0;
+               float maxRhoIndex = Util::MV;
+               for(int i = 0; i < lRhos0.size(); i++) {
+                  if(lRhos0[i].first > maxRho) {
+                     maxRho = lRhos0[i].first;
+                     maxRhoIndex = i;
+                  }
+               }
+               if(Util::isValid(maxRhoIndex)) {
+                  int ii = lRhos0[maxRhoIndex].second;
+                  int index = lLocIndices0[ii];
+                  float obsLat = gLocations[index].lat();
+                  float obsLon = gLocations[index].lon();
+                  lRhos0.erase(lRhos0.begin() + maxRhoIndex);
+                  std::stringstream ss;
+                  ss << "Omitting " << obsLat << "," << obsLon
+                     << " for forecast point " << lat << "," << lon << " due to cross-validation";
+                  Util::info(ss.str());
                }
             }
             arma::vec lRhos;

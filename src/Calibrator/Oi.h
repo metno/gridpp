@@ -57,6 +57,7 @@ class CalibratorOi : public Calibrator {
       typedef arma::vec vectype;
       typedef arma::cx_mat cxtype;
       float mLambda;
+      bool mCrossValidate;
       Type mType;
       float calcDelta(float iOldDelta, const vec2& iY) const;
       float transform(float iValue) const;

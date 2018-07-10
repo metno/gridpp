@@ -145,11 +145,20 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
    float sigma = mSigma;
    int gS = gLocations.size();
+   float gridSize = Util::MV; // meteres between each gridbox
    // Find the spacing between each grid
-   float gridSize = Util::getDistance(lats[0][0], lons[0][0], lats[1][0], lons[1][0]);
-   std::stringstream ss;
-   ss << "Grid size: " << gridSize << " m";
-   Util::info(ss.str());
+   if(lats.size() > 1 && lats[0].size() > 1) {
+      gridSize = Util::getDistance(lats[0][0], lons[0][0], lats[1][0], lons[1][0]);
+      std::stringstream ss;
+      ss << "Grid size: " << gridSize << " m";
+      Util::info(ss.str());
+   }
+   else {
+      std::stringstream ss;
+      ss << "Could not determine grid size. Treating as irregular grid.";
+      Util::info(ss.str());
+   }
+   bool isRegularGrid = Util::isValid(gridSize);
 
    // Loop over each observation, find the nearest gridpoint and place the obs into all gridpoints
    // in the vicinity of the nearest neighbour. This is only meant to be an approximation, but saves
@@ -170,24 +179,26 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    }
 
    // Spread each observation out to this many gridpoints from the nearest neighbour
-   int radius = 3.64 * mHLength / gridSize;
+   int gridpointRadius = Util::MV;
+   if(isRegularGrid) {
+      gridpointRadius = 3.64 * mHLength / gridSize;
 
-   // When large radiuses are used, the process becomes memory-intensive. Try to fail here
-   // if we expect to use more memory than desired. The true memory is roughly
-   // 1 GB + expectedBytes * F
-   int bytesPerValue = 4;
-   float expectedBytes = float(radius * radius) * 4 * bytesPerValue * gS;
-   std::cout << "Expected MB: " << 1000 + expectedBytes / 1024 / 1024 << std::endl;
-   if(Util::isValid(mMaxBytes) && expectedBytes > mMaxBytes) {
-      std::stringstream ss;
-      ss << "Expected size (" << expectedBytes / 1024 / 1024 << " MB) is greater than "
-         << float(mMaxBytes) / 1024 / 1024 << " MB";
-      Util::error(ss.str());
+      // When large radiuses are used, the process becomes memory-intensive. Try to fail here
+      // if we expect to use more memory than desired. The true memory is roughly
+      // 1 GB + expectedBytes * F
+      int bytesPerValue = 4;
+      float expectedBytes = float(gridpointRadius * gridpointRadius) * 4 * bytesPerValue * gS;
+      std::cout << "Expected MB: " << 1000 + expectedBytes / 1024 / 1024 << std::endl;
+      if(Util::isValid(mMaxBytes) && expectedBytes > mMaxBytes) {
+         std::stringstream ss;
+         ss << "Expected size (" << expectedBytes / 1024 / 1024 << " MB) is greater than "
+            << float(mMaxBytes) / 1024 / 1024 << " MB";
+         Util::error(ss.str());
+      }
    }
 
    double time_s = Util::clock();
    KDTree searchTree(iFile.getLats(), iFile.getLons());
-   int count = 0;
    for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
          std::stringstream ss;
@@ -214,29 +225,50 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       gYi[i] = Y;
       gXi[i] = X;
       gLafs[i] = lafs[Y][X];
+      // std::cout << gLocations[i].lat() << " " << gLocations[i].lon() << " " << lats[Y][X] << " " << lons[Y][X] << std::endl;
 
-      if(Util::isValid(gObs[i])) {
-         // Check if the elevation of the station roughly matches the reference grid elevation
-         bool hasValidElev = !Util::isValid(mMaxElevDiff) || Util::isValid(gLocations[i].elev());
-         if(Util::isValid(mMaxElevDiff) && hasValidElev) {
-            float elevDiff = abs(gLocations[i].elev() - elevs[Y][X]);
-            hasValidElev = elevDiff < mMaxElevDiff;
-         }
-         if(hasValidElev) {
-            for(int y = std::max(0, Y - radius); y < std::min(nY, Y + radius); y++) {
-               for(int x = std::max(0, X - radius); x < std::min(nX, X + radius); x++) {
-                  if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
-                     gLocIndices[y][x].push_back(i);
-                     count ++;
+      if(!Util::isValid(gridSize) || (X > 0 && X < nX - 1 && Y > 0 && Y < nY - 1)) {
+         if(Util::isValid(gObs[i])) {
+            // Check if the elevation of the station roughly matches the reference grid elevation
+            bool hasValidElev = !Util::isValid(mMaxElevDiff) || Util::isValid(gLocations[i].elev());
+            if(Util::isValid(mMaxElevDiff) && hasValidElev) {
+               float elevDiff = abs(gLocations[i].elev() - elevs[Y][X]);
+               hasValidElev = elevDiff < mMaxElevDiff;
+            }
+            if(hasValidElev) {
+               if(isRegularGrid) {
+                  for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
+                     for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
+                        if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
+                           gLocIndices[y][x].push_back(i);
+                        }
+                     }
+                  }
+               }
+               else {
+                  for(int y = 0; y < nY; y++) {
+                     for(int x = 0; x < nX; x++) {
+                        float dist = Util::getDistance(gLocations[i].lat(), gLocations[i].lon(), lats[y][x], lons[y][x], true);
+                        if(dist < 3.64 * mHLength) {
+                           if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
+                              gLocIndices[y][x].push_back(i);
+                           }
+                        }
+                     }
                   }
                }
             }
+            else {
+               std::stringstream ss;
+               ss << "Removing station because elevation (" << gLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
+               Util::warning(ss.str());
+            }
          }
-         else {
-            std::stringstream ss;
-            ss << "Removing station because elevation (" << gLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
-            Util::warning(ss.str());
-         }
+      }
+      else {
+         std::stringstream ss;
+         ss << "Removing station (" << gLocations[i].lat() << " " << gLocations[i].lon() << ") because outside domain";
+         Util::warning(ss.str());
       }
    }
    double time_e = Util::clock();
@@ -373,7 +405,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                int X = gXi[index];
                int Y = gYi[index];
                // Only include observations that are within the domain
-               if(X > 0 && X < lats[0].size()-1 && Y > 0 && Y < lats.size()-1) {
+               if(!isRegularGrid || (X > 0 && X < lats[0].size()-1 && Y > 0 && Y < lats.size()-1)) {
                   if(rho > mMinRho) {
                      lRhos0.push_back(std::pair<float,int>(rho, i));
                   }

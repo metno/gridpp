@@ -16,11 +16,8 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinRho(0.0013),
       mEpsilon(0.5),
       mRadarEpsilon(0.54*0.54),
-      mUseRho(true),
       mObsOnly(false),
       mElevGradient(-0.0065),
-      mMethod(Util::MV),
-      mUseBug(false),
       mBiasVariable(""),
       mSigma(1),
       mDelta(-999),
@@ -37,7 +34,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMaxElevDiff(200),
       // Default model error variance
       mMinValidEns(5),
-      mTest(Util::MV),
       mNewDeltaVar(1),
       mExtrapolate(false),
       mDiagnose(false),
@@ -63,11 +59,8 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("y", mY);
    iOptions.getValue("extrapolate", mExtrapolate);
    iOptions.getValue("minRho", mMinRho);
-   iOptions.getValue("useRho", mUseRho);
-   iOptions.getValue("useBug", mUseBug);
    iOptions.getValue("saveDiff", mSaveDiff);
    iOptions.getValue("maxBytes", mMaxBytes);
-   iOptions.getValue("method", mMethod);
    iOptions.getValue("minEns", mMinValidEns);
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("elevGradient", mElevGradient);
@@ -76,7 +69,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("wmin", mWMin);
    iOptions.getValue("epsilon", mEpsilon);
    iOptions.getValue("radarEpsilon", mRadarEpsilon);
-   iOptions.getValue("test", mTest);
    iOptions.getValue("c", mC);
    iOptions.getValue("lambda", mLambda);
    iOptions.getValue("crossValidate", mCrossValidate);
@@ -609,15 +601,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   for(int i = 0; i < lS; i++) {
                      int index = lLocIndices[i];
                      float r = sigma * sigma * gCi[index];
-                     if(mUseRho) {
-                        float rho = lRhos[i];
-                        Rinv(i, i) = 1 / r * rho;
-                        if(x == mX && y == mY) {
-                           std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
-                        }
-                     }
-                     else {
-                        Rinv(i, i) = 1 / r;
+                     float rho = lRhos[i];
+                     Rinv(i, i) = 1 / r * rho;
+                     if(x == mX && y == mY) {
+                        std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
                      }
                   }
                }
@@ -861,9 +848,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      if(useBias) {
                         raw -= (*bias)(y, x, 0);
                      }
-                     if(mUseBug) {
-                        raw = (*field)(y, x, ei);
-                     }
                      if(!mExtrapolate) {
                         // Don't allow a final increment that is larger than any increment
                         // at station points
@@ -1045,5 +1029,31 @@ float CalibratorOi::invTransform(float iValue) const {
 std::string CalibratorOi::description() {
    std::stringstream ss;
    ss << Util::formatDescription("-c oi","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
+   ss << Util::formatDescription("   type=temperature","One of 'temperature', 'precipitation'. If 'precipitation', enable the box-cox transformation.") << std::endl;
+   ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
+   ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
+   ss << Util::formatDescription("   dr=100","Radar decorrelation distance (in meters).") << std::endl;
+   ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
+   ss << Util::formatDescription("   sigma=1","") << std::endl;
+   ss << Util::formatDescription("   delta=undef","") << std::endl;
+   ss << Util::formatDescription("   gamma=0.25","") << std::endl;
+   ss << Util::formatDescription("   mu=0.9","") << std::endl;
+   ss << Util::formatDescription("   minObs=0","Require at least this many obs inside the localization region to perform OI.") << std::endl;
+
+   ss << Util::formatDescription("   x=undef","Turn on debug info for this x-coordinate") << std::endl;
+   ss << Util::formatDescription("   y=undef","Turn on debug info for this y-coordinate") << std::endl;
+   ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;
+   ss << Util::formatDescription("   minRho=0.0013","Perform localization by requiring this minimum rho value") << std::endl;
+   ss << Util::formatDescription("   maxBytes=6442450944","Don't allocate more than this many bytes when creating the localization information") << std::endl;
+   ss << Util::formatDescription("   minEns=5","Switch to single-member mode if fewer than this number of members") << std::endl;
+   ss << Util::formatDescription("   elevGradient=-0.0065","Use this elevation gradient to downscale background to obs") << std::endl;
+   ss << Util::formatDescription("   useEns=1","Enable ensemble-mode. If 0, use single-member mode.") << std::endl;
+   ss << Util::formatDescription("   wmin=0.5","") << std::endl;
+   ss << Util::formatDescription("   epsilon=0.5","") << std::endl;
+   ss << Util::formatDescription("   radarEpsilon=0.2916","") << std::endl;
+   ss << Util::formatDescription("   lambda=0.5","") << std::endl;
+   ss << Util::formatDescription("   diagnose=0","") << std::endl;
+   ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;
+   ss << Util::formatDescription("   crossValidate=0","If 1, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
    return ss.str();
 }

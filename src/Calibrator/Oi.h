@@ -40,12 +40,8 @@ class CalibratorOi : public Calibrator {
       float mMaxBytes;
       bool mUseMeanBias;
       int mMinValidEns;
-      bool mUseRho;
-      bool mUseBug;
-      int mMethod;
       bool mSaveDiff;
       float mElevGradient;
-      int mTest;
       bool mExtrapolate;
       float mWMin;
       float mNewDeltaVar;

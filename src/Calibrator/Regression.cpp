@@ -164,11 +164,13 @@ Parameters CalibratorRegression::train(const std::vector<ObsEns>& iData) const {
    return par;
 }
 
-std::string CalibratorRegression::description() {
+std::string CalibratorRegression::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c regression", "Polynomial or multivariate regression equation. Set 'order' for polynomial regression and 'variables' for multivariate regression. Applies the following models: newForecast = a + b * forecast + c * forecast^2 ... or newForecast = a * var1 + b * var2.... A parameter file is required with the values [a b c ... ]") << std::endl;
-   ss << Util::formatDescription("   order=1", "What order is the polynomial regression? 0th order: a; 1st order: a + bx; 2nd order a + bc + cx^2; etc.") << std::endl;
-   ss << Util::formatDescription("   variables=undef", "Use these variables as predictors. Use '1' to represent a constant term.") << std::endl;
-   ss << Util::formatDescription("   intercept=1", "Applies only to training of coefficients for polynomial regression. Should the regression include an intercept term? If 1, then yes.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   order=1", "What order is the polynomial regression? 0th order: a; 1st order: a + bx; 2nd order a + bc + cx^2; etc.") << std::endl;
+      ss << Util::formatDescription("   variables=undef", "Use these variables as predictors. Use '1' to represent a constant term.") << std::endl;
+      ss << Util::formatDescription("   intercept=1", "Applies only to training of coefficients for polynomial regression. Should the regression include an intercept term? If 1, then yes.") << std::endl;
+   }
    return ss.str();
 }

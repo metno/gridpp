@@ -386,12 +386,14 @@ void CalibratorGaussian::my_fdf(const gsl_vector *x, void *params, double *f, gs
 }
 */
 
-std::string CalibratorGaussian::description() {
+std::string CalibratorGaussian::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c gaussian", "Calibrates an ensemble using a Gaussian distribution, suitable for parameters like temperature. The distribution has two parameters:") << std::endl;
    ss << Util::formatDescription("", "* mean  = ensmean") << std::endl;
    ss << Util::formatDescription("", "* sigma = exp(a + b * ensspread)") << std::endl;
    ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensspread is the standard deviation of members. The parameter set must contain 8 columns with the values [a b].") << std::endl;
-   ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
+   }
    return ss.str();
 }

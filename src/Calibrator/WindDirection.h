@@ -12,7 +12,7 @@ class Parameters;
 class CalibratorWindDirection : public Calibrator {
    public:
       CalibratorWindDirection(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "windDirection";};
       //! Get multiplication factor for given wind direction
       //! @param iWindDirection in degrees, meteorological wind direction (0 degrees is from North)

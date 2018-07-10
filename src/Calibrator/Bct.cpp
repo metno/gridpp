@@ -194,7 +194,7 @@ float CalibratorBct::getInvCdf(float iQuantile, float iEnsMean, float iEnsStd, c
    return value;
 }
 
-std::string CalibratorBct::description() {
+std::string CalibratorBct::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c bct", "Calibrates an ensemble using a Box-Cox t-distribution, suitable for parameters like windspeed. The distribution has four parameters:") << std::endl;
    ss << Util::formatDescription("", "* mean  = a + b * ensmean") << std::endl;
@@ -202,6 +202,8 @@ std::string CalibratorBct::description() {
    ss << Util::formatDescription("", "* nu = e + f * ensmean") << std::endl;
    ss << Util::formatDescription("", "* tau = exp(g)") << std::endl;
    ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensstd is the ensemble standard deviation. The parameter set must contain 7 columns with the values [a b c d e f g].") << std::endl;
-   ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution from giving very high values.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution from giving very high values.") << std::endl;
+   }
    return ss.str();
 }

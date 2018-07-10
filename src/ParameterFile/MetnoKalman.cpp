@@ -165,9 +165,11 @@ bool ParameterFileMetnoKalman::isReadable() const {
    return ParameterFileMetnoKalman::isValid(getFilename());
 }
 
-std::string ParameterFileMetnoKalman::description() {
+std::string ParameterFileMetnoKalman::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-p metnoKalman", "Metno's internal format for kalman filter corrections.") << std::endl;
-   ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   }
    return ss.str();
 }

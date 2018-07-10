@@ -1026,34 +1026,36 @@ float CalibratorOi::invTransform(float iValue) const {
    return rValue;
 }
 
-std::string CalibratorOi::description() {
+std::string CalibratorOi::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c oi","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
-   ss << Util::formatDescription("   type=temperature","One of 'temperature', 'precipitation'. If 'precipitation', enable the box-cox transformation.") << std::endl;
-   ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
-   ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
-   ss << Util::formatDescription("   dr=100","Radar decorrelation distance (in meters).") << std::endl;
-   ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
-   ss << Util::formatDescription("   sigma=1","") << std::endl;
-   ss << Util::formatDescription("   delta=undef","") << std::endl;
-   ss << Util::formatDescription("   gamma=0.25","") << std::endl;
-   ss << Util::formatDescription("   mu=0.9","") << std::endl;
-   ss << Util::formatDescription("   minObs=0","Require at least this many obs inside the localization region to perform OI.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   type=temperature","One of 'temperature', 'precipitation'. If 'precipitation', enable the box-cox transformation.") << std::endl;
+      ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
+      ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
+      ss << Util::formatDescription("   dr=100","Radar decorrelation distance (in meters).") << std::endl;
+      ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
+      ss << Util::formatDescription("   sigma=1","") << std::endl;
+      ss << Util::formatDescription("   delta=undef","") << std::endl;
+      ss << Util::formatDescription("   gamma=0.25","") << std::endl;
+      ss << Util::formatDescription("   mu=0.9","") << std::endl;
+      ss << Util::formatDescription("   minObs=0","Require at least this many obs inside the localization region to perform OI.") << std::endl;
 
-   ss << Util::formatDescription("   x=undef","Turn on debug info for this x-coordinate") << std::endl;
-   ss << Util::formatDescription("   y=undef","Turn on debug info for this y-coordinate") << std::endl;
-   ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;
-   ss << Util::formatDescription("   minRho=0.0013","Perform localization by requiring this minimum rho value") << std::endl;
-   ss << Util::formatDescription("   maxBytes=6442450944","Don't allocate more than this many bytes when creating the localization information") << std::endl;
-   ss << Util::formatDescription("   minEns=5","Switch to single-member mode if fewer than this number of members") << std::endl;
-   ss << Util::formatDescription("   elevGradient=-0.0065","Use this elevation gradient to downscale background to obs") << std::endl;
-   ss << Util::formatDescription("   useEns=1","Enable ensemble-mode. If 0, use single-member mode.") << std::endl;
-   ss << Util::formatDescription("   wmin=0.5","") << std::endl;
-   ss << Util::formatDescription("   epsilon=0.5","") << std::endl;
-   ss << Util::formatDescription("   radarEpsilon=0.2916","") << std::endl;
-   ss << Util::formatDescription("   lambda=0.5","") << std::endl;
-   ss << Util::formatDescription("   diagnose=0","") << std::endl;
-   ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;
-   ss << Util::formatDescription("   crossValidate=0","If 1, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
+      ss << Util::formatDescription("   x=undef","Turn on debug info for this x-coordinate") << std::endl;
+      ss << Util::formatDescription("   y=undef","Turn on debug info for this y-coordinate") << std::endl;
+      ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;
+      ss << Util::formatDescription("   minRho=0.0013","Perform localization by requiring this minimum rho value") << std::endl;
+      ss << Util::formatDescription("   maxBytes=6442450944","Don't allocate more than this many bytes when creating the localization information") << std::endl;
+      ss << Util::formatDescription("   minEns=5","Switch to single-member mode if fewer than this number of members") << std::endl;
+      ss << Util::formatDescription("   elevGradient=-0.0065","Use this elevation gradient to downscale background to obs") << std::endl;
+      ss << Util::formatDescription("   useEns=1","Enable ensemble-mode. If 0, use single-member mode.") << std::endl;
+      ss << Util::formatDescription("   wmin=0.5","") << std::endl;
+      ss << Util::formatDescription("   epsilon=0.5","") << std::endl;
+      ss << Util::formatDescription("   radarEpsilon=0.2916","") << std::endl;
+      ss << Util::formatDescription("   lambda=0.5","") << std::endl;
+      ss << Util::formatDescription("   diagnose=0","") << std::endl;
+      ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;
+      ss << Util::formatDescription("   crossValidate=0","If 1, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
+   }
    return ss.str();
 }

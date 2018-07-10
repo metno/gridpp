@@ -473,18 +473,20 @@ Parameters CalibratorKriging::train(const std::vector<ObsEns>& iData) const {
    return par;
 }
 
-std::string CalibratorKriging::description() {
+std::string CalibratorKriging::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c kriging","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
-   ss << Util::formatDescription("   radius=30000","Only use values from locations within this radius (in meters). Must be >= 0.") << std::endl;
-   ss << Util::formatDescription("   efoldDist=30000","How fast should the weight of a station reduce with distance? For cressman: linearly decrease to this distance (in meters); For barnes: reduce to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
-   ss << Util::formatDescription("   maxElevDiff=undef","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0. Leave undefined if no reduction of bias in the vertical is desired.") << std::endl;
-   ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
-   ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
-   ss << Util::formatDescription("   window=0","Use a time window to allow weighting of the kriging. Use the fraction of timesteps within +- window where the auxillary variable is within the range. Use 0 for no window.") << std::endl;
-   ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
-   ss << Util::formatDescription("   operator=add","How should the bias be applied to the raw forecast? One of 'add', 'subtract', 'multiply', 'divide'. For add/subtract, the mean of the field is assumed to be 0, and for multiply/divide, 1.") << std::endl;
-   ss << Util::formatDescription("   approxDist=true","When computing the distance between two points, should the equirectangular approximation be used to save time? Should be good enough for most kriging purposes.") << std::endl;
-   ss << Util::formatDescription("   crossValidate=false","If true, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   radius=30000","Only use values from locations within this radius (in meters). Must be >= 0.") << std::endl;
+      ss << Util::formatDescription("   efoldDist=30000","How fast should the weight of a station reduce with distance? For cressman: linearly decrease to this distance (in meters); For barnes: reduce to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
+      ss << Util::formatDescription("   maxElevDiff=undef","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0. Leave undefined if no reduction of bias in the vertical is desired.") << std::endl;
+      ss << Util::formatDescription("   auxVariable=undef","Should an auxilary variable be used to turn off kriging? For example turn off kriging where there is precipitation.") << std::endl;
+      ss << Util::formatDescription("   range=undef","What range of the auxillary variable should kriging be turned on for? For example use 0,0.3 to turn kriging off for precip > 0.3.") << std::endl;
+      ss << Util::formatDescription("   window=0","Use a time window to allow weighting of the kriging. Use the fraction of timesteps within +- window where the auxillary variable is within the range. Use 0 for no window.") << std::endl;
+      ss << Util::formatDescription("   type=cressman","Weighting function used in kriging. One of 'cressman', or 'barnes'.") << std::endl;
+      ss << Util::formatDescription("   operator=add","How should the bias be applied to the raw forecast? One of 'add', 'subtract', 'multiply', 'divide'. For add/subtract, the mean of the field is assumed to be 0, and for multiply/divide, 1.") << std::endl;
+      ss << Util::formatDescription("   approxDist=true","When computing the distance between two points, should the equirectangular approximation be used to save time? Should be good enough for most kriging purposes.") << std::endl;
+      ss << Util::formatDescription("   crossValidate=false","If true, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
+   }
    return ss.str();
 }

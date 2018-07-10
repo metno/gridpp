@@ -8,7 +8,7 @@ class CalibratorDiagnoseWind : public Calibrator {
       CalibratorDiagnoseWind(const Variable& iVariable, const Options& iOptions);
       std::string name() const {return "diagnoseWind";};
       bool requiresParameterFile() const { return false;};
-      static std::string description();
+      static std::string description(bool full=true);
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       std::string mX;

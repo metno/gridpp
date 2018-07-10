@@ -13,7 +13,7 @@ class CalibratorOi : public Calibrator {
       // Compute rho. A rho of 0 is returned if a vertical distance is missing when the
       // vertical scale is defined.
       float calcRho(float iHdist, float iVdist, float iLdist) const;
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "oi";};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

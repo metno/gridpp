@@ -54,7 +54,7 @@ void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const 
       }
    }
 }
-std::string DownscalerPressure::description() {
+std::string DownscalerPressure::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-d pressure", "Adjusts the pressure of the nearest neighbour based on the elevation difference and a standard atmosphere.") << std::endl;
    return ss.str();

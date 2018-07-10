@@ -451,31 +451,33 @@ float DownscalerGradient::calcElevGradient(int i, int j, int e, int Icenter, int
       elevGradient = mMaxElevGradient;
    return elevGradient;
 }
-std::string DownscalerGradient::description() {
+std::string DownscalerGradient::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-d gradient", "Adjusts the nearest neighbour based on elevation or coastal gradients in a neighbourhood. The gradient is applied using the difference of the elevation and /or land-area fraction of the output gridpoint to the nearest neighbour: T = T(nn) + elev_gradient * dElev + laf_gradient * dLaf. If the gradient puts the forecast outside the domain of the variable (e.g. negative precipitation) then the nearest neighbour is used.") << std::endl;
-   ss << Util::formatDescription("   constantElevGradient=undef", "Fix elevation gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
-   ss << Util::formatDescription("   elevRadius=3", "Compute elevation gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
-   ss << Util::formatDescription("   minElevDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
-   ss << Util::formatDescription("   defaultElevGradient=0", "If the elevation gradient is not computable (too unstable), use this default gradient.") << std::endl;
-   ss << Util::formatDescription("   minElevGradient=undef", "Do not allow elevation gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   maxElevGradient=undef", "Do not allow elevation gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   minLafForElevGradient=0", "When computing the elevation gradient, only include points with a LAF above this value.") << std::endl;
-   ss << Util::formatDescription("   minNumPoints=2", "Minimum number of points needed to compute elevation gradient.") << std::endl;
-   ss << Util::formatDescription("   elevGradientVariable=undef", "Which variable to use for the gradient? If undefined, use the same variables as the forecast variable.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   constantElevGradient=undef", "Fix elevation gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
+      ss << Util::formatDescription("   elevRadius=3", "Compute elevation gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
+      ss << Util::formatDescription("   minElevDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
+      ss << Util::formatDescription("   defaultElevGradient=0", "If the elevation gradient is not computable (too unstable), use this default gradient.") << std::endl;
+      ss << Util::formatDescription("   minElevGradient=undef", "Do not allow elevation gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
+      ss << Util::formatDescription("   maxElevGradient=undef", "Do not allow elevation gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
+      ss << Util::formatDescription("   minLafForElevGradient=0", "When computing the elevation gradient, only include points with a LAF above this value.") << std::endl;
+      ss << Util::formatDescription("   minNumPoints=2", "Minimum number of points needed to compute elevation gradient.") << std::endl;
+      ss << Util::formatDescription("   elevGradientVariable=undef", "Which variable to use for the gradient? If undefined, use the same variables as the forecast variable.") << std::endl;
 
-   ss << Util::formatDescription("   lafRadius=1", "Smoothen the LAF output with this neighbourhood radius.") << std::endl;
-   ss << Util::formatDescription("   minLafDiff=0.1", "Minimum LAF range (between 0 and 1) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
-   ss << Util::formatDescription("   minFracSeaPoints=0", "Minimum fraction of points in neighbourhood with a LAF < 0.5 to compute a LAF gradient.") << std::endl;
-   ss << Util::formatDescription("   minLafGradient=undef", "Do not allow LAF gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   maxLafGradient=undef", "Do not allow LAF gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
-   ss << Util::formatDescription("   lafSearchRadii=1,2,3", "Compute LAF gradients using neighbourhoods with these sizes.") << std::endl;
-   ss << Util::formatDescription("   lafWeights=undef", "Weights when computing the average LAF gradient in different neighbourhoods.") << std::endl;
+      ss << Util::formatDescription("   lafRadius=1", "Smoothen the LAF output with this neighbourhood radius.") << std::endl;
+      ss << Util::formatDescription("   minLafDiff=0.1", "Minimum LAF range (between 0 and 1) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
+      ss << Util::formatDescription("   minFracSeaPoints=0", "Minimum fraction of points in neighbourhood with a LAF < 0.5 to compute a LAF gradient.") << std::endl;
+      ss << Util::formatDescription("   minLafGradient=undef", "Do not allow LAF gradient to be smaller than this value. If undefined, do not alter gradient.") << std::endl;
+      ss << Util::formatDescription("   maxLafGradient=undef", "Do not allow LAF gradient to be larger than this value. If undefined, do not alter gradient.") << std::endl;
+      ss << Util::formatDescription("   lafSearchRadii=1,2,3", "Compute LAF gradients using neighbourhoods with these sizes.") << std::endl;
+      ss << Util::formatDescription("   lafWeights=undef", "Weights when computing the average LAF gradient in different neighbourhoods.") << std::endl;
 
-   ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev) * exp(gradient * dLaf). Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
-   ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
-   ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
-   ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;
-   ss << Util::formatDescription("   limit=0", "Should the downscaled value be forced to be within the min/max range of the elevation neighbourhood?") << std::endl;
+      ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev) * exp(gradient * dLaf). Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
+      ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
+      ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
+      ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;
+      ss << Util::formatDescription("   limit=0", "Should the downscaled value be forced to be within the min/max range of the elevation neighbourhood?") << std::endl;
+   }
    return ss.str();
 }

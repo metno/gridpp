@@ -8,7 +8,7 @@ class CalibratorDiagnoseHumidity : public Calibrator {
       CalibratorDiagnoseHumidity(const Variable& iVariable, const Options& iOptions);
       std::string name() const {return "diagnoseHumidity";};
       bool requiresParameterFile() const { return false;};
-      static std::string description();
+      static std::string description(bool full=true);
       // Temperature in K, RH in [0,1], Returns TD in K
       static float computeDewpoint(float iTemperature, float iRelativeHumidity);
       // Temperatures in K, Returns RH in [0,1]

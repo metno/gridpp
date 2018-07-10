@@ -198,11 +198,13 @@ Parameters CalibratorCoastal::train(const std::vector<ObsEnsField>& iData, const
    return par;
 }
 
-std::string CalibratorCoastal::description() {
+std::string CalibratorCoastal::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c coastal", "Weights land and sea forecasts") << std::endl;
-   ss << Util::formatDescription("   searchRadius=3", "Radius (in number of gridpoints) to search for land and sea points.") << std::endl;
-   ss << Util::formatDescription("   minLafDiff=0.1", "Minimum difference in land area fraction in order to use the  land and sea points") << std::endl;
-   ss << Util::formatDescription("   useNN=False", "Use the nearest neighbour as the basevalue, instead of the point with the lowest LAF.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   searchRadius=3", "Radius (in number of gridpoints) to search for land and sea points.") << std::endl;
+      ss << Util::formatDescription("   minLafDiff=0.1", "Minimum difference in land area fraction in order to use the  land and sea points") << std::endl;
+      ss << Util::formatDescription("   useNN=False", "Use the nearest neighbour as the basevalue, instead of the point with the lowest LAF.") << std::endl;
+   }
    return ss.str();
 }

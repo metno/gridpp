@@ -8,7 +8,7 @@ class Parameters;
 class CalibratorAltitude : public Calibrator {
    public:
       CalibratorAltitude(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "altitude";};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

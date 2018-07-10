@@ -7,7 +7,7 @@
 class CalibratorWindow : public Calibrator {
    public:
       CalibratorWindow(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "window";};
       bool requiresParameterFile() const { return false;};
    private:

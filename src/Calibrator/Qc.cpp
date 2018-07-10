@@ -45,10 +45,12 @@ bool CalibratorQc::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    return true;
 }
 
-std::string CalibratorQc::description() {
+std::string CalibratorQc::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c qc", "Apply quality control, ensuring the values are within the bounds of the variable. If the original value is missing, no correction is applied.") << std::endl;
-   ss << Util::formatDescription("   min=undef", "Force the minimum allowed value. If not provided, don't force a minimum.") << std::endl;
-   ss << Util::formatDescription("   max=undef", "Force the maximum allowed value. If not provided, don't force a maximum.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   min=undef", "Force the minimum allowed value. If not provided, don't force a minimum.") << std::endl;
+      ss << Util::formatDescription("   max=undef", "Force the maximum allowed value. If not provided, don't force a maximum.") << std::endl;
+   }
    return ss.str();
 }

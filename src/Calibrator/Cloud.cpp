@@ -43,7 +43,7 @@ bool CalibratorCloud::calibrateCore(File& iFile, const ParameterFile* iParameter
    }
    return true;
 }
-std::string CalibratorCloud::description() {
+std::string CalibratorCloud::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c cloud", "Ensures that every ensemble member with precipitation also has complete cloud cover.") << std::endl;
    return ss.str();

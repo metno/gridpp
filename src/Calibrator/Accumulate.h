@@ -7,7 +7,7 @@
 class CalibratorAccumulate : public Calibrator {
    public:
       CalibratorAccumulate(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "accumulate";};
       bool requiresParameterFile() const { return false;};
    private:

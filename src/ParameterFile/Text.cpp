@@ -196,7 +196,7 @@ bool ParameterFileText::isLocationDependent() const {
    return locationDependent;
 }
 
-std::string ParameterFileText::description() {
+std::string ParameterFileText::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-p text", "Simple ascii text file with space separated entries. Each line represents one lead time and/or location, and each column one parameter. If lat/lon is missing, then parameters are assumed global. If time is missing, then the same parameters are used for all times.") << std::endl;
    ss << Util::formatDescription("", "time lat lon elev param1 param2 ... paramN") << std::endl;

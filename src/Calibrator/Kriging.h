@@ -9,7 +9,7 @@ class Parameters;
 class CalibratorKriging : public Calibrator {
    public:
       CalibratorKriging(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       float calcCovar(const Location& loc1, const Location& loc2) const;
       enum Type {
          TypeCressman = 10,

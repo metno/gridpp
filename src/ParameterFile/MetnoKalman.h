@@ -15,7 +15,7 @@ class ParameterFileMetnoKalman : public ParameterFile {
       static bool isValid(std::string iFilename);
       bool isReadable() const;
       std::string name() const {return "metnoKalman";};
-      static std::string description();
+      static std::string description(bool full=true);
    private:
       std::vector<int> mTimes;
       float mLocalMV;

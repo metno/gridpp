@@ -54,7 +54,7 @@ class ParameterFile : public Scheme {
       static std::string getDescription(bool iSpatialOnly=false);
       virtual void write() const {};
 
-      static std::string getDescriptions();
+      static std::string getDescriptions(bool full=true);
 
       // Return the number of bytes in cache
       long getCacheSize() const;

@@ -8,7 +8,7 @@ class Parameters;
 class CalibratorSort : public Calibrator {
    public:
       CalibratorSort(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "sort";};
       bool requiresParameterFile() const { return false;};
    private:

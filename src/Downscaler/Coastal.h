@@ -12,7 +12,7 @@ class DownscalerCoastal : public Downscaler {
       float getMinLafDiff() const;
       float getMinGradient() const;
       float getMaxGradient() const;
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "coastal";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;

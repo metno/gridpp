@@ -16,7 +16,7 @@ class DownscalerGradient : public Downscaler {
       //! Downscale the specified variable
       DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       ~DownscalerGradient();
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "gradient";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;

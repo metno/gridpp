@@ -11,7 +11,7 @@ class DownscalerSmart : public Downscaler {
    public:
       //! Downscale the specified variable
       DownscalerSmart(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "smart";};
 
       //! Method may return fewer than num smart neighbours

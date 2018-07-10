@@ -7,7 +7,7 @@
 class CalibratorCloud : public Calibrator {
    public:
       CalibratorCloud(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "cloud";};
       bool requiresParameterFile() const { return false;};
    private:

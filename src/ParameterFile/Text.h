@@ -32,7 +32,7 @@ class ParameterFileText : public ParameterFile {
       //! @param iFilename Write to this filename. If empty, write to the file that was read from.
       void write(const std::string& iFilename) const;
       void write() const;
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "text";};
    private:
       std::vector<int> mTimes;

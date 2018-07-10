@@ -29,7 +29,7 @@ bool CalibratorAltitude::calibrateCore(File& iFile, const ParameterFile* iParame
    return true;
 }
 
-std::string CalibratorAltitude::description() {
+std::string CalibratorAltitude::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c altitude", "Changes the altitudes in the file to the altitudes in the parameter file. If the file does not have an altitude field, then a new one is not created.") << std::endl;
    return ss.str();

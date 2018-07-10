@@ -100,11 +100,13 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
    return true;
 }
 
-std::string CalibratorNeighbourhood::description() {
+std::string CalibratorNeighbourhood::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;
-   ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction. The radius can alternatively be specified using a location-independent parameter file, with one parameter.") << std::endl;
-   ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
-   ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction. The radius can alternatively be specified using a location-independent parameter file, with one parameter.") << std::endl;
+      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+      ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   }
    return ss.str();
 }

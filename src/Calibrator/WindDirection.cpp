@@ -50,13 +50,15 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
    return true;
 }
 
-std::string CalibratorWindDirection::description() {
+std::string CalibratorWindDirection::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c windDirection", "Multiply a variable by a factor based on the wind-direction:") << std::endl;
    ss << "                                factor = a + b*sin(dir)   + c*cos(dir)   + d*sin(2*dir) + e*cos(2*dir)" << std::endl;
    ss << "                                           + f*sin(3*dir) + g*cos(3*dir) + h*sin(4*dir) + i*cos(4*dir)" << std::endl;
    ss << Util::formatDescription("", "A parameter file is required, with the values [a b c d e f g h i].") << std::endl;
-   ss << Util::formatDescription("   directionVariable=required", "Variable name to use as wind direction.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   directionVariable=required", "Variable name to use as wind direction.") << std::endl;
+   }
    return ss.str();
 }
 

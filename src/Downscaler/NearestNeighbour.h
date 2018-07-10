@@ -22,7 +22,7 @@ class DownscalerNearestNeighbour : public Downscaler {
             const vec2& iOutputLats, const vec2& iOutputLons,
             const vec2Int& nearestI, const vec2Int& nearestJ);
 
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "nearestNeighbour";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;

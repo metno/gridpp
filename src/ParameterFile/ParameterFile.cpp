@@ -255,11 +255,11 @@ void ParameterFile::setFilename(std::string iFilename) {
    mFilename = iFilename;
 }
 
-std::string ParameterFile::getDescriptions() {
+std::string ParameterFile::getDescriptions(bool full) {
    std::stringstream ss;
-   ss << ParameterFileText::description() << std::endl;
-   ss << ParameterFileMetnoKalman::description() << std::endl;
-   ss << ParameterFileNetcdf::description() << std::endl;
+   ss << ParameterFileText::description(full) << std::endl;
+   ss << ParameterFileMetnoKalman::description(full) << std::endl;
+   ss << ParameterFileNetcdf::description(full) << std::endl;
    return ss.str();
 }
 

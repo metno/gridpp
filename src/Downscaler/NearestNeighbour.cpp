@@ -111,7 +111,7 @@ vec2 DownscalerNearestNeighbour::downscaleVec(const vec2& iInput,
 }
 
 
-std::string DownscalerNearestNeighbour::description() {
+std::string DownscalerNearestNeighbour::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-d nearestNeighbour", "Uses the nearest gridpoint in curved distance") << std::endl;
    return ss.str();

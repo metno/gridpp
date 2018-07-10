@@ -36,7 +36,7 @@ class DownscalerBilinear : public Downscaler {
       //! cannot be used.
       static bool findCoords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2);
 
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "bilinear";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;

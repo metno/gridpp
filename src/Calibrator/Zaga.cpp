@@ -653,24 +653,26 @@ float CalibratorZaga::logLikelihood(float obs, float iEnsMean, float iEnsFrac, c
    return log(pdf);
 }
 
-std::string CalibratorZaga::description() {
+std::string CalibratorZaga::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precipitation. The distribution has three parameters:") << std::endl;
    ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
    ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
    ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;
    ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option). The parameter set must contain 8 columns with the values [a b c d e f g h].") << std::endl;
-   ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
-   ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
-   ss << Util::formatDescription("   precipLowQuantile=undef", "If set, write values to the PrecipLow variable using this quantile (number between 0 and 1)") << std::endl;
-   ss << Util::formatDescription("   precipMiddleQuantile=undef", "If set, write values to the PrecipMiddle variable using this quantile (number between 0 and 1)") << std::endl;
-   ss << Util::formatDescription("   precipHighQuantile=undef", "If set, write values to the PrecipHigh variable using this quantile (number between 0 and 1)") << std::endl;
-   ss << Util::formatDescription("   lowVariable=undef", "If set, write precip low values to this variable") << std::endl;
-   ss << Util::formatDescription("   middleVariable=undef", "If set, write precip middle values to this variable name.") << std::endl;
-   ss << Util::formatDescription("   highVariable=undef", "If set, write precip high values to this variablei name.") << std::endl;
-   ss << Util::formatDescription("   popVariable=undef", "iF set, write POP values to this variable name.") << std::endl;
-   ss << Util::formatDescription("   popThreshold=0.5", "If POP is written, what threshold should be used?") << std::endl;
-   ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution to yield very high values.") << std::endl;
-   ss << Util::formatDescription("   6h=0", "If POP is produced, should it be based on the precip in the last 6 hours? If so, the Pop6h variable is written.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
+      ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
+      ss << Util::formatDescription("   precipLowQuantile=undef", "If set, write values to the PrecipLow variable using this quantile (number between 0 and 1)") << std::endl;
+      ss << Util::formatDescription("   precipMiddleQuantile=undef", "If set, write values to the PrecipMiddle variable using this quantile (number between 0 and 1)") << std::endl;
+      ss << Util::formatDescription("   precipHighQuantile=undef", "If set, write values to the PrecipHigh variable using this quantile (number between 0 and 1)") << std::endl;
+      ss << Util::formatDescription("   lowVariable=undef", "If set, write precip low values to this variable") << std::endl;
+      ss << Util::formatDescription("   middleVariable=undef", "If set, write precip middle values to this variable name.") << std::endl;
+      ss << Util::formatDescription("   highVariable=undef", "If set, write precip high values to this variablei name.") << std::endl;
+      ss << Util::formatDescription("   popVariable=undef", "iF set, write POP values to this variable name.") << std::endl;
+      ss << Util::formatDescription("   popThreshold=0.5", "If POP is written, what threshold should be used?") << std::endl;
+      ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution to yield very high values.") << std::endl;
+      ss << Util::formatDescription("   6h=0", "If POP is produced, should it be based on the precip in the last 6 hours? If so, the Pop6h variable is written.") << std::endl;
+   }
    return ss.str();
 }

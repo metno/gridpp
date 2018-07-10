@@ -36,7 +36,7 @@ class Calibrator : public Scheme {
       //! Returns the name of this calibrator
       virtual std::string name() const = 0;
 
-      static std::string getDescriptions();
+      static std::string getDescriptions(bool full=true);
 
       virtual Parameters train(const std::vector<ObsEns>& iData) const;
       // Defaults to using the regular train method

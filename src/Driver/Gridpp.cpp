@@ -9,8 +9,8 @@
 #include "../Options.h"
 #include "../Setup.h"
 
-void writeUsage() {
-   std::cout << "Post-processes gridded forecasts" << std::endl;
+void writeUsage(bool full) {
+   std::cout << "Post-processes gridded forecasts. For more information see https://github.com/metno/gridpp." << std::endl;
    std::cout << std::endl;
    std::cout << "usage:  gridpp inputs [options] outputs [options] [-v var [options] [-d downscaler [options] [-p parameters [options]]] [-c calibrator [options] [-p parameters [options]]]*]+ [--debug <level>]" << std::endl;
    std::cout << "        gridpp [--version]" << std::endl;
@@ -28,18 +28,8 @@ void writeUsage() {
    std::cout << "   -p parameters One of the parameter formats below." << std::endl;
    std::cout << "   options       Options of the form key=value" << std::endl;
    std::cout << "   --version     Print the program's version" << std::endl;
-   std::cout << "   --help        Print usage information" << std::endl;
    std::cout << "   --debug lvl   Set debug level: quiet, error, warn (default), info" << std::endl;
-   std::cout << std::endl;
-   std::cout << "Notes:" << std::endl;
-   std::cout << "   - At least one variable must be specified." << std::endl;
-   std::cout << "   - If multiple downscalers are specified for one variable, the last is used." << std::endl;
-   std::cout << "   - If the same variable is specified multiple times, the first definition is used." << std::endl;
-   std::cout << "   - Multiple identical calibrators are allowed for a single variable." << std::endl;
-   std::cout << "   - Only one parameter format can be specified for given a downscaler or calibrator." << std::endl;
-   std::cout << std::endl;
-   std::cout << "Example:" << std::endl;
-   std::cout << "   ./gridpp testing/files/10x10.nc testing/files/10x10_copy.nc -v T -d nearestNeighbour" << std::endl;
+   std::cout << "   --help        Print usage information including all options" << std::endl;
    std::cout << std::endl;
    std::cout << "Inputs/Outputs:" << std::endl;
    std::cout << "   I/O types are autodetected, but can be specified using:" << std::endl;
@@ -50,14 +40,23 @@ void writeUsage() {
    std::cout << Util::formatDescription("units=undef", "Write this to the units attribute in the output.") << std::endl;
    std::cout << Util::formatDescription("standardName=1", "Write this to the standard_name attribute in the output.") << std::endl;
    std::cout << std::endl;
-   std::cout << "Downscalers with options (and default values):" << std::endl;
-   std::cout << Downscaler::getDescriptions();
+   if(full)
+      std::cout << "Downscalers with options (and default values):" << std::endl;
+   else
+      std::cout << "Downscalers:" << std::endl;
+   std::cout << Downscaler::getDescriptions(full);
    std::cout << std::endl;
-   std::cout << "Calibrators with options (and default values):" << std::endl;
-   std::cout << Calibrator::getDescriptions();
+   if(full)
+      std::cout << "Calibrators with options (and default values):" << std::endl;
+   else
+      std::cout << "Calibrators:" << std::endl;
+   std::cout << Calibrator::getDescriptions(full);
    std::cout << std::endl;
-   std::cout << "Parameter formats with Options (and default values)" << std::endl;
-   std::cout << ParameterFile::getDescriptions();
+   if(full)
+      std::cout << "Parameter formats with Options (and default values):" << std::endl;
+   else
+      std::cout << "Parameter formats:" << std::endl;
+   std::cout << ParameterFile::getDescriptions(full);
 }
 
 int main(int argc, const char *argv[]) {
@@ -70,13 +69,13 @@ int main(int argc, const char *argv[]) {
          return 0;
       }
       else if(strcmp(argv[i], "--help") == 0) {
-         writeUsage();
+         writeUsage(true);
          return 0;
       }
 
    }
    if(argc < 3) {
-      writeUsage();
+      writeUsage(false);
       return 0;
    }
    // Retrieve setup

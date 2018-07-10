@@ -272,12 +272,14 @@ bool ParameterFileNetcdf::isReadable() const {
    return ParameterFileNetcdf::isValid(getFilename());
 }
 
-std::string ParameterFileNetcdf::description() {
+std::string ParameterFileNetcdf::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-p netcdf", "Parameters stored in a Netcdf file. File must have contain: dimensions time, lat (or latitude or y), lon (or longitude or x), coefficient; variables with dims: time[time], latitude[lat,lon], longitude[lat,lon], coefficients[*]. the coefficient variable must have lat, lon, coefficient dimensions, and optimally time. These can be in any order. If there is no time dimension, then the parameters are used for all times. The number of parameters in a set must be constant and equals the size of the 'coefficient' dimension.") << std::endl;
-   ss << Util::formatDescription("   dimName=coefficient", "What is the name of the dimension representing different coefficients?") << std::endl;
-   ss << Util::formatDescription("   varName=coefficients", "What is the name of the variable containing the coefficients?") << std::endl;
-   ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   dimName=coefficient", "What is the name of the dimension representing different coefficients?") << std::endl;
+      ss << Util::formatDescription("   varName=coefficients", "What is the name of the variable containing the coefficients?") << std::endl;
+      ss << Util::formatDescription("   file=required", "Filename of file.") << std::endl;
+   }
    return ss.str();
 }
 void ParameterFileNetcdf::write() const {

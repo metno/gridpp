@@ -7,7 +7,7 @@ class ParameterFile;
 class CalibratorPhase : public Calibrator {
    public:
       CalibratorPhase(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "phase";};
 
       //! Precipitation phase

@@ -150,29 +150,29 @@ Options Calibrator::getOptions() const {
    return mOptions;
 }
 
-std::string Calibrator::getDescriptions() {
+std::string Calibrator::getDescriptions(bool full) {
    std::stringstream ss;
-   ss << CalibratorAccumulate::description() << std::endl;
-   ss << CalibratorAltitude::description() << std::endl;
-   ss << CalibratorBct::description() << std::endl;
-   ss << CalibratorCloud::description() << std::endl;
-   ss << CalibratorCoastal::description() << std::endl;
-   ss << CalibratorDeaccumulate::description() << std::endl;
-   ss << CalibratorDiagnoseHumidity::description() << std::endl;
-   ss << CalibratorDiagnoseWind::description() << std::endl;
-   ss << CalibratorGaussian::description() << std::endl;
-   ss << CalibratorKriging::description() << std::endl;
-   ss << CalibratorMask::description() << std::endl;
-   ss << CalibratorNeighbourhood::description() << std::endl;
-   ss << CalibratorOi::description() << std::endl;
-   ss << CalibratorOverride::description() << std::endl;
-   ss << CalibratorPhase::description() << std::endl;
-   ss << CalibratorQc::description() << std::endl;
-   ss << CalibratorQnh::description() << std::endl;
-   ss << CalibratorQq::description() << std::endl;
-   ss << CalibratorRegression::description() << std::endl;
-   ss << CalibratorSort::description() << std::endl;
-   ss << CalibratorWindDirection::description() << std::endl;
-   ss << CalibratorZaga::description() << std::endl;
+   ss << CalibratorAccumulate::description(full) << std::endl;
+   ss << CalibratorAltitude::description(full) << std::endl;
+   ss << CalibratorBct::description(full) << std::endl;
+   ss << CalibratorCloud::description(full) << std::endl;
+   ss << CalibratorCoastal::description(full) << std::endl;
+   ss << CalibratorDeaccumulate::description(full) << std::endl;
+   ss << CalibratorDiagnoseHumidity::description(full) << std::endl;
+   ss << CalibratorDiagnoseWind::description(full) << std::endl;
+   ss << CalibratorGaussian::description(full) << std::endl;
+   ss << CalibratorKriging::description(full) << std::endl;
+   ss << CalibratorMask::description(full) << std::endl;
+   ss << CalibratorNeighbourhood::description(full) << std::endl;
+   ss << CalibratorOi::description(full) << std::endl;
+   ss << CalibratorOverride::description(full) << std::endl;
+   ss << CalibratorPhase::description(full) << std::endl;
+   ss << CalibratorQc::description(full) << std::endl;
+   ss << CalibratorQnh::description(full) << std::endl;
+   ss << CalibratorQq::description(full) << std::endl;
+   ss << CalibratorRegression::description(full) << std::endl;
+   ss << CalibratorSort::description(full) << std::endl;
+   ss << CalibratorWindDirection::description(full) << std::endl;
+   ss << CalibratorZaga::description(full) << std::endl;
    return ss.str();
 }

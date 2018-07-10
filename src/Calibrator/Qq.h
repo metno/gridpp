@@ -7,7 +7,7 @@ class ParameterFile;
 class CalibratorQq : public Calibrator {
    public:
       CalibratorQq(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "qq";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:

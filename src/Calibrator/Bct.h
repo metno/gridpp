@@ -15,7 +15,7 @@ class CalibratorBct : public Calibrator {
       CalibratorBct(const Variable& iMainPredictor, const Options& iOptions);
       static float getInvCdf(float iQuantile, float iEnsMean, float iEnsStd, const Parameters& iParameters);
 
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "bct";};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;

@@ -163,14 +163,16 @@ float CalibratorDiagnoseHumidity::computeWetbulb(float iTemperature, float iPres
    }
 }
 
-std::string CalibratorDiagnoseHumidity::description() {
+std::string CalibratorDiagnoseHumidity::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c diagnoseHumidity","Compute dewpoint (from temperature, rh), wetbulb (from temperature, rh, pressure), or relative humidity (from temperature, dewpoint).") << std::endl;
-   ss << Util::formatDescription("   temperature=required","Temperature variable name") << std::endl;
-   ss << Util::formatDescription("   rh=undef","Relative humidity variable name") << std::endl;
-   ss << Util::formatDescription("   dewpoint=undef","Dewpoint temperature variable name") << std::endl;
-   ss << Util::formatDescription("   pressure=undef","Pressure variable name") << std::endl;
-   ss << Util::formatDescription("   compute=required","Which variable type should be diagnosed? One of dewpoint, wetbulb, rh.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   temperature=required","Temperature variable name") << std::endl;
+      ss << Util::formatDescription("   rh=undef","Relative humidity variable name") << std::endl;
+      ss << Util::formatDescription("   dewpoint=undef","Dewpoint temperature variable name") << std::endl;
+      ss << Util::formatDescription("   pressure=undef","Pressure variable name") << std::endl;
+      ss << Util::formatDescription("   compute=required","Which variable type should be diagnosed? One of dewpoint, wetbulb, rh.") << std::endl;
+   }
    return ss.str();
 }
 

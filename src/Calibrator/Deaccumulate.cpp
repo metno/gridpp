@@ -45,7 +45,7 @@ bool CalibratorDeaccumulate::calibrateCore(File& iFile, const ParameterFile* iPa
    }
    return true;
 }
-std::string CalibratorDeaccumulate::description() {
+std::string CalibratorDeaccumulate::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c deaccumulate","Deaccumlates a value over time. It is assumed that the raw value for time t is the accumulated precip on the interval [0,t]. After deaccumulation, the value for time t is then the value over the interval [t-1,t]. Thus, the deaccumulated value for the first timestep will be missing.") << std::endl;
    return ss.str();

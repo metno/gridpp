@@ -34,7 +34,8 @@ class Downscaler : public Scheme {
       //! @param iJ J-index of nearest point. Set to Util::MV if no nearest neighbour.
       static void getNearestNeighbourBruteForce(const File& iFrom, float iLon, float iLat, int& iI, int &iJ);
 
-      static std::string getDescriptions();
+      // @param full Give full descriptions, including options
+      static std::string getDescriptions(bool full=true);
 
       //! Clears nearest neighbour cache
       static void clearCache();

@@ -184,15 +184,15 @@ void Downscaler::getNearestNeighbourBruteForce(const File& iFrom, float iLon, fl
    }
 }
 
-std::string Downscaler::getDescriptions() {
+std::string Downscaler::getDescriptions(bool full) {
    std::stringstream ss;
-   ss << DownscalerNearestNeighbour::description();
-   ss << DownscalerGradient::description();
-   ss << DownscalerBilinear::description();
-   ss << DownscalerSmart::description();
-   ss << DownscalerPressure::description();
-   ss << DownscalerCoastal::description();
-   ss << DownscalerBypass::description();
+   ss << DownscalerNearestNeighbour::description(full);
+   ss << DownscalerGradient::description(full);
+   ss << DownscalerBilinear::description(full);
+   ss << DownscalerSmart::description(full);
+   ss << DownscalerPressure::description(full);
+   ss << DownscalerCoastal::description(full);
+   ss << DownscalerBypass::description(full);
    return ss.str();
 }
 

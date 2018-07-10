@@ -161,11 +161,13 @@ int DownscalerSmart::getNumSearchPoints(int iSearchRadius) {
    return (iSearchRadius*2+1)*(iSearchRadius*2+1);
 }
 
-std::string DownscalerSmart::description() {
+std::string DownscalerSmart::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-d smart", "Use nearby neighbours that are at a similar elevation to the lookup point. If the lookup point has missing elevation, use the nearest neighbour.") << std::endl;
-   ss << Util::formatDescription("   radius=3", "Search for smart neighbours within this radius (gridpoints)") << std::endl;
-   ss << Util::formatDescription("   num=5", "Average this many smart neighbours") << std::endl;
-   ss << Util::formatDescription("   minElevDiff=-999", "Use the nearest neighbour if its elevation difference (in meters) is less or equal to this. Use -999 to turn this feature off.") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   radius=3", "Search for smart neighbours within this radius (gridpoints)") << std::endl;
+      ss << Util::formatDescription("   num=5", "Average this many smart neighbours") << std::endl;
+      ss << Util::formatDescription("   minElevDiff=-999", "Use the nearest neighbour if its elevation difference (in meters) is less or equal to this. Use -999 to turn this feature off.") << std::endl;
+   }
    return ss.str();
 }

@@ -86,11 +86,13 @@ bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParamete
    return true;
 }
 
-std::string CalibratorWindow::description() {
+std::string CalibratorWindow::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c window","Applies a statistical operator to values within a temporal window. Any missing values are ignored when computing the statistic.") << std::endl;
-   ss << Util::formatDescription("   radius=required", "Define the window as all offsets within +- radius (must be 0 or greater). The unit is in number of time indices in the file.") << std::endl;
-   ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
-   ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   if(full) {
+      ss << Util::formatDescription("   radius=required", "Define the window as all offsets within +- radius (must be 0 or greater). The unit is in number of time indices in the file.") << std::endl;
+      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+      ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+   }
    return ss.str();
 }

@@ -8,7 +8,7 @@ class Parameters;
 class CalibratorRegression : public Calibrator {
    public:
       CalibratorRegression(const Variable& iVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "regression";};
       Parameters train(const std::vector<ObsEns>& iData) const;
    private:

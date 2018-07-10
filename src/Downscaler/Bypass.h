@@ -9,7 +9,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerBypass : public Downscaler {
    public:
       DownscalerBypass(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "bypass";};
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;

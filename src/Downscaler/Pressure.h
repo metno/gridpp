@@ -11,7 +11,7 @@ typedef std::vector<std::vector<int> > vec2Int;
 class DownscalerPressure : public Downscaler {
    public:
       DownscalerPressure(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
-      static std::string description();
+      static std::string description(bool full=true);
       std::string name() const {return "pressure";};
       static float calcPressure(float iElev0, float iPressure0, float iElev1);
    private:

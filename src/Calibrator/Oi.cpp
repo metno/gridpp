@@ -445,7 +445,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             int lS = lLocIndices.size();
             if(x == mX && y == mY) {
-               std::cout << lS << std::endl;
+               std::cout << "Number of local stations: " << lS << std::endl;
             }
 
             if(lS == 0 || lS < mMinObs) {
@@ -487,7 +487,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                }
             }
             if(x == mX && y == mY) {
-               std::cout << nValidEns << std::endl;
+               std::cout << "Number of valid ensemble members: " << nValidEns << std::endl;
             }
 
             vectype lObs(lS);
@@ -680,15 +680,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   abort();
                }
 
-               if(x == mX && y == mY) {
-                  std::cout << "Rinv for " << mX << "," << mY << std::endl;
-                  for(int i = 0; i < lS; i++) {
-                     for(int j = 0; j < lS; j++) {
-                        std::cout << Rinv(i, j) << " " << std::endl;
-                     }
-                     std::cout << std::endl;
-                  }
-               }
                // Compute C matrix
                // k x gS * gS x gS
                mattype C(nValidEns, lS);

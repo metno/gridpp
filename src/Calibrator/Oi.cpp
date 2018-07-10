@@ -13,7 +13,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mRadarLength(10000),
       mMu(0.9),
       mMinObs(0),
-      mSort(true),
       mMinRho(0.0013),
       mEpsilon(0.5),
       mRadarEpsilon(0.54*0.54),
@@ -53,7 +52,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("h", mVLength);
    iOptions.getValue("dr", mRadarLength);
    iOptions.getValue("maxLocations", mMaxLocations);
-   iOptions.getValue("sort", mSort);
    iOptions.getValue("sigma", mSigma);
    iOptions.getValue("delta", mDelta);
    iOptions.getValue("deltaVariable", mDeltaVariable);
@@ -241,9 +239,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                if(isRegularGrid) {
                   for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
                      for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
-                        if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
-                           gLocIndices[y][x].push_back(i);
-                        }
+                        gLocIndices[y][x].push_back(i);
                      }
                   }
                }
@@ -251,11 +247,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   for(int y = 0; y < nY; y++) {
                      for(int x = 0; x < nX; x++) {
                         float dist = Util::getDistance(gLocations[i].lat(), gLocations[i].lon(), lats[y][x], lons[y][x], true);
-                        if(dist < 3.64 * mHLength) {
-                           if(mSort || gLocIndices[y][x].size() < mMaxLocations) {
-                              gLocIndices[y][x].push_back(i);
-                           }
-                        }
+                        if(dist < 3.64 * mHLength)
+                           gLocIndices[y][x].push_back(i);
                      }
                   }
                }
@@ -441,9 +434,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                // Otherwise, just use the last locations added
                lRhos = arma::vec(mMaxLocations);
-               if(mSort) {
-                  std::sort(lRhos0.begin(), lRhos0.end(), Util::sort_pair_first<float,int>());
-               }
+               std::sort(lRhos0.begin(), lRhos0.end(), Util::sort_pair_first<float,int>());
                for(int i = 0; i < mMaxLocations; i++) {
                   // The best values start at the end of the array
                   int index = lRhos0[lRhos0.size() - 1 - i].second;

@@ -25,7 +25,6 @@ class CalibratorOi : public Calibrator {
       float mGamma;
       std::string mBiasVariable;
       int mMaxLocations;
-      bool mSort;
       float mSigma;
       float mDelta;
       std::string mDeltaVariable;

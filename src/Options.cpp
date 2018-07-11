@@ -46,12 +46,13 @@ Options::Options(std::string iOptionString) {
 void Options::addOption(std::string iOptionString) {
    int nextEqual = iOptionString.find('=');
    if(nextEqual < 0) {
-      return;
+      std::string key = iOptionString;
+      std::string value = "1";
+      addOption(key, value);
    }
    else {
       std::string key   = iOptionString.substr(0, nextEqual);
       std::string value = iOptionString.substr(nextEqual+1);
-
       addOption(key, value);
    }
 }

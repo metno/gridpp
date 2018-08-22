@@ -46,6 +46,12 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
                   elevPos = currCounter;
                currCounter++;
             }
+            int numSpatialVariables = Util::isValid(latPos) + Util::isValid(lonPos) + Util::isValid(elevPos);
+            if(numSpatialVariables > 0 && numSpatialVariables < 3) {
+               std::stringstream ss;
+               ss << "Partial spatial definitions found. Only " << numSpatialVariables << " out of lat, lon, elev columns are found";
+               Util::error(ss.str());
+            }
          }
          else {
             // Loop over each value

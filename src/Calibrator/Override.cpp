@@ -20,7 +20,7 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
    vec2 elevs = iFile.getElevs();
 
    if(iParameterFile->getNumParameters() != 1) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have two dataacolumns");
+      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have one dataacolumn");
    }
    if(!iParameterFile->isLocationDependent()) {
       Util::error("Parameter file '" + iParameterFile->getFilename() + "' must be location dependent");

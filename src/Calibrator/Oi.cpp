@@ -627,34 +627,53 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      }
                   }
                   int lNumRadar = gRadarIndices.size();
-                  // std::cout << x << " " << y << " " << lS << " " << lNumRadar << std::endl;
-                  // if(lNumRadar > 0)
-                  //    std::cout << "Number of radar pixels: " << x << "," << y << " " << lNumRadar << std::endl;
 
                   // Compute R tilde r
                   mattype radarR(lNumRadar, lNumRadar, arma::fill::zeros);
                   for(int i = 0; i < lNumRadar; i++) {
                      for(int j = 0; j < lNumRadar; j++) {
-                        int index_i = gRadarIndices[i];
-                        int index_j = gRadarIndices[j];
-                        if(index_i == index_j) {
-                           radarR(i, j) = 1;
+                        int gIndex_i = gRadarIndices[i];
+                        int gIndex_j = gRadarIndices[j];
+                        int lIndex_i = lRadarIndices[i];
+                        int lIndex_j = lRadarIndices[j];
+                        if(i == j) {
+                           radarR(i, i) = 1;
                         }
                         else {
                            // Equation 5
-                           float dist = 1; //Util::getDistance(gLocations[index_i].lat(), gLocations[index_i].lon(), gLocations[index_j].lat(), gLocations[index_j].lon(), true);
-                           float rho = (1 + dist / mRadarLength) * exp(-dist / mRadarLength);
+                           float dist = Util::getDistance(gLocations[gIndex_i].lat(), gLocations[gIndex_i].lon(), gLocations[gIndex_j].lat(), gLocations[gIndex_j].lon(), true);
+                           float h = dist / mRadarLength;
+                           float rho = (1 + h) * exp(-h);
                            radarR(i, j) = rho;
                         }
                      }
                   }
+                  if(x == mX && y == mY) {
+                     std::cout << "Number of radar points: " << " " << lNumRadar << std::endl;
+                     if(lNumRadar > 0) {
+                        print_matrix<mattype>(radarR);
+                     }
+                  }
+
                   // TODO: Use a proper estimate
                   // Could be computed based on lY
                   // Need to have a lower bound (in transformed space)
                   float ensembleVarianceEstimate = 0.1;
 
+                  float cond = arma::rcond(radarR);
+                  if(cond <= 0) {
+                     std::stringstream ss;
+                     ss << "Condition number of " << cond << " for radar values. Using raw values";
+                     Util::warning(ss.str());
+                     for(int e = 0; e < nEns; e++) {
+                        (*output)(y, x, e) = (*field)(y, x, e); // Util::MV;
+                     }
+                     continue;
+                  }
+
                   mattype radarRinv(lNumRadar, lNumRadar, arma::fill::zeros); 
                   radarRinv = arma::inv(radarR);
+
                   for(int i = 0; i < lS; i++) {
                      // TODO: At some point, include rho here
                      Rinv(i, i) = lRhos[i] / (mEpsilon * mEpsilon * ensembleVarianceEstimate);
@@ -664,15 +683,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      int ii = lRadarIndices[i];
                      for(int j = 0; j < lNumRadar; j++) {
                         int jj = lRadarIndices[j];
-                        Rinv(ii, jj) = 1 / (mRadarEpsilon * mRadarEpsilon * ensembleVarianceEstimate) * radarRinv(i, j);
-                     }
-                  }
-                  if(false && lNumRadar > 5) {
-                     for(int i = 0; i < lNumRadar; i++) {
-                        for(int j = 0; j < lNumRadar; j++) {
-                           std::cout << radarR(i, j) << " ";
-                        }
-                        std::cout << std::endl;
+                        Rinv(ii, jj) = sqrt(lRhos[ii] * lRhos[jj]) / (mRadarEpsilon * mRadarEpsilon * ensembleVarianceEstimate) * radarRinv(i, j);
                      }
                   }
                }

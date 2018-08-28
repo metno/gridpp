@@ -30,15 +30,18 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
       Field& wind      = *iFile.getField(mVariable, t);
       Field& direction = *iFile.getField(mDirectionVariable, t);
 
-      Parameters parameters;
+      Parameters parametersGlobal;
       if(!iParameterFile->isLocationDependent())
-         parameters = iParameterFile->getParameters(t);
+         parametersGlobal = iParameterFile->getParameters(t);
 
-      #pragma omp parallel for private(parameters)
+      #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            Parameters parameters;
             if(iParameterFile->isLocationDependent())
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            else
+               parameters = parametersGlobal;
             for(int e = 0; e < nEns; e++) {
                float currDirection = direction(i,j,e);
                float factor = getFactor(currDirection, parameters);

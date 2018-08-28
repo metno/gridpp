@@ -33,9 +33,9 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      Parameters parameters;
+      Parameters parametersGlobal;
       if(!iParameterFile->isLocationDependent())
-         parameters = iParameterFile->getParameters(t);
+         parametersGlobal = iParameterFile->getParameters(t);
       const FieldPtr field = iFile.getField(mVariable, t);
       std::vector<FieldPtr> fields;
       if(multiVariate) {
@@ -52,11 +52,16 @@ bool CalibratorRegression::calibrateCore(File& iFile, const ParameterFile* iPara
          fields.push_back(field);
       }
 
-      #pragma omp parallel for private(parameters)
+      #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+
+            Parameters parameters;
             if(iParameterFile->isLocationDependent())
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            else
+               parameters = parametersGlobal;
+
             for(int e = 0; e < nEns; e++) {
                if(Util::isValid((*field)(i,j,e))) {
                   if(multiVariate) {

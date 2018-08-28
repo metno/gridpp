@@ -70,9 +70,9 @@ bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterF
       int numInvalidRaw = 0;
       int numInvalidCal = 0;
 
-      Parameters parameters;
+      Parameters parametersGlobal;
       if(!iParameterFile->isLocationDependent())
-         parameters = iParameterFile->getParameters(t);
+         parametersGlobal = iParameterFile->getParameters(t);
 
       // Load the POP output field, if needed
       FieldPtr pop;
@@ -92,11 +92,14 @@ bool CalibratorZaga::calibrateCore(File& iFile, const ParameterFile* iParameterF
          precipHigh = iFile.getField(mHighVariable, t);
       }
 
-      #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal) private(parameters)
+      #pragma omp parallel for reduction(+:numInvalidRaw, numInvalidCal)
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            Parameters parameters;
             if(iParameterFile->isLocationDependent())
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            else
+               parameters = parametersGlobal;
 
             // for Pop6h, the first few hours are undefined, since we cannot do a 6h accumulation
             if(mPopVariable != "" && t < startTime) {

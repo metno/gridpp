@@ -25,15 +25,18 @@ bool CalibratorBct::calibrateCore(File& iFile, const ParameterFile* iParameterFi
    for(int t = 0; t < nTime; t++) {
       Field& field = *iFile.getField(mVariable, t);
 
-      Parameters parameters;
+      Parameters parametersGlobal;
       if(!iParameterFile->isLocationDependent())
-         parameters = iParameterFile->getParameters(t);
+         parametersGlobal = iParameterFile->getParameters(t);
 
-      #pragma omp parallel for private(parameters)
+      #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
+            Parameters parameters;
             if(iParameterFile->isLocationDependent())
                parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
+            else
+               parameters = parametersGlobal;
 
             // Compute ensemble mean
             float ensMean = 0;

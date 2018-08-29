@@ -73,18 +73,15 @@ endfunction()
 
 list_sources(SRC)
 set(DRVSRC  "src/Driver/Gridpp.cpp")
-set(KFSRC   "src/Driver/Kf.cpp")
 set(TRAINRC "src/Driver/Train.cpp")
 
 add_gridpp_library(gridpp-static STATIC)
 add_executable(gridpp-bin   ${DRVSRC} )
-add_executable(gridpp-kf    ${KFSRC}  )
 add_executable(gridpp-train ${TRAINRC})
 set_target_properties(gridpp-bin   PROPERTIES OUTPUT_NAME gridpp)
-set_target_properties(gridpp-kf    PROPERTIES OUTPUT_NAME gridpp_kf)
 set_target_properties(gridpp-train PROPERTIES OUTPUT_NAME gridpp_train)
 
-foreach(item gridpp-bin gridpp-kf gridpp-train)
+foreach(item gridpp-bin gridpp-train)
    target_link_libraries(${item} gridpp-static)
 
    target_link_libraries(${item} "${Boost_LIBRARIES}")
@@ -133,5 +130,5 @@ else()
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-install(TARGETS gridpp-bin gridpp-train gridpp-kf
+install(TARGETS gridpp-bin gridpp-train
    RUNTIME DESTINATION bin)

@@ -302,11 +302,10 @@ namespace {
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=text")), ".*");
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parametersInvalidTime.txt type=text")), ".*");
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=netcdf")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
 
       // Different number of input and output files
-      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
-      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=metnoKalman")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10*.nc\" \"testing/files/10x10.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=netcdf")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("\"testing/files/10x10.nc\" \"testing/files/10x10*.nc\" -v precipitation_amount -c zaga -p testing/files/parametersw8e9yhd89hywe89d.txt type=netcdf")), ".*");
 
       // -vi but no -v
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10_copy.nc -vi precipitation_amount")), ".*");

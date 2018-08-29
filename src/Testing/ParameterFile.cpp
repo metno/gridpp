@@ -24,10 +24,8 @@ namespace {
       ParameterFile* p1 = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt"));
       EXPECT_EQ("text", p1->name());
       EXPECT_TRUE(p1->isLocationDependent());
-      ParameterFile* p2 = ParameterFile::getScheme("metnoKalman", Options("file=testing/files/kalmanOutput.txt"));
-      EXPECT_EQ("metnoKalman", p2->name());
-      ParameterFile* p3 = ParameterFile::getScheme("netcdf", Options("file=testing/files/10x10_param.nc"));
-      EXPECT_EQ("netcdf", p3->name());
+      ParameterFile* p2 = ParameterFile::getScheme("netcdf", Options("file=testing/files/10x10_param.nc"));
+      EXPECT_EQ("netcdf", p2->name());
    }
    TEST_F(ParameterFileTest, nearestNeighbour) {
       ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersKriging.txt"));

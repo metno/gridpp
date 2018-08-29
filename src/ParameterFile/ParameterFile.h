@@ -51,7 +51,6 @@ class ParameterFile : public Scheme {
 
       std::string getFilename() const;
       virtual std::string name() const = 0;
-      static std::string getDescription(bool iSpatialOnly=false);
       virtual void write() const {};
 
       static std::string getDescriptions(bool full=true);
@@ -83,7 +82,6 @@ class ParameterFile : public Scheme {
       mutable std::vector<Location> mLocations;
       Options mOptions;
 };
-#include "MetnoKalman.h"
 #include "Text.h"
 #include "Simple.h"
 #include "Netcdf.h"

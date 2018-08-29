@@ -34,10 +34,7 @@ void ParameterFile::recomputeTree() const {
 
 ParameterFile* ParameterFile::getScheme(std::string iName, const Options& iOptions, bool iIsNew) {
    ParameterFile* p;
-   if(iName == "metnoKalman") {
-      p = new ParameterFileMetnoKalman(iOptions, iIsNew);
-   }
-   else if(iName == "text") {
+   if(iName == "text") {
       p = new ParameterFileText(iOptions, iIsNew);
    }
    else if(iName == "netcdf") {
@@ -242,15 +239,6 @@ int ParameterFile::getNumParameters() const {
    return size;
 }
 
-std::string ParameterFile::getDescription(bool iSpatialOnly) {
-   std::stringstream ss;
-   if(iSpatialOnly)
-      ss << "What file type is the parameters in? One of 'text' and 'metnoKalman'.";
-   else
-      ss << "What file type is the parameters in? One of 'text' and 'metnoKalman'.";
-   return ss.str();
-}
-
 void ParameterFile::setFilename(std::string iFilename) {
    mFilename = iFilename;
 }
@@ -258,7 +246,6 @@ void ParameterFile::setFilename(std::string iFilename) {
 std::string ParameterFile::getDescriptions(bool full) {
    std::stringstream ss;
    ss << ParameterFileText::description(full) << std::endl;
-   ss << ParameterFileMetnoKalman::description(full) << std::endl;
    ss << ParameterFileNetcdf::description(full) << std::endl;
    return ss.str();
 }

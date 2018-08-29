@@ -122,16 +122,17 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    }
 
    std::vector<Location> gLocations = iParameterFile->getLocations();
-   int numRequiredParameters;
+   int maxNumParameters;
    if(mType == TypeTemperature)
-      numRequiredParameters = 2;
-   else if(mType == TypePrecipitation)
-      numRequiredParameters = 3;
+      maxNumParameters = 2;
+   else if(mType == TypeTemperature)
+      maxNumParameters = 3;
    else
       abort();
-   if(iParameterFile->getNumParameters() < numRequiredParameters) {
+
+   if(iParameterFile->getNumParameters() > maxNumParameters) {
       std::stringstream ss;
-      ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, not " << numRequiredParameters;
+      ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, which is greater than " << maxNumParameters;
       Util::error(ss.str());
    }
 
@@ -162,8 +163,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    std::vector<float> gXi(gS, Util::MV);
    std::vector<float> gLafs(gS, Util::MV);
    std::vector<float> gElevs(gS, Util::MV);
-   std::vector<float> gCi(gS, Util::MV);
-   std::vector<float> gRadarL(gS, Util::MV);
+   std::vector<float> gCi(gS, 1);
+   std::vector<float> gRadarL(gS, 0);
    std::vector<float> gObs(gS, Util::MV);
    gLocIndices.resize(nY);
    for(int y = 0; y < nY; y++) {
@@ -198,19 +199,13 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          Util::info(ss.str());
       }
       Parameters parameters = iParameterFile->getParameters(0, gLocations[i]);
-      if(mType == TypeTemperature) {
-         if(parameters.size() < 2)
-            Util::error("Temperature OI needs 2 parameters");
-         gObs[i] = parameters[0];
+      assert(parameters.size() > 0);
+      gObs[i] = parameters[0];
+      if(parameters.size() == 2)
          gCi[i] = parameters[1];
-      }
-      else if(mType == TypePrecipitation) {
-         if(parameters.size() < 3)
-            Util::error("Precipitation OI needs 3 parameters");
-         gObs[i] = transform(parameters[0]);
-         gCi[i] = parameters[1];
+      if(mType == TypePrecipitation && parameters.size() == 3)
          gRadarL[i] = parameters[2];
-      }
+
       gElevs[i] = gLocations[i].elev();
       int Y, X;
       searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);

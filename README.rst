@@ -39,6 +39,9 @@ Installing on Ubuntu
   sudo apt-get install netcdf-bin libnetcdf-dev
   sudo apt-get install cmake
 
+You also need [[Armadillo 6.6|http://arma.sourceforge.net/]] or later installed. Apt-get only has
+version 6.5 on Ubuntu Xenial.
+
 Optional: If you are developing the code, install the google test library:
 
 .. code-block:: bash

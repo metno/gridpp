@@ -96,7 +96,7 @@ Follow instructions here: https://launchpad.net/~metno/+archive/ubuntu/gridpp
 
 Copyright and license
 ---------------------
-Copyright (C) 2015-2017 MET Norway. Gridded post-processor is licensed under `GPL
+Copyright (C) 2014-2018 MET Norway. Gridded post-processor is licensed under `GPL
 version 2 <https://github.com/metno/gridpp/blob/master/LICENSE>`_ or (at
 your option) any later version.
 

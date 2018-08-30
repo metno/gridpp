@@ -16,3 +16,4 @@ devel/
 data
 coverage.*
 debian/gridpp*
+build*

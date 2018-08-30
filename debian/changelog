@@ -1,13 +1,19 @@
 gridpp (0.3.0) precise; urgency=low
 
+The command-line interface to this version has changed significantly. Instead
+of refering to variables with codes such as T for temperature, the user
+specifies the variable name as found in the NetCDF file (e.g
+air_temperature_2m).
+
+The compilation is now done with cmake.
+
   * New features:
+    - Adds -c oi to perform optimal interpolation
     - Gradient downscaler can use temperature at model levels (instead of T2m)
       when computing gradient
-    - Gradient downscaler can use gradients in land-area fraction
-    - Bilinear downscaler added
-    - Coastal bias-correction scheme added that weights land and sea
+    - Adds coastal regression in -d gradient
+    - Adds -c coastal, a bias-correction scheme that weights land and sea
       tempatures from a neighbourhood
-    - Added compilation with cmake
     - Variable names can be overridden by passing in a variable map file
   * Backwards-incompatible changes:
     - Gradient downscaler options are different. Use -d gradientOld to get
@@ -17,7 +23,7 @@ gridpp (0.3.0) precise; urgency=low
     - Names as they appear in the file are used to identify variables. I.e.
       use -v air_temperture_2m instead of -v T.
 
- -- Thomas Nipen <thomas.nipen@met.no>  Tue, 6 Jun 2017 10:15:25 +0200
+ -- Thomas Nipen <thomas.nipen@met.no>  Fri, 31 Aug 2018 10:00:00 +0200
 
 gridpp (0.2.10) precise; urgency=low
 

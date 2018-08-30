@@ -747,11 +747,18 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   continue;
                }
 
+               // Compute sqrt of matrix. Armadillo 6.6 has this function, but on many systems this
+               // is not available. Therefore, compute sqrt using the method found in 6.6
+               // cxtype Wcx(nValidEns, nValidEns);
+               // status = arma::sqrtmat(Wcx, (nValidEns - 1) * P);
+               // mattype W = arma::real(Wcx);
+
                mattype P = arma::inv(Pinv);
-               cxtype Wcx(nValidEns, nValidEns);
-               bool status = arma::sqrtmat(Wcx, (nValidEns - 1) * P);
+               vectype eigval;
+               mattype eigvec;
+               bool status = arma::eig_sym(eigval, eigvec, (nValidEns - 1) * P);
                if(!status) {
-                  std::cout << "Near singular matrix for sqrtmat:" << std::endl;
+                  std::cout << "Cannot find eigenvector:" << std::endl;
                   std::cout << "Lat: " << lat << std::endl;
                   std::cout << "Lon: " << lon << std::endl;
                   std::cout << "Elev: " << elev << std::endl;
@@ -767,8 +774,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   std::cout << "Yhat" << std::endl;
                   print_matrix<mattype>(lYhat);
                }
-
+               eigval = sqrt(eigval);
+               mattype Wcx = eigvec * arma::diagmat(eigval) * eigvec.t();
                mattype W = arma::real(Wcx);
+
                if(W.n_rows == 0) {
                   std::stringstream ss;
                   ss << "Could not find the real part of W. Using raw values.";

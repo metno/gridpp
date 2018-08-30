@@ -42,7 +42,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
 endif()
 
 find_package(Boost  REQUIRED)
-find_package(Armadillo 6.6 REQUIRED)
+find_package(Armadillo 6.5 REQUIRED)
 find_package(NetCDF REQUIRED)
 find_package(GSL REQUIRED)
 

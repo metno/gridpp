@@ -13,5 +13,6 @@ class CalibratorCloud : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       std::string mPrecipVariable;
+      float mValue;
 };
 #endif

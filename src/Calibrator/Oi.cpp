@@ -171,10 +171,14 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       gLocIndices[y].resize(nX);
    }
 
+   // Calculate the factor that the horizontal decorrelation scale should be multiplied by
+   // to get the localization radius. For minRho=0.0013, the factor is 3.64
+   float radiusFactor = sqrt(-2*log(mMinRho));
+
    // Spread each observation out to this many gridpoints from the nearest neighbour
    int gridpointRadius = Util::MV;
    if(isRegularGrid) {
-      gridpointRadius = 3.64 * mHLength / gridSize;
+      gridpointRadius = radiusFactor * mHLength / gridSize;
 
       // When large radiuses are used, the process becomes memory-intensive. Try to fail here
       // if we expect to use more memory than desired. The true memory is roughly
@@ -192,6 +196,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
    double time_s = Util::clock();
    KDTree searchTree(iFile.getLats(), iFile.getLons());
+
+   // Assign observations to gridpoints. Parse the observations and only keep those that pass certain checks
    for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
          std::stringstream ss;

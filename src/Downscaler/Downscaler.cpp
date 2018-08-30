@@ -191,7 +191,6 @@ std::string Downscaler::getDescriptions(bool full) {
    ss << DownscalerBilinear::description(full);
    ss << DownscalerSmart::description(full);
    ss << DownscalerPressure::description(full);
-   ss << DownscalerCoastal::description(full);
    ss << DownscalerBypass::description(full);
    return ss.str();
 }

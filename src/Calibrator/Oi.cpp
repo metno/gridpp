@@ -129,7 +129,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    int maxNumParameters;
    if(mType == TypeTemperature)
       maxNumParameters = 2;
-   else if(mType == TypeTemperature)
+   else if(mType == TypePrecipitation)
       maxNumParameters = 3;
    else
       abort();

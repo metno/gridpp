@@ -47,6 +47,8 @@ class CalibratorOi : public Calibrator {
       float mNewDeltaVar;
       float mMaxElevDiff;
       bool mDiagnose;
+      bool mLandOnly;
+      std::string mDiaFile;
       bool mUseEns;
       typedef arma::mat mattype;
       typedef arma::vec vectype;

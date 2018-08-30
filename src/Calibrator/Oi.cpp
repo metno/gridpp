@@ -42,6 +42,8 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mCrossValidate(false),
       mType(TypeTemperature),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
+      mLandOnly(false),
+      mDiaFile(""),
       mGamma(0.25) {
    iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
@@ -72,6 +74,8 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("c", mC);
    iOptions.getValue("lambda", mLambda);
    iOptions.getValue("crossValidate", mCrossValidate);
+   iOptions.getValue("landOnly", mLandOnly);
+   iOptions.getValue("diaFile", mDiaFile);
    iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
@@ -153,6 +157,13 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    }
    bool isRegularGrid = Util::isValid(gridSize);
 
+   // Log file for diagnostics of rejected observations
+   std::ofstream diaFile;
+   if(mDiaFile != "") {
+     diaFile.open(mDiaFile.c_str());
+   }
+
+
    // Loop over each observation, find the nearest gridpoint and place the obs into all gridpoints
    // in the vicinity of the nearest neighbour. This is only meant to be an approximation, but saves
    // considerable time instead of doing a loop over each grid point and each observation.
@@ -218,7 +229,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       gYi[i] = Y;
       gXi[i] = X;
       gLafs[i] = lafs[Y][X];
-      // std::cout << gLocations[i].lat() << " " << gLocations[i].lon() << " " << lats[Y][X] << " " << lons[Y][X] << std::endl;
 
       if(!Util::isValid(gridSize) || (X > 0 && X < nX - 1 && Y > 0 && Y < nY - 1)) {
          if(Util::isValid(gObs[i])) {
@@ -229,27 +239,44 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                hasValidElev = elevDiff < mMaxElevDiff;
             }
             if(hasValidElev) {
-               if(isRegularGrid) {
-                  for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
-                     for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
-                        gLocIndices[y][x].push_back(i);
+
+               // Don't include an observation if it is in the ocean and landOnly=1
+               bool wrongLaf = Util::isValid(gLafs[i]) && mLandOnly && gLafs[i] == 0;
+               if(!wrongLaf) {
+                  if(isRegularGrid) {
+                     for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
+                        for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
+                           gLocIndices[y][x].push_back(i);
+                        }
+                     }
+                  }
+                  else {
+                     // Do a rough localization based on distance
+                     for(int y = 0; y < nY; y++) {
+                        for(int x = 0; x < nX; x++) {
+                           float dist = Util::getDistance(gLocations[i].lat(), gLocations[i].lon(), lats[y][x], lons[y][x], true);
+                           if(dist < radiusFactor * mHLength)
+                              gLocIndices[y][x].push_back(i);
+                        }
                      }
                   }
                }
                else {
-                  for(int y = 0; y < nY; y++) {
-                     for(int x = 0; x < nX; x++) {
-                        float dist = Util::getDistance(gLocations[i].lat(), gLocations[i].lon(), lats[y][x], lons[y][x], true);
-                        if(dist < 3.64 * mHLength)
-                           gLocIndices[y][x].push_back(i);
-                     }
+                  std::stringstream ss;
+                  ss << "Removing station (" << gLocations[i].lat() << " " << gLocations[i].lon() << ") because laf=0";
+                  Util::warning(ss.str());
+                  if(mDiaFile != "") {
+                     diaFile << gLocations[i].lon() << ";" << gLocations[i].lat() << ";2;" << std::endl;  
                   }
                }
             }
             else {
                std::stringstream ss;
-               ss << "Removing station because elevation (" << gLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
+               ss << "Removing station (" << gLocations[i].lat() << " " << gLocations[i].lon() << ") because elevation (" << gLocations[i].elev() << " m) is too far from grid (" << elevs[Y][X] << " m)";
                Util::warning(ss.str());
+               if(mDiaFile != "") {
+                  diaFile << gLocations[i].lon() << ";" << gLocations[i].lat() << ";1;" << std::endl;  
+               }
             }
          }
       }
@@ -953,6 +980,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          iFile.addField(newdelta, Variable(mDeltaVariable), t);
       }
    }
+   if ( mDiaFile != "" ){
+     diaFile.close();
+   }
    return true;
 }
 
@@ -1058,6 +1088,8 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   lambda=0.5","") << std::endl;
       ss << Util::formatDescription("   diagnose=0","") << std::endl;
       ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;
+      ss << Util::formatDescription("   landOnly=0","Remove stations that are not on land (laf > 0)") << std::endl;
+      ss << Util::formatDescription("   diaFile=undef","If defined, write information about removed stations to this filename") << std::endl;
       ss << Util::formatDescription("   crossValidate=0","If 1, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
    }
    return ss.str();

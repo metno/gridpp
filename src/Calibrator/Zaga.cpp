@@ -658,12 +658,12 @@ float CalibratorZaga::logLikelihood(float obs, float iEnsMean, float iEnsFrac, c
 
 std::string CalibratorZaga::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precipitation. The distribution has three parameters:") << std::endl;
-   ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
-   ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
-   ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;
-   ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option). The parameter set must contain 8 columns with the values [a b c d e f g h].") << std::endl;
    if(full) {
+      ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution, suitable for parameters like precipitation. The distribution has three parameters:") << std::endl;
+      ss << Util::formatDescription("", "* mean  = exp(a + b * ensmean^(1/3)") << std::endl;
+      ss << Util::formatDescription("", "* sigma = exp(c + d * ensmean") << std::endl;
+      ss << Util::formatDescription("", "* logit(p0) = e + f * ensmean + g * ensfrac + h * ensmean^(1/3)") << std::endl;
+      ss << Util::formatDescription("", "where ensmean is the ensemble mean, and ensfrac is the fraction of members above a certain threshold (use fracThreshold option). The parameter set must contain 8 columns with the values [a b c d e f g h].") << std::endl;
       ss << Util::formatDescription("   fracThreshold=0.5", "Threshold defining precip/no-precip boundary when computing fraction of members with precip.") << std::endl;
       ss << Util::formatDescription("   neighbourhoodSize=0", "Increase the ensemble by taking all gridpoints within a neighbourhood. A value of 0 means no neighbourhood is used.") << std::endl;
       ss << Util::formatDescription("   precipLowQuantile=undef", "If set, write values to the PrecipLow variable using this quantile (number between 0 and 1)") << std::endl;
@@ -677,5 +677,7 @@ std::string CalibratorZaga::description(bool full) {
       ss << Util::formatDescription("   maxEnsMean=100", "Upper limit of what the ensemble mean is allowed to be when passed into the distribution. This effectively prevents the distribution to yield very high values.") << std::endl;
       ss << Util::formatDescription("   6h=0", "If POP is produced, should it be based on the precip in the last 6 hours? If so, the Pop6h variable is written.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c zaga", "Calibrates an ensemble using a zero-adjusted gamma distribution") << std::endl;
    return ss.str();
 }

@@ -1061,8 +1061,8 @@ float CalibratorOi::invTransform(float iValue) const {
 
 std::string CalibratorOi::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c oi","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
    if(full) {
+      ss << Util::formatDescription("-c oi","Merge observations from parameter file with background field using Optimal interpolation. A parameter file is required where the first parameter is an observation.")<< std::endl;
       ss << Util::formatDescription("   type=temperature","One of 'temperature', 'precipitation'. If 'precipitation', enable the box-cox transformation.") << std::endl;
       ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
@@ -1092,5 +1092,7 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   diaFile=undef","If defined, write information about removed stations to this filename") << std::endl;
       ss << Util::formatDescription("   crossValidate=0","If 1, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c oi","Merging of observations and background using Optimal interpolation")<< std::endl;
    return ss.str();
 }

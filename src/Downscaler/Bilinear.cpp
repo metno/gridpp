@@ -363,6 +363,9 @@ bool DownscalerBilinear::calcGeneral(float x, float y, float x0, float x1, float
 
 std::string DownscalerBilinear::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-d bilinear", "Bilinear interpolation using the 4 points surrounding the lookup point. If the lookup point is outside the input domain, then the nearest neighbour is used.") << std::endl;
+   if(full)
+      ss << Util::formatDescription("-d bilinear", "Bilinear interpolation using the 4 points surrounding the lookup point. If the lookup point is outside the input domain, then the nearest neighbour is used.") << std::endl;
+   else
+      ss << Util::formatDescription("-d bilinear", "Bilinear interpolation") << std::endl;
    return ss.str();
 }

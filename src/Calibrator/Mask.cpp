@@ -76,9 +76,11 @@ bool CalibratorMask::calibrateCore(File& iFile, const ParameterFile* iParameterF
 
 std::string CalibratorMask::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c mask", "Allows removal of gridpoints that are not within (or alternatively within) a radius of a set of points provided in a parameter file. The removed gridpoints are set to missing. The parameter file must be spatial and conain one parameter representing the radius in meters. Each gridpoint is checked against each parameter point to see if the gridpoint is within its radius.") << std::endl;
    if(full) {
+      ss << Util::formatDescription("-c mask", "Allows removal of gridpoints that are not within (or alternatively within) a radius of a set of points provided in a parameter file. The removed gridpoints are set to missing. The parameter file must be spatial and conain one parameter representing the radius in meters. Each gridpoint is checked against each parameter point to see if the gridpoint is within its radius.") << std::endl;
       ss << Util::formatDescription("   keep=1", "If 1, then all gridpoints within the radius of any parameter point will be kept. If 0, then all gridpoints within the radius of any parameter point will be removed.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c mask", "Remove or keep gridpoints near parameter locations") << std::endl;
    return ss.str();
 }

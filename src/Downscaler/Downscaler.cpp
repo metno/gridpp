@@ -34,9 +34,6 @@ Downscaler* Downscaler::getScheme(std::string iName, const Variable& iInputVaria
    else if(iName == "pressure") {
       d = new DownscalerPressure(iInputVariable, iOutputVariable, iOptions);
    }
-   else if(iName == "coastal") {
-      d = new DownscalerCoastal(iInputVariable, iOutputVariable, iOptions);
-   }
    else if(iName == "gradient") {
       d = new DownscalerGradient(iInputVariable, iOutputVariable, iOptions);
    }

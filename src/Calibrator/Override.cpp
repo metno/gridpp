@@ -77,7 +77,7 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
 
 std::string CalibratorOverride::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c override", "Overrides certain points in the file based on parameter values at point locations.") << std::endl;
+   ss << Util::formatDescription("-c override", "Overrides points in the file based on values at point locations.") << std::endl;
    if(full) {
       ss << Util::formatDescription("   radius=0", "Write values into all gridpoints in a square box with this radius (in number of gridpoints).") << std::endl;
       ss << Util::formatDescription("   maxElevDiff=undef", "Only write in gridpoints that are within this elevation difference to the point. If undefined, then do not do an elevation check.") << std::endl;

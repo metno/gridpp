@@ -63,18 +63,20 @@ bool CalibratorPhase::calibrateCore(File& iFile, const ParameterFile* iParameter
 
 std::string CalibratorPhase::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c phase", "Compute precipitation phase based on temperature, with values encoded by:") << std::endl;
-   ss << Util::formatDescription("", "* 0 = no precipitation (Precip < minPrecip)") << std::endl;
-   ss << Util::formatDescription("", "* 1 = rain (b < T)") << std::endl;
-   ss << Util::formatDescription("", "* 2 = sleet (a < T <= b)") << std::endl;
-   ss << Util::formatDescription("", "* 3 = snow (T < a)") << std::endl;
-   ss << Util::formatDescription("", "T can be either a regular temperature or a wetbulb temperature") << std::endl;
    if(full) {
+      ss << Util::formatDescription("-c phase", "Compute precipitation phase based on temperature, with values encoded by:") << std::endl;
+      ss << Util::formatDescription("", "* 0 = no precipitation (Precip < minPrecip)") << std::endl;
+      ss << Util::formatDescription("", "* 1 = rain (b < T)") << std::endl;
+      ss << Util::formatDescription("", "* 2 = sleet (a < T <= b)") << std::endl;
+      ss << Util::formatDescription("", "* 3 = snow (T < a)") << std::endl;
+      ss << Util::formatDescription("", "T can be either a regular temperature or a wetbulb temperature") << std::endl;
       ss << Util::formatDescription("   temperature=required", "Name of temperature variable to use.") << std::endl;
       ss << Util::formatDescription("   precipitation=required", "Name of precipitation variable to use.") << std::endl;
       ss << Util::formatDescription("   minPrecip=0.2", "Minimum precip (in mm) needed to be considered as precipitation.") << std::endl;
       ss << Util::formatDescription("   snowThreshold=273.15", "Temperature threshold between snow and sleet.") << std::endl;
       ss << Util::formatDescription("   rainThreshold=274.15", "Temperature threshold between sleet and rain.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c phase", "Compute precipitation phase based on temperature") << std::endl;
    return ss.str();
 }

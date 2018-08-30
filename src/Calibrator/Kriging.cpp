@@ -475,8 +475,8 @@ Parameters CalibratorKriging::train(const std::vector<ObsEns>& iData) const {
 
 std::string CalibratorKriging::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c kriging","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
    if(full) {
+      ss << Util::formatDescription("-c kriging","Spreads bias in space by using kriging. A parameter file is required, which must have one column with the bias.")<< std::endl;
       ss << Util::formatDescription("   radius=30000","Only use values from locations within this radius (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   efoldDist=30000","How fast should the weight of a station reduce with distance? For cressman: linearly decrease to this distance (in meters); For barnes: reduce to 1/e after this distance (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   maxElevDiff=undef","What is the maximum elevation difference (in meters) that bias can be spread to? Must be >= 0. Leave undefined if no reduction of bias in the vertical is desired.") << std::endl;
@@ -488,5 +488,7 @@ std::string CalibratorKriging::description(bool full) {
       ss << Util::formatDescription("   approxDist=true","When computing the distance between two points, should the equirectangular approximation be used to save time? Should be good enough for most kriging purposes.") << std::endl;
       ss << Util::formatDescription("   crossValidate=false","If true, then don't use the nearest point in the kriging. The end result is a field that can be verified against observations at the kriging points.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c kriging","Spreads bias in space by using kriging")<< std::endl;
    return ss.str();
 }

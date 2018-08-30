@@ -453,8 +453,8 @@ float DownscalerGradient::calcElevGradient(int i, int j, int e, int Icenter, int
 }
 std::string DownscalerGradient::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-d gradient", "Adjusts the nearest neighbour based on elevation or coastal gradients in a neighbourhood. The gradient is applied using the difference of the elevation and /or land-area fraction of the output gridpoint to the nearest neighbour: T = T(nn) + elev_gradient * dElev + laf_gradient * dLaf. If the gradient puts the forecast outside the domain of the variable (e.g. negative precipitation) then the nearest neighbour is used.") << std::endl;
    if(full) {
+      ss << Util::formatDescription("-d gradient", "Adjusts the nearest neighbour based on elevation or coastal gradients in a neighbourhood. The gradient is applied using the difference of the elevation and /or land-area fraction of the output gridpoint to the nearest neighbour: T = T(nn) + elev_gradient * dElev + laf_gradient * dLaf. If the gradient puts the forecast outside the domain of the variable (e.g. negative precipitation) then the nearest neighbour is used.") << std::endl;
       ss << Util::formatDescription("   constantElevGradient=undef", "Fix elevation gradient to this value. Units are units_of_variable / meter. Positive values mean an increase with height. If unspecified, computes the gradient by regression of points in a neighbourhood. The remaining options are ignored.") << std::endl;
       ss << Util::formatDescription("   elevRadius=3", "Compute elevation gradient in a neighbourhood box of points within within +- radius in both east-west and north-south direction. Also use this neighbourhood to compute the vertical gradient.") << std::endl;
       ss << Util::formatDescription("   minElevDiff=30", "Minimum elevation range (in meters) required within the neighbourhood to compute gradient. Use nearest neighbour otherwise.") << std::endl;
@@ -479,5 +479,7 @@ std::string DownscalerGradient::description(bool full) {
       ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;
       ss << Util::formatDescription("   limit=0", "Should the downscaled value be forced to be within the min/max range of the elevation neighbourhood?") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-d gradient", "Adjust nearest neighbour based on elevation and coastal gradients") << std::endl;
    return ss.str();
 }

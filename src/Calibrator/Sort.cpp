@@ -48,6 +48,9 @@ bool CalibratorSort::calibrateCore(File& iFile, const ParameterFile* iParameterF
 
 std::string CalibratorSort::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c sort", "Sorts the ensemble members from lowest to highest. Any missing members are placed last.") << std::endl;
+   if(full)
+      ss << Util::formatDescription("-c sort", "Sorts ensemble members from lowest to highest. Any missing members are placed last.") << std::endl;
+   else
+      ss << Util::formatDescription("-c sort", "Sorts ensemble members from lowest to highest") << std::endl;
    return ss.str();
 }

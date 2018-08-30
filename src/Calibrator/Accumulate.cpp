@@ -47,6 +47,6 @@ bool CalibratorAccumulate::calibrateCore(File& iFile, const ParameterFile* iPara
 }
 std::string CalibratorAccumulate::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c accumulate","Accumlates a variable over time.") << std::endl;
+   ss << Util::formatDescription("-c accumulate","Accumlates a variable over time") << std::endl;
    return ss.str();
 }

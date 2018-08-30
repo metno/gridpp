@@ -94,14 +94,16 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
 }
 std::string CalibratorDiagnoseWind::description(bool full) {
    std::stringstream ss;
-   ss << Util::formatDescription("-c diagnoseWind","Compute wind speed/direction or x/y components. Specify either x/y or speed/direction options:") << std::endl;
    if(full) {
+      ss << Util::formatDescription("-c diagnoseWind","Compute wind speed/direction or x/y components. Specify either x/y or speed/direction options:") << std::endl;
       ss << Util::formatDescription("   x=undef","X-wind variable name") << std::endl;
       ss << Util::formatDescription("   y=undef","Y-wind variable name") << std::endl;
       ss << Util::formatDescription("   speed=undef","Speed variable name") << std::endl;
       ss << Util::formatDescription("   direction=undef","Direction variable name") << std::endl;
       ss << Util::formatDescription("   compute=required","Which variable type should be diagnosed? One of x, y, speed, or direction.") << std::endl;
    }
+   else
+      ss << Util::formatDescription("-c diagnoseWind","Diagnose wind speed/direction or x/y components") << std::endl;
    return ss.str();
 }
 

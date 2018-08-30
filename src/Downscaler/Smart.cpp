@@ -20,13 +20,6 @@ void DownscalerSmart::downscaleCore(const File& iInput, File& iOutput) const {
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
-   vec2 ilats  = iInput.getLats();
-   vec2 ilons  = iInput.getLons();
-   vec2 ielevs = iInput.getElevs();
-   vec2 olats  = iOutput.getLats();
-   vec2 olons  = iOutput.getLons();
-   vec2 oelevs = iOutput.getElevs();
-
    // Get nearest neighbour
    vec3Int nearestI, nearestJ;
    getSmartNeighbours(iInput, iOutput, nearestI, nearestJ);

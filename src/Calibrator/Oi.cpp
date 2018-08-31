@@ -10,16 +10,16 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mVLength(100),
       mHLength(30000),
-      mRadarLength(10000),
+      mHLengthC(10000),
       mMu(0.9),
-      mMinObs(0),
       mMinRho(0.0013),
       mEpsilon(0.5),
-      mRadarEpsilon(0.54*0.54),
+      mEpsilonC(0.5),
       mElevGradient(-0.0065),
       mBiasVariable(""),
       mSigma(1),
-      mDelta(-999),
+      mSigmaC(1),
+      mDelta(1),
       mC(1.03),
       mSaveDiff(false),
       mDeltaVariable(""),
@@ -46,14 +46,15 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
-   iOptions.getValue("dr", mRadarLength);
+   iOptions.getValue("dc", mHLengthC);
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sigma", mSigma);
+   if(!iOptions.getValue("sigmaC", mSigmaC))
+      mSigmaC = mSigma;
    iOptions.getValue("delta", mDelta);
    iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
    iOptions.getValue("mu", mMu);
-   iOptions.getValue("minObs", mMinObs);
    iOptions.getValue("x", mX);
    iOptions.getValue("y", mY);
    iOptions.getValue("extrapolate", mExtrapolate);
@@ -66,7 +67,8 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("useEns", mUseEns);
    iOptions.getValue("wmin", mWMin);
    iOptions.getValue("epsilon", mEpsilon);
-   iOptions.getValue("radarEpsilon", mRadarEpsilon);
+   if(iOptions.getValue("epsilonC", mEpsilonC))
+      mEpsilonC = mEpsilon;
    iOptions.getValue("c", mC);
    iOptions.getValue("lambda", mLambda);
    iOptions.getValue("crossValidate", mCrossValidate);
@@ -470,7 +472,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                std::cout << "Number of local stations: " << lS << std::endl;
             }
 
-            if(lS == 0 || lS < mMinObs) {
+            if(lS == 0) {
                // If we have too few observations though, then use the background
                for(int e = 0; e < nEns; e++) {
                   if(mSaveDiff)
@@ -609,9 +611,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                if(numParameters == 2) {
                   for(int i = 0; i < lS; i++) {
                      int index = lLocIndices[i];
-                     float r = mSigma * mSigma * gCi[index];
-                     float rho = lRhos[i];
-                     Rinv(i, i) = 1 / r * rho;
+                     Rinv(i, i) = lRhos[i] / (mSigma * mSigma * gCi[index]);
                      if(x == mX && y == mY) {
                         std::cout << "R(" << i << ") " << Rinv(i, i) << std::endl;
                      }
@@ -651,7 +651,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         else {
                            // Equation 5
                            float dist = Util::getDistance(gLocations[gIndex_i].lat(), gLocations[gIndex_i].lon(), gLocations[gIndex_j].lat(), gLocations[gIndex_j].lon(), true);
-                           float h = dist / mRadarLength;
+                           float h = dist / mHLengthC;
                            float rho = (1 + h) * exp(-h);
                            radarR(i, j) = rho;
                         }
@@ -663,11 +663,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         print_matrix<mattype>(radarR);
                      }
                   }
-
-                  // TODO: Use a proper estimate
-                  // Could be computed based on lY
-                  // Need to have a lower bound (in transformed space)
-                  float ensembleVarianceEstimate = 0.1;
 
                   float cond = arma::rcond(radarR);
                   if(cond <= 0) {
@@ -684,15 +679,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   radarRinv = arma::inv(radarR);
 
                   for(int i = 0; i < lS; i++) {
-                     // TODO: At some point, include rho here
-                     Rinv(i, i) = lRhos[i] / (mEpsilon * mEpsilon * ensembleVarianceEstimate);
+                     int index = lLocIndices[i];
+                     Rinv(i, i) = lRhos[i] / (mSigma * mSigma * gCi[index]);
                   }
                   // Overwrite where we have radar pixels
                   for(int i = 0; i < lNumRadar; i++) {
                      int ii = lRadarIndices[i];
                      for(int j = 0; j < lNumRadar; j++) {
                         int jj = lRadarIndices[j];
-                        Rinv(ii, jj) = sqrt(lRhos[ii] * lRhos[jj]) / (mRadarEpsilon * mRadarEpsilon * ensembleVarianceEstimate) * radarRinv(i, j);
+                        Rinv(ii, jj) = sqrt(lRhos[ii] * lRhos[jj]) / (mSigmaC * mSigmaC) * radarRinv(i, j);
                      }
                   }
                }
@@ -707,11 +702,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
                mattype Pinv(nValidEns, nValidEns);
                float currDelta = 1;
-               if(Util::isValid(mDelta))
-                  currDelta = mDelta;
-               else if(useDelta) {
+               if(useDelta)
                   currDelta = (*delta)(y, x, 0);
-               }
+               else
+                  currDelta = mDelta;
                float diag = 1 / currDelta * (nValidEns - 1);
                if(useBias)
                   diag = 1 / currDelta / (1 + mGamma) * (nValidEns - 1);
@@ -1058,13 +1052,13 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   transform=none","One of 'none', 'boxcox'. Use 'boxcox' for 'precipitation'.") << std::endl;
       ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
-      ss << Util::formatDescription("   dr=100","Radar decorrelation distance (in meters).") << std::endl;
+      ss << Util::formatDescription("   dc=10000","Decorrelation distance (in meters) for observations with spatial correlation.") << std::endl;
       ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
       ss << Util::formatDescription("   sigma=1","Average standard error of observations") << std::endl;
-      ss << Util::formatDescription("   delta=undef","Background variance inflation factor") << std::endl;
-      ss << Util::formatDescription("   gamma=0.25","") << std::endl;
-      ss << Util::formatDescription("   mu=0.9","") << std::endl;
-      ss << Util::formatDescription("   minObs=0","Require at least this many obs inside the localization region to perform OI.") << std::endl;
+      ss << Util::formatDescription("   sigmaC=1","Average standard error of observations with spatial correlation") << std::endl;
+      ss << Util::formatDescription("   delta=1","Background variance inflation factor") << std::endl;
+      // ss << Util::formatDescription("   gamma=0.25","") << std::endl;
+      // ss << Util::formatDescription("   mu=0.9","") << std::endl;
       ss << Util::formatDescription("   x=undef","Turn on debug info for this x-coordinate") << std::endl;
       ss << Util::formatDescription("   y=undef","Turn on debug info for this y-coordinate") << std::endl;
       ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;
@@ -1075,7 +1069,7 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   useEns=1","Enable ensemble-mode. If 0, use single-member mode.") << std::endl;
       ss << Util::formatDescription("   wmin=0.5","") << std::endl;
       ss << Util::formatDescription("   epsilon=0.5","") << std::endl;
-      ss << Util::formatDescription("   radarEpsilon=0.2916","") << std::endl;
+      ss << Util::formatDescription("   epsilonC=0.2916","") << std::endl;
       ss << Util::formatDescription("   lambda=0.5","") << std::endl;
       ss << Util::formatDescription("   diagnose=0","") << std::endl;
       ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;

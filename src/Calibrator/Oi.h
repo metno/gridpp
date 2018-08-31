@@ -18,6 +18,7 @@ class CalibratorOi : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       enum Type {TypeTemperature, TypePrecipitation};
+      enum TransformType {TransformTypeNone, TransformTypeBoxCox};
       float mVLength;
       float mHLength;
       float mRadarLength;
@@ -56,6 +57,7 @@ class CalibratorOi : public Calibrator {
       float mLambda;
       bool mCrossValidate;
       Type mType;
+      TransformType mTransformType;
       float calcDelta(float iOldDelta, const vec2& iY) const;
       float transform(float iValue) const;
       float invTransform(float iValue) const;

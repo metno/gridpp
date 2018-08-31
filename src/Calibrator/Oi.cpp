@@ -40,9 +40,9 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mWMin(0.5),
       mLambda(0.5),
       mCrossValidate(false),
-      mType(TypeTemperature),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
       mLandOnly(false),
+      mTransformType(TransformTypeNone),
       mDiaFile(""),
       mGamma(0.25) {
    iOptions.getValue("biasVariable", mBiasVariable);
@@ -79,12 +79,15 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
-   std::string type;
-   if(iOptions.getValue("type", type)) {
-      if(type == "temperature")
-         mType = TypeTemperature;
-      else
-         mType = TypePrecipitation;
+   std::string transformType;
+   if(iOptions.getValue("transform", transformType)) {
+      if(transformType == "boxcox")
+         mTransformType = TransformTypeBoxCox;
+      else {
+         std::stringstream ss;
+         ss << "Could not recognize transform=" << transformType << std::endl;
+         Util::error(ss.str());
+      }
    }
 
    iOptions.check();
@@ -125,22 +128,14 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       return false;
    }
 
-   std::vector<Location> gLocations = iParameterFile->getLocations();
-   int maxNumParameters;
-   if(mType == TypeTemperature)
-      maxNumParameters = 2;
-   else if(mType == TypePrecipitation)
-      maxNumParameters = 3;
-   else
-      abort();
-
+   int maxNumParameters = 3;
    if(iParameterFile->getNumParameters() > maxNumParameters) {
       std::stringstream ss;
       ss << "Parameter file has " << iParameterFile->getNumParameters() << " parameters, which is greater than " << maxNumParameters;
       Util::error(ss.str());
    }
 
-   float sigma = mSigma;
+   std::vector<Location> gLocations = iParameterFile->getLocations();
    int gS = gLocations.size();
    float gridSize = Util::MV; // meteres between each gridbox
    // Find the spacing between each grid
@@ -208,6 +203,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    double time_s = Util::clock();
    KDTree searchTree(iFile.getLats(), iFile.getLons());
 
+   int numParameters = iParameterFile->getNumParameters();
+
    // Assign observations to gridpoints. Parse the observations and only keep those that pass certain checks
    for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
@@ -220,7 +217,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       gObs[i] = parameters[0];
       if(parameters.size() == 2)
          gCi[i] = parameters[1];
-      if(mType == TypePrecipitation && parameters.size() == 3)
+      if(parameters.size() == 3)
          gRadarL[i] = parameters[2];
 
       gElevs[i] = gLocations[i].elev();
@@ -299,16 +296,13 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr delta;
       FieldPtr newdelta;
 
-      // Transform
-      if(mType == TypePrecipitation) {
-         #pragma omp parallel for
-         for(int x = 0; x < nX; x++) {
-            for(int y = 0; y < nY; y++) {
-               for(int e = 0; e < nEns; e++) {
-                  float value = (*field)(y, x, e);
-                  if(Util::isValid(value))
-                     (*field)(y, x, e) = transform(value);
-               }
+      #pragma omp parallel for
+      for(int x = 0; x < nX; x++) {
+         for(int y = 0; y < nY; y++) {
+            for(int e = 0; e < nEns; e++) {
+               float value = (*field)(y, x, e);
+               if(Util::isValid(value))
+                  (*field)(y, x, e) = transform(value);
             }
          }
       }
@@ -625,10 +619,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             else {
                // Compute Rinv
                mattype Rinv(lS, lS, arma::fill::zeros);
-               if(mType == TypeTemperature) {
+               if(numParameters == 2) {
                   for(int i = 0; i < lS; i++) {
                      int index = lLocIndices[i];
-                     float r = sigma * sigma * gCi[index];
+                     float r = mSigma * mSigma * gCi[index];
                      float rho = lRhos[i];
                      Rinv(i, i) = 1 / r * rho;
                      if(x == mX && y == mY) {
@@ -636,7 +630,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      }
                   }
                }
-               else if(mType == TypePrecipitation) {
+               else if(numParameters == 3) {
                   // Inverting the matrix is more complicated, since the radar observations
                   // have covariances. Therefore invert the covariance matrix for the radar part and
                   // insert the values into the big inverse matrix.
@@ -957,15 +951,13 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
 
       // Back-transform
-      if(mType == TypePrecipitation) {
-         #pragma omp parallel for
-         for(int x = 0; x < nX; x++) {
-            for(int y = 0; y < nY; y++) {
-               for(int e = 0; e < nEns; e++) {
-                  float value = (*output)(y, x, e);
-                  if(Util::isValid(value))
-                     (*output)(y, x, e) = invTransform(value);
-               }
+      #pragma omp parallel for
+      for(int x = 0; x < nX; x++) {
+         for(int y = 0; y < nY; y++) {
+            for(int e = 0; e < nEns; e++) {
+               float value = (*output)(y, x, e);
+               if(Util::isValid(value))
+                  (*output)(y, x, e) = invTransform(value);
             }
          }
       }
@@ -1044,6 +1036,9 @@ float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {
 }
 
 float CalibratorOi::transform(float iValue) const {
+   if(mTransformType == TransformTypeNone)
+      return iValue;
+
    if(iValue <= 0)
       iValue = 0;
    if(mLambda == 0)
@@ -1053,8 +1048,10 @@ float CalibratorOi::transform(float iValue) const {
 }
 
 float CalibratorOi::invTransform(float iValue) const {
-   float rValue = 0;
+   if(mTransformType == TransformTypeNone)
+      return iValue;
 
+   float rValue = 0;
    if(mLambda == 0)
       rValue = exp(iValue);
    else {

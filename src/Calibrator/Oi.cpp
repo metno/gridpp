@@ -124,6 +124,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       return false;
    }
 
+   // Check parameters
    int maxNumParameters = 3;
    if(iParameterFile->getNumParameters() > maxNumParameters) {
       std::stringstream ss;
@@ -131,10 +132,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       Util::error(ss.str());
    }
 
+   // Find the grid configuration: regular or irregular
+   // For regular grids, we can do certain optimizations
    std::vector<Location> gLocations = iParameterFile->getLocations();
    int gS = gLocations.size();
-   float gridSize = Util::MV; // meteres between each gridbox
-   // Find the spacing between each grid
+   float gridSize = Util::MV; // meters between each gridbox
    if(lats.size() > 1 && lats[0].size() > 1) {
       gridSize = Util::getDistance(lats[0][0], lons[0][0], lats[1][0], lons[1][0]);
       std::stringstream ss;
@@ -153,7 +155,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    if(mDiaFile != "") {
      diaFile.open(mDiaFile.c_str());
    }
-
 
    // Loop over each observation, find the nearest gridpoint and place the obs into all gridpoints
    // in the vicinity of the nearest neighbour. This is only meant to be an approximation, but saves
@@ -178,6 +179,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    float radiusFactor = sqrt(-2*log(mMinRho));
 
    // Spread each observation out to this many gridpoints from the nearest neighbour
+
+   // Check that we do not run out of memory
    int gridpointRadius = Util::MV;
    if(isRegularGrid) {
       gridpointRadius = radiusFactor * mHLength / gridSize;
@@ -196,12 +199,12 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
    }
 
-   double time_s = Util::clock();
-   KDTree searchTree(iFile.getLats(), iFile.getLons());
-
    int numParameters = iParameterFile->getNumParameters();
 
-   // Assign observations to gridpoints. Parse the observations and only keep those that pass certain checks
+   // For each gridpoint, find which observations are relevant. Parse the observations and only keep
+   // those that pass certain checks
+   double time_s = Util::clock();
+   KDTree searchTree(iFile.getLats(), iFile.getLons());
    for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
          std::stringstream ss;
@@ -292,6 +295,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       FieldPtr delta;
       FieldPtr newdelta;
 
+      // Transform the background
       #pragma omp parallel for
       for(int x = 0; x < nX; x++) {
          for(int y = 0; y < nY; y++) {
@@ -515,9 +519,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
 
             }
 
-            // 
-            // Revert to static structure function when there is not enough ensemble information
-            // 
+            ////////////////////////////////////////////////////////////////////////////////////////
+            // Single-member mode:                                                                //
+            // Revert to static structure function when there is not enough ensemble information  //
+            ////////////////////////////////////////////////////////////////////////////////////////
             if(!mUseEns || nValidEns < mMinValidEns) {
                // Current grid-point to station error covariance matrix
                mattype lG(1, lS, arma::fill::zeros);
@@ -594,6 +599,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   (*newbias)(y, x, 0) = (*bias)(y, x, 0) - mGamma / (1 + mGamma) * biasTotal;
                }
             }
+            ////////////////////////////////////////////////////////////////////////////////////////
+            // Ensemble-member mode:                                                              //
+            // Use ensemble covariance structure                                                  //
+            ////////////////////////////////////////////////////////////////////////////////////////
             else {
                // Compute Rinv
                mattype Rinv(lS, lS, arma::fill::zeros);
@@ -857,6 +866,10 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      if(useBias) {
                         raw -= (*bias)(y, x, 0);
                      }
+
+                     ///////////////////////////////
+                     // Anti-extrapolation filter //
+                     ///////////////////////////////
                      if(!mExtrapolate) {
                         // Don't allow a final increment that is larger than any increment
                         // at station points
@@ -891,9 +904,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         }
                      }
                      (*output)(y, x, ei) = ensMean + currIncrement;
-                     // if(mType == TypePrecipitation && (*output)(y, x, ei) < -2) {
-                     //    (*output)(y, x, ei) = -2;
-                     // }
                   }
 
                   if(mNumVariable != "") {

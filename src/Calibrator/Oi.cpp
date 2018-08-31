@@ -16,7 +16,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinRho(0.0013),
       mEpsilon(0.5),
       mRadarEpsilon(0.54*0.54),
-      mObsOnly(false),
       mElevGradient(-0.0065),
       mBiasVariable(""),
       mSigma(1),
@@ -30,7 +29,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mY(Util::MV),
       mMaxLocations(20),
       mNumVariable(""),
-      mUseMeanBias(false),
       mMaxElevDiff(200),
       // Default model error variance
       mMinValidEns(5),
@@ -54,7 +52,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("delta", mDelta);
    iOptions.getValue("deltaVariable", mDeltaVariable);
    iOptions.getValue("gamma", mGamma);
-   iOptions.getValue("obsOnly", mObsOnly);
    iOptions.getValue("mu", mMu);
    iOptions.getValue("minObs", mMinObs);
    iOptions.getValue("x", mX);
@@ -66,7 +63,6 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("minEns", mMinValidEns);
    iOptions.getValue("numVariable", mNumVariable);
    iOptions.getValue("elevGradient", mElevGradient);
-   iOptions.getValue("useMeanBias", mUseMeanBias);
    iOptions.getValue("useEns", mUseEns);
    iOptions.getValue("wmin", mWMin);
    iOptions.getValue("epsilon", mEpsilon);
@@ -481,24 +477,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                continue;
             }
 
-            if(mObsOnly) {
-               // Here we don't run the OI algorithm but instead just use the median
-               // of all observations
-               std::vector<float> lObs(lS, Util::MV);
-               for(int i = 0; i < lS; i++) {
-                  int index = lLocIndices[i];
-                  lObs[i] = gObs[index];
-               }
-               float value = Util::calculateStat(lObs, Util::StatTypeQuantile, 0.5);
-               for(int e = 0; e < nEns; e++) {
-                  if(mSaveDiff)
-                     (*output)(y, x, e) = value - (*field)(y, x, e);
-                  else
-                     (*output)(y, x, e) = value;
-               }
-               continue;
-            }
-
             int nValidEns = 0;
             std::vector<int> validEns;
             for(int e = 0; e < nEns; e++) {
@@ -871,8 +849,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   }
 
                   float currIncrement = total;
-                  if(mUseMeanBias)
-                     currIncrement = arma::mean(lObs - lYhat);
 
                   if(mSaveDiff)
                      (*output)(y, x, ei) = currIncrement;
@@ -981,7 +957,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          iFile.addField(newdelta, Variable(mDeltaVariable), t);
       }
    }
-   if ( mDiaFile != "" ){
+   if(mDiaFile != "") {
      diaFile.close();
    }
    return true;
@@ -1069,17 +1045,16 @@ std::string CalibratorOi::description(bool full) {
    std::stringstream ss;
    if(full) {
       ss << Util::formatDescription("-c oi","Merge observations from parameter file with background field using Optimal interpolation. A parameter file is required where the first parameter is an observation.")<< std::endl;
-      ss << Util::formatDescription("   type=temperature","One of 'temperature', 'precipitation'. If 'precipitation', enable the box-cox transformation.") << std::endl;
+      ss << Util::formatDescription("   transform=none","One of 'none', 'boxcox'. Use 'boxcox' for 'precipitation'.") << std::endl;
       ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
       ss << Util::formatDescription("   dr=100","Radar decorrelation distance (in meters).") << std::endl;
       ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
-      ss << Util::formatDescription("   sigma=1","") << std::endl;
-      ss << Util::formatDescription("   delta=undef","") << std::endl;
+      ss << Util::formatDescription("   sigma=1","Average standard error of observations") << std::endl;
+      ss << Util::formatDescription("   delta=undef","Background variance inflation factor") << std::endl;
       ss << Util::formatDescription("   gamma=0.25","") << std::endl;
       ss << Util::formatDescription("   mu=0.9","") << std::endl;
       ss << Util::formatDescription("   minObs=0","Require at least this many obs inside the localization region to perform OI.") << std::endl;
-
       ss << Util::formatDescription("   x=undef","Turn on debug info for this x-coordinate") << std::endl;
       ss << Util::formatDescription("   y=undef","Turn on debug info for this y-coordinate") << std::endl;
       ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;

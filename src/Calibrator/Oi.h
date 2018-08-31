@@ -33,13 +33,11 @@ class CalibratorOi : public Calibrator {
       float mC;
       float mRadarEpsilon;
       float mEpsilon;
-      bool mObsOnly;
       int mMinObs;
       int mX;
       int mY;
       float mMinRho;
       float mMaxBytes;
-      bool mUseMeanBias;
       int mMinValidEns;
       bool mSaveDiff;
       float mElevGradient;

@@ -213,7 +213,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
       Parameters parameters = iParameterFile->getParameters(0, gLocations[i]);
       assert(parameters.size() > 0);
-      gObs[i] = parameters[0];
+      gObs[i] = transform(parameters[0]);
       if(parameters.size() == 2)
          gCi[i] = parameters[1];
       if(parameters.size() == 3)

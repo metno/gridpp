@@ -15,7 +15,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mMinRho(0.0013),
       mEpsilon(0.5),
       mEpsilonC(0.5),
-      mElevGradient(-0.0065),
+      mElevGradient(-999),
       mBiasVariable(""),
       mSigma(1),
       mSigmaC(1),
@@ -355,7 +355,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       for(int i = 0; i < gS; i++) {
          gY[i].resize(nEns, 0);
          float elevCorr = 0;
-         if(Util::isValid(mElevGradient)) {
+         if(Util::isValid(mElevGradient) && mElevGradient != 0) {
             float nnElev = elevs[gYi[i]][gXi[i]];
             assert(Util::isValid(nnElev));
             assert(Util::isValid(gLocations[i].elev()));
@@ -1064,8 +1064,8 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   extrapolate=0","Allow OI to extrapolate increments. If 0, then increments are bounded by the increments at the observation sites.") << std::endl;
       ss << Util::formatDescription("   minRho=0.0013","Perform localization by requiring this minimum rho value") << std::endl;
       ss << Util::formatDescription("   maxBytes=6442450944","Don't allocate more than this many bytes when creating the localization information") << std::endl;
-      ss << Util::formatDescription("   minEns=5","Switch to single-member mode if fewer than this number of members") << std::endl;
-      ss << Util::formatDescription("   elevGradient=-0.0065","Use this elevation gradient to downscale background to obs") << std::endl;
+      ss << Util::formatDescription("   minEns=5","Switch to single-member mode if fewer than this number of members available") << std::endl;
+      ss << Util::formatDescription("   elevGradient=0","Elevation gradient when downscaling background to obs. Use -0.0065 for temperature.") << std::endl;
       ss << Util::formatDescription("   useEns=1","Enable ensemble-mode. If 0, use single-member mode.") << std::endl;
       ss << Util::formatDescription("   wmin=0.5","") << std::endl;
       ss << Util::formatDescription("   epsilon=0.5","") << std::endl;

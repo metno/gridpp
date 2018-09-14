@@ -1,11 +1,8 @@
 gridpp (0.3.0) precise; urgency=low
 
-  * Major changes:
-    - The command-line interface to this version has changed significantly.
-      Variables are referenced by their NetCDF variable name, and not with codes
-      such as T for temperature.
   * New features:
-    - Compilation with cmake.
+      Variables are referenced by their NetCDF variable name
+    - Adds cmake compilation
     - Adds -c oi to perform optimal interpolation
     - Gradient downscaler can use temperature at model levels (instead of T2m)
       when computing gradient
@@ -18,11 +15,12 @@ gridpp (0.3.0) precise; urgency=low
       previous behaviour.
     - Parameter text files must contain header
     - Parameter files are specified differently: -p <filename> type=<type>
+    - The command-line interface to this version has changed significantly.
     - Names as they appear in the file are used to identify variables. I.e.
       use -v air_temperture_2m instead of -v T.
-    - -c diagnose replaced by -c diagnoseHunidity and -c diagnoseWind
+    - -c diagnose replaced by -c diagnoseHumidity and -c diagnoseWind
 
- -- Thomas Nipen <thomasn@met.no>  Fri, 31 Aug 2018 10:00:00 +0200
+ -- Thomas Nipen <thomasn@met.no>  Fri, 14 Sep 2018 10:00:00 +0200
 
 gridpp (0.2.10) precise; urgency=low
 

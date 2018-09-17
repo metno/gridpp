@@ -1,4 +1,4 @@
-gridpp (0.3.0) precise; urgency=low
+gridpp (0.3.1) precise; urgency=low
 
   * New features:
       Variables are referenced by their NetCDF variable name

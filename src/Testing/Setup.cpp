@@ -112,10 +112,10 @@ namespace {
    }
    TEST_F(SetupTest, allowBypass) {
       // Test that undefined variables can be passed down past the downscaler
-      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v wetbulb"));
+      MetSetup setup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v wetbulb -d bypass"));
       ASSERT_EQ(1, setup.variableConfigurations.size());
       EXPECT_EQ(Variable("wetbulb"), setup.variableConfigurations[0].outputVariable.name());
-      EXPECT_EQ(Setup::defaultDownscaler(), setup.variableConfigurations[0].downscaler->name());
+      EXPECT_EQ("bypass", setup.variableConfigurations[0].downscaler->name());
       EXPECT_EQ(0,                          setup.variableConfigurations[0].calibrators.size());
    }
    TEST_F(SetupTest, valid) {
@@ -320,6 +320,11 @@ namespace {
 
       // Different input output options on the same file
       EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc xDim=y testing/files/10x10.nc -v precipitation_amount -c zaga -p testing/files/parameters.txt")), ".*");
+
+      // Variable does not exist in input
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v wetbulb")), ".*");
+      EXPECT_DEATH(MetSetup(Util::split("testing/files/10x10.nc testing/files/10x10.nc -v wetbulb -d nearestNeighbour")), ".*");
+
    }
    TEST_F(SetupTest, defaultDownscaler) {
       std::string downscaler = Setup::defaultDownscaler();

@@ -301,19 +301,20 @@ Setup::Setup(const std::vector<std::string>& argv) {
                VariableConfiguration varconf;
                varconf.parameterFileDownscaler = parameterFileDownscaler;
                // Find input variable
-               bool found = inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
-               if(!found) {
-                  std::stringstream ss;
-                  ss << "Input file does not contain variable with name '" << useVariableInputName << "'";
-                  Util::warning(ss.str());
-               }
+               bool foundVarInput = inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
                varconf.inputVariable.add(useVariableInputOptions);
+               if(!foundVarInput && downscaler != "bypass") {
+                  std::stringstream ss;
+                  ss << "Input file does not contain variable with name '" << useVariableInputName << "'. Use -d bypass if the variable will be diagnosed by a calibrator.";
+                  Util::error(ss.str());
+               }
 
                // Find output variable
-               found = outputFiles[0]->getVariable(variableName, varconf.outputVariable);
-               if(!found) {
-                  found = inputFiles[0]->getVariable(variableName, varconf.outputVariable);
-                  if(!found)
+               bool foundVarOutput = outputFiles[0]->getVariable(variableName, varconf.outputVariable);
+
+               if(!foundVarOutput) {
+                  foundVarOutput = inputFiles[0]->getVariable(variableName, varconf.outputVariable);
+                  if(!foundVarOutput)
                      varconf.outputVariable = Variable(variableName);
                }
                varconf.outputVariable.add(vOptions);
@@ -329,6 +330,7 @@ Setup::Setup(const std::vector<std::string>& argv) {
                varconf.outputVariableOptions = vOptions;
                Downscaler* d = Downscaler::getScheme(downscaler, varconf.inputVariable, varconf.outputVariable, dOptions);
                varconf.downscaler = d;
+
                variableConfigurations.push_back(varconf);
             }
             else {

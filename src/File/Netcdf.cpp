@@ -90,21 +90,24 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    mLons = getLatLonVariable(mLonVar);
 
    if(Util::isValid(mElevVar)) {
-      mElevs = getLatLonVariable(mElevVar);
+      vec2 elevs = getLatLonVariable(mElevVar);
       for(int i = 0; i < getNumY(); i++) {
          for(int j = 0; j < getNumX(); j++) {
-            mElevs[i][j] *= elevScale;
+            elevs[i][j] *= elevScale;
          }
       }
+      setElevs(elevs);
    }
    else {
-      mElevs.resize(getNumY());
+      vec2 elevs;
+      elevs.resize(getNumY());
       for(int i = 0; i < getNumY(); i++) {
-         mElevs[i].resize(getNumX());
+         elevs[i].resize(getNumX());
          for(int j = 0; j < getNumX(); j++) {
-            mElevs[i][j] = Util::MV;
+            elevs[i][j] = Util::MV;
          }
       }
+      // setElevs(elevs);
       Util::warning("No altitude field available in " + getFilename());
    }
 

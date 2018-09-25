@@ -36,13 +36,15 @@ FileFake::FileFake(const Options& iOptions) :
          mLons[i][j] = 0 + 10.0 * j / nLon;
       }
    }
-   mElevs.resize(getNumY());
+   vec2 elevs;
+   elevs.resize(getNumY());
    for(int i = 0; i < nLat; i++) {
-      mElevs[i].resize(nLon);
+      elevs[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
-         mElevs[i][j] = 0;
+         elevs[i][j] = 0;
       }
    }
+   setElevs(elevs);
    mLandFractions.resize(nLat);
    for(int i = 0; i < nLat; i++) {
       mLandFractions[i].resize(nLon);

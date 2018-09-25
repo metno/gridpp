@@ -28,7 +28,9 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    std::vector<float> landFraction0(1, Util::MV);
    mLats.push_back(lat0);
    mLons.push_back(lon0);
-   mElevs.push_back(elev0);
+   vec2 elevs;
+   elevs.push_back(elev0);
+   setElevs(elevs);
    mLandFractions.push_back(landFraction0);
    mNEns = 1;
    std::vector<double> times;
@@ -118,7 +120,6 @@ FieldPtr FilePoint::getFieldCore(const Variable& iVariable, int iTime) const {
 
 void FilePoint::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
-   // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
    if(iVariables.size() == 0) {
       Util::warning("No variables to write");
       return;

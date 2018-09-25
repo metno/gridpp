@@ -82,6 +82,7 @@ class File {
       bool getVariable(std::string iVariableName, Variable& iVariable) const;
       static std::string getDescriptions();
       void addVariableAlias(std::string iAlias, Variable iVariable);
+      bool hasElevs() const;
    protected:
       virtual FieldPtr getFieldCore(const Variable& iVariable, int iTime) const = 0;
       // File must save variables, but also altitudes, in case they got changed
@@ -92,7 +93,6 @@ class File {
       // Subclasses must fill these fields in the constructor:
       vec2 mLats;
       vec2 mLons;
-      vec2 mElevs;
       vec2 mLandFractions;
       int mNEns;
 
@@ -108,6 +108,8 @@ class File {
       double mReferenceTime;
       std::vector<double> mTimes;
       static Uuid mNextTag;
+      vec2 mElevs;
+      bool mHasElevs;
 };
 #include "Netcdf.h"
 #include "Fake.h"

@@ -68,6 +68,11 @@ bool CalibratorDiagnoseHumidity::calibrateCore(File& iFile, const ParameterFile*
          FieldPtr pressure;
          if(mPressure != "")
             pressure = iFile.getField(mPressure, t);
+         else {
+            if(!iFile.hasElevs()) {
+               Util::error("Cannot diagnose wetbulb, since pressure can be diagnosed since altitude is missing");
+            }
+         }
 
          #pragma omp parallel for
          for(int y = 0; y < nY; y++) {

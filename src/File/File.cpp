@@ -10,6 +10,7 @@ Uuid File::mNextTag = 0;
 
 File::File(std::string iFilename, const Options& iOptions) :
       mFilename(iFilename),
+      mHasElevs(false),
       mReferenceTime(Util::MV) {
    createNewTag();
 
@@ -248,6 +249,7 @@ bool File::setElevs(vec2 iElevs) {
    if(iElevs.size() != getNumY() || iElevs[0].size() != getNumX())
       return false;
    mElevs = iElevs;
+   mHasElevs = true;
    return true;
 }
 bool File::setLandFractions(vec2 iLandFractions) {
@@ -263,7 +265,16 @@ vec2 File::getLons() const {
    return mLons;
 }
 vec2 File::getElevs() const {
-   return mElevs;
+   // Elevations not set, return a grid of missing values
+   if(mElevs.size() == 0) {
+      vec2 elevs;
+      elevs.resize(getNumY());
+      for(int i = 0; i < elevs.size(); i++)
+         elevs[i].resize(getNumX(), Util::MV);
+      return elevs;
+   }
+   else
+      return mElevs;
 }
 vec2 File::getLandFractions() const {
    return mLandFractions;
@@ -327,6 +338,10 @@ bool File::hasDefinedVariable(Variable iVariable) const {
       }
    }
    return false;
+}
+
+bool File::hasElevs() const {
+   return mHasElevs;
 }
 
 void File::addVariableAlias(std::string iAlias, Variable iVariable) {

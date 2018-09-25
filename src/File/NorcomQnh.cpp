@@ -10,7 +10,8 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
       File(iFilename, iOptions) {
    mLats.resize(1);
    mLons.resize(1);
-   mElevs.resize(1);
+   vec2 elevs;
+   elevs.resize(1);
    mLandFractions.resize(1);
    mNEns = 1;
    if(!iOptions.getValues("lats", mLats[0])) {
@@ -19,10 +20,11 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    if(!iOptions.getValues("lons", mLons[0])) {
       Util::error("Missing 'lons' option for '" + iFilename + "'");
    }
-   if(!iOptions.getValues("elevs", mElevs[0])) {
+   if(!iOptions.getValues("elevs", elevs[0])) {
       Util::error("Missing 'elevs' option for '" + iFilename + "'");
    }
-   mLandFractions[0].resize(mElevs[0].size(), Util::MV);
+   setElevs(elevs);
+   mLandFractions[0].resize(elevs[0].size(), Util::MV);
    if(!iOptions.getValues("names", mNames)) {
       Util::error("Missing 'names' option for '" + iFilename + "'");
    }
@@ -30,7 +32,7 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    if(!iOptions.getValue("numTimes", numTimes)) {
       Util::error("Missing 'numTimes' option for '" + iFilename + "'");
    }
-   if(mLats[0].size() != mLons[0].size() || mLats[0].size() != mElevs[0].size() || mLats[0].size() != mNames.size()) {
+   if(mLats[0].size() != mLons[0].size() || mLats[0].size() != elevs[0].size() || mLats[0].size() != mNames.size()) {
       Util::error("FileNorcomQnh: 'lats', 'lons', 'elevs', 'names' must be the same size");
    }
    for(int i = 0; i < mLats[0].size(); i++) {

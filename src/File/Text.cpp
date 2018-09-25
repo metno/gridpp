@@ -79,15 +79,17 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
 
    mLats.resize(locations.size());
    mLons.resize(locations.size());
-   mElevs.resize(locations.size());
+   vec2 elevs;
+   elevs.resize(locations.size());
    for(int i = 0; i < locations.size(); i++) {
       mLats[i].resize(1);
       mLons[i].resize(1);
-      mElevs[i].resize(1);
+      elevs[i].resize(1);
       mLats[i][0] = locations[i].lat();
       mLons[i][0] = locations[i].lon();
-      mElevs[i][0] = locations[i].elev();
+      elevs[i][0] = locations[i].elev();
    }
+   setElevs(elevs);
 
    setTimes(times);
 

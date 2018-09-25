@@ -31,6 +31,10 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
    for(int t = 0; t < nTime; t++) {
       Field& output = *iFile.getField(mVariable, t);
       if(mCompute == "x") {
+         if(!iFile.hasVariable(mSpeed))
+            Util::error("Cannot diagnose x, since speed field is missing");
+         if(!iFile.hasVariable(mDirection))
+            Util::error("Cannot diagnose x, since direction field is missing");
          const Field& speed = *iFile.getField(mSpeed, t);
          const Field& direction = *iFile.getField(mDirection, t);
 
@@ -46,6 +50,10 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
       }
 
       else if(mCompute == "y") {
+         if(!iFile.hasVariable(mSpeed))
+            Util::error("Cannot diagnose y, since speed field is missing");
+         if(!iFile.hasVariable(mDirection))
+            Util::error("Cannot diagnose y, since direction field is missing");
          const Field& speed = *iFile.getField(mSpeed, t);
          const Field& direction = *iFile.getField(mDirection, t);
 
@@ -61,6 +69,10 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
       }
 
       else if(mCompute == "speed") {
+         if(!iFile.hasVariable(mX))
+            Util::error("Cannot diagnose speed, since x field is missing");
+         if(!iFile.hasVariable(mY))
+            Util::error("Cannot diagnose speed, since y field is missing");
          const Field& X = *iFile.getField(mX, t);
          const Field& Y = *iFile.getField(mY, t);
 
@@ -76,6 +88,10 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
       }
 
       else if(mCompute == "direction") {
+         if(!iFile.hasVariable(mX))
+            Util::error("Cannot diagnose direction, since x field is missing");
+         if(!iFile.hasVariable(mY))
+            Util::error("Cannot diagnose direction, since y field is missing");
          const Field& X = *iFile.getField(mX, t);
          const Field& Y = *iFile.getField(mY, t);
 

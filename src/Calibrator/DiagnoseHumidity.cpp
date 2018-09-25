@@ -33,6 +33,10 @@ bool CalibratorDiagnoseHumidity::calibrateCore(File& iFile, const ParameterFile*
    for(int t = 0; t < nTime; t++) {
       Field& output = *iFile.getField(mVariable, t);
       if(mCompute == "dewpoint") {
+         if(!iFile.hasVariable(mTemperature))
+            Util::error("Cannot diagnose dewpoint, since temperature field is missing");
+         if(!iFile.hasVariable(mRh))
+            Util::error("Cannot diagnose dewpoint, since rh field is missing");
          const Field& temperature = *iFile.getField(mTemperature, t);
          const Field& rh = *iFile.getField(mRh, t);
 
@@ -48,6 +52,10 @@ bool CalibratorDiagnoseHumidity::calibrateCore(File& iFile, const ParameterFile*
       }
 
       else if(mCompute == "rh") {
+         if(!iFile.hasVariable(mTemperature))
+            Util::error("Cannot diagnose rh, since temperature field is missing");
+         if(!iFile.hasVariable(mDewpoint))
+            Util::error("Cannot diagnose rh, since dewpoint field is missing");
          const Field& temperature = *iFile.getField(mTemperature, t);
          const Field& dewpoint = *iFile.getField(mDewpoint, t);
 
@@ -63,11 +71,18 @@ bool CalibratorDiagnoseHumidity::calibrateCore(File& iFile, const ParameterFile*
       }
 
       else if(mCompute == "wetbulb") {
+         if(!iFile.hasVariable(mTemperature))
+            Util::error("Cannot diagnose wetbulb, since temperature field is missing");
+         if(!iFile.hasVariable(mRh))
+            Util::error("Cannot diagnose wetbulb, since rh field is missing");
          const Field& temperature = *iFile.getField(mTemperature, t);
          const Field& rh = *iFile.getField(mRh, t);
          FieldPtr pressure;
-         if(mPressure != "")
+         if(mPressure != "") {
+            if(!iFile.hasVariable(mPressure))
+               Util::error("Cannot diagnose wetbulb, since pressure field is missing");
             pressure = iFile.getField(mPressure, t);
+         }
          else {
             if(!iFile.hasElevs()) {
                Util::error("Cannot diagnose wetbulb, since pressure can be diagnosed since altitude is missing");

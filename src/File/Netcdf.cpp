@@ -127,8 +127,14 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 
    // Compute times
    if(hasVar("forecast_reference_time")) {
-      int vReferenceTime = getVar("forecast_reference_time");
       double referenceTime = getReferenceTime();
+      int vReferenceTime = getVar("forecast_reference_time");
+      int numDims = getNumDims(vReferenceTime);
+      if(numDims != 0) {
+         std::stringstream ss;
+         ss << "forecast_reference_time should not have any dimensions";
+         Util::error(ss.str());
+      }
       int status = nc_get_var_double(mFile, vReferenceTime, &referenceTime);
       handleNetcdfError(status, "could not get reference time");
       setReferenceTime(referenceTime);

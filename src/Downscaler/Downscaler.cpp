@@ -99,16 +99,16 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
        return;
    }
 
+   vec2 ilats = iFrom.getLats();
+   vec2 ilons = iFrom.getLons();
+   vec2 olats = iTo.getLats();
+   vec2 olons = iTo.getLons();
+   int nLon = iTo.getNumX();
+   int nLat = iTo.getNumY();
+
    // Check if the grid is the same
    if(iFrom.getNumY() == iTo.getNumY() && iFrom.getNumX() == iTo.getNumX()) {
-      vec2 ilats = iFrom.getLats();
-      vec2 ilons = iFrom.getLons();
-      vec2 olats = iTo.getLats();
-      vec2 olons = iTo.getLons();
-
       if(ilats == olats && ilons == olons) {
-         int nLon = iTo.getNumX();
-         int nLat = iTo.getNumY();
 
          iI.resize(nLat);
          iJ.resize(nLat);
@@ -125,6 +125,64 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
          addToCache(iFrom, iTo, iI, iJ);
          return;
       }
+   }
+   // Check if the grid is regular lat/lon
+   bool isRegular = true;
+   for(int y = 0; y < iFrom.getNumY(); y++) {
+      for(int x = 0; x < iFrom.getNumX(); x++) {
+         if(ilats[y][x] != ilats[y][0])
+            isRegular = false;
+         if(ilons[y][x] != ilons[0][x])
+            isRegular = false;
+      }
+      if(!isRegular)
+         break;
+   }
+   if(isRegular) {
+      Util::info("Input grid is regular lat/lon, short cut in finding nearest neighbours");
+      iI.resize(nLat);
+      iJ.resize(nLat);
+
+      std::vector<float> lats;
+      std::vector<float> lons;
+      lats.resize(iFrom.getNumY());
+      lons.resize(iFrom.getNumX());
+      for(int i = 0; i < iFrom.getNumY(); i++) {
+         lats[i] = ilats[i][0];
+      }
+      for(int j = 0; j < iFrom.getNumX(); j++) {
+         lons[j] = ilons[0][j];
+      }
+
+      for(int i = 0; i < nLat; i++) {
+         iI[i].resize(nLon, 0);
+         iJ[i].resize(nLon, 0);
+         for(int j = 0; j < nLon; j++) {
+            int iNearest = 0;
+            int jNearest = 0;
+            float minDist = 1e9;
+            for(int ii = 0; ii < lats.size(); ii++) {
+               assert(ii < lats.size());
+               float dist = fabs(lats[ii] - olats[i][j]);
+               if(dist < minDist) {
+                  minDist = dist;
+                  iNearest = ii;
+               }
+            }
+            for(int ii = 0; ii < lons.size(); ii++) {
+               float dist = fabs(lons[ii] - olons[i][j]);
+               assert(ii < lons.size());
+               if(dist < minDist) {
+                  minDist = dist;
+                  jNearest = ii;
+               }
+            }
+            iI[i][j] = iNearest;
+            iJ[i][j] = jNearest;
+         }
+      }
+      addToCache(iFrom, iTo, iI, iJ);
+      return;
    }
 
    KDTree searchTree(iFrom.getLats(), iFrom.getLons());

@@ -127,69 +127,72 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
       }
    }
    // Check if the grid is regular lat/lon
-   bool isRegular = true;
-   for(int y = 0; y < iFrom.getNumY(); y++) {
-      for(int x = 0; x < iFrom.getNumX(); x++) {
-         if(ilats[y][x] != ilats[y][0])
-            isRegular = false;
-         if(ilons[y][x] != ilons[0][x])
-            isRegular = false;
+   bool checkRegular = false;
+   if(checkRegular) {
+      bool isRegular = true;
+      for(int y = 0; y < iFrom.getNumY(); y++) {
+         for(int x = 0; x < iFrom.getNumX(); x++) {
+            if(ilats[y][x] != ilats[y][0])
+               isRegular = false;
+            if(ilons[y][x] != ilons[0][x])
+               isRegular = false;
+         }
+         if(!isRegular)
+            break;
       }
-      if(!isRegular)
-         break;
-   }
-   if(isRegular) {
-      Util::info("Input grid is regular lat/lon, short cut in finding nearest neighbours");
-      iI.resize(nLat);
-      iJ.resize(nLat);
+      if(isRegular) {
+         Util::info("Input grid is regular lat/lon, short cut in finding nearest neighbours");
+         iI.resize(nLat);
+         iJ.resize(nLat);
 
-      std::vector<float> lats;
-      std::vector<float> lons;
-      lats.resize(iFrom.getNumY());
-      lons.resize(iFrom.getNumX());
-      for(int i = 0; i < iFrom.getNumY(); i++) {
-         lats[i] = ilats[i][0];
-      }
-      for(int j = 0; j < iFrom.getNumX(); j++) {
-         lons[j] = ilons[0][j];
-      }
+         std::vector<float> lats;
+         std::vector<float> lons;
+         lats.resize(iFrom.getNumY());
+         lons.resize(iFrom.getNumX());
+         for(int i = 0; i < iFrom.getNumY(); i++) {
+            lats[i] = ilats[i][0];
+         }
+         for(int j = 0; j < iFrom.getNumX(); j++) {
+            lons[j] = ilons[0][j];
+         }
 
-      for(int i = 0; i < nLat; i++) {
-         iI[i].resize(nLon, Util::MV);
-         iJ[i].resize(nLon, Util::MV);
-         for(int j = 0; j < nLon; j++) {
-            if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
-               int iNearest = Util::MV;
-               int jNearest = Util::MV;
-               float iMinDist = 1e9;
-               for(int ii = 0; ii < lats.size(); ii++) {
-                  if(Util::isValid(lats[ii])) {
-                     float dist = fabs(lats[ii] - olats[i][j]);
-                     if(dist < iMinDist) {
-                        iMinDist = dist;
-                        iNearest = ii;
+         for(int i = 0; i < nLat; i++) {
+            iI[i].resize(nLon, Util::MV);
+            iJ[i].resize(nLon, Util::MV);
+            for(int j = 0; j < nLon; j++) {
+               if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
+                  int iNearest = Util::MV;
+                  int jNearest = Util::MV;
+                  float iMinDist = 1e9;
+                  for(int ii = 0; ii < lats.size(); ii++) {
+                     if(Util::isValid(lats[ii])) {
+                        float dist = fabs(lats[ii] - olats[i][j]);
+                        if(dist < iMinDist) {
+                           iMinDist = dist;
+                           iNearest = ii;
+                        }
                      }
                   }
-               }
-               float jMinDist = 1e9;
-               for(int jj = 0; jj < lons.size(); jj++) {
-                  if(Util::isValid(lons[jj])) {
-                     float dist = fabs(lons[jj] - olons[i][j]);
-                     if(dist < jMinDist) {
-                        jMinDist = dist;
-                        jNearest = jj;
+                  float jMinDist = 1e9;
+                  for(int jj = 0; jj < lons.size(); jj++) {
+                     if(Util::isValid(lons[jj])) {
+                        float dist = fabs(lons[jj] - olons[i][j]);
+                        if(dist < jMinDist) {
+                           jMinDist = dist;
+                           jNearest = jj;
+                        }
                      }
                   }
-               }
-               if(Util::isValid(iNearest) && Util::isValid(jNearest)) {
-                  iI[i][j] = iNearest;
-                  iJ[i][j] = jNearest;
+                  if(Util::isValid(iNearest) && Util::isValid(jNearest)) {
+                     iI[i][j] = iNearest;
+                     iJ[i][j] = jNearest;
+                  }
                }
             }
          }
+         addToCache(iFrom, iTo, iI, iJ);
+         return;
       }
-      addToCache(iFrom, iTo, iI, iJ);
-      return;
    }
 
    KDTree searchTree(iFrom.getLats(), iFrom.getLons());

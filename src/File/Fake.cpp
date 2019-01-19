@@ -22,20 +22,35 @@ FileFake::FileFake(const Options& iOptions) :
    if(!Util::isValid(nTime) || nTime <= 0) {
       Util::error("FileFake: Invalid number of times");
    }
-   mLats.resize(nLat);
+   vec2 lats;
+   lats.resize(nLat);
    for(int i = 0; i < nLat; i++) {
-      mLats[i].resize(nLon);
+      lats[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
-         mLats[i][j] = 50 + 10.0 * i / nLat;
+         lats[i][j] = 50 + 10.0 * i / nLat;
       }
    }
-   mLons.resize(nLat);
+   vec2 lons;
+   lons.resize(nLat);
    for(int i = 0; i < nLat; i++) {
-      mLons[i].resize(nLon);
+      lons[i].resize(nLon);
       for(int j = 0; j < nLon; j++) {
-         mLons[i][j] = 0 + 10.0 * j / nLon;
+         lons[i][j] = 0 + 10.0 * j / nLon;
       }
    }
+   bool successLats = setLats(lats);
+   if(!successLats) {
+      std::stringstream ss;
+      ss << "Could not set latitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   bool successLons = setLons(lons);
+   if(!successLons) {
+      std::stringstream ss;
+      ss << "Could not set longitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+
    vec2 elevs;
    elevs.resize(getNumY());
    for(int i = 0; i < nLat; i++) {

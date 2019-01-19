@@ -36,6 +36,11 @@ class File {
       void write(std::vector<Variable> iVariables);
 
       // Dimension sizes
+
+      // Latitudes and longitudes must be set early on in the code, as this sets
+      // the X and Y dimension
+      bool setLats(vec2 iLats);
+      bool setLons(vec2 iLons);
       int getNumY() const;
       int getNumX() const;
       int getNumEns() const;
@@ -44,8 +49,6 @@ class File {
       vec2 getLons() const;
       vec2 getElevs() const;
       vec2 getLandFractions() const;
-      bool setLats(vec2 iLats);
-      bool setLons(vec2 iLons);
       bool setElevs(vec2 iElevs);
       bool setLandFractions(vec2 iLandFractions);
       bool setNumEns(int iNum);
@@ -91,8 +94,6 @@ class File {
       virtual bool hasVariableCore(const Variable& iVariable) const = 0;
 
       // Subclasses must fill these fields in the constructor:
-      vec2 mLats;
-      vec2 mLons;
       vec2 mLandFractions;
       int mNEns;
 
@@ -110,6 +111,8 @@ class File {
       static Uuid mNextTag;
       vec2 mElevs;
       bool mHasElevs;
+      vec2 mLats;
+      vec2 mLons;
 };
 #include "Netcdf.h"
 #include "Fake.h"

@@ -211,7 +211,8 @@ Uuid File::getUniqueTag() const {
    return mTag;
 }
 bool File::setLats(vec2 iLats) {
-   if(iLats.size() != getNumY() || iLats[0].size() != getNumX())
+   bool uninitialized = mLats.size() == 0;
+   if(!uninitialized && (iLats.size() != getNumY() || iLats[0].size() != getNumX()))
       return false;
    if(mLats != iLats)
       createNewTag();
@@ -219,7 +220,8 @@ bool File::setLats(vec2 iLats) {
    return true;
 }
 bool File::setLons(vec2 iLons) {
-   if(iLons.size() != getNumY() || iLons[0].size() != getNumX())
+   bool uninitialized = mLons.size() == 0;
+   if(!uninitialized && (iLons.size() != getNumY() || iLons[0].size() != getNumX()))
       return false;
    if(mLons != iLons)
       createNewTag();
@@ -232,7 +234,7 @@ bool File::setLons(vec2 iLons) {
             int sign = lon / fabs(lon);
             lon = fabs(lon);
             lon = fmod(lon,360); // lon is between 0 and 360
-            lon = sign * lon; // lon is between -360 and 306
+            lon = sign * lon; // lon is between -360 and 360
             if(lon > 180)
                lon = lon - 360;
             else if(lon < -180)

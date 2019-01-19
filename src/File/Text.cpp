@@ -77,17 +77,30 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
    std::vector<Location> locations(locationsSet.begin(), locationsSet.end());
    std::sort(times.begin(), times.end());
 
-   mLats.resize(locations.size());
-   mLons.resize(locations.size());
+   vec2 lats, lons;
+   lats.resize(locations.size());
+   lons.resize(locations.size());
    vec2 elevs;
    elevs.resize(locations.size());
    for(int i = 0; i < locations.size(); i++) {
-      mLats[i].resize(1);
-      mLons[i].resize(1);
+      lats[i].resize(1);
+      lons[i].resize(1);
       elevs[i].resize(1);
-      mLats[i][0] = locations[i].lat();
-      mLons[i][0] = locations[i].lon();
+      lats[i][0] = locations[i].lat();
+      lons[i][0] = locations[i].lon();
       elevs[i][0] = locations[i].elev();
+   }
+   bool successLats = setLats(lats);
+   if(!successLats) {
+      std::stringstream ss;
+      ss << "Could not set latitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   bool successLons = setLons(lons);
+   if(!successLons) {
+      std::stringstream ss;
+      ss << "Could not set longitudes in " << getFilename();
+      Util::error(ss.str());
    }
    setElevs(elevs);
 
@@ -117,7 +130,6 @@ FieldPtr FileText::getFieldCore(const Variable& iVariable, int iTime) const {
 
 void FileText::writeCore(std::vector<Variable> iVariables) {
    std::ofstream ofs(getFilename().c_str());
-   // ofs << mLats[0][0] << " " << mLons[0][0] << " " << mElevs[0][0];
    if(iVariables.size() == 0) {
       Util::warning("No variables to write");
       return;

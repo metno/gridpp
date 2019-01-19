@@ -26,8 +26,21 @@ FilePoint::FilePoint(std::string iFilename, const Options& iOptions) :
    std::vector<float> lon0(1, lon);
    std::vector<float> elev0(1, elev);
    std::vector<float> landFraction0(1, Util::MV);
-   mLats.push_back(lat0);
-   mLons.push_back(lon0);
+   vec2 lats, lons;
+   lats.push_back(lat0);
+   lons.push_back(lon0);
+   bool successLats = setLats(lats);
+   if(!successLats) {
+      std::stringstream ss;
+      ss << "Could not set latitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   bool successLons = setLons(lons);
+   if(!successLons) {
+      std::stringstream ss;
+      ss << "Could not set longitudes in " << getFilename();
+      Util::error(ss.str());
+   }
    vec2 elevs;
    elevs.push_back(elev0);
    setElevs(elevs);

@@ -86,8 +86,18 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
    // Done reading options
 
    // Retrieve lat/lon grid
-   mLats = getLatLonVariable(mLatVar);
-   mLons = getLatLonVariable(mLonVar);
+   bool successLats = setLats(getLatLonVariable(mLatVar));
+   if(!successLats) {
+      std::stringstream ss;
+      ss << "Could not set latitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   bool successLons = setLons(getLatLonVariable(mLonVar));
+   if(!successLons) {
+      std::stringstream ss;
+      ss << "Could not set longitudes in " << getFilename();
+      Util::error(ss.str());
+   }
 
    if(Util::isValid(mElevVar)) {
       vec2 elevs = getLatLonVariable(mElevVar);

@@ -8,22 +8,22 @@
 
 FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
       File(iFilename, iOptions) {
-   mLats.resize(1);
-   mLons.resize(1);
+   vec2 lats, lons;
+   lats.resize(1);
+   lons.resize(1);
    vec2 elevs;
    elevs.resize(1);
    mLandFractions.resize(1);
    mNEns = 1;
-   if(!iOptions.getValues("lats", mLats[0])) {
+   if(!iOptions.getValues("lats", lats[0])) {
       Util::error("Missing 'lats' option for '" + iFilename + "'");
    }
-   if(!iOptions.getValues("lons", mLons[0])) {
+   if(!iOptions.getValues("lons", lons[0])) {
       Util::error("Missing 'lons' option for '" + iFilename + "'");
    }
    if(!iOptions.getValues("elevs", elevs[0])) {
       Util::error("Missing 'elevs' option for '" + iFilename + "'");
    }
-   setElevs(elevs);
    mLandFractions[0].resize(elevs[0].size(), Util::MV);
    if(!iOptions.getValues("names", mNames)) {
       Util::error("Missing 'names' option for '" + iFilename + "'");
@@ -32,17 +32,30 @@ FileNorcomQnh::FileNorcomQnh(std::string iFilename, const Options& iOptions) :
    if(!iOptions.getValue("numTimes", numTimes)) {
       Util::error("Missing 'numTimes' option for '" + iFilename + "'");
    }
-   if(mLats[0].size() != mLons[0].size() || mLats[0].size() != elevs[0].size() || mLats[0].size() != mNames.size()) {
+   if(lats[0].size() != lons[0].size() || lats[0].size() != elevs[0].size() || lats[0].size() != mNames.size()) {
       Util::error("FileNorcomQnh: 'lats', 'lons', 'elevs', 'names' must be the same size");
    }
-   for(int i = 0; i < mLats[0].size(); i++) {
-      float lat = mLats[0][i];
+   for(int i = 0; i < lats[0].size(); i++) {
+      float lat = lats[0][i];
       if(lat < -90 || lat > 90) {
          std::stringstream ss;
          ss << "Invalid latitude: " << lat;
          Util::error(ss.str());
       }
    }
+   bool successLats = setLats(lats);
+   if(!successLats) {
+      std::stringstream ss;
+      ss << "Could not set latitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   bool successLons = setLons(lons);
+   if(!successLons) {
+      std::stringstream ss;
+      ss << "Could not set longitudes in " << getFilename();
+      Util::error(ss.str());
+   }
+   setElevs(elevs);
 
    std::vector<double> times;
    for(int i = 0; i < numTimes; i++)
@@ -101,7 +114,8 @@ void FileNorcomQnh::writeCore(std::vector<Variable> iVariables) {
 
    ofs.precision(0);
    // Write one line for each station
-   for(int j = 0; j < mLats[0].size(); j++) {
+   vec2 lats = getLats();
+   for(int j = 0; j < lats[0].size(); j++) {
       std::string locationName = mNames[j];
       ofs << "EST MIN QNH ";
       ofs << std::setfill(' ') << std::setw(maxNameSize) << std::left << locationName << ": ";

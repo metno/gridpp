@@ -147,6 +147,7 @@ class Util {
 
       //! Applies statistics operator to array. Missing values are ignored.
       static float calculateStat(const std::vector<float>& iArray, Util::StatType iStatType, float iQuantile=Util::MV);
+      static void getStatType(std::string iName, Util::StatType& iType, float& iQuantile);
       
       //! \brief Comparator class for sorting pairs using the first entry.
       //! Sorts from smallest to largest

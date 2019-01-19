@@ -413,6 +413,27 @@ float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStat
    }
    return value;
 }
+void Util::getStatType(std::string iName, Util::StatType& iType, float& iQuantile) {
+   iQuantile = 0;
+   if(iName == "mean") {
+      iType = Util::StatTypeMean;
+   }
+   else if(iName == "min") {
+      iType = Util::StatTypeQuantile;
+      iQuantile = 0;
+   }
+   else if(iName == "max") {
+      iType = Util::StatTypeQuantile;
+      iQuantile = 1;
+   }
+   else if(iName == "median") {
+      iType = Util::StatTypeQuantile;
+      iQuantile = 0.5;
+   }
+   else if(iName == "std") {
+      iType = Util::StatTypeStd;
+   }
+}
 
 vec2 Util::inverse(const vec2 iMatrix) {
    int N = iMatrix.size();

@@ -54,7 +54,8 @@ class Downscaler : public Scheme {
 #include "NearestNeighbour.h"
 #include "Gradient.h"
 #include "Bilinear.h"
-#include "Smart.h"
-#include "Bypass.h"
 #include "Pressure.h"
+#include "Smart.h"
+#include "Upscale.h"
+#include "Bypass.h"
 #endif

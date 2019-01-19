@@ -155,30 +155,37 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
       }
 
       for(int i = 0; i < nLat; i++) {
-         iI[i].resize(nLon, 0);
-         iJ[i].resize(nLon, 0);
+         iI[i].resize(nLon, Util::MV);
+         iJ[i].resize(nLon, Util::MV);
          for(int j = 0; j < nLon; j++) {
-            int iNearest = 0;
-            int jNearest = 0;
-            float minDist = 1e9;
-            for(int ii = 0; ii < lats.size(); ii++) {
-               assert(ii < lats.size());
-               float dist = fabs(lats[ii] - olats[i][j]);
-               if(dist < minDist) {
-                  minDist = dist;
-                  iNearest = ii;
+            if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
+               int iNearest = Util::MV;
+               int jNearest = Util::MV;
+               float iMinDist = 1e9;
+               for(int ii = 0; ii < lats.size(); ii++) {
+                  if(Util::isValid(lats[ii])) {
+                     float dist = fabs(lats[ii] - olats[i][j]);
+                     if(dist < iMinDist) {
+                        iMinDist = dist;
+                        iNearest = ii;
+                     }
+                  }
+               }
+               float jMinDist = 1e9;
+               for(int jj = 0; jj < lons.size(); jj++) {
+                  if(Util::isValid(lons[jj])) {
+                     float dist = fabs(lons[jj] - olons[i][j]);
+                     if(dist < jMinDist) {
+                        jMinDist = dist;
+                        jNearest = jj;
+                     }
+                  }
+               }
+               if(Util::isValid(iNearest) && Util::isValid(jNearest)) {
+                  iI[i][j] = iNearest;
+                  iJ[i][j] = jNearest;
                }
             }
-            for(int ii = 0; ii < lons.size(); ii++) {
-               float dist = fabs(lons[ii] - olons[i][j]);
-               assert(ii < lons.size());
-               if(dist < minDist) {
-                  minDist = dist;
-                  jNearest = ii;
-               }
-            }
-            iI[i][j] = iNearest;
-            iJ[i][j] = jNearest;
          }
       }
       addToCache(iFrom, iTo, iI, iJ);

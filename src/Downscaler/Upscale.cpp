@@ -11,8 +11,12 @@ DownscalerUpscale::DownscalerUpscale(const Variable& iInputVariable, const Varia
       mQuantile(0),
       Downscaler(iInputVariable, iOutputVariable, iOptions) {
    std::string statType;
-   if(iOptions.getValue("stat", statType))
+   if(iOptions.getValue("stat", statType)) {
       Util::getStatType(statType, mStatType, mQuantile);
+   }
+   if(mStatType == Util::StatTypeQuantile) {
+      iOptions.getRequiredValue("quantile", mQuantile);
+   }
    iOptions.check();
 }
 
@@ -59,5 +63,7 @@ void DownscalerUpscale::downscaleCore(const File& iInput, File& iOutput) const {
 std::string DownscalerUpscale::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-d upscale", "Aggregate all neighbours who are closest to the lookup point.") << std::endl;
+      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+      ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    return ss.str();
 }

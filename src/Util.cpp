@@ -433,6 +433,9 @@ void Util::getStatType(std::string iName, Util::StatType& iType, float& iQuantil
    else if(iName == "std") {
       iType = Util::StatTypeStd;
    }
+   else if(iName == "quantile") {
+      iType = Util::StatTypeQuantile;
+   }
 }
 
 vec2 Util::inverse(const vec2 iMatrix) {

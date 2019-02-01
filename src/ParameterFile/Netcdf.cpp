@@ -92,14 +92,15 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    }
 
    int var = getVar(mFile, mVarName);
-   int totalNumParameters = nLat*nLon*nTime*nCoeff;
+   long totalNumParameters = nLat*nLon;
+   totalNumParameters *= nTime*nCoeff;
+   assert(totalNumParameters > 0);
    float* values = getNcFloats(mFile, var);
 
    // Initialize parameters to empty and then fill in later
    std::vector<Location> locations;
    for(int i = 0; i < nLat; i++) {
       for(int j = 0; j < nLon; j++) {
-         int locIndex = i * nLon + j;
          Location location(lats[i][j], lons[i][j], elevs[i][j]);
          locations.push_back(location);
       }
@@ -472,7 +473,8 @@ std::vector<int> ParameterFileNetcdf::getIndices(int i, const std::vector<int>& 
 }
 
 float* ParameterFileNetcdf::getNcFloats(int iFile, int iVar) {
-   int size = NetcdfUtil::getTotalSize(iFile, iVar);
+   long size = NetcdfUtil::getTotalSize(iFile, iVar);
+   assert(size > 0);
    float* values = new float[size];
    int status = nc_get_var_float(iFile, iVar, values);
    char name[512];

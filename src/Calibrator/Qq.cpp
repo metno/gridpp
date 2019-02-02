@@ -34,7 +34,9 @@ CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
    if(iParameterFile->getNumParameters() % 2 != 0) {
-      Util::error("Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns");
+      std::stringstream ss;
+      ss << "Parameter file '" + iParameterFile->getFilename() + "' must have an even number of datacolumns (currently " << iParameterFile->getNumParameters() << " parameters)";
+      Util::error(ss.str());
    }
 
    const int nLat = iFile.getNumY();

@@ -109,7 +109,11 @@ float Util::getDistance(float lat1, float lon1, float lat2, float lon2, bool app
       !Util::isValid(lon1) || !Util::isValid(lon2)) {
       return Util::MV;
    }
-   assert(fabs(lat1) <= 90 && fabs(lat2) <= 90 && fabs(lon1) <= 360 && fabs(lon2) <= 360);
+   if(!(fabs(lat1) <= 90 && fabs(lat2) <= 90 && fabs(lon1) <= 360 && fabs(lon2) <= 360)) {
+      std::stringstream ss;
+      ss  <<" Cannot calculate distance, invalid lat/lon: (" << lat1 << "," << lon1 << ") (" << lat2 << "," << lon2 << ")";
+      Util::error(ss.str());
+   }
 
    if(lat1 == lat2 && lon1 == lon2)
       return 0;

@@ -217,6 +217,17 @@ bool File::setLats(vec2 iLats) {
    if(mLats != iLats)
       createNewTag();
    mLats = iLats;
+
+   // Check that latitudes are valid
+   for(int i = 0; i < mLats.size(); i++) {
+      for(int j = 0; j < mLats[i].size(); j++) {
+         if(mLats[i][j] < -90 || mLats[i][j] > 90) {
+            std::stringstream ss;
+            ss << "Invalid latitude in file '" << getFilename() << "': " << mLats[i][j] << std::endl;
+            Util::error(ss.str());
+         }
+      }
+   }
    return true;
 }
 bool File::setLons(vec2 iLons) {
@@ -226,6 +237,18 @@ bool File::setLons(vec2 iLons) {
    if(mLons != iLons)
       createNewTag();
    mLons = iLons;
+
+   // Check that longitudes are valid
+   for(int i = 0; i < mLons.size(); i++) {
+      for(int j = 0; j < mLons[i].size(); j++) {
+         if(mLons[i][j] < -90 || mLons[i][j] > 90) {
+            std::stringstream ss;
+            ss << "Invalid longitude in file '" << getFilename() << "': " << mLons[i][j] << std::endl;
+            Util::error(ss.str());
+         }
+      }
+   }
+
    for(int i = 0; i < mLons.size(); i++) {
       for(int j = 0; j < mLons[i].size(); j++) {
          float lon = mLons[i][j];

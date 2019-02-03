@@ -241,7 +241,7 @@ bool File::setLons(vec2 iLons) {
    // Check that longitudes are valid
    for(int i = 0; i < mLons.size(); i++) {
       for(int j = 0; j < mLons[i].size(); j++) {
-         if(mLons[i][j] < -90 || mLons[i][j] > 90) {
+         if(mLons[i][j] < -360 || mLons[i][j] > 360) {
             std::stringstream ss;
             ss << "Invalid longitude in file '" << getFilename() << "': " << mLons[i][j] << std::endl;
             Util::error(ss.str());

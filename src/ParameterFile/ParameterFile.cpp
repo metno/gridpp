@@ -228,8 +228,10 @@ int ParameterFile::getNumParameters() const {
       for(int i = 0; i < parvec.size(); i++) {
          int currSize = parvec[i].size();
          if(currSize != 0) {
-            if(Util::isValid(size) && currSize != size)
+            if(Util::isValid(size) && currSize != size) {
+               std::cout << "Missmatch in parameter size" << size << " " << currSize << std::endl;
                return Util::MV;
+            }
             size = currSize;
          }
          else

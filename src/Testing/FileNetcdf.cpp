@@ -32,8 +32,8 @@ namespace {
    }
    TEST_F(FileNetcdfTest, missingTime) {
       FileNetcdf file = FileNetcdf("testing/files/validNetcdf3.nc");
-      EXPECT_EQ(10, file.getNumY());
-      EXPECT_EQ(10, file.getNumX());
+      EXPECT_EQ(3, file.getNumY());
+      EXPECT_EQ(3, file.getNumX());
       EXPECT_EQ(1, file.getNumEns());
       EXPECT_EQ(1, file.getNumTime());
    }

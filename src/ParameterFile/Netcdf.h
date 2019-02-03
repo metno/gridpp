@@ -44,6 +44,7 @@ class ParameterFileNetcdf : public ParameterFile {
       //! Convert linear index 'i' to vector 'iInidices'. 'iCount' specifies the size of the data
       //! Using row-major ordering (last index varies fastest)
       std::vector<int> getIndices(int i, const std::vector<int>& iCount) const;
+      int getIndex(const std::vector<int>& iIndices, const std::vector<int>& iCount) const;
 
       // Read variable from file, convert missing values
       // User must release memory

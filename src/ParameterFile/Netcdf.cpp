@@ -106,6 +106,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
       }
    }
    initializeEmpty(locations, nTime, nCoeff);
+   Util::info("Done initializing empty parameters");
 
    /*
    Read parameters from file and arrange them in mParameters. This is a bit tricky because we do not
@@ -156,32 +157,33 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
       Util::error("Coefficients in " + getFilename() + " is missing coefficient dimension");
 
    // Loop over the parameters placing them into the right position
-   int index = 0;
    Parameters par;
-   while(index < totalNumParameters) {
-      float currParameter = values[index];
-      // Translate the linear index into a vector index
-      std::vector<int> indices = getIndices(index, sizes);
-      assert(indices.size() == ndims);
+   std::stringstream ss0;
+   ss0 << "Parameter sizes (lat, lon, time, coeff): " << nLat << " " << nLon << " " << nTime << " " << nCoeff;
+   Util::info(ss0.str());
+   std::vector<int> indices(4, 0);
+   for(int i = 0; i < lats.size(); i++) {
+      indices[latDimIndex] = i;
+      for(int j = 0; j < lats[i].size(); j++) {
+         indices[lonDimIndex] = j;
+         Location location(lats[i][j], lons[i][j], elevs[i][j]);
+         for(int t = 0; t < nTime; t++) {
+            indices[timeDimIndex] = t;
+            std::vector<float> par(nCoeff, 0);
+            for(int c = 0; c < nCoeff; c++) {
+               indices[coeffDimIndex] = c;
+               int index = getIndex(indices, sizes);
+               par[c] = values[index];
+            }
+            mParameters[location][t] = Parameters(par);
+         }
 
-      // Determine the location, time, and parameter corresponding to 'index'
-      int i = indices[latDimIndex];
-      int j = indices[lonDimIndex];
-      int coeffIndex = indices[coeffDimIndex];
-      int timeIndex = 0;
-      if(Util::isValid(timeDimIndex))
-         timeIndex = indices[timeDimIndex];
-
-      Location location(lats[i][j], lons[i][j], elevs[i][j]);
-
-      // TODO: Only insert when parameters are valid
-      // Assign parameter
-      mParameters[location][timeIndex][coeffIndex] = currParameter;
-      if(timeIndex > 0)
-         setIsTimeDependent(true);
-      setMaxTime(std::max(getMaxTime(), timeIndex));
-      index++;
+      }
    }
+   if(nTime > 1)
+      setIsTimeDependent(true);
+   setMaxTime(nTime);
+   assert(getNumParameters() > 0);
 
    delete[] values;
    delete[] times;
@@ -470,6 +472,19 @@ std::vector<int> ParameterFileNetcdf::getIndices(int i, const std::vector<int>& 
       sizeSoFar *= iCount[k];
    }
    return indices;
+}
+
+int ParameterFileNetcdf::getIndex(const std::vector<int>& iIndices, const std::vector<int>& iCount) const {
+   // The last index changes fastest, the first slowest
+   int index = 0;
+   int numDims = iCount.size();
+   int sizeSoFar = 1;
+   for(int k = numDims-1; k >= 0; k--) {
+      int currIndex = iIndices[k];
+      index += currIndex * sizeSoFar;
+      sizeSoFar *= iCount[k];
+   }
+   return index;
 }
 
 float* ParameterFileNetcdf::getNcFloats(int iFile, int iVar) {

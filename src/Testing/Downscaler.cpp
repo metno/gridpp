@@ -89,35 +89,6 @@ namespace {
       EXPECT_EQ(1, I[1][1]);
       EXPECT_EQ(1, J[1][1]);
    }
-   TEST_F(TestDownscaler, missingLatLon) {
-      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
-      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
-      float lat1[] = {50,Util::MV,60};
-      float lon1[] = {0,Util::MV};
-      float lat2[] = {40, 54};
-      float lon2[] = {-1,Util::MV};
-      setLatLon(from, lat1, lon1);
-      setLatLon(to,   lat2, lon2);
-
-      vec2Int I, J, If, Jf;
-      Downscaler::getNearestNeighbour(from, to, I, J);
-      Downscaler::clearCache();
-      Downscaler::getNearestNeighbourBruteForce(from, to, If, Jf);
-      EXPECT_EQ(I, If);
-      EXPECT_EQ(J, Jf);
-
-      ASSERT_EQ(2, I.size());
-      ASSERT_EQ(2, I[0].size());
-
-      EXPECT_EQ(0, I[0][0]);
-      EXPECT_EQ(0, J[0][0]);
-      EXPECT_EQ(Util::MV, I[0][1]);
-      EXPECT_EQ(Util::MV, J[0][1]);
-      EXPECT_EQ(0, I[1][0]);
-      EXPECT_EQ(0, J[1][0]);
-      EXPECT_EQ(Util::MV, I[1][1]);
-      EXPECT_EQ(Util::MV, J[1][1]);
-   }
    TEST_F(TestDownscaler, identicalGrid) {
       int nLat = 3;
       int nLon = 4;
@@ -265,6 +236,18 @@ namespace {
             EXPECT_EQ(j, J[i][j]);
          }
       }
+   }
+   TEST_F(TestDownscaler, missingLatLon) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      FileFake from(Options("nLat=3 nLon=2 nEns=1 nTime=1"));
+      FileFake to(Options("nLat=2 nLon=2 nEns=1 nTime=1"));
+      float lat1[] = {50,Util::MV,60};
+      float lon1[] = {0,Util::MV};
+      float lat2[] = {40, 54};
+      float lon2[] = {-1,Util::MV};
+      EXPECT_DEATH(setLatLon(from, lat1, lon1), ".*");
+      EXPECT_DEATH(setLatLon(to,   lat2, lon2), ".*");
    }
 }
 int main(int argc, char **argv) {

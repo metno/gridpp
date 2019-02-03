@@ -48,10 +48,7 @@ namespace {
       FileNorcomQnh::description();
    }
    TEST_F(FileNorcomQnhTest, valid) {
-      // Longitudes outside 360, -360 should be allowed
       FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=300 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
-      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
-      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=-370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
    }
    TEST_F(FileNorcomQnhTest, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -74,6 +71,10 @@ namespace {
       // Invalid latitude
       EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=101 lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
       EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=-91 lons=180 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+
+      // Longitudes outside 360, -360 should not be allowed
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=-370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
 
       // Start/end time not in ascending order
       EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q numTimes=2 startTime=1 endTime=0")), ".*");

@@ -57,12 +57,17 @@ namespace {
       (*fieldY)(2, 2, 0) = Util::MV;
       (*fieldY)(3, 2, 0) = Util::MV;
 
+      // Check that we don't get negative directions
+      (*fieldX)(0, 0, 0) = 1;
+      (*fieldY)(0, 0, 0) = 0;
+
       calDir->calibrate(from, NULL);
       FieldPtr field = from.getField(mD, 0);
       EXPECT_FLOAT_EQ(86.715614, (*field)(5,2,0));  // x: -1.886 y: -0.108
       EXPECT_FLOAT_EQ(Util::MV, (*field)(1,2,0));
       EXPECT_FLOAT_EQ(Util::MV, (*field)(2,2,0));
       EXPECT_FLOAT_EQ(Util::MV, (*field)(3,2,0));
+      EXPECT_FLOAT_EQ(270, (*field)(0,0,0)); // x: 1 y: 0
    }
    TEST_F(TestCalibratorDiagnoseWind, xy) {
       // Diagnose windspeed and direction from u and v. Then change the windspeed to

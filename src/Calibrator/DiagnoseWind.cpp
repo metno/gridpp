@@ -99,8 +99,13 @@ bool CalibratorDiagnoseWind::calibrateCore(File& iFile, const ParameterFile* iPa
          for(int y = 0; y < nY; y++) {
             for(int x = 0; x < nX; x++) {
                for(int e = 0; e < nEns; e++) {
-                  if(Util::isValid(X(y, x, e)) && Util::isValid(Y(y, x, e)))
-                     output(y, x, e) = std::atan2(-X(y, x, e), -Y(y, x, e)) * 180 / Util::pi;
+                  if(Util::isValid(X(y, x, e)) && Util::isValid(Y(y, x, e))) {
+                     float dir = std::atan2(-X(y, x, e), -Y(y, x, e)) * 180 / Util::pi;
+                     if(dir < 0)
+                        dir += 360;
+
+                     output(y, x, e) = dir;
+                  }
                }
             }
          }

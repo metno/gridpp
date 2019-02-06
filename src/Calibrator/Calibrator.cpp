@@ -172,6 +172,7 @@ std::string Calibrator::getDescriptions(bool full) {
    ss << CalibratorQq::description(full);
    ss << CalibratorRegression::description(full);
    ss << CalibratorSort::description(full);
+   ss << CalibratorWindow::description(full);
    ss << CalibratorWindDirection::description(full);
    ss << CalibratorZaga::description(full);
    return ss.str();

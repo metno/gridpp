@@ -18,9 +18,9 @@ namespace {
          }
          Variable mVariable;
    };
-   TEST_F(TestCalibratorWindow, radius0) {
+   TEST_F(TestCalibratorWindow, length1) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=0 stat=mean"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=1 stat=mean"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(23, (*from.getField(mVariable, 0))(0,0,0));
@@ -34,9 +34,9 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mVariable, 8))(0,0,0));
       EXPECT_FLOAT_EQ(23, (*from.getField(mVariable, 9))(0,0,0));
    }
-   TEST_F(TestCalibratorWindow, radius2) {
+   TEST_F(TestCalibratorWindow, length5) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=mean"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=mean"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(19.333333, (*from.getField(mVariable, 0))(0,0,0));
@@ -52,7 +52,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, min) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=min"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=min"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(15, (*from.getField(mVariable, 0))(0,0,0));
@@ -68,7 +68,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, max) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=max"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=max"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(23, (*from.getField(mVariable, 0))(0,0,0));
@@ -84,7 +84,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, std) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=std"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=std"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(3.299832,  (*from.getField(mVariable, 0))(0,0,0));
@@ -95,7 +95,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, quantile) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=quantile quantile=0.5"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=quantile quantile=0.5"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(20,   (*from.getField(mVariable, 0))(0,0,0));
@@ -106,7 +106,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, median) {
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=2 stat=median"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=median"));
       cal.calibrate(from);
 
       EXPECT_FLOAT_EQ(20,   (*from.getField(mVariable, 0))(0,0,0));
@@ -115,10 +115,10 @@ namespace {
       EXPECT_FLOAT_EQ(22,   (*from.getField(mVariable, 7))(0,0,0));
       EXPECT_FLOAT_EQ(21,   (*from.getField(mVariable, 9))(0,0,0));
    }
-   TEST_F(TestCalibratorWindow, radius100) {
-      // A large radius forces all values to be the same
+   TEST_F(TestCalibratorWindow, length100) {
+      // A large length forces all values to be the same
       FileNetcdf from("testing/files/1x1.nc");
-      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("radius=100 stat=mean"));
+      CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=201 stat=mean"));
       cal.calibrate(from);
 
       for(int t = 0; t < 10; t++) {
@@ -131,10 +131,10 @@ namespace {
 
       EXPECT_DEATH(CalibratorWindow(mVariable, Options("stat=invalidStatType")), ".*");
 
-      // Negative radius
-      EXPECT_DEATH(CalibratorWindow(mVariable, Options("radius=-1")), ".*");
-      EXPECT_DEATH(CalibratorWindow(mVariable, Options("radius=-1 stat=quantile")), ".*");
-      EXPECT_DEATH(CalibratorWindow(mVariable, Options("radius=-1 stat=quantile quantile=0.5")), ".*");
+      // Negative length
+      EXPECT_DEATH(CalibratorWindow(mVariable, Options("length=-1")), ".*");
+      EXPECT_DEATH(CalibratorWindow(mVariable, Options("length=-1 stat=quantile")), ".*");
+      EXPECT_DEATH(CalibratorWindow(mVariable, Options("length=-1 stat=quantile quantile=0.5")), ".*");
 
       // Missing quantile
       EXPECT_DEATH(CalibratorWindow(mVariable, Options("stat=quantile")), ".*");

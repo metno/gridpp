@@ -3,13 +3,33 @@
 #include "../File/File.h"
 CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
-      mRadius(3),
+      mLength(7),
+      mBefore(false),
       mStatType(Util::StatTypeMean),
+      mEdgePolicy(EdgePolicyCompute),
       mQuantile(Util::MV) {
-   iOptions.getValue("radius", mRadius);
-   if(mRadius < 0) {
+   iOptions.getValue("length", mLength);
+   iOptions.getValue("before", mBefore);
+   std::string edgePolicy;
+   iOptions.getValue("edgePolicy", edgePolicy);
+   if(edgePolicy == "compute")
+      mEdgePolicy = EdgePolicyCompute;
+   else if(edgePolicy == "missing")
+      mEdgePolicy = EdgePolicyMissing;
+   else {
       std::stringstream ss;
-      ss << "CalibratorWindow: 'radius' (" << mRadius << ") must be >= 0";
+      ss << "Cannot understand edgePolicy=" << edgePolicy;
+      Util::error(ss.str());
+   }
+
+   if(mLength < 1) {
+      std::stringstream ss;
+      ss << "CalibratorWindow: 'length' (" << mLength << ") must be > 0";
+      Util::error(ss.str());
+   }
+   if(!mBefore && mLength % 2 != 1) {
+      std::stringstream ss;
+      ss << "CalibratorWindow: 'length' (" << mLength << ") must be an odd number if before=0";
       Util::error(ss.str());
    }
 
@@ -62,20 +82,33 @@ bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParamete
       fields[t] = iFile.getEmptyField();
    }
 
+   std::vector<float> window;
+   window.resize(mLength, Util::MV);
    for(int t = 0; t < nTime; t++) {
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
-               std::vector<float> window;
-               window.resize(2*mRadius+1, Util::MV);
                int index = 0;
-               for(int tt = std::max(0,t-mRadius); tt <= std::min(nTime-1, t + mRadius); tt++) {
-                  float curr = (*fieldsOrig[tt])(i,j,e);
-                  window[index] = curr;
-                  index++;
+               int halfLength = (mLength - 1) / 2;
+               int start = std::max(0,t-halfLength);
+               int end = std::min(nTime-1, t + halfLength);
+               if(mBefore) {
+                  start = std::max(0, t - (mLength - 1));
+                  end = std::min(nTime-1, t);
                }
-               (*fields[t])(i,j,e) = Util::calculateStat(window, mStatType, mQuantile);
+               assert(end - start + 1 <= mLength);
+               if(mEdgePolicy == EdgePolicyMissing && (end - start + 1 != mLength)) {
+                  (*fields[t])(i,j,e) = Util::MV;
+               }
+               else {
+                  for(int tt = start; tt <= end; tt++) {
+                     float curr = (*fieldsOrig[tt])(i,j,e);
+                     window[index] = curr;
+                     index++;
+                  }
+                  (*fields[t])(i,j,e) = Util::calculateStat(window, mStatType, mQuantile);
+               }
             }
          }
       }
@@ -90,8 +123,10 @@ std::string CalibratorWindow::description(bool full) {
    std::stringstream ss;
    ss << Util::formatDescription("-c window","Applies a statistical operator to values within a temporal window. Any missing values are ignored when computing the statistic.") << std::endl;
    if(full) {
-      ss << Util::formatDescription("   radius=required", "Define the window as all offsets within +- radius (must be 0 or greater). The unit is in number of time indices in the file.") << std::endl;
+      ss << Util::formatDescription("   length=required", "Length of the window (in number of timesteps) to apply operator on (must be 0 or greater).") << std::endl;
+      ss << Util::formatDescription("   before=false", "If false, the window is centered on each leadtime (if length is an even number, then it is shiftet such that it includes one extra future leadtime). If true, then the window ends and includes at the leadtime.") << std::endl;
       ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+      ss << Util::formatDescription("   edgePolicy=compute", "What policy should be used on edges? Either 'compute' to compute as usual, or 'missing' to set missing value if the window is not full.") << std::endl;
       ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    }
    return ss.str();

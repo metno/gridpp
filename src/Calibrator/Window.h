@@ -12,8 +12,15 @@ class CalibratorWindow : public Calibrator {
       bool requiresParameterFile() const { return false;};
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
-      int mRadius;
+      int mLength;
       Util::StatType mStatType;
       float mQuantile;
+      bool mBefore;
+      std::vector<float> mWeights;
+      enum EdgePolicy {
+         EdgePolicyCompute = 0,
+         EdgePolicyMissing = 10
+      };
+      EdgePolicy mEdgePolicy;
 };
 #endif

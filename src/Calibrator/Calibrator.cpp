@@ -84,6 +84,9 @@ Calibrator* Calibrator::getScheme(std::string iName, Variable iVariable, const O
    else if(iName == "coastal") {
       c = new CalibratorCoastal(iVariable, iOptions);
    }
+   else if(iName == "threshold") {
+      c = new CalibratorThreshold(iVariable, iOptions);
+   }
    else {
       Util::error("Could not instantiate calibrator with name '" + iName + "'");
       return NULL;
@@ -172,6 +175,7 @@ std::string Calibrator::getDescriptions(bool full) {
    ss << CalibratorQq::description(full);
    ss << CalibratorRegression::description(full);
    ss << CalibratorSort::description(full);
+   ss << CalibratorThreshold::description(full);
    ss << CalibratorWindow::description(full);
    ss << CalibratorWindDirection::description(full);
    ss << CalibratorZaga::description(full);

@@ -134,8 +134,11 @@ class Util {
 
       enum StatType {
          StatTypeMean      = 0,
-         StatTypeStd       = 30,
-         StatTypeQuantile  = 40
+         StatTypeMin       = 10,
+         StatTypeMedian    = 20,
+         StatTypeMax       = 30,
+         StatTypeStd       = 40,
+         StatTypeQuantile  = 50
       };
 
       enum Operator {

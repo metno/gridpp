@@ -385,7 +385,13 @@ float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStat
          value = std;
       }
    }
-   else if(iStatType == Util::StatTypeQuantile) {
+   else {
+      if(iStatType == Util::StatTypeMin)
+         iQuantile = 0;
+      if(iStatType == Util::StatTypeMedian)
+         iQuantile = 0.5;
+      if(iStatType == Util::StatTypeMax)
+         iQuantile = 1;
       // Remove missing
       std::vector<float> cleanHood;
       cleanHood.reserve(iArray.size());
@@ -423,16 +429,13 @@ void Util::getStatType(std::string iName, Util::StatType& iType, float& iQuantil
       iType = Util::StatTypeMean;
    }
    else if(iName == "min") {
-      iType = Util::StatTypeQuantile;
-      iQuantile = 0;
+      iType = Util::StatTypeMin;
    }
    else if(iName == "max") {
-      iType = Util::StatTypeQuantile;
-      iQuantile = 1;
+      iType = Util::StatTypeMax;
    }
    else if(iName == "median") {
-      iType = Util::StatTypeQuantile;
-      iQuantile = 0.5;
+      iType = Util::StatTypeMedian;
    }
    else if(iName == "std") {
       iType = Util::StatTypeStd;

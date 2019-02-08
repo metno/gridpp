@@ -22,16 +22,13 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
          mStatType = Util::StatTypeMean;
       }
       else if(op == "min") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 0;
+         mStatType = Util::StatTypeMin;
       }
       else if(op == "max") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 1;
+         mStatType = Util::StatTypeMax;
       }
       else if(op == "median") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 0.5;
+         mStatType = Util::StatTypeMedian;
       }
       else if(op == "std") {
          mStatType = Util::StatTypeStd;

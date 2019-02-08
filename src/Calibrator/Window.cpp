@@ -10,7 +10,7 @@ CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOp
       mQuantile(Util::MV) {
    iOptions.getValue("length", mLength);
    iOptions.getValue("before", mBefore);
-   std::string edgePolicy;
+   std::string edgePolicy = "compute";
    iOptions.getValue("edgePolicy", edgePolicy);
    if(edgePolicy == "compute")
       mEdgePolicy = EdgePolicyCompute;
@@ -25,11 +25,6 @@ CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOp
    if(mLength < 1) {
       std::stringstream ss;
       ss << "CalibratorWindow: 'length' (" << mLength << ") must be > 0";
-      Util::error(ss.str());
-   }
-   if(!mBefore && mLength % 2 != 1) {
-      std::stringstream ss;
-      ss << "CalibratorWindow: 'length' (" << mLength << ") must be an odd number if before=0";
       Util::error(ss.str());
    }
 
@@ -82,17 +77,18 @@ bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParamete
       fields[t] = iFile.getEmptyField();
    }
 
-   std::vector<float> window;
-   window.resize(mLength, Util::MV);
    for(int t = 0; t < nTime; t++) {
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
             for(int e = 0; e < nEns; e++) {
+               std::vector<float> window;
+               window.resize(mLength, Util::MV);
                int index = 0;
-               int halfLength = (mLength - 1) / 2;
-               int start = std::max(0,t-halfLength);
-               int end = std::min(nTime-1, t + halfLength);
+               int before = (mLength-1) / 2;
+               int after = mLength - before - 1;
+               int start = std::max(0, t - before);
+               int end = std::min(nTime-1, t + after);
                if(mBefore) {
                   start = std::max(0, t - (mLength - 1));
                   end = std::min(nTime-1, t);

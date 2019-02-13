@@ -339,7 +339,7 @@ std::string Util::formatDescription(std::string iTitle, std::string iMessage, in
 float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStatType, float iQuantile) {
    // Initialize to missing
    float value = Util::MV;
-   if(iStatType == Util::StatTypeMean) {
+   if(iStatType == Util::StatTypeMean || iStatType == Util::StatTypeSum) {
       float total = 0;
       int count = 0;
       for(int n = 0; n < iArray.size(); n++) {
@@ -349,7 +349,10 @@ float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStat
          }
       }
       if(count > 0) {
-         value = total / count;
+         if(iStatType == Util::StatTypeMean)
+            value = total / count;
+         else
+            value = total;
       }
    }
    else if(iStatType == Util::StatTypeStd) {
@@ -423,8 +426,7 @@ float Util::calculateStat(const std::vector<float>& iArray, Util::StatType iStat
    }
    return value;
 }
-void Util::getStatType(std::string iName, Util::StatType& iType, float& iQuantile) {
-   iQuantile = 0;
+bool Util::getStatType(std::string iName, Util::StatType& iType) {
    if(iName == "mean") {
       iType = Util::StatTypeMean;
    }
@@ -437,12 +439,19 @@ void Util::getStatType(std::string iName, Util::StatType& iType, float& iQuantil
    else if(iName == "median") {
       iType = Util::StatTypeMedian;
    }
-   else if(iName == "std") {
-      iType = Util::StatTypeStd;
-   }
    else if(iName == "quantile") {
       iType = Util::StatTypeQuantile;
    }
+   else if(iName == "std") {
+      iType = Util::StatTypeStd;
+   }
+   else if(iName == "sum") {
+      iType = Util::StatTypeSum;
+   }
+   else {
+      return false;
+   }
+   return true;
 }
 
 vec2 Util::inverse(const vec2 iMatrix) {

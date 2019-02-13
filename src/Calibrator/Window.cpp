@@ -121,9 +121,9 @@ std::string CalibratorWindow::description(bool full) {
    if(full) {
       ss << Util::formatDescription("   length=required", "Length of the window (in number of timesteps) to apply operator on (must be 0 or greater).") << std::endl;
       ss << Util::formatDescription("   before=false", "If false, the window is centered on each leadtime (if length is an even number, then it is shiftet such that it includes one extra future leadtime). If true, then the window ends and includes at the leadtime.") << std::endl;
-      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the window? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
-      ss << Util::formatDescription("   edgePolicy=compute", "What policy should be used on edges? Either 'compute' to compute as usual, or 'missing' to set missing value if the window is not full.") << std::endl;
+      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'quantile', 'std', or 'sum'. 'std' is the population standard deviation.") << std::endl;
       ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+      ss << Util::formatDescription("   edgePolicy=compute", "What policy should be used on edges? Either 'compute' to compute as usual, or 'missing' to set missing value if the window is not full.") << std::endl;
    }
    return ss.str();
 }

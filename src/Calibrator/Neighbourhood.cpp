@@ -18,32 +18,17 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
 
    std::string op;
    if(iOptions.getValue("stat", op)) {
-      if(op == "mean") {
-         mStatType = Util::StatTypeMean;
+      bool status = Util::getStatType(op, mStatType);
+      if(!status) {
+         std::stringstream ss;
+         ss << "Could not recognize stat=" << op;
+         Util::error(ss.str());
       }
-      else if(op == "min") {
-         mStatType = Util::StatTypeMin;
-      }
-      else if(op == "max") {
-         mStatType = Util::StatTypeMax;
-      }
-      else if(op == "median") {
-         mStatType = Util::StatTypeMedian;
-      }
-      else if(op == "std") {
-         mStatType = Util::StatTypeStd;
-      }
-      else if(op == "quantile"){
-         mStatType = Util::StatTypeQuantile;
-         if(!iOptions.getValue("quantile", mQuantile)) {
-            Util::error("CalibratorNeighbourhood: option 'quantile' is required");
-         }
-         if(!Util::isValid(mQuantile) || mQuantile < 0 || mQuantile > 1) {
-            Util::error("CalibratorNeighbourhood: 'quantile' must be on the interval [0,1]");
-         }
-      }
-      else {
-         Util::error("CalibratorNeighbourhood: Unrecognized value for 'stat'");
+   }
+   if(mStatType == Util::StatTypeQuantile) {
+      iOptions.getRequiredValue("quantile", mQuantile);
+      if(!Util::isValid(mQuantile) || mQuantile < 0 || mQuantile > 1) {
+         Util::error("'quantile' must be on the interval [0,1]");
       }
    }
    iOptions.check();
@@ -102,7 +87,7 @@ std::string CalibratorNeighbourhood::description(bool full) {
    if(full) {
       ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood (example by averaging across a neighbourhood thereby smoothing the field).") << std::endl;
       ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction. The radius can alternatively be specified using a location-independent parameter file, with one parameter.") << std::endl;
-      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'std', or 'quantile'. 'std' is the population standard deviation.") << std::endl;
+      ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'quantile', 'std', or 'sum'. 'std' is the population standard deviation.") << std::endl;
       ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
    }
    else

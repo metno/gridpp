@@ -30,35 +30,17 @@ CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOp
 
    std::string op;
    if(iOptions.getValue("stat", op)) {
-      if(op == "mean") {
-         mStatType = Util::StatTypeMean;
+      bool status = Util::getStatType(op, mStatType);
+      if(!status) {
+         std::stringstream ss;
+         ss << "Could not recognize stat=" << op;
+         Util::error(ss.str());
       }
-      else if(op == "min") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 0;
-      }
-      else if(op == "max") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 1;
-      }
-      else if(op == "median") {
-         mStatType = Util::StatTypeQuantile;
-         mQuantile = 0.5;
-      }
-      else if(op == "std") {
-         mStatType = Util::StatTypeStd;
-      }
-      else if(op == "quantile"){
-         mStatType = Util::StatTypeQuantile;
-         if(!iOptions.getValue("quantile", mQuantile)) {
-            Util::error("CalibratorWindow: option 'quantile' is required");
-         }
-         if(!Util::isValid(mQuantile) || mQuantile < 0 || mQuantile > 1) {
-            Util::error("CalibratorWindow: 'quantile' must be on the interval [0,1]");
-         }
-      }
-      else {
-         Util::error("CalibratorWindow: Unrecognized value for 'stat'");
+   }
+   if(mStatType == Util::StatTypeQuantile) {
+      iOptions.getRequiredValue("quantile", mQuantile);
+      if(!Util::isValid(mQuantile) || mQuantile < 0 || mQuantile > 1) {
+         Util::error("'quantile' must be on the interval [0,1]");
       }
    }
    iOptions.check();

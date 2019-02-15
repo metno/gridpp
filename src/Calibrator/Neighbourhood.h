@@ -19,5 +19,6 @@ class CalibratorNeighbourhood : public Calibrator {
       int mRadius;
       Util::StatType mStatType;
       float mQuantile;
+      bool mFast;
 };
 #endif

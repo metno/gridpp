@@ -20,7 +20,7 @@ namespace {
    };
    TEST_F(TestCalibratorNeighbourhood, 10x10_double) {
       FileNetcdf from("testing/files/10x10.nc");
-      CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1"));
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 fast=1"));
 
       cal.calibrate(from);
       FieldPtr after = from.getField(mVariable, 0);
@@ -30,9 +30,44 @@ namespace {
 
       EXPECT_FLOAT_EQ(304.6667, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(306.1667, (*after)(5,9,0));
+      EXPECT_FLOAT_EQ(303,      (*after)(9,9,0));
       EXPECT_FLOAT_EQ(308.25,   (*after)(0,9,0));
+      EXPECT_FLOAT_EQ(302,      (*after)(0,0,0));
+      EXPECT_FLOAT_EQ(303,      (*after)(1,0,0));
+      EXPECT_FLOAT_EQ(304.6667, (*after)(5,0,0));
+      EXPECT_FLOAT_EQ(306.25,   (*after)(9,0,0));
+      EXPECT_FLOAT_EQ(305.5,    (*after)(8,0,0));
+      EXPECT_FLOAT_EQ(300+61.0/9,    (*after)(8,1,0));
 
-      CalibratorNeighbourhood cal2 = CalibratorNeighbourhood(mVariable ,Options("radius=2"));
+      CalibratorNeighbourhood cal2 = CalibratorNeighbourhood(mVariable ,Options("radius=2 fast=1"));
+      cal2.calibrate(from);
+      EXPECT_FLOAT_EQ(304.73114, (*after)(5,2,0));
+      // Exact equality is difficult to achieve to do accumulated round-off errors
+      EXPECT_NEAR(305.355, (*after)(5,9,0), 0.001);
+   }
+   TEST_F(TestCalibratorNeighbourhood, 10x10_double_slow) {
+      // The slow method should give the same results
+      FileNetcdf from("testing/files/10x10.nc");
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 fast=0"));
+
+      cal.calibrate(from);
+      FieldPtr after = from.getField(mVariable, 0);
+      ASSERT_EQ(10, after->getNumY());
+      ASSERT_EQ(10, after->getNumX());
+      ASSERT_EQ(1,  after->getNumEns());
+
+      EXPECT_FLOAT_EQ(304.6667, (*after)(5,2,0));
+      EXPECT_FLOAT_EQ(306.1667, (*after)(5,9,0));
+      EXPECT_FLOAT_EQ(303,      (*after)(9,9,0));
+      EXPECT_FLOAT_EQ(308.25,   (*after)(0,9,0));
+      EXPECT_FLOAT_EQ(302,      (*after)(0,0,0));
+      EXPECT_FLOAT_EQ(303,      (*after)(1,0,0));
+      EXPECT_FLOAT_EQ(304.6667, (*after)(5,0,0));
+      EXPECT_FLOAT_EQ(306.25,   (*after)(9,0,0));
+      EXPECT_FLOAT_EQ(305.5,    (*after)(8,0,0));
+      EXPECT_FLOAT_EQ(300+61.0/9,    (*after)(8,1,0));
+
+      CalibratorNeighbourhood cal2 = CalibratorNeighbourhood(mVariable ,Options("radius=2 fast=0"));
       cal2.calibrate(from);
       EXPECT_FLOAT_EQ(304.73114, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(305.35556, (*after)(5,9,0));
@@ -65,6 +100,25 @@ namespace {
       EXPECT_FLOAT_EQ(304.6667, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(306.1667, (*after)(5,9,0));
       EXPECT_FLOAT_EQ(308.25,   (*after)(0,9,0));
+   }
+   TEST_F(TestCalibratorNeighbourhood, sum) {
+      // The slow method should give the same results
+      FileNetcdf from("testing/files/10x10.nc");
+      CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=sum fast=1"));
+
+      cal.calibrate(from);
+      FieldPtr after = from.getField(mVariable, 0);
+
+      EXPECT_FLOAT_EQ(304.6667*9, (*after)(5,2,0));
+      EXPECT_FLOAT_EQ(306.1667*6, (*after)(5,9,0));
+      EXPECT_FLOAT_EQ(303*4,      (*after)(9,9,0));
+      EXPECT_FLOAT_EQ(308.25*4,   (*after)(0,9,0));
+      EXPECT_FLOAT_EQ(302*4,      (*after)(0,0,0));
+      EXPECT_FLOAT_EQ(303*6,      (*after)(1,0,0));
+      EXPECT_FLOAT_EQ(304.6667*6, (*after)(5,0,0));
+      EXPECT_FLOAT_EQ(306.25*4,   (*after)(9,0,0));
+      EXPECT_FLOAT_EQ(305.5*6,    (*after)(8,0,0));
+      EXPECT_FLOAT_EQ(300*9+61.0, (*after)(8,1,0));
    }
    TEST_F(TestCalibratorNeighbourhood, min) {
       FileNetcdf from("testing/files/10x10.nc");

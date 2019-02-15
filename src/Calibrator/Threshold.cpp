@@ -40,10 +40,14 @@ bool CalibratorThreshold::calibrateCore(File& iFile, const ParameterFile* iParam
                if(Util::isValid(value)) {
                   (*field)(y, x, e) = mValues[nThresholds];
                   for(int p = 0; p < nThresholds; p++) {
-                     if(value < mThresholds[p])
+                     if(value < mThresholds[p]) {
                         (*field)(y, x, e) = mValues[p];
-                     else if(value == mThresholds[p] && mEquals[p] == 1)
+                        break;
+                     }
+                     else if(value == mThresholds[p] && mEquals[p] == 1) {
                         (*field)(y, x, e) = mValues[p];
+                        break;
+                     }
                   }
                }
             }

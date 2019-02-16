@@ -9,9 +9,11 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
       mRadius(3),
       mStatType(Util::StatTypeMean),
       mFast(true),
+      mApprox(false),
       mQuantile(Util::MV) {
    iOptions.getValue("radius", mRadius);
    iOptions.getValue("fast", mFast);
+   iOptions.getValue("approx", mApprox);
    if(mRadius < 0) {
       std::stringstream ss;
       ss << "CalibratorNeighbourhood: 'radius' (" << mRadius << ") must be >= 0";
@@ -155,7 +157,61 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
             }
          }
       }
+      else if(numMissingValues(precipRaw) == 0 && (
+               (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) || 
+               (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
+         // Compute min/max quickly or any other quantile in a faster, but approximate way
+         for(int e = 0; e < nEns; e++) {
+            #pragma omp parallel for
+            for(int i = 0; i < nLat; i++) {
+               if(i < mRadius || i >= nLat - mRadius) {
+                  // Regular way
+                  for(int j = 0; j < nLon; j++) {
+                     // Put neighbourhood into vector
+                     std::vector<float> neighbourhood;
+                     int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
+                     int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
+                     assert(Ni > 0);
+                     assert(Nj > 0);
+                     neighbourhood.resize(Ni*Nj, Util::MV);
+                     int index = 0;
+                     for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
+                        for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
+                           float value = precipRaw(ii,jj,e);
+                           assert(index < Ni*Nj);
+                           neighbourhood[index] = value;
+                           index++;
+                        }
+                     }
+                     assert(index == Ni*Nj);
+                     precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+                  }
+               }
+               else {
+                  // Fast way: Compute stats on each sliver
+                  std::vector<float> slivers(nLon, 0);
+                  for(int j = 0; j < nLon; j++) {
+                     std::vector<float> sliver(2*mRadius+1, 0);
+                     int count = 0;
+                     for(int ii = i - mRadius; ii <= i + mRadius; ii++) {
+                        sliver[count] = precipRaw(ii, j, e);
+                        count++;
+                     }
+                     slivers[j] = Util::calculateStat(sliver, mStatType, mQuantile);
+                  }
+                  for(int j = 0; j < nLon; j++) {
+                     std::vector<float> curr;
+                     for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
+                        curr.push_back(slivers[jj]);
+                     }
+                     precip(i, j, e) = Util::calculateStat(curr, mStatType, mQuantile);
+                  }
+               }
+            }
+         }
+      }
       else {
+         // Compute by brute force
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             for(int j = 0; j < nLon; j++) {
@@ -185,6 +241,17 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
    }
    return true;
 }
+int CalibratorNeighbourhood::numMissingValues(const Field& iField) const {
+   int count = 0;
+   for(int x = 0; x < iField.getNumX(); x++) {
+      for(int y = 0; y < iField.getNumY(); y++) {
+         for(int e = 0; e < iField.getNumEns(); e++) {
+            count += !Util::isValid(iField(y, x, e));
+         }
+      }
+   }
+   return count;
+}
 
 std::string CalibratorNeighbourhood::description(bool full) {
    std::stringstream ss;
@@ -193,7 +260,8 @@ std::string CalibratorNeighbourhood::description(bool full) {
       ss << Util::formatDescription("   radius=3", "Use gridpoints within this number of points within in both east-west and north-south direction. The radius can alternatively be specified using a location-independent parameter file, with one parameter.") << std::endl;
       ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'quantile', 'std', or 'sum'. 'std' is the population standard deviation.") << std::endl;
       ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
-      ss << Util::formatDescription("   fast=1", "Use shortcuts to compute 'mean' or 'sum faster.") << std::endl;
+      ss << Util::formatDescription("   fast=1", "Use shortcuts to compute 'max', 'min', 'mean' or 'sum' faster.") << std::endl;
+      ss << Util::formatDescription("   approx=0", "Use approximations to compute 'median' or 'quantile' faster.") << std::endl;
    }
    else
       ss << Util::formatDescription("-c neighbourhood", "Applies a statistical operator on a neighbourhood") << std::endl;

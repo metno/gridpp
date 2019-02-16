@@ -20,5 +20,7 @@ class CalibratorNeighbourhood : public Calibrator {
       Util::StatType mStatType;
       float mQuantile;
       bool mFast;
+      bool mApprox;
+      int numMissingValues(const Field& iField) const;
 };
 #endif

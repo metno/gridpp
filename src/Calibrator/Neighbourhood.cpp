@@ -66,7 +66,6 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                counts[i].resize(nLon, 0);
             }
             // Compute accumulated values
-            #pragma omp parallel for
             for(int i = 0; i < nLat; i++) {
                for(int j = 0; j < nLon; j++) {
                   float value = precipRaw(i, j, e);
@@ -113,6 +112,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                }
             }
             // Put neighbourhood into vector
+            #pragma omp parallel for
             for(int i = 0; i < nLat; i++) {
                for(int j = 0; j < nLon; j++) {
                   int i1 = std::min(nLat-1, i + mRadius);

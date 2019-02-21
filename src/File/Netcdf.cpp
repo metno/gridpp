@@ -1184,11 +1184,14 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
          values = new float[numX];
       else if(dims[0] == mYDim)
          values = new float[numY];
-      else
-         Util::error("Could not load lat/lon. Variable does not have lat or lon dimensions.");
+      else {
+         std::stringstream ss;
+         ss << "Could not load latitude/longitude/altitude in " << getFilename() << " . Variable does not have x or y dimensions.";
+         Util::error(ss.str());
+      }
 
       bool status = nc_get_var_float(mFile, iVar, values);
-      handleNetcdfError(status, "could not get data from lat/lon variable");
+      handleNetcdfError(status, "could not get data from latitude/longitude/altitude variable");
 
       for(int i = 0; i < numY; i++) {
          for(int j = 0; j < numX; j++) {
@@ -1219,15 +1222,20 @@ vec2 FileNetcdf::getLatLonVariable(int iVar) const {
             count[d] = numX;
          }
       }
-      if(!Util::isValid(yPos) || !Util::isValid(xPos)) {
+      if(!Util::isValid(xPos)) {
          std::stringstream ss;
-         ss << "lat/lon field does not have lat or lon dimension";
+         ss << "Latitude/longitude/altitude field in " << getFilename() << " has multiple dimensions, but it does not have the x dimension";
+         Util::error(ss.str());
+      }
+      if(!Util::isValid(yPos)) {
+         std::stringstream ss;
+         ss << "Latitude/longitude/altitude field in " << getFilename() << " has multiple dimensions, but it does not have the y dimension";
          Util::error(ss.str());
       }
 
       float* values = new float[numX*numY];
       bool status = nc_get_vara_float(mFile, iVar, start, count, values);
-      handleNetcdfError(status, "could not get data from lat/lon variable");
+      handleNetcdfError(status, "could not get data from latitude/longitude/altitude variable");
       for(int i = 0; i < numY; i++) {
          for(int j = 0; j < numX; j++) {
             int index = 0;

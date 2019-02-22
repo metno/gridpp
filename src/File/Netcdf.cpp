@@ -74,8 +74,16 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
          elevScale = 1.0 / 9.81;
       }
    }
-   else
-      mElevVar = getVar(elevVar);
+   else {
+      if(hasVar(elevVar))
+         mElevVar = getVar(elevVar);
+      else {
+         std::stringstream ss;
+         ss << "Cannot find altitude field '" << elevVar << "'. Altitudes not used.";
+         Util::warning(ss.str());
+      }
+
+   }
 
    std::string lafVar;
    if(!iOptions.getValue("lafVar", lafVar)) {

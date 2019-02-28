@@ -195,8 +195,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       std::cout << "Expected MB: " << 1000 + expectedBytes / 1024 / 1024 << std::endl;
       if(Util::isValid(mMaxBytes) && expectedBytes > mMaxBytes) {
          std::stringstream ss;
-         ss << "Expected size (" << expectedBytes / 1024 / 1024 << " MB) is greater than "
-            << float(mMaxBytes) / 1024 / 1024 << " MB";
+         ss << "Number of required bytes (" << expectedBytes / 1024 / 1024 << " MB) exceeds threshold "
+            << float(mMaxBytes) / 1024 / 1024 << " MB. Use maxBytes= to set threshold.";
          Util::error(ss.str());
       }
    }

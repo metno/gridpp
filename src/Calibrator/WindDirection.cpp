@@ -8,7 +8,7 @@
 #include "../Parameters.h"
 CalibratorWindDirection::CalibratorWindDirection(const Variable& iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions) {
-   iOptions.getValue("directionVariable", mDirectionVariable);
+   iOptions.getRequiredValue("directionVariable", mDirectionVariable);
    iOptions.check();
 }
 
@@ -44,8 +44,10 @@ bool CalibratorWindDirection::calibrateCore(File& iFile, const ParameterFile* iP
                parameters = parametersGlobal;
             for(int e = 0; e < nEns; e++) {
                float currDirection = direction(i,j,e);
-               float factor = getFactor(currDirection, parameters);
-               wind(i,j,e) = factor*wind(i,j,e);
+               if(Util::isValid(currDirection)) {
+                   float factor = getFactor(currDirection, parameters);
+                   wind(i,j,e) = factor*wind(i,j,e);
+               }
             }
          }
       }

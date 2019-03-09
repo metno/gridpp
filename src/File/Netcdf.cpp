@@ -189,8 +189,6 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       Util::error(ss.str());
    }
 
-   Util::info( "File '" + iFilename + " 'has dimensions " + getDimenionString());
-
    // Load variables
    int numVars = Util::MV;
    status = nc_inq_nvars(mFile, &numVars);

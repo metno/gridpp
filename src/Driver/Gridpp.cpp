@@ -120,6 +120,9 @@ int main(int argc, const char *argv[]) {
    for(int f = 0; f < setup.inputFiles.size(); f++) {
       Util::info("Input type:  " + setup.inputFiles[f]->name());
       Util::info("Output type: " + setup.outputFiles[f]->name());
+      Util::info( "Input file '" + setup.inputFiles[f]->getFilename() + "' has dimensions " + setup.inputFiles[f]->getDimenionString());
+      Util::info( "Output file '" + setup.outputFiles[f]->getFilename() + "' has dimensions " + setup.outputFiles[f]->getDimenionString());
+
       setup.outputFiles[f]->setTimes(setup.inputFiles[f]->getTimes());
       setup.outputFiles[f]->setNumEns(setup.inputFiles[f]->getNumEns());
       setup.outputFiles[f]->setReferenceTime(setup.inputFiles[f]->getReferenceTime());

@@ -16,6 +16,7 @@ class CalibratorWindow : public Calibrator {
       Util::StatType mStatType;
       float mQuantile;
       bool mBefore;
+      bool mKeepMissing;
       std::vector<float> mWeights;
       enum EdgePolicy {
          EdgePolicyCompute = 0,

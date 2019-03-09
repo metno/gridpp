@@ -7,9 +7,11 @@ CalibratorWindow::CalibratorWindow(const Variable& iVariable, const Options& iOp
       mBefore(false),
       mStatType(Util::StatTypeMean),
       mEdgePolicy(EdgePolicyCompute),
+      mKeepMissing(false),
       mQuantile(Util::MV) {
    iOptions.getValue("length", mLength);
    iOptions.getValue("before", mBefore);
+   iOptions.getValue("keepMissing", mKeepMissing);
    std::string edgePolicy = "compute";
    iOptions.getValue("edgePolicy", edgePolicy);
    if(edgePolicy == "compute")
@@ -80,12 +82,17 @@ bool CalibratorWindow::calibrateCore(File& iFile, const ParameterFile* iParamete
                   (*fields[t])(i,j,e) = Util::MV;
                }
                else {
+                  bool numMissing = 0;
                   for(int tt = start; tt <= end; tt++) {
                      float curr = (*fieldsOrig[tt])(i,j,e);
+                     numMissing += !Util::isValid(curr);
                      window[index] = curr;
                      index++;
                   }
-                  (*fields[t])(i,j,e) = Util::calculateStat(window, mStatType, mQuantile);
+                  if(mKeepMissing && numMissing > 0)
+                     (*fields[t])(i,j,e) = Util::MV;
+                  else
+                     (*fields[t])(i,j,e) = Util::calculateStat(window, mStatType, mQuantile);
                }
             }
          }
@@ -105,6 +112,7 @@ std::string CalibratorWindow::description(bool full) {
       ss << Util::formatDescription("   before=0", "If 0, the window is centered on each leadtime (if length is an even number, then it is shifted such that it includes one extra future leadtime). If 1, then the window ends and includes the leadtime.") << std::endl;
       ss << Util::formatDescription("   stat=mean", "What statistical operator should be applied to the neighbourhood? One of 'mean', 'median', 'min', 'max', 'quantile', 'std', or 'sum'. 'std' is the population standard deviation.") << std::endl;
       ss << Util::formatDescription("   quantile=undef", "If stat=quantile is selected, what quantile (number on the interval [0,1]) should be used?") << std::endl;
+      ss << Util::formatDescription("   keepMissing=0", "Should missing values cause the window to be missing? If not, then ignore missing values in calculation.") << std::endl;
       ss << Util::formatDescription("   edgePolicy=compute", "What policy should be used on edges? Either 'compute' to compute as usual, or 'missing' to set missing value if the window is not full.") << std::endl;
    }
    return ss.str();

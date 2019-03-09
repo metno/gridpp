@@ -77,12 +77,12 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
 
    int nTime = 1;
    int dTime = Util::MV;
-   if(hasVar(mFile, "time")) {
+   if(hasVar(mFile, "time") && hasDim(mFile, "time")) {
       dTime = getTimeDim(mFile);
       nTime = getDimSize(mFile, dTime);
    }
    double* times = new double[nTime];
-   if(hasVar(mFile, "time")) {
+   if(hasVar(mFile, "time") && hasDim(mFile, "time")) {
       int vTime = getVar(mFile, "time");
       status = nc_get_var_double(mFile, vTime, times);
       handleNetcdfError(status, "could not get times");

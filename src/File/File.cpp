@@ -76,12 +76,15 @@ FieldPtr File::getField(std::string iVariable, int iTime) const {
    // Create new variable
    return getField(Variable(iVariable), iTime);
 }
-FieldPtr File::getField(const Variable& iVariable, int iTime) const {
+FieldPtr File::getField(const Variable& iVariable, int iTime, bool iSkipRead) const {
    // Determine if values have been cached
    std::map<Variable, std::vector<FieldPtr> >::const_iterator it = mFields.find(iVariable);
    bool needsReading = it == mFields.end();
    if(!needsReading) {
+      // The variable has at least been partly read
       if(mFields[iVariable].size() <= iTime) {
+         // This is an internal error. The variable has been partly read, but space has not
+         // been allocated for all timesteps.
          std::stringstream ss;
          ss << "Attempted to access variable '" << iVariable.name() << "' for time " << iTime
             << " in file '" << getFilename() << "'";
@@ -91,6 +94,7 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
       needsReading = mFields[iVariable][iTime] == NULL;
    }
    else {
+      // The variable has never been read or diagnosed. Allocate space for it.
       if(getNumTime() <= iTime) {
          std::stringstream ss;
          ss << "Attempted to access variable '" << iVariable.name() << "' for time " << iTime
@@ -102,8 +106,7 @@ FieldPtr File::getField(const Variable& iVariable, int iTime) const {
 
    if(needsReading) {
       // Load non-derived variable from file
-      if(hasVariableCore(iVariable)) {
-         // mFields[iVariable][iTime] = getFieldCore(iVariable, iTime);
+      if(!iSkipRead && hasVariableCore(iVariable)) {
          addField(getFieldCore(iVariable, iTime), iVariable, iTime);
       }
       else {

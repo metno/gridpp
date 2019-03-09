@@ -23,7 +23,7 @@ void DownscalerNearestNeighbour::downscaleCore(const File& iInput, File& iOutput
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);
-      Field& ofield = *iOutput.getField(mOutputVariable, t);
+      Field& ofield = *iOutput.getField(mOutputVariable, t, true);
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {

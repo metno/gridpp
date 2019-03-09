@@ -23,13 +23,15 @@ class File {
       //! Insantiates a file. Returns null if file does not exist or cannot be parsed.
       static File* getScheme(std::string iFilename, const Options& iOptions, bool iReadOnly=false);
 
-      FieldPtr getField(const Variable& iVariable, int iTime) const;
+      //! Get a handle to a field
+      //! @param iSkipRead If 'true', don't read the field, just initialize a field with missing values
+      FieldPtr getField(const Variable& iVariable, int iTime, bool iSkipRead=false) const;
       FieldPtr getField(std::string iVariable, int iTime) const;
 
-      //! Get a new field initialized with missing values
+      //! Get a new field initialized with missing values. Don't register the field to any variable.
       FieldPtr getEmptyField(float iFillValue=Util::MV) const;
 
-      // Add a field to the file, overwriting existing ones (if necessary)
+      // Register a field to the file, overwriting existing ones (if necessary)
       void addField(FieldPtr iField, const Variable& iVariable, int iTime) const;
 
       // Write these variables to file

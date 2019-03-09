@@ -21,6 +21,6 @@ class CalibratorNeighbourhood : public Calibrator {
       float mQuantile;
       bool mFast;
       bool mApprox;
-      int numMissingValues(const Field& iField) const;
+      int numMissingValues(const Field& iField, int iEnsIndex) const;
 };
 #endif

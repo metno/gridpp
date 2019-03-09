@@ -46,6 +46,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
+      double start_time = Util::clock();
       Field& precip = *iFile.getField(mVariable, t);
       Field precipRaw = precip;
 
@@ -57,8 +58,9 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
          radius = iParameterFile->getParameters(t)[0];
       }
 
-      if(mFast && (mStatType == Util::StatTypeMean || mStatType == Util::StatTypeSum)) {
-         for(int e = 0; e < nEns; e++) {
+      int count_stat = 0;
+      for(int e = 0; e < nEns; e++) {
+         if(mFast && (mStatType == Util::StatTypeMean || mStatType == Util::StatTypeSum)) {
             vec2 values;
             vec2 counts;
             values.resize(nLat);
@@ -156,12 +158,10 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                }
             }
          }
-      }
-      else if(numMissingValues(precipRaw) == 0 && (
-               (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) || 
-               (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
-         // Compute min/max quickly or any other quantile in a faster, but approximate way
-         for(int e = 0; e < nEns; e++) {
+         else if(numMissingValues(precipRaw, e) == 0 && (
+                  (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) ||
+                  (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
+            // Compute min/max quickly or any other quantile in a faster, but approximate way
             #pragma omp parallel for
             for(int i = 0; i < nLat; i++) {
                if(i < mRadius || i >= nLat - mRadius) {
@@ -185,6 +185,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                      }
                      assert(index == Ni*Nj);
                      precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+                     count_stat += neighbourhood.size();
                   }
                }
                else {
@@ -198,6 +199,7 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                         count++;
                      }
                      slivers[j] = Util::calculateStat(sliver, mStatType, mQuantile);
+                     count_stat += sliver.size();
                   }
                   for(int j = 0; j < nLon; j++) {
                      std::vector<float> curr;
@@ -205,17 +207,16 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                         curr.push_back(slivers[jj]);
                      }
                      precip(i, j, e) = Util::calculateStat(curr, mStatType, mQuantile);
+                     count_stat += curr.size();
                   }
                }
             }
          }
-      }
-      else {
-         // Compute by brute force
-         #pragma omp parallel for
-         for(int i = 0; i < nLat; i++) {
-            for(int j = 0; j < nLon; j++) {
-               for(int e = 0; e < nEns; e++) {
+         else {
+            // Compute by brute force
+            #pragma omp parallel for
+            for(int i = 0; i < nLat; i++) {
+               for(int j = 0; j < nLon; j++) {
                   // Put neighbourhood into vector
                   std::vector<float> neighbourhood;
                   int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
@@ -234,20 +235,20 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
                   }
                   assert(index == Ni*Nj);
                   precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+                  count_stat += neighbourhood.size();
                }
             }
          }
       }
+      std::cout << "Number of stat calculations: " << count_stat << " " << Util::clock() - start_time << std::endl;
    }
    return true;
 }
-int CalibratorNeighbourhood::numMissingValues(const Field& iField) const {
+int CalibratorNeighbourhood::numMissingValues(const Field& iField, int iEnsIndex) const {
    int count = 0;
    for(int x = 0; x < iField.getNumX(); x++) {
       for(int y = 0; y < iField.getNumY(); y++) {
-         for(int e = 0; e < iField.getNumEns(); e++) {
-            count += !Util::isValid(iField(y, x, e));
-         }
+         count += !Util::isValid(iField(y, x, iEnsIndex));
       }
    }
    return count;

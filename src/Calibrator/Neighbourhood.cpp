@@ -39,208 +39,14 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
 }
 
 bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
-   int nLat = iFile.getNumY();
-   int nLon = iFile.getNumX();
-   int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
 
    // Loop over offsets
    for(int t = 0; t < nTime; t++) {
-      double start_time = Util::clock();
-      Field& precip = *iFile.getField(mVariable, t);
-      Field precipRaw = precip;
+      Field& output = *iFile.getField(mVariable, t);
+      Field raw = output;
 
-      int radius = mRadius;
-      if(iParameterFile != NULL) {
-         if(iParameterFile->isLocationDependent()) {
-            Util::error("Cannot use a location dependent parameter file for CalibratorNeighbourhood");
-         }
-         radius = iParameterFile->getParameters(t)[0];
-      }
-
-      int count_stat = 0;
-      for(int e = 0; e < nEns; e++) {
-         if(mFast && (mStatType == Util::StatTypeMean || mStatType == Util::StatTypeSum)) {
-            vec2 values;
-            vec2 counts;
-            values.resize(nLat);
-            counts.resize(nLat);
-            for(int i = 0; i < nLat; i++) {
-               values[i].resize(nLon, 0);
-               counts[i].resize(nLon, 0);
-            }
-            // Compute accumulated values
-            for(int i = 0; i < nLat; i++) {
-               for(int j = 0; j < nLon; j++) {
-                  float value = precipRaw(i, j, e);
-                  if(j == 0 && i == 0) {
-                     // Lower corner
-                     if(Util::isValid(value)) {
-                        values[i][j] = precipRaw(i, j, e);
-                        counts[i][j] = 1;
-                     }
-                  }
-                  else if(j == 0) {
-                     // Lower row
-                     if(Util::isValid(value)) {
-                        values[i][j] = values[i-1][j] + precipRaw(i,j,e);
-                        counts[i][j] = counts[i-1][j] + 1;
-                     }
-                     else {
-                        values[i][j] = values[i-1][j];
-                        counts[i][j] = counts[i-1][j];
-                     }
-                  }
-                  else if(i == 0) {
-                     // Left column
-                     if(Util::isValid(value)) {
-                        values[i][j] = values[i][j-1] + precipRaw(i,j,e);
-                        counts[i][j] = counts[i][j-1] + 1;
-                     }
-                     else {
-                        values[i][j] = values[i][j-1];
-                        counts[i][j] = counts[i][j-1];
-                     }
-
-                  }
-                  else {
-                     if(Util::isValid(value)) {
-                        values[i][j] = values[i][j-1] + values[i-1][j] - values[i-1][j-1] + precipRaw(i,j,e);
-                        counts[i][j] = counts[i][j-1] + counts[i-1][j] - counts[i-1][j-1] + 1;
-                     }
-                     else {
-                        values[i][j] = values[i][j-1] + values[i-1][j] - values[i-1][j-1];
-                        counts[i][j] = counts[i][j-1] + counts[i-1][j] - counts[i-1][j-1];
-                     }
-                  }
-               }
-            }
-            // Put neighbourhood into vector
-            #pragma omp parallel for
-            for(int i = 0; i < nLat; i++) {
-               for(int j = 0; j < nLon; j++) {
-                  int i1 = std::min(nLat-1, i + mRadius);
-                  int j1 = std::min(nLon-1, j + mRadius);
-                  int i0 = i - mRadius - 1;
-                  int j0 = j - mRadius - 1;
-                  float value11 = values[i1][j1];
-                  float value00 = 0;
-                  float value10 = 0;
-                  float value01 = 0;
-                  int count11 = counts[i1][j1];
-                  int count00 = 0;
-                  int count10 = 0;
-                  int count01 = 0;
-                  if(i0 >= 0 && j0 >= 0) {
-                     value00 = values[i0][j0];
-                     value10 = values[i1][j0];
-                     value01 = values[i0][j1];
-                     count00 = counts[i0][j0];
-                     count10 = counts[i1][j0];
-                     count01 = counts[i0][j1];
-                  }
-                  else if(j0 >= 0) {
-                     value10 = values[i1][j0];
-                     count10 = counts[i1][j0];
-                  }
-                  else if(i0 >= 0) {
-                     value01 = values[i0][j1];
-                     count01 = counts[i0][j1];
-                  }
-                  float value = value11 + value00 - value10 - value01;
-                  int count = count11 + count00 - count10 - count01;
-                  if(count > 0) {
-                     if(mStatType == Util::StatTypeMean) {
-                        value /= count;
-                     }
-                     precip(i,j,e) = value;
-                  }
-               }
-            }
-         }
-         else if(numMissingValues(precipRaw, e) == 0 && (
-                  (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) ||
-                  (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
-            // Compute min/max quickly or any other quantile in a faster, but approximate way
-            #pragma omp parallel for
-            for(int i = 0; i < nLat; i++) {
-               if(i < mRadius || i >= nLat - mRadius) {
-                  // Regular way
-                  for(int j = 0; j < nLon; j++) {
-                     // Put neighbourhood into vector
-                     std::vector<float> neighbourhood;
-                     int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
-                     int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
-                     assert(Ni > 0);
-                     assert(Nj > 0);
-                     neighbourhood.resize(Ni*Nj, Util::MV);
-                     int index = 0;
-                     for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
-                        for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
-                           float value = precipRaw(ii,jj,e);
-                           assert(index < Ni*Nj);
-                           neighbourhood[index] = value;
-                           index++;
-                        }
-                     }
-                     assert(index == Ni*Nj);
-                     precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
-                     count_stat += neighbourhood.size();
-                  }
-               }
-               else {
-                  // Fast way: Compute stats on each sliver
-                  std::vector<float> slivers(nLon, 0);
-                  for(int j = 0; j < nLon; j++) {
-                     std::vector<float> sliver(2*mRadius+1, 0);
-                     int count = 0;
-                     for(int ii = i - mRadius; ii <= i + mRadius; ii++) {
-                        sliver[count] = precipRaw(ii, j, e);
-                        count++;
-                     }
-                     slivers[j] = Util::calculateStat(sliver, mStatType, mQuantile);
-                     count_stat += sliver.size();
-                  }
-                  for(int j = 0; j < nLon; j++) {
-                     std::vector<float> curr;
-                     for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
-                        curr.push_back(slivers[jj]);
-                     }
-                     precip(i, j, e) = Util::calculateStat(curr, mStatType, mQuantile);
-                     count_stat += curr.size();
-                  }
-               }
-            }
-         }
-         else {
-            // Compute by brute force
-            #pragma omp parallel for
-            for(int i = 0; i < nLat; i++) {
-               for(int j = 0; j < nLon; j++) {
-                  // Put neighbourhood into vector
-                  std::vector<float> neighbourhood;
-                  int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
-                  int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
-                  assert(Ni > 0);
-                  assert(Nj > 0);
-                  neighbourhood.resize(Ni*Nj, Util::MV);
-                  int index = 0;
-                  for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
-                     for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
-                        float value = precipRaw(ii,jj,e);
-                        assert(index < Ni*Nj);
-                        neighbourhood[index] = value;
-                        index++;
-                     }
-                  }
-                  assert(index == Ni*Nj);
-                  precip(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
-                  count_stat += neighbourhood.size();
-               }
-            }
-         }
-      }
-      std::cout << "Number of stat calculations: " << count_stat << " " << Util::clock() - start_time << std::endl;
+      calibrateField(raw, output, iParameterFile);
    }
    return true;
 }
@@ -252,6 +58,205 @@ int CalibratorNeighbourhood::numMissingValues(const Field& iField, int iEnsIndex
       }
    }
    return count;
+}
+void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput, const ParameterFile* iParameterFile, int t) const {
+   double start_time = Util::clock();
+   int radius = mRadius;
+   int nEns = iInput.getNumEns();
+   int nLat = iInput.getNumY();
+   int nLon = iInput.getNumX();
+   if(iParameterFile != NULL) {
+      if(iParameterFile->isLocationDependent()) {
+         Util::error("Cannot use a location dependent parameter file for CalibratorNeighbourhood");
+      }
+      radius = iParameterFile->getParameters(t)[0];
+   }
+
+   int count_stat = 0;
+   for(int e = 0; e < nEns; e++) {
+      if(mFast && (mStatType == Util::StatTypeMean || mStatType == Util::StatTypeSum)) {
+         vec2 values;
+         vec2 counts;
+         values.resize(nLat);
+         counts.resize(nLat);
+         for(int i = 0; i < nLat; i++) {
+            values[i].resize(nLon, 0);
+            counts[i].resize(nLon, 0);
+         }
+         // Compute accumulated values
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               float value = iInput(i, j, e);
+               if(j == 0 && i == 0) {
+                  // Lower corner
+                  if(Util::isValid(value)) {
+                     values[i][j] = iInput(i, j, e);
+                     counts[i][j] = 1;
+                  }
+               }
+               else if(j == 0) {
+                  // Lower row
+                  if(Util::isValid(value)) {
+                     values[i][j] = values[i-1][j] + iInput(i,j,e);
+                     counts[i][j] = counts[i-1][j] + 1;
+                  }
+                  else {
+                     values[i][j] = values[i-1][j];
+                     counts[i][j] = counts[i-1][j];
+                  }
+               }
+               else if(i == 0) {
+                  // Left column
+                  if(Util::isValid(value)) {
+                     values[i][j] = values[i][j-1] + iInput(i,j,e);
+                     counts[i][j] = counts[i][j-1] + 1;
+                  }
+                  else {
+                     values[i][j] = values[i][j-1];
+                     counts[i][j] = counts[i][j-1];
+                  }
+
+               }
+               else {
+                  if(Util::isValid(value)) {
+                     values[i][j] = values[i][j-1] + values[i-1][j] - values[i-1][j-1] + iInput(i,j,e);
+                     counts[i][j] = counts[i][j-1] + counts[i-1][j] - counts[i-1][j-1] + 1;
+                  }
+                  else {
+                     values[i][j] = values[i][j-1] + values[i-1][j] - values[i-1][j-1];
+                     counts[i][j] = counts[i][j-1] + counts[i-1][j] - counts[i-1][j-1];
+                  }
+               }
+            }
+         }
+         // Put neighbourhood into vector
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               int i1 = std::min(nLat-1, i + mRadius);
+               int j1 = std::min(nLon-1, j + mRadius);
+               int i0 = i - mRadius - 1;
+               int j0 = j - mRadius - 1;
+               float value11 = values[i1][j1];
+               float value00 = 0;
+               float value10 = 0;
+               float value01 = 0;
+               int count11 = counts[i1][j1];
+               int count00 = 0;
+               int count10 = 0;
+               int count01 = 0;
+               if(i0 >= 0 && j0 >= 0) {
+                  value00 = values[i0][j0];
+                  value10 = values[i1][j0];
+                  value01 = values[i0][j1];
+                  count00 = counts[i0][j0];
+                  count10 = counts[i1][j0];
+                  count01 = counts[i0][j1];
+               }
+               else if(j0 >= 0) {
+                  value10 = values[i1][j0];
+                  count10 = counts[i1][j0];
+               }
+               else if(i0 >= 0) {
+                  value01 = values[i0][j1];
+                  count01 = counts[i0][j1];
+               }
+               float value = value11 + value00 - value10 - value01;
+               int count = count11 + count00 - count10 - count01;
+               if(count > 0) {
+                  if(mStatType == Util::StatTypeMean) {
+                     value /= count;
+                  }
+                  iOutput(i,j,e) = value;
+               }
+            }
+         }
+      }
+      else if(numMissingValues(iInput, e) == 0 && (
+               (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) ||
+               (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
+         // Compute min/max quickly or any other quantile in a faster, but approximate way
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            if(i < mRadius || i >= nLat - mRadius) {
+               // Regular way
+               for(int j = 0; j < nLon; j++) {
+                  // Put neighbourhood into vector
+                  std::vector<float> neighbourhood;
+                  int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
+                  int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
+                  assert(Ni > 0);
+                  assert(Nj > 0);
+                  neighbourhood.resize(Ni*Nj, Util::MV);
+                  int index = 0;
+                  for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
+                     for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
+                        float value = iInput(ii,jj,e);
+                        assert(index < Ni*Nj);
+                        neighbourhood[index] = value;
+                        index++;
+                     }
+                  }
+                  assert(index == Ni*Nj);
+                  iOutput(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+                  count_stat += neighbourhood.size();
+               }
+            }
+            else {
+               // Fast way: Compute stats on each sliver
+               std::vector<float> slivers(nLon, 0);
+               for(int j = 0; j < nLon; j++) {
+                  std::vector<float> sliver(2*mRadius+1, 0);
+                  int count = 0;
+                  for(int ii = i - mRadius; ii <= i + mRadius; ii++) {
+                     sliver[count] = iInput(ii, j, e);
+                     count++;
+                  }
+                  slivers[j] = Util::calculateStat(sliver, mStatType, mQuantile);
+                  count_stat += sliver.size();
+               }
+               for(int j = 0; j < nLon; j++) {
+                  std::vector<float> curr;
+                  for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
+                     curr.push_back(slivers[jj]);
+                  }
+                  iOutput(i, j, e) = Util::calculateStat(curr, mStatType, mQuantile);
+                  count_stat += curr.size();
+               }
+            }
+         }
+      }
+      else {
+         // Compute by brute force
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               // Put neighbourhood into vector
+               std::vector<float> neighbourhood;
+               int Ni = std::min(nLat-1, i+radius) - std::max(0, i-radius) + 1;
+               int Nj = std::min(nLon-1, j+radius) - std::max(0, j-radius) + 1;
+               assert(Ni > 0);
+               assert(Nj > 0);
+               neighbourhood.resize(Ni*Nj, Util::MV);
+               int index = 0;
+               for(int ii = std::max(0, i-radius); ii <= std::min(nLat-1, i+radius); ii++) {
+                  for(int jj = std::max(0, j-radius); jj <= std::min(nLon-1, j+radius); jj++) {
+                     float value = iInput(ii,jj,e);
+                     assert(index < Ni*Nj);
+                     neighbourhood[index] = value;
+                     index++;
+                  }
+               }
+               assert(index == Ni*Nj);
+               iOutput(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+               count_stat += neighbourhood.size();
+            }
+         }
+      }
+   }
+   std::stringstream ss;
+   ss << "Number of neighbourhood stat calculations: " << count_stat << " " << Util::clock() - start_time;
+   Util::info(ss.str());
 }
 
 std::string CalibratorNeighbourhood::description(bool full) {

@@ -12,7 +12,8 @@ class CalibratorOi : public Calibrator {
       CalibratorOi(Variable iVariable, const Options& iOptions);
       // Compute rho. A rho of 0 is returned if a vertical distance is missing when the
       // vertical scale is defined.
-      float calcRho(float iHdist, float iVdist, float iLdist) const;
+      enum RhoType {RhoTypeGaussian, RhoTypeSoar};
+      float calcRho(float iHdist, float iVdist, float iLdist, RhoType iType=RhoTypeGaussian) const;
       static std::string description(bool full=true);
       std::string name() const {return "oi";};
    private:
@@ -59,5 +60,7 @@ class CalibratorOi : public Calibrator {
       float calcDelta(float iOldDelta, const vec2& iY) const;
       float transform(float iValue) const;
       float invTransform(float iValue) const;
+      RhoType mRhoType;
+      float mBoxCoxThreshold;
 };
 #endif

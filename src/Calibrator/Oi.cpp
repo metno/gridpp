@@ -5,6 +5,7 @@
 #include "../Downscaler/Downscaler.h"
 #include <math.h>
 #include <armadillo>
+#include "Neighbourhood.h"
 
 CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
@@ -42,7 +43,9 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mLandOnly(false),
       mTransformType(TransformTypeNone),
       mDiaFile(""),
-      mGamma(0.25) {
+      mGamma(0.25),
+      mRhoType(RhoTypeGaussian),
+      mBoxCoxThreshold(Util::MV) {
    iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
@@ -76,6 +79,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("diaFile", mDiaFile);
    iOptions.getValue("diagnose", mDiagnose);
    iOptions.getValue("newDeltaVar", mNewDeltaVar);
+   iOptions.getValue("boxCoxThreshold", mBoxCoxThreshold);
    iOptions.getValue("maxElevDiff", mMaxElevDiff);  // Don't use obs that are further than this from their nearest neighbour
    std::string transformType;
    if(iOptions.getValue("transform", transformType)) {
@@ -84,6 +88,18 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       else {
          std::stringstream ss;
          ss << "Could not recognize transform=" << transformType << std::endl;
+         Util::error(ss.str());
+      }
+   }
+   std::string rhoType;
+   if(iOptions.getValue("rhoType", rhoType)) {
+      if(rhoType == "gaussian")
+         mRhoType = RhoTypeGaussian;
+      else if(rhoType == "soar")
+         mRhoType = RhoTypeSoar;
+      else {
+         std::stringstream ss;
+         ss << "Could not recognize rhoType=" << rhoType << std::endl;
          Util::error(ss.str());
       }
    }
@@ -387,6 +403,29 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          }
       }
 
+      // Calculate number of valid members
+      int nValidEns = 0;
+      std::vector<int> validEns;
+      for(int e = 0; e < nEns; e++) {
+         int numInvalid = 0;
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               float value = (*field)(y, x, e);
+               if(!Util::isValid(value))
+                  numInvalid++;
+            }
+         }
+         if(numInvalid == 0) {
+            validEns.push_back(e);
+            nValidEns++;
+         }
+      }
+      std::cout << "Number of valid ensemble members: " << nValidEns << std::endl;
+      bool singleMemberMode = !mUseEns || nValidEns < mMinValidEns;
+
+      // Temporary field for single-member mode when using a transform
+      FieldPtr sigmaTransformed = iFile.getEmptyField(0);
+
       #pragma omp parallel for
       for(int x = 0; x < nX; x++) {
          for(int y = 0; y < nY; y++) {
@@ -412,7 +451,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                float lafdist = 0;
                if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                   lafdist = gLafs[index] - laf;
-               float rho = calcRho(hdist, vdist, lafdist);
+               float rho = calcRho(hdist, vdist, lafdist, mRhoType);
                int X = gXi[index];
                int Y = gYi[index];
                // Only include observations that are within the domain
@@ -483,19 +522,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                continue;
             }
 
-            int nValidEns = 0;
-            std::vector<int> validEns;
-            for(int e = 0; e < nEns; e++) {
-               float value = (*field)(y, x, e);
-               if(Util::isValid(value)) {
-                  validEns.push_back(e);
-                  nValidEns++;
-               }
-            }
-            if(x == mX && y == mY) {
-               std::cout << "Number of valid ensemble members: " << nValidEns << std::endl;
-            }
-
             vectype lObs(lS);
             vectype lElevs(lS);
             vectype lLafs(lS);
@@ -525,7 +551,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
             // Single-member mode:                                                                //
             // Revert to static structure function when there is not enough ensemble information  //
             ////////////////////////////////////////////////////////////////////////////////////////
-            if(!mUseEns || nValidEns < mMinValidEns) {
+            if(singleMemberMode) {
                // Current grid-point to station error covariance matrix
                mattype lG(1, lS, arma::fill::zeros);
                // Station to station error covariance matrix
@@ -542,7 +568,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   float lafdist = 0;
                   if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                      lafdist = gLafs[index] - laf;
-                  float rho = calcRho(hdist, vdist, lafdist);
+                  float rho = calcRho(hdist, vdist, lafdist, mRhoType);
                   lG(0, i) = rho;
                   for(int j = 0; j < lS; j++) {
                      int index_j = lLocIndices[j];
@@ -554,15 +580,20 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      if(Util::isValid(gLafs[index]) && Util::isValid(laf))
                         lafdist = gLafs[index] - gLafs[index_j];
 
-                     lP(i, j) = calcRho(hdist, vdist, lafdist);
+                     lP(i, j) = calcRho(hdist, vdist, lafdist, mRhoType);
                   }
                }
-               mattype lGSR;
+               mattype lGSR;  // Kalman gain
+               mattype lSRinv;
                // TODO: This will be different for precipitation
-               if(useBias)
-                  lGSR = lG * arma::inv(lP + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
-               else
-                  lGSR = lG * arma::inv(lP + mEpsilon * mEpsilon * lR);
+               if(useBias) {
+                  lSRinv = arma::inv(lP + 1 / (1 + mGamma) * mEpsilon * mEpsilon * lR);
+                  lGSR = lG * lSRinv;
+               }
+               else {
+                  lSRinv = arma::inv(lP + mEpsilon * mEpsilon * lR);
+                  lGSR = lG * lSRinv;
+               }
 
                // This should loop over nValidEns. And use ei.
                for(int e = 0; e < nValidEns; e++) {
@@ -570,10 +601,35 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   if (Util::isValid((*field)(y, x, ei))) {
                      vectype currFcst = lY.col(e) + lYhat;
                      vectype dx = lGSR * (lObs - currFcst);
+
+                     // Store sigma in transformed space
+                     (*output)(y, x, ei) = (*field)(y, x, ei) + dx[0];
+                     if(mTransformType != TransformTypeNone) {
+                        if( (*output)(y, x, ei) >= transform(mBoxCoxThreshold)) {
+                           vectype incrementAtObsPoints = lP * (lSRinv * (lObs - currFcst));
+                           float total = 0;
+                           float totalDiagR = 0;
+                           float lGSRG = 0;
+                           for(int s = 0; s < lS; s++) {
+                              total += (lObs[s] - currFcst[s]) * (lObs[s] - currFcst[s] - incrementAtObsPoints[s]);
+                              totalDiagR += mEpsilon * mEpsilon * lR[s];
+                              lGSRG += lGSR[s] * lG[s];
+                           }
+                           float sigmaObs = total / lS;
+                           float meanDiagR = totalDiagR / lS;
+                           float sigmaB = sigmaObs / meanDiagR;
+                           (*sigmaTransformed)(y, x, ei) = sigmaB * (1 - lGSRG);
+                           if(x == mX && y == mY) {
+                              std::cout << "sigmaObs: " << sigmaObs << std::endl;
+                              std::cout << "meanDiagR: " << meanDiagR << std::endl;
+                              std::cout << "sigmaB: " << sigmaB << std::endl;
+                              std::cout << "sigmaTransformed: " << (*sigmaTransformed)(y, x, ei) << std::endl;
+                           }
+                        }
+                     }
                      if(x == mX && y == mY) {
                         std::cout << "Lat: " << lat << std::endl;
                         std::cout << "Lon: " << lon << " " << lat << " " << std::endl;
-                        std::cout << "Elev: " << elev << std::endl;
                         std::cout << "Elev: " << elev << std::endl;
                         std::cout << "P:" << std::endl;
                         print_matrix<mattype>(lP);
@@ -591,7 +647,6 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                         print_matrix<mattype>(lYhat);
                         std::cout << "dx: " << dx[0] << std::endl;
                      }
-                     (*output)(y, x, ei) = (*field)(y, x, ei) + dx[0];
                   }
                }
 
@@ -931,13 +986,51 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       }
 
       // Back-transform
-      #pragma omp parallel for
-      for(int x = 0; x < nX; x++) {
-         for(int y = 0; y < nY; y++) {
-            for(int e = 0; e < nEns; e++) {
-               float value = (*output)(y, x, e);
-               if(Util::isValid(value))
-                  (*output)(y, x, e) = invTransform(value);
+      Util::info("Back transform");
+      if(singleMemberMode) {
+         // Single member mode needs to deal with variance
+         if(mTransformType != TransformTypeNone) {
+            CalibratorNeighbourhood calibrator(Variable(), Options("radius=12 stat=mean fast=1"));
+            // Smothen sigmaTranformed twice
+            FieldPtr sigmaTransformedTemp = iFile.getEmptyField(0);
+            Util::info("Calibrate 1");
+            // calibrator.calibrateField(*sigmaTransformed, *sigmaTransformedTemp);
+            calibrator.calibrateField(*sigmaTransformed, *sigmaTransformed);
+            calibrator.calibrateField(*sigmaTransformed, *sigmaTransformed);
+            // Util::info("Calibrate 2");
+            // calibrator.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
+
+            #pragma omp parallel for
+            for(int x = 0; x < nX; x++) {
+               for(int y = 0; y < nY; y++) {
+                  for(int e = 0; e < nEns; e++) {
+                     float value = (*output)(y, x, e);
+                     // (*output)(y, x, e) = (*sigmaTransformed)(y, x, e);
+                     if(Util::isValid(value)) {
+                        float f = pow(mLambda * value + 1, 1 / mLambda);
+                        float f2 = pow((1 - mLambda) * (mLambda * value + 1), 1 / mLambda - 2);
+                        if(x == mX && y == mY) {
+                           // TODO: Is it * f2?
+                           std::cout <<  (*sigmaTransformed)(y, x, e) << " " <<  (*output)(y, x, e)
+                              << " " << f << " " << f2 <<  " " << f + 0.5 * (*sigmaTransformed)(y, x, e) *
+                              f2 << std::endl;
+                        }
+                        (*output)(y, x, e) = f + 0.5 * (*sigmaTransformed)(y, x, e) * f2;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      else {
+         #pragma omp parallel for
+         for(int x = 0; x < nX; x++) {
+            for(int y = 0; y < nY; y++) {
+               for(int e = 0; e < nEns; e++) {
+                  float value = (*output)(y, x, e);
+                  if(Util::isValid(value))
+                     (*output)(y, x, e) = invTransform(value);
+               }
             }
          }
       }
@@ -997,9 +1090,13 @@ float CalibratorOi::calcDelta(float iOldDelta, const vec2& iY) const {
    return (iOldDelta * weightNew + currDeltaEvidence * weightOld) / (weightOld + weightNew);
 }
 
-float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist) const {
+float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist, RhoType iType) const {
    float h = (iHDist/mHLength);
-   float rho = exp(-0.5 * h * h);
+   float rho = 1;
+   if(iType == RhoTypeGaussian)
+      rho = exp(-0.5 * h * h);
+   else
+      rho = (1 + h) * exp(-h);
    if(Util::isValid(mVLength)) {
       if(!Util::isValid(iVDist)) {
          rho = 0;
@@ -1071,6 +1168,8 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   epsilon=0.5","") << std::endl;
       ss << Util::formatDescription("   epsilonC=0.2916","") << std::endl;
       ss << Util::formatDescription("   lambda=0.5","") << std::endl;
+      ss << Util::formatDescription("   boxCoxThreshold=undef","") << std::endl;
+      ss << Util::formatDescription("   rhoType=gaussian","One of 'gaussian', 'soar'") << std::endl;
       ss << Util::formatDescription("   diagnose=0","") << std::endl;
       ss << Util::formatDescription("   maxElevDiff=200","Remove stations that are further away from the background elevation than this (in meters)") << std::endl;
       ss << Util::formatDescription("   landOnly=0","Remove stations that are not on land (laf > 0)") << std::endl;

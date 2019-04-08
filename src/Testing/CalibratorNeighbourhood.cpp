@@ -72,6 +72,28 @@ namespace {
       EXPECT_FLOAT_EQ(304.73114, (*after)(5,2,0));
       EXPECT_FLOAT_EQ(305.35556, (*after)(5,9,0));
    }
+   TEST_F(TestCalibratorNeighbourhood, calibrateField) {
+      FileNetcdf from("testing/files/10x10.nc");
+      std::vector<std::string> stats;
+      stats.push_back("mean");
+      stats.push_back("median");
+      stats.push_back("min");
+      stats.push_back("max");
+      for(int s = 0; s < stats.size(); s++) {
+          std::stringstream ss;
+          ss << "radius=1stat= " << stats[s] << " fast=0";
+          CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable, Options(ss.str()));
+          FieldPtr before = from.getField(mVariable, 0);
+          FieldPtr after = from.getEmptyField(0);
+          cal.calibrateField(*before, *after);
+          cal.calibrateField(*before, *before);
+          for(int x = 0; x < before->getNumX(); x++) {
+              for(int y = 0; y < before->getNumY(); y++) {
+                  EXPECT_EQ((*before)(y, x), (*after)(y, x));
+              }
+          }
+      }
+   }
    TEST_F(TestCalibratorNeighbourhood, 10x10_missingValues) {
       FileNetcdf from("testing/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable, Options("radius=1"));

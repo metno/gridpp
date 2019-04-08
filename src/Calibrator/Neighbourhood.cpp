@@ -176,6 +176,11 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                (mFast && (mStatType == Util::StatTypeMin || mStatType == Util::StatTypeMax)) ||
                (mApprox && (mStatType == Util::StatTypeMedian || mStatType == Util::StatTypeQuantile)))) {
          // Compute min/max quickly or any other quantile in a faster, but approximate way
+         vec2 values;
+         values.resize(nLat);
+         for(int i = 0; i < nLat; i++) {
+            values[i].resize(nLon, 0);
+         }
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             if(i < mRadius || i >= nLat - mRadius) {
@@ -198,7 +203,7 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                      }
                   }
                   assert(index == Ni*Nj);
-                  iOutput(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+                  values[i][j] = Util::calculateStat(neighbourhood, mStatType, mQuantile);
                   count_stat += neighbourhood.size();
                }
             }
@@ -220,14 +225,25 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                   for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
                      curr.push_back(slivers[jj]);
                   }
-                  iOutput(i, j, e) = Util::calculateStat(curr, mStatType, mQuantile);
+                  values[i][j] = Util::calculateStat(curr, mStatType, mQuantile);
                   count_stat += curr.size();
                }
+            }
+         }
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               iOutput(i,j,e) = values[i][j];
             }
          }
       }
       else {
          // Compute by brute force
+         vec2 values;
+         values.resize(nLat);
+         for(int i = 0; i < nLat; i++) {
+            values[i].resize(nLon, 0);
+         }
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             for(int j = 0; j < nLon; j++) {
@@ -248,8 +264,14 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                   }
                }
                assert(index == Ni*Nj);
-               iOutput(i,j,e) = Util::calculateStat(neighbourhood, mStatType, mQuantile);
+               values[i][j] = Util::calculateStat(neighbourhood, mStatType, mQuantile);
                count_stat += neighbourhood.size();
+            }
+         }
+         #pragma omp parallel for
+         for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+               iOutput(i,j,e) = values[i][j];
             }
          }
       }

@@ -123,6 +123,11 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    int nX = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
+   float sigmaThreshold = 0.001;
+   CalibratorNeighbourhood calibrator25(Variable(), Options("radius=25 stat=mean fast=0"));
+   CalibratorNeighbourhood calibrator10(Variable(), Options("radius=10 stat=mean fast=0"));
+   CalibratorNeighbourhood calibrator05(Variable(), Options("radius=5 stat=mean fast=0"));
+   CalibratorNeighbourhood calibrator03(Variable(), Options("radius=3 stat=mean fast=0"));
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
@@ -605,6 +610,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                      // Store sigma in transformed space
                      (*output)(y, x, ei) = (*field)(y, x, ei) + dx[0];
                      if(mTransformType != TransformTypeNone) {
+                        if( (*output)(y, x, ei)< -1.0 / mLambda) {
+                           (*output)(y, x, ei) = -1.0 / mLambda;
+                        }
                         if( (*output)(y, x, ei) >= transform(mBoxCoxThreshold)) {
                            vectype incrementAtObsPoints = lP * (lSRinv * (lObs - currFcst));
                            float total = 0;
@@ -612,13 +620,14 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                            float lGSRG = 0;
                            for(int s = 0; s < lS; s++) {
                               total += (lObs[s] - currFcst[s]) * (lObs[s] - currFcst[s] - incrementAtObsPoints[s]);
-                              totalDiagR += mEpsilon * mEpsilon * lR[s];
+                              // CL old: totalDiagR += mEpsilon * mEpsilon * lR[s];
+                              totalDiagR += mEpsilon * mEpsilon * lR(s,s);
                               lGSRG += lGSR[s] * lG[s];
                            }
                            float sigmaObs = total / lS;
                            float meanDiagR = totalDiagR / lS;
                            float sigmaB = sigmaObs / meanDiagR;
-                           (*sigmaTransformed)(y, x, ei) = sigmaB * (1 - lGSRG);
+                           (*sigmaTransformed)(y, x, ei) = std::max(sigmaThreshold,sigmaB * (1 - lGSRG));
                            if(x == mX && y == mY) {
                               std::cout << "sigmaObs: " << sigmaObs << std::endl;
                               std::cout << "meanDiagR: " << meanDiagR << std::endl;
@@ -990,36 +999,81 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       if(singleMemberMode) {
          // Single member mode needs to deal with variance
          if(mTransformType != TransformTypeNone) {
-            CalibratorNeighbourhood calibrator(Variable(), Options("radius=12 stat=mean fast=1"));
             // Smothen sigmaTranformed twice
             FieldPtr sigmaTransformedTemp = iFile.getEmptyField(0);
-            Util::info("Calibrate 1");
-            // calibrator.calibrateField(*sigmaTransformed, *sigmaTransformedTemp);
-            calibrator.calibrateField(*sigmaTransformed, *sigmaTransformed);
-            calibrator.calibrateField(*sigmaTransformed, *sigmaTransformed);
-            // Util::info("Calibrate 2");
-            // calibrator.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
+            #pragma omp parallel for
+            for(int x = 0; x < nX; x++) {
+               for(int y = 0; y < nY; y++) {
+                  for(int e = 0; e < nEns; e++) {
+                    (*sigmaTransformedTemp)(y, x, e)=(*sigmaTransformed)(y, x, e);
+                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
+                       (*sigmaTransformed)(y, x, e)=0;
+                    }
+                  }
+               }
+            }
+            calibrator25.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
+            #pragma omp parallel for
+            for(int x = 0; x < nX; x++) {
+               for(int y = 0; y < nY; y++) {
+                  for(int e = 0; e < nEns; e++) {
+                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
+                       (*sigmaTransformed)(y, x, e)=0;
+                    }
+                  }
+               }
+            }
+            calibrator05.calibrateField(*sigmaTransformed, *sigmaTransformedTemp);
+            #pragma omp parallel for
+            for(int x = 0; x < nX; x++) {
+               for(int y = 0; y < nY; y++) {
+                  for(int e = 0; e < nEns; e++) {
+                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
+                       (*sigmaTransformedTemp)(y, x, e)=0;
+                    }
+                  }
+               }
+            }
+            calibrator03.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
 
             #pragma omp parallel for
             for(int x = 0; x < nX; x++) {
                for(int y = 0; y < nY; y++) {
                   for(int e = 0; e < nEns; e++) {
                      float value = (*output)(y, x, e);
+                     float sigmaValue = (*sigmaTransformed)(y, x, e);
                      // (*output)(y, x, e) = (*sigmaTransformed)(y, x, e);
                      if(Util::isValid(value)) {
-                        float f = pow(mLambda * value + 1, 1 / mLambda);
-                        float f2 = pow((1 - mLambda) * (mLambda * value + 1), 1 / mLambda - 2);
-                        if(x == mX && y == mY) {
-                           // TODO: Is it * f2?
-                           std::cout <<  (*sigmaTransformed)(y, x, e) << " " <<  (*output)(y, x, e)
-                              << " " << f << " " << f2 <<  " " << f + 0.5 * (*sigmaTransformed)(y, x, e) *
-                              f2 << std::endl;
+                        if(sigmaValue==0 || value<transform(mBoxCoxThreshold)) {
+                          (*output)(y, x, e) = invTransform(value);
                         }
-                        (*output)(y, x, e) = f + 0.5 * (*sigmaTransformed)(y, x, e) * f2;
+                        else {
+                           float f = pow(mLambda * value + 1, 1 / mLambda);
+                           float f2 = pow((1 - mLambda) * (mLambda * value + 1), 1 / mLambda - 2);
+                           if(x == mX && y == mY) {
+                              // TODO: Is it * f2?
+                              std::cout <<  (*sigmaTransformed)(y, x, e) << " " <<  (*output)(y, x, e)
+                                 << " " << f << " " << f2 <<  " " << f + 0.5 * (*sigmaTransformed)(y, x, e) *
+                                 f2 << std::endl;
+                           }
+                           (*output)(y, x, e) = f + 0.5 * sigmaValue * f2;
+                        }
                      }
                   }
                }
+            } // end for Backtransf
+            // smooth the output field
+            FieldPtr outputTemp = iFile.getEmptyField(0);
+            calibrator03.calibrateField(*output, *outputTemp);
+            #pragma omp parallel for
+            for(int x = 0; x < nX; x++) {
+               for(int y = 0; y < nY; y++) {
+                  for(int e = 0; e < nEns; e++) {
+                    (*output)(y, x, e)=(*outputTemp)(y, x, e);
+                  }
+               }
             }
+
          }
       }
       else {

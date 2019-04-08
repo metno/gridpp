@@ -123,11 +123,15 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    int nX = iFile.getNumX();
    int nEns = iFile.getNumEns();
    int nTime = iFile.getNumTime();
+
+   // Single-member SOAR variables
    float sigmaThreshold = 0.001;
-   CalibratorNeighbourhood calibrator25(Variable(), Options("radius=25 stat=mean fast=0"));
-   CalibratorNeighbourhood calibrator10(Variable(), Options("radius=10 stat=mean fast=0"));
-   CalibratorNeighbourhood calibrator05(Variable(), Options("radius=5 stat=mean fast=0"));
-   CalibratorNeighbourhood calibrator03(Variable(), Options("radius=3 stat=mean fast=0"));
+   std::vector<CalibratorNeighbourhood> smoothers;
+   smoothers.push_back(CalibratorNeighbourhood(Variable(), Options("radius=25 stat=mean fast=0")));
+   smoothers.push_back(CalibratorNeighbourhood(Variable(), Options("radius=5 stat=mean fast=0")));
+   smoothers.push_back(CalibratorNeighbourhood(Variable(), Options("radius=3 stat=mean fast=0")));
+   CalibratorNeighbourhood outputSmoother = CalibratorNeighbourhood(Variable(), Options("radius=3 stat=mean fast=0"));
+
    vec2 lats = iFile.getLats();
    vec2 lons = iFile.getLons();
    vec2 elevs = iFile.getElevs();
@@ -999,42 +1003,20 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       if(singleMemberMode) {
          // Single member mode needs to deal with variance
          if(mTransformType != TransformTypeNone) {
-            // Smothen sigmaTranformed twice
-            FieldPtr sigmaTransformedTemp = iFile.getEmptyField(0);
-            #pragma omp parallel for
-            for(int x = 0; x < nX; x++) {
-               for(int y = 0; y < nY; y++) {
-                  for(int e = 0; e < nEns; e++) {
-                    (*sigmaTransformedTemp)(y, x, e)=(*sigmaTransformed)(y, x, e);
-                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
-                       (*sigmaTransformed)(y, x, e)=0;
-                    }
+            // Smothen sigmaTranformed several times
+            for(int r = 0; r < smoothers.size(); r++) {
+               #pragma omp parallel for
+               for(int x = 0; x < nX; x++) {
+                  for(int y = 0; y < nY; y++) {
+                     for(int e = 0; e < nEns; e++) {
+                       if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
+                          (*sigmaTransformed)(y, x, e)=0;
+                       }
+                     }
                   }
                }
+               smoothers[r].calibrateField(*sigmaTransformed, *sigmaTransformed);
             }
-            calibrator25.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
-            #pragma omp parallel for
-            for(int x = 0; x < nX; x++) {
-               for(int y = 0; y < nY; y++) {
-                  for(int e = 0; e < nEns; e++) {
-                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
-                       (*sigmaTransformed)(y, x, e)=0;
-                    }
-                  }
-               }
-            }
-            calibrator05.calibrateField(*sigmaTransformed, *sigmaTransformedTemp);
-            #pragma omp parallel for
-            for(int x = 0; x < nX; x++) {
-               for(int y = 0; y < nY; y++) {
-                  for(int e = 0; e < nEns; e++) {
-                    if( (*output)(y, x, e) < transform(mBoxCoxThreshold)) {
-                       (*sigmaTransformedTemp)(y, x, e)=0;
-                    }
-                  }
-               }
-            }
-            calibrator03.calibrateField(*sigmaTransformedTemp, *sigmaTransformed);
 
             #pragma omp parallel for
             for(int x = 0; x < nX; x++) {
@@ -1062,18 +1044,8 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                   }
                }
             } // end for Backtransf
-            // smooth the output field
-            FieldPtr outputTemp = iFile.getEmptyField(0);
-            calibrator03.calibrateField(*output, *outputTemp);
-            #pragma omp parallel for
-            for(int x = 0; x < nX; x++) {
-               for(int y = 0; y < nY; y++) {
-                  for(int e = 0; e < nEns; e++) {
-                    (*output)(y, x, e)=(*outputTemp)(y, x, e);
-                  }
-               }
-            }
-
+            // Smooth the output field
+            outputSmoother.calibrateField(*output, *output);
          }
       }
       else {

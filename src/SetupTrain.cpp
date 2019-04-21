@@ -230,6 +230,7 @@ SetupTrain::SetupTrain(const std::vector<std::string>& argv) {
             ss << "Observation files do not define variable of type '" << variableName << "'";
             Util::error(ss.str());
          }
+         variable = Variable(variableName);
 
          downscaler = Downscaler::getScheme("nearestNeighbour", inputVariable, outputVariable, Options());
          method = Calibrator::getScheme(methodType, outputVariable, mOptions);

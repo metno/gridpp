@@ -35,7 +35,7 @@ class File {
       void addField(FieldPtr iField, const Variable& iVariable, int iTime) const;
 
       // Write these variables to file
-      void write(std::vector<Variable> iVariables);
+      void write(std::vector<Variable> iVariables, std::string iMessage="");
 
       // Dimension sizes
 
@@ -91,7 +91,7 @@ class File {
    protected:
       virtual FieldPtr getFieldCore(const Variable& iVariable, int iTime) const = 0;
       // File must save variables, but also altitudes, in case they got changed
-      virtual void writeCore(std::vector<Variable> iVariables) = 0;
+      virtual void writeCore(std::vector<Variable> iVariables, std::string iMessage="") = 0;
       //! Does the subclass provide this variable without deriving it?
       virtual bool hasVariableCore(const Variable& iVariable) const = 0;
 

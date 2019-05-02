@@ -48,7 +48,7 @@ class FileNetcdf : public File {
    protected:
       float getScale(int iVar) const;
       float getOffset(int iVar) const;
-      void writeCore(std::vector<Variable> iVariables);
+      void writeCore(std::vector<Variable> iVariables, std::string iMessage="");
       FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
       bool hasVariableCore(const Variable& iVariable) const;
 
@@ -99,7 +99,7 @@ class FileNetcdf : public File {
       void defineTimes();
       void defineEns();
       void defineReferenceTime();
-      void defineGlobalAttributes();
+      void defineGlobalAttributes(std::string iMesssage);
       void writeTimes();
       void writeReferenceTime();
       bool hasDim(std::string iDim) const;

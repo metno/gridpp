@@ -82,7 +82,7 @@ FieldPtr FileNorcomQnh::getFieldCore(const Variable& iVariable, int iTime) const
    return field;
 }
 
-void FileNorcomQnh::writeCore(std::vector<Variable> iVariables) {
+void FileNorcomQnh::writeCore(std::vector<Variable> iVariables, std::string iMessage) {
    std::ofstream ofs(getFilename().c_str());
    if(iVariables.size() == 0) {
       Util::warning("No variables to write");

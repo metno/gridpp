@@ -16,7 +16,7 @@ class FilePoint : public File {
       std::string name() const {return "point";};
    protected:
       FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
-      void writeCore(std::vector<Variable> iVariables);
+      void writeCore(std::vector<Variable> iVariables, std::string iMessage="");
       bool hasVariableCore(const Variable& iVariable) const {return true;};
 };
 #endif

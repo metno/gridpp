@@ -85,7 +85,7 @@ FieldPtr FileFake::getFieldCore(const Variable& iVariable, int iTime) const {
    }
    return field;
 }
-void FileFake::writeCore(std::vector<Variable> iVariables) {
+void FileFake::writeCore(std::vector<Variable> iVariables, std::string iMessage) {
    Util::warning("Cannot write file using the 'Fake' format");
 }
 

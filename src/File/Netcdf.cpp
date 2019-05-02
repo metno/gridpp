@@ -347,7 +347,7 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
    return field;
 }
 
-void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
+void FileNetcdf::writeCore(std::vector<Variable> iVariables, std::string iMessage) {
    startDefineMode();
 
    // check if altitudes are valid
@@ -365,7 +365,7 @@ void FileNetcdf::writeCore(std::vector<Variable> iVariables) {
    defineTimes();
    defineEns();
    defineReferenceTime();
-   defineGlobalAttributes();
+   defineGlobalAttributes(iMessage);
    // Define variables
    for(int v = 0; v < iVariables.size(); v++) {
       Variable variable = iVariables[v];
@@ -1161,11 +1161,11 @@ void FileNetcdf::writeReferenceTime() {
    int status = nc_put_var_double(mFile, vTime, &referenceTime);
    handleNetcdfError(status, "could not write reference time");
 }
-void FileNetcdf::defineGlobalAttributes() {
+void FileNetcdf::defineGlobalAttributes(std::string iMessage) {
    if(getGlobalAttribute("Conventions") != "")
       setGlobalAttribute("Conventions", "CF-1.0");
    std::stringstream ss;
-   ss << Util::getCurrentTimeStamp() << ": post-processing by gridpp";
+   ss << Util::getCurrentTimeStamp() << ": gridpp " << iMessage;
    prependGlobalAttribute("history", ss.str());
 }
 bool FileNetcdf::hasDim(int iFile, std::string iDim) {

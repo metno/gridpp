@@ -9,7 +9,7 @@ class FileFake : public File {
       static std::string description();
       std::string name() const {return "fake";};
    protected:
-      void writeCore(std::vector<Variable> iVariables);
+      void writeCore(std::vector<Variable> iVariables, std::string iMessage="");
       FieldPtr getFieldCore(const Variable& iVariable, int iTime) const;
       bool hasVariableCore(const Variable& iVariable) const;
 };

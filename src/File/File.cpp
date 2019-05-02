@@ -133,8 +133,8 @@ FieldPtr File::getField(const Variable& iVariable, int iTime, bool iSkipRead) co
 File::~File() {
 }
 
-void File::write(std::vector<Variable> iVariables) {
-   writeCore(iVariables);
+void File::write(std::vector<Variable> iVariables, std::string iMessage) {
+   writeCore(iVariables, iMessage);
    // mCache.clear();
 }
 

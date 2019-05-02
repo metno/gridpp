@@ -180,7 +180,14 @@ int main(int argc, const char *argv[]) {
 
       // Write to output
       double s = Util::clock();
-      setup.outputFiles[f]->write(writeVariables);
+      std::stringstream ssMessage;
+      for(int i = 1; i < argc; i++) {
+         if(i > 1)
+            ssMessage << " ";
+         ssMessage << argv[i];
+      }
+
+      setup.outputFiles[f]->write(writeVariables, ssMessage.str());
       double e = Util::clock();
       std::stringstream ss1;
       ss1 << "Writing file: " << e-s << " seconds";

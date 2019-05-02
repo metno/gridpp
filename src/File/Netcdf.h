@@ -68,6 +68,7 @@ class FileNetcdf : public File {
       std::string mEnsDimName;
 
       int getDim(std::string iDim) const;
+      std::string getDimName(int iDim) const;
       std::vector<int> getDims(int iVar) const;
       int getVar(std::string iVar) const;
       std::string getVarName(int iVar) const;

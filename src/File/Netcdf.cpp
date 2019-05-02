@@ -261,6 +261,11 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
             }
          }
       }
+      if(!Util::isValid(ensPos) && Util::isValid(mEnsDim)) {
+         std::stringstream ss;
+         ss << "Ensemble dimension '" << getDimName(mEnsDim) << "' found in file, but variable '" << iVariable.name() << "' does not have this dimension";
+         Util::warning(ss.str());
+      }
    }
 
    // Initialize vector
@@ -813,6 +818,17 @@ std::string FileNetcdf::getVarName(int iVar) const {
    return std::string(var);
 }
 
+std::string FileNetcdf::getDimName(int iDim) const {
+   char name[1000];
+   int status = nc_inq_dimname(mFile, iDim, name);
+   if(status != NC_NOERR) {
+      std::stringstream ss;
+      ss << "File '" << getFilename() << "' does not have dimension '" << iDim << "'";
+      Util::error(ss.str());
+   }
+   return std::string(name);
+}
+
 int FileNetcdf::getDimSize(std::string iDim) const {
    if(!hasDim(iDim))
       return 0;
@@ -1097,7 +1113,7 @@ void FileNetcdf::defineTimes() {
 }
 void FileNetcdf::defineEns() {
    if(!Util::isValid(mEnsDim) && mNEns > 1) {
-      int status = nc_def_dim(mFile, mEnsDimName.c_str(), 10, &mEnsDim);
+      int status = nc_def_dim(mFile, mEnsDimName.c_str(), mNEns, &mEnsDim);
       handleNetcdfError(status, "creating '" + mEnsDimName + "' dimension");
    }
 }

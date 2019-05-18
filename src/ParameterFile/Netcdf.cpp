@@ -168,7 +168,8 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
          indices[lonDimIndex] = j;
          Location location(lats[i][j], lons[i][j], elevs[i][j]);
          for(int t = 0; t < nTime; t++) {
-            indices[timeDimIndex] = t;
+            if(Util::isValid(timeDimIndex))
+               indices[timeDimIndex] = t;
             std::vector<float> par(nCoeff, 0);
             for(int c = 0; c < nCoeff; c++) {
                indices[coeffDimIndex] = c;
@@ -177,7 +178,6 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
             }
             mParameters[location][t] = Parameters(par);
          }
-
       }
    }
    if(nTime > 1)

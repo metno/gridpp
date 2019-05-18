@@ -11,9 +11,13 @@
 ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) : ParameterFile(iOptions, iIsNew),
       mDimName("coeff"),
       mVarName("coefficient"),
+      mXDimName(""),
+      mYDimName(""),
       mInDefineMode(false) {
    iOptions.getValue("dimName", mDimName);
    iOptions.getValue("varName", mVarName);
+   iOptions.getValue("xDim", mXDimName);
+   iOptions.getValue("yDim", mYDimName);
 
    if(iIsNew) {
       int status = nc_create(getFilename().c_str(), NC_NETCDF4, &mFile);
@@ -417,7 +421,9 @@ void ParameterFileNetcdf::handleNetcdfError(int status, std::string message) con
 
 int ParameterFileNetcdf::getLatDim(int iFile) const {
    int dLat;
-   if(hasDim(iFile, "lat"))
+   if(mYDimName != "")
+      dLat = getDim(iFile, mYDimName);
+   else if(hasDim(iFile, "lat"))
       dLat = getDim(iFile, "lat");
    else if(hasDim(iFile, "latitude"))
       dLat = getDim(iFile, "latitude");
@@ -430,7 +436,9 @@ int ParameterFileNetcdf::getLatDim(int iFile) const {
 
 int ParameterFileNetcdf::getLonDim(int iFile) const {
    int dLon;
-   if(hasDim(iFile, "lon"))
+   if(mXDimName != "")
+      dLon = getDim(iFile, mXDimName);
+   else if(hasDim(iFile, "lon"))
       dLon = getDim(iFile, "lon");
    else if(hasDim(iFile, "longitude"))
       dLon = getDim(iFile, "longitude");

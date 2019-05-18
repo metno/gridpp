@@ -40,6 +40,8 @@ class ParameterFileNetcdf : public ParameterFile {
       static bool   hasVar(int iFile, std::string iVar);
       std::string mDimName;
       std::string mVarName;
+      std::string mXDimName;
+      std::string mYDimName;
       void handleNetcdfError(int status, std::string message="") const;
       //! Convert linear index 'i' to vector 'iInidices'. 'iCount' specifies the size of the data
       //! Using row-major ordering (last index varies fastest)

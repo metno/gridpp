@@ -230,15 +230,15 @@ std::string CalibratorQq::description(bool full) {
       ss << Util::formatDescription("", "Note that observations and forecasts must be sorted. I.e obs0 does not necessarily correspond to the time when fcst0 was issued. If a parameter set has one or more missing values, then the ensemble using this parameter set is not processed.") << std::endl;
       ss << Util::formatDescription("   extrapolation=1to1", "If a forecast is outside the curve, how should extrapolation be done? '1to1': Use a slope of 1, i.e. preserving the bias at the nearest end point; 'meanSlope': Use the average slope from the lower to upper endpoints; 'nearestSlope': Use the slope through the two nearest points; 'zero': Use a slope of 0, meaning that the forecast will equal the max/min observation.") << std::endl;
       ss << Util::formatDescription("   quantiles=undef", "If creating training parameters, should specific quantiles be stored, instead of all observations and forecasts? Can be a vector of values between 0 and 1.") << std::endl;
-      ss << Util::formatDescription("   extraObs=undef", "Only applicable when training. Add these extra observations to the curve at the end.") << std::endl;
-      ss << Util::formatDescription("   extraFcst=undef", "Only applicable when training. Add these extra forecasts to the curve at the end. Must be the same length as extraObs.") << std::endl;
+      ss << Util::formatDescription("   extraObs=undef", "Add these extra observations points to the curve. Must be the same length as extraFcst.") << std::endl;
+      ss << Util::formatDescription("   extraFcst=undef", "Add these extra forecasts points to the curve at the end. Must be the same length as extraObs.") << std::endl;
    }
    else
       ss << Util::formatDescription("-c qq", "Quantile-quantile mapping") << std::endl;
    return ss.str();
 }
 
-void CalibratorQq::separate(const Parameters& iParameters, std::vector<float>& iObs, std::vector<float>& iFcst) {
+void CalibratorQq::separate(const Parameters& iParameters, std::vector<float>& iObs, std::vector<float>& iFcst) const {
    iObs.clear();
    iFcst.clear();
    int N = iParameters.size() / 2;
@@ -247,5 +247,13 @@ void CalibratorQq::separate(const Parameters& iParameters, std::vector<float>& i
    for(int i = 0; i < N; i++) {
       iObs[i] = iParameters[2*i];
       iFcst[i] = iParameters[2*i+1];
+   }
+   if(mExtraObs.size() > 0) {
+      for(int i = 0; i < mExtraObs.size(); i++) {
+         iObs.push_back(mExtraObs[i]);
+         iFcst.push_back(mExtraFcst[i]);
+      }
+      std::sort(iObs.begin(), iObs.end());
+      std::sort(iFcst.begin(), iFcst.end());
    }
 }

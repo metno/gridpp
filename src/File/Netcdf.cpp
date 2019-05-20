@@ -261,11 +261,11 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
             }
          }
       }
-      if(!Util::isValid(ensPos) && Util::isValid(mEnsDim)) {
-         std::stringstream ss;
-         ss << "Ensemble dimension '" << getDimName(mEnsDim) << "' found in file, but variable '" << iVariable.name() << "' does not have this dimension";
-         Util::warning(ss.str());
-      }
+   }
+   if(!Util::isValid(ensPos) && Util::isValid(mEnsDim)) {
+      std::stringstream ss;
+      ss << "Ensemble dimension '" << getDimName(mEnsDim) << "' found in file, but variable '" << iVariable.name() << "' does not have this dimension";
+      Util::warning(ss.str());
    }
 
    // Initialize vector

@@ -181,9 +181,9 @@ void ParameterFileText::write(const std::string& iFilename) const {
    std::map<Location, std::vector<Parameters> >::const_iterator it;
    // Loop over times
    if(isLocationDependent())
-      ofs << "# time lat lon elev" << std::endl;
+      ofs << "time lat lon elev" << std::endl;
    else
-      ofs << "# time" << std::endl;
+      ofs << "time" << std::endl;
    for(int i = 0; i < getNumParameters(); i++) {
       ofs << " param" << i;
    }

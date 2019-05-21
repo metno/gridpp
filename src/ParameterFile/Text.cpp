@@ -17,6 +17,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
    int numParameters = Util::MV;
    int counter = 0;
    std::set<int> times;
+   std::string header;
    std::vector<std::string> columnNames;
    int timePos = Util::MV;
    int latPos = Util::MV;
@@ -26,14 +27,17 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
       char line[10000];
       ifs.getline(line, 10000, '\n');
       if(ifs.good() && line[0] != '#') {
-         std::stringstream ss(line);
+         header = std::string(line);
+         std::stringstream ss(header);
          if(columnNames.size() == 0) {
             int currCounter = 0;
             while(ss.good()) {
                std::string value;
                bool status = ss >> value;
                if(!status) {
-                  Util::error("Could not read header from file '" + mFilename + "'");
+                  std::stringstream ss;
+                  ss << "Could not read header '" << header << "' from file '" + mFilename + "'";
+                  Util::error(ss.str());
                }
                columnNames.push_back(value);
                if(value == "time")
@@ -117,6 +121,19 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
       }
    }
    ifs.close();
+
+   // Check header
+   if(counter == 0) {
+      std::stringstream ss;
+      ss << "No parameter sets found in '" << mFilename;
+      Util::error(ss.str());
+   }
+   if(counter > 1 && (!Util::isValid(timePos) && !Util::isValid(latPos))) {
+      std::stringstream ss;
+      ss << "'time' and/or 'lat'/'lon'/'elev' not found in header line (" << header << ") in '" << mFilename << "'. Is the file missing a header?";
+      Util::error(ss.str());
+   }
+
    mTimes = std::vector<int>(times.begin(), times.end());
    std::sort(mTimes.begin(), mTimes.end());
 

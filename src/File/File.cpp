@@ -305,6 +305,13 @@ vec2 File::getElevs() const {
       return mElevs;
 }
 vec2 File::getLandFractions() const {
+   if(mLandFractions.size() != getNumY() || mLandFractions[0].size() != getNumX()) {
+      vec2 landFractions;
+      landFractions.resize(getNumY());
+      for(int i = 0; i < getNumY(); i++)
+         landFractions[i].resize(getNumX(), Util::MV);
+      return landFractions;
+   }
    return mLandFractions;
 }
 int File::getNumY() const {

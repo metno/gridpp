@@ -301,7 +301,23 @@ Setup::Setup(const std::vector<std::string>& argv) {
                VariableConfiguration varconf;
                varconf.parameterFileDownscaler = parameterFileDownscaler;
                // Find input variable
-               bool foundVarInput = inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
+               bool foundVarInput = inputFiles[0]->hasVariable(useVariableInputName);
+               if(foundVarInput)
+                  inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
+               else if (inputFiles[0] == outputFiles[0]) {
+                  // A variable to be diagnosed should use the bypass downscaler. However, if the
+                  // variable will be diagnosed by the current gridpp command and the input and
+                  // output files are the same, then it doesn't need it.
+                  for(int i = 0; i < variableConfigurations.size(); i++) {
+                     if(variableConfigurations[i].outputVariable.name() == useVariableInputName) {
+                        varconf.inputVariable = variableConfigurations[i].outputVariable;
+                        foundVarInput = true;
+                        std::stringstream ss;
+                        ss << "Using previously diagnosed variable for " << varconf.inputVariable.name();
+                        Util::status(ss.str());
+                     }
+                  }
+               }
                varconf.inputVariable.add(useVariableInputOptions);
                if(!foundVarInput && downscaler != "bypass") {
                   std::stringstream ss;

@@ -248,7 +248,7 @@ FieldPtr FileNetcdf::getFieldCore(const Variable& iVariable, int iTime) const {
          if(Util::isValid(level)) {
             int size = getDimSize(dim);
             if(size > 1) {
-               if(level >= dim) {
+               if(level >= size) {
                   std::stringstream ss;
                   char name[1000];
                   int status = nc_inq_varname(mFile, dim, name);

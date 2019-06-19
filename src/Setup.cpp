@@ -304,17 +304,27 @@ Setup::Setup(const std::vector<std::string>& argv) {
                bool foundVarInput = inputFiles[0]->hasVariable(useVariableInputName);
                if(foundVarInput)
                   inputFiles[0]->getVariable(useVariableInputName, varconf.inputVariable);
-               else if (inputFiles[0] == outputFiles[0]) {
-                  // A variable to be diagnosed should use the bypass downscaler. However, if the
-                  // variable will be diagnosed by the current gridpp command and the input and
-                  // output files are the same, then it doesn't need it.
-                  for(int i = 0; i < variableConfigurations.size(); i++) {
-                     if(variableConfigurations[i].outputVariable.name() == useVariableInputName) {
-                        varconf.inputVariable = variableConfigurations[i].outputVariable;
-                        foundVarInput = true;
-                        std::stringstream ss;
-                        ss << "Using previously diagnosed variable for " << varconf.inputVariable.name();
-                        Util::status(ss.str());
+               else {
+                  std::map<std::string, Variable>::const_iterator it = variableAliases.find(useVariableInputName);
+                  if(it != variableAliases.end()) {
+                     std::stringstream ss;
+                     ss << "Using variable alias for " << useVariableInputName;
+                     Util::status(ss.str());
+                     varconf.inputVariable = it->second;
+                     foundVarInput = true;
+                  }
+                  else if (inputFiles[0] == outputFiles[0]) {
+                     // A variable to be diagnosed should use the bypass downscaler. However, if the
+                     // variable will be diagnosed by the current gridpp command and the input and
+                     // output files are the same, then it doesn't need it.
+                     for(int i = 0; i < variableConfigurations.size(); i++) {
+                        if(variableConfigurations[i].outputVariable.name() == useVariableInputName) {
+                           varconf.inputVariable = variableConfigurations[i].outputVariable;
+                           foundVarInput = true;
+                           std::stringstream ss;
+                           ss << "Using previously diagnosed variable for " << varconf.inputVariable.name();
+                           Util::status(ss.str());
+                        }
                      }
                   }
                }

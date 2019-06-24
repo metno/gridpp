@@ -112,7 +112,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
             assert(Icenter < ielevs.size());
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {
-               float currElev = oelevs[i][j];
                float currLaf = Util::MV;
                if(mLafRadius == 0) {
                   currLaf = olafs[i][j];
@@ -138,8 +137,6 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                // float nearestElev = ielevs[Icenter][Jcenter];
                // float nearestLaf = ilafs[Icenter][Jcenter];
                // float nearestValue = ifield(Icenter, Jcenter, e);
-               float baseElev = elevsInterp[i][j];
-               float baseLaf = lafsInterp[i][j];
                float baseValue = ofield(i, j, e);
 
                // Missing ensemble member
@@ -168,12 +165,18 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                      2) Compute the LAF gradient, by adjusting neighbourhood using elevation gradient
                      3) Adjust the point with the lower LAF by adding on the LAF gradient and elevation gradient
                   */
-                  float dElev = currElev - baseElev;
-                  float dLaf = currLaf - baseLaf;
-
-                  float value = baseValue + dElev * elevGradient;
-                  if(Util::isValid(lafGradient))
+                  float baseElev = elevsInterp[i][j];
+                  float baseLaf = lafsInterp[i][j];
+                  float value = baseValue;
+                  float currElev = oelevs[i][j];
+                  if(Util::isValid(currElev) && Util::isValid(baseElev)) {
+                     float dElev = currElev - baseElev;
+                     value += dElev * elevGradient;
+                  }
+                  if(Util::isValid(currLaf) && Util::isValid(baseLaf) && Util::isValid(lafGradient)) {
+                     float dLaf = currLaf - baseLaf;
                      value += dLaf * lafGradient;
+                  }
 
                   if((Util::isValid(minAllowed) && value < minAllowed) || (Util::isValid(maxAllowed) && value > maxAllowed)) {
                      value = baseValue;

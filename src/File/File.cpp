@@ -109,6 +109,12 @@ FieldPtr File::getField(const Variable& iVariable, int iTime, bool iSkipRead) co
       if(!iSkipRead && hasVariableCore(iVariable)) {
          addField(getFieldCore(iVariable, iTime), iVariable, iTime);
       }
+      else if (iSkipRead) {
+         for(int t = 0; t < getNumTime(); t++) {
+            FieldPtr field = getEmptyField();
+            addField(field, iVariable, t);
+         }
+      }
       else {
          std::string variableType = iVariable.name();
          Util::warning(variableType + " not available in '" + getFilename() + "'");

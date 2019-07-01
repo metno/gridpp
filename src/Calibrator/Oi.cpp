@@ -11,6 +11,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mVLength(100),
       mHLength(30000),
+      mWLength(0.2),
       mHLengthC(10000),
       mMu(0.9),
       mMinRho(0.0013),
@@ -36,7 +37,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       mNewDeltaVar(1),
       mExtrapolate(false),
       mDiagnose(false),
-      mWMin(0.5),
+      mWMin(Util::MV),
       mLambda(0.5),
       mCrossValidate(false),
       mMaxBytes(6.0 * 1024 * 1024 * 1024),
@@ -49,6 +50,7 @@ CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
    iOptions.getValue("biasVariable", mBiasVariable);
    iOptions.getValue("d", mHLength);
    iOptions.getValue("h", mVLength);
+   iOptions.getValue("w", mWLength);
    iOptions.getValue("dc", mHLengthC);
    iOptions.getValue("maxLocations", mMaxLocations);
    iOptions.getValue("sigma", mSigma);
@@ -1135,7 +1137,12 @@ float CalibratorOi::calcRho(float iHDist, float iVDist, float iLDist, RhoType iT
       }
    }
    if(Util::isValid(mWMin)) {
-      rho *= 1 - (1 - mWMin) * std::abs(iLDist);
+      float factor = 1 - (1 - mWMin) * std::abs(iLDist);
+      rho *= factor;
+   }
+   if(Util::isValid(mWLength)) {
+      float factor = exp(-0.5 * iLDist * iLDist / (mWLength * mWLength));
+      rho *= factor;
    }
    return rho;
 }
@@ -1177,6 +1184,7 @@ std::string CalibratorOi::description(bool full) {
       ss << Util::formatDescription("   transform=none","One of 'none', 'boxcox'. Use 'boxcox' for 'precipitation'.") << std::endl;
       ss << Util::formatDescription("   d=30000","Horizontal decorrelation distance (in meters). Must be >= 0.") << std::endl;
       ss << Util::formatDescription("   h=100","Vertical decorrelation distance (in meters). Use -999 to disable.") << std::endl;
+      ss << Util::formatDescription("   w=0.2","Decorrelation distance in land area fraction (in units 1). Use -999 to disable.") << std::endl;
       ss << Util::formatDescription("   dc=10000","Decorrelation distance (in meters) for observations with spatial correlation.") << std::endl;
       ss << Util::formatDescription("   maxLocations=20","Don't use more than this many locations within the localization region. Sort the stations by rho and use the best ones.") << std::endl;
       ss << Util::formatDescription("   sigma=1","Average standard error of observations") << std::endl;

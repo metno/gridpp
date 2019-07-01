@@ -23,6 +23,7 @@ class CalibratorOi : public Calibrator {
       float mVLength;
       float mHLength;
       float mHLengthC;
+      float mWLength;
       float mMu;
       float mGamma;
       std::string mBiasVariable;

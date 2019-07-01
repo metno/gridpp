@@ -398,15 +398,17 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                count++;
             }
          }
-         float mean = total / count;
+         float mean = Util::MV;
+         if(count > 0)
+            mean = total / count;
          for(int e = 0; e < nEns; e++) {
             float value = gY[i][e];
-            if(Util::isValid(value)) {
+            if(Util::isValid(value) && Util::isValid(mean)) {
                gY[i][e] -= mean;
             }
          }
          gYhat[i] = mean;
-         if(useBias) {
+         if(useBias && Util::isValid(gYhat[i])) {
             float currBias = (*bias)(gYi[i], gXi[i], 0);
             gYhat[i] -= currBias;
          }

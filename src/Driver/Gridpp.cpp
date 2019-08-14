@@ -116,6 +116,7 @@ int main(int argc, const char *argv[]) {
    else if(debugMode == "info") {
    }
 
+   std::cout << "Number of OMP threads: " << omp_get_max_threads() << std::endl;
    Setup setup(args);
    for(int f = 0; f < setup.inputFiles.size(); f++) {
       Util::info("Input type:  " + setup.inputFiles[f]->name());

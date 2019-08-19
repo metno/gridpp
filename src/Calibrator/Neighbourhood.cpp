@@ -222,6 +222,7 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                }
                for(int j = 0; j < nLon; j++) {
                   std::vector<float> curr;
+                  curr.reserve(2*mRadius);
                   for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
                      curr.push_back(slivers[jj]);
                   }

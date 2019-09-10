@@ -93,9 +93,7 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bo
       time = 0;
 
    if(time > mMaxTime) {
-      std::stringstream ss;
-      ss << "Could not load parameters for time " << time << " (max " << mMaxTime << ")";
-      Util::error(ss.str());
+      time = time % mMaxTime;
    }
 
    if(mParameters.size() == 0)

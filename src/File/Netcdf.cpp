@@ -175,6 +175,12 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
          std::vector<double> times(1, time);
          setTimes(times);
       }
+      if(!Util::isValid(getReferenceTime())) {
+         std::stringstream ss;
+         ss << "File does not contain reference time, using the first timestep as the reference time";
+         Util::warning(ss.str());
+         setReferenceTime(getTimes()[0]);
+      }
    }
    else if(Util::isValid(getReferenceTime())) {
       std::stringstream ss;

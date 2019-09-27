@@ -74,14 +74,17 @@ endfunction()
 list_sources(SRC)
 set(DRVSRC  "src/Driver/Gridpp.cpp")
 set(TRAINRC "src/Driver/Train.cpp")
+set(KDTREERC "src/Driver/KDTree.cpp")
 
 add_gridpp_library(gridpp-static STATIC)
 add_executable(gridpp-bin   ${DRVSRC} )
 add_executable(gridpp-train ${TRAINRC})
+add_executable(gridpp-kdtree ${KDTREERC})
 set_target_properties(gridpp-bin   PROPERTIES OUTPUT_NAME gridpp)
 set_target_properties(gridpp-train PROPERTIES OUTPUT_NAME gridpp_train)
+set_target_properties(gridpp-kdtree PROPERTIES OUTPUT_NAME gridpp_kdtree)
 
-foreach(item gridpp-bin gridpp-train)
+foreach(item gridpp-bin gridpp-train gridpp-kdtree)
    target_link_libraries(${item} gridpp-static)
 
    target_link_libraries(${item} "${Boost_LIBRARIES}")

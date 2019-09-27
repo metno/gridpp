@@ -92,7 +92,7 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bo
    if(!isTimeDependent())
       time = 0;
 
-   if(time > mMaxTime) {
+   if(time >= mMaxTime) {
       time = time % mMaxTime;
    }
 

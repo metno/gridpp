@@ -1,4 +1,7 @@
 #include "KDTree.h"
+
+#include <limits>
+
 KDTree::KDTree() : mRoot(NULL) {
 }
 
@@ -124,11 +127,12 @@ const KDTree::TreeNode* KDTree::firstGuess(const unode& root, const float lon, c
    return root.get();
 }
 
-const KDTree::TreeNode* KDTree::nearestNeighbour(const unode& root, const float lon, const float lat) {
+const KDTree::queryRes KDTree::nearestNeighbour(const unode& root, const float lon, const float lat, const float oldBest) {
 
    const TreeNode * nearLeaf = firstGuess(root, lon, lat);
 
-   float currBest = Util::getDistance(lat, lon, nearLeaf->lat, nearLeaf->lon);
+   float currBest = oldBest;
+   float refinedBest = oldBest;
 
    const TreeNode * currentLeaf = nearLeaf;
    const TreeNode * nearestLeaf = nearLeaf;
@@ -149,18 +153,26 @@ const KDTree::TreeNode* KDTree::nearestNeighbour(const unode& root, const float 
       }
 
       if(cross) {
+         queryRes refineRes;
          if(currentLeaf->left.get() == nearLeaf) {
             nearLeaf = NULL;
-            if(currentLeaf->right) nearLeaf = nearestNeighbour( currentLeaf->right, lon, lat);
+            if(currentLeaf->right) {
+               refineRes = nearestNeighbour( currentLeaf->right, lon, lat, currBest);
+               nearLeaf = refineRes.first;
+               refinedBest = refineRes.second;
+            }
          } else {
             nearLeaf = NULL;
-            if(currentLeaf->left) nearLeaf = nearestNeighbour(currentLeaf->left, lon, lat);
+            if(currentLeaf->left) {
+               refineRes = nearestNeighbour(currentLeaf->left, lon, lat, currBest);
+               nearLeaf = refineRes.first;
+               refinedBest = refineRes.second;
+            }
          }
 
          if(nearLeaf) {
-            float dist = Util::getDistance(lat, lon, nearLeaf->lat, nearLeaf->lon);
-            if(dist < currBest) {
-               currBest = dist;
+            if(refinedBest < currBest) {
+               currBest = refinedBest;
                nearestLeaf = nearLeaf;
             }
          }
@@ -174,7 +186,7 @@ const KDTree::TreeNode* KDTree::nearestNeighbour(const unode& root, const float 
       }
    }
 
-   return nearestLeaf;
+   return std::make_pair(nearestLeaf, currBest);
 }
 
 void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) const {
@@ -206,7 +218,7 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
       for(size_t j = 0; j < nLon; ++j) {
          if(Util::isValid(olats[i][j]) && Util::isValid(olons[i][j])) {
             // Find the nearest neighbour from input grid (ii, jj)
-            nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j]);
+            nearest = nearestNeighbour(mRoot, olons[i][j], olats[i][j], std::numeric_limits<float>::infinity()).first;
             iI[i][j] = nearest->ipos;
             iJ[i][j] = nearest->jpos;
          }
@@ -215,7 +227,7 @@ void KDTree::getNearestNeighbour(const File& iTo, vec2Int& iI, vec2Int& iJ) cons
 }
 
 void KDTree::getNearestNeighbour(float iLat, float iLon, int& iI, int& iJ) const {
-   const TreeNode * nearest = nearestNeighbour(mRoot, iLon, iLat);
+   const TreeNode * nearest = nearestNeighbour(mRoot, iLon, iLat, std::numeric_limits<float>::infinity()).first;
    iI = nearest->ipos;
    iJ = nearest->jpos;
    return;

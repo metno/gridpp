@@ -2,6 +2,7 @@
 #define KDTREE_H
 #include <boost/scoped_ptr.hpp>
 #include <vector>
+#include <utility>
 #include "Util.h"
 #include "File/File.h"
 typedef std::vector<std::vector<int> > vec2Int;
@@ -76,9 +77,10 @@ class KDTree {
       friend bool compareLons (const KDTree::Indexed& l, const KDTree::Indexed& r);
       friend bool compareLats (const KDTree::Indexed& l, const KDTree::Indexed& r);
       typedef std::vector<Indexed> indexdVec;
+      typedef std::pair<const KDTree::TreeNode*, float> queryRes;
 
 
-      static const TreeNode* nearestNeighbour(const unode& root, const float lon, const float lat);
+      static const queryRes nearestNeighbour(const unode& root, const float lon, const float lat, const float oldBest);
       static const TreeNode* firstGuess(const unode& root, const float lon, const float lat);
       static void subTree(indexdVec& iLonLat,
                           const size_t from,

@@ -140,15 +140,30 @@ float CalibratorDiagnoseHumidity::mEwt[41] = { .000034,.000089,.000220,.000517,.
 float CalibratorDiagnoseHumidity::computeRh(float iTemperature, float iDewPointTemperature) {
    // Taken from https://github.com/metno/wdb2ts
    if(Util::isValid(iTemperature) && Util::isValid(iDewPointTemperature)) {
+      if(iTemperature <= iDewPointTemperature)
+         return 1;
+
       float x, et, etd, rh;
       int l;
 
       x = (iTemperature - 173.16) * 0.2;
+      if(x < 0)
+         x = 0;
+      else if(x > 39)
+         x = 39;
       l = int(x);
+      assert(l >= 0);
+      assert(l +1 < 41);
       et = mEwt[l] + (mEwt[l + 1] - mEwt[l]) * (x - float(l));
 
       x = (iDewPointTemperature - 173.16) * 0.2;
+      if(x < 0)
+         x = 0;
+      else if(x > 39)
+         x = 39;
       l = int(x);
+      assert(l >= 0);
+      assert(l +1 < 41);
       etd = mEwt[l] + (mEwt[l + 1] - mEwt[l]) * (x - float(l));
       rh = etd / et;
 

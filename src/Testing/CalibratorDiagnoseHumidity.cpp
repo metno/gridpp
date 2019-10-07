@@ -43,6 +43,10 @@ namespace {
       EXPECT_FLOAT_EQ(1, CalibratorDiagnoseHumidity::computeRh(273.15, 273.15));
       EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeRh(Util::MV, 273.15-1.27));
       EXPECT_FLOAT_EQ(Util::MV, CalibratorDiagnoseHumidity::computeRh(273.15, Util::MV));
+      EXPECT_FLOAT_EQ(1, CalibratorDiagnoseHumidity::computeRh(200, 300));
+      EXPECT_FLOAT_EQ(1, CalibratorDiagnoseHumidity::computeRh(200, 200));
+      EXPECT_FLOAT_EQ(1, CalibratorDiagnoseHumidity::computeRh(100, 90));
+      EXPECT_FLOAT_EQ(1, CalibratorDiagnoseHumidity::computeRh(500, 490));
    }
    TEST_F(TestCalibratorDiagnoseHumidity, wetbulb) {
       EXPECT_FLOAT_EQ(269.02487, CalibratorDiagnoseHumidity::computeWetbulb(270, 100000, 0.80)); // 269.03

@@ -168,6 +168,54 @@ namespace {
       ASSERT_EQ(3, par.size());
       EXPECT_FLOAT_EQ(1, par[0]);
    } 
+   TEST_F(ParameterFileTest, cycling) {
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt"));
+      // Location loc = Location(0,0,0);
+      Parameters par = p->getParameters(0);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(3, par[0]);
+
+      par = p->getParameters(1);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+
+      par = p->getParameters(2);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(5, par[0]);
+
+      // Parameters should repeat
+      par = p->getParameters(3);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(3, par[0]);
+
+      par = p->getParameters(7);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+   }
+   TEST_F(ParameterFileTest, cyclingWithLocation) {
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt"));
+      Location loc = Location(0,0,0);
+      Parameters par = p->getParameters(0, loc);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(3, par[0]);
+
+      par = p->getParameters(1, loc);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+
+      par = p->getParameters(2, loc);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(5, par[0]);
+
+      // Parameters should repeat
+      par = p->getParameters(3, loc);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(3, par[0]);
+
+      par = p->getParameters(7, loc);
+      ASSERT_EQ(1, par.size());
+      EXPECT_FLOAT_EQ(4, par[0]);
+   }
    TEST_F(ParameterFileTest, descriptions) {
       ParameterFile::getDescriptions();
    }

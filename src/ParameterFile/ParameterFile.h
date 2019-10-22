@@ -68,8 +68,8 @@ class ParameterFile : public Scheme {
       bool mIsNew; // Should this file be created?
       void initializeEmpty(const std::vector<Location>& iLocations, int iNumTimes, int iNumParameters);
       void setIsTimeDependent(bool iFlag);
-      void setMaxTime(int iMaxTime);
-      int getMaxTime() const;
+      void setMaxTimeIndex(int iMaxTime);
+      int getMaxTimeIndex() const;
    private:
       bool mIsTimeDependent;
       int mMaxTime;
@@ -81,6 +81,7 @@ class ParameterFile : public Scheme {
       // Locations in the tree
       mutable std::vector<Location> mLocations;
       Options mOptions;
+      bool mAllowCycling;
 };
 #include "Text.h"
 #include "Simple.h"

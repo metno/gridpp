@@ -54,6 +54,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       ParameterFileText file(Options("file=testing/files/parametersMultipleTime.txt"));
+      EXPECT_DEATH(file.getParameters(1100), ".*");
       EXPECT_DEATH(file.getParameters(-1), ".*");
    }
 

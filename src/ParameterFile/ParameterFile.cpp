@@ -12,8 +12,10 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
       mOptions(iOptions),
       mIsTimeDependent(false),
       mMaxTime(0),
+      mAllowCycling(false),
       mIsNew(iIsNew) {
    iOptions.getValue("file", mFilename);
+   iOptions.getValue("cycle", mAllowCycling);
 }
 
 void ParameterFile::recomputeTree() const {
@@ -57,11 +59,17 @@ Parameters ParameterFile::getParameters(int iTime) const {
    if(!isTimeDependent())
       time = 0;
 
-   if(mMaxTime > 0) {
-      int numParameters = mMaxTime + 1;
-      if(time >= numParameters) {
-         time = time % numParameters;
+   if(getMaxTimeIndex() > 0 && mAllowCycling) {
+      int numTimes = getMaxTimeIndex() + 1;
+      if(time >= numTimes) {
+         time = time % numTimes;
       }
+   }
+
+   if(time > getMaxTimeIndex()) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time << " (max " << mMaxTime << ")";
+      Util::error(ss.str());
    }
 
    if(isLocationDependent()) {
@@ -93,11 +101,16 @@ Parameters ParameterFile::getParameters(int iTime, const Location& iLocation, bo
    if(!isTimeDependent())
       time = 0;
 
-   if(mMaxTime > 0) {
-      int numParameters = mMaxTime + 1;
-      if(time >= numParameters) {
-         time = time % numParameters;
+   if(getMaxTimeIndex() > 0 && mAllowCycling) {
+      int numTimes = getMaxTimeIndex() + 1;
+      if(time >= numTimes) {
+         time = time % numTimes;
       }
+   }
+   if(time > getMaxTimeIndex()) {
+      std::stringstream ss;
+      ss << "Could not load parameters for time " << time << " (max " << mMaxTime << ")";
+      Util::error(ss.str());
    }
 
    if(mParameters.size() == 0)
@@ -176,10 +189,10 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
 }
 
 void ParameterFile::setParameters(Parameters iParameters, int iTime, const Location& iLocation) {
-   mMaxTime = std::max(mMaxTime, iTime);
+   setMaxTimeIndex(std::max(getMaxTimeIndex(), iTime));
    LocationParameters::const_iterator it = mParameters.find(iLocation);
    if(mParameters[iLocation].size() <= iTime) {
-      mParameters[iLocation].resize(mMaxTime+1);
+      mParameters[iLocation].resize(getMaxTimeIndex()+1);
    }
    mParameters[iLocation][iTime] = iParameters;
    mIsTimeDependent = mIsTimeDependent || iTime > 0;
@@ -249,6 +262,7 @@ void ParameterFile::setFilename(std::string iFilename) {
 
 std::string ParameterFile::getDescriptions(bool full) {
    std::stringstream ss;
+   ss << Util::formatDescription("cycle=0", "Shall the leadtimes be be cycled? Only applies if the number of times in parameter file > 1.") << std::endl;
    ss << ParameterFileText::description(full) << std::endl;
    ss << ParameterFileNetcdf::description(full) << std::endl;
    return ss.str();
@@ -278,11 +292,11 @@ void ParameterFile::setIsTimeDependent(bool iFlag) {
    mIsTimeDependent = iFlag;
 }
 
-void ParameterFile::setMaxTime(int iMaxTime) {
+void ParameterFile::setMaxTimeIndex(int iMaxTime) {
    mMaxTime = iMaxTime;
 }
 
-int ParameterFile::getMaxTime() const {
+int ParameterFile::getMaxTimeIndex() const {
    return mMaxTime;
 }
 

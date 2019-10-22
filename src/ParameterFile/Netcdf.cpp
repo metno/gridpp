@@ -186,7 +186,7 @@ ParameterFileNetcdf::ParameterFileNetcdf(const Options& iOptions, bool iIsNew) :
    }
    if(nTime > 1)
       setIsTimeDependent(true);
-   setMaxTime(nTime);
+   setMaxTimeIndex(nTime - 1);
    assert(getNumParameters() > 0);
 
    delete[] values;

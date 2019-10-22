@@ -168,8 +168,16 @@ namespace {
       ASSERT_EQ(3, par.size());
       EXPECT_FLOAT_EQ(1, par[0]);
    } 
+   TEST_F(ParameterFileTest, nocycling) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt cycle=0"));
+      p->getParameters(0);
+      EXPECT_DEATH(p->getParameters(100), ".*");
+      // Location loc = Location(0,0,0);
+   }
    TEST_F(ParameterFileTest, cycling) {
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt cycle=1"));
       // Location loc = Location(0,0,0);
       Parameters par = p->getParameters(0);
       ASSERT_EQ(1, par.size());
@@ -193,7 +201,7 @@ namespace {
       EXPECT_FLOAT_EQ(4, par[0]);
    }
    TEST_F(ParameterFileTest, cyclingWithLocation) {
-      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt"));
+      ParameterFile* p = ParameterFile::getScheme("text", Options("file=testing/files/parametersCycling.txt cycle"));
       Location loc = Location(0,0,0);
       Parameters par = p->getParameters(0, loc);
       ASSERT_EQ(1, par.size());

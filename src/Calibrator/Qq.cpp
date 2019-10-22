@@ -8,6 +8,8 @@ CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
       mLowerQuantile(0),
       mUpperQuantile(1),
+      mX(Util::MV),
+      mY(Util::MV),
       mPolicy(ExtrapolationPolicy::OneToOne) {
 
    std::string extrapolation;
@@ -30,6 +32,8 @@ CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
    if(mExtraObs.size() != mExtraFcst.size()) {
       Util::error("extraObs must have the same length as extraFcst");
    }
+   iOptions.getValue("x", mX);
+   iOptions.getValue("y", mY);
    iOptions.check();
 }
 bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -133,6 +137,12 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
                            slope = dObs / dFcst;
                         }
                         value = nearestObs + slope * (raw - nearestFcst);
+                     }
+                     if(j == mX && i == mY) {
+                        std::cout << "Time: " << t << " Ens: " << e << std::endl;
+                        for(int p = 0; p < fcstVec.size(); p++) {
+                           std::cout << obsVec[p] << " " << fcstVec[p] << std::endl;
+                        }
                      }
                      (*field)(i,j,e) = value;
                   }

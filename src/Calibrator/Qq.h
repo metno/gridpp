@@ -28,5 +28,7 @@ class CalibratorQq : public Calibrator {
       void separate(const Parameters& iParameters, std::vector<float>& iObs, std::vector<float>& iFcst) const;
       std::vector<float> mExtraObs;
       std::vector<float> mExtraFcst;
+      int mX;
+      int mY;
 };
 #endif

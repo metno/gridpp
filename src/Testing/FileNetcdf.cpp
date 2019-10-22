@@ -226,6 +226,11 @@ namespace {
       FileNetcdf file("testing/files/validNetcdf3.nc");
       EXPECT_EQ(1, file.getNumTime());
    }
+   TEST_F(FileNetcdfTest, invalidFile) {
+      ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+      Util::setShowError(false);
+      EXPECT_DEATH(FileNetcdf("testing/files/validText1.nc"), ".*");
+   }
    TEST_F(FileNetcdfTest, createNewVariable) {
       FileNetcdf file("testing/files/10x10_copy.nc");
       std::vector<Variable> vars;

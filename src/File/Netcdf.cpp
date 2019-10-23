@@ -166,7 +166,10 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
 
    if(Util::isValid(mTimeVar)) {
       int size = getDimSize(mTimeDim);
-      if(Util::isValid(size)) {
+      if(size == 0) {
+
+      }
+      else if(Util::isValid(size)) {
          double* times = new double[size];
          int status = nc_get_var_double(mFile, mTimeVar, times);
          handleNetcdfError(status, "could not get times");
@@ -181,7 +184,7 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
          std::vector<double> times(1, time);
          setTimes(times);
       }
-      if(!Util::isValid(getReferenceTime())) {
+      if(size > 0 && !Util::isValid(getReferenceTime())) {
          std::stringstream ss;
          ss << "File does not contain reference time, using the first timestep as the reference time";
          Util::warning(ss.str());

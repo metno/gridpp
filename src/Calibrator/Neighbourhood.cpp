@@ -45,8 +45,16 @@ bool CalibratorNeighbourhood::calibrateCore(File& iFile, const ParameterFile* iP
    for(int t = 0; t < nTime; t++) {
       Field& output = *iFile.getField(mVariable, t);
       Field raw = output;
-
-      calibrateField(raw, output, iParameterFile);
+      if(iParameterFile != NULL) {
+         if(iParameterFile->isLocationDependent()) {
+            Util::error("Cannot use a location dependent parameter file for CalibratorNeighbourhood");
+         }
+         Parameters parameters = iParameterFile->getParameters(t);
+         calibrateField(raw, output, &parameters);
+      }
+      else {
+         calibrateField(raw, output);
+      }
    }
    return true;
 }
@@ -59,17 +67,14 @@ int CalibratorNeighbourhood::numMissingValues(const Field& iField, int iEnsIndex
    }
    return count;
 }
-void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput, const ParameterFile* iParameterFile, int t) const {
+void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput, const Parameters* iParameters) const {
    double start_time = Util::clock();
    int radius = mRadius;
    int nEns = iInput.getNumEns();
    int nLat = iInput.getNumY();
    int nLon = iInput.getNumX();
-   if(iParameterFile != NULL) {
-      if(iParameterFile->isLocationDependent()) {
-         Util::error("Cannot use a location dependent parameter file for CalibratorNeighbourhood");
-      }
-      radius = iParameterFile->getParameters(t)[0];
+   if(iParameters != NULL) {
+      radius = (*iParameters)[0];
    }
 
    int count_stat = 0;
@@ -133,10 +138,10 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
             for(int j = 0; j < nLon; j++) {
-               int i1 = std::min(nLat-1, i + mRadius);
-               int j1 = std::min(nLon-1, j + mRadius);
-               int i0 = i - mRadius - 1;
-               int j0 = j - mRadius - 1;
+               int i1 = std::min(nLat-1, i + radius);
+               int j1 = std::min(nLon-1, j + radius);
+               int i0 = i - radius - 1;
+               int j0 = j - radius - 1;
                float value11 = values[i1][j1];
                float value00 = 0;
                float value10 = 0;
@@ -183,7 +188,7 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
          }
          #pragma omp parallel for
          for(int i = 0; i < nLat; i++) {
-            if(i < mRadius || i >= nLat - mRadius) {
+            if(i < radius || i >= nLat - radius) {
                // Regular way
                for(int j = 0; j < nLon; j++) {
                   // Put neighbourhood into vector
@@ -211,9 +216,9 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                // Fast way: Compute stats on each sliver
                std::vector<float> slivers(nLon, 0);
                for(int j = 0; j < nLon; j++) {
-                  std::vector<float> sliver(2*mRadius+1, 0);
+                  std::vector<float> sliver(2*radius+1, 0);
                   int count = 0;
-                  for(int ii = i - mRadius; ii <= i + mRadius; ii++) {
+                  for(int ii = i - radius; ii <= i + radius; ii++) {
                      sliver[count] = iInput(ii, j, e);
                      count++;
                   }
@@ -222,8 +227,8 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
                }
                for(int j = 0; j < nLon; j++) {
                   std::vector<float> curr;
-                  curr.reserve(2*mRadius);
-                  for(int jj = std::max(0, j - mRadius); jj <= std::min(nLon-1, j + mRadius); jj++) {
+                  curr.reserve(2*radius);
+                  for(int jj = std::max(0, j - radius); jj <= std::min(nLon-1, j + radius); jj++) {
                      curr.push_back(slivers[jj]);
                   }
                   values[i][j] = Util::calculateStat(curr, mStatType, mQuantile);

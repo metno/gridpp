@@ -14,7 +14,7 @@ class CalibratorNeighbourhood : public Calibrator {
       static std::string description(bool full=true);
       std::string name() const {return "neighbourhood";};
       bool requiresParameterFile() const { return false;};
-      void calibrateField(const Field& iInput, Field& iOutput, const ParameterFile* iParameterFile=NULL, int t=0) const;
+      void calibrateField(const Field& iInput, Field& iOutput, const Parameters* iParameters=NULL) const;
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       int mRadius;

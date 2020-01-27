@@ -3,6 +3,8 @@
 #include "../Util.h"
 #include <math.h>
 
+float DownscalerBilinear::bilinearLimit = 0.05;
+
 DownscalerBilinear::DownscalerBilinear(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
       Downscaler(iInputVariable, iOutputVariable, iOptions) {
    iOptions.check();
@@ -44,27 +46,25 @@ float DownscalerBilinear::bilinear(float x, float y, float x0, float x1, float x
    // Parallelogram method based on: http://www.ahinson.com/algorithms_general/Sections/InterpolationRegression/InterpolationIrregularBilinear.pdf
 
    float s = Util::MV, t = Util::MV;
-   bool rectangularGrid = (X1 == X3 && X2 == X4 && Y1 == Y2 && Y3 == Y4);
-   bool verticalParallel = fabs((X3 - X1)*(Y4 - Y2) - (X4 - X2)*(Y3 - Y1)) <= 1e-6;
-   bool horizontalParallel = fabs((X2 - X1)*(Y4 - Y3) - (X4 - X3)*(Y2 - Y1)) <= 1e-6;
+   calcST(x, y, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
 
-   // Compute s and t
-   if(verticalParallel && horizontalParallel)
-      calcParallelogram(x, y, X1, X2, X3, X4, Y1, Y2, Y3, Y4, t, s);
-   else
-      calcGeneral(x, y, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
-
-   if(t >= 1 && t <= 1.15)
+   float upperLimit = 1.17;
+   float lowerLimit = -0.20;
+   if(t >= 1 && t <= upperLimit)
       t = 1;
-   if(t <= 0 && t >= -0.15)
+   if(t <= 0 && t >= lowerLimit)
       t = 0;
-   if(s >= 1 && s <= 1.15)
+   if(s >= 1 && s <= upperLimit)
       s = 1;
-   if(s <= 0 && s >= -0.15)
+   if(s <= 0 && s >= lowerLimit)
       s = 0;
    if(!(s >= 0 && s <= 1 && t >= 0 && t <= 1)) {
       std::stringstream ss;
-      ss << "Problem with bilinear interpolation. Grid is rotated/distorted in a way that is not supported. s=" << s << " and t=" << t << " are outside [-0.05,1.05].";
+      ss << "Problem with bilinear interpolation. Grid is rotated/distorted in a way that is not supported. s=" << s << " and t=" << t << " are outside ["
+         << lowerLimit << "," << upperLimit << "].";
+      ss << std::endl << x << " " << y << " " << x0 << " " << x1 << " " << x2 << " " << x3 << std::endl;
+      ss << y0 << " " << y1 << " " << y2 << " " << y3 << std::endl;
+      ss << v0 << " " << v1 << " " << v2 << " " << v3 << std::endl;
       Util::error(ss.str());
    }
    assert(s >= 0 && s <= 1 && t >= 0 && t <= 1);
@@ -197,8 +197,13 @@ bool DownscalerBilinear::findCoords(float iLat, float iLon, const vec2& iLats, c
    int nI = iLats.size();
    int nJ = iLats[0].size();
 
+   assert(I < nI && I >= 0);
+   assert(J < nJ && J >= 0);
+
    // Check if we are outside the grid
    // 0 1 2 3 x
+   if(I == nI-1 || I == 0 || J == nJ -1 || J == 0)
+      return false;
    if(isAbove && I == nI-1 && iLats[I-1][J] < iLats[I][J])
       return false;
    // x 0 1 2 3
@@ -227,55 +232,138 @@ bool DownscalerBilinear::findCoords(float iLat, float iLon, const vec2& iLats, c
    bool Iinc = (I == 0) || (iLats[I][J] > iLats[I-1][J]);
    bool Jinc = (J == 0) || (iLons[I][J] > iLons[I][J-1]);
 
-   // Find out which Is to use
-   if(isAbove) {
-      if(Iinc) {
-         I1 = I;
-         I2 = I + 1;
-      }
-      else {
-         I1 = I - 1;
-         I2 = I;
-      }
-   }
-   else {
-      if(Iinc) {
-         I1 = I - 1;
-         I2 = I;
-      }
-      else {
-         I1 = I;
-         I2 = I + 1;
-      }
-   }
+   getI(I, isAbove, Iinc, I1, I2);
+   getJ(J, isRight, Jinc, J1, J2);
 
-   // Find out which Js to use
-   if(isRight) {
-      if(Jinc) {
-         J1 = J;
-         J2 = J + 1;
-      }
-      else {
-         J1 = J - 1;
-         J2 = J;
-      }
+   #if 0
+   if(abs(iLon +10.1549) < 0.0001 && abs(iLat - 71.021) < 0.0001) {
+      std::cout << iLon << " " << iLat << " " << isRight << " " << isAbove << " " << Iinc << " " << Jinc << " " << I1 << " " << I2 << " " << J1 << " " << J2 <<
+         std::endl;
+      std::cout << "I " << I << " J " << J << std::endl;
+      std::cout << "nI " << nI << " nJ " << nJ << std::endl;
+      std::cout << iLats[I][J] << " " << iLats[I-1][J] << " " << Iinc << std::endl;
+      std::cout << iLons[I][J] << " " << iLons[I][J-1] << " " << Jinc << std::endl;
    }
-   else {
-      if(Jinc) {
-         J1 = J - 1;
-         J2 = J;
-      }
-      else {
-         J1 = J;
-         J2 = J + 1;
-      }
-   }
+   #endif
+
    if((I1 < 0 || I1 >= iLats.size()) ||
       (I2 < 0 || I2 >= iLats.size()) ||
       (J1 < 0 || J1 >= iLats[0].size()) ||
       (J2 < 0 || J2 >= iLats[0].size())) {
       return false;
    }
+   float s = Util::MV;
+   float t = Util::MV;
+
+   float x0 = iLons[I1][J1];
+   float x1 = iLons[I2][J1];
+   float x2 = iLons[I1][J2];
+   float x3 = iLons[I2][J2];
+   float y0 = iLats[I1][J1];
+   float y1 = iLats[I2][J1];
+   float y2 = iLats[I1][J2];
+   float y3 = iLats[I2][J2];
+   calcST(iLon, iLat, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
+   # if 1
+   if(I == 91 && J == 193 && (s > 1 + bilinearLimit || s < -bilinearLimit || t > 1 + bilinearLimit || t < -bilinearLimit)) {
+      std::stringstream ss;
+      ss << "Problem: " << s << " " << t << std::endl;
+      ss << "coord: " << iLat << " " << iLon << std::endl;
+      ss << "above/right: " << isAbove << " " << isRight << std::endl;
+      ss << "inc: " << Iinc << " " << Jinc << std::endl;
+      ss << "IJ: " << I << " " << J << std::endl;
+      ss << "I: " << I1 << " " << I2 << std::endl;
+      ss << "J: " << J1 << " " << J2 << std::endl;
+      ss << "x: " << x0 << " " << x1 << " " << x2 << " " << x3 << std::endl;
+      ss << "y: " << y0 << " " << y1 << " " << y2 << " " << y3 << std::endl;
+      Util::warning(ss.str());
+   }
+   # endif
+   if(s > 1 + bilinearLimit || s < -bilinearLimit || t > 1 + bilinearLimit || t < -bilinearLimit) {
+      if(t < -bilinearLimit || t > 1 + bilinearLimit) {
+         // We likely used the wrong direction
+         isAbove = !isAbove;
+         getI(I, isAbove, Iinc, I1, I2);
+      }
+
+      if(s < -bilinearLimit || s > 1 + bilinearLimit) {
+         // We likely used the wrong direction
+         isRight = !isRight;
+         getJ(J, isRight, Jinc, J1, J2);
+      }
+      if(isAbove && I == nI-1 && iLats[I-1][J] < iLats[I][J])
+         return false;
+      // x 0 1 2 3
+      if(!isAbove && I == 0 && iLats[0][J] < iLats[1][J])
+         return false;
+      // 3 2 1 0 x
+      if(isAbove && I == 0 && iLats[0][J] > iLats[1][J])
+         return false;
+      // x 3 2 1 0
+      if(!isAbove && I == nI-1 && iLats[I-1][J] > iLats[I][J])
+         return false;
+
+      if(isRight && J == nJ-1 && iLons[I][J-1] < iLons[I][J])
+         return false;
+      // x 0 1 2 3
+      if(!isRight && J == 0 && iLons[I][0] < iLons[I][1])
+         return false;
+      // 3 2 1 0 x
+      if(isRight && J == 0 && iLons[I][0] > iLons[I][1])
+         return false;
+      // x 3 2 1 0
+      if(!isRight && I == nJ-1 && iLons[I][J-1] > iLons[I][J])
+         return false;
+      x0 = iLons[I1][J1];
+      x1 = iLons[I2][J1];
+      x2 = iLons[I1][J2];
+      x3 = iLons[I2][J2];
+      y0 = iLats[I1][J1];
+      y1 = iLats[I2][J1];
+      y2 = iLats[I1][J2];
+      y3 = iLats[I2][J2];
+      calcST(iLon, iLat, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
+   }
+
+   if(s > 1 + bilinearLimit || s < -bilinearLimit || t > 1 + bilinearLimit || t < -bilinearLimit) {
+      std::stringstream ss;
+      ss << "Problem: " << s << " " << t << std::endl;
+      ss << "coord: " << iLat << " " << iLon << std::endl;
+      ss << "above/right: " << isAbove << " " << isRight << std::endl;
+      ss << "inc: " << Iinc << " " << Jinc << std::endl;
+      ss << "IJ: " << I << " " << J << std::endl;
+      ss << "I: " << I1 << " " << I2 << std::endl;
+      ss << "J: " << J1 << " " << J2 << std::endl;
+      ss << "N: " << nI << " " << nJ << std::endl;
+      ss << "x: " << x0 << " " << x1 << " " << x2 << " " << x3 << std::endl;
+      ss << "y: " << y0 << " " << y1 << " " << y2 << " " << y3 << std::endl;
+      Util::error(ss.str());
+   }
+   assert(s <= 1 + bilinearLimit);
+   assert(s >= -bilinearLimit);
+   assert(t <= 1 + bilinearLimit);
+   assert(t >= - bilinearLimit);
+   return true;
+}
+bool DownscalerBilinear::calcST(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
+   float Y1 = y1;
+   float Y2 = y3;
+   float Y3 = y0;
+   float Y4 = y2;
+   float X1 = x1;
+   float X2 = x3;
+   float X3 = x0;
+   float X4 = x2;
+
+   bool rectangularGrid = (X1 == X3 && X2 == X4 && Y1 == Y2 && Y3 == Y4);
+   bool verticalParallel = fabs((X3 - X1)*(Y4 - Y2) - (X4 - X2)*(Y3 - Y1)) <= 1e-6;
+   bool horizontalParallel = fabs((X2 - X1)*(Y4 - Y3) - (X4 - X3)*(Y2 - Y1)) <= 1e-6;
+
+   // Compute s and t
+   if(verticalParallel && horizontalParallel)
+      calcParallelogram(x, y, X1, X2, X3, X4, Y1, Y2, Y3, Y4, t, s);
+   else
+      calcGeneral(x, y, x0, x1, x2, x3, y0, y1, y2, y3, t, s);
    return true;
 }
 bool DownscalerBilinear::calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s) {
@@ -364,6 +452,53 @@ bool DownscalerBilinear::calcGeneral(float x, float y, float x0, float x1, float
    return true;
 }
 
+bool DownscalerBilinear::getI(int I, bool isAbove, bool Iinc, int& I1, int& I2) {
+// Find out which Is to use
+   if(isAbove) {
+      if(Iinc) {
+         I1 = I;
+         I2 = I + 1;
+      }
+      else {
+         I1 = I - 1;
+         I2 = I;
+      }
+   }
+   else {
+      if(Iinc) {
+         I1 = I - 1;
+         I2 = I;
+      }
+      else {
+         I1 = I;
+         I2 = I + 1;
+      }
+   }
+}
+
+bool DownscalerBilinear::getJ(int J, bool isRight, bool Jinc, int& J1, int& J2) {
+   // Find out which Js to use
+   if(isRight) {
+      if(Jinc) {
+         J1 = J;
+         J2 = J + 1;
+      }
+      else {
+         J1 = J - 1;
+         J2 = J;
+      }
+   }
+   else {
+      if(Jinc) {
+         J1 = J - 1;
+         J2 = J;
+      }
+      else {
+         J1 = J;
+         J2 = J + 1;
+      }
+   }
+}
 std::string DownscalerBilinear::description(bool full) {
    std::stringstream ss;
    if(full)

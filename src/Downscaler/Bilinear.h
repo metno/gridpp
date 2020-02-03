@@ -38,13 +38,14 @@ class DownscalerBilinear : public Downscaler {
 
       static std::string description(bool full=true);
       std::string name() const {return "bilinear";};
-   private:
-      void downscaleCore(const File& iInput, File& iOutput) const;
+
       static bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s);
       static bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
       static bool calcST(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
       static bool getI(int I, bool isAbove, bool Iinc, int& I1, int& I2);
       static bool getJ(int J, bool isAbove, bool Jinc, int& J1, int& J2);
+   private:
+      void downscaleCore(const File& iInput, File& iOutput) const;
       static float bilinearLimit;
 };
 #endif

@@ -202,8 +202,8 @@ bool DownscalerBilinear::findCoords(float iLat, float iLon, const vec2& iLats, c
 
    // Check if we are outside the grid
    // 0 1 2 3 x
-   if(I == nI-1 || I == 0 || J == nJ -1 || J == 0)
-      return false;
+   // if(I == nI-1 || I == 0 || J == nJ -1 || J == 0)
+   //    return false;
    if(isAbove && I == nI-1 && iLats[I-1][J] < iLats[I][J])
       return false;
    // x 0 1 2 3

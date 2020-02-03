@@ -29,6 +29,22 @@ namespace {
             grid[1][1] = i11;
             return grid;
          };
+         vec2 make3x3(float i00, float i01, float i02, float i10, float i11, float i12, float i20, float i21, float i22) {
+            vec2 grid;
+            grid.resize(3);
+            for(int i = 0; i < 3; i++)
+                grid[i].resize(3);
+            grid[0][0] = i00;
+            grid[0][1] = i01;
+            grid[0][2] = i02;
+            grid[1][0] = i10;
+            grid[1][1] = i11;
+            grid[1][2] = i12;
+            grid[2][0] = i20;
+            grid[2][1] = i21;
+            grid[2][2] = i22;
+            return grid;
+         };
          void setLatLon(FileFake& iFile, const float iLat[], const float iLon[]) {
             vec2 lat;
             vec2 lon;
@@ -58,6 +74,19 @@ namespace {
 
    TEST_F(TestDownscalerBilinear, description) {
       DownscalerBilinear::description();
+   }
+   TEST_F(TestDownscalerBilinear, calcParallelogram) {
+      float t = Util::MV;
+      float s = Util::MV;
+      bool status = DownscalerBilinear::calcST(0.5, 0.55, 0, 0, 1, 1, 0, 1, 0.2, 1.2, t, s);
+      EXPECT_FLOAT_EQ(0.55, t);
+      EXPECT_FLOAT_EQ(0.5, s);
+      status = DownscalerBilinear::calcST(0, 0, 0, 0, 1, 1, 0, 1, 0.2, 1.2, t, s);
+      EXPECT_FLOAT_EQ(1, t);
+      EXPECT_FLOAT_EQ(0, s);
+      status = DownscalerBilinear::calcST(0.5, 0.1, 0, 0, 1, 1, 0, 1, 0.2, 1.2, t, s);
+      EXPECT_FLOAT_EQ(1, t);
+      EXPECT_FLOAT_EQ(0.5, s);
    }
    TEST_F(TestDownscalerBilinear, rectangular) {
       // Test in python
@@ -254,6 +283,22 @@ namespace {
       lons = make2x2(0, 1, 0, 1);
       I = 0;
       EXPECT_FALSE(d.findCoords(1.1, 1, lats, lons, I, J, I1, J1, I2, J2));
+   }
+   TEST_F(TestDownscalerBilinear, findCoordsRotated) {
+      float lat =  52.281;
+      float lon = 1.94;
+      // vec2 lats = make3x3(51, 52.28, 52.30, 51, 52.28, 52.30, 51, 52.285, 52.317);
+      vec2 lats = make3x3(51, 51, 51, 52.28, 52.28, 52.285, 52.30, 52.30, 52.317);
+      vec2 lons = make3x3(1.9, 1.925, 1.961, 1.9, 1.926, 1.961, 1.9, 1.918, 1.95);
+      int I = 1;
+      int J = 2;
+      int I1, I2, J1, J2;
+      bool status = DownscalerBilinear::findCoords(lat, lon, lats, lons, I, J, I1, J1, I2, J2);
+      ASSERT_TRUE(status);
+      EXPECT_EQ(0, I1);
+      EXPECT_EQ(1, I2);
+      EXPECT_EQ(1, J1);
+      EXPECT_EQ(2, J2);
    }
 }
 int main(int argc, char **argv) {

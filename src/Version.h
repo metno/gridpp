@@ -1,3 +1,3 @@
 #ifndef GRIDPP_VERSION
-#define GRIDPP_VERSION "0.3.4-dev"
+#define GRIDPP_VERSION "0.3.4"
 #endif

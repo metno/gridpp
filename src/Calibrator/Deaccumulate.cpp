@@ -2,7 +2,9 @@
 #include "../Util.h"
 #include "../File/File.h"
 CalibratorDeaccumulate::CalibratorDeaccumulate(const Variable& iVariable, const Options& iOptions) :
+      mWindow(1),
       Calibrator(iVariable, iOptions) {
+   iOptions.getValue("window", mWindow);
    iOptions.check();
 }
 bool CalibratorDeaccumulate::calibrateCore(File& iFile, const ParameterFile* iParameterFile) const {
@@ -24,11 +26,11 @@ bool CalibratorDeaccumulate::calibrateCore(File& iFile, const ParameterFile* iPa
       for(int y = 0; y < nY; y++) {
          for(int x = 0; x < nX; x++) {
             for(int e = 0; e < nEns; e++) {
-               if(t == 0) {
+               if(t < mWindow) {
                   (*fields[t])(y, x, e) = Util::MV;
                }
                else {
-                  float previous = (*fieldsAcc[t - 1])(y, x, e);
+                  float previous = (*fieldsAcc[t - mWindow])(y, x, e);
                   float current  = (*fieldsAcc[t])(y, x, e);
                   if(Util::isValid(current) && Util::isValid(previous)) {
                      (*fields[t])(y, x, e) = current - previous;

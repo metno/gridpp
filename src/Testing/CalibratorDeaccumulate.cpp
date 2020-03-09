@@ -13,7 +13,7 @@ namespace {
          }
          virtual void SetUp() {
             mTemperature = Variable("air_temperature_2m");
-            mPrecipitation = Variable("precipitation_amount");
+            mPrecipitation = Variable("precipitation_amount_acc");
             mMissing = Variable("qnh");
          }
          virtual void TearDown() {
@@ -24,6 +24,22 @@ namespace {
    };
 
    TEST_F(TestCalibratorDeaccumulate, 1x1) {
+      FileNetcdf from("testing/files/1x1.nc");
+      CalibratorDeaccumulate cal = CalibratorDeaccumulate(mPrecipitation, Options("window=3"));
+      cal.calibrate(from);
+
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 0))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 1))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 2))(0,0,0));
+      EXPECT_FLOAT_EQ(4, (*from.getField(mPrecipitation, 3))(0,0,0));
+      EXPECT_FLOAT_EQ(2.5, (*from.getField(mPrecipitation, 4))(0,0,0));
+      EXPECT_FLOAT_EQ(6, (*from.getField(mPrecipitation, 5))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 6))(0,0,0));
+      EXPECT_FLOAT_EQ(6.5, (*from.getField(mPrecipitation, 7))(0,0,0));
+      EXPECT_FLOAT_EQ(2, (*from.getField(mPrecipitation, 8))(0,0,0));
+      EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 9))(0,0,0));
+   }
+   TEST_F(TestCalibratorDeaccumulate, ) {
       FileNetcdf from("testing/files/1x1.nc");
       CalibratorDeaccumulate cal = CalibratorDeaccumulate(mTemperature, Options());
       cal.calibrate(from);

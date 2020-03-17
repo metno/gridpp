@@ -19,26 +19,26 @@ gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs) {
     mTree = test;
 }
 
-int gridpp::Grid::get_num_neighbours(float lat, float lon, float radius) {
+int gridpp::Grid::get_num_neighbours(float lat, float lon, float radius) const {
     ivec indices = mTree.get_neighbours(lat, lon, radius);
     return indices.size();
 }
 
-ivec2 gridpp::Grid::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) {
+ivec2 gridpp::Grid::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const {
     ivec indices = mTree.get_neighbours_with_distance(lat, lon, radius, distances);
     return get_indices(indices);
 }
 
-ivec2 gridpp::Grid::get_neighbours(float lat, float lon, float radius) {
+ivec2 gridpp::Grid::get_neighbours(float lat, float lon, float radius) const {
     ivec indices = mTree.get_neighbours(lat, lon, radius);
     return get_indices(indices);
 }
 
-ivec2 gridpp::Grid::get_closest_neighbours(float lat, float lon, int num) {
+ivec2 gridpp::Grid::get_closest_neighbours(float lat, float lon, int num) const {
     ivec indices = mTree.get_closest_neighbours(lat, lon, num);
     return get_indices(indices);
 }
-ivec gridpp::Grid::get_nearest_neighbour(float lat, float lon) {
+ivec gridpp::Grid::get_nearest_neighbour(float lat, float lon) const {
     return get_closest_neighbours(lat, lon, 1)[0];
 }
 vec2 gridpp::Grid::get_lats() const {

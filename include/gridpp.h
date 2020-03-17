@@ -43,14 +43,14 @@ namespace gridpp {
              *  @param lat Latitude of lookup-point
              *  @param lon Longitude of lookup-point
              * */
-            int get_nearest_neighbour(float lat, float lon);
+            int get_nearest_neighbour(float lat, float lon) const;
 
             /** Find all points with a radius
              *  @param lat Latitude of lookup-point
              *  @param lon Longitude of lookup-point
              *  @param radius Lookup radius [m]
              * */
-            ivec get_neighbours(float lat, float lon, float radius);
+            ivec get_neighbours(float lat, float lon, float radius) const;
 
             /** Find all points with a radius
              *  @param lat Latitude of lookup-point
@@ -58,21 +58,21 @@ namespace gridpp {
              *  @param radius Lookup radius [m]
              *  @param distances Vector to store separation distances [m]
              * */
-            ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances);
+            ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
 
             /** Find the number of points within a radius
              *  @param lat Latitude of lookup-point
              *  @param lon Longitude of lookup-point
              *  @param radius Lookup radius [m]
              * */
-            int get_num_neighbours(float lat, float lon, float radius);
+            int get_num_neighbours(float lat, float lon, float radius) const;
 
             /** Find a set of nearest points
              *  @param lat Latitude of lookup-point
              *  @param lon Longitude of lookup-point
              *  @param num Number of points to find
              * */
-            ivec get_closest_neighbours(float lat, float lon, int num);
+            ivec get_closest_neighbours(float lat, float lon, int num) const;
 
 
             /** Convert lat/lons to 3D cartesian coordinates with the centre of the earth as the origin
@@ -110,11 +110,11 @@ namespace gridpp {
     class Points  {
         public:
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
-            int get_nearest_neighbour(float lat, float lon);
-            ivec get_neighbours(float lat, float lon, float radius);
-            ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances);
-            int get_num_neighbours(float lat, float lon, float radius);
-            ivec get_closest_neighbours(float lat, float lon, int num);
+            int get_nearest_neighbour(float lat, float lon) const;
+            ivec get_neighbours(float lat, float lon, float radius) const;
+            ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
+            int get_num_neighbours(float lat, float lon, float radius) const;
+            ivec get_closest_neighbours(float lat, float lon, int num) const;
 
             vec get_lats() const;
             vec get_lons() const;
@@ -131,11 +131,11 @@ namespace gridpp {
     class Grid {
         public:
             Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2());
-            ivec get_nearest_neighbour(float lat, float lon);
-            ivec2 get_neighbours(float lat, float lon, float radius);
-            ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances);
-            int get_num_neighbours(float lat, float lon, float radius);
-            ivec2 get_closest_neighbours(float lat, float lon, int num);
+            ivec get_nearest_neighbour(float lat, float lon) const;
+            ivec2 get_neighbours(float lat, float lon, float radius) const;
+            ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
+            int get_num_neighbours(float lat, float lon, float radius) const;
+            ivec2 get_closest_neighbours(float lat, float lon, int num) const;
 
             vec2 get_lats() const;
             vec2 get_lons() const;
@@ -193,8 +193,8 @@ namespace gridpp {
 
     vec2 neighbourhood(const vec2& input, int radius, std::string operation, float quantile=-1);
     vec3 neighbourhood(const vec3& input, int radius, std::string operation, float quantile=-1);
-    // vec2 bilinear(const Points& tree, const vec2
-
+    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
     namespace util {
         void debug(std::string string);
         void error(std::string string);

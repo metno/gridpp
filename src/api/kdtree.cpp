@@ -12,12 +12,12 @@ gridpp::KDTree::KDTree(vec lats, vec lons) {
     }
 }
 
-int gridpp::KDTree::get_num_neighbours(float lat, float lon, float radius) {
+int gridpp::KDTree::get_num_neighbours(float lat, float lon, float radius) const {
     ivec indices = get_neighbours(lat, lon, radius);
     return indices.size();
 }
 
-ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) {
+ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const {
     float x, y, z;
     gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
     ivec indices = get_neighbours(lat, lon, radius);
@@ -33,7 +33,7 @@ ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float ra
     return indices;
 }
 
-ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius) {
+ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius) const {
     float x, y, z;
     gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
 
@@ -55,7 +55,7 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius) {
     return ret;
 }
 
-ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) {
+ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) const {
     float x, y, z;
     gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
     point p(x, y, z);
@@ -89,7 +89,7 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) {
     }
     return ret;
 }
-int gridpp::KDTree::get_nearest_neighbour(float lat, float lon) {
+int gridpp::KDTree::get_nearest_neighbour(float lat, float lon) const {
     return get_closest_neighbours(lat, lon, 1)[0];
 }
 bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) {

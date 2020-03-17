@@ -1,45 +1,14 @@
 #include "gridpp.h"
 
-gridpp::KDTree::KDTree(vec lats, vec lons, vec elevs, vec lafs) :
-        mX(1) {
+gridpp::KDTree::KDTree(vec lats, vec lons) {
     mLats = lats;
     mLons = lons;
-    mElevs = elevs;
-    mLafs = lafs;
     vec x, y, z;
 
     gridpp::KDTree::convert_coordinates(mLats, mLons, x, y, z);
     for(int i = 0; i < mLats.size(); i++) {
         point p(x[i], y[i], z[i]);
         mTree.insert(std::make_pair(p, i));
-    }
-}
-
-gridpp::KDTree::KDTree(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs) {
-    mX = lats[0].size();
-    int N = lats.size() * lats[0].size();
-    mLats.reserve(N);
-    mLons.reserve(N);
-    mElevs.reserve(N);
-    mLafs.reserve(N);
-    for(int i = 0; i < lats.size(); i++) {
-        for(int j = 0; j < lats[0].size(); j++) {
-            float x, y, z;
-            assert(lats[i].size() == lats[0].size());
-            gridpp::KDTree::convert_coordinates(lats[i][j], lons[i][j], x, y, z);
-            point p(x, y, z);
-            mTree.insert(std::make_pair(p, i));
-            mLats.push_back(lats[i][j]);
-            mLons.push_back(lons[i][j]);
-            if(elevs.size() == 0)
-                mElevs.push_back(0);
-            else
-                mElevs.push_back(elevs[i][j]);
-            if(lafs.size() == 0)
-                mLafs.push_back(1);
-            else
-                mLafs.push_back(lafs[i][j]);
-        }
     }
 }
 
@@ -123,13 +92,6 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) {
 int gridpp::KDTree::get_nearest_neighbour(float lat, float lon) {
     return get_closest_neighbours(lat, lon, 1)[0];
 }
-ivec gridpp::KDTree::get_nearest_neighbour_2d(float lat, float lon) {
-    int index = get_closest_neighbours(lat, lon, 1)[0];
-    ivec indices(2, 0);
-    indices[0] = index / mX;
-    indices[1] = index % mX;
-    return indices;
-}
 bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) {
     int N = lats.size();
     x_coords.resize(N);
@@ -179,40 +141,12 @@ float gridpp::KDTree::calc_distance(float x0, float y0, float z0, float x1, floa
 float gridpp::KDTree::deg2rad(float deg) {
    return (deg * M_PI / 180);
 }
+float gridpp::KDTree::rad2deg(float rad) {
+   return (rad * 180 / M_PI);
+}
 vec gridpp::KDTree::get_lats() const {
     return mLats;
 }
 vec gridpp::KDTree::get_lons() const {
     return mLons;
-}
-vec gridpp::KDTree::get_elevs() const {
-    return mElevs;
-}
-vec gridpp::KDTree::get_lafs() const {
-    return mLafs;
-}
-vec2 gridpp::KDTree::get_lats_2d() const {
-    return get_2d(mLats);
-}
-vec2 gridpp::KDTree::get_lons_2d() const {
-    return get_2d(mLons);
-}
-vec2 gridpp::KDTree::get_elevs_2d() const {
-    return get_2d(mElevs);
-}
-vec2 gridpp::KDTree::get_lafs_2d() const {
-    return get_2d(mLafs);
-}
-vec2 gridpp::KDTree::get_2d(vec input) const {
-    int Y = input.size() / mX;
-    vec2 output(Y);
-    int count = 0;
-    for(int i = 0; i < Y; i++) {
-        output[i].resize(mX, 0);
-        for(int j = 0; j < mX; j++) {
-            output[i][j] = input[count];
-            count++;
-        }
-    }
-    return output;
 }

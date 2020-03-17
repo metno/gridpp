@@ -4,6 +4,7 @@
 %include "std_string.i"
 namespace std {
   %template(IntVector) vector<int>;
+  %template(IntVector2) vector<vector<int> >;
   %template(DoubleVector) vector<double>;
   %template(FloatVector) vector<float>;
   %template(FloatVector2) vector<vector<float> >;

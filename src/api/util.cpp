@@ -110,3 +110,10 @@ int gridpp::util::num_missing_values(const vec2& iArray) {
    }
    return count;
 }
+void gridpp::util::debug(std::string string) {
+    std::cout << string << std::endl;
+}
+
+void gridpp::util::error(std::string string) {
+    std::cout << string << std::endl;
+}

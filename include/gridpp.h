@@ -14,17 +14,12 @@ typedef std::vector<std::vector<float> > vec2;
 typedef std::vector<float> vec;
 // typedef std::vector<float> fvec;
 typedef std::vector<int> ivec;
+typedef std::vector<std::vector<int> > ivec2;
 namespace gridpp {
     typedef arma::mat mattype;
     typedef arma::vec vectype;
     typedef arma::cx_mat cxtype;
 
-    float getDistance(float lat1, float lon1, float lat2, float lon2, bool approx=false);
-    bool isValid(float iValue);
-    float deg2rad(float deg);
-    float rad2deg(float rad);
-    void debug(std::string string);
-    void error(std::string string);
     float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin);
 
     static float MV;
@@ -39,20 +34,16 @@ namespace gridpp {
             return left.first < right.first;
         };
     };
-
     class KDTree {
         public:
-            KDTree(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
-            KDTree(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2());
-            KDTree(const KDTree& other) {abort();};
-            KDTree& operator=(KDTree other) {abort();};
+            KDTree(vec lats, vec lons);
+            KDTree() {};
 
             /** Find single nearest points
              *  @param lat Latitude of lookup-point
              *  @param lon Longitude of lookup-point
              * */
             int get_nearest_neighbour(float lat, float lon);
-            ivec get_nearest_neighbour_2d(float lat, float lon);
 
             /** Find all points with a radius
              *  @param lat Latitude of lookup-point
@@ -102,41 +93,78 @@ namespace gridpp {
              * */
             static bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord);
             static float deg2rad(float deg);
+            static float rad2deg(float deg);
             static float calc_distance(float lat1, float lon1, float lat2, float lon2);
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
             vec get_lats() const;
             vec get_lons() const;
-            vec get_elevs() const;
-            vec get_lafs() const;
-            vec2 get_lats_2d() const;
-            vec2 get_lons_2d() const;
-            vec2 get_elevs_2d() const;
-            vec2 get_lafs_2d() const;
-        private:
+        protected:
             typedef boost::geometry::model::point<float, 3, boost::geometry::cs::cartesian> point;
             typedef std::pair<point, unsigned> value;
             typedef boost::geometry::model::box<point> box;
             boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > mTree;
-            int mX;
+            vec mLats;
+            vec mLons;
+    };
+
+    class Points  {
+        public:
+            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
+            int get_nearest_neighbour(float lat, float lon);
+            ivec get_neighbours(float lat, float lon, float radius);
+            ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances);
+            int get_num_neighbours(float lat, float lon, float radius);
+            ivec get_closest_neighbours(float lat, float lon, int num);
+
+            vec get_lats() const;
+            vec get_lons() const;
+            vec get_elevs() const;
+            vec get_lafs() const;
+        private:
+            KDTree mTree;
             vec mLats;
             vec mLons;
             vec mElevs;
             vec mLafs;
+    };
+
+    class Grid {
+        public:
+            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2());
+            ivec get_nearest_neighbour(float lat, float lon);
+            ivec2 get_neighbours(float lat, float lon, float radius);
+            ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances);
+            int get_num_neighbours(float lat, float lon, float radius);
+            ivec2 get_closest_neighbours(float lat, float lon, int num);
+
+            vec2 get_lats() const;
+            vec2 get_lons() const;
+            vec2 get_elevs() const;
+            vec2 get_lafs() const;
+        private:
+            KDTree mTree;
+            int mX;
             vec2 get_2d(vec input) const;
+            ivec get_indices(int index) const;
+            ivec2 get_indices(ivec indices) const;
+            vec2 mLats;
+            vec2 mLons;
+            vec2 mElevs;
+            vec2 mLafs;
     };
 
     int optimal_interpolation_single_member(const vec2& input,
-            const gridpp::KDTree& bgrid,
+            const gridpp::Grid& bgrid,
             const vec& pobs,
             const vec& pci,
-            const gridpp::KDTree& ptree,
+            const gridpp::Points& ptree,
             float minRho,
             float hlength,
             float vlength,
             float wmin,
             float maxElevDiff,
             bool landOnly,
-            int maxLocations,
+            int maxPoints,
             float elevGradient,
             float epsilon,
             vec2& output);
@@ -158,16 +186,18 @@ namespace gridpp {
             float wmin,
             float maxElevDiff,
             bool landOnly,
-            int maxLocations,
+            int maxPoints,
             float elevGradient,
             float epsilon,
             vec2& output);
 
     vec2 neighbourhood(const vec2& input, int radius, std::string operation, float quantile=-1);
     vec3 neighbourhood(const vec3& input, int radius, std::string operation, float quantile=-1);
-    // vec2 bilinear(const KDTree& tree, const vec2
+    // vec2 bilinear(const Points& tree, const vec2
 
     namespace util {
+        void debug(std::string string);
+        void error(std::string string);
         bool is_valid(float value);
         float calculate_stat(const std::vector<float>& iArray, std::string iOperator, float iQuantile=MV);
         int num_missing_values(const vec2& iArray);

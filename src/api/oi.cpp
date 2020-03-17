@@ -5,21 +5,21 @@
 #include <assert.h>
 
 int gridpp::optimal_interpolation_single_member(const vec2& input,
-        const gridpp::KDTree& btree,
+        const gridpp::Grid& btree,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
-        const gridpp::KDTree& ptree,
+        const gridpp::Points& ptree,
         float minRho,
         float hlength,
         float vlength,
         float wmin,
         float maxElevDiff,
         bool landOnly,
-        int maxLocations,
+        int maxPoints,
         float elevGradient,
         float epsilon,
         vec2& output) {
-    return optimal_interpolation_single_member(input, btree.get_lats_2d(), btree.get_lons_2d(), btree.get_elevs_2d(), btree.get_lafs_2d(), pobs, pci, ptree.get_lats(), ptree.get_lons(), ptree.get_elevs(), ptree.get_lafs(), minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxLocations, elevGradient, epsilon, output);
+    return optimal_interpolation_single_member(input, btree.get_lats(), btree.get_lons(), btree.get_elevs(), btree.get_lafs(), pobs, pci, ptree.get_lats(), ptree.get_lons(), ptree.get_elevs(), ptree.get_lafs(), minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
 }
 int gridpp::optimal_interpolation_single_member(const vec2& input,
         const vec2& blats,
@@ -38,7 +38,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         float wmin,
         float maxElevDiff,
         bool landOnly,
-        int maxLocations,
+        int maxPoints,
         float elevGradient,
         float epsilon,
         vec2& output) {
@@ -69,18 +69,18 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     float MV = -999;
 
     // Estimate the grid spacing
-    float gridSize = getDistance(blats[0][0], blons[0][0], blats[1][0], blons[1][0], false);
+    float gridSize = gridpp::KDTree::calc_distance(blats[0][0], blons[0][0], blats[1][0], blons[1][0]);
     std::stringstream ss;
     ss << "Estimated grid size: " << gridSize << " m" << std::endl;
     ss << "Number of observations: " << nS << std::endl;
     ss << "Number of gridpoints: " << nY << " " << nX;
-    debug(ss.str());
+    gridpp::util::debug(ss.str());
 
     // Loop over each observation, find the nearest gridpoint and place the obs into all gridpoints
     // in the vicinity of the nearest neighbour. This is only meant to be an approximation, but saves
     // considerable time instead of doing a loop over each grid point and each observation.
 
-    // Store the indicies (into the gLocations array) that a gridpoint has available
+    // Store the indicies (into the gPoints array) that a gridpoint has available
     std::vector<std::vector<std::vector<int> > > gLocIndices; // Y, X, obs indices
     std::vector<float> pYi(nS, MV);
     std::vector<float> pXi(nS, MV);
@@ -109,7 +109,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     }
 
     std::cout << "Computing search tree..." << std::endl;
-    gridpp::KDTree searchTree(blats0, blons0);
+    gridpp::Points searchTree(blats0, blons0);
     std::cout << "Done computing search tree" << std::endl;
 
     // For each gridpoint, find which observations are relevant. Parse the observations and only keep
@@ -123,14 +123,14 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         pXi[i] = X;
 
         // Check if the elevation of the station roughly matches the reference grid elevation
-        bool hasValidElev = !isValid(maxElevDiff) || isValid(pelevs[i]);
-        if(isValid(maxElevDiff) && hasValidElev) {
+        bool hasValidElev = !gridpp::util::is_valid(maxElevDiff) || gridpp::util::is_valid(pelevs[i]);
+        if(gridpp::util::is_valid(maxElevDiff) && hasValidElev) {
             float elevDiff = abs(pelevs[i] - belevs[Y][X]);
             hasValidElev = elevDiff < maxElevDiff;
         }
         if(hasValidElev) {
             // Don't include an observation if it is in the ocean and landOnly=1
-            bool wrongLaf = isValid(plafs[i]) && landOnly && plafs[i] == 0;
+            bool wrongLaf = gridpp::util::is_valid(plafs[i]) && landOnly && plafs[i] == 0;
             if(!wrongLaf) {
                 for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
                     for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
@@ -147,7 +147,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     // for(int x = 0; x < nX; x++) {
     //     for(int y = 0; y < nY; y++) {
     //         float value = input[y][x];
-    //         if(isValid(value))
+    //         if(gridpp::util::is_valid(value))
     //             input[y][x] = gridpp::transform(value);
     //     }
     // }
@@ -156,15 +156,15 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     vec gY(nS);
     for(int i = 0; i < nS; i++) {
         float elevCorr = 0;
-        if(isValid(elevGradient) && elevGradient != 0) {
+        if(gridpp::util::is_valid(elevGradient) && elevGradient != 0) {
             float nnElev = belevs[pYi[i]][pXi[i]];
-            assert(isValid(nnElev));
-            assert(isValid(pelevs[i]));
+            assert(gridpp::util::is_valid(nnElev));
+            assert(gridpp::util::is_valid(pelevs[i]));
             float elevDiff = pelevs[i] - nnElev;
             elevCorr = elevGradient * elevDiff;
         }
         float value = input[pYi[i]][pXi[i]];
-        // if(isValid(value)) {
+        // if(gridpp::util::is_valid(value)) {
         value += elevCorr;
         gY[i] = value;
     }
@@ -185,12 +185,12 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
             lRhos0.reserve(lLocIndices0.size());
             for(int i = 0; i < lLocIndices0.size(); i++) {
                 int index = lLocIndices0[i];
-                float hdist = getDistance(plats[index], plons[index], lat, lon, true);
+                float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], lat, lon);
                 float vdist = MV;
-                if(isValid(pelevs[index] && isValid(elev)))
+                if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(elev)))
                     vdist = pelevs[index] - elev;
                 float lafdist = 0;
-                if(isValid(plafs[index]) && isValid(laf))
+                if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
                 float rho = gridpp::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
                 int X = pXi[index];
@@ -204,12 +204,12 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
             }
 
             arma::vec lRhos;
-            if(lRhos0.size() > maxLocations) {
+            if(lRhos0.size() > maxPoints) {
                 // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                 // Otherwise, just use the last locations added
-                lRhos = arma::vec(maxLocations);
+                lRhos = arma::vec(maxPoints);
                 std::sort(lRhos0.begin(), lRhos0.end(), gridpp::sort_pair_first<float,int>());
-                for(int i = 0; i < maxLocations; i++) {
+                for(int i = 0; i < maxPoints; i++) {
                     // The best values start at the end of the array
                     int index = lRhos0[lRhos0.size() - 1 - i].second;
                     lLocIndices.push_back(lLocIndices0[index]);
@@ -265,23 +265,23 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
             for(int i = 0; i < lS; i++) {
                 int index = lLocIndices[i];
                 lR(i, i) = pci[index];
-                float hdist = getDistance(plats[index], plons[index], lat, lon, true);
+                float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], lat, lon);
                 float vdist = MV;
-                if(isValid(pelevs[index] && isValid(elev)))
+                if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(elev)))
                     vdist = pelevs[index] - elev;
                 float lafdist = 0;
-                if(isValid(plafs[index]) && isValid(laf))
+                if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
                 float rho = calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
                 lG(0, i) = rho;
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
-                    float hdist = getDistance(plats[index], plons[index], plats[index_j], plons[index_j], true);
+                    float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], plats[index_j], plons[index_j]);
                     float vdist = MV;
-                    if(isValid(pelevs[index] && isValid(pelevs[index_j])))
+                    if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(pelevs[index_j])))
                         vdist = pelevs[index] - pelevs[index_j];
                     float lafdist = 0;
-                    if(isValid(plafs[index]) && isValid(laf))
+                    if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                         lafdist = plafs[index] - plafs[index_j];
 
                     lP(i, j) = gridpp::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
@@ -302,7 +302,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float value = (*output)(y, x, e);
-            if(isValid(value))
+            if(gridpp::util::is_valid(value))
                 (*output)(y, x, e) = invTransform(value);
         }
     }
@@ -312,8 +312,8 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
 float gridpp::calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
    float h = (iHDist/hlength);
    float rho = exp(-0.5 * h * h);
-   if(isValid(vlength)) {
-      if(!isValid(iVDist)) {
+   if(gridpp::util::is_valid(vlength)) {
+      if(!gridpp::util::is_valid(iVDist)) {
          rho = 0;
       }
       else {
@@ -321,54 +321,10 @@ float gridpp::calcRho(float iHDist, float iVDist, float iLDist, float hlength, f
          rho *= exp(-0.5 * v * v);
       }
    }
-   if(isValid(wmin)) {
+   if(gridpp::util::is_valid(wmin)) {
       rho *= 1 - (1 - wmin) * std::abs(iLDist);
    }
    return rho;
-}
-float gridpp::getDistance(float lat1, float lon1, float lat2, float lon2, bool approx) {
-   if(!isValid(lat1) || !isValid(lat2) ||
-      !isValid(lon1) || !isValid(lon2)) {
-      return -999;
-   }
-   if(!(fabs(lat1) <= 90 && fabs(lat2) <= 90 && fabs(lon1) <= 360 && fabs(lon2) <= 360)) {
-      std::stringstream ss;
-      ss  <<" Cannot calculate distance, invalid lat/lon: (" << lat1 << "," << lon1 << ") (" << lat2 << "," << lon2 << ")";
-      error(ss.str());
-   }
-
-   if(lat1 == lat2 && lon1 == lon2)
-      return 0;
-
-   double lat1r = deg2rad(lat1);
-   double lat2r = deg2rad(lat2);
-   double lon1r = deg2rad(lon1);
-   double lon2r = deg2rad(lon2);
-   // Calculate distance according to: http://www.movable-type.co.uk/scripts/latlong.html
-   double radiusEarth = 6.378137e6;
-   if(approx) {
-      float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
-      float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
-      return radiusEarth*sqrt(dx2+dy2);
-   }
-   else {
-      double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
-                   + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
-                   + sin(lat1r)*sin(lat2r);
-      double dist = acos(ratio)*radiusEarth;
-      return (float) dist;
-   }
-}
-bool gridpp::isValid(float iValue) {
-    return !std::isnan(iValue) && !std::isinf(iValue) && iValue != -999;
-}
-float gridpp::deg2rad(float deg) {
-   float pi = 3.14159265;
-   return (deg * pi / 180);
-}
-float gridpp::rad2deg(float rad) {
-   float pi = 3.14159265;
-   return (rad * 180 / pi);
 }
 // Set up convenient functions for debugging in gdb
 // template<class Matrix>
@@ -378,26 +334,19 @@ float gridpp::rad2deg(float rad) {
 
 // template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
 // template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
-void gridpp::debug(std::string string) {
-    std::cout << string << std::endl;
-}
-
-void gridpp::error(std::string string) {
-    std::cout << string << std::endl;
-}
 void gridpp::check_vec(vec2 input, int Y, int X) {
     assert(input.size() == Y);
     for(int i = 0; i < input.size(); i++) {
         assert(input[i].size() == X);
         for(int j = 0; j < input[i].size(); j++) {
-            assert(isValid(input[i][j]));
+            assert(gridpp::util::is_valid(input[i][j]));
         }
     }
 }
 void gridpp::check_vec(vec input, int S) {
     assert(input.size() == S);
     for(int i = 0; i < input.size(); i++) {
-        assert(isValid(input[i]));
+        assert(gridpp::util::is_valid(input[i]));
     }
 }
 /*

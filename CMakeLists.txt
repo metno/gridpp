@@ -135,3 +135,13 @@ endif()
 
 install(TARGETS gridpp-bin gridpp-train
    RUNTIME DESTINATION bin)
+
+
+include_directories(./include)
+file(GLOB SOURCES "src/api/*.cpp")
+add_library(gridpp SHARED ${SOURCES})
+target_link_libraries(gridpp "${Boost_LIBRARIES}")
+target_link_libraries(gridpp "${NETCDF_LIBRARIES}")
+target_link_libraries(gridpp "${GSL_LIBRARIES}")
+target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
+add_subdirectory(SWIG)

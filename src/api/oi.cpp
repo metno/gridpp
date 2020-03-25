@@ -5,33 +5,10 @@
 #include <assert.h>
 
 int gridpp::optimal_interpolation_single_member(const vec2& input,
-        const gridpp::Grid& btree,
+        const gridpp::Grid& bgrid,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
-        const gridpp::Points& ptree,
-        float minRho,
-        float hlength,
-        float vlength,
-        float wmin,
-        float maxElevDiff,
-        bool landOnly,
-        int maxPoints,
-        float elevGradient,
-        float epsilon,
-        vec2& output) {
-    return optimal_interpolation_single_member(input, btree.get_lats(), btree.get_lons(), btree.get_elevs(), btree.get_lafs(), pobs, pci, ptree.get_lats(), ptree.get_lons(), ptree.get_elevs(), ptree.get_lafs(), minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
-}
-int gridpp::optimal_interpolation_single_member(const vec2& input,
-        const vec2& blats,
-        const vec2& blons,
-        const vec2& belevs,
-        const vec2& blafs,
-        const vec& pobs,  // gObs
-        const vec& pci,   // gCi
-        const vec& plats,
-        const vec& plons,
-        const vec& pelevs,
-        const vec& plafs,
+        const gridpp::Points& points,
         float minRho,
         float hlength,
         float vlength,
@@ -47,18 +24,19 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
 
     int nY = input.size();
     int nX = input[0].size();
-    int nS = pobs.size();
+    int nS = points.size();
 
     // Check input data
-    check_vec(blats, nY, nX);
-    check_vec(blons, nY, nX);
-    check_vec(belevs, nY, nX);
-    check_vec(blafs, nY, nX);
+    check_vec(pobs, nS);
     check_vec(pci, nS);
-    check_vec(plats, nS);
-    check_vec(plons, nS);
-    check_vec(pelevs, nS);
-    check_vec(plafs, nS);
+    vec2 blats = bgrid.get_lats();
+    vec2 blons = bgrid.get_lons();
+    vec2 belevs = bgrid.get_elevs();
+    vec2 blafs = bgrid.get_lafs();
+    vec plats = points.get_lats();
+    vec plons = points.get_lons();
+    vec pelevs = points.get_elevs();
+    vec plafs = points.get_lafs();
 
     // Prepare output matrix
     output.resize(nY);
@@ -108,17 +86,12 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         }
     }
 
-    std::cout << "Computing search tree..." << std::endl;
-    gridpp::Points searchTree(blats0, blons0);
-    std::cout << "Done computing search tree" << std::endl;
-
     // For each gridpoint, find which observations are relevant. Parse the observations and only keep
     // those that pass certain checks
     for(int i = 0; i < nS; i++) {
-        int index = searchTree.get_nearest_neighbour(plats[i], plons[i]);
-        // TODO: Check
-        int X = index / nY;
-        int Y = index % nY;
+        const std::vector<int> indices = bgrid.get_nearest_neighbour(plats[i], plons[i]);
+        int X = indices[1];
+        int Y = indices[0];
         pYi[i] = Y;
         pXi[i] = X;
 
@@ -308,6 +281,34 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
     }
     */
     return 0;
+
+    // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
+}
+int gridpp::optimal_interpolation_single_member(const vec2& input,
+        const vec2& blats,
+        const vec2& blons,
+        const vec2& belevs,
+        const vec2& blafs,
+        const vec& pobs,  // gObs
+        const vec& pci,   // gCi
+        const vec& plats,
+        const vec& plons,
+        const vec& pelevs,
+        const vec& plafs,
+        float minRho,
+        float hlength,
+        float vlength,
+        float wmin,
+        float maxElevDiff,
+        bool landOnly,
+        int maxPoints,
+        float elevGradient,
+        float epsilon,
+        vec2& output) {
+
+    gridpp::Grid bgrid(blats, blons, belevs, blafs);
+    gridpp::Points points(plats, plons, pelevs, plafs);
+    return optimal_interpolation_single_member(input, bgrid, pobs, pci, points, minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
 }
 float gridpp::calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
    float h = (iHDist/hlength);
@@ -335,6 +336,7 @@ float gridpp::calcRho(float iHDist, float iVDist, float iLDist, float hlength, f
 // template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
 // template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
 void gridpp::check_vec(vec2 input, int Y, int X) {
+    std::cout << input.size() << " " << input[0].size() << " " << Y << " " << X << std::endl;
     assert(input.size() == Y);
     for(int i = 0; i < input.size(); i++) {
         assert(input[i].size() == X);

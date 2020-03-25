@@ -7,6 +7,17 @@ gridpp::Points::Points(vec lats, vec lons, vec elevs, vec lafs) {
     mLafs = lafs;
     KDTree tree = KDTree(lats, lons);
     mTree = tree;
+    int N = mLats.size();
+    if(mElevs.size() != N) {
+        mElevs.clear();
+        for(int i = 0; i < N; i++)
+            mElevs.push_back(0);
+    }
+    if(mLafs.size() != N) {
+        mLafs.clear();
+        for(int i = 0; i < N; i++)
+            mLafs.push_back(1);
+    }
 }
 
 int gridpp::Points::get_num_neighbours(float lat, float lon, float radius) const {
@@ -38,4 +49,7 @@ vec gridpp::Points::get_elevs() const {
 }
 vec gridpp::Points::get_lafs() const {
     return mLafs;
+}
+int gridpp::Points::size() const {
+    return mLats.size();
 }

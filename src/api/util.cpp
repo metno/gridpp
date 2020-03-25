@@ -10,11 +10,11 @@ bool gridpp::util::is_valid(float value) {
     float MV = -999;
     return !std::isnan(value) && !std::isinf(value) && value != MV;
 }
-float gridpp::util::calculate_stat(const std::vector<float>& iArray, std::string iOperator, float iQuantile) {
+float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::util::StatType iStatType, float iQuantile) {
    // Initialize to missing
    float MV = -999;
    float value = MV;
-   if(iOperator == "mean" || iOperator == "sum") {
+   if(iStatType == gridpp::util::StatTypeMean || iStatType == gridpp::util::StatTypeSum) {
       float total = 0;
       int count = 0;
       for(int n = 0; n < iArray.size(); n++) {
@@ -24,13 +24,13 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, std::string
          }
       }
       if(count > 0) {
-         if(iOperator == "mean")
+         if(iStatType == gridpp::util::StatTypeMean)
             value = total / count;
          else
             value = total;
       }
    }
-   else if(iOperator == "std") {
+   else if(iStatType == gridpp::util::StatTypeStd) {
       // STD = sqrt(E[X^2] - E[X]^2)
       // The above formula is unstable when the variance is small and the mean is large.
       // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
@@ -64,11 +64,11 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, std::string
       }
    }
    else {
-      if(iOperator == "min")
+      if(iStatType == gridpp::util::StatTypeMin)
          iQuantile = 0;
-      if(iOperator == "median")
+      if(iStatType == gridpp::util::StatTypeMedian)
          iQuantile = 0.5;
-      if(iOperator == "max")
+      if(iStatType == gridpp::util::StatTypeMax)
          iQuantile = 1;
       // Remove missing
       std::vector<float> cleanHood;
@@ -117,3 +117,36 @@ void gridpp::util::debug(std::string string) {
 void gridpp::util::error(std::string string) {
     std::cout << string << std::endl;
 }
+double gridpp::util::clock() {
+   timeval t;
+   gettimeofday(&t, NULL);
+   double sec = (t.tv_sec);
+   double msec= (t.tv_usec);
+   return sec + msec/1e6;
+}
+gridpp::util::StatType gridpp::util::getStatType(std::string iName) {
+    gridpp::util::StatType iType;
+   if(iName == "mean") {
+      iType = gridpp::util::StatTypeMean;
+   }
+   else if(iName == "min") {
+      iType = gridpp::util::StatTypeMin;
+   }
+   else if(iName == "max") {
+      iType = gridpp::util::StatTypeMax;
+   }
+   else if(iName == "median") {
+      iType = gridpp::util::StatTypeMedian;
+   }
+   else if(iName == "quantile") {
+      iType = gridpp::util::StatTypeQuantile;
+   }
+   else if(iName == "std") {
+      iType = gridpp::util::StatTypeStd;
+   }
+   else if(iName == "sum") {
+      iType = gridpp::util::StatTypeSum;
+   }
+   return iType;
+}
+

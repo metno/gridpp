@@ -98,6 +98,7 @@ namespace gridpp {
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
             vec get_lats() const;
             vec get_lons() const;
+            int size() const;
         protected:
             typedef boost::geometry::model::point<float, 3, boost::geometry::cs::cartesian> point;
             typedef std::pair<point, unsigned> value;
@@ -120,6 +121,7 @@ namespace gridpp {
             vec get_lons() const;
             vec get_elevs() const;
             vec get_lafs() const;
+            int size() const;
         private:
             KDTree mTree;
             vec mLats;
@@ -141,6 +143,7 @@ namespace gridpp {
             vec2 get_lons() const;
             vec2 get_elevs() const;
             vec2 get_lafs() const;
+            ivec size() const;
         private:
             KDTree mTree;
             int mX;
@@ -157,7 +160,7 @@ namespace gridpp {
             const gridpp::Grid& bgrid,
             const vec& pobs,
             const vec& pci,
-            const gridpp::Points& ptree,
+            const gridpp::Points& points,
             float minRho,
             float hlength,
             float vlength,
@@ -191,15 +194,32 @@ namespace gridpp {
             float epsilon,
             vec2& output);
 
-    vec2 neighbourhood(const vec2& input, int radius, std::string operation, float quantile=-1);
-    vec3 neighbourhood(const vec3& input, int radius, std::string operation, float quantile=-1);
+    vec2 neighbourhood(const vec2& input, int radius, std::string operation, float quantile=-1, bool approx=false);
+    vec3 neighbourhood(const vec3& input, int radius, std::string operation, float quantile=-1, bool approx=false);
+    // input: Y, X, E
+    vec2 neighbourhood_quantile(const vec3& input, int radius, float quantile, const vec& thresholds);
+    vec2 neighbourhood_quantile(const vec3& input, int radius, float quantile, int num_thresholds);
+    vec2 neighbourhood_quantile(const vec2& input, int radius, float quantile, int num_thresholds);
     vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+
+    vec2 mask(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool keep);
     namespace util {
+      enum StatType {
+         StatTypeMean      = 0,
+         StatTypeMin       = 10,
+         StatTypeMedian    = 20,
+         StatTypeMax       = 30,
+         StatTypeQuantile  = 40,
+         StatTypeStd       = 50,
+         StatTypeSum       = 60
+      };
+      StatType getStatType(std::string iName);
+        double clock();
         void debug(std::string string);
         void error(std::string string);
         bool is_valid(float value);
-        float calculate_stat(const std::vector<float>& iArray, std::string iOperator, float iQuantile=MV);
+        float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
         int num_missing_values(const vec2& iArray);
     }
     /*

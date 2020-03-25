@@ -9,14 +9,31 @@ gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs) {
     int N = lats.size() * lats[0].size();
     vec lats0(N);
     vec lons0(N);
+    int count = 0;
     for(int i = 0; i < lats.size(); i++) {
         for(int j = 0; j < lats[0].size(); j++) {
-            lats0.push_back(lats[i][j]);
-            lons0.push_back(lons[i][j]);
+            lats0[count] = lats[i][j];
+            lons0[count] = lons[i][j];
+            count++;
         }
     }
     KDTree test = KDTree(lats0, lons0);
     mTree = test;
+
+    if(mElevs.size() != lats.size() or mElevs[0].size() != lats[0].size()) {
+        mElevs.clear();
+        mElevs.resize(lats.size());
+        for(int i = 0; i < lats.size(); i++) {
+            mElevs[i].resize(lats[0].size(), 0);
+        }
+    }
+    if(mLafs.size() != lats.size() or mLafs[0].size() != lats[0].size()) {
+        mLafs.clear();
+        mLafs.resize(lats.size());
+        for(int i = 0; i < lats.size(); i++) {
+            mLafs[i].resize(lats[0].size(), 1);
+        }
+    }
 }
 
 int gridpp::Grid::get_num_neighbours(float lat, float lon, float radius) const {
@@ -68,6 +85,7 @@ vec2 gridpp::Grid::get_2d(vec input) const {
 }
 ivec gridpp::Grid::get_indices(int index) const {
     ivec results(2, 0);
+    assert(index < mTree.size());
     results[0] = index / mX;
     results[1] = index % mX;
     return results;
@@ -78,4 +96,7 @@ ivec2 gridpp::Grid::get_indices(ivec indices) const {
         results[i] = get_indices(indices[i]);
     }
     return results;
+}
+ivec gridpp::Grid::size() const {
+    return get_indices(mTree.size());
 }

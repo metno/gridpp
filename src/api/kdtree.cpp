@@ -82,10 +82,7 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) const
         float x1, y1, z1;
         gridpp::KDTree::convert_coordinates(mLats[results[i].second], mLons[results[i].second], x1, y1, z1);
         float dist = gridpp::KDTree::calc_distance(x, y, z, x1, y1, z1);
-        std::cout << "Distance " << dist << std::endl;
-        if(dist > 0) {
-            ret.push_back(results[i].second);
-        }
+        ret.push_back(results[i].second);
     }
     return ret;
 }
@@ -149,4 +146,7 @@ vec gridpp::KDTree::get_lats() const {
 }
 vec gridpp::KDTree::get_lons() const {
     return mLons;
+}
+int gridpp::KDTree::size() const {
+    return mLats.size();
 }

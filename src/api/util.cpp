@@ -5,6 +5,14 @@
 #include <cmath>
 #include <math.h>
 #include <assert.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <iomanip>
+#include <cstdio>
+
+#ifdef DEBUG
+extern "C" void __gcov_flush();
+#endif
 
 bool gridpp::util::is_valid(float value) {
     float MV = -999;
@@ -114,8 +122,18 @@ void gridpp::util::debug(std::string string) {
     std::cout << string << std::endl;
 }
 
-void gridpp::util::error(std::string string) {
-    std::cout << string << std::endl;
+void gridpp::util::error(std::string iMessage) {
+#ifdef DEBUG
+  std::cout << "Error: " << iMessage << std::endl;
+  void *array[10];
+  size_t size = backtrace(array, 10);
+  std::cout << "Stack trace:" << std::endl;
+  backtrace_symbols_fd(array, size, 2);
+   __gcov_flush();
+#else
+  std::cout << "Error: " << iMessage << std::endl;
+#endif
+   abort();
 }
 double gridpp::util::clock() {
    timeval t;

@@ -4,7 +4,23 @@
 #include <armadillo>
 #include <assert.h>
 
-int gridpp::optimal_interpolation_single_member(const vec2& input,
+namespace {
+    typedef arma::mat mattype;
+    typedef arma::vec vectype;
+    typedef arma::cx_mat cxtype;
+
+    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin);
+    void check_vec(vec2 input, int Y, int X);
+    void check_vec(vec input, int S);
+
+    template<class T1, class T2> struct sort_pair_first {
+        bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {
+            return left.first < right.first;
+        };
+    };
+}
+
+int gridpp::optimal_interpolation(const vec2& input,
         const gridpp::Grid& bgrid,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
@@ -13,14 +29,11 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         float hlength,
         float vlength,
         float wmin,
-        float maxElevDiff,
-        bool landOnly,
         int maxPoints,
         float elevGradient,
         float epsilon,
         vec2& output) {
-
-    std::cout << "Starting" << std::endl;
+    double s_time = gridpp::util::clock();
 
     int nY = input.size();
     int nX = input[0].size();
@@ -96,24 +109,16 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         pXi[i] = X;
 
         // Check if the elevation of the station roughly matches the reference grid elevation
-        bool hasValidElev = !gridpp::util::is_valid(maxElevDiff) || gridpp::util::is_valid(pelevs[i]);
-        if(gridpp::util::is_valid(maxElevDiff) && hasValidElev) {
-            float elevDiff = abs(pelevs[i] - belevs[Y][X]);
-            hasValidElev = elevDiff < maxElevDiff;
-        }
+        bool hasValidElev = gridpp::util::is_valid(pelevs[i]);
         if(hasValidElev) {
-            // Don't include an observation if it is in the ocean and landOnly=1
-            bool wrongLaf = gridpp::util::is_valid(plafs[i]) && landOnly && plafs[i] == 0;
-            if(!wrongLaf) {
-                for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
-                    for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
-                        gLocIndices[y][x].push_back(i);
-                    }
+            for(int y = std::max(0, Y - gridpointRadius); y < std::min(nY, Y + gridpointRadius); y++) {
+                for(int x = std::max(0, X - gridpointRadius); x < std::min(nX, X + gridpointRadius); x++) {
+                    gLocIndices[y][x].push_back(i);
                 }
             }
         }
     }
-    std::cout << "Done assigning observations to gridpoints" << std::endl;
+    std::cout << "Done assigning observations to gridpoints " << gridpp::util::clock() - s_time << std::endl;
 
     // Transform the background
     // #pragma omp parallel for
@@ -152,6 +157,11 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
 
             // Create list of locations for this gridpoint
             std::vector<int> lLocIndices0 = gLocIndices[y][x];
+            if(lLocIndices0.size() == 0) {
+                // If we have too few observations though, then use the background
+                output[y][x] = input[y][x];
+                continue;
+            }
             std::vector<int> lLocIndices;
             lLocIndices.reserve(lLocIndices0.size());
             std::vector<std::pair<float,int> > lRhos0;
@@ -165,7 +175,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
                 float lafdist = 0;
                 if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
-                float rho = gridpp::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
                 int X = pXi[index];
                 int Y = pYi[index];
                 // Only include observations that are within the domain
@@ -181,7 +191,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
                 // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                 // Otherwise, just use the last locations added
                 lRhos = arma::vec(maxPoints);
-                std::sort(lRhos0.begin(), lRhos0.end(), gridpp::sort_pair_first<float,int>());
+                std::sort(lRhos0.begin(), lRhos0.end(), ::sort_pair_first<float,int>());
                 for(int i = 0; i < maxPoints; i++) {
                     // The best values start at the end of the array
                     int index = lRhos0[lRhos0.size() - 1 - i].second;
@@ -245,7 +255,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
                 float lafdist = 0;
                 if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
-                float rho = calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
                 lG(0, i) = rho;
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
@@ -257,7 +267,7 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
                     if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                         lafdist = plafs[index] - plafs[index_j];
 
-                    lP(i, j) = gridpp::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                    lP(i, j) = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
                 }
             }
             mattype lGSR;
@@ -280,10 +290,12 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         }
     }
     */
+    std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return 0;
 
-    // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
+    // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), minRho, hlength, vlength, wmin, maxPoints, elevGradient, epsilon, output);
 }
+/*
 int gridpp::optimal_interpolation_single_member(const vec2& input,
         const vec2& blats,
         const vec2& blons,
@@ -299,8 +311,6 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         float hlength,
         float vlength,
         float wmin,
-        float maxElevDiff,
-        bool landOnly,
         int maxPoints,
         float elevGradient,
         float epsilon,
@@ -308,47 +318,50 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
 
     gridpp::Grid bgrid(blats, blons, belevs, blafs);
     gridpp::Points points(plats, plons, pelevs, plafs);
-    return optimal_interpolation_single_member(input, bgrid, pobs, pci, points, minRho, hlength, vlength, wmin, maxElevDiff, landOnly, maxPoints, elevGradient, epsilon, output);
+    return optimal_interpolation_single_member(input, bgrid, pobs, pci, points, minRho, hlength, vlength, wmin, maxPoints, elevGradient, epsilon, output);
 }
-float gridpp::calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
-   float h = (iHDist/hlength);
-   float rho = exp(-0.5 * h * h);
-   if(gridpp::util::is_valid(vlength)) {
-      if(!gridpp::util::is_valid(iVDist)) {
-         rho = 0;
-      }
-      else {
-         float v = (iVDist/vlength);
-         rho *= exp(-0.5 * v * v);
-      }
-   }
-   if(gridpp::util::is_valid(wmin)) {
-      rho *= 1 - (1 - wmin) * std::abs(iLDist);
-   }
-   return rho;
-}
-// Set up convenient functions for debugging in gdb
-// template<class Matrix>
-// void print_matrix(Matrix matrix) {
-//     matrix.print(std::cout);
-// }
+*/
+namespace {
+    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
+       float h = (iHDist/hlength);
+       float rho = exp(-0.5 * h * h);
+       if(gridpp::util::is_valid(vlength)) {
+          if(!gridpp::util::is_valid(iVDist)) {
+             rho = 0;
+          }
+          else {
+             float v = (iVDist/vlength);
+             rho *= exp(-0.5 * v * v);
+          }
+       }
+       if(gridpp::util::is_valid(wmin)) {
+          rho *= 1 - (1 - wmin) * std::abs(iLDist);
+       }
+       return rho;
+    }
+    // Set up convenient functions for debugging in gdb
+    // template<class Matrix>
+    // void print_matrix(Matrix matrix) {
+    //     matrix.print(std::cout);
+    // }
 
-// template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
-// template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
-void gridpp::check_vec(vec2 input, int Y, int X) {
-    std::cout << input.size() << " " << input[0].size() << " " << Y << " " << X << std::endl;
-    assert(input.size() == Y);
-    for(int i = 0; i < input.size(); i++) {
-        assert(input[i].size() == X);
-        for(int j = 0; j < input[i].size(); j++) {
-            assert(gridpp::util::is_valid(input[i][j]));
+    // template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
+    // template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
+    void check_vec(vec2 input, int Y, int X) {
+        std::cout << input.size() << " " << input[0].size() << " " << Y << " " << X << std::endl;
+        assert(input.size() == Y);
+        for(int i = 0; i < input.size(); i++) {
+            assert(input[i].size() == X);
+            for(int j = 0; j < input[i].size(); j++) {
+                assert(gridpp::util::is_valid(input[i][j]));
+            }
         }
     }
-}
-void gridpp::check_vec(vec input, int S) {
-    assert(input.size() == S);
-    for(int i = 0; i < input.size(); i++) {
-        assert(gridpp::util::is_valid(input[i]));
+    void check_vec(vec input, int S) {
+        assert(input.size() == S);
+        for(int i = 0; i < input.size(); i++) {
+            assert(gridpp::util::is_valid(input[i]));
+        }
     }
 }
 /*
@@ -382,3 +395,12 @@ float CalibratorOi::invTransform(float iValue) const {
    return rValue;
 }
 */
+
+int gridpp::optimal_interpolation_ens(const vec3& input,
+            const gridpp::Grid& bgrid,
+            const vec& pobs,
+            const vec& pci,
+            const gridpp::Points& points,
+            vec2& output) {
+
+}

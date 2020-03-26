@@ -236,8 +236,8 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     vec2 iInputLons = igrid.get_lons();
     float MV = -999;
 
-    int nLat = iInputLats.size();
-    int nLon = iInputLats[0].size();
+    int nLat = iOutputLats.size();
+    int nLon = iOutputLats[0].size();
 
     vec2 output;
     output.resize(nLat);

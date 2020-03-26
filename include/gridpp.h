@@ -15,25 +15,106 @@ typedef std::vector<float> vec;
 // typedef std::vector<float> fvec;
 typedef std::vector<int> ivec;
 typedef std::vector<std::vector<int> > ivec2;
+
 namespace gridpp {
-    typedef arma::mat mattype;
-    typedef arma::vec vectype;
-    typedef arma::cx_mat cxtype;
-
-    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin);
-
     static float MV;
     static float pi;
     static double radiusEarth;
 
-    void check_vec(vec2 input, int Y, int X);
-    void check_vec(vec input, int S);
+    class KDTree;
+    class Points;
+    class Grid;
 
-    template<class T1, class T2> struct sort_pair_first {
-        bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {
-            return left.first < right.first;
-        };
-    };
+    /** Optimal interpolation
+      * @param: input 2D field of background values
+      * @param: bgrid grid corresponding to input
+      * @param: pobs vector of observations
+      * @param: pci vector of ci values
+      * @param: points observation points
+    */
+    int optimal_interpolation(const vec2& input,
+            const gridpp::Grid& bgrid,
+            const vec& pobs,
+            const vec& pci,
+            const gridpp::Points& points,
+            float minRho,
+            float hlength,
+            float vlength,
+            float wmin,
+            int maxPoints,
+            float elevGradient,
+            float epsilon,
+            vec2& output);
+
+    /** Optimal interpolation for ensemble
+      * @param: input 3D field of background values (Y, X, E)
+      * @param: bgrid grid corresponding to input
+      * @param: pobs vector of observations
+      * @param: pci vector of ci values
+      * @param: points observation points
+    */
+    int optimal_interpolation_ens(const vec3& input,
+            const gridpp::Grid& bgrid,
+            const vec& pobs,
+            const vec& pci,
+            const gridpp::Points& points,
+            vec2& output);
+
+    /** Neighbourhood in space
+      * @param: input Deterministic values with dimensions Y, X
+      * @param: radius filter radius in number of gridpoints
+      * @param: operation one of min, mean, median, max, std
+    */
+    vec2 neighbourhood(const vec2& input, int radius, std::string operation);
+
+    /** Neighbourhood in space and across members
+    */
+    vec2 neighbourhood_ens(const vec3& input, int radius, std::string operation);
+
+    /** Neighbourhood quantile in space and across members
+      * @param: input Ensemble values with dimensions Y, X, E
+      * @param: radius filter radius in number of gridpoints
+      * @param: quantile which quantile to compute (between 0 and 1)
+      * @param: num_threhsolds number of thresholds to use to approximate value (0 for no approximation).
+    */
+    vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, int num_thresholds);
+    vec2 neighbourhood_quantile(const vec2& input, int radius, float quantile, int num_thresholds);
+
+    /** Fill in values inside or outside a set of circles
+      * @param: input Deterministic values with dimensions Y, X
+      * @param: radiii Circle radii for each point
+      * @param: value Fill in this value
+      * @param: outside if True, fill outside circles, if False, fill inside circles
+    */
+    vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+
+    // Grid to grid interpolation
+    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+
+    // Grid to point interpolation
+    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+    vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+
+    namespace util {
+      enum StatType {
+         StatTypeMean      = 0,
+         StatTypeMin       = 10,
+         StatTypeMedian    = 20,
+         StatTypeMax       = 30,
+         StatTypeQuantile  = 40,
+         StatTypeStd       = 50,
+         StatTypeSum       = 60
+      };
+      StatType getStatType(std::string iName);
+        double clock();
+        void debug(std::string string);
+        void error(std::string string);
+        bool is_valid(float value);
+        float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
+        int num_missing_values(const vec2& iArray);
+    }
+
     class KDTree {
         public:
             KDTree(vec lats, vec lons);
@@ -156,21 +237,20 @@ namespace gridpp {
             vec2 mLafs;
     };
 
-    int optimal_interpolation_single_member(const vec2& input,
-            const gridpp::Grid& bgrid,
-            const vec& pobs,
-            const vec& pci,
-            const gridpp::Points& points,
-            float minRho,
-            float hlength,
-            float vlength,
-            float wmin,
-            float maxElevDiff,
-            bool landOnly,
-            int maxPoints,
-            float elevGradient,
-            float epsilon,
-            vec2& output);
+
+    /*
+    namespace downscaling {
+        vec2 nearestNeighbour(const vec2& iLats, const vec2& iLons, const vec2& iValues, const vec2& oLats, const vec2& oLons, int iRadius, std::string iStatType, std::string iQuantile);
+        vec2 nearestNeighbour(Field ifield, Grid ogrid, int iRadius, std::string iStatType, std::string iQuantile);
+    }
+    namespace calibration {
+        vec2 quantileMapping(const vec2& iValues, std::string iExtrapolation, vec iQuantiles, const ParameterSet& iParameterSet);
+        vec2 quantileMapping(const vec2& iValues, std::string iExtrapolation, vec iQuantiles, const Points& iParameterPoints, const vec2 iParameters);
+    }
+    namespace diagnose {
+        vec2 computeRh(const vec2& iTemperatures, const vec2& iDewPointTemperatures);
+        float computeRh(float iTemperatures, float iDewPointTemperatures);
+    }
 
     int optimal_interpolation_single_member(const vec2& input,
             const vec2& blats,
@@ -187,67 +267,11 @@ namespace gridpp {
             float hlength,
             float vlength,
             float wmin,
-            float maxElevDiff,
-            bool landOnly,
             int maxPoints,
             float elevGradient,
             float epsilon,
             vec2& output);
 
-    vec2 neighbourhood(const vec2& input, int radius, std::string operation, float quantile=-1, bool approx=false);
-    vec3 neighbourhood(const vec3& input, int radius, std::string operation, float quantile=-1, bool approx=false);
-    // input: Y, X, E
-    vec2 neighbourhood_quantile(const vec3& input, int radius, float quantile, const vec& thresholds);
-    vec2 neighbourhood_quantile(const vec3& input, int radius, float quantile, int num_thresholds);
-    vec2 neighbourhood_quantile(const vec2& input, int radius, float quantile, int num_thresholds);
-    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
-    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
-
-    vec2 mask(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool keep);
-    namespace util {
-      enum StatType {
-         StatTypeMean      = 0,
-         StatTypeMin       = 10,
-         StatTypeMedian    = 20,
-         StatTypeMax       = 30,
-         StatTypeQuantile  = 40,
-         StatTypeStd       = 50,
-         StatTypeSum       = 60
-      };
-      StatType getStatType(std::string iName);
-        double clock();
-        void debug(std::string string);
-        void error(std::string string);
-        bool is_valid(float value);
-        float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
-        int num_missing_values(const vec2& iArray);
-    }
-    /*
-    namespace downscaling {
-        vec2 nearestNeighbour(const vec2& iLats, const vec2& iLons, const vec2& iValues, const vec2& oLats, const vec2& oLons, int iRadius, std::string iStatType, std::string iQuantile);
-        vec2 nearestNeighbour(Field ifield, Grid ogrid, int iRadius, std::string iStatType, std::string iQuantile);
-    }
-    namespace calibration {
-        vec2 quantileMapping(const vec2& iValues, std::string iExtrapolation, vec iQuantiles, const ParameterSet& iParameterSet);
-        vec2 neighbourhood(const Field& iField, const Grid& oGrid, float iRadius, std::string iOperator);
-        vec2 optimal_interpolation_single_member(const vec2& iValues, const Grid& iGrid);
-        vec2 optimal_interpolation_ensemble(const vec3& iValues, const Grid& iGrid, const ParameterSet& iParameterSet);
-    }
-    namespace diagnose {
-        vec2 computeRh(const vec2& iTemperatures, const vec2& iDewPointTemperatures);
-        float computeRh(float iTemperatures, float iDewPointTemperatures);
-    }
-
-    class Grid(Dataset) {
-        Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs);
-    }
-    class ParameterSet {
-        ParameterSetSpatial(vec2 iLats, vec2 iLons, vec3 iRef, vec3 iModel);
-        void get(float iLat, float iLon, float iElev, vec iRef, vec iModel);
-        private:
-            vec2 iLats, iLons;
-            vec3 iRef, iModel;
-    };
     */
 };
 #endif

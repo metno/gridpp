@@ -31,6 +31,10 @@ add_custom_target(install-python
         DEPENDS _gridpp
         COMMAND python3 ${SETUP_PY_OUT} install)
 
+add_custom_target(install-python-user
+        DEPENDS _gridpp
+        COMMAND python3 ${SETUP_PY_OUT} install --user)
+
 add_custom_target(build-python
         DEPENDS _gridpp
         COMMAND python3 ${SETUP_PY_OUT} build)
@@ -38,4 +42,8 @@ add_custom_target(build-python
 add_custom_target(develop-python
         DEPENDS _gridpp
         COMMAND python3 ${SETUP_PY_OUT} develop)
+
+add_custom_target(develop-python-user
+        DEPENDS _gridpp
+        COMMAND python3 ${SETUP_PY_OUT} develop --user)
 

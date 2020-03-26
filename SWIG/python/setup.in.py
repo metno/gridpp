@@ -26,10 +26,12 @@ class CompiledLibInstall(setuptools.command.install.install):
 
         # Directory to install to
         install_dir = get_python_lib()
+        install_dir = self.install_libbase
 
         # Install files
-        [shutil.copy(filename, install_dir) for filename in filenames]
         print("INSTALL DIR", install_dir)
+        # print(self.__dict__)
+        [shutil.copy(filename, install_dir) for filename in filenames]
 
 def partition(pred, iterable):
     t1, t2 = itertools.tee(iterable)

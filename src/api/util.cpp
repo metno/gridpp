@@ -167,4 +167,65 @@ gridpp::util::StatType gridpp::util::getStatType(std::string iName) {
    }
    return iType;
 }
+vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
+    vec quantiles;
+    quantiles.reserve(num);
+    quantiles.push_back(values[0]);
+    int count_lower = 0;
+    for(int i = 0; i < values.size(); i++) {
+        if(values[i] != quantiles[0])
+            break;
+        count_lower++;
+    }
+    int size = values.size();
+    if(count_lower > size / num)
+        quantiles.push_back(values[count_lower]);
 
+    // Remove duplicates
+    vec values_unique;
+    values_unique.reserve(values.size());
+    float last_quantile = quantiles[quantiles.size() - 1];
+    for(int i = 0; i < values.size(); i++) {
+        if(values[i] > last_quantile && (values_unique.size() == 0 || values[i] != values_unique[values_unique.size() - 1]))
+            values_unique.push_back(values[i]);
+    }
+    int num_left = num - quantiles.size();
+    // std::cout << "Number of unique values: " << values_unique.size() << std::endl;
+    for(int i = 1; i <= num_left; i++) {
+        float f = float(i) / (num_left);
+        int index = values_unique.size() * f - 1;
+        if(index > 0) {
+            float value = values_unique[index];
+            quantiles.push_back(value);
+        }
+        else {
+            std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
+            std::cout << count_lower << " " << values.size() << " " << last_quantile << std::endl;
+            abort();
+        }
+    }
+    // for(int i = 0; i < quantiles.size(); i++)
+    //     std::cout << "Threshold[" << i << "] = " << quantiles[i] << std::endl;
+    /*
+    int index = size / num;
+    int step = size / num;
+    count = 1;
+    while(index < Y * X * E) {
+        float value = values[index];
+        std::cout << " " << count << " " << index << " " << step << " " << quantiles.size() << std::endl;
+        if(value != last) {
+            std::cout << "Threshold " << quantiles.size() << " = " << value << std::endl;
+            quantiles.push_back(value);
+            last = value;
+        }
+        else {
+            step = (size - index) / (num - quantiles.size());
+            std::cout << "Same. Step is now: " << step << std::endl;
+        }
+        last = value;
+        index += step;
+        count++;
+    }
+    */
+
+}

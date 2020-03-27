@@ -97,22 +97,30 @@ namespace gridpp {
     vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
 
     namespace util {
-      enum StatType {
-         StatTypeMean      = 0,
-         StatTypeMin       = 10,
-         StatTypeMedian    = 20,
-         StatTypeMax       = 30,
-         StatTypeQuantile  = 40,
-         StatTypeStd       = 50,
-         StatTypeSum       = 60
-      };
-      StatType getStatType(std::string iName);
+        enum StatType {
+            StatTypeMean      = 0,
+            StatTypeMin       = 10,
+            StatTypeMedian    = 20,
+            StatTypeMax       = 30,
+            StatTypeQuantile  = 40,
+            StatTypeStd       = 50,
+            StatTypeSum       = 60
+        };
+        StatType getStatType(std::string iName);
         double clock();
         void debug(std::string string);
         void error(std::string string);
         bool is_valid(float value);
         float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
         int num_missing_values(const vec2& iArray);
+
+        /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
+          *  but including the first number after duplicated values. Include the lowest and highest
+          *  values.
+          *  @param values vector of values (unsorted)
+          *  @param num number of thresholds to get
+        */
+        vec calc_even_quantiles(const vec& values, int num);
     }
 
     class KDTree {

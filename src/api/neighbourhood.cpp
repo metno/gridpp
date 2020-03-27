@@ -222,80 +222,23 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, int radius, float qua
         // TODO
         abort();
     }
-    vec thresholds;
-    thresholds.reserve(num_thresholds);
     int Y = input.size();
     int X = input[0].size();
     int E = input[0][0].size();
     int size = Y * X * E;
-    vec all_values(size);
-    int count = 0;
+    vec all_values;
+    all_values.reserve(size);
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
             for(int e = 0; e < E; e++) {
-                all_values[count] = input[y][x][e];
-                count++;
+                if(gridpp::util::is_valid(input[y][x][e])) {
+                    all_values.push_back(input[y][x][e]);
+                }
             }
         }
     }
     std::sort(all_values.begin(), all_values.end());
-
-    thresholds.push_back(all_values[0]);
-    int count_lower = 0;
-    for(int i = 0; i < all_values.size(); i++) {
-        if(all_values[i] != thresholds[0])
-            break;
-        count_lower++;
-    }
-    if(count_lower > size / num_thresholds)
-        thresholds.push_back(all_values[count_lower]);
-
-    // Remove duplicates
-    vec all_values_unique;
-    all_values_unique.reserve(all_values.size());
-    float last_threshold = thresholds[thresholds.size() - 1];
-    for(int i = 0; i < all_values.size(); i++) {
-        if(all_values[i] > last_threshold && (all_values_unique.size() == 0 || all_values[i] != all_values_unique[all_values_unique.size() - 1]))
-            all_values_unique.push_back(all_values[i]);
-    }
-    int num_thresholds_left = num_thresholds - thresholds.size();
-    // std::cout << "Number of unique values: " << all_values_unique.size() << std::endl;
-    for(int i = 1; i <= num_thresholds_left; i++) {
-        float f = float(i) / (num_thresholds_left);
-        int index = all_values_unique.size() * f - 1;
-        if(index > 0) {
-            float value = all_values_unique[index];
-            thresholds.push_back(value);
-        }
-        else {
-            std::cout << i << " " << f << " " << index << " " << num_thresholds_left << std::endl;
-            std::cout << count_lower << " " << all_values.size() << std::endl;
-            abort();
-        }
-    }
-    // for(int i = 0; i < thresholds.size(); i++)
-    //     std::cout << "Threshold[" << i << "] = " << thresholds[i] << std::endl;
-    /*
-    int index = size / num_thresholds;
-    int step = size / num_thresholds;
-    count = 1;
-    while(index < Y * X * E) {
-        float value = all_values[index];
-        std::cout << " " << count << " " << index << " " << step << " " << thresholds.size() << std::endl;
-        if(value != last) {
-            std::cout << "Threshold " << thresholds.size() << " = " << value << std::endl;
-            thresholds.push_back(value);
-            last = value;
-        }
-        else {
-            step = (size - index) / (num_thresholds - thresholds.size());
-            std::cout << "Same. Step is now: " << step << std::endl;
-        }
-        last = value;
-        index += step;
-        count++;
-    }
-    */
+    vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
 
     return ::neighbourhood_quantile_ens(input, radius, quantile, thresholds);
 }

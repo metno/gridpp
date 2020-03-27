@@ -1,1 +1,0 @@
-version = '${PROJECT_VERSION}'

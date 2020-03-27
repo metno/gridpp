@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
+
+file (READ "${CMAKE_CURRENT_SOURCE_DIR}/include/gridpp.h" VERSION0)
+project(gridpp)
+string(REGEX REPLACE "^.+define GRIDPP_VERSION \"(.+)\".+" "\\1" PROJECT_VERSION ${VERSION0})
+
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-project(gridpp)
 enable_language(CXX)
 
 set(CMAKE_CXX_STANDARD 98)

@@ -168,7 +168,13 @@ gridpp::util::StatType gridpp::util::getStatType(std::string iName) {
    return iType;
 }
 vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
+    if(num >= values.size())
+        return  values;
+
     vec quantiles;
+    if(num == 0)
+        return quantiles;
+
     quantiles.reserve(num);
     quantiles.push_back(values[0]);
     int count_lower = 0;
@@ -204,6 +210,7 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
             abort();
         }
     }
+    return quantiles;
     // for(int i = 0; i < quantiles.size(); i++)
     //     std::cout << "Threshold[" << i << "] = " << quantiles[i] << std::endl;
     /*
@@ -228,4 +235,69 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     }
     */
 
+}
+int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
+    float MV=-999;
+    int index = MV;
+    for(int i = 0; i < (int) iValues.size(); i++) {
+        float currValue = iValues[i];
+        if(gridpp::util::is_valid(currValue)) {
+            if(currValue < iX) {
+                index = i;
+            }
+            else if(currValue == iX) {
+                index = i;
+                break;
+            }
+            else if(currValue > iX) {
+                break;
+            }
+        }
+    }
+    return index;
+}
+int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
+    float MV=-999;
+    int index = MV;
+    for(int i = iValues.size()-1; i >= 0; i--) {
+        float currValue = iValues[i];
+        if(gridpp::util::is_valid(currValue)) {
+            if(currValue > iX) {
+                index = i;
+            }
+            else if(currValue == iX) {
+                index = i;
+                break;
+            }
+            else if(currValue < iX) {
+                break;
+            }
+        }
+    }
+    return index;
+}
+float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
+    float MV =-999;
+    float y = MV;
+
+    if(x > iX[iX.size()-1])
+        return iY[iX.size()-1];
+    if(x < iX[0])
+        return iY[0];
+
+    int i0   = get_lower_index(x, iX);
+    int i1   = get_upper_index(x, iX);
+    float x0 = iX[i0];
+    float x1 = iX[i1];
+    float y0 = iY[i0];
+    float y1 = iY[i1];
+
+    if(x0 == x1)
+        y = (y0+y1)/2;
+    else {
+        assert(x1 >= x0);
+        y = y0 + (y1 - y0) * (x - x0)/(x1 - x0);
+    }
+
+    return y;
 }

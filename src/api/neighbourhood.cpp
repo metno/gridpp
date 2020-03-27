@@ -1,9 +1,6 @@
 #include "gridpp.h"
 
 namespace {
-    int getLowerIndex(float iX, const std::vector<float>& iValues);
-    int getUpperIndex(float iX, const std::vector<float>& iValues);
-    float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
     vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
     vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, const vec& thresholds);
 }
@@ -223,9 +220,12 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, int radius, float qua
         abort();
     }
     int Y = input.size();
+    assert(Y > 0);
     int X = input[0].size();
+    assert(X > 0);
     int E = input[0][0].size();
-    int size = Y * X * E;
+    assert(E > 0);
+    size_t size = Y * X * E;
     vec all_values;
     all_values.reserve(size);
     for(int y = 0; y < Y; y++) {
@@ -332,7 +332,7 @@ namespace {
                         yarray[t] += stats[t][y][x] / nE;
                     }
                 }
-                output[y][x] = interpolate(quantile, yarray, thresholds);
+                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
                 /*
                 if(yarray[1] > 0.1) {
                     std::cout << output[y][x] << std::endl;
@@ -348,70 +348,5 @@ namespace {
         double e_time = gridpp::util::clock() ;
         std::cout << e_time - s_time << " s" << std::endl;
         return output;
-    }
-    int getLowerIndex(float iX, const std::vector<float>& iValues) {
-        float MV=-999;
-       int index = MV;
-       for(int i = 0; i < (int) iValues.size(); i++) {
-          float currValue = iValues[i];
-          if(gridpp::util::is_valid(currValue)) {
-             if(currValue < iX) {
-                index = i;
-             }
-             else if(currValue == iX) {
-                index = i;
-                break;
-             }
-             else if(currValue > iX) {
-                break;
-             }
-          }
-       }
-       return index;
-    }
-    int getUpperIndex(float iX, const std::vector<float>& iValues) {
-        float MV=-999;
-       int index = MV;
-       for(int i = iValues.size()-1; i >= 0; i--) {
-          float currValue = iValues[i];
-          if(gridpp::util::is_valid(currValue)) {
-             if(currValue > iX) {
-                index = i;
-             }
-             else if(currValue == iX) {
-                index = i;
-                break;
-             }
-             else if(currValue < iX) {
-                break;
-             }
-          }
-       }
-       return index;
-    }
-    float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
-       float MV =-999;
-       float y = MV;
-
-       if(x > iX[iX.size()-1])
-          return iY[iX.size()-1];
-       if(x < iX[0])
-          return iY[0];
-
-       int i0   = getLowerIndex(x, iX);
-       int i1   = getUpperIndex(x, iX);
-       float x0 = iX[i0];
-       float x1 = iX[i1];
-       float y0 = iY[i0];
-       float y1 = iY[i1];
-
-       if(x0 == x1)
-          y = (y0+y1)/2;
-       else {
-          assert(x1 >= x0);
-          y = y0 + (y1 - y0) * (x - x0)/(x1 - x0);
-       }
-
-       return y;
     }
 }

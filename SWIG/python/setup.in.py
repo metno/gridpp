@@ -114,7 +114,7 @@ setup(
     #    'test': ['pytest'],
     },
 
-    test_suite="gridppOI.tests",
+    test_suite="gridpp.tests",
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
@@ -122,7 +122,7 @@ setup(
     #package_data={
     #    'sample': ['package_data.dat'],
     #},
-    py_modules=['gridppOI'],
+    py_modules=['gridpp'],
 
     cmdclass={'install': CompiledLibInstall},
     # cmdclass={'build': build},

@@ -9,6 +9,8 @@
 #include <boost/geometry/geometries/box.hpp>
 
 #include <boost/geometry/index/rtree.hpp>
+#define GRIDPP_VERSION "0.3.2-dev"
+#define __version__ GRIDPP_VERSION
 typedef std::vector<std::vector<std::vector<float> > > vec3;
 typedef std::vector<std::vector<float> > vec2;
 typedef std::vector<float> vec;
@@ -24,6 +26,7 @@ namespace gridpp {
     class KDTree;
     class Points;
     class Grid;
+    std::string version();
 
     /** Optimal interpolation
       * @param: input 2D field of background values
@@ -113,11 +116,14 @@ namespace gridpp {
         bool is_valid(float value);
         float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
         int num_missing_values(const vec2& iArray);
+        int get_lower_index(float iX, const std::vector<float>& iValues);
+        int get_upper_index(float iX, const std::vector<float>& iValues);
+        float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
 
         /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
           *  but including the first number after duplicated values. Include the lowest and highest
           *  values.
-          *  @param values vector of values (unsorted)
+          *  @param values vector of values (unsorted, and no invalid values)
           *  @param num number of thresholds to get
         */
         vec calc_even_quantiles(const vec& values, int num);

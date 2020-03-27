@@ -103,13 +103,12 @@ bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& 
 
 bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) {
 
-    float earth_radius = 6.37e6;
     double lonr = M_PI / 180 * lon;
     double latr = M_PI / 180 * lat;
     // std::cout << lon << " " << lat << std::endl;
-    x_coord = std::cos(latr) * std::cos(lonr) * earth_radius;
-    y_coord = std::cos(latr) * std::sin(lonr) * earth_radius;
-    z_coord = std::sin(latr) * earth_radius;
+    x_coord = std::cos(latr) * std::cos(lonr) * gridpp::radius_earth;
+    y_coord = std::cos(latr) * std::sin(lonr) * gridpp::radius_earth;
+    z_coord = std::sin(latr) * gridpp::radius_earth;
     return true;
 }
 float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lon2) {

@@ -25,7 +25,6 @@ bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4,
 
 bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
     // std::cout << "Method general" << std::endl;
-    float MV = -999;
     float a = -x0 + x2;
     float b = -x0 + x1;
     float c = x0 - x1 - x2 + x3;
@@ -34,7 +33,7 @@ bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float
     float f = -y0 + y1;
     float g = y0 - y1 - y2 + y3;
     float h = y - y0;
-    float alpha=MV, beta=MV;
+    float alpha=gridpp::MV, beta=gridpp::MV;
     float Y1 = y1;
     float Y2 = y3;
     float Y3 = y0;
@@ -104,8 +103,7 @@ float bilinear(float x, float y, float x0, float x1, float x2, float x3, float y
    // General method based on: https://stackoverflow.com/questions/23920976/bilinear-interpolation-with-non-aligned-input-points
    // Parallelogram method based on: http://www.ahinson.com/algorithms_general/Sections/InterpolationRegression/InterpolationIrregularBilinear.pdf
 
-   float MV = -999;
-   float s = MV, t = MV;
+   float s = gridpp::MV, t = gridpp::MV;
    bool rectangularGrid = (X1 == X3 && X2 == X4 && Y1 == Y2 && Y3 == Y4);
    bool verticalParallel = fabs((X3 - X1)*(Y4 - Y2) - (X4 - X2)*(Y3 - Y1)) <= 1e-6;
    bool horizontalParallel = fabs((X2 - X1)*(Y4 - Y3) - (X4 - X3)*(Y2 - Y1)) <= 1e-6;
@@ -234,7 +232,6 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     vec2 iOutputLons = ogrid.get_lons();
     vec2 iInputLats = igrid.get_lats();
     vec2 iInputLons = igrid.get_lons();
-    float MV = -999;
 
     int nLat = iOutputLats.size();
     int nLon = iOutputLats[0].size();
@@ -255,10 +252,10 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
             int J = indices[1];
             float lat = iOutputLats[i][j];
             float lon = iOutputLons[i][j];
-            int I1 = MV;
-            int I2 = MV;
-            int J1 = MV;
-            int J2 = MV;
+            int I1 = gridpp::MV;
+            int I2 = gridpp::MV;
+            int J1 = gridpp::MV;
+            int J2 = gridpp::MV;
             bool inside = ::findCoords(lat, lon, iInputLats, iInputLons, I, J, I1, J1, I2, J2);
             if(inside) {
                 float x0 = iInputLons[I1][J1];

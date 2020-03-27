@@ -57,8 +57,6 @@ int gridpp::optimal_interpolation(const vec2& input,
         output[y].resize(nX);
     }
 
-    float MV = -999;
-
     // Estimate the grid spacing
     float gridSize = gridpp::KDTree::calc_distance(blats[0][0], blons[0][0], blats[1][0], blons[1][0]);
     std::stringstream ss;
@@ -73,8 +71,8 @@ int gridpp::optimal_interpolation(const vec2& input,
 
     // Store the indicies (into the gPoints array) that a gridpoint has available
     std::vector<std::vector<std::vector<int> > > gLocIndices; // Y, X, obs indices
-    std::vector<float> pYi(nS, MV);
-    std::vector<float> pXi(nS, MV);
+    std::vector<float> pYi(nS, gridpp::MV);
+    std::vector<float> pXi(nS, gridpp::MV);
     gLocIndices.resize(nY);
     for(int y = 0; y < nY; y++) {
         gLocIndices[y].resize(nX);
@@ -169,7 +167,7 @@ int gridpp::optimal_interpolation(const vec2& input,
             for(int i = 0; i < lLocIndices0.size(); i++) {
                 int index = lLocIndices0[i];
                 float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], lat, lon);
-                float vdist = MV;
+                float vdist = gridpp::MV;
                 if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(elev)))
                     vdist = pelevs[index] - elev;
                 float lafdist = 0;
@@ -249,7 +247,7 @@ int gridpp::optimal_interpolation(const vec2& input,
                 int index = lLocIndices[i];
                 lR(i, i) = pci[index];
                 float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], lat, lon);
-                float vdist = MV;
+                float vdist = gridpp::MV;
                 if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(elev)))
                     vdist = pelevs[index] - elev;
                 float lafdist = 0;
@@ -260,7 +258,7 @@ int gridpp::optimal_interpolation(const vec2& input,
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
                     float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], plats[index_j], plons[index_j]);
-                    float vdist = MV;
+                    float vdist = gridpp::MV;
                     if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(pelevs[index_j])))
                         vdist = pelevs[index] - pelevs[index_j];
                     float lafdist = 0;

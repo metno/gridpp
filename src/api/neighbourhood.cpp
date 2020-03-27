@@ -25,7 +25,6 @@ vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, std::string opera
 }
 vec2 gridpp::neighbourhood(const vec2& input, int iRadius, std::string operation) {
     double s_time = gridpp::util::clock();
-    float MV = -999;
     bool fast = true;
     int count_stat = 0;
     int nY = input.size();
@@ -151,7 +150,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, std::string operation
                     int Nj = std::min(nX-1, j+iRadius) - std::max(0, j-iRadius) + 1;
                     assert(Ni > 0);
                     assert(Nj > 0);
-                    neighbourhood.resize(Ni*Nj, MV);
+                    neighbourhood.resize(Ni*Nj, gridpp::MV);
                     int index = 0;
                     for(int ii = std::max(0, i-iRadius); ii <= std::min(nY-1, i+iRadius); ii++) {
                         for(int jj = std::max(0, j-iRadius); jj <= std::min(nX-1, j+iRadius); jj++) {
@@ -244,7 +243,6 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, int radius, float qua
 }
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, std::string operation, float quantile) {
-        float MV = -999;
         int count_stat = 0;
         int nY = input.size();
         int nX = input[0].size();
@@ -267,7 +265,7 @@ namespace {
                 int Nj = std::min(nX-1, j+iRadius) - std::max(0, j-iRadius) + 1;
                 assert(Ni > 0);
                 assert(Nj > 0);
-                neighbourhood.resize(Ni*Nj, MV);
+                neighbourhood.resize(Ni*Nj, gridpp::MV);
                 int index = 0;
                 for(int ii = std::max(0, i-iRadius); ii <= std::min(nY-1, i+iRadius); ii++) {
                     for(int jj = std::max(0, j-iRadius); jj <= std::min(nX-1, j+iRadius); jj++) {
@@ -291,7 +289,6 @@ namespace {
     }
     vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, const vec& thresholds) {
         double s_time = gridpp::util::clock();
-        float MV = -999;
         bool fast = true;
         int count_stat = 0;
         int nY = input.size();

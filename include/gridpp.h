@@ -19,9 +19,9 @@ typedef std::vector<int> ivec;
 typedef std::vector<std::vector<int> > ivec2;
 
 namespace gridpp {
-    static float MV;
-    static float pi;
-    static double radiusEarth;
+    static const float MV = -999;
+    static const float pi = 3.14159265;
+    static double radius_earth = 6.37e6;
 
     class KDTree;
     class Points;

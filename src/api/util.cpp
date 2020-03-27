@@ -15,13 +15,11 @@ extern "C" void __gcov_flush();
 #endif
 
 bool gridpp::util::is_valid(float value) {
-    float MV = -999;
-    return !std::isnan(value) && !std::isinf(value) && value != MV;
+    return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV;
 }
 float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::util::StatType iStatType, float iQuantile) {
    // Initialize to missing
-   float MV = -999;
-   float value = MV;
+   float value = gridpp::MV;
    if(iStatType == gridpp::util::StatTypeMean || iStatType == gridpp::util::StatTypeSum) {
       float total = 0;
       int count = 0;
@@ -45,7 +43,7 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::uti
       // the resulting calculation of VAR(X-K) is stable. Set K to the first non-missing value.
       float total  = 0;
       float total2 = 0;
-      float K = MV;
+      float K = gridpp::MV;
       int count = 0;
       for(int n = 0; n < iArray.size(); n++) {
          if(gridpp::util::is_valid(iArray[n])) {
@@ -237,8 +235,7 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
 
 }
 int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
-    float MV=-999;
-    int index = MV;
+    int index = gridpp::MV;
     for(int i = 0; i < (int) iValues.size(); i++) {
         float currValue = iValues[i];
         if(gridpp::util::is_valid(currValue)) {
@@ -257,8 +254,7 @@ int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
     return index;
 }
 int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
-    float MV=-999;
-    int index = MV;
+    int index = gridpp::MV;
     for(int i = iValues.size()-1; i >= 0; i--) {
         float currValue = iValues[i];
         if(gridpp::util::is_valid(currValue)) {
@@ -277,8 +273,7 @@ int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
     return index;
 }
 float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
-    float MV =-999;
-    float y = MV;
+    float y = gridpp::MV;
 
     if(x > iX[iX.size()-1])
         return iY[iX.size()-1];

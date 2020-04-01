@@ -5,7 +5,6 @@ set(CMAKE_SWIG_FLAGS "")
 set_source_files_properties(../${PROJECT_NAME}.i PROPERTIES CPLUSPLUS ON)
 include_directories(../../include)
 
-
 # Add swig module
 #set(CMAKE_SWIG_FLAGS -interface _pygridpp)
 swig_add_library(gridpp TYPE SHARED LANGUAGE python SOURCES ../${PROJECT_NAME}.i)

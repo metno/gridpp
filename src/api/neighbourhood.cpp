@@ -211,7 +211,7 @@ vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int radiu
             input3[i][j].push_back(input[i][j]);
         }
     }
-    return gridpp::neighbourhood_quantile_ens(input3, radius, quantile, num_thresholds);
+    return gridpp::neighbourhood_quantile_ens(input3, quantile, radius, num_thresholds);
 }
 vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds) {
     if(num_thresholds == 0) {
@@ -239,7 +239,7 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int r
     std::sort(all_values.begin(), all_values.end());
     vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
 
-    return ::neighbourhood_quantile_ens(input, radius, quantile, thresholds);
+    return ::neighbourhood_quantile_ens(input, quantile, radius, thresholds);
 }
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, std::string operation, float quantile) {
@@ -290,6 +290,8 @@ namespace {
     vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
         double s_time = gridpp::util::clock();
         bool fast = true;
+        assert(quantile >= 0);
+        assert(quantile <= 1);
         int count_stat = 0;
         int nY = input.size();
         int nX = input[0].size();

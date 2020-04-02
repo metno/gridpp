@@ -76,12 +76,12 @@ namespace gridpp {
 
     /** Neighbourhood quantile in space and across members
       * @param: input Ensemble values with dimensions Y, X, E
-      * @param: radius filter radius in number of gridpoints
       * @param: quantile which quantile to compute (between 0 and 1)
+      * @param: radius filter radius in number of gridpoints
       * @param: num_threhsolds number of thresholds to use to approximate value (0 for no approximation).
     */
-    vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, int num_thresholds);
-    vec2 neighbourhood_quantile(const vec2& input, int radius, float quantile, int num_thresholds);
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds);
+    vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds);
 
     /** Fill in values inside or outside a set of circles
       * @param: input Deterministic values with dimensions Y, X

@@ -2,7 +2,7 @@
 
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
-    vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, const vec& thresholds);
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
 }
 
 
@@ -203,7 +203,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, std::string operation
     // std::cout << count_stat << " " << e_time - s_time << " s" << std::endl;
     return output;
 }
-vec2 gridpp::neighbourhood_quantile(const vec2& input, int radius, float quantile, int num_thresholds) {
+vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds) {
     vec3 input3(input.size());
     for(int i = 0; i < input.size(); i++) {
         input3[i].resize(input[i].size());
@@ -213,7 +213,7 @@ vec2 gridpp::neighbourhood_quantile(const vec2& input, int radius, float quantil
     }
     return gridpp::neighbourhood_quantile_ens(input3, radius, quantile, num_thresholds);
 }
-vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, int num_thresholds) {
+vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds) {
     if(num_thresholds == 0) {
         // TODO
         abort();
@@ -287,7 +287,7 @@ namespace {
             }
         }
     }
-    vec2 neighbourhood_quantile_ens(const vec3& input, int radius, float quantile, const vec& thresholds) {
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
         double s_time = gridpp::util::clock();
         bool fast = true;
         int count_stat = 0;

@@ -315,7 +315,7 @@ namespace {
                temp[y].resize(nX, 0);
                for(int x = 0; x < nX; x++) {
                    for(int e = 0; e < nE; e++) {
-                       if(input[y][x][e] < thresholds[t]) {
+                       if(input[y][x][e] <= thresholds[t]) {
                            temp[y][x] += 1.0 / nE;
                        }
                    }

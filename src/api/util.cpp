@@ -275,9 +275,9 @@ int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
 float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
     float y = gridpp::MV;
 
-    if(x > iX[iX.size()-1])
+    if(x >= iX[iX.size()-1])
         return iY[iX.size()-1];
-    if(x < iX[0])
+    if(x <= iX[0])
         return iY[0];
 
     int i0   = get_lower_index(x, iX);

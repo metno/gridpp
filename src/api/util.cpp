@@ -296,3 +296,6 @@ float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std
 
     return y;
 }
+void gridpp::util::not_implemented_error() {
+    gridpp::util::error("Not implemented");
+}

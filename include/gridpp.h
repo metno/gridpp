@@ -119,6 +119,7 @@ namespace gridpp {
         int get_lower_index(float iX, const std::vector<float>& iValues);
         int get_upper_index(float iX, const std::vector<float>& iValues);
         float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
+        void not_implemented_error();
 
         /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
           *  but including the first number after duplicated values. Include the lowest and highest

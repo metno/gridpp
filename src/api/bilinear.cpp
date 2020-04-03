@@ -225,6 +225,7 @@ bool findCoords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, in
 }
 }
 vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
+    gridpp::util::not_implemented_error();
 }
 
 vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {

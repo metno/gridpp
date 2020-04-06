@@ -104,12 +104,23 @@ namespace gridpp {
     // Grid to grid interpolation
     vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
+    // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
 
     // Grid to point interpolation
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
     vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
 
+    /** Diagnose QNH from pressure and altitude
+     *  @param pressure Pressure at point [pa]
+     *  @param altitude Altitude of point [m]
+    */
+    float qnh(float pressure, float altitude);
+    vec qnh(const vec& pressure, const vec& altitude);
+
     namespace util {
+        // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
+        // ivec regression(const vec& x, const vec& y);
         enum StatType {
             StatTypeMean      = 0,
             StatTypeMin       = 10,
@@ -138,6 +149,7 @@ namespace gridpp {
           *  @param num number of thresholds to get
         */
         vec calc_even_quantiles(const vec& values, int num);
+        void check_equal_size(const vec& v1, const vec& v2);
     }
 
     class KDTree {

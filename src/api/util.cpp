@@ -301,6 +301,8 @@ void gridpp::util::not_implemented_error() {
 }
 void gridpp::util::check_equal_size(const vec& v1, const vec& v2) {
     if(v1.size() != v2.size()) {
-        gridpp::util::error("Vectors are not of the same size");
+        std::stringstream ss;
+        ss << "Vectors are not of the same size: " << v1.size() << " != " << v2.size();
+        gridpp::util::error(ss.str());
     }
 }

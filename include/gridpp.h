@@ -114,9 +114,33 @@ namespace gridpp {
     /** Diagnose QNH from pressure and altitude
      *  @param pressure Pressure at point [pa]
      *  @param altitude Altitude of point [m]
+     *  @returns QNH [pa]
     */
     float qnh(float pressure, float altitude);
     vec qnh(const vec& pressure, const vec& altitude);
+
+    /** Diagnose dewpoint temperature
+     *  @param temperature Temperature [K]
+     *  @param relative_humidity Relative humidity [1]
+     *  @returns Dewpoint temperature [K]
+    */
+    float dewpoint(float temperature, float relative_humidity);
+    vec dewpoint(const vec& temperature, const vec& relative_humidity);
+
+    /** Diagnose relative humidity
+     *  @param temperature Temperature [K]
+     *  @param dewpoint Dewpoint temperature [K]
+     *  @returns Relative humidity [1]
+    */
+    float relative_humidity(float temperature, float dewpoint);
+
+    /** Diagnose wetbulb temperature
+     *  @param temperature Temperature [K]
+     *  @param pressure Air pressure [pa]
+     *  @param Relative humidity [1]
+     *  @returns Wetbulb temperature [K]
+    */
+    float wetbulb(float temperature, float pressure, float relative_humidity);
 
     namespace util {
         // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
@@ -149,6 +173,8 @@ namespace gridpp {
           *  @param num number of thresholds to get
         */
         vec calc_even_quantiles(const vec& values, int num);
+
+        /** Raises an exception if the two arrays are not the same size */
         void check_equal_size(const vec& v1, const vec& v2);
     }
 

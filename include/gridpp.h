@@ -13,6 +13,7 @@
 #define __version__ GRIDPP_VERSION
 typedef std::vector<std::vector<std::vector<float> > > vec3;
 typedef std::vector<std::vector<float> > vec2;
+typedef std::vector<std::vector<double> > dvec2;
 typedef std::vector<float> vec;
 // typedef std::vector<float> fvec;
 typedef std::vector<int> ivec;
@@ -78,10 +79,19 @@ namespace gridpp {
       * @param: input Ensemble values with dimensions Y, X, E
       * @param: quantile which quantile to compute (between 0 and 1)
       * @param: radius filter radius in number of gridpoints
-      * @param: num_threhsolds number of thresholds to use to approximate value (0 for no approximation).
+      * @param: num_thresholds number of thresholds to use to approximate value (0 for no approximation).
     */
     vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds);
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
     vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds);
+
+    /** Compute neighbourhood without any shortcuts. This is likely quite slow.
+     *  @param: input
+     *  @param: radius filter radius in number of gridpoints
+     *  @param: operation one of min, mean, median, max, quantile
+     *  @param: quantile quantile to calculate for if operation="quantile"
+    */
+    vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
 
     /** Fill in values inside or outside a set of circles
       * @param: input Deterministic values with dimensions Y, X

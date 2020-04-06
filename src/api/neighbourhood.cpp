@@ -1,11 +1,5 @@
 #include "gridpp.h"
 
-namespace {
-    vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
-}
-
-
 vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, std::string operation) {
     vec2 flat(input.size());
     int Y = input.size();
@@ -197,7 +191,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, std::string operation
         }
     }
     else {
-        output = ::neighbourhood_brute_force(input, iRadius, operation, 0);
+        output = gridpp::neighbourhood_brute_force(input, iRadius, operation, 0);
     }
     double e_time = gridpp::util::clock() ;
     // std::cout << count_stat << " " << e_time - s_time << " s" << std::endl;
@@ -239,113 +233,111 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int r
     std::sort(all_values.begin(), all_values.end());
     vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
 
-    return ::neighbourhood_quantile_ens(input, quantile, radius, thresholds);
+    return gridpp::neighbourhood_quantile_ens(input, quantile, radius, thresholds);
 }
-namespace {
-    vec2 neighbourhood_brute_force(const vec2& input, int iRadius, std::string operation, float quantile) {
-        int count_stat = 0;
-        int nY = input.size();
-        int nX = input[0].size();
-        vec2 output(nY);
-        gridpp::util::StatType stat_type = gridpp::util::getStatType(operation);
-        for(int y = 0; y < nY; y++) {
-            output[y].resize(nX, 0);
-        }
-        vec2 values;
-        values.resize(nY);
-        for(int i = 0; i < nY; i++) {
-            values[i].resize(nX, 0);
-        }
-// #pragma omp parallel for
-        for(int i = 0; i < nY; i++) {
-            for(int j = 0; j < nX; j++) {
-                // Put neighbourhood into vector
-                std::vector<float> neighbourhood;
-                int Ni = std::min(nY-1, i+iRadius) - std::max(0, i-iRadius) + 1;
-                int Nj = std::min(nX-1, j+iRadius) - std::max(0, j-iRadius) + 1;
-                assert(Ni > 0);
-                assert(Nj > 0);
-                neighbourhood.resize(Ni*Nj, gridpp::MV);
-                int index = 0;
-                for(int ii = std::max(0, i-iRadius); ii <= std::min(nY-1, i+iRadius); ii++) {
-                    for(int jj = std::max(0, j-iRadius); jj <= std::min(nX-1, j+iRadius); jj++) {
-                        float value = input[ii][jj];
-                        assert(index < Ni*Nj);
-                        neighbourhood[index] = value;
-                        index++;
-                    }
+vec2 gridpp::neighbourhood_brute_force(const vec2& input, int iRadius, std::string operation, float quantile) {
+    int count_stat = 0;
+    int nY = input.size();
+    int nX = input[0].size();
+    vec2 output(nY);
+    gridpp::util::StatType stat_type = gridpp::util::getStatType(operation);
+    for(int y = 0; y < nY; y++) {
+        output[y].resize(nX, 0);
+    }
+    vec2 values;
+    values.resize(nY);
+    for(int i = 0; i < nY; i++) {
+        values[i].resize(nX, 0);
+    }
+    // #pragma omp parallel for
+    for(int i = 0; i < nY; i++) {
+        for(int j = 0; j < nX; j++) {
+            // Put neighbourhood into vector
+            std::vector<float> neighbourhood;
+            int Ni = std::min(nY-1, i+iRadius) - std::max(0, i-iRadius) + 1;
+            int Nj = std::min(nX-1, j+iRadius) - std::max(0, j-iRadius) + 1;
+            assert(Ni > 0);
+            assert(Nj > 0);
+            neighbourhood.resize(Ni*Nj, gridpp::MV);
+            int index = 0;
+            for(int ii = std::max(0, i-iRadius); ii <= std::min(nY-1, i+iRadius); ii++) {
+                for(int jj = std::max(0, j-iRadius); jj <= std::min(nX-1, j+iRadius); jj++) {
+                    float value = input[ii][jj];
+                    assert(index < Ni*Nj);
+                    neighbourhood[index] = value;
+                    index++;
                 }
-                assert(index == Ni*Nj);
-                values[i][j] = gridpp::util::calculate_stat(neighbourhood, stat_type, quantile);
-                count_stat += neighbourhood.size();
             }
-        }
-// #pragma omp parallel for
-        for(int i = 0; i < nY; i++) {
-            for(int j = 0; j < nX; j++) {
-                output[i][j] = values[i][j];
-            }
+            assert(index == Ni*Nj);
+            values[i][j] = gridpp::util::calculate_stat(neighbourhood, stat_type, quantile);
+            count_stat += neighbourhood.size();
         }
     }
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
-        double s_time = gridpp::util::clock();
-        bool fast = true;
-        assert(quantile >= 0);
-        assert(quantile <= 1);
-        int count_stat = 0;
-        int nY = input.size();
-        int nX = input[0].size();
-        int nE = input[0][0].size();
-        vec2 output(nY);
-
-        for(int y = 0; y < nY; y++) {
-            output[y].resize(nX, 0);
+    // #pragma omp parallel for
+    for(int i = 0; i < nY; i++) {
+        for(int j = 0; j < nX; j++) {
+            output[i][j] = values[i][j];
         }
+    }
+}
+vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
+    double s_time = gridpp::util::clock();
+    bool fast = true;
+    assert(quantile >= 0);
+    assert(quantile <= 1);
+    int count_stat = 0;
+    int nY = input.size();
+    int nX = input[0].size();
+    int nE = input[0][0].size();
+    vec2 output(nY);
+
+    for(int y = 0; y < nY; y++) {
+        output[y].resize(nX, 0);
+    }
 
 
-        // Compute
-        vec3 stats(thresholds.size());
-        for(int t = 0; t < thresholds.size(); t++) {
-            stats[t].resize(nY);
-            for(int y = 0; y < nY; y++) {
-                stats[t][y].resize(nX, 0);
-           }
-           vec2 temp(nY);
-           for(int y = 0; y < nY; y++) {
-               temp[y].resize(nX, 0);
-               for(int x = 0; x < nX; x++) {
-                   for(int e = 0; e < nE; e++) {
-                       if(input[y][x][e] <= thresholds[t]) {
-                           temp[y][x] += 1.0 / nE;
-                       }
-                   }
-               }
-           }
-           stats[t] = gridpp::neighbourhood(temp, radius, "mean");
-        }
+    // Compute
+    vec3 stats(thresholds.size());
+    for(int t = 0; t < thresholds.size(); t++) {
+        stats[t].resize(nY);
         for(int y = 0; y < nY; y++) {
+            stats[t][y].resize(nX, 0);
+        }
+        vec2 temp(nY);
+        for(int y = 0; y < nY; y++) {
+            temp[y].resize(nX, 0);
             for(int x = 0; x < nX; x++) {
-                vec yarray(thresholds.size());
-                for(int t = 0; t < thresholds.size(); t++) {
-                    for(int e = 0; e < nE; e++) {
-                        yarray[t] += stats[t][y][x] / nE;
+                for(int e = 0; e < nE; e++) {
+                    if(input[y][x][e] <= thresholds[t]) {
+                        temp[y][x] += 1.0 / nE;
                     }
                 }
-                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
-                /*
-                if(yarray[1] > 0.1) {
-                    std::cout << output[y][x] << std::endl;
-                    for(int t = 0; t < thresholds.size(); t++) {
-                        std::cout << thresholds[t] << " " << stats[t][y][x] << std::endl;
-                    }
-                    abort();
-                }
-                */
             }
         }
-
-        double e_time = gridpp::util::clock() ;
-        std::cout << e_time - s_time << " s" << std::endl;
-        return output;
+        stats[t] = gridpp::neighbourhood(temp, radius, "mean");
     }
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            vec yarray(thresholds.size());
+            for(int t = 0; t < thresholds.size(); t++) {
+                for(int e = 0; e < nE; e++) {
+                    yarray[t] += stats[t][y][x] / nE;
+                }
+            }
+            output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
+            /*
+               if(yarray[1] > 0.1) {
+               std::cout << output[y][x] << std::endl;
+               for(int t = 0; t < thresholds.size(); t++) {
+               std::cout << thresholds[t] << " " << stats[t][y][x] << std::endl;
+               }
+               abort();
+               }
+               */
+        }
+    }
+
+    double e_time = gridpp::util::clock() ;
+    std::cout << e_time - s_time << " s" << std::endl;
+    return output;
 }

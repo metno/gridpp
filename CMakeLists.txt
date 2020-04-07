@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 file (READ "${CMAKE_CURRENT_SOURCE_DIR}/include/gridpp.h" VERSION0)
 project(gridpp)
-string(REGEX REPLACE "^.+define GRIDPP_VERSION \"(.+)\".+" "\\1" PROJECT_VERSION ${VERSION0})
+string(REGEX REPLACE "^.+define GRIDPP_VERSION \"([^\n]+)\".+" "\\1" PROJECT_VERSION ${VERSION0})
+message(${PROJECT_VERSION})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

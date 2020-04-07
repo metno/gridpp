@@ -19,6 +19,7 @@ install:
  - sudo apt-get install netcdf-bin libnetcdf-dev
  - sudo apt-get install libgtest-dev
  - sudo apt-get install lcov
+ - sudo apt-get install swig
  - sudo gem install coveralls-lcov
  - sudo apt-get install libarmadillo6 libarmadillo-dev
 

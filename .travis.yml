@@ -5,10 +5,10 @@ language: cpp
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=RELEASE
     - os: linux
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=DEBUG
 
 install:

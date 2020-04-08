@@ -27,6 +27,16 @@ namespace gridpp {
     class KDTree;
     class Points;
     class Grid;
+    class Interpolator;
+    class Nearest;
+    class Parameters;
+    enum Extrapolation {
+            ExtrapolationOneToOne = 0,
+            ExtrapolationMeanSlope = 10,
+            ExtrapolationNearestSlope = 20,
+            ExtrapolationZero = 30,
+        };
+
     std::string version();
 
     /** Optimal interpolation
@@ -100,6 +110,14 @@ namespace gridpp {
       * @param: outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+
+    // With parameter interpolator
+    vec2 quantile_mapping(const vec2& input, const Grid& grid, gridpp::Extrapolation policy, const Parameters& parameters);
+    // Constant map over the whole domain
+    vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+    // Processes a vector
+    vec quantile_mapping(const vec& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+    float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
 
     // Grid to grid interpolation
     vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
@@ -300,6 +318,26 @@ namespace gridpp {
             vec2 mLafs;
     };
 
+    class Interpolator {
+        public:
+            float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const;
+    };
+    class Nearest: public Interpolator {
+        public:
+            Nearest(int num=1);
+            float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude=gridpp::MV, float land_area_fraction=gridpp::MV) const;
+        private:
+            int m_num;
+    };
+    class Parameters {
+        public:
+            Parameters(const gridpp::Points& points, const vec2& values, const gridpp::Interpolator& interpolator);
+            vec get(float lat, float lon, float altitude, float land_area_fraction) const;
+        protected:
+            Points m_points;
+            vec2 m_values;
+            Interpolator m_interpolator;
+    };
 
     /*
     namespace downscaling {

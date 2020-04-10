@@ -1,5 +1,9 @@
 #include "gridpp.h"
 
+gridpp::Points::Points() {
+    // TODO: Deal with the empty case. Can't really find nearest neighbours then
+
+}
 gridpp::Points::Points(vec lats, vec lons, vec elevs, vec lafs) {
     mLats = lats;
     mLons = lons;

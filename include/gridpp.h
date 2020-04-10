@@ -281,6 +281,7 @@ namespace gridpp {
 
     class Points  {
         public:
+            Points();
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
             int get_nearest_neighbour(float lat, float lon) const;
             ivec get_neighbours(float lat, float lon, float radius) const;
@@ -303,6 +304,7 @@ namespace gridpp {
 
     class Grid {
         public:
+            Grid();
             Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2());
             ivec get_nearest_neighbour(float lat, float lon) const;
             ivec2 get_neighbours(float lat, float lon, float radius) const;

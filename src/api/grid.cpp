@@ -1,5 +1,8 @@
 #include "gridpp.h"
 
+gridpp::Grid::Grid() {
+
+}
 gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs) {
     mLats = lats;
     mLons = lons;

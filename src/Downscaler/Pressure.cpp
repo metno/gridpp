@@ -10,47 +10,17 @@ DownscalerPressure::DownscalerPressure(const Variable& iInputVariable, const Var
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {
-   int nLat = iOutput.getNumY();
-   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
 
-   vec2 ilats  = iInput.getLats();
-   vec2 ilons  = iInput.getLons();
-   vec2 ielevs = iInput.getElevs();
-   vec2 olats  = iOutput.getLats();
-   vec2 olons  = iOutput.getLons();
-   vec2 oelevs = iOutput.getElevs();
-
-   // Get nearest neighbour
-   vec2Int nearestI, nearestJ;
-   getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
-
+   gridpp::Grid igrid(iInput.getLats(), iInput.getLons());
+   gridpp::Grid ogrid(iOutput.getLats(), iOutput.getLons());
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);
       Field& ofield = *iOutput.getField(mOutputVariable, t, true);
 
-      #pragma omp parallel for
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            int Icenter = nearestI[i][j];
-            int Jcenter = nearestJ[i][j];
-            assert(Icenter < ielevs.size());
-            assert(Jcenter < ielevs[Icenter].size());
-            for(int e = 0; e < nEns; e++) {
-               float currElev = oelevs[i][j];
-               float nearestElev = ielevs[Icenter][Jcenter];
-               if(!Util::isValid(currElev) || !Util::isValid(nearestElev)) {
-                  // Can't adjust if we don't have an elevation, use nearest neighbour
-                  ofield(i,j,e) = ifield(Icenter,Jcenter,e);
-               }
-               else {
-                  float nearestPressure = ifield(Icenter,Jcenter,e);
-                  float currPressure = calcPressure(nearestElev, nearestPressure, currElev);
-                  ofield(i,j,e) = currPressure;
-               }
-            }
-         }
+      for(int e = 0; e < nEns; e++) {
+         ofield.set(gridpp::pressure(igrid, ogrid, ifield(e)), e);
       }
    }
 }

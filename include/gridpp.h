@@ -124,6 +124,16 @@ namespace gridpp {
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
     // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
     // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
+    vec2 pressure(const Grid& igrid, const Grid& ogrid, const vec2& ipressure, const vec2& itemperature=vec2());
+
+    /** Calculate pressure at a new altitude
+     *  @param ialtitude Altitude at start point
+     *  @param oaltitude Altitude at new point
+     *  @param ipressure Pressure at start point
+     *  @param itemperature Temperature at start point
+     *  @return Pressure at new point
+     */
+    float pressure(float ialtitude, float oaltitude, float ipressure, float itemperature=288.15);
 
     // Grid to point interpolation
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);

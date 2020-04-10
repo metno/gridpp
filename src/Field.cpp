@@ -18,6 +18,30 @@ std::vector<float> Field::operator()(unsigned int y, unsigned int x) const {
    return values;
 }
 
+std::vector<std::vector<float> > Field::operator()(unsigned int e) const {
+
+    std::vector<std::vector<float> > values(mNY);
+    for(int y = 0; y < mNY; y++) {
+        values[y].resize(mNX, Util::MV);
+    }
+    for(int y = 0; y < mNY; y++) {
+        for(int x = 0; x < mNX; x++) {
+            values[y][x] = mValues[getIndex(y, x, e)];
+        }
+    }
+    return values;
+}
+
+void Field::set(std::vector<std::vector<float> > iValues, unsigned int e) {
+    assert(iValues.size() == mNY);
+    for(int y = 0; y < mNY; y++) {
+        assert(iValues[y].size() == mNX);
+        for(int x = 0; x < mNX; x++) {
+            mValues[getIndex(y, x, e)] = iValues[y][x];
+        }
+    }
+}
+
 int Field::getNumY() const {
    return mNY;
 }

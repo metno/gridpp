@@ -36,6 +36,8 @@ class Field {
       //! @param x x-axis index
       //! @return ensemble of values
       std::vector<float> operator()(unsigned int y, unsigned int x) const;
+      std::vector<std::vector<float> > operator()(unsigned int e) const;
+      void set(std::vector<std::vector<float> > iValues, unsigned int e);
 
       //! Are all values (for all lat/lon/ens) in fields identical?
       bool operator==(const Field& iField) const;

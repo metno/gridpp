@@ -19,9 +19,9 @@ class CalibratorNeighbourhood : public Calibrator {
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       int mRadius;
       Util::StatType mStatType;
+      std::string mStatTypeName;
       float mQuantile;
       bool mFast;
-      bool mApprox;
-      int numMissingValues(const Field& iField, int iEnsIndex) const;
+      int mNumThresholds;
 };
 #endif

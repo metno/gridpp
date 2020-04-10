@@ -62,6 +62,7 @@ function(list_sources sources)
    set(${sources}
       ${CORESRC}
       ${CALSRC}
+      ${APISRC}
       ${FILESRC}
       ${DOWNSRC}
       ${PARSRC} PARENT_SCOPE)
@@ -73,8 +74,7 @@ function(add_gridpp_library target lib_type)
    target_include_directories(${target} PUBLIC "${NETCDF_INCLUDE_DIRS}")
    target_include_directories(${target} PUBLIC "${GSL_INCLUDE_DIRS}")
    target_include_directories(${target} PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
-
-   set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp)
+   set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp_cml)
 endfunction()
 
 list_sources(SRC)
@@ -145,11 +145,12 @@ install(TARGETS gridpp-bin gridpp-train
 
 include_directories(./include)
 file(GLOB SOURCES "src/api/*.cpp")
-add_library(gridpp SHARED ${SOURCES})
+add_library(gridpp SHARED ${APISRC})
 target_link_libraries(gridpp "${Boost_LIBRARIES}")
 target_link_libraries(gridpp "${NETCDF_LIBRARIES}")
 target_link_libraries(gridpp "${GSL_LIBRARIES}")
 target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
+# target_link_libraries(gridpp gridpp)
 target_include_directories(gridpp PUBLIC "${Boost_INCLUDE_DIR}")
 target_include_directories(gridpp PUBLIC "${NETCDF_INCLUDE_DIRS}")
 target_include_directories(gridpp PUBLIC "${GSL_INCLUDE_DIRS}")

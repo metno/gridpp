@@ -8,7 +8,8 @@ include_directories(../../include)
 # Add swig module
 #set(CMAKE_SWIG_FLAGS -interface _pygridpp)
 swig_add_library(gridpp TYPE SHARED LANGUAGE python SOURCES ../${PROJECT_NAME}.i)
-swig_link_libraries(gridpp ${PROJECT_NAME} ${PYTHON_LIBRARIES})
+#swig_link_libraries(gridpp ${PROJECT_NAME} ${PYTHON_LIBRARIES})
+swig_link_libraries(gridpp gridpp ${PYTHON_LIBRARIES})
 #set_property(TARGET _pygridpp PROPERTY OUTPUT_NAME gridpp)
 
 # Files to install with Python

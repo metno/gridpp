@@ -137,6 +137,15 @@ namespace gridpp {
     float qnh(float pressure, float altitude);
     vec qnh(const vec& pressure, const vec& altitude);
 
+    /** Diagnose wind speed from its components
+     *  @param xwind X-component of wind [any unit]
+     *  @param ywind Y-component of wind [any unit]
+     *  @return Wind speed [any unit]
+     * */
+    float wind_speed(float xwind, float ywind);
+    vec wind_speed(const vec& xwind, const vec& ywind);
+    vec2 wind_speed(const vec2& xwind, const vec2& ywind);
+
     /** Diagnose dewpoint temperature
      *  @param temperature Temperature [K]
      *  @param relative_humidity Relative humidity [1]

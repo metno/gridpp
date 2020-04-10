@@ -3,7 +3,7 @@
 
 #include "Downscaler.h"
 #include "../File/File.h"
-#include "../KDTree.h"
+#include "gridpp.h"
 
 std::map<Uuid, std::map<Uuid, std::pair<vec2Int, vec2Int> > > Downscaler::mNeighbourCache;
 
@@ -198,8 +198,18 @@ void Downscaler::getNearestNeighbour(const File& iFrom, const File& iTo, vec2Int
       }
    }
 
-   KDTree searchTree(iFrom.getLats(), iFrom.getLons());
-   searchTree.getNearestNeighbour(iTo, iI, iJ);
+   gridpp::Grid searchTree(iFrom.getLats(), iFrom.getLons());
+   iI.resize(nLat);
+   iJ.resize(nLat);
+   for(int y = 0; y < nLat; y++) {
+       iI[y].resize(nLon, Util::MV);
+       iJ[y].resize(nLon, Util::MV);
+       for(int x = 0; x < nLon; x++) {
+          ivec indices = searchTree.get_nearest_neighbour(olats[y][x], olons[y][x]);
+          iI[y][x] = indices[0];
+          iJ[y][x] = indices[1];
+       }
+   }
 
    addToCache(iFrom, iTo, iI, iJ);
 }

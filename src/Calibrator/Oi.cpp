@@ -6,6 +6,7 @@
 #include <math.h>
 #include <armadillo>
 #include "Neighbourhood.h"
+#include "gridpp.h"
 
 CalibratorOi::CalibratorOi(Variable iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
@@ -233,7 +234,7 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
    // For each gridpoint, find which observations are relevant. Parse the observations and only keep
    // those that pass certain checks
    double time_s = Util::clock();
-   KDTree searchTree(iFile.getLats(), iFile.getLons());
+   gridpp::Grid searchTree(iFile.getLats(), iFile.getLons());
    for(int i = 0; i < gS; i++) {
       if(i % 1000 == 0) {
          std::stringstream ss;
@@ -249,8 +250,9 @@ bool CalibratorOi::calibrateCore(File& iFile, const ParameterFile* iParameterFil
          gRadarL[i] = parameters[2];
 
       gElevs[i] = gLocations[i].elev();
-      int Y, X;
-      searchTree.getNearestNeighbour(gLocations[i].lat(), gLocations[i].lon(), Y, X);
+      ivec indices = searchTree.get_nearest_neighbour(gLocations[i].lat(), gLocations[i].lon());
+      int Y = indices[0];
+      int X = indices[1];
       gYi[i] = Y;
       gXi[i] = X;
       gLafs[i] = lafs[Y][X];

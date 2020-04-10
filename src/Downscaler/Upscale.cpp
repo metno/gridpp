@@ -1,7 +1,7 @@
 #include "Upscale.h"
 #include "../File/File.h"
 #include "../Util.h"
-#include "../KDTree.h"
+#include "gridpp.h"
 #include <math.h>
 
 // std::map<const File*, std::map<const File*, std::pair<vec2Int, vec2Int> > > DownscalerUpscale::mNeighbourCache;
@@ -29,15 +29,25 @@ DownscalerUpscale::DownscalerUpscale(const Variable& iInputVariable, const Varia
 }
 
 void DownscalerUpscale::downscaleCore(const File& iInput, File& iOutput) const {
+   int iLat = iInput.getNumY();
+   int iLon = iInput.getNumX();
    int nLat = iOutput.getNumY();
    int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
+   vec2 ilats = iInput.getLats();
+   vec2 ilons = iInput.getLons();
 
    // Create a map from each input point to the output grid
    vec2Int I, J;
-   KDTree searchTree(iOutput.getLats(), iOutput.getLons());
-   searchTree.getNearestNeighbour(iInput, I, J);
+   gridpp::Grid searchTree(iOutput.getLats(), iOutput.getLons());
+   for(int y = 0; y < iLat; y++) {
+       for(int x = 0; x < iLon; x++) {
+          ivec indices = searchTree.get_nearest_neighbour(ilats[y][x], ilons[y][x]);
+          I[y][x] = indices[0];
+          J[y][x] = indices[1];
+       }
+   }
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);

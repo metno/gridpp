@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "../Util.h"
+#include "gridpp.h"
 #include <assert.h>
 #include <set>
 #include <fstream>
@@ -20,17 +21,16 @@ ParameterFile::ParameterFile(const Options& iOptions, bool iIsNew) :
 
 void ParameterFile::recomputeTree() const {
    if(isLocationDependent()) {
-      vec2 lats, lons;
+      vec lats, lons;
       LocationParameters::const_iterator it = mParameters.begin();
       for(it = mParameters.begin(); it != mParameters.end(); it++) {
          const Location loc = it->first;
-         std::vector<float> lat(1, loc.lat());
-         std::vector<float> lon(1, loc.lon());
-         lats.push_back(lat);
-         lons.push_back(lon);
+         lats.push_back(loc.lat());
+         lons.push_back(loc.lon());
          mLocations.push_back(loc);
       }
-      mNearestNeighbourTree.build(lats, lons);
+      gridpp::Points points(lats, lons);
+      mNearestNeighbourTree = points;
    }
 }
 
@@ -147,8 +147,7 @@ bool ParameterFile::getNearestLocation(int iTime, const Location& iLocation, Loc
       LocationParameters::const_iterator it2 = mParameters.find(iLocation);
       if(it2 == mParameters.end()) {
          // If not, use the nearest neighbour
-         int I, J;
-         mNearestNeighbourTree.getNearestNeighbour(iLocation.lat(), iLocation.lon(), I, J);
+         int I = mNearestNeighbourTree.get_nearest_neighbour(iLocation.lat(), iLocation.lon());
          const Location& loc = mLocations[I];
          it2 = mParameters.find(loc);
       }

@@ -4,6 +4,7 @@
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
+#include "gridpp.h"
 CalibratorOverride::CalibratorOverride(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
       mRadius(0),
@@ -27,11 +28,13 @@ bool CalibratorOverride::calibrateCore(File& iFile, const ParameterFile* iParame
    }
 
    std::vector<Location> pointLocations = iParameterFile->getLocations();
-   KDTree searchTree(iFile.getLats(), iFile.getLons());
+   gridpp::Grid searchTree(iFile.getLats(), iFile.getLons());
    std::vector<int> Ys(pointLocations.size(), 0);
    std::vector<int> Xs(pointLocations.size(), 0);
    for(int k = 0; k < pointLocations.size(); k++) {
-      searchTree.getNearestNeighbour(pointLocations[k].lat(), pointLocations[k].lon(), Ys[k], Xs[k]);
+      ivec indices = searchTree.get_nearest_neighbour(pointLocations[k].lat(), pointLocations[k].lon());
+      Ys[k] = indices[0];
+      Xs[k] = indices[1];
    }
 
    // Loop over offsets

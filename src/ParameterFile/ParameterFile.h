@@ -49,6 +49,8 @@ class ParameterFile : public Scheme {
       // Returns Util::MV if the number are not consistent
       int getNumParameters() const;
 
+      gridpp::Parameters getApiParameters(int iTime) const;
+
       std::string getFilename() const;
       virtual std::string name() const = 0;
       virtual void write() const {};

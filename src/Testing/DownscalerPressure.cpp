@@ -2,6 +2,7 @@
 #include "../File/File.h"
 #include "../Downscaler/Pressure.h"
 #include <gtest/gtest.h>
+#include "gridpp.h"
 
 namespace {
    class TestDownscalerPressure : public ::testing::Test {
@@ -64,19 +65,19 @@ namespace {
       ASSERT_EQ(1, toT.getNumY());
       ASSERT_EQ(4, toT.getNumX());
       // T = T(nn) * exp(-1.21e-4 * (elev - elev(nn)))
-      EXPECT_FLOAT_EQ(302.44693, toT(0,0,0)); // 301 160m->120m
-      EXPECT_FLOAT_EQ(255.93558, toT(0,1,0)); // 301 160m->1500m
-      EXPECT_FLOAT_EQ(294.83279, toT(0,2,0)); // 304 347m->600m
-      EXPECT_FLOAT_EQ(320.89322, toT(0,3,0)); // 304 347m->-100m
+      EXPECT_FLOAT_EQ(302.41766, toT(0,0,0)); // 301 160m->120m
+      EXPECT_FLOAT_EQ(256.77454, toT(0,1,0)); // 301 160m->1500m
+      EXPECT_FLOAT_EQ(295.01501, toT(0,2,0)); // 304 347m->600m
+      EXPECT_FLOAT_EQ(320.54321, toT(0,3,0)); // 304 347m->-100m
    }
    TEST_F(TestDownscalerPressure, calcPressure) {
-      EXPECT_FLOAT_EQ(101325, DownscalerPressure::calcPressure(0, 101325, 0));
-      EXPECT_FLOAT_EQ(89777.391, DownscalerPressure::calcPressure(0, 101325, 1000));
-      EXPECT_FLOAT_EQ(67504.562, DownscalerPressure::calcPressure(300, 70000, 600));
+      EXPECT_FLOAT_EQ(101325, gridpp::pressure(0, 0, 101325));
+      EXPECT_FLOAT_EQ(89996.852, gridpp::pressure(0, 1000, 101325));
+      EXPECT_FLOAT_EQ(67554.031, gridpp::pressure(300, 600, 70000));
 
-      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(Util::MV, 101325, 89874.6));
-      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(0, Util::MV, 89874.6));
-      EXPECT_FLOAT_EQ(Util::MV, DownscalerPressure::calcPressure(0, 101325, Util::MV));
+      EXPECT_FLOAT_EQ(Util::MV, gridpp::pressure(gridpp::MV, 100, 101325));
+      EXPECT_FLOAT_EQ(Util::MV, gridpp::pressure(0, 100, gridpp::MV));
+      EXPECT_FLOAT_EQ(Util::MV, gridpp::pressure(0, gridpp::MV, 101325));
    }
    TEST_F(TestDownscalerPressure, description) {
       DownscalerPressure::description();

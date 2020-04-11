@@ -4,7 +4,7 @@ namespace {
     void separate(const vec& parameters, vec& ref, vec& fcst);
 }
 
-vec2 gridpp::quantile_mapping(const vec2& input, const gridpp::Grid& grid, gridpp::Extrapolation policy, const gridpp::Parameters& parameters) {
+vec2 gridpp::quantile_mapping(const gridpp::Grid& grid, const vec2& input, gridpp::Extrapolation policy, const gridpp::Parameters& parameters) {
     int Y = input.size();
     int X = input[0].size();
     vec2 lats = grid.get_lats();

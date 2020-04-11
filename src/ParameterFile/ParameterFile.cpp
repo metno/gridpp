@@ -302,3 +302,43 @@ int ParameterFile::getMaxTimeIndex() const {
 Options ParameterFile::getOptions() const {
    return mOptions;
 }
+gridpp::Parameters ParameterFile::getApiParameters(int iTime) const {
+    gridpp::Nearest interpolator(1);
+    int N = mLocations.size();
+    if(N > 0) {
+        vec lats(N, gridpp::MV);
+        vec lons(N, gridpp::MV);
+        int P = getNumParameters();
+        vec2 values(P);
+        for(int p = 0; p < P; P++) {
+            values[p].resize(N, gridpp::MV);
+        }
+        for(int n = 0; n < N; n++) {
+            lats[n] = mLocations[n].lat();
+            lons[n] = mLocations[n].lon();
+            Parameters par = getParameters(iTime, mLocations[n], false);
+            vec curr = par.getValues();
+            for(int p = 0; p < P; p++)
+                if(Util::isValid(curr[p]))
+                    values[p][n] = curr[p];
+        }
+        gridpp::Points points(lats, lons);
+        return gridpp::Parameters(points, values, interpolator);
+    }
+    else {
+        vec lats(1, 0);
+        vec lons(1, 0);
+        int P = getNumParameters();
+        Parameters par = getParameters(iTime);
+        vec curr = par.getValues();
+        vec2 values(P);
+        for(int p = 0; p < P; p++) {
+            if(Util::isValid(curr[p]))
+                values[p].resize(1, curr[p]);
+            else
+                values[p].resize(1, gridpp::MV);
+        }
+        gridpp::Points points(lats, lons);
+        return gridpp::Parameters(points, values, interpolator);
+    }
+}

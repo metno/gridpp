@@ -15,15 +15,7 @@ class CalibratorQq : public Calibrator {
       float mLowerQuantile;
       float mUpperQuantile;
       std::vector<float> mQuantiles;
-      struct ExtrapolationPolicy {
-         enum Policy {
-            OneToOne = 0,
-            MeanSlope = 10,
-            NearestSlope = 20,
-            Zero = 30,
-         };
-      };
-      ExtrapolationPolicy::Policy mPolicy;
+      gridpp::Extrapolation mPolicy;
       // Separate the vector of obs,fcst,obs,fcst,... into separate vectors
       void separate(const Parameters& iParameters, std::vector<float>& iObs, std::vector<float>& iFcst) const;
       std::vector<float> mExtraObs;

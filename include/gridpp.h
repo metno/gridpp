@@ -1,16 +1,15 @@
 #ifndef API_H
 #define API_H
 #include <vector>
-#include <set>
 #include <string>
 #include <armadillo>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
-
 #include <boost/geometry/index/rtree.hpp>
 #define GRIDPP_VERSION "0.3.2-dev"
 #define __version__ GRIDPP_VERSION
+
 typedef std::vector<std::vector<std::vector<float> > > vec3;
 typedef std::vector<std::vector<float> > vec2;
 typedef std::vector<std::vector<double> > dvec2;
@@ -20,6 +19,8 @@ typedef std::vector<int> ivec;
 typedef std::vector<std::vector<int> > ivec2;
 
 namespace gridpp {
+    // Constants
+    // static const float MV = NAN;
     static const float MV = -999;
     static const float pi = 3.14159265;
     static double radius_earth = 6.37e6;
@@ -37,7 +38,12 @@ namespace gridpp {
             ExtrapolationZero = 30,
         };
 
+    /** @return The gridpp version */
     std::string version();
+
+    /****************************************
+     * Data assimilation methods            *
+     ****************************************/
 
     /** Optimal interpolation
       * @param: input 2D field of background values
@@ -74,6 +80,10 @@ namespace gridpp {
             const gridpp::Points& points,
             vec2& output);
 
+    /****************************************
+     * Neighbourhood methods                *
+     ****************************************/
+
     /** Neighbourhood in space
       * @param: input Deterministic values with dimensions Y, X
       * @param: radius filter radius in number of gridpoints
@@ -103,6 +113,17 @@ namespace gridpp {
     */
     vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
 
+    /****************************************
+     * Calibration methods                  *
+     ****************************************/
+    // With parameter interpolator
+    vec2 quantile_mapping(const Grid& grid, const vec2& input, gridpp::Extrapolation policy, const Parameters& parameters);
+    // Constant map over the whole domain
+    vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+    // Processes a vector
+    vec quantile_mapping(const vec& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+    float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
+
     /** Fill in values inside or outside a set of circles
       * @param: input Deterministic values with dimensions Y, X
       * @param: radiii Circle radii for each point
@@ -111,41 +132,22 @@ namespace gridpp {
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
 
-    // With parameter interpolator
-    vec2 quantile_mapping(const vec2& input, const Grid& grid, gridpp::Extrapolation policy, const Parameters& parameters);
-    // Constant map over the whole domain
-    vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
-    // Processes a vector
-    vec quantile_mapping(const vec& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
-    float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
-
+    /****************************************
+     * Downscaling methods                  *
+     ****************************************/
     // Grid to grid interpolation
-    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
-    // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
-    // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
-    vec2 pressure(const Grid& igrid, const Grid& ogrid, const vec2& ipressure, const vec2& itemperature=vec2());
-
-    /** Calculate pressure at a new altitude
-     *  @param ialtitude Altitude at start point
-     *  @param oaltitude Altitude at new point
-     *  @param ipressure Pressure at start point
-     *  @param itemperature Temperature at start point
-     *  @return Pressure at new point
-     */
-    float pressure(float ialtitude, float oaltitude, float ipressure, float itemperature=288.15);
-
     // Grid to point interpolation
-    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
     vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
 
-    /** Diagnose QNH from pressure and altitude
-     *  @param pressure Pressure at point [pa]
-     *  @param altitude Altitude of point [m]
-     *  @returns QNH [pa]
-    */
-    float qnh(float pressure, float altitude);
-    vec qnh(const vec& pressure, const vec& altitude);
+    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+    // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
+    // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
+
+    /****************************************
+     * Diagnosing methods                   *
+     ****************************************/
 
     /** Diagnose wind speed from its components
      *  @param xwind X-component of wind [any unit]
@@ -178,6 +180,23 @@ namespace gridpp {
      *  @returns Wetbulb temperature [K]
     */
     float wetbulb(float temperature, float pressure, float relative_humidity);
+
+    /** Calculate pressure at a new elevation
+     *  @param ielev Elevation at start point
+     *  @param oelev Elevation at new point
+     *  @param ipressure Pressure at start point
+     *  @param itemperature Temperature at start point
+     *  @return Pressure at new point
+     */
+    float pressure(float ielev, float oelev, float ipressure, float itemperature=288.15);
+
+    /** Diagnose QNH from pressure and altitude
+     *  @param pressure Pressure at point [pa]
+     *  @param altitude Altitude of point [m]
+     *  @returns QNH [pa]
+    */
+    float qnh(float pressure, float altitude);
+    vec qnh(const vec& pressure, const vec& altitude);
 
     namespace util {
         // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
@@ -215,6 +234,7 @@ namespace gridpp {
         void check_equal_size(const vec& v1, const vec& v2);
     }
 
+    /** Helper class for Grid and points */
     class KDTree {
         public:
             KDTree(vec lats, vec lons);
@@ -339,61 +359,33 @@ namespace gridpp {
             vec2 mLafs;
     };
 
+    /** Class for interpolating parameters at points to new points */
     class Interpolator {
         public:
-            float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const;
+            virtual float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const = 0;
+            virtual Interpolator* clone() const = 0;
     };
     class Nearest: public Interpolator {
         public:
             Nearest(int num=1);
             float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude=gridpp::MV, float land_area_fraction=gridpp::MV) const;
+            Interpolator* clone() const;
         private:
             int m_num;
     };
+    /** Class for encapulating parameter sets for locations and estimating them for arbitrary points */
     class Parameters {
         public:
-            Parameters(const gridpp::Points& points, const vec2& values, const gridpp::Interpolator& interpolator);
+            Parameters(const gridpp::Points& points, const vec2& values, gridpp::Interpolator& interpolator);
+            ~Parameters();
+            /** Estimate parameters at a given point
+             *  @return Parameter set
+             */
             vec get(float lat, float lon, float altitude, float land_area_fraction) const;
-        protected:
+        private:
             Points m_points;
             vec2 m_values;
-            Interpolator m_interpolator;
+            Interpolator* m_interpolator;
     };
-
-    /*
-    namespace downscaling {
-        vec2 nearestNeighbour(const vec2& iLats, const vec2& iLons, const vec2& iValues, const vec2& oLats, const vec2& oLons, int iRadius, std::string iStatType, std::string iQuantile);
-        vec2 nearestNeighbour(Field ifield, Grid ogrid, int iRadius, std::string iStatType, std::string iQuantile);
-    }
-    namespace calibration {
-        vec2 quantileMapping(const vec2& iValues, std::string iExtrapolation, vec iQuantiles, const ParameterSet& iParameterSet);
-        vec2 quantileMapping(const vec2& iValues, std::string iExtrapolation, vec iQuantiles, const Points& iParameterPoints, const vec2 iParameters);
-    }
-    namespace diagnose {
-        vec2 computeRh(const vec2& iTemperatures, const vec2& iDewPointTemperatures);
-        float computeRh(float iTemperatures, float iDewPointTemperatures);
-    }
-
-    int optimal_interpolation_single_member(const vec2& input,
-            const vec2& blats,
-            const vec2& blons,
-            const vec2& belevs,
-            const vec2& blafs,
-            const vec& pobs,
-            const vec& pci,
-            const vec& plats,
-            const vec& plons,
-            const vec& pelevs,
-            const vec& plafs,
-            float minRho,
-            float hlength,
-            float vlength,
-            float wmin,
-            int maxPoints,
-            float elevGradient,
-            float epsilon,
-            vec2& output);
-
-    */
 };
 #endif

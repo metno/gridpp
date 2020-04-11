@@ -1,10 +1,12 @@
 #include "gridpp.h"
 
+#if 0
 float gridpp::Interpolator::interpolate(const gridpp::Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const {
     gridpp::util::not_implemented_error();
     return gridpp::MV;
 }
-gridpp::Nearest::Nearest(int num) : m_num(num) {
+#endif
+gridpp::Nearest::Nearest(int num) : m_num(num), gridpp::Interpolator::Interpolator() {
 
 }
 float gridpp::Nearest::interpolate(const gridpp::Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const {
@@ -22,4 +24,8 @@ float gridpp::Nearest::interpolate(const gridpp::Points& points, const vec& valu
         return sum / count;
     else
         return gridpp::MV;
+}
+gridpp::Interpolator* gridpp::Nearest::clone() const {
+    gridpp::Interpolator* val = new gridpp::Nearest(m_num);
+    return val;
 }

@@ -1,27 +1,29 @@
 #include "Qq.h"
-#include <cmath>
 #include "../Util.h"
 #include "../File/File.h"
 #include "../ParameterFile/ParameterFile.h"
 #include "../Downscaler/Pressure.h"
+#include "gridpp.h"
+#include <cmath>
+
 CalibratorQq::CalibratorQq(const Variable& iVariable, const Options& iOptions) :
       Calibrator(iVariable, iOptions),
       mLowerQuantile(0),
       mUpperQuantile(1),
       mX(Util::MV),
       mY(Util::MV),
-      mPolicy(ExtrapolationPolicy::OneToOne) {
+      mPolicy(gridpp::ExtrapolationOneToOne) {
 
    std::string extrapolation;
    if(iOptions.getValue("extrapolation", extrapolation)) {
       if(extrapolation == "1to1")
-         mPolicy = ExtrapolationPolicy::OneToOne;
+         mPolicy = gridpp::ExtrapolationOneToOne;
       else if(extrapolation == "meanSlope")
-         mPolicy = ExtrapolationPolicy::MeanSlope;
+         mPolicy = gridpp::ExtrapolationMeanSlope;
       else if(extrapolation == "nearestSlope")
-         mPolicy = ExtrapolationPolicy::NearestSlope;
+         mPolicy = gridpp::ExtrapolationNearestSlope;
       else if(extrapolation == "zero")
-         mPolicy = ExtrapolationPolicy::Zero;
+         mPolicy = gridpp::ExtrapolationZero;
       else {
          Util::error("CalibratorQq: value for 'extrapolation' not recognized");
       }
@@ -43,115 +45,15 @@ bool CalibratorQq::calibrateCore(File& iFile, const ParameterFile* iParameterFil
       Util::error(ss.str());
    }
 
-   const int nLat = iFile.getNumY();
-   const int nLon = iFile.getNumX();
    const int nEns = iFile.getNumEns();
    const int nTime = iFile.getNumTime();
-   const vec2 lats = iFile.getLats();
-   const vec2 lons = iFile.getLons();
-   const vec2 elevs = iFile.getElevs();
+   gridpp::Grid grid(iFile.getLats(), iFile.getLons());
 
    for(int t = 0; t < nTime; t++) {
-      const FieldPtr field = iFile.getField(mVariable, t);
-
-      // Retrieve the calibration parameters for this time
-      // Overwrite them later if they are location dependent
-      std::vector<float> obsVecGlobal, fcstVecGlobal;
-      if(!iParameterFile->isLocationDependent()) {
-         Parameters parameters = iParameterFile->getParameters(t);
-         separate(parameters, obsVecGlobal, fcstVecGlobal);
-      }
-      #pragma omp parallel for
-      for(int i = 0; i < nLat; i++) {
-         for(int j = 0; j < nLon; j++) {
-            std::vector<float> obsVec, fcstVec;
-            if(iParameterFile->isLocationDependent()) {
-               Parameters parameters = iParameterFile->getParameters(t, Location(lats[i][j], lons[i][j], elevs[i][j]));
-               separate(parameters, obsVec, fcstVec);
-            }
-            else {
-               obsVec = obsVecGlobal;
-               fcstVec = fcstVecGlobal;
-            }
-            int N = obsVec.size();
-            if(obsVec.size() < 1) {
-               Util::error("CalibratorQq cannot use parameters with size less than 2");
-            }
-            // Only process if all parameters are valid
-            bool hasValidParameters = true;
-            for(int p = 0; p < obsVec.size(); p++) {
-               hasValidParameters = hasValidParameters && Util::isValid(obsVec[p]);
-            }
-            for(int p = 0; p < fcstVec.size(); p++) {
-               hasValidParameters = hasValidParameters && Util::isValid(fcstVec[p]);
-            }
-            if(hasValidParameters) {
-               for(int e = 0; e < nEns; e++) {
-                  float raw = (*field)(i,j,e);
-                  float value = Util::MV;
-                  if(Util::isValid(raw)) {
-                     float smallestObs  = obsVec[0];
-                     float smallestFcst = fcstVec[0];
-                     float largestObs   = obsVec[obsVec.size()-1];
-                     float largestFcst  = fcstVec[fcstVec.size()-1];
-
-                     // Linear interpolation within curve
-                     if(raw > smallestFcst && raw < largestFcst) {
-                        value = Util::interpolate(raw, fcstVec, obsVec);
-                     }
-                     // Extrapolate outside curve
-                     else {
-                        float nearestObs;
-                        float nearestFcst;
-                        if(raw <= smallestFcst) {
-                           nearestObs  = smallestObs;
-                           nearestFcst = smallestFcst;
-                        }
-                        else {
-                           nearestObs  = largestObs;
-                           nearestFcst = largestFcst;
-                        }
-                        float slope = 1;
-                        if(mPolicy == ExtrapolationPolicy::Zero) {
-                           slope = 0;
-                        }
-                        if(mPolicy == ExtrapolationPolicy::OneToOne || N <= 1) {
-                           slope = 1;
-                        }
-                        else if(mPolicy == ExtrapolationPolicy::MeanSlope) {
-                           float dObs  = largestObs - smallestObs;
-                           float dFcst = largestFcst - smallestFcst;
-                           slope = dObs / dFcst;
-                        }
-                        else if(mPolicy == ExtrapolationPolicy::NearestSlope) {
-                           float dObs;
-                           float dFcst;
-                           if(raw <= smallestFcst) {
-                              dObs  = obsVec[1] - obsVec[0];
-                              dFcst = fcstVec[1] - fcstVec[0];
-                           }
-                           else {
-                              dObs  = obsVec[N-1] - obsVec[N-2];
-                              dFcst = fcstVec[N-1] - fcstVec[N-2];
-                           }
-                           slope = dObs / dFcst;
-                        }
-                        value = nearestObs + slope * (raw - nearestFcst);
-                     }
-                     if(j == mX && i == mY) {
-                        std::cout << "Time: " << t << " Ens: " << e << std::endl;
-                        for(int p = 0; p < fcstVec.size(); p++) {
-                           std::cout << obsVec[p] << " " << fcstVec[p] << std::endl;
-                        }
-                     }
-                     (*field)(i,j,e) = value;
-                  }
-                  else {
-                     (*field)(i,j,e)  = Util::MV;
-                  }
-               }
-            }
-         }
+      FieldPtr field = iFile.getField(mVariable, t);
+      gridpp::Parameters parameters = iParameterFile->getApiParameters(t);
+      for(int e = 0; e < nEns; e++) {
+         field->set(gridpp::quantile_mapping(grid, (*field)(e), mPolicy, parameters), e);
       }
    }
    return true;

@@ -17,10 +17,10 @@ extern "C" void __gcov_flush();
 bool gridpp::util::is_valid(float value) {
     return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV;
 }
-float gridpp::util::calculate_stat(const std::vector<float>& array, gridpp::Operation operation, float quantile) {
+float gridpp::util::calc_statistic(const std::vector<float>& array, gridpp::Statistic statistic, float quantile) {
    // Initialize to missing
    float value = gridpp::MV;
-   if(operation == gridpp::Mean || operation == gridpp::Sum) {
+   if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
       float total = 0;
       int count = 0;
       for(int n = 0; n < array.size(); n++) {
@@ -30,13 +30,13 @@ float gridpp::util::calculate_stat(const std::vector<float>& array, gridpp::Oper
          }
       }
       if(count > 0) {
-         if(operation == gridpp::Mean)
+         if(statistic == gridpp::Mean)
             value = total / count;
          else
             value = total;
       }
    }
-   else if(operation == gridpp::Std) {
+   else if(statistic == gridpp::Std) {
       // STD = sqrt(E[X^2] - E[X]^2)
       // The above formula is unstable when the variance is small and the mean is large.
       // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
@@ -70,11 +70,11 @@ float gridpp::util::calculate_stat(const std::vector<float>& array, gridpp::Oper
       }
    }
    else {
-      if(operation == gridpp::Min)
+      if(statistic == gridpp::Min)
          quantile = 0;
-      if(operation == gridpp::Median)
+      if(statistic == gridpp::Median)
          quantile = 0.5;
-      if(operation == gridpp::Max)
+      if(statistic == gridpp::Max)
          quantile = 1;
       // Remove missing
       std::vector<float> cleanHood;

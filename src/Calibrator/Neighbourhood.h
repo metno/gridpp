@@ -3,6 +3,7 @@
 #include "Calibrator.h"
 #include "../Variable.h"
 #include "../Util.h"
+#include "gridpp.h"
 
 class ParameterFile;
 class Parameters;
@@ -18,7 +19,7 @@ class CalibratorNeighbourhood : public Calibrator {
    private:
       bool calibrateCore(File& iFile, const ParameterFile* iParameterFile) const;
       int mRadius;
-      Util::StatType mStatType;
+      gridpp::Statistic mStatType;
       std::string mStatTypeName;
       float mQuantile;
       bool mFast;

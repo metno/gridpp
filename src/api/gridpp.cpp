@@ -3,8 +3,8 @@ std::string gridpp::version() {
     return __version__;
 }
 
-gridpp::Operation gridpp::get_operation(std::string name) {
-    gridpp::Operation type;
+gridpp::Statistic gridpp::get_statistic(std::string name) {
+    gridpp::Statistic type;
     if(name == "mean") {
         type = gridpp::Mean;
     }
@@ -25,6 +25,9 @@ gridpp::Operation gridpp::get_operation(std::string name) {
     }
     else if(name == "sum") {
         type = gridpp::Sum;
+    }
+    else {
+        type = gridpp::Unknown;
     }
     return type;
 }

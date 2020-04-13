@@ -39,17 +39,19 @@ namespace gridpp {
             Zero = 30,         /**< Continue using a slope of 0 */
         };
 
-    enum Operation {
+    /** Statistical operations to reduce a vector to a scalar */
+    enum Statistic {
         Mean      = 0,
         Min       = 10,
         Median    = 20,
         Max       = 30,
         Quantile  = 40,
         Std       = 50,
-        Sum       = 60
+        Sum       = 60,
+        Unknown   = -1
     };
     /** Convert operation string to enum */
-    Operation get_operation(std::string name);
+    Statistic get_statistic(std::string name);
 
     /** The gridpp version
      * @return The gridpp version
@@ -104,14 +106,14 @@ namespace gridpp {
       * @param radius Filter radius in number of gridpoints
       * @param operation One of min, mean, median, max, std
     */
-    vec2 neighbourhood(const vec2& input, int radius, std::string operation);
+    vec2 neighbourhood(const vec2& input, int radius, Statistic statistic);
 
     /** Neighbourhood filter in space and across ensemble members
       * @param input 3D vector with dimensions (Y, X, ensemble)
       * @param radius Filter radius in number of gridpoints
       * @param operation One of min, mean, median, max, std
     */
-    vec2 neighbourhood_ens(const vec3& input, int radius, std::string operation);
+    vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
 
     /** Spatial neighbourhood filter for quantile operation
       * @param input 2D grid of values
@@ -142,7 +144,7 @@ namespace gridpp {
      *  @param radius Filter radius in number of gridpoints
      *  @param operation one of min, mean, median, max
     */
-    vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation);
+    vec2 neighbourhood_brute_force(const vec2& input, int radius, Statistic statistic);
 
     /** Spatial neighbourhood filter without any shortcuts for quantile operation. This is likely quite slow.
      *  @param input 2D grid of values
@@ -310,7 +312,7 @@ namespace gridpp {
         void debug(std::string string);
         void error(std::string string);
         bool is_valid(float value);
-        float calculate_stat(const std::vector<float>& array, Operation operation, float quantile=MV);
+        float calc_statistic(const std::vector<float>& array, Statistic statistic, float quantile=MV);
         int num_missing_values(const vec2& iArray);
         int get_lower_index(float iX, const std::vector<float>& iValues);
         int get_upper_index(float iX, const std::vector<float>& iValues);

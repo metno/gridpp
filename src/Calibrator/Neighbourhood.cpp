@@ -8,7 +8,7 @@
 CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, const Options& iOptions):
       Calibrator(iVariable, iOptions),
       mRadius(3),
-      mStatType(Util::StatTypeMean),
+      mStatType(gridpp::Mean),
       mStatTypeName("mean"),
       mFast(true),
       mNumThresholds(0),
@@ -23,14 +23,14 @@ CalibratorNeighbourhood::CalibratorNeighbourhood(const Variable& iVariable, cons
 
    std::string op;
    if(iOptions.getValue("stat", mStatTypeName)) {
-      bool status = Util::getStatType(mStatTypeName, mStatType);
-      if(!status) {
+      mStatType = gridpp::get_statistic(mStatTypeName);
+      if(mStatType == gridpp::Unknown) {
          std::stringstream ss;
          ss << "Could not recognize stat=" << mStatTypeName;
          Util::error(ss.str());
       }
    }
-   if(mStatType == Util::StatTypeQuantile) {
+   if(mStatType == gridpp::Quantile) {
       iOptions.getValue("numThresholds", mNumThresholds);
       iOptions.getRequiredValue("quantile", mQuantile);
       if(!Util::isValid(mQuantile) || mQuantile < 0 || mQuantile > 1) {
@@ -69,11 +69,14 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
    int count_stat = 0;
    for(int e = 0; e < nEns; e++) {
       const vec2 input = iInput(e);
-      if(mStatType != Util::StatTypeQuantile && mStatType != Util::StatTypeMedian) {
-          iOutput.set(gridpp::neighbourhood(input, radius, mStatTypeName), e);
+      if(mStatType != gridpp::Quantile && mStatType != gridpp::Median) {
+          iOutput.set(gridpp::neighbourhood(input, radius, mStatType), e);
       }
       else {
-         iOutput.set(gridpp::neighbourhood_quantile(input, radius, mQuantile, mNumThresholds), e);
+         float quantile = mQuantile;
+         if(mStatType == gridpp::Median)
+             quantile = 0.5;
+         iOutput.set(gridpp::neighbourhood_quantile(input, radius, quantile, mNumThresholds), e);
       }
    }
 }

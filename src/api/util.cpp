@@ -17,104 +17,129 @@ extern "C" void __gcov_flush();
 bool gridpp::util::is_valid(float value) {
     return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV;
 }
-float gridpp::util::calc_statistic(const std::vector<float>& array, gridpp::Statistic statistic, float quantile) {
-   // Initialize to missing
-   float value = gridpp::MV;
-   if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
-      float total = 0;
-      int count = 0;
-      for(int n = 0; n < array.size(); n++) {
-         if(gridpp::util::is_valid(array[n])) {
-            total += array[n];
-            count++;
-         }
-      }
-      if(count > 0) {
-         if(statistic == gridpp::Mean)
-            value = total / count;
-         else
-            value = total;
-      }
-   }
-   else if(statistic == gridpp::Std) {
-      // STD = sqrt(E[X^2] - E[X]^2)
-      // The above formula is unstable when the variance is small and the mean is large.
-      // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
-      // the resulting calculation of VAR(X-K) is stable. Set K to the first non-missing value.
-      float total  = 0;
-      float total2 = 0;
-      float K = gridpp::MV;
-      int count = 0;
-      for(int n = 0; n < array.size(); n++) {
-         if(gridpp::util::is_valid(array[n])) {
-            if(!gridpp::util::is_valid(K))
-               K = array[n];
-            assert(gridpp::util::is_valid(K));
+float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic) {
+    // Initialize to missing
+    float value = gridpp::MV;
+    if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
+        float total = 0;
+        int count = 0;
+        for(int n = 0; n < array.size(); n++) {
+            if(gridpp::util::is_valid(array[n])) {
+                total += array[n];
+                count++;
+            }
+        }
+        if(count > 0) {
+            if(statistic == gridpp::Mean)
+                value = total / count;
+            else
+                value = total;
+        }
+    }
+    else if(statistic == gridpp::Std) {
+        // STD = sqrt(E[X^2] - E[X]^2)
+        // The above formula is unstable when the variance is small and the mean is large.
+        // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
+        // the resulting calculation of VAR(X-K) is stable. Set K to the first non-missing value.
+        float total  = 0;
+        float total2 = 0;
+        float K = gridpp::MV;
+        int count = 0;
+        for(int n = 0; n < array.size(); n++) {
+            if(gridpp::util::is_valid(array[n])) {
+                if(!gridpp::util::is_valid(K))
+                    K = array[n];
+                assert(gridpp::util::is_valid(K));
 
-            total  += array[n] - K;
-            total2 += (array[n] - K)*(array[n] - K);
-            count++;
-         }
-      }
-      if(count > 0) {
-         float mean  = total / count;
-         float mean2 = total2 / count;
-         float var   = mean2 - mean*mean;
-         if(var < 0) {
-            // This should never happen
-            var = 0;
-            // Util::warning("CalibratorNeighbourhood: Problems computing std, unstable result. Setting value to 0");
-         }
-         float std = sqrt(var);
-         value = std;
-      }
-   }
-   else {
-      if(statistic == gridpp::Min)
-         quantile = 0;
-      if(statistic == gridpp::Median)
-         quantile = 0.5;
-      if(statistic == gridpp::Max)
-         quantile = 1;
-      // Remove missing
-      std::vector<float> cleanHood;
-      cleanHood.reserve(array.size());
-      for(int i = 0; i < array.size(); i++) {
-         if(gridpp::util::is_valid(array[i]))
+                total  += array[n] - K;
+                total2 += (array[n] - K)*(array[n] - K);
+                count++;
+            }
+        }
+        if(count > 0) {
+            float mean  = total / count;
+            float mean2 = total2 / count;
+            float var   = mean2 - mean*mean;
+            if(var < 0) {
+                // This should never happen
+                var = 0;
+                // Util::warning("CalibratorNeighbourhood: Problems computing std, unstable result. Setting value to 0");
+            }
+            float std = sqrt(var);
+            value = std;
+        }
+    }
+    else {
+        float quantile = gridpp::MV;
+        if(statistic == gridpp::Min)
+            quantile = 0;
+        else if(statistic == gridpp::Median)
+            quantile = 0.5;
+        else if(statistic == gridpp::Max)
+            quantile = 1;
+        else
+            throw std::runtime_error("Internal error. Cannot compute statistic");
+        value = gridpp::util::calc_quantile(array, quantile);
+    }
+    return value;
+}
+float gridpp::util::calc_quantile(const vec& array, float quantile) {
+    // Initialize to missing
+    float value = gridpp::MV;
+    // Remove missing
+    std::vector<float> cleanHood;
+    cleanHood.reserve(array.size());
+    for(int i = 0; i < array.size(); i++) {
+        if(gridpp::util::is_valid(array[i]))
             cleanHood.push_back(array[i]);
-      }
-      int N = cleanHood.size();
-      if(N > 0) {
-         std::sort(cleanHood.begin(), cleanHood.end());
-         int lowerIndex = floor(quantile * (N-1));
-         int upperIndex = ceil(quantile * (N-1));
-         float lowerQuantile = (float) lowerIndex / (N-1);
-         float upperQuantile = (float) upperIndex / (N-1);
-         float lowerValue = cleanHood[lowerIndex];
-         float upperValue = cleanHood[upperIndex];
-         if(lowerIndex == upperIndex) {
+    }
+    int N = cleanHood.size();
+    if(N > 0) {
+        std::sort(cleanHood.begin(), cleanHood.end());
+        int lowerIndex = floor(quantile * (N-1));
+        int upperIndex = ceil(quantile * (N-1));
+        float lowerQuantile = (float) lowerIndex / (N-1);
+        float upperQuantile = (float) upperIndex / (N-1);
+        float lowerValue = cleanHood[lowerIndex];
+        float upperValue = cleanHood[upperIndex];
+        if(lowerIndex == upperIndex) {
             value = lowerValue;
-         }
-         else {
+        }
+        else {
             assert(upperQuantile > lowerQuantile);
             assert(quantile >= lowerQuantile);
             float f = (quantile - lowerQuantile)/(upperQuantile - lowerQuantile);
             assert(f >= 0);
             assert(f <= 1);
             value   = lowerValue + (upperValue - lowerValue) * f;
-         }
-      }
-   }
-   return value;
+        }
+    }
+    return value;
+}
+vec gridpp::util::calc_statistic(const vec2& array, gridpp::Statistic statistic) {
+    int N = array.size();
+    vec output(N);
+    for(int n = 0; n < N; n++) {
+        output[n] = gridpp::util::calc_statistic(array[n], statistic);
+    }
+    return output;
+}
+vec gridpp::util::calc_quantile(const vec2& array, float quantile) {
+    int N = array.size();
+    vec output(N);
+    for(int n = 0; n < N; n++) {
+        output[n] = gridpp::util::calc_quantile(array[n], quantile);
+    }
+    return output;
 }
 int gridpp::util::num_missing_values(const vec2& iArray) {
-   int count = 0;
-   for(int y = 0; y < iArray.size(); y++) {
-      for(int x = 0; x < iArray[y].size(); x++) {
-         count += !gridpp::util::is_valid(iArray[y][x]);
-      }
-   }
-   return count;
+    int count = 0;
+    for(int y = 0; y < iArray.size(); y++) {
+        for(int x = 0; x < iArray[y].size(); x++) {
+            count += !gridpp::util::is_valid(iArray[y][x]);
+        }
+    }
+    return count;
 }
 void gridpp::util::debug(std::string string) {
     std::cout << string << std::endl;
@@ -122,23 +147,23 @@ void gridpp::util::debug(std::string string) {
 
 void gridpp::util::error(std::string iMessage) {
 #ifdef DEBUG
-  std::cout << "Error: " << iMessage << std::endl;
-  void *array[10];
-  size_t size = backtrace(array, 10);
-  std::cout << "Stack trace:" << std::endl;
-  backtrace_symbols_fd(array, size, 2);
-   __gcov_flush();
+    std::cout << "Error: " << iMessage << std::endl;
+    void *array[10];
+    size_t size = backtrace(array, 10);
+    std::cout << "Stack trace:" << std::endl;
+    backtrace_symbols_fd(array, size, 2);
+    __gcov_flush();
 #else
-  std::cout << "Error: " << iMessage << std::endl;
+    std::cout << "Error: " << iMessage << std::endl;
 #endif
-   abort();
+    abort();
 }
 double gridpp::util::clock() {
-   timeval t;
-   gettimeofday(&t, NULL);
-   double sec = (t.tv_sec);
-   double msec= (t.tv_usec);
-   return sec + msec/1e6;
+    timeval t;
+    gettimeofday(&t, NULL);
+    double sec = (t.tv_sec);
+    double msec= (t.tv_usec);
+    return sec + msec/1e6;
 }
 vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     if(num >= values.size())
@@ -187,26 +212,26 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     //     std::cout << "Threshold[" << i << "] = " << quantiles[i] << std::endl;
     return quantiles;
     /*
-    int index = size / num;
-    int step = size / num;
-    count = 1;
-    while(index < Y * X * E) {
-        float value = values[index];
-        std::cout << " " << count << " " << index << " " << step << " " << quantiles.size() << std::endl;
-        if(value != last) {
-            std::cout << "Threshold " << quantiles.size() << " = " << value << std::endl;
-            quantiles.push_back(value);
-            last = value;
-        }
-        else {
-            step = (size - index) / (num - quantiles.size());
-            std::cout << "Same. Step is now: " << step << std::endl;
-        }
-        last = value;
-        index += step;
-        count++;
-    }
-    */
+       int index = size / num;
+       int step = size / num;
+       count = 1;
+       while(index < Y * X * E) {
+       float value = values[index];
+       std::cout << " " << count << " " << index << " " << step << " " << quantiles.size() << std::endl;
+       if(value != last) {
+       std::cout << "Threshold " << quantiles.size() << " = " << value << std::endl;
+       quantiles.push_back(value);
+       last = value;
+       }
+       else {
+       step = (size - index) / (num - quantiles.size());
+       std::cout << "Same. Step is now: " << step << std::endl;
+       }
+       last = value;
+       index += step;
+       count++;
+       }
+       */
 
 }
 int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
@@ -311,30 +336,30 @@ vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius
 }
 ivec gridpp::util::regression(const vec& x, const vec& y) {
     ivec ret(2, 0;
-    float meanXY  = 0; // elev*T
-    float meanX   = 0; // elev
-    float meanY   = 0; // T
-    float meanXX  = 0; // elev*elev
-    int   counter = 0;
-    int N = x.size();
-    for(int n = 0; n < N; n++) {
-        meanXY += x[n] * y[n];
-        meanX += x[n];
-        meanY += y[n];
-        meanXX += x[n] * x[n];
-        counter++;
-    }
-    meanXY /= counter;
-    meanX  /= counter;
-    meanY  /= counter;
-    meanXX /= counter;
-    float gradient = 0;
-    if(meanXX - meanX*meanX != 0) {
-        gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
-    }
-    // TODO
-    ret[0] = 0;
-    ret[1] = gradient;
-    return ret;
+            float meanXY  = 0; // elev*T
+            float meanX   = 0; // elev
+            float meanY   = 0; // T
+            float meanXX  = 0; // elev*elev
+            int   counter = 0;
+            int N = x.size();
+            for(int n = 0; n < N; n++) {
+            meanXY += x[n] * y[n];
+            meanX += x[n];
+            meanY += y[n];
+            meanXX += x[n] * x[n];
+            counter++;
+            }
+            meanXY /= counter;
+            meanX  /= counter;
+            meanY  /= counter;
+            meanXX /= counter;
+            float gradient = 0;
+            if(meanXX - meanX*meanX != 0) {
+            gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+            }
+            // TODO
+            ret[0] = 0;
+            ret[1] = gradient;
+            return ret;
 }
 #endif

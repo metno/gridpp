@@ -163,7 +163,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                             }
                         }
                     }
-                    values[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic, 0);
+                    values[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic);
                     count_stat += neighbourhood.size();
                 }
             }
@@ -177,7 +177,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                         sliver[count] = input[ii][j];
                         count++;
                     }
-                    slivers[j] = gridpp::util::calc_statistic(sliver, statistic, 0);
+                    slivers[j] = gridpp::util::calc_statistic(sliver, statistic);
                     count_stat += sliver.size();
                 }
                 for(int j = 0; j < nX; j++) {
@@ -186,7 +186,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                     for(int jj = std::max(0, j - iRadius); jj <= std::min(nX-1, j + iRadius); jj++) {
                         curr.push_back(slivers[jj]);
                     }
-                    values[i][j] = gridpp::util::calc_statistic(curr, statistic, 0);
+                    values[i][j] = gridpp::util::calc_statistic(curr, statistic);
                     count_stat += curr.size();
                 }
             }
@@ -281,7 +281,7 @@ namespace {
                     }
                 }
                 assert(index == Ni*Nj);
-                output[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic, quantile);
+                output[i][j] = gridpp::util::calc_quantile(neighbourhood, quantile);
                 count_stat += neighbourhood.size();
             }
         }

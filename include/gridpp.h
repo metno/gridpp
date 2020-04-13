@@ -318,7 +318,10 @@ namespace gridpp {
         void debug(std::string string);
         void error(std::string string);
         bool is_valid(float value);
-        float calc_statistic(const std::vector<float>& array, Statistic statistic, float quantile=MV);
+        float calc_statistic(const vec& array, Statistic statistic);
+        float calc_quantile(const vec& array, float quantile);
+        vec calc_statistic(const vec2& array, Statistic statistic);
+        vec calc_quantile(const vec2& array, float quantile=MV);
         int num_missing_values(const vec2& iArray);
         int get_lower_index(float iX, const std::vector<float>& iValues);
         int get_upper_index(float iX, const std::vector<float>& iValues);

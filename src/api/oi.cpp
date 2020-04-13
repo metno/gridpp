@@ -9,7 +9,7 @@ namespace {
     typedef arma::vec vectype;
     typedef arma::cx_mat cxtype;
 
-    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin);
+    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength);
     void check_vec(vec2 input, int Y, int X);
     void check_vec(vec input, int S);
 
@@ -25,12 +25,12 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const gridpp::Points& points,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
-        float minRho,
+        float min_rho,
         float hlength,
         float vlength,
-        float wmin,
-        int maxPoints,
-        float elevGradient,
+        float wlength,
+        int max_points,
+        float elev_gradient,
         float epsilon) {
     double s_time = gridpp::util::clock();
 
@@ -79,8 +79,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     }
 
     // Calculate the factor that the horizontal decorrelation scale should be multiplied by
-    // to get the localization radius. For minRho=0.0013, the factor is 3.64
-    float radiusFactor = sqrt(-2*log(minRho));
+    // to get the localization radius. For min_rho=0.0013, the factor is 3.64
+    float radiusFactor = sqrt(-2*log(min_rho));
 
     // Spread each observation out to this many gridpoints from the nearest neighbour
     int gridpointRadius = radiusFactor * hlength / gridSize;
@@ -132,12 +132,12 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     vec gY(nS);
     for(int i = 0; i < nS; i++) {
         float elevCorr = 0;
-        if(gridpp::util::is_valid(elevGradient) && elevGradient != 0) {
+        if(gridpp::util::is_valid(elev_gradient) && elev_gradient != 0) {
             float nnElev = belevs[pYi[i]][pXi[i]];
             assert(gridpp::util::is_valid(nnElev));
             assert(gridpp::util::is_valid(pelevs[i]));
             float elevDiff = pelevs[i] - nnElev;
-            elevCorr = elevGradient * elevDiff;
+            elevCorr = elev_gradient * elevDiff;
         }
         float value = input[pYi[i]][pXi[i]];
         // if(gridpp::util::is_valid(value)) {
@@ -173,24 +173,24 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                 float lafdist = 0;
                 if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
-                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wlength);
                 int X = pXi[index];
                 int Y = pYi[index];
                 // Only include observations that are within the domain
                 if(X > 0 && X < blats[0].size()-1 && Y > 0 && Y < blats.size()-1) {
-                    if(rho > minRho) {
+                    if(rho > min_rho) {
                         lRhos0.push_back(std::pair<float,int>(rho, i));
                     }
                 }
             }
 
             arma::vec lRhos;
-            if(lRhos0.size() > maxPoints) {
+            if(max_points > 0 && lRhos0.size() > max_points) {
                 // If sorting is enabled and we have too many locations, then only keep the best ones based on rho.
                 // Otherwise, just use the last locations added
-                lRhos = arma::vec(maxPoints);
+                lRhos = arma::vec(max_points);
                 std::sort(lRhos0.begin(), lRhos0.end(), ::sort_pair_first<float,int>());
-                for(int i = 0; i < maxPoints; i++) {
+                for(int i = 0; i < max_points; i++) {
                     // The best values start at the end of the array
                     int index = lRhos0[lRhos0.size() - 1 - i].second;
                     lLocIndices.push_back(lLocIndices0[index]);
@@ -253,7 +253,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                 float lafdist = 0;
                 if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                     lafdist = plafs[index] - laf;
-                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wlength);
                 lG(0, i) = rho;
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
@@ -265,7 +265,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                     if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
                         lafdist = plafs[index] - plafs[index_j];
 
-                    lP(i, j) = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wmin);
+                    lP(i, j) = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wlength);
                 }
             }
             mattype lGSR;
@@ -291,7 +291,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return output;
 
-    // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), minRho, hlength, vlength, wmin, maxPoints, elevGradient, epsilon, output);
+    // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), min_rho, hlength, vlength, wlength, max_points, elev_gradient, epsilon, output);
 }
 /*
 int gridpp::optimal_interpolation_single_member(const vec2& input,
@@ -305,22 +305,22 @@ int gridpp::optimal_interpolation_single_member(const vec2& input,
         const vec& plons,
         const vec& pelevs,
         const vec& plafs,
-        float minRho,
+        float min_rho,
         float hlength,
         float vlength,
-        float wmin,
-        int maxPoints,
-        float elevGradient,
+        float wlength,
+        int max_points,
+        float elev_gradient,
         float epsilon,
         vec2& output) {
 
     gridpp::Grid bgrid(blats, blons, belevs, blafs);
     gridpp::Points points(plats, plons, pelevs, plafs);
-    return optimal_interpolation_single_member(input, bgrid, pobs, pci, points, minRho, hlength, vlength, wmin, maxPoints, elevGradient, epsilon, output);
+    return optimal_interpolation_single_member(input, bgrid, pobs, pci, points, min_rho, hlength, vlength, wlength, max_points, elev_gradient, epsilon, output);
 }
 */
 namespace {
-    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
+    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) {
        float h = (iHDist/hlength);
        float rho = exp(-0.5 * h * h);
        if(gridpp::util::is_valid(vlength) && vlength > 0) {
@@ -329,11 +329,13 @@ namespace {
           }
           else {
              float v = (iVDist/vlength);
-             rho *= exp(-0.5 * v * v);
+             float factor = exp(-0.5 * v * v);
+             rho *= factor;
           }
        }
-       if(gridpp::util::is_valid(wmin)) {
-          rho *= 1 - (1 - wmin) * std::abs(iLDist);
+       if(gridpp::util::is_valid(wlength) && wlength > 0) {
+          float factor = exp(-0.5 * iLDist * iLDist / (wlength * wlength));
+          rho *= factor;
        }
        return rho;
     }

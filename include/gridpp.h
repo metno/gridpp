@@ -7,6 +7,7 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
+
 #define GRIDPP_VERSION "0.3.2-dev"
 #define __version__ GRIDPP_VERSION
 
@@ -68,22 +69,25 @@ namespace gridpp {
       * @param points Points of observations
       * @param pobs Vector of observations
       * @param pci Vector of ci values
-      * @param minRho Minimum rho value for localization
+      * @param min_rho Minimum rho value for localization
       * @param hlength Horizontal decorrelation length [m]
       * @param vlength Vertical decorrelation length; Use 0 to disable [m]
-      * @param wmin Land/sea  [m]
+      * @param wlength Land area fraction decorrelation length; Use 0 to disable [1]
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param elev_gradient Use this elevation gradient for observation operator; Use 0 to disable [units/m]
+      * @param epsilon Ratio of observation variance to background variance
     */
     vec2 optimal_interpolation(const gridpp::Grid& bgrid,
             const vec2& input,
             const gridpp::Points& points,
             const vec& pobs,
             const vec& pci,
-            float minRho,
+            float min_rho,
             float hlength,
             float vlength,
-            float wmin,
-            int maxPoints,
-            float elevGradient,
+            float wlength,
+            int max_points,
+            float elev_gradient,
             float epsilon);
 
     /** Optimal interpolation using a structure function based on an ensemble 

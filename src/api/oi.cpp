@@ -20,19 +20,18 @@ namespace {
     };
 }
 
-int gridpp::optimal_interpolation(const vec2& input,
-        const gridpp::Grid& bgrid,
+vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
+        const vec2& input,
+        const gridpp::Points& points,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
-        const gridpp::Points& points,
         float minRho,
         float hlength,
         float vlength,
         float wmin,
         int maxPoints,
         float elevGradient,
-        float epsilon,
-        vec2& output) {
+        float epsilon) {
     double s_time = gridpp::util::clock();
 
     int nY = input.size();
@@ -52,6 +51,7 @@ int gridpp::optimal_interpolation(const vec2& input,
     vec plafs = points.get_lafs();
 
     // Prepare output matrix
+    vec2 output;
     output.resize(nY);
     for(int y = 0; y < nY; y++) {
         output[y].resize(nX);
@@ -289,7 +289,7 @@ int gridpp::optimal_interpolation(const vec2& input,
     }
     */
     std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
-    return 0;
+    return output;
 
     // return optimal_interpolation_single_member(input, bgrid.get_lats(), bgrid.get_lons(), bgrid.get_elevs(), bgrid.get_lafs(), pobs, pci, points.get_lats(), points.get_lons(), points.get_elevs(), points.get_lafs(), minRho, hlength, vlength, wmin, maxPoints, elevGradient, epsilon, output);
 }
@@ -323,7 +323,7 @@ namespace {
     float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wmin) {
        float h = (iHDist/hlength);
        float rho = exp(-0.5 * h * h);
-       if(gridpp::util::is_valid(vlength)) {
+       if(gridpp::util::is_valid(vlength) && vlength > 0) {
           if(!gridpp::util::is_valid(iVDist)) {
              rho = 0;
           }
@@ -394,11 +394,10 @@ float CalibratorOi::invTransform(float iValue) const {
 }
 */
 
-int gridpp::optimal_interpolation_ens(const vec3& input,
-            const gridpp::Grid& bgrid,
-            const vec& pobs,
-            const vec& pci,
+vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
+            const vec3& input,
             const gridpp::Points& points,
-            vec2& output) {
-
+            const vec& pobs,
+            const vec& pci) {
+    vec3 output;
 }

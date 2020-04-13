@@ -62,40 +62,42 @@ namespace gridpp {
      * Data assimilation methods            *
      ****************************************/
 
-    /** Optimal interpolation
+    /** Optimal interpolation using a static structure function
+      * @param bgrid Grid of background field
       * @param input 2D field of background values
-      * @param bgrid grid corresponding to input
-      * @param pobs vector of observations
-      * @param pci vector of ci values
-      * @param points observation points
+      * @param points Points of observations
+      * @param pobs Vector of observations
+      * @param pci Vector of ci values
+      * @param minRho Minimum rho value for localization
+      * @param hlength Horizontal decorrelation length [m]
+      * @param vlength Vertical decorrelation length; Use 0 to disable [m]
+      * @param wmin Land/sea  [m]
     */
-    int optimal_interpolation(const vec2& input,
-            const gridpp::Grid& bgrid,
+    vec2 optimal_interpolation(const gridpp::Grid& bgrid,
+            const vec2& input,
+            const gridpp::Points& points,
             const vec& pobs,
             const vec& pci,
-            const gridpp::Points& points,
             float minRho,
             float hlength,
             float vlength,
             float wmin,
             int maxPoints,
             float elevGradient,
-            float epsilon,
-            vec2& output);
+            float epsilon);
 
-    /** Optimal interpolation for ensemble
+    /** Optimal interpolation using a structure function based on an ensemble 
       * @param input 3D field of background values (Y, X, E)
       * @param bgrid grid corresponding to input
       * @param pobs vector of observations
       * @param pci vector of ci values
       * @param points observation points
     */
-    int optimal_interpolation_ens(const vec3& input,
-            const gridpp::Grid& bgrid,
-            const vec& pobs,
-            const vec& pci,
+    vec3 optimal_interpolation_ens(const gridpp::Grid& bgrid,
+            const vec3& input,
             const gridpp::Points& points,
-            vec2& output);
+            const vec& pobs,
+            const vec& pci);
 
     /****************************************
      * Neighbourhood methods                *

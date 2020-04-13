@@ -10,13 +10,13 @@
 #define GRIDPP_VERSION "0.3.2-dev"
 #define __version__ GRIDPP_VERSION
 
-typedef std::vector<std::vector<std::vector<float> > > vec3;
-typedef std::vector<std::vector<float> > vec2;
-typedef std::vector<std::vector<double> > dvec2;
-typedef std::vector<float> vec;
-// typedef std::vector<float> fvec;
-typedef std::vector<int> ivec;
-typedef std::vector<std::vector<int> > ivec2;
+typedef std::vector<int> ivec;      /**< 1D vector of ints */
+typedef std::vector<float> vec;     /**< 1D vector of floats */
+typedef std::vector<double> dvec;   /**< 1D vector of doubles */
+typedef std::vector<ivec> ivec2;    /**< 2D vector of ints */
+typedef std::vector<vec> vec2;      /**< 2D vector of floats */
+typedef std::vector<dvec> dvec2;    /**< 2D vector of doubles */
+typedef std::vector<vec2> vec3;     /**< 3D vector of floats */
 
 namespace gridpp {
     // Constants
@@ -33,10 +33,10 @@ namespace gridpp {
     class Parameters;
     /** Methods for extrapolating outside a curve */
     enum Extrapolation {
-            ExtrapolationOneToOne = 0,      /**< Continue using a slope of 1 */
-            ExtrapolationMeanSlope = 10,    /**< Continue outside the curve using the mean slope of the curve*/
-            ExtrapolationNearestSlope = 20, /**< Continue using the slope of the last two points in the curve*/
-            ExtrapolationZero = 30,         /**< Continue using a slope of 0 */
+            OneToOne = 0,      /**< Continue using a slope of 1 */
+            MeanSlope = 10,    /**< Continue outside the curve using the mean slope of the curve*/
+            NearestSlope = 20, /**< Continue using the slope of the last two points in the curve*/
+            Zero = 30,         /**< Continue using a slope of 0 */
         };
 
     enum Operation {
@@ -48,7 +48,12 @@ namespace gridpp {
         Std       = 50,
         Sum       = 60
     };
-    /** The @return The gridpp version */
+    /** Convert operation string to enum */
+    Operation get_operation(std::string name);
+
+    /** The gridpp version
+     * @return The gridpp version
+    */
     std::string version();
 
     /****************************************
@@ -149,13 +154,45 @@ namespace gridpp {
     /****************************************
      * Calibration methods                  *
      ****************************************/
-    // With parameter interpolator
-    vec2 quantile_mapping(const Grid& grid, const vec2& input, gridpp::Extrapolation policy, const Parameters& parameters);
-    // Constant map over the whole domain
+    /** Quantile mapping of 2D grid using a constant quantile map
+      * @param input Values on grid
+      * @param x X-axis parameters values
+      * @param y Y-axis parameters values
+      * @param policy Extrapolation policy
+      * @return Quantile-mapped values
+      *
+    */
     vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
-    // Processes a vector
+
+    /** Quantile mapping of a vector of value
+      * @param input Input values
+      * @param x X-axis parameters values
+      * @param y Y-axis parameters values
+      * @param policy Extrapolation policy
+      * @return Quantile-mapped output values
+      *
+    */
     vec quantile_mapping(const vec& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+
+    /** Quantile mapping of a single value
+      * @param input Input value
+      * @param x X-axis parameters values
+      * @param y Y-axis parameters values
+      * @param policy Extrapolation policy
+      * @return Quantile-mapped output value
+      *
+    */
     float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
+
+    /** Quantile mapping of 2D grid using a parameter interpolator
+      * @param grid Grid
+      * @param input Values on grid
+      * @param policy Extrapolation policy
+      * @param parameters Parameter interpolator
+      * @return Quantile-mapped values
+      *
+    */
+    vec2 quantile_mapping(const Grid& grid, const vec2& input, gridpp::Extrapolation policy, const Parameters& parameters);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
@@ -168,12 +205,35 @@ namespace gridpp {
     /****************************************
      * Downscaling methods                  *
      ****************************************/
-    // Grid to grid interpolation
+    /** Nearest neighbour dowscaling grid to grid
+      * @param igrid Input grid
+      * @param ogrid Output grid to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @return Values on the output grid
+    */
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
-    // Grid to point interpolation
+    /** Nearest neighbour dowscaling grid to point
+      * @param igrid Input grid
+      * @param ogrid Output points to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @return Values for the output points
+    */
     vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
 
+    /** Bilinear downscaling grid to grid
+      * @param igrid Input grid
+      * @param ogrid Output grid to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @return Values on the output grid
+    */
     vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+
+    /** Bilinear downscaling grid to points
+      * @param igrid Input grid
+      * @param ogrid Output points to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @return Values for the output points
+    */
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
     // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
     // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
@@ -191,22 +251,28 @@ namespace gridpp {
     vec wind_speed(const vec& xwind, const vec& ywind);
     vec2 wind_speed(const vec2& xwind, const vec2& ywind);
 
-    /** Compute dewpoint temperature from temperature and relative humidity
+    /** Calculate dewpoint temperature from temperature and relative humidity
      *  @param temperature Temperature [K]
      *  @param relative_humidity Relative humidity [1]
      *  @returns Dewpoint temperature [K]
     */
     float dewpoint(float temperature, float relative_humidity);
+
+    /** Vector version of dewpoint calculation
+     *  @param temperature Temperatures [K]
+     *  @param relative_humidity Relative humidities [1]
+     *  @returns Dewpoint temperatures [K]
+    */
     vec dewpoint(const vec& temperature, const vec& relative_humidity);
 
-    /** Compute relative humidity from temperature and dewpoint temperature
+    /** Calculate relative humidity from temperature and dewpoint temperature
      *  @param temperature Temperature [K]
      *  @param dewpoint Dewpoint temperature [K]
      *  @returns Relative humidity [1]
     */
     float relative_humidity(float temperature, float dewpoint);
 
-    /** Compute wetbulb temperature from temperature, pressure, and relative humidity
+    /** Calculate wetbulb temperature from temperature, pressure, and relative humidity
      *  @param temperature Temperature [K]
      *  @param pressure Air pressure [pa]
      *  @param Relative humidity [1]
@@ -229,26 +295,22 @@ namespace gridpp {
      *  @returns QNH [pa]
     */
     float qnh(float pressure, float altitude);
+
+    /** Vector version of QNH calculation
+     *  @param pressure Pressures at points [pa]
+     *  @param altitude Altitudes of points [m]
+     *  @returns QNH [pa]
+    */
     vec qnh(const vec& pressure, const vec& altitude);
 
     namespace util {
         // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
         // ivec regression(const vec& x, const vec& y);
-        enum StatType {
-            StatTypeMean      = 0,
-            StatTypeMin       = 10,
-            StatTypeMedian    = 20,
-            StatTypeMax       = 30,
-            StatTypeQuantile  = 40,
-            StatTypeStd       = 50,
-            StatTypeSum       = 60
-        };
-        StatType getStatType(std::string iName);
         double clock();
         void debug(std::string string);
         void error(std::string string);
         bool is_valid(float value);
-        float calculate_stat(const std::vector<float>& iArray, StatType iStatType, float iQuantile=MV);
+        float calculate_stat(const std::vector<float>& array, Operation operation, float quantile=MV);
         int num_missing_values(const vec2& iArray);
         int get_lower_index(float iX, const std::vector<float>& iValues);
         int get_upper_index(float iX, const std::vector<float>& iValues);

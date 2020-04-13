@@ -17,26 +17,26 @@ extern "C" void __gcov_flush();
 bool gridpp::util::is_valid(float value) {
     return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV;
 }
-float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::util::StatType iStatType, float iQuantile) {
+float gridpp::util::calculate_stat(const std::vector<float>& array, gridpp::Operation operation, float quantile) {
    // Initialize to missing
    float value = gridpp::MV;
-   if(iStatType == gridpp::util::StatTypeMean || iStatType == gridpp::util::StatTypeSum) {
+   if(operation == gridpp::Mean || operation == gridpp::Sum) {
       float total = 0;
       int count = 0;
-      for(int n = 0; n < iArray.size(); n++) {
-         if(gridpp::util::is_valid(iArray[n])) {
-            total += iArray[n];
+      for(int n = 0; n < array.size(); n++) {
+         if(gridpp::util::is_valid(array[n])) {
+            total += array[n];
             count++;
          }
       }
       if(count > 0) {
-         if(iStatType == gridpp::util::StatTypeMean)
+         if(operation == gridpp::Mean)
             value = total / count;
          else
             value = total;
       }
    }
-   else if(iStatType == gridpp::util::StatTypeStd) {
+   else if(operation == gridpp::Std) {
       // STD = sqrt(E[X^2] - E[X]^2)
       // The above formula is unstable when the variance is small and the mean is large.
       // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
@@ -45,14 +45,14 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::uti
       float total2 = 0;
       float K = gridpp::MV;
       int count = 0;
-      for(int n = 0; n < iArray.size(); n++) {
-         if(gridpp::util::is_valid(iArray[n])) {
+      for(int n = 0; n < array.size(); n++) {
+         if(gridpp::util::is_valid(array[n])) {
             if(!gridpp::util::is_valid(K))
-               K = iArray[n];
+               K = array[n];
             assert(gridpp::util::is_valid(K));
 
-            total  += iArray[n] - K;
-            total2 += (iArray[n] - K)*(iArray[n] - K);
+            total  += array[n] - K;
+            total2 += (array[n] - K)*(array[n] - K);
             count++;
          }
       }
@@ -70,24 +70,24 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::uti
       }
    }
    else {
-      if(iStatType == gridpp::util::StatTypeMin)
-         iQuantile = 0;
-      if(iStatType == gridpp::util::StatTypeMedian)
-         iQuantile = 0.5;
-      if(iStatType == gridpp::util::StatTypeMax)
-         iQuantile = 1;
+      if(operation == gridpp::Min)
+         quantile = 0;
+      if(operation == gridpp::Median)
+         quantile = 0.5;
+      if(operation == gridpp::Max)
+         quantile = 1;
       // Remove missing
       std::vector<float> cleanHood;
-      cleanHood.reserve(iArray.size());
-      for(int i = 0; i < iArray.size(); i++) {
-         if(gridpp::util::is_valid(iArray[i]))
-            cleanHood.push_back(iArray[i]);
+      cleanHood.reserve(array.size());
+      for(int i = 0; i < array.size(); i++) {
+         if(gridpp::util::is_valid(array[i]))
+            cleanHood.push_back(array[i]);
       }
       int N = cleanHood.size();
       if(N > 0) {
          std::sort(cleanHood.begin(), cleanHood.end());
-         int lowerIndex = floor(iQuantile * (N-1));
-         int upperIndex = ceil(iQuantile * (N-1));
+         int lowerIndex = floor(quantile * (N-1));
+         int upperIndex = ceil(quantile * (N-1));
          float lowerQuantile = (float) lowerIndex / (N-1);
          float upperQuantile = (float) upperIndex / (N-1);
          float lowerValue = cleanHood[lowerIndex];
@@ -97,8 +97,8 @@ float gridpp::util::calculate_stat(const std::vector<float>& iArray, gridpp::uti
          }
          else {
             assert(upperQuantile > lowerQuantile);
-            assert(iQuantile >= lowerQuantile);
-            float f = (iQuantile - lowerQuantile)/(upperQuantile - lowerQuantile);
+            assert(quantile >= lowerQuantile);
+            float f = (quantile - lowerQuantile)/(upperQuantile - lowerQuantile);
             assert(f >= 0);
             assert(f <= 1);
             value   = lowerValue + (upperValue - lowerValue) * f;
@@ -139,31 +139,6 @@ double gridpp::util::clock() {
    double sec = (t.tv_sec);
    double msec= (t.tv_usec);
    return sec + msec/1e6;
-}
-gridpp::util::StatType gridpp::util::getStatType(std::string iName) {
-    gridpp::util::StatType iType;
-   if(iName == "mean") {
-      iType = gridpp::util::StatTypeMean;
-   }
-   else if(iName == "min") {
-      iType = gridpp::util::StatTypeMin;
-   }
-   else if(iName == "max") {
-      iType = gridpp::util::StatTypeMax;
-   }
-   else if(iName == "median") {
-      iType = gridpp::util::StatTypeMedian;
-   }
-   else if(iName == "quantile") {
-      iType = gridpp::util::StatTypeQuantile;
-   }
-   else if(iName == "std") {
-      iType = gridpp::util::StatTypeStd;
-   }
-   else if(iName == "sum") {
-      iType = gridpp::util::StatTypeSum;
-   }
-   return iType;
 }
 vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     if(num >= values.size())
@@ -208,9 +183,9 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
             abort();
         }
     }
-    return quantiles;
     // for(int i = 0; i < quantiles.size(); i++)
     //     std::cout << "Threshold[" << i << "] = " << quantiles[i] << std::endl;
+    return quantiles;
     /*
     int index = size / num;
     int step = size / num;
@@ -306,3 +281,60 @@ void gridpp::util::check_equal_size(const vec& v1, const vec& v2) {
         gridpp::util::error(ss.str());
     }
 }
+#if 0
+vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius) {
+    int Y = values.size();
+    int X = values[0].size();
+    vec2 ret(values.size());
+
+    for(int y = 0; y < Y; y++) {
+        values[y].resize(X, 0);
+        for(int x = 0; x < X; x++) {
+            if(y > radius && y < Y - radius - 1 && x > radius && x < X - radius - 1) {
+                vec xxx;
+                vec yyy;
+                xxx.reserve((2*radius+1)*(2*radius+1));
+                yyy.reserve((2*radius+1)*(2*radius+1));
+                for(int yy = y - radius; yy < Y - radius - 1; y++) {
+                    for(int xx = x - radius; xx < X - radius - 1; x++) {
+                        if(util::is_valid(aux[y][x])) {
+                            xxx.push_back(aux[y][x]);
+                            yyy.push_back(values[y][x]);
+                        }
+                    }
+                }
+                ivec coeffs = regression(xxx, yyy);
+                ret[y][x] = coeffs[1];
+            }
+        }
+    }
+}
+ivec gridpp::util::regression(const vec& x, const vec& y) {
+    ivec ret(2, 0;
+    float meanXY  = 0; // elev*T
+    float meanX   = 0; // elev
+    float meanY   = 0; // T
+    float meanXX  = 0; // elev*elev
+    int   counter = 0;
+    int N = x.size();
+    for(int n = 0; n < N; n++) {
+        meanXY += x[n] * y[n];
+        meanX += x[n];
+        meanY += y[n];
+        meanXX += x[n] * x[n];
+        counter++;
+    }
+    meanXY /= counter;
+    meanX  /= counter;
+    meanY  /= counter;
+    meanXX /= counter;
+    float gradient = 0;
+    if(meanXX - meanX*meanX != 0) {
+        gradient = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
+    }
+    // TODO
+    ret[0] = 0;
+    ret[1] = gradient;
+    return ret;
+}
+#endif

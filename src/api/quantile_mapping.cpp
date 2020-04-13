@@ -57,18 +57,18 @@ float gridpp::quantile_mapping(float input, const vec& ref, const vec& fcst, gri
                 nearestFcst = largestFcst;
             }
             float slope = 1;
-            if(policy == gridpp::ExtrapolationZero) {
+            if(policy == gridpp::Zero) {
                 slope = 0;
             }
-            if(policy == gridpp::ExtrapolationOneToOne || N <= 1) {
+            if(policy == gridpp::OneToOne || N <= 1) {
                 slope = 1;
             }
-            else if(policy == gridpp::ExtrapolationMeanSlope) {
+            else if(policy == gridpp::MeanSlope) {
                 float dObs  = largestObs - smallestObs;
                 float dFcst = largestFcst - smallestFcst;
                 slope = dObs / dFcst;
             }
-            else if(policy == gridpp::ExtrapolationNearestSlope) {
+            else if(policy == gridpp::NearestSlope) {
                 float dObs;
                 float dFcst;
                 if(input <= smallestFcst) {

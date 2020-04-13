@@ -31,14 +31,24 @@ namespace gridpp {
     class Interpolator;
     class Nearest;
     class Parameters;
+    /** Methods for extrapolating outside a curve */
     enum Extrapolation {
-            ExtrapolationOneToOne = 0,
-            ExtrapolationMeanSlope = 10,
-            ExtrapolationNearestSlope = 20,
-            ExtrapolationZero = 30,
+            ExtrapolationOneToOne = 0,      /**< Continue using a slope of 1 */
+            ExtrapolationMeanSlope = 10,    /**< Continue outside the curve using the mean slope of the curve*/
+            ExtrapolationNearestSlope = 20, /**< Continue using the slope of the last two points in the curve*/
+            ExtrapolationZero = 30,         /**< Continue using a slope of 0 */
         };
 
-    /** @return The gridpp version */
+    enum Operation {
+        Mean      = 0,
+        Min       = 10,
+        Median    = 20,
+        Max       = 30,
+        Quantile  = 40,
+        Std       = 50,
+        Sum       = 60
+    };
+    /** The @return The gridpp version */
     std::string version();
 
     /****************************************
@@ -46,11 +56,11 @@ namespace gridpp {
      ****************************************/
 
     /** Optimal interpolation
-      * @param: input 2D field of background values
-      * @param: bgrid grid corresponding to input
-      * @param: pobs vector of observations
-      * @param: pci vector of ci values
-      * @param: points observation points
+      * @param input 2D field of background values
+      * @param bgrid grid corresponding to input
+      * @param pobs vector of observations
+      * @param pci vector of ci values
+      * @param points observation points
     */
     int optimal_interpolation(const vec2& input,
             const gridpp::Grid& bgrid,
@@ -67,11 +77,11 @@ namespace gridpp {
             vec2& output);
 
     /** Optimal interpolation for ensemble
-      * @param: input 3D field of background values (Y, X, E)
-      * @param: bgrid grid corresponding to input
-      * @param: pobs vector of observations
-      * @param: pci vector of ci values
-      * @param: points observation points
+      * @param input 3D field of background values (Y, X, E)
+      * @param bgrid grid corresponding to input
+      * @param pobs vector of observations
+      * @param pci vector of ci values
+      * @param points observation points
     */
     int optimal_interpolation_ens(const vec3& input,
             const gridpp::Grid& bgrid,
@@ -84,34 +94,57 @@ namespace gridpp {
      * Neighbourhood methods                *
      ****************************************/
 
-    /** Neighbourhood in space
-      * @param: input Deterministic values with dimensions Y, X
-      * @param: radius filter radius in number of gridpoints
-      * @param: operation one of min, mean, median, max, std
+    /** Spatial neighbourhood filter
+      * @param input 2D grid of values
+      * @param radius Filter radius in number of gridpoints
+      * @param operation One of min, mean, median, max, std
     */
     vec2 neighbourhood(const vec2& input, int radius, std::string operation);
 
-    /** Neighbourhood in space and across members
+    /** Neighbourhood filter in space and across ensemble members
+      * @param input 3D vector with dimensions (Y, X, ensemble)
+      * @param radius Filter radius in number of gridpoints
+      * @param operation One of min, mean, median, max, std
     */
     vec2 neighbourhood_ens(const vec3& input, int radius, std::string operation);
 
-    /** Neighbourhood quantile in space and across members
-      * @param: input Ensemble values with dimensions Y, X, E
-      * @param: quantile which quantile to compute (between 0 and 1)
-      * @param: radius filter radius in number of gridpoints
-      * @param: num_thresholds number of thresholds to use to approximate value (0 for no approximation).
+    /** Spatial neighbourhood filter for quantile operation
+      * @param input 2D grid of values
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param operation One of min, mean, median, max, std
     */
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds);
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
     vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds);
 
-    /** Compute neighbourhood without any shortcuts. This is likely quite slow.
-     *  @param: input
-     *  @param: radius filter radius in number of gridpoints
-     *  @param: operation one of min, mean, median, max, quantile
-     *  @param: quantile quantile to calculate for if operation="quantile"
+    /** Neighbourhood filter space and across members for quantile operation
+      * @param input 3D vector with dimensions (Y, X, ensemble)
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param num_thresholds Number of thresholds to use to approximate value (0 for no approximation)
     */
-    vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation, float quantile);
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds);
+
+    /** Neighbourhood filter space and across members for quantile operation
+      * @param input 3D vector with dimensions (Y, X, ensemble)
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
+
+    /** Spatial neighbourhood filter without any shortcuts. This is likely quite slow.
+     *  @param input 2D grid of values
+     *  @param radius Filter radius in number of gridpoints
+     *  @param operation one of min, mean, median, max
+    */
+    vec2 neighbourhood_brute_force(const vec2& input, int radius, std::string operation);
+
+    /** Spatial neighbourhood filter without any shortcuts for quantile operation. This is likely quite slow.
+     *  @param input 2D grid of values
+     *  @param radius Filter radius in number of gridpoints
+     *  @param quantile Quantile to calculate for (between 0 and 1)
+    */
+    vec2 neighbourhood_quantile_brute_force(const vec2& input, int radius, float quantile);
 
     /****************************************
      * Calibration methods                  *
@@ -125,10 +158,10 @@ namespace gridpp {
     float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
 
     /** Fill in values inside or outside a set of circles
-      * @param: input Deterministic values with dimensions Y, X
-      * @param: radiii Circle radii for each point
-      * @param: value Fill in this value
-      * @param: outside if True, fill outside circles, if False, fill inside circles
+      * @param input Deterministic values with dimensions Y, X
+      * @param radiii Circle radii for each point
+      * @param value Fill in this value
+      * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
 
@@ -158,7 +191,7 @@ namespace gridpp {
     vec wind_speed(const vec& xwind, const vec& ywind);
     vec2 wind_speed(const vec2& xwind, const vec2& ywind);
 
-    /** Diagnose dewpoint temperature
+    /** Compute dewpoint temperature from temperature and relative humidity
      *  @param temperature Temperature [K]
      *  @param relative_humidity Relative humidity [1]
      *  @returns Dewpoint temperature [K]
@@ -166,14 +199,14 @@ namespace gridpp {
     float dewpoint(float temperature, float relative_humidity);
     vec dewpoint(const vec& temperature, const vec& relative_humidity);
 
-    /** Diagnose relative humidity
+    /** Compute relative humidity from temperature and dewpoint temperature
      *  @param temperature Temperature [K]
      *  @param dewpoint Dewpoint temperature [K]
      *  @returns Relative humidity [1]
     */
     float relative_humidity(float temperature, float dewpoint);
 
-    /** Diagnose wetbulb temperature
+    /** Compute wetbulb temperature from temperature, pressure, and relative humidity
      *  @param temperature Temperature [K]
      *  @param pressure Air pressure [pa]
      *  @param Relative humidity [1]
@@ -309,6 +342,7 @@ namespace gridpp {
             vec mLons;
     };
 
+    /** Represents a vector of locations and their metadata */
     class Points  {
         public:
             Points();
@@ -332,6 +366,7 @@ namespace gridpp {
             vec mLafs;
     };
 
+    /** Represents a 2D grid of locations and their metadata */
     class Grid {
         public:
             Grid();

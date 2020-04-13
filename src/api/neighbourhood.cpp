@@ -198,6 +198,31 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
             }
         }
     }
+    else if(statistic == gridpp::Std || statistic == gridpp::Variance) {
+        vec2 mean = gridpp::neighbourhood(input, iRadius, gridpp::Mean);
+        vec2 input2(nY);
+        for(int y = 0; y < nY; y++) {
+            input2[y].resize(input[y].size(), 0);
+            for(int x = 0; x < nX; x++) {
+                input2[y][x] = input[y][x] * input[y][x];
+            }
+        }
+        vec2 mean2 = gridpp::neighbourhood(input2, iRadius, gridpp::Mean);
+        if(statistic == gridpp::Std) {
+            for(int y = 0; y < nY; y++) {
+                for(int x = 0; x < nX; x++) {
+                    output[y][x] = sqrt(mean2[y][x] - mean[y][x] * mean[y][x]);
+                }
+            }
+        }
+        else {
+            for(int y = 0; y < nY; y++) {
+                for(int x = 0; x < nX; x++) {
+                    output[y][x] = mean2[y][x] - mean[y][x] * mean[y][x];
+                }
+            }
+        }
+    }
     else {
         output = gridpp::neighbourhood_brute_force(input, iRadius, statistic);
     }

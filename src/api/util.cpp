@@ -36,7 +36,7 @@ float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic
                 value = total;
         }
     }
-    else if(statistic == gridpp::Std) {
+    else if(statistic == gridpp::Std || statistic == gridpp::Variance) {
         // STD = sqrt(E[X^2] - E[X]^2)
         // The above formula is unstable when the variance is small and the mean is large.
         // Use the property that VAR(X) = VAR(X-K). Provided K is any element in the array,
@@ -65,8 +65,10 @@ float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic
                 var = 0;
                 // Util::warning("CalibratorNeighbourhood: Problems computing std, unstable result. Setting value to 0");
             }
-            float std = sqrt(var);
-            value = std;
+            value = var;
+            if(statistic == gridpp::Std) {
+                value = sqrt(var);
+            }
         }
     }
     else {

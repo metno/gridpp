@@ -48,7 +48,8 @@ namespace gridpp {
         Max       = 30,
         Quantile  = 40,
         Std       = 50,
-        Sum       = 60,
+        Variance  = 60,
+        Sum       = 70,
         Unknown   = -1
     };
     /** Convert operation string to enum */

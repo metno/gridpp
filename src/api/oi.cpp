@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <armadillo>
 #include <assert.h>
+#include <exception>
 
 namespace {
     typedef arma::mat mattype;
@@ -32,6 +33,17 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         int max_points,
         float elev_gradient,
         float epsilon) {
+    if(max_points < 0)
+        throw std::invalid_argument("max_points must be >= 0");
+    if(min_rho <= 0)
+        throw std::invalid_argument("min_rho must be > 0");
+    if(input.size() != bgrid.size()[0] && input.size() != bgrid.size()[1])
+        throw std::runtime_error("Input field is not the same size as the grid");
+    if(pobs.size() != points.size())
+        throw std::runtime_error("Observations and points exception mismatch");
+    if(pci.size() != points.size())
+        throw std::runtime_error("Ci and points size mismatch");
+
     double s_time = gridpp::util::clock();
 
     int nY = input.size();

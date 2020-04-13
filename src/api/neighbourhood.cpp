@@ -1,4 +1,5 @@
 #include "gridpp.h"
+#include <exception>
 
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile);
@@ -20,6 +21,11 @@ vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, gridpp::Statistic
     return results;
 }
 vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic statistic) {
+    if(iRadius < 0)
+        throw std::invalid_argument("Radius must be > 0");
+    if(statistic == gridpp::Quantile)
+        throw std::invalid_argument("Use neighbourhood_quantile for computing neighbourhood quantiles");
+
     double s_time = gridpp::util::clock();
     bool fast = true;
     int count_stat = 0;
@@ -245,6 +251,9 @@ vec2 gridpp::neighbourhood_quantile_brute_force(const vec2& input, int iRadius, 
 }
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile) {
+        if(iRadius < 0)
+            throw std::invalid_argument("Radius must be > 0");
+
         int count_stat = 0;
         int nY = input.size();
         int nX = input[0].size();
@@ -281,6 +290,11 @@ namespace {
     }
 }
 vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
+    if(radius < 0)
+        throw std::invalid_argument("Radius must be > 0");
+    if(quantile < 0 || quantile > 1)
+        throw std::invalid_argument("Quantile must be between 0 and 1 inclusive");
+
     double s_time = gridpp::util::clock();
     bool fast = true;
     assert(quantile >= 0);

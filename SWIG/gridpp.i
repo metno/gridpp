@@ -2,6 +2,16 @@
 %include "typemaps.i"
 %include "std_vector.i"
 %include "std_string.i"
+%include exception.i
+%exception {
+    try {
+        $action
+    }
+    catch (...) {
+         SWIG_exception(SWIG_RuntimeError, "Unknown exception");
+    }
+}
+
 %begin %{
 #define SWIG_PYTHON_CAST_MODE
     %}
@@ -19,4 +29,5 @@ namespace std {
 /*  Put header files here or function declarations like below */
 #include "gridpp.h"
 %}
+
 %include "gridpp.h"

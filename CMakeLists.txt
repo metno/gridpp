@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
+# Determine gridpp version
 file (READ "${CMAKE_CURRENT_SOURCE_DIR}/include/gridpp.h" VERSION0)
 project(gridpp)
 string(REGEX REPLACE "^.+define GRIDPP_VERSION \"([^\n]+)\".+" "\\1" PROJECT_VERSION ${VERSION0})
-message(${PROJECT_VERSION})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Set compiler flags
 enable_language(CXX)
-
 set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -46,6 +46,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
    set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${OpenMP_CXX_FLAGS}")
 endif()
 
+# Required packages
 find_package(Boost  1.57 REQUIRED)
 find_package(Armadillo 6.5 REQUIRED)
 find_package(NetCDF REQUIRED)
@@ -129,14 +130,24 @@ else()
       COMMAND ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags src/*.h src/*.cpp src/*/*.h src/*/*.cpp
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
-lookup_program(DOXYGEN_TOOL doxygen)
-if(NOT DOXYGEN_TOOL)
-   message(STATUS "Documentation generation disabled")
+
+# Documentation
+option(BUILD_DOC "Build documentation" ON)
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/config.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/docs/DoxygenLayout.xml" "DoxygenLayout.xml" @ONLY)
+    add_custom_target(docs ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY
+        ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API
+        documentation with Doxygen"
+        VERBATIM )
 else()
-   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doxygen/config.in" "doxygen/config" @ONLY)
-   add_custom_target(doxygen
-      COMMAND doxygen doxygen/config
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    message(STATUS "Documentation generation disabled. Doxygen needs to be installed to generate documentation.")
 endif()
 
 install(TARGETS gridpp-bin gridpp-train

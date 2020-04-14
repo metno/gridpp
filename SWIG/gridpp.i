@@ -3,9 +3,29 @@
 %include "std_vector.i"
 %include "std_string.i"
 %include exception.i
+/*
+      SWIG_MemoryError
+      SWIG_IOError
+      SWIG_RuntimeError
+      SWIG_IndexError
+      SWIG_TypeError
+      SWIG_DivisionByZero
+      SWIG_OverflowError
+      SWIG_SyntaxError
+      SWIG_ValueError
+      SWIG_SystemError
+*/
 %exception {
     try {
         $action
+    }
+    catch (std::invalid_argument &e) {
+        std::string s(e.what());
+        SWIG_exception(SWIG_ValueError, s.c_str());
+    }
+    catch (std::exception &e) {
+        std::string s(e.what());
+        SWIG_exception(SWIG_RuntimeError, s.c_str());
     }
     catch (...) {
          SWIG_exception(SWIG_RuntimeError, "Unknown exception");

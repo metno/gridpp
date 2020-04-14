@@ -21,8 +21,8 @@ typedef std::vector<vec2> vec3;     /**< 3D vector of floats */
 
 namespace gridpp {
     // Constants
-    // static const float MV = NAN;
-    static const float MV = -999;
+    static const float MV = NAN;
+    // static const float MV = -999;
     static const float pi = 3.14159265;
     static double radius_earth = 6.37e6;
 

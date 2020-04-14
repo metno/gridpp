@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <iomanip>
 #include <cstdio>
+#include <exception>
 
 #ifdef DEBUG
 extern "C" void __gcov_flush();
@@ -195,19 +196,21 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
         if(values[i] > last_quantile && (values_unique.size() == 0 || values[i] != values_unique[values_unique.size() - 1]))
             values_unique.push_back(values[i]);
     }
-    int num_left = num - quantiles.size();
-    // std::cout << "Number of unique values: " << values_unique.size() << std::endl;
-    for(int i = 1; i <= num_left; i++) {
-        float f = float(i) / (num_left);
-        int index = values_unique.size() * f - 1;
-        if(index > 0) {
-            float value = values_unique[index];
-            quantiles.push_back(value);
-        }
-        else {
-            std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
-            std::cout << count_lower << " " << values.size() << " " << last_quantile << std::endl;
-            abort();
+    if(values_unique.size() > 0) {
+        int num_left = num - quantiles.size();
+        // std::cout << "Number of unique values: " << values_unique.size() << std::endl;
+        for(int i = 1; i <= num_left; i++) {
+            float f = float(i) / (num_left);
+            int index = values_unique.size() * f - 1;
+            if(index > 0) {
+                float value = values_unique[index];
+                quantiles.push_back(value);
+            }
+            else {
+                std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
+                std::cout << count_lower << " " << values.size() << " " << last_quantile << std::endl;
+                abort();
+            }
         }
     }
     // for(int i = 0; i < quantiles.size(); i++)
@@ -275,7 +278,11 @@ int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
     return index;
 }
 float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
+    if(iX.size() != iY.size())
+        throw std::invalid_argument("Dimension mismatch. Cannot interpolate.");
     float y = gridpp::MV;
+    if(iX.size() == 0)
+        return gridpp::MV;
 
     if(x >= iX[iX.size()-1])
         return iY[iX.size()-1];

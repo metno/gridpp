@@ -20,6 +20,22 @@ values[2, 4] = np.nan
 values = np.array(values)
 
 class NeighbourhoodTest(unittest.TestCase):
+    def test_empty(self):
+        for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
+            output = gridpp.neighbourhood([[]], 1, statistic)
+            self.assertEqual(output, ())
+        for quantile in np.arange(0.1,0.9,0.1):
+            for num_thresholds in [0, 1, 2]:
+                output = gridpp.neighbourhood_quantile([[]], 0.9, 1, num_thresholds)
+                self.assertEqual(output, ())
+
+    def test_missing(self):
+        empty = np.zeros([5, 5])
+        empty[0:3, 0:3] = np.nan
+        for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
+            output = gridpp.neighbourhood(empty, 1, statistic)
+            self.assertTrue(np.isnan(np.array(output)[0:2,0:2]).all())
+
     def test_mean(self):
         output = gridpp.neighbourhood(values, 1, gridpp.Mean)
         self.assertEqual(output[2][2], 12.5)
@@ -30,7 +46,6 @@ class NeighbourhoodTest(unittest.TestCase):
 
         output = np.array(gridpp.neighbourhood(values, 0, gridpp.Mean)).flatten()
         I = np.where(np.isnan(output) == 0)[0]
-        print(output)
         self.assertTrue((np.isnan(output) == np.isnan(values.flatten())).all())
         self.assertTrue((output[I] == values.flatten()[I]).all())
 
@@ -43,7 +58,6 @@ class NeighbourhoodTest(unittest.TestCase):
         output = gridpp.neighbourhood(values, 100, gridpp.Min)
         self.assertTrue((np.array(output) == 0).all())
 
-
     def test_max(self):
         output = gridpp.neighbourhood(values, 1, gridpp.Max)
         self.assertEqual(output[2][2], 18)
@@ -52,12 +66,6 @@ class NeighbourhoodTest(unittest.TestCase):
 
         output = gridpp.neighbourhood(values, 100, gridpp.Max)
         self.assertTrue((np.array(output) == 24).all())
-
-    def test_missing(self):
-        empty = np.zeros([5, 5])
-        empty[0:3, 0:3] = np.nan
-        output = gridpp.neighbourhood(empty, 1, gridpp.Mean)
-        self.assertTrue(np.isnan(np.array(output)[0:2,0:2]).all())
 
     def test_quantile(self):
         output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1, 100))

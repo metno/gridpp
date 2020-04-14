@@ -8,7 +8,7 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#define GRIDPP_VERSION "0.3.2-dev"
+#define GRIDPP_VERSION "0.4.0a1"
 #define __version__ GRIDPP_VERSION
 
 typedef std::vector<int> ivec;      /**< 1D vector of ints */
@@ -341,7 +341,7 @@ namespace gridpp {
         void check_equal_size(const vec& v1, const vec& v2);
     }
 
-    /** Helper class for Grid and points */
+    /** Helper class for Grid and Points */
     class KDTree {
         public:
             KDTree(vec lats, vec lons);

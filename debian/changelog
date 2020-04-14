@@ -1,3 +1,9 @@
+gridpp (0.4.0) bionic; urgency=low
+
+   * Added an API to the core functionality in gridpp
+   * More exact and efficient neighbourhood quantile calculations
+   * Added window= to -c deaccumulate
+
 gridpp (0.3.1) precise; urgency=low
 
   * New features:

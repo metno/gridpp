@@ -158,7 +158,7 @@ namespace gridpp {
      *  @param radius Filter radius in number of gridpoints
      *  @param quantile Quantile to calculate for (between 0 and 1)
     */
-    vec2 neighbourhood_quantile_brute_force(const vec2& input, int radius, float quantile);
+    vec2 neighbourhood_quantile_brute_force(const vec2& input, float quantile, int radius);
 
     /****************************************
      * Calibration methods                  *

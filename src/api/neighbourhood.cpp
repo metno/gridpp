@@ -271,7 +271,7 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int r
 vec2 gridpp::neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic) {
     return ::neighbourhood_brute_force(input, iRadius, statistic, 0);
 }
-vec2 gridpp::neighbourhood_quantile_brute_force(const vec2& input, int iRadius, float quantile) {
+vec2 gridpp::neighbourhood_quantile_brute_force(const vec2& input, float quantile, int iRadius) {
     return ::neighbourhood_brute_force(input, iRadius, gridpp::Quantile, quantile);
 }
 namespace {
@@ -306,7 +306,10 @@ namespace {
                     }
                 }
                 assert(index == Ni*Nj);
-                output[i][j] = gridpp::util::calc_quantile(neighbourhood, quantile);
+                if(statistic == gridpp::Quantile)
+                    output[i][j] = gridpp::util::calc_quantile(neighbourhood, quantile);
+                else
+                    output[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic);
                 count_stat += neighbourhood.size();
             }
         }

@@ -4,6 +4,7 @@
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile);
     vec2 neighbourhood_brute_force_ens(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile);
+    vec3 vec2_to_vec3(const vec2& input);
 }
 vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, gridpp::Statistic statistic) {
     vec2 flat(input.size());
@@ -233,22 +234,37 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
     // std::cout << count_stat << " " << e_time - s_time << " s" << std::endl;
     return output;
 }
-vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds) {
-    vec3 input3(input.size());
-    for(int i = 0; i < input.size(); i++) {
-        input3[i].resize(input[i].size());
-        for(int j = 0; j < input[i].size(); j++) {
-            input3[i][j].push_back(input[i][j]);
+vec gridpp::get_neighbourhood_thresholds(const vec2& input, int num_thresholds) {
+    if(num_thresholds <= 0)
+        throw std::invalid_argument("num_thresholds must be > 0");
+
+    if(input.size() == 0 || input[0].size() == 0)
+        return vec();
+
+    int Y = input.size();
+    assert(Y > 0);
+    int X = input[0].size();
+    assert(X > 0);
+    size_t size = Y * X;
+    vec all_values;
+    all_values.reserve(size);
+    for(int y = 0; y < Y; y++) {
+        for(int x = 0; x < X; x++) {
+            if(gridpp::util::is_valid(input[y][x])) {
+                all_values.push_back(input[y][x]);
+            }
         }
     }
-    return gridpp::neighbourhood_quantile_ens(input3, quantile, radius, num_thresholds);
+    std::sort(all_values.begin(), all_values.end());
+    vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
+    return thresholds;
 }
-vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds) {
+vec gridpp::get_neighbourhood_thresholds(const vec3& input, int num_thresholds) {
+    if(num_thresholds <= 0)
+        throw std::invalid_argument("num_thresholds must be > 0");
+
     if(input.size() == 0 || input[0].size() == 0 || input[0][0].size() == 0)
-        return vec2();
-    if(num_thresholds == 0) {
-        return ::neighbourhood_brute_force_ens(input, radius, gridpp::Quantile, quantile);
-    }
+        return vec();
     int Y = input.size();
     assert(Y > 0);
     int X = input[0].size();
@@ -269,9 +285,91 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int r
     }
     std::sort(all_values.begin(), all_values.end());
     vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
-    // for(int i = 0; i < thresholds.size(); i++)
-    //     std::cout << "Threshold[" << i << "] = " << thresholds[i] << std::endl;
-    return gridpp::neighbourhood_quantile_ens(input, quantile, radius, thresholds);
+    return thresholds;
+}
+vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int radius, const vec& thresholds) {
+    vec3 input3 = ::vec2_to_vec3(input);
+    return gridpp::neighbourhood_quantile_ens(input3, quantile, radius, thresholds);
+}
+vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
+    if(radius < 0)
+        throw std::invalid_argument("Radius must be > 0");
+    if(quantile < 0 || quantile > 1)
+        throw std::invalid_argument("Quantile must be between 0 and 1 inclusive");
+
+    if(input.size() == 0 || input[0].size() == 0 || input[0][0].size() == 0)
+        return vec2();
+    double s_time = gridpp::util::clock();
+    bool fast = true;
+    assert(quantile >= 0);
+    assert(quantile <= 1);
+    int nY = input.size();
+    int nX = input[0].size();
+    int nE = input[0][0].size();
+
+    vec2 output(nY);
+    for(int y = 0; y < nY; y++) {
+        output[y].resize(nX, gridpp::MV);
+    }
+    if(thresholds.size() == 0)
+        return output;
+
+    // Compute neighbourhood means for each threshold
+    vec3 stats(thresholds.size());
+    for(int t = 0; t < thresholds.size(); t++) {
+        stats[t].resize(nY);
+        for(int y = 0; y < nY; y++) {
+            stats[t][y].resize(nX, 0);
+        }
+        vec2 temp(nY);
+        for(int y = 0; y < nY; y++) {
+            temp[y].resize(nX, gridpp::MV);
+            for(int x = 0; x < nX; x++) {
+                int sum = 0;
+                int count = 0;
+                for(int e = 0; e < nE; e++) {
+                    if(gridpp::util::is_valid(input[y][x][e])) {
+                        if(input[y][x][e] <= thresholds[t]) {
+                            sum++;
+                        }
+                        count++;
+                    }
+                }
+                if(count > 0)
+                    temp[y][x] = float(sum) / count;
+            }
+        }
+        stats[t] = gridpp::neighbourhood(temp, radius, gridpp::Mean);
+    }
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            vec yarray(thresholds.size(), gridpp::MV);
+            bool is_missing = false;
+            for(int t = 0; t < thresholds.size(); t++) {
+                float sum = 0;
+                int count = 0;
+                for(int e = 0; e < nE; e++) {
+                    if(gridpp::util::is_valid(stats[t][y][x])) {
+                        sum += stats[t][y][x];
+                        count++;
+                    }
+                }
+                if(count > 0) {
+                    yarray[t] = sum / count;
+                    assert(yarray[t] <= 1);
+                    assert(yarray[t] >= 0);
+                }
+                else
+                    is_missing = true;
+            }
+            if(!is_missing)
+                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
+        }
+    }
+
+    double e_time = gridpp::util::clock() ;
+    std::cout << e_time - s_time << " s" << std::endl;
+    return output;
 }
 vec2 gridpp::neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic) {
     return ::neighbourhood_brute_force(input, iRadius, statistic, 0);
@@ -377,82 +475,18 @@ namespace {
         }
         return output;
     }
-}
-vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds) {
-    if(radius < 0)
-        throw std::invalid_argument("Radius must be > 0");
-    if(quantile < 0 || quantile > 1)
-        throw std::invalid_argument("Quantile must be between 0 and 1 inclusive");
-
-    double s_time = gridpp::util::clock();
-    bool fast = true;
-    assert(quantile >= 0);
-    assert(quantile <= 1);
-    int nY = input.size();
-    int nX = input[0].size();
-    int nE = input[0][0].size();
-
-    vec2 output(nY);
-    for(int y = 0; y < nY; y++) {
-        output[y].resize(nX, gridpp::MV);
-    }
-    if(thresholds.size() == 0)
+    vec3 vec2_to_vec3(const vec2& input) {
+        if(input.size() == 0 || input[0].size() == 0)
+            return vec3();
+        int Y = input.size();
+        int X = input[0].size();
+        vec3 output(Y);
+        for(int y = 0; y < Y; y++) {
+            output[y].resize(X);
+            for(int x = 0; x < X; x++) {
+                output[y][x].push_back(input[y][x]);
+            }
+        }
         return output;
-
-    // Compute neighbourhood means for each threshold
-    vec3 stats(thresholds.size());
-    for(int t = 0; t < thresholds.size(); t++) {
-        stats[t].resize(nY);
-        for(int y = 0; y < nY; y++) {
-            stats[t][y].resize(nX, 0);
-        }
-        vec2 temp(nY);
-        for(int y = 0; y < nY; y++) {
-            temp[y].resize(nX, gridpp::MV);
-            for(int x = 0; x < nX; x++) {
-                int sum = 0;
-                int count = 0;
-                for(int e = 0; e < nE; e++) {
-                    if(gridpp::util::is_valid(input[y][x][e])) {
-                        if(input[y][x][e] <= thresholds[t]) {
-                            sum++;
-                        }
-                        count++;
-                    }
-                }
-                if(count > 0)
-                    temp[y][x] = float(sum) / count;
-            }
-        }
-        stats[t] = gridpp::neighbourhood(temp, radius, gridpp::Mean);
     }
-    for(int y = 0; y < nY; y++) {
-        for(int x = 0; x < nX; x++) {
-            vec yarray(thresholds.size(), gridpp::MV);
-            bool is_missing = false;
-            for(int t = 0; t < thresholds.size(); t++) {
-                float sum = 0;
-                int count = 0;
-                for(int e = 0; e < nE; e++) {
-                    if(gridpp::util::is_valid(stats[t][y][x])) {
-                        sum += stats[t][y][x];
-                        count++;
-                    }
-                }
-                if(count > 0) {
-                    yarray[t] = sum / count;
-                    assert(yarray[t] <= 1);
-                    assert(yarray[t] >= 0);
-                }
-                else
-                    is_missing = true;
-            }
-            if(!is_missing)
-                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
-        }
-    }
-
-    double e_time = gridpp::util::clock() ;
-    std::cout << e_time - s_time << " s" << std::endl;
-    return output;
 }

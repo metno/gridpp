@@ -25,8 +25,9 @@ class NeighbourhoodTest(unittest.TestCase):
             output = gridpp.neighbourhood([[]], 1, statistic)
             self.assertEqual(output, ())
         for quantile in np.arange(0.1,0.9,0.1):
-            for num_thresholds in [0, 1, 2]:
-                output = gridpp.neighbourhood_quantile([[]], 0.9, 1, num_thresholds)
+            for num_thresholds in [1, 2]:
+                thresholds = gridpp.get_neighbourhood_thresholds(values, num_thresholds)
+                output = gridpp.neighbourhood_quantile([[]], 0.9, 1, thresholds)
                 self.assertEqual(output, ())
 
     def test_missing(self):
@@ -68,14 +69,15 @@ class NeighbourhoodTest(unittest.TestCase):
         self.assertTrue((np.array(output) == 24).all())
 
     def test_quantile(self):
-        output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1, 100))
+        thresholds = gridpp.get_neighbourhood_thresholds(values, 100)
+        output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1, thresholds))
         self.assertEqual(output[2][2], 12)   # Should be 12.5
         self.assertEqual(output[2][3], 12.5) # Should be 13
 
-        output = np.array(gridpp.neighbourhood_quantile(np.full([100,100], np.nan), 0.5, 1, 100))
+        output = np.array(gridpp.neighbourhood_quantile(np.full([100,100], np.nan), 0.5, 1, thresholds))
         self.assertTrue(np.isnan(np.array(output)).all())
 
-        output = np.array(gridpp.neighbourhood_quantile(np.zeros([100,100]), 0.5, 1, 100))
+        output = np.array(gridpp.neighbourhood_quantile(np.zeros([100,100]), 0.5, 1, thresholds))
         self.assertTrue((np.array(output) == 0).all())
 
         output = np.array(gridpp.neighbourhood_quantile_brute_force(values, 0.5, 1))

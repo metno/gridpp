@@ -111,14 +111,14 @@ namespace gridpp {
     /** Spatial neighbourhood filter
       * @param input 2D grid of values
       * @param radius Filter radius in number of gridpoints
-      * @param operation One of min, mean, median, max, std
+      * @param statistic Statistic to compute
     */
     vec2 neighbourhood(const vec2& input, int radius, Statistic statistic);
 
     /** Neighbourhood filter in space and across ensemble members
       * @param input 3D vector with dimensions (Y, X, ensemble)
       * @param radius Filter radius in number of gridpoints
-      * @param operation One of min, mean, median, max, std
+      * @param statistic Statistic to compute
     */
     vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
 
@@ -126,17 +126,9 @@ namespace gridpp {
       * @param input 2D grid of values
       * @param quantile Quantile to compute (between 0 and 1)
       * @param radius Filter radius in number of gridpoints
-      * @param operation One of min, mean, median, max, std
+      * @param thresholds Vector of thresholds to use to approximate value
     */
-    vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, int num_thresholds);
-
-    /** Neighbourhood filter space and across members for quantile operation
-      * @param input 3D vector with dimensions (Y, X, ensemble)
-      * @param quantile Quantile to compute (between 0 and 1)
-      * @param radius Filter radius in number of gridpoints
-      * @param num_thresholds Number of thresholds to use to approximate value (0 for no approximation)
-    */
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, int num_thresholds);
+    vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, const vec& thresholds);
 
     /** Neighbourhood filter space and across members for quantile operation
       * @param input 3D vector with dimensions (Y, X, ensemble)
@@ -160,6 +152,18 @@ namespace gridpp {
     */
     vec2 neighbourhood_quantile_brute_force(const vec2& input, float quantile, int radius);
 
+    /** Calculate appropriate approximation thresholds for neighbourhood quantile
+     *  @param input 2D grid of values
+     *  @param num_thresholds Number of thresholds
+    */
+    vec get_neighbourhood_thresholds(const vec2& input, int num_thresholds);
+
+    /** Calculate appropriate approximation thresholds for neighbourhood quantile
+     *  @param input 3D grid of values
+     *  @param num_thresholds Number of thresholds
+    */
+    vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
+
     /****************************************
      * Calibration methods                  *
      ****************************************/
@@ -169,7 +173,6 @@ namespace gridpp {
       * @param y Y-axis parameters values
       * @param policy Extrapolation policy
       * @return Quantile-mapped values
-      *
     */
     vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
 

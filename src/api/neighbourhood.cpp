@@ -356,8 +356,12 @@ vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int r
                 }
                 if(count > 0) {
                     yarray[t] = sum / count;
-                    assert(yarray[t] <= 1);
-                    assert(yarray[t] >= 0);
+                    // Small floating point errors can occur in neighbourhood. Force values to be
+                    // within [0, 1]
+                    if(yarray[t] > 1)
+                        yarray[t] = 1;
+                    else if(yarray[t] < 0)
+                        yarray[t] = 0;
                 }
                 else
                     is_missing = true;

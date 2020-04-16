@@ -43,7 +43,7 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
    add_definitions("-DDEBUG")
 elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
    find_package(OpenMP REQUIRED)
-   set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${OpenMP_CXX_FLAGS}")
+   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC ${OpenMP_CXX_FLAGS}")
 endif()
 
 # Required packages
@@ -156,7 +156,7 @@ install(TARGETS gridpp-bin gridpp-train
 
 include_directories(./include)
 file(GLOB SOURCES "src/api/*.cpp")
-add_library(gridpp SHARED ${APISRC})
+add_library(gridpp ${APISRC})
 target_link_libraries(gridpp "${Boost_LIBRARIES}")
 target_link_libraries(gridpp "${NETCDF_LIBRARIES}")
 target_link_libraries(gridpp "${GSL_LIBRARIES}")

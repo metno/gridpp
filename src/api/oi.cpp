@@ -97,7 +97,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     //     for(int y = 0; y < nY; y++) {
     //         float value = input[y][x];
     //         if(gridpp::util::is_valid(value))
-    //             input[y][x] = gridpp::transform(value);
+    //             input[y][x] = transform.forward(value);
     //     }
     // }
 
@@ -195,16 +195,14 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     }
 
     // Back-transform
-    /*
-    #pragma omp parallel for
-    for(int x = 0; x < nX; x++) {
-        for(int y = 0; y < nY; y++) {
-            float value = (*output)(y, x, e);
-            if(gridpp::util::is_valid(value))
-                (*output)(y, x, e) = invTransform(value);
-        }
-    }
-    */
+    // #pragma omp parallel for
+    // for(int x = 0; x < nX; x++) {
+    //     for(int y = 0; y < nY; y++) {
+    //         float value = (*output)(y, x, e);
+    //         if(gridpp::util::is_valid(value))
+    //             (*output)(y, x, e) = transform.backward(value);
+    //     }
+    // }
     std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return output;
 }

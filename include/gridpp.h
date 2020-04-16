@@ -420,6 +420,32 @@ namespace gridpp {
             float mW;
     };
 
+    class Transform {
+        public:
+            virtual float forward(float value) const = 0;
+            virtual float backward(float value) const = 0;
+            virtual vec2 forward(const vec2& input) const;
+            virtual vec2 backward(const vec2& input) const;
+    };
+    class Identity : public Transform {
+        public:
+            float forward(float value) const;
+            float backward(float value) const;
+    };
+    class Log : public Transform {
+        public:
+            float forward(float value) const;
+            float backward(float value) const;
+    };
+    class BoxCox : public Transform {
+        public:
+            BoxCox(float threshold);
+            float forward(float value) const;
+            float backward(float value) const;
+        private:
+            float mThreshold;
+    };
+
     /** Helper class for Grid and Points */
     class KDTree {
         public:

@@ -101,5 +101,8 @@ ivec2 gridpp::Grid::get_indices(ivec indices) const {
     return results;
 }
 ivec gridpp::Grid::size() const {
-    return get_indices(mTree.size());
+    ivec indices = get_indices(mTree.size() - 1);
+    indices[0]++;
+    indices[1]++;
+    return indices;
 }

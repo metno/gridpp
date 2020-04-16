@@ -149,3 +149,14 @@ vec gridpp::KDTree::get_lons() const {
 int gridpp::KDTree::size() const {
     return mLats.size();
 }
+gridpp::KDTree& gridpp::KDTree::operator=(gridpp::KDTree other) {
+    std::swap(mLats, other.mLats);
+    std::swap(mLons, other.mLons);
+    std::swap(mTree, other.mTree);
+    return *this;
+}
+gridpp::KDTree::KDTree(const gridpp::KDTree& other) {
+    mLats = other.mLats;
+    mLons = other.mLons;
+    mTree = other.mTree;
+}

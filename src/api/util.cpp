@@ -148,6 +148,10 @@ void gridpp::util::debug(std::string string) {
     std::cout << string << std::endl;
 }
 
+void gridpp::util::warning(std::string string) {
+    std::cout << "Warning: " << string << std::endl;
+}
+
 void gridpp::util::error(std::string iMessage) {
 #ifdef DEBUG
     std::cout << "Error: " << iMessage << std::endl;
@@ -314,6 +318,12 @@ void gridpp::util::check_equal_size(const vec& v1, const vec& v2) {
         ss << "Vectors are not of the same size: " << v1.size() << " != " << v2.size();
         gridpp::util::error(ss.str());
     }
+}
+vec2 gridpp::util::init_vec2(int Y, int X, float value) {
+    vec2 output(Y);
+    for(int y = 0; y < Y; y++)
+        output[y].resize(X, value);
+    return output;
 }
 #if 0
 vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius) {

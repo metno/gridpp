@@ -102,7 +102,14 @@ namespace gridpp {
             const vec3& input,
             const gridpp::Points& points,
             const vec& pobs,
-            const vec& pci);
+            const vec& pci,
+            float min_rho,
+            float hlength,
+            float vlength,
+            float wlength,
+            int max_points,
+            float elev_gradient,
+            float epsilon);
 
     /****************************************
      * Neighbourhood methods                *
@@ -320,6 +327,7 @@ namespace gridpp {
         // ivec regression(const vec& x, const vec& y);
         double clock();
         void debug(std::string string);
+        void warning(std::string string);
         void error(std::string string);
         bool is_valid(float value);
         float calc_statistic(const vec& array, Statistic statistic);
@@ -331,6 +339,7 @@ namespace gridpp {
         int get_upper_index(float iX, const std::vector<float>& iValues);
         float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
         void not_implemented_error();
+        vec2 init_vec2(int Y, int X, float value=gridpp::MV);
 
         /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
           *  but including the first number after duplicated values. Include the lowest and highest
@@ -348,6 +357,8 @@ namespace gridpp {
     class KDTree {
         public:
             KDTree(vec lats, vec lons);
+            KDTree& operator=(KDTree other);
+            KDTree(const KDTree& other);
             KDTree() {};
 
             /** Find single nearest points
@@ -424,6 +435,8 @@ namespace gridpp {
         public:
             Points();
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
+            Points& operator=(Points other);
+            Points(const Points& other);
             int get_nearest_neighbour(float lat, float lon) const;
             ivec get_neighbours(float lat, float lon, float radius) const;
             ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
@@ -435,6 +448,8 @@ namespace gridpp {
             vec get_elevs() const;
             vec get_lafs() const;
             int size() const;
+            ivec get_in_domain_indices(const Grid& grid) const;
+            Points get_in_domain(const Grid& grid) const;
         private:
             KDTree mTree;
             vec mLats;

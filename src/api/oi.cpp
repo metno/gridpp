@@ -28,10 +28,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const gridpp::Points& points,
         const vec& pobs,  // gObs
         const vec& pci,   // gCi
-        float min_rho,
-        float hlength,
-        float vlength,
-        float wlength,
+        const gridpp::StructureFunction& structure,
         int max_points,
         float elev_gradient,
         float epsilon) {
@@ -40,8 +37,6 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     // Check input data
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
-    if(min_rho <= 0)
-        throw std::invalid_argument("min_rho must be > 0");
     if(input.size() != bgrid.size()[0] || input[0].size() != bgrid.size()[1])
         throw std::runtime_error("Input field is not the same size as the grid");
     if(pobs.size() != points.size())
@@ -85,8 +80,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     ss << "Number of gridpoints: " << nY << " " << nX;
     gridpp::util::debug(ss.str());
 
-    // Calculate the horizontal localization radius. For min_rho=0.0013, the factor is 3.64
-    float localizationRadius = sqrt(-2*log(min_rho)) * hlength;
+    float localizationRadius = structure.localization_distance();
 
     // Store the nearst gridpoint indicies for each observation
     std::vector<float> pYi(nS, gridpp::MV);
@@ -134,17 +128,10 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             lRhos0.reserve(lLocIndices0.size());
             for(int i = 0; i < lLocIndices0.size(); i++) {
                 int index = lLocIndices0[i];
-                float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], lat, lon);
-                float vdist = gridpp::MV;
-                if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(elev)))
-                    vdist = pelevs[index] - elev;
-                float lafdist = 0;
-                if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
-                    lafdist = plafs[index] - laf;
-                float rho = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wlength);
-                int X = pXi[index];
-                int Y = pYi[index];
-                if(rho > min_rho) {
+                Point p1(plats[index], plons[index], pelevs[index], plafs[index]);
+                Point p2(lat, lon, elev, laf);
+                float rho = structure.corr(p1, p2);
+                if(rho > 0) {
                     lRhos0.push_back(std::pair<float,int>(rho, i));
                 }
             }
@@ -194,17 +181,11 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                 lY(i) = gY[index];
                 lR(i, i) = pci0[index];
                 lG(0, i) = lRhos(i);
+                Point p1(plats[index], plons[index], pelevs[index], plafs[index]);
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
-                    float hdist = gridpp::KDTree::calc_distance(plats[index], plons[index], plats[index_j], plons[index_j]);
-                    float vdist = gridpp::MV;
-                    if(gridpp::util::is_valid(pelevs[index] && gridpp::util::is_valid(pelevs[index_j])))
-                        vdist = pelevs[index] - pelevs[index_j];
-                    float lafdist = 0;
-                    if(gridpp::util::is_valid(plafs[index]) && gridpp::util::is_valid(laf))
-                        lafdist = plafs[index] - plafs[index_j];
-
-                    lP(i, j) = ::calcRho(hdist, vdist, lafdist, hlength, vlength, wlength);
+                    Point p2(plats[index_j], plons[index_j], pelevs[index_j], plafs[index_j]);
+                    lP(i, j) = structure.corr(p1, p2);
                 }
             }
             mattype lGSR = lG * arma::inv(lP + epsilon * epsilon * lR);

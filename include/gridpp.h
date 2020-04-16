@@ -32,6 +32,8 @@ namespace gridpp {
     class Interpolator;
     class Nearest;
     class Parameters;
+    class StructureFunction;
+
     /** Methods for extrapolating outside a curve */
     enum Extrapolation {
             OneToOne = 0,      /**< Continue using a slope of 1 */
@@ -83,10 +85,7 @@ namespace gridpp {
             const gridpp::Points& points,
             const vec& pobs,
             const vec& pci,
-            float min_rho,
-            float hlength,
-            float vlength,
-            float wlength,
+            const gridpp::StructureFunction& structure,
             int max_points,
             float elev_gradient,
             float epsilon);
@@ -335,8 +334,28 @@ namespace gridpp {
         vec calc_statistic(const vec2& array, Statistic statistic);
         vec calc_quantile(const vec2& array, float quantile=MV);
         int num_missing_values(const vec2& iArray);
+
+        /** Find the index in a vector that is equal or just below a value
+         *  @param iX Lookup value
+         *  @param iValues Lookup vector. Must be sorted.
+         *  @return The index into iValues that is equal or just below iX
+        */
         int get_lower_index(float iX, const std::vector<float>& iValues);
+
+        /** Find the index in a vector that is equal or just above a value
+         *  @param iX Lookup value
+         *  @param iValues Lookup vector. Must be sorted.
+         *  @return The index into iValues that is equal or just above iX
+        */
         int get_upper_index(float iX, const std::vector<float>& iValues);
+
+        /** Piecewise linear interpolation.o
+         *  If x is outside the range of iX, then the min/max value of iY is used
+         *  @param x Interpolation to this point
+         *  @param iX Vector of x-axis values. Vector must be sorted.
+         *  @param iY Vector of y-axis values corresponding to iX.
+         *  @return Y value corresponding to x
+        */
         float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
         void not_implemented_error();
         vec2 init_vec2(int Y, int X, float value=gridpp::MV);
@@ -352,6 +371,54 @@ namespace gridpp {
         /** Raises an exception if the two arrays are not the same size */
         void check_equal_size(const vec& v1, const vec& v2);
     }
+
+    class Point {
+        public:
+            Point(float lat, float lon, float elev=gridpp::MV, float laf=gridpp::MV);
+            float lat;
+            float lon;
+            float elev;
+            float laf;
+    };
+    /** Covariance structure function */
+    class StructureFunction {
+        public:
+            StructureFunction(float h);
+            /** Correlation between two points */
+            virtual float corr(const Point& p1, const Point& p2) const = 0;
+            /** Correlation between two points including auxillary variables */
+            virtual float corr(const Point& p1, const Point& p2, const vec& v1, const vec& v2) const;
+            /** Maximum distance for which an observation can have an impact (localization)
+              * @return Distance [m]
+            */
+            virtual float localization_distance() const = 0;
+        protected:
+            float barnes_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
+            float cressman_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
+            float mH;
+    };
+    /** Simple structure function based on distance, elevation, and land area fraction */
+    class BarnesStructure: private StructureFunction {
+        public:
+            BarnesStructure(float h, float v=0, float w=0, float min_rho=0.0013);
+            float corr(const Point& p1, const Point& p2) const;
+            float localization_distance() const;
+        private:
+            float mV;
+            float mW;
+            float mMinRho;
+    };
+
+    /** Simple structure function based on distance, elevation, and land area fraction */
+    class CressmanStructure: private StructureFunction {
+        public:
+            CressmanStructure(float h, float v=0, float w=0);
+            float corr(const Point& p1, const Point& p2) const;
+            float localization_distance() const;
+        private:
+            float mV;
+            float mW;
+    };
 
     /** Helper class for Grid and Points */
     class KDTree {

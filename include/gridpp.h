@@ -71,24 +71,18 @@ namespace gridpp {
       * @param input 2D field of background values
       * @param points Points of observations
       * @param pobs Vector of observations
-      * @param pci Vector of ci values
-      * @param min_rho Minimum rho value for localization
-      * @param hlength Horizontal decorrelation length [m]
-      * @param vlength Vertical decorrelation length; Use 0 to disable [m]
-      * @param wlength Land area fraction decorrelation length; Use 0 to disable [1]
+      * @param pratios Vector of ratio of observation error variance to background variance
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param elev_gradient Use this elevation gradient for observation operator; Use 0 to disable [units/m]
-      * @param epsilon Ratio of observation variance to background variance
     */
     vec2 optimal_interpolation(const gridpp::Grid& bgrid,
             const vec2& input,
             const gridpp::Points& points,
             const vec& pobs,
-            const vec& pci,
+            const vec& pratios,
             const gridpp::StructureFunction& structure,
             int max_points,
-            float elev_gradient,
-            float epsilon);
+            float elev_gradient);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * @param input 3D field of background values (Y, X, E)

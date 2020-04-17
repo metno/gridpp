@@ -27,11 +27,10 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const vec2& input,
         const gridpp::Points& points,
         const vec& pobs,  // gObs
-        const vec& pci,   // gCi
+        const vec& pratios,   // gCi
         const gridpp::StructureFunction& structure,
         int max_points,
-        float elev_gradient,
-        float epsilon) {
+        float elev_gradient) {
     double s_time = gridpp::util::clock();
 
     // Check input data
@@ -41,7 +40,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         throw std::runtime_error("Input field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::runtime_error("Observations and points exception mismatch");
-    if(pci.size() != points.size())
+    if(pratios.size() != points.size())
         throw std::runtime_error("Ci and points size mismatch");
 
     int nY = input.size();
@@ -69,10 +68,10 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     int nS = plats.size();
     assert(indices.size() == nS);
     vec pobs0(nS);
-    vec pci0(nS);
+    vec pratios0(nS);
     for(int s = 0; s < nS; s++) {
         pobs0[s] = pobs[indices[s]];
-        pci0[s] = pci[indices[s]];
+        pratios0[s] = pratios[indices[s]];
     }
 
     std::stringstream ss;
@@ -179,7 +178,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                 int index = lLocIndices[i];
                 lObs(i) = pobs0[index];
                 lY(i) = gY[index];
-                lR(i, i) = pci0[index];
+                lR(i, i) = pratios0[index];
                 lG(0, i) = lRhos(i);
                 Point p1(plats[index], plons[index], pelevs[index], plafs[index]);
                 for(int j = 0; j < lS; j++) {
@@ -188,7 +187,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                     lP(i, j) = structure.corr(p1, p2);
                 }
             }
-            mattype lGSR = lG * arma::inv(lP + epsilon * epsilon * lR);
+            mattype lGSR = lG * arma::inv(lP + lR);
             vectype dx = lGSR * (lObs - lY);
             output[y][x] = input[y][x] + dx[0];
         }

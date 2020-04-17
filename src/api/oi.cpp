@@ -24,27 +24,27 @@ namespace {
 }
 
 vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
-        const vec2& input,
+        const vec2& background,
         const gridpp::Points& points,
         const vec& pobs,  // gObs
         const vec& pratios,   // gCi
+        const vec& pbackground,
         const gridpp::StructureFunction& structure,
-        int max_points,
-        float elev_gradient) {
+        int max_points) {
     double s_time = gridpp::util::clock();
 
     // Check input data
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
-    if(input.size() != bgrid.size()[0] || input[0].size() != bgrid.size()[1])
+    if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1])
         throw std::runtime_error("Input field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::runtime_error("Observations and points exception mismatch");
     if(pratios.size() != points.size())
         throw std::runtime_error("Ci and points size mismatch");
 
-    int nY = input.size();
-    int nX = input[0].size();
+    int nY = background.size();
+    int nX = background[0].size();
 
     // Prepare output matrix
     vec2 output = gridpp::util::init_vec2(nY, nX);
@@ -94,14 +94,14 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     // #pragma omp parallel for
     // for(int x = 0; x < nX; x++) {
     //     for(int y = 0; y < nY; y++) {
-    //         float value = input[y][x];
+    //         float value = background[y][x];
     //         if(gridpp::util::is_valid(value))
-    //             input[y][x] = transform.forward(value);
+    //             background[y][x] = transform.forward(value);
     //     }
     // }
 
     // Compute the background value at observation points (Y)
-    vec gY = ::compute_background(input, bgrid, points, elev_gradient);
+    vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
 
     #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
@@ -116,7 +116,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             ivec lLocIndices0 = points0.get_neighbours(lat, lon, localizationRadius);
             if(lLocIndices0.size() == 0) {
                 // If we have too few observations though, then use the background
-                output[y][x] = input[y][x];
+                output[y][x] = background[y][x];
                 continue;
             }
             std::vector<int> lLocIndices;
@@ -161,7 +161,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             int lS = lLocIndices.size();
             if(lS == 0) {
                 // If we have too few observations though, then use the background
-                output[y][x] = input[y][x];
+                output[y][x] = background[y][x];
                 continue;
             }
 
@@ -189,7 +189,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             }
             mattype lGSR = lG * arma::inv(lP + lR);
             vectype dx = lGSR * (lObs - lY);
-            output[y][x] = input[y][x] + dx[0];
+            output[y][x] = background[y][x] + dx[0];
         }
     }
 

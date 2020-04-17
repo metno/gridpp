@@ -76,13 +76,13 @@ namespace gridpp {
       * @param elev_gradient Use this elevation gradient for observation operator; Use 0 to disable [units/m]
     */
     vec2 optimal_interpolation(const gridpp::Grid& bgrid,
-            const vec2& input,
+            const vec2& background,
             const gridpp::Points& points,
             const vec& pobs,
             const vec& pratios,
+            const vec& pbackground,
             const gridpp::StructureFunction& structure,
-            int max_points,
-            float elev_gradient);
+            int max_points);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * @param input 3D field of background values (Y, X, E)

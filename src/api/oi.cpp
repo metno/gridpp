@@ -81,15 +81,6 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
 
     float localizationRadius = structure.localization_distance();
 
-    // Store the nearst gridpoint indicies for each observation
-    std::vector<float> pYi(nS, gridpp::MV);
-    std::vector<float> pXi(nS, gridpp::MV);
-    for(int i = 0; i < nS; i++) {
-        const std::vector<int> indices = bgrid.get_nearest_neighbour(plats[i], plons[i]);
-        pYi[i] = indices[0];
-        pXi[i] = indices[1];
-    }
-
     // Transform the background
     // #pragma omp parallel for
     // for(int x = 0; x < nX; x++) {

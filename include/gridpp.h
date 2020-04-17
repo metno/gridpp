@@ -377,7 +377,7 @@ namespace gridpp {
     /** Covariance structure function */
     class StructureFunction {
         public:
-            StructureFunction(float h);
+            StructureFunction(float localization_distance);
             /** Correlation between two points */
             virtual float corr(const Point& p1, const Point& p2) const = 0;
             /** Correlation between two points including auxillary variables */
@@ -385,22 +385,23 @@ namespace gridpp {
             /** Maximum distance for which an observation can have an impact (localization)
               * @return Distance [m]
             */
-            virtual float localization_distance() const = 0;
+            float localization_distance() const;
         protected:
             float barnes_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
             float cressman_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
-            float mH;
+            float barnes_rho(float dist, float length) const;
+            float cressman_rho(float dist, float length) const;
+            float mLocalizationDistance;
     };
     /** Simple structure function based on distance, elevation, and land area fraction */
     class BarnesStructure: private StructureFunction {
         public:
-            BarnesStructure(float h, float v=0, float w=0, float min_rho=0.0013);
+            BarnesStructure(float h, float v=0, float w=0, float hmax=gridpp::MV);
             float corr(const Point& p1, const Point& p2) const;
-            float localization_distance() const;
         private:
+            float mH;
             float mV;
             float mW;
-            float mMinRho;
     };
 
     /** Simple structure function based on distance, elevation, and land area fraction */
@@ -408,8 +409,8 @@ namespace gridpp {
         public:
             CressmanStructure(float h, float v=0, float w=0);
             float corr(const Point& p1, const Point& p2) const;
-            float localization_distance() const;
         private:
+            float mH;
             float mV;
             float mW;
     };

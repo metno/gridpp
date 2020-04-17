@@ -247,8 +247,10 @@ namespace gridpp {
       * @return Values for the output points
     */
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
-    // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, int radius, float num, float min_elev_diff);
-    // vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues)
+
+    vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, float elev_gradient);
+    vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2 ivalues, float elev_gradient);
+
 
     /****************************************
      * Diagnosing methods                   *

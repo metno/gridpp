@@ -387,8 +387,6 @@ namespace gridpp {
             */
             float localization_distance() const;
         protected:
-            float barnes_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
-            float cressman_rho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) const;
             float barnes_rho(float dist, float length) const;
             float cressman_rho(float dist, float length) const;
             float mLocalizationDistance;

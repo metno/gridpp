@@ -81,16 +81,6 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
 
     float localizationRadius = structure.localization_distance();
 
-    // Transform the background
-    // #pragma omp parallel for
-    // for(int x = 0; x < nX; x++) {
-    //     for(int y = 0; y < nY; y++) {
-    //         float value = background[y][x];
-    //         if(gridpp::util::is_valid(value))
-    //             background[y][x] = transform.forward(value);
-    //     }
-    // }
-
     // Compute the background value at observation points (Y)
     vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
 
@@ -175,7 +165,10 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
                 for(int j = 0; j < lS; j++) {
                     int index_j = lLocIndices[j];
                     Point p2(plats[index_j], plons[index_j], pelevs[index_j], plafs[index_j]);
-                    lP(i, j) = structure.corr(p1, p2);
+                    if(i == j)
+                        lP(i, j) = 1;
+                    else
+                        lP(i, j) = structure.corr(p1, p2);
                 }
             }
             mattype lGSR = lG * arma::inv(lP + lR);
@@ -184,17 +177,64 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         }
     }
 
-    // Back-transform
-    // #pragma omp parallel for
-    // for(int x = 0; x < nX; x++) {
-    //     for(int y = 0; y < nY; y++) {
-    //         float value = (*output)(y, x, e);
-    //         if(gridpp::util::is_valid(value))
-    //             (*output)(y, x, e) = transform.backward(value);
-    //     }
-    // }
     std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return output;
+}
+
+vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
+        const vec2& background,
+        float bsigma,
+        const gridpp::Points& points,
+        const vec& pobs,
+        const vec& psigma,
+        const vec& pbackground,
+        const gridpp::StructureFunction& structure,
+        int max_points,
+        const gridpp::Transform& transform) {
+
+    int nY = background.size();
+    int nX = background[0].size();
+    int nS = points.size();
+
+    // Transform the background
+    // #pragma omp parallel for
+    vec2 background_transformed = background;
+    for(int x = 0; x < nX; x++) {
+        for(int y = 0; y < nY; y++) {
+            float value = background_transformed[y][x];
+            if(gridpp::util::is_valid(value))
+                background_transformed[y][x] = transform.forward(value);
+        }
+    }
+
+    vec pbackground_transformed = pbackground;
+    vec pobs_transformed = pobs;
+    vec pratios(nS);
+    for(int s = 0; s < nS; s++) {
+        float value = pbackground_transformed[s];
+        if(gridpp::util::is_valid(value))
+            pbackground_transformed[s] = transform.forward(value);
+
+        value = pobs_transformed[s];
+        if(gridpp::util::is_valid(value))
+            pobs_transformed[s] = transform.forward(value);
+
+        pratios[s] = psigma[s] * psigma[s] / bsigma / bsigma;
+    }
+
+    vec2 analysis = optimal_interpolation(bgrid, background_transformed, points, pobs_transformed, pratios, pbackground_transformed, structure, max_points);
+
+    // Transform the background
+    // #pragma omp parallel for
+    for(int x = 0; x < nX; x++) {
+        for(int y = 0; y < nY; y++) {
+            float value = analysis[y][x];
+            if(gridpp::util::is_valid(value))
+                analysis[y][x] = transform.backward(value);
+        }
+    }
+
+    return analysis;
 }
 
 namespace {
@@ -264,35 +304,3 @@ namespace {
         return output;
     }
 }
-/*
-float transform(float iValue) const {
-   if(mTransformType == TransformTypeNone)
-      return iValue;
-
-   if(iValue <= 0)
-      iValue = 0;
-   if(mLambda == 0)
-      return log(iValue);
-   else
-      return (pow(iValue, mLambda) - 1) / mLambda;
-}
-
-float CalibratorOi::invTransform(float iValue) const {
-   if(mTransformType == TransformTypeNone)
-      return iValue;
-
-   float rValue = 0;
-   if(mLambda == 0)
-      rValue = exp(iValue);
-   else {
-      if(iValue < -1.0 / mLambda) {
-         iValue = -1.0 / mLambda;
-      }
-      rValue = pow(1 + mLambda * iValue, 1 / mLambda);
-   }
-   if(rValue <= 0)
-      rValue = 0;
-   return rValue;
-}
-*/
-

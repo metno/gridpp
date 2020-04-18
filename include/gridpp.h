@@ -33,6 +33,7 @@ namespace gridpp {
     class Nearest;
     class Parameters;
     class StructureFunction;
+    class Transform;
 
     /** Methods for extrapolating outside a curve */
     enum Extrapolation {
@@ -66,14 +67,15 @@ namespace gridpp {
      * Data assimilation methods            *
      ****************************************/
 
-    /** Optimal interpolation using a static structure function
+    /** Optimal interpolation for a deterministic field
       * @param bgrid Grid of background field
-      * @param input 2D field of background values
+      * @param background 2D field of background values
       * @param points Points of observations
       * @param pobs Vector of observations
       * @param pratios Vector of ratio of observation error variance to background variance
+      * @param pbackground Background with observation operator
+      * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param elev_gradient Use this elevation gradient for observation operator; Use 0 to disable [units/m]
     */
     vec2 optimal_interpolation(const gridpp::Grid& bgrid,
             const vec2& background,
@@ -83,6 +85,17 @@ namespace gridpp {
             const vec& pbackground,
             const gridpp::StructureFunction& structure,
             int max_points);
+
+    vec2 optimal_interpolation_transform(const gridpp::Grid& bgrid,
+            const vec2& background,
+            float bsigma,
+            const gridpp::Points& points,
+            const vec& pobs,
+            const vec& psigma,
+            const vec& pbackground,
+            const gridpp::StructureFunction& structure,
+            int max_points,
+            const gridpp::Transform& transform);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * @param input 3D field of background values (Y, X, E)
@@ -382,22 +395,22 @@ namespace gridpp {
             StructureFunction(float localization_distance);
             /** Correlation between two points */
             virtual float corr(const Point& p1, const Point& p2) const = 0;
-            /** Correlation between two points including auxillary variables */
-            virtual float corr(const Point& p1, const Point& p2, const vec& v1, const vec& v2) const;
             /** Maximum distance for which an observation can have an impact (localization)
               * @return Distance [m]
             */
             float localization_distance() const;
+            virtual StructureFunction* clone() const = 0;
         protected:
             float barnes_rho(float dist, float length) const;
             float cressman_rho(float dist, float length) const;
             float mLocalizationDistance;
     };
     /** Simple structure function based on distance, elevation, and land area fraction */
-    class BarnesStructure: private StructureFunction {
+    class BarnesStructure: public StructureFunction {
         public:
             BarnesStructure(float h, float v=0, float w=0, float hmax=gridpp::MV);
             float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
         private:
             float mH;
             float mV;
@@ -405,14 +418,24 @@ namespace gridpp {
     };
 
     /** Simple structure function based on distance, elevation, and land area fraction */
-    class CressmanStructure: private StructureFunction {
+    class CressmanStructure: public StructureFunction {
         public:
             CressmanStructure(float h, float v=0, float w=0);
             float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
         private:
             float mH;
             float mV;
             float mW;
+    };
+    class CrossValidation: public StructureFunction {
+        public:
+            CrossValidation(StructureFunction& structure, float dist=0);
+            float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            StructureFunction* m_structure;
+            float m_dist;
     };
 
     class Transform {

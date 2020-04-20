@@ -27,7 +27,7 @@ class NeighbourhoodTest(unittest.TestCase):
         for quantile in np.arange(0.1,0.9,0.1):
             for num_thresholds in [1, 2]:
                 thresholds = gridpp.get_neighbourhood_thresholds(values, num_thresholds)
-                output = gridpp.neighbourhood_quantile([[]], 0.9, 1, thresholds)
+                output = gridpp.neighbourhood_quantile_fast([[]], 0.9, 1, thresholds)
                 self.assertEqual(output, ())
 
     def test_missing(self):
@@ -70,20 +70,33 @@ class NeighbourhoodTest(unittest.TestCase):
 
     def test_quantile(self):
         thresholds = gridpp.get_neighbourhood_thresholds(values, 100)
-        output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1, thresholds))
+        output = np.array(gridpp.neighbourhood_quantile_fast(values, 0.5, 1, thresholds))
         self.assertEqual(output[2][2], 12)   # Should be 12.5
         self.assertEqual(output[2][3], 12.5) # Should be 13
 
-        output = np.array(gridpp.neighbourhood_quantile(np.full([100,100], np.nan), 0.5, 1, thresholds))
+        output = np.array(gridpp.neighbourhood_quantile_fast(np.full([100,100], np.nan), 0.5, 1, thresholds))
         self.assertTrue(np.isnan(np.array(output)).all())
 
-        output = np.array(gridpp.neighbourhood_quantile(np.zeros([100,100]), 0.5, 1, thresholds))
+        output = np.array(gridpp.neighbourhood_quantile_fast(np.zeros([100,100]), 0.5, 1, thresholds))
         self.assertTrue((np.array(output) == 0).all())
 
-        output = np.array(gridpp.neighbourhood_quantile_brute_force(values, 0.5, 1))
+        output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1))
         self.assertEqual(output[2][2], 12.5)
         self.assertEqual(output[2][3], 13)
         self.assertEqual(output[0][4], 4)
+
+    def test_quantile_exceed(self):
+        input = np.reshape(range(25), [5, 5]).astype(float)
+        thresholds = [1, 5, 10]
+        output = gridpp.neighbourhood_quantile_fast(values, 0.9, 1, thresholds)
+        print(np.array(output))
+
+    def test_mean(self):
+        input = np.reshape(range(100*100), [100, 100]).astype(float)
+        input = (np.random.rand(1000, 1000)> 0.5).astype(float)
+        thresholds = [1, 5, 10]
+        output = gridpp.neighbourhood(values, 7, gridpp.Mean)
+        print(np.array(output))
 
 if __name__ == '__main__':
     unittest.main()

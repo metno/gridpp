@@ -129,35 +129,42 @@ namespace gridpp {
     */
     vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
 
-    /** Spatial neighbourhood filter for quantile operation
+    /** Spatial neighbourhood filter. An exact but slow algorithm.
+     *  @param input 2D grid of values
+     *  @param radius Filter radius in number of gridpoints
+     *  @param quantile Quantile to calculate for (between 0 and 1)
+    */
+    vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius);
+
+    /** Neighbourhood filter in space and across ensemble members. An exampt but slow algorithm.
+     *  @param input 3D grid of values
+     *  @param radius Filter radius in number of gridpoints
+     *  @param quantile Quantile to calculate for (between 0 and 1)
+    */
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius);
+
+    /** Approximate spatial neighbourhood filter for quantile operation.
       * @param input 2D grid of values
       * @param quantile Quantile to compute (between 0 and 1)
       * @param radius Filter radius in number of gridpoints
       * @param thresholds Vector of thresholds to use to approximate value
     */
-    vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius, const vec& thresholds);
+    vec2 neighbourhood_quantile_fast(const vec2& input, float quantile, int radius, const vec& thresholds);
 
-    /** Neighbourhood filter space and across members for quantile operation
+    /** Approximate neighbourhood filter space and across members for quantile operation
       * @param input 3D vector with dimensions (Y, X, ensemble)
       * @param quantile Quantile to compute (between 0 and 1)
       * @param radius Filter radius in number of gridpoints
       * @param thresholds Vector of thresholds to use to approximate value
     */
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius, const vec& thresholds);
+    vec2 neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
 
-    /** Spatial neighbourhood filter without any shortcuts. This is likely quite slow.
+    /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
      *  @param input 2D grid of values
      *  @param radius Filter radius in number of gridpoints
      *  @param operation one of min, mean, median, max
     */
     vec2 neighbourhood_brute_force(const vec2& input, int radius, Statistic statistic);
-
-    /** Spatial neighbourhood filter without any shortcuts for quantile operation. This is likely quite slow.
-     *  @param input 2D grid of values
-     *  @param radius Filter radius in number of gridpoints
-     *  @param quantile Quantile to calculate for (between 0 and 1)
-    */
-    vec2 neighbourhood_quantile_brute_force(const vec2& input, float quantile, int radius);
 
     /** Calculate appropriate approximation thresholds for neighbourhood quantile
      *  @param input 2D grid of values

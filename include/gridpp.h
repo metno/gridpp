@@ -106,14 +106,10 @@ namespace gridpp {
             const vec3& input,
             const gridpp::Points& points,
             const vec& pobs,
-            const vec& pci,
-            float min_rho,
-            float hlength,
-            float vlength,
-            float wlength,
-            int max_points,
-            float elev_gradient,
-            float epsilon);
+            const vec& psigmas,
+            const vec2& pbackground,
+            const gridpp::StructureFunction& structure,
+            int max_points);
 
     /****************************************
      * Neighbourhood methods                *

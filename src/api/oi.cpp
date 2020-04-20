@@ -10,7 +10,6 @@ namespace {
     typedef arma::vec vectype;
     typedef arma::cx_mat cxtype;
 
-    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength);
     void check_vec(vec2 input, int Y, int X);
     void check_vec(vec input, int S);
 
@@ -20,7 +19,6 @@ namespace {
         };
     };
 
-    vec compute_background(const vec2& input, const gridpp::Grid& grid, const gridpp::Points& points, float elev_gradient);
 }
 
 vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
@@ -69,9 +67,11 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     assert(indices.size() == nS);
     vec pobs0(nS);
     vec pratios0(nS);
+    vec pbackground0(nS);
     for(int s = 0; s < nS; s++) {
         pobs0[s] = pobs[indices[s]];
         pratios0[s] = pratios[indices[s]];
+        pbackground0[s] = pbackground[indices[s]];
     }
 
     std::stringstream ss;
@@ -82,7 +82,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     float localizationRadius = structure.localization_distance();
 
     // Compute the background value at observation points (Y)
-    vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
+    vec gY = pbackground0; // ::compute_background(background, bgrid, points, elev_gradient);
 
     #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
@@ -235,72 +235,4 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
     }
 
     return analysis;
-}
-
-namespace {
-    float calcRho(float iHDist, float iVDist, float iLDist, float hlength, float vlength, float wlength) {
-       float h = (iHDist/hlength);
-       float rho = exp(-0.5 * h * h);
-       if(gridpp::util::is_valid(vlength) && vlength > 0) {
-          if(!gridpp::util::is_valid(iVDist)) {
-             rho = 0;
-          }
-          else {
-             float v = (iVDist/vlength);
-             float factor = exp(-0.5 * v * v);
-             rho *= factor;
-          }
-       }
-       if(gridpp::util::is_valid(wlength) && wlength > 0) {
-          float factor = exp(-0.5 * iLDist * iLDist / (wlength * wlength));
-          rho *= factor;
-       }
-       return rho;
-    }
-    // Set up convenient functions for debugging in gdb
-    // template<class Matrix>
-    // void print_matrix(Matrix matrix) {
-    //     matrix.print(std::cout);
-    // }
-
-    // template void print_matrix<CalibratorOi::mattype>(CalibratorOi::mattype matrix);
-    // template void print_matrix<CalibratorOi::cxtype>(CalibratorOi::cxtype matrix);
-    void check_vec(vec2 input, int Y, int X) {
-        std::cout << input.size() << " " << input[0].size() << " " << Y << " " << X << std::endl;
-        assert(input.size() == Y);
-        for(int i = 0; i < input.size(); i++) {
-            assert(input[i].size() == X);
-            for(int j = 0; j < input[i].size(); j++) {
-                assert(gridpp::util::is_valid(input[i][j]));
-            }
-        }
-    }
-    void check_vec(vec input, int S) {
-        assert(input.size() == S);
-        for(int i = 0; i < input.size(); i++) {
-            assert(gridpp::util::is_valid(input[i]));
-        }
-    }
-    vec compute_background(const vec2& input, const gridpp::Grid& grid, const gridpp::Points& points, float elev_gradient) {
-        vec output(points.size());
-        vec lats = points.get_lats();
-        vec lons = points.get_lons();
-        vec elevs = points.get_elevs();
-        vec2 gelevs = grid.get_elevs();
-        for(int i = 0; i < points.size(); i++) {
-            ivec indices = grid.get_nearest_neighbour(lats[i], lons[i]);
-            int y = indices[0];
-            int x = indices[1];
-            output[i] = input[y][x];
-            if(gridpp::util::is_valid(elev_gradient) && elev_gradient != 0) {
-                float nnElev = gelevs[y][x];
-                assert(gridpp::util::is_valid(nnElev));
-                assert(gridpp::util::is_valid(elevs[i]));
-                float elevDiff = elevs[i] - nnElev;
-                float elevCorr = elev_gradient * elevDiff;
-                output[i] += elevCorr;
-            }
-        }
-        return output;
-    }
 }

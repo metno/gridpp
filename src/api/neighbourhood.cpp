@@ -40,7 +40,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
         output[y].resize(nX, gridpp::MV);
     }
     if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
-        vec2 values;
+        dvec2 values;
         ivec2 counts;
         values.resize(nY);
         counts.resize(nY);
@@ -102,10 +102,10 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                 int j1 = std::min(nX-1, j + iRadius);
                 int i0 = i - iRadius - 1;
                 int j0 = j - iRadius - 1;
-                float value11 = values[i1][j1];
-                float value00 = 0;
-                float value10 = 0;
-                float value01 = 0;
+                double value11 = values[i1][j1];
+                double value00 = 0;
+                double value10 = 0;
+                double value01 = 0;
                 int count11 = counts[i1][j1];
                 int count00 = 0;
                 int count10 = 0;
@@ -126,7 +126,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                     value01 = values[i0][j1];
                     count01 = counts[i0][j1];
                 }
-                float value = value11 + value00 - value10 - value01;
+                double value = value11 + value00 - value10 - value01;
                 int count = count11 + count00 - count10 - count01;
                 if(count > 0) {
                     if(statistic == gridpp::Mean) {

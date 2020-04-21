@@ -29,7 +29,9 @@ namespace gridpp {
     class KDTree;
     class Points;
     class Grid;
+    class Interpolator;
     class Nearest;
+    class Parameters;
     class StructureFunction;
     class Transform;
 
@@ -209,6 +211,16 @@ namespace gridpp {
       *
     */
     float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
+
+    /** Quantile mapping of 2D grid using a parameter interpolator
+      * @param grid Grid
+      * @param input Values on grid
+      * @param policy Extrapolation policy
+      * @param parameters Parameter interpolator
+      * @return Quantile-mapped values
+      *
+    */
+    vec2 quantile_mapping(const Grid& grid, const vec2& input, gridpp::Extrapolation policy, const Parameters& parameters);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
@@ -586,6 +598,35 @@ namespace gridpp {
             vec2 mLons;
             vec2 mElevs;
             vec2 mLafs;
+    };
+
+    /** Class for interpolating parameters at points to new points */
+    class Interpolator {
+        public:
+            virtual float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude, float land_area_fraction) const = 0;
+            virtual Interpolator* clone() const = 0;
+    };
+    class Nearest: public Interpolator {
+        public:
+            Nearest(int num=1);
+            float interpolate(const Points& points, const vec& values, float lat, float lon, float altitude=gridpp::MV, float land_area_fraction=gridpp::MV) const;
+            Interpolator* clone() const;
+        private:
+            int m_num;
+    };
+    /** Class for encapulating parameter sets for locations and estimating them for arbitrary points */
+    class Parameters {
+        public:
+            Parameters(const gridpp::Points& points, const vec2& values, gridpp::Interpolator& interpolator);
+            ~Parameters();
+            /** Estimate parameters at a given point
+             *  @return Parameter set
+             */
+            vec get(float lat, float lon, float altitude, float land_area_fraction) const;
+        private:
+            Points m_points;
+            vec2 m_values;
+            Interpolator* m_interpolator;
     };
 };
 #endif

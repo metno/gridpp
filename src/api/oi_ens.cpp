@@ -30,19 +30,19 @@ template void print_matrix< ::cxtype>(::cxtype matrix);
 
 vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
         const vec3& background,
-        const gridpp::Points& points,
-        const vec& pobs,  // gObs
-        const vec& psigmas,   // pci
-        const vec2& pbackground,
+        const gridpp::Points& points0,
+        const vec& pobs0,  // gObs
+        const vec& psigmas0,   // pci
+        const vec2& pbackground0,
         const gridpp::StructureFunction& structure,
         int max_points) {
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1])
         throw std::runtime_error("Input field is not the same size as the grid");
-    if(pobs.size() != points.size())
+    if(pobs0.size() != points0.size())
         throw std::runtime_error("Observations and points exception mismatch");
-    if(psigmas.size() != points.size())
+    if(psigmas0.size() != points0.size())
         throw std::runtime_error("Ci and points size mismatch");
 
     double s_time = gridpp::util::clock();
@@ -76,23 +76,23 @@ vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
     ////////////////////////////////////
     // Remove stations outside domain //
     ////////////////////////////////////
-    ivec indices = points.get_in_domain_indices(bgrid);
-    gridpp::Points points0;
-    points0 = points.get_in_domain(bgrid);
+    ivec indices = points0.get_in_domain_indices(bgrid);
+    gridpp::Points points;
+    points = points0.get_in_domain(bgrid);
 
-    vec plats = points0.get_lats();
-    vec plons = points0.get_lons();
-    vec pelevs = points0.get_elevs();
-    vec plafs = points0.get_lafs();
+    vec plats = points.get_lats();
+    vec plons = points.get_lons();
+    vec pelevs = points.get_elevs();
+    vec plafs = points.get_lafs();
     int nS = plats.size();
     assert(indices.size() == nS);
-    vec pobs0(nS);
-    vec psigmas0(nS);
-    vec2 pbackground0(nS);
+    vec pobs(nS);
+    vec psigmas(nS);
+    vec2 pbackground(nS);
     for(int s = 0; s < nS; s++) {
-        pobs0[s] = pobs[indices[s]];
-        psigmas0[s] = psigmas[indices[s]];
-        pbackground0[s] = pbackground[indices[s]];
+        pobs[s] = pobs0[indices[s]];
+        psigmas[s] = psigmas0[indices[s]];
+        pbackground[s] = pbackground0[indices[s]];
     }
 
 
@@ -104,7 +104,7 @@ vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
     float localizationRadius = structure.localization_distance();
 
     // Compute Y
-    vec2 gY = pbackground0;
+    vec2 gY = pbackground;
     vec gYhat(nS);
     for(int i = 0; i < nS; i++) {
         float mean = gridpp::util::calc_statistic(gY[i], gridpp::Mean);
@@ -227,7 +227,7 @@ vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
             if(numParameters == 2) {
                 for(int i = 0; i < lS; i++) {
                     int index = lLocIndices[i];
-                    Rinv(i, i) = lRhos[i] / (psigmas0[index] * psigmas0[index]);
+                    Rinv(i, i) = lRhos[i] / (psigmas[index] * psigmas[index]);
                 }
             }
             else if(numParameters == 3) {

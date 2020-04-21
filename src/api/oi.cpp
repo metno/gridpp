@@ -23,10 +23,10 @@ namespace {
 
 vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const vec2& background,
-        const gridpp::Points& points,
-        const vec& pobs,  // gObs
-        const vec& pratios,   // gCi
-        const vec& pbackground,
+        const gridpp::Points& points0,
+        const vec& pobs0,  // gObs
+        const vec& pratios0,   // gCi
+        const vec& pbackground0,
         const gridpp::StructureFunction& structure,
         int max_points) {
     double s_time = gridpp::util::clock();
@@ -36,9 +36,9 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         throw std::invalid_argument("max_points must be >= 0");
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1])
         throw std::runtime_error("Input field is not the same size as the grid");
-    if(pobs.size() != points.size())
+    if(pobs0.size() != points0.size())
         throw std::runtime_error("Observations and points exception mismatch");
-    if(pratios.size() != points.size())
+    if(pratios0.size() != points0.size())
         throw std::runtime_error("Ci and points size mismatch");
 
     int nY = background.size();
@@ -55,23 +55,23 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     ////////////////////////////////////
     // Remove stations outside domain //
     ////////////////////////////////////
-    ivec indices = points.get_in_domain_indices(bgrid);
-    gridpp::Points points0;
-    points0 = points.get_in_domain(bgrid);
+    ivec indices = points0.get_in_domain_indices(bgrid);
+    gridpp::Points points;
+    points = points0.get_in_domain(bgrid);
 
-    vec plats = points0.get_lats();
-    vec plons = points0.get_lons();
-    vec pelevs = points0.get_elevs();
-    vec plafs = points0.get_lafs();
+    vec plats = points.get_lats();
+    vec plons = points.get_lons();
+    vec pelevs = points.get_elevs();
+    vec plafs = points.get_lafs();
     int nS = plats.size();
     assert(indices.size() == nS);
-    vec pobs0(nS);
-    vec pratios0(nS);
-    vec pbackground0(nS);
+    vec pobs(nS);
+    vec pratios(nS);
+    vec pbackground(nS);
     for(int s = 0; s < nS; s++) {
-        pobs0[s] = pobs[indices[s]];
-        pratios0[s] = pratios[indices[s]];
-        pbackground0[s] = pbackground[indices[s]];
+        pobs[s] = pobs0[indices[s]];
+        pratios[s] = pratios0[indices[s]];
+        pbackground[s] = pbackground0[indices[s]];
     }
 
     std::stringstream ss;
@@ -82,7 +82,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     float localizationRadius = structure.localization_distance();
 
     // Compute the background value at observation points (Y)
-    vec gY = pbackground0; // ::compute_background(background, bgrid, points, elev_gradient);
+    vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
 
     #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
@@ -94,7 +94,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
 
             // Find observations within localization radius
             // TODO: Check that the chosen ones have elevation
-            ivec lLocIndices0 = points0.get_neighbours(lat, lon, localizationRadius);
+            ivec lLocIndices0 = points.get_neighbours(lat, lon, localizationRadius);
             if(lLocIndices0.size() == 0) {
                 // If we have too few observations though, then use the background
                 output[y][x] = background[y][x];
@@ -157,9 +157,9 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             mattype lR(lS, lS, arma::fill::zeros);
             for(int i = 0; i < lS; i++) {
                 int index = lLocIndices[i];
-                lObs(i) = pobs0[index];
+                lObs(i) = pobs[index];
                 lY(i) = gY[index];
-                lR(i, i) = pratios0[index];
+                lR(i, i) = pratios[index];
                 lG(0, i) = lRhos(i);
                 Point p1(plats[index], plons[index], pelevs[index], plafs[index]);
                 for(int j = 0; j < lS; j++) {

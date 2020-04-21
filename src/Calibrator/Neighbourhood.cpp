@@ -76,7 +76,13 @@ void CalibratorNeighbourhood::calibrateField(const Field& iInput, Field& iOutput
          float quantile = mQuantile;
          if(mStatType == gridpp::Median)
              quantile = 0.5;
-         iOutput.set(gridpp::neighbourhood_quantile(input, radius, quantile, mNumThresholds), e);
+         if(mNumThresholds > 0) {
+             const vec thresholds = gridpp::get_neighbourhood_thresholds(input, mNumThresholds);
+             iOutput.set(gridpp::neighbourhood_quantile_fast(input, radius, quantile, thresholds), e);
+         }
+         else {
+             iOutput.set(gridpp::neighbourhood_quantile(input, radius, quantile), e);
+         }
       }
    }
 }

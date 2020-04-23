@@ -11,7 +11,7 @@ vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     for(int i = 0; i < nLat; i++)
         output[i].resize(nLon);
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(int i = 0; i < nLat; i++) {
         for(int j = 0; j < nLon; j++) {
             ivec indices = igrid.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);

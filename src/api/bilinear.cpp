@@ -18,7 +18,7 @@ vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
     vec output(nPoints, gridpp::MV);
 
     // Algorithm from here:
-#pragma omp parallel for
+    // #pragma omp parallel for
     for(int i = 0; i < nPoints; i++) {
         // Use the four points surrounding the lookup point. Use the nearest neighbour
         // and then figure out what side of this point the other there points are.

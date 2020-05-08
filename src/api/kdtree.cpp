@@ -131,6 +131,15 @@ float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lo
     double dist = acos(ratio)*radiusEarth;
     return (float) dist;
 }
+float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2) {
+    double lat1r = deg2rad(lat1);
+    double lat2r = deg2rad(lat2);
+    double lon1r = deg2rad(lon1);
+    double lon2r = deg2rad(lon2);
+    float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
+    float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
+    return gridpp::radius_earth*sqrt(dx2+dy2);
+}
 float gridpp::KDTree::calc_distance(float x0, float y0, float z0, float x1, float y1, float z1) {
     return sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1) + (z0 - z1)*(z0 - z1));
 }

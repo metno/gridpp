@@ -34,12 +34,21 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     // Check input data
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
-    if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1])
-        throw std::runtime_error("Input field is not the same size as the grid");
-    if(pobs0.size() != points0.size())
-        throw std::runtime_error("Observations and points exception mismatch");
-    if(pratios0.size() != points0.size())
-        throw std::runtime_error("Ci and points size mismatch");
+    if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
+        std::stringstream ss;
+        ss << "Input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
+        throw std::runtime_error(ss.str());
+    }
+    if(pobs0.size() != points0.size()) {
+        std::stringstream ss;
+        ss << "Observations (" << pobs0.size() << ") and points (" << points0.size() << ") size mismatch";
+        throw std::runtime_error(ss.str());
+    }
+    if(pratios0.size() != points0.size()) {
+        std::stringstream ss;
+        ss << "Ratios (" << pratios0.size() << ") and points (" << points0.size() << ") size mismatch";
+        throw std::runtime_error(ss.str());
+    }
 
     int nY = background.size();
     int nX = background[0].size();

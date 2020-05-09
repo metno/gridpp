@@ -99,13 +99,14 @@ namespace gridpp {
             const gridpp::Transform& transform);
 
     /** Optimal interpolation using a structure function based on an ensemble 
+      * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
       * @param input 3D field of background values (Y, X, E)
       * @param bgrid grid corresponding to input
       * @param pobs vector of observations
       * @param pci vector of ci values
       * @param points observation points
     */
-    vec3 optimal_interpolation_ens(const gridpp::Grid& bgrid,
+    vec3 optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             const vec3& input,
             const gridpp::Points& points,
             const vec& pobs,

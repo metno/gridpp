@@ -28,7 +28,7 @@ void print_matrix(Matrix matrix) {
 template void print_matrix< ::mattype>(::mattype matrix);
 template void print_matrix< ::cxtype>(::cxtype matrix);
 
-vec3 gridpp::optimal_interpolation_ens(const gridpp::Grid& bgrid,
+vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
         const vec3& background,
         const gridpp::Points& points0,
         const vec& pobs0,  // gObs

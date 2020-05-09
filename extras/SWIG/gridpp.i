@@ -35,6 +35,9 @@
 %begin %{
 #define SWIG_PYTHON_CAST_MODE
     %}
+%init %{
+    gridpp::initialize_omp();
+%}
 namespace std {
   %template(IntVector) vector<int>;
   %template(IntVector2) vector<vector<int> >;

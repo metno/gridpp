@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <armadillo>
+#include <omp.h>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -333,6 +334,9 @@ namespace gridpp {
      *  @returns QNH [pa]
     */
     vec qnh(const vec& pressure, const vec& altitude);
+
+    void set_omp_threads(int num);
+    void initialize_omp();
 
     namespace util {
         // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);

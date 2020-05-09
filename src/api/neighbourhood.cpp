@@ -95,7 +95,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
             }
         }
         // Put neighbourhood into vector
-// #pragma omp parallel for
+        #pragma omp parallel for
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 int i1 = std::min(nY-1, i + iRadius);
@@ -144,7 +144,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
         for(int i = 0; i < nY; i++) {
             values[i].resize(nX, 0);
         }
-// #pragma omp parallel for
+        #pragma omp parallel for
         for(int i = 0; i < nY; i++) {
             if(i < iRadius || i >= nY - iRadius) {
                 // Regular way
@@ -195,7 +195,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                 }
             }
         }
-// #pragma omp parallel for
+        #pragma omp parallel for
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 output[i][j] = values[i][j];
@@ -316,6 +316,7 @@ vec2 gridpp::neighbourhood_quantile_ens_fast(const vec3& input, float quantile, 
 
     // Compute neighbourhood means for each threshold
     vec3 stats(thresholds.size());
+    #pragma omp parallel for
     for(int t = 0; t < thresholds.size(); t++) {
         stats[t].resize(nY);
         for(int y = 0; y < nY; y++) {
@@ -341,6 +342,7 @@ vec2 gridpp::neighbourhood_quantile_ens_fast(const vec3& input, float quantile, 
         }
         stats[t] = gridpp::neighbourhood(temp, radius, gridpp::Mean);
     }
+    #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         for(int x = 0; x < nX; x++) {
             vec yarray(thresholds.size(), gridpp::MV);
@@ -402,7 +404,7 @@ namespace {
         for(int y = 0; y < nY; y++) {
             output[y].resize(nX, gridpp::MV);
         }
-        // #pragma omp parallel for
+        #pragma omp parallel for
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 // Put neighbourhood into vector
@@ -451,7 +453,7 @@ namespace {
         for(int y = 0; y < nY; y++) {
             output[y].resize(nX, gridpp::MV);
         }
-        // #pragma omp parallel for
+        #pragma omp parallel for
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 // Put neighbourhood into vector

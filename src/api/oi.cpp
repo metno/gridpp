@@ -84,7 +84,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     // Compute the background value at observation points (Y)
     vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
 
-    // #pragma omp parallel for
+    double curr_time = gridpp::util::clock();
+    #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float lat = blats[y][x];
@@ -197,8 +198,8 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
     int nS = points.size();
 
     // Transform the background
-    // #pragma omp parallel for
     vec2 background_transformed = background;
+    // #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float value = background_transformed[y][x];

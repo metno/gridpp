@@ -1,13 +1,14 @@
-#ifndef API_H
-#define API_H
+#ifndef GRIDPP_API_H
+#define GRIDPP_API_H
 #include <vector>
 #include <string>
-#include <armadillo>
-#include <omp.h>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 
 #define GRIDPP_VERSION "0.4.0a1"
 #define __version__ GRIDPP_VERSION
@@ -336,7 +337,10 @@ namespace gridpp {
     */
     vec qnh(const vec& pressure, const vec& altitude);
 
+    /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
+
+    /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
     void initialize_omp();
 
     namespace util {

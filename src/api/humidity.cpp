@@ -18,7 +18,8 @@ float gridpp::dewpoint(float temperature, float relative_humidity) {
         return gridpp::MV;
 }
 vec gridpp::dewpoint(const vec& temperature, const vec& relative_humidity) {
-    gridpp::util::check_equal_size(temperature, relative_humidity);
+    if(temperature.size() != relative_humidity.size())
+        throw std::invalid_argument("Temperature and relative_humidity vectors are not the same size");
 
     vec ret(temperature.size());
     for(int y = 0; y < temperature.size(); y++) {

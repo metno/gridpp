@@ -26,7 +26,8 @@ float gridpp::qnh(float pressure, float altitude) {
    }
 }
 vec gridpp::qnh(const vec& pressure, const vec& altitude) {
-    gridpp::util::check_equal_size(pressure, altitude);
+    if(pressure.size() != altitude.size())
+        throw std::invalid_argument("Pressure and altitude vectors are not the same size");
 
     vec ret(pressure.size());
     for(int y = 0; y < pressure.size(); y++) {

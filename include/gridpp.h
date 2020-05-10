@@ -343,6 +343,7 @@ namespace gridpp {
     /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
     void initialize_omp();
 
+    /** Helper functions */
     namespace util {
         // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
         // ivec regression(const vec& x, const vec& y);
@@ -354,7 +355,7 @@ namespace gridpp {
         float calc_statistic(const vec& array, Statistic statistic);
         float calc_quantile(const vec& array, float quantile);
         vec calc_statistic(const vec2& array, Statistic statistic);
-        vec calc_quantile(const vec2& array, float quantile=MV);
+        vec calc_quantile(const vec2& array, float quantile=gridpp::MV);
         int num_missing_values(const vec2& iArray);
 
         /** Find the index in a vector that is equal or just below a value
@@ -380,6 +381,8 @@ namespace gridpp {
         */
         float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
         void not_implemented_error();
+
+        /** Initialize a vector of size Y, X, with a given value */
         vec2 init_vec2(int Y, int X, float value=gridpp::MV);
 
         /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
@@ -390,8 +393,8 @@ namespace gridpp {
         */
         vec calc_even_quantiles(const vec& values, int num);
 
-        /** Raises an exception if the two arrays are not the same size */
-        void check_equal_size(const vec& v1, const vec& v2);
+        /** Check if the grid is the same size as the 2D vector */
+        bool compatible_size(const Grid& grid, const vec2& v);
     }
 
     class Point {

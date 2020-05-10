@@ -312,12 +312,8 @@ float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std
 void gridpp::util::not_implemented_error() {
     gridpp::util::error("Not implemented");
 }
-void gridpp::util::check_equal_size(const vec& v1, const vec& v2) {
-    if(v1.size() != v2.size()) {
-        std::stringstream ss;
-        ss << "Vectors are not of the same size: " << v1.size() << " != " << v2.size();
-        gridpp::util::error(ss.str());
-    }
+bool gridpp::util::compatible_size(const Grid& grid, const vec2& v) {
+    return v.size() == 0 || grid.size()[0] != v.size() || grid.size()[1] != v[0].size();
 }
 vec2 gridpp::util::init_vec2(int Y, int X, float value) {
     vec2 output(Y);

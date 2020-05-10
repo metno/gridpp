@@ -7,30 +7,9 @@ namespace {
     bool findCoords(float iLat, float iLon, const vec2& iLats, const vec2& iLons, int I, int J, int& I1, int& J1, int& I2, int& J2);
     float calc(const ivec& indices, const vec2& iInputLats, const vec2& iInputLons, const vec2& ivalues, float lat, float lon);
 }
-vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
-    vec iOutputLats = opoints.get_lats();
-    vec iOutputLons = opoints.get_lons();
-    vec2 iInputLats = igrid.get_lats();
-    vec2 iInputLons = igrid.get_lons();
-
-    int nPoints = iOutputLats.size();
-
-    vec output(nPoints, gridpp::MV);
-
-    // Algorithm from here:
-    // #pragma omp parallel for
-    for(int i = 0; i < nPoints; i++) {
-        // Use the four points surrounding the lookup point. Use the nearest neighbour
-        // and then figure out what side of this point the other there points are.
-        ivec indices = igrid.get_nearest_neighbour(iOutputLats[i], iOutputLons[i]);
-        float lat = iOutputLats[i];
-        float lon = iOutputLons[i];
-        output[i] = ::calc(indices, iInputLats, iInputLons, ivalues, lat, lon);
-    }
-    return output;
-}
-
 vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
+    if(gridpp::util::compatible_size(igrid, ivalues))
+        throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
     vec2 iInputLats = igrid.get_lats();
@@ -45,7 +24,7 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
         output[i].resize(nLon);
 
     // Algorithm from here:
-#pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for(int i = 0; i < nLat; i++) {
         for(int j = 0; j < nLon; j++) {
             // Use the four points surrounding the lookup point. Use the nearest neighbour
@@ -58,6 +37,32 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     }
     return output;
 }
+
+vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
+    if(gridpp::util::compatible_size(igrid, ivalues))
+        throw std::invalid_argument("Grid size is not the same as values");
+    vec iOutputLats = opoints.get_lats();
+    vec iOutputLons = opoints.get_lons();
+    vec2 iInputLats = igrid.get_lats();
+    vec2 iInputLons = igrid.get_lons();
+
+    int nPoints = iOutputLats.size();
+
+    vec output(nPoints, gridpp::MV);
+
+    // Algorithm from here:
+    #pragma omp parallel for
+    for(int i = 0; i < nPoints; i++) {
+        // Use the four points surrounding the lookup point. Use the nearest neighbour
+        // and then figure out what side of this point the other there points are.
+        ivec indices = igrid.get_nearest_neighbour(iOutputLats[i], iOutputLons[i]);
+        float lat = iOutputLats[i];
+        float lon = iOutputLons[i];
+        output[i] = ::calc(indices, iInputLats, iInputLons, ivalues, lat, lon);
+    }
+    return output;
+}
+
 namespace {
     bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s) {
         // std::cout << "Method 3: Parallelogram" << std::endl;

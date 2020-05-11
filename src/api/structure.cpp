@@ -46,7 +46,7 @@ gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) 
 }
 float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     count++;
-    float hdist = gridpp::KDTree::calc_distance(p1.lat, p1.lon, p2.lat, p2.lon);
+    float hdist = gridpp::KDTree::calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon);
     if(hdist > localization_distance())
         return 0;
     float rho = gridpp::StructureFunction::barnes_rho(hdist, mH);
@@ -73,7 +73,7 @@ gridpp::CressmanStructure::CressmanStructure(float h, float v, float w) :
     mW = w;
 }
 float gridpp::CressmanStructure::corr(const Point& p1, const Point& p2) const {
-    float hdist = gridpp::KDTree::calc_distance(p1.lat, p1.lon, p2.lat, p2.lon);
+    float hdist = gridpp::KDTree::calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon);
     float rho = gridpp::StructureFunction::cressman_rho(hdist, mH);
     if(gridpp::util::is_valid(p1.elev) && gridpp::util::is_valid(p2.elev)) {
         float vdist = p1.elev - p2.elev;
@@ -98,7 +98,7 @@ gridpp::CrossValidation::CrossValidation(StructureFunction& structure, float dis
     m_dist = dist;
 }
 float gridpp::CrossValidation::corr(const Point& p1, const Point& p2) const {
-    float hdist = gridpp::KDTree::calc_distance(p1.lat, p1.lon, p2.lat, p2.lon);
+    float hdist = gridpp::KDTree::calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon);
     if(hdist <= m_dist)
         return 0;
     return m_structure->corr(p1, p2);

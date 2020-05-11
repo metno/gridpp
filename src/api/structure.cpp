@@ -29,7 +29,7 @@ float gridpp::StructureFunction::localization_distance() const {
 
 /** Barnes */
 gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) :
-    gridpp::StructureFunction(h), count(0) {
+    gridpp::StructureFunction(h) {
     if(hmax < 0) {
         throw std::invalid_argument("hmax must be >= 0");
     }
@@ -45,7 +45,6 @@ gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) 
     mW = w;
 }
 float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
-    count++;
     float hdist = gridpp::KDTree::calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon);
     if(hdist > localization_distance())
         return 0;

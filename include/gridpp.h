@@ -427,7 +427,6 @@ namespace gridpp {
             BarnesStructure(float h, float v=0, float w=0, float hmax=gridpp::MV);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
-            mutable int count;
         private:
             float mH;
             float mV;

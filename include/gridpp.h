@@ -252,6 +252,7 @@ namespace gridpp {
       * @return Values for the output points
     */
     vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+    vec2 nearest(const Grid& igrid, const Points& opoints, const vec3 ivalues);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid
@@ -397,6 +398,7 @@ namespace gridpp {
 
         /** Check if the grid is the same size as the 2D vector */
         bool compatible_size(const Grid& grid, const vec2& v);
+        bool compatible_size(const Grid& grid, const vec3& v);
     }
 
     class Point {

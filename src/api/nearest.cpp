@@ -1,4 +1,5 @@
 #include "gridpp.h"
+#include <iostream>
 #include <math.h>
 vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     if(gridpp::util::compatible_size(igrid, ivalues))
@@ -40,6 +41,31 @@ vec gridpp::nearest(const Grid& igrid, const Points& opoints, vec2 ivalues) {
         int I = indices[0];
         int J = indices[1];
         output[i] = ivalues[I][J];
+    }
+    return output;
+}
+vec2 gridpp::nearest(const Grid& igrid, const Points& opoints, vec3 ivalues) {
+    if(gridpp::util::compatible_size(igrid, ivalues))
+       throw std::invalid_argument("Grid size is not the same as values");
+    vec iOutputLats = opoints.get_lats();
+    vec iOutputLons = opoints.get_lons();
+
+    int nPoints = iOutputLats.size();
+    int nTime = ivalues.size();
+
+    vec2 output(nTime);
+    for(int t = 0; t < nTime; t++) {
+        output[t].resize(nPoints, gridpp::MV);
+    }
+
+    #pragma omp parallel for
+    for(int i = 0; i < nPoints; i++) {
+        ivec indices = igrid.get_nearest_neighbour(iOutputLats[i], iOutputLons[i]);
+        for(int t = 0; t < nTime; t++) {
+            int I = indices[0];
+            int J = indices[1];
+            output[t][i] = ivalues[t][I][J];
+        }
     }
     return output;
 }

@@ -315,6 +315,9 @@ void gridpp::util::not_implemented_error() {
 bool gridpp::util::compatible_size(const Grid& grid, const vec2& v) {
     return v.size() == 0 || grid.size()[0] != v.size() || grid.size()[1] != v[0].size();
 }
+bool gridpp::util::compatible_size(const Grid& grid, const vec3& v) {
+    return v.size() == 0 || v[0].size() == 0 || grid.size()[0] != v[0].size() || grid.size()[1] != v[0][0].size();
+}
 vec2 gridpp::util::init_vec2(int Y, int X, float value) {
     vec2 output(Y);
     for(int y = 0; y < Y; y++)

@@ -65,6 +65,8 @@ namespace gridpp {
     */
     std::string version();
 
+    float* test_array(float* v, int n);
+
     /****************************************
      * Data assimilation methods            *
      ****************************************/

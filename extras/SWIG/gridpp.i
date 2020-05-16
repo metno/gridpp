@@ -14,6 +14,35 @@ void PRINT_DEBUG(std::string message) {
     import_array();
 %}
 
+%include exception.i
+/*
+      SWIG_MemoryError
+      SWIG_IOError
+      SWIG_RuntimeError
+      SWIG_IndexError
+      SWIG_TypeError
+      SWIG_DivisionByZero
+      SWIG_OverflowError
+      SWIG_SyntaxError
+      SWIG_ValueError
+      SWIG_SystemError
+*/
+%exception {
+    try {
+        $action
+    }
+    catch (std::invalid_argument &e) {
+        std::string s(e.what());
+        SWIG_exception(SWIG_ValueError, s.c_str());
+    }
+    catch (std::exception &e) {
+        std::string s(e.what());
+        SWIG_exception(SWIG_RuntimeError, s.c_str());
+    }
+    catch (...) {
+         SWIG_exception(SWIG_RuntimeError, "Unknown exception");
+    }
+}
 %include "std_vector.i"
 namespace std {
 %template(IntVector) vector<int>;
@@ -352,22 +381,7 @@ namespace std {
 %np_vector_typemaps(float, NPY_FLOAT)
 %np_vector_typemaps(double, NPY_DOUBLE)
 
-/*
-       // npy_intp length = $1.size();
-       npy_intp dims[1] = {$1.size()};
-      $result = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, (PyArrayObject*)$1)
-              // memcpy(PyArray_DATA((PyArrayObject*)$result),$1.data(),sizeof(float)*length);
-*/
-/* C++ -> Python */
-    /*
-%typemap(out) std::vector<float> {
-       npy_intp length = $1.size();
-       npy_intp dims[1] = {$1.size()};
-      //    $result = PyArray_SimpleNew(1, length, NPY_FLOAT);
-      $result = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, (PyArrayObject*)$1.data());
-      //       memcpy(PyArray_DATA((PyArrayObject*)$result),$1.data(),sizeof(float)*length);
-}
-  */
+%apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& output };
 %{
 #include "gridpp.h"
 %}

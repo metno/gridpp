@@ -16,15 +16,26 @@ class NeighbourhoodTest(unittest.TestCase):
         30  0  1  2
             0 10 20
         """
-        lons, lats = np.meshgrid([0, 10, 20], [30, 40, 50])
+        for num_treads in [1, 2]:
+            gridpp.set_omp_threads(num_treads)
+            lons, lats = np.meshgrid([0, 10, 20], [30, 40, 50])
+            grid = gridpp.Grid(lats, lons)
+            values = np.zeros(lons.shape)
+            values[:] = np.reshape(range(9), lons.shape)
+            points = gridpp.Points([25, 40, 55, 25, 40, 55, 25, 40, 55, 25, 40, 55, 25, 40, 55], [-1, -1, -1, 0, 0, 0, 10, 10, 10, 20, 20, 20, 21, 21, 21])
+            output = gridpp.nearest(grid, points, values)
+            np.testing.assert_array_equal(output, (0, 3, 6, 0, 3, 6, 1, 4, 7, 2, 5, 8, 2, 5, 8))
+            output = gridpp.bilinear(grid, points, values)
+            np.testing.assert_array_equal(output, (0, 3, 6, 0, 3, 6, 1, 4, 7, 2, 5, 8, 2, 5, 8))
+    def test_one_row(self):
+        gridpp.set_omp_threads(1)
+        lons, lats = np.meshgrid([0], [30, 40, 50])
         grid = gridpp.Grid(lats, lons)
         values = np.zeros(lons.shape)
-        values[:] = np.reshape(range(9), lons.shape)
+        values[:] = np.reshape(range(3), lons.shape)
         points = gridpp.Points([25, 40, 55, 25, 40, 55, 25, 40, 55, 25, 40, 55, 25, 40, 55], [-1, -1, -1, 0, 0, 0, 10, 10, 10, 20, 20, 20, 21, 21, 21])
         output = gridpp.nearest(grid, points, values)
-        self.assertEqual(output, (0, 3, 6, 0, 3, 6, 1, 4, 7, 2, 5, 8, 2, 5, 8))
-        output = gridpp.bilinear(grid, points, values)
-        self.assertEqual(output, (0, 3, 6, 0, 3, 6, 1, 4, 7, 2, 5, 8, 2, 5, 8))
+        np.testing.assert_array_equal(output, (0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2))
 
 
 if __name__ == '__main__':

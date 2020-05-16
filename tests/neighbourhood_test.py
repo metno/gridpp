@@ -23,12 +23,16 @@ class NeighbourhoodTest(unittest.TestCase):
     def test_empty(self):
         for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
             output = gridpp.neighbourhood([[]], 1, statistic)
-            self.assertEqual(output, ())
+            self.assertEqual(len(output.shape), 2)
+            self.assertEqual(output.shape[0], 0)
+            self.assertEqual(output.shape[1], 0)
         for quantile in np.arange(0.1,0.9,0.1):
             for num_thresholds in [1, 2]:
                 thresholds = gridpp.get_neighbourhood_thresholds(values, num_thresholds)
                 output = gridpp.neighbourhood_quantile_fast([[]], 0.9, 1, thresholds)
-                self.assertEqual(output, ())
+                self.assertEqual(len(output.shape), 2)
+                self.assertEqual(output.shape[0], 0)
+                self.assertEqual(output.shape[1], 0)
 
     def test_missing(self):
         empty = np.zeros([5, 5])

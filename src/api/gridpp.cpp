@@ -6,6 +6,12 @@
 std::string gridpp::version() {
     return __version__;
 }
+float* gridpp::test_array(float* v, int n) {
+    int count = 0;
+    for(int i = 0; i < n; i++)
+        count++;
+    return v;
+ }
 
 gridpp::Statistic gridpp::get_statistic(std::string name) {
     gridpp::Statistic type;

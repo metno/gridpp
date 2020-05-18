@@ -12,6 +12,7 @@ void PRINT_DEBUG(std::string message) {
 %include "numpy.i"
 %init %{
     import_array();
+    gridpp::initialize_omp();
 %}
 
 %include exception.i

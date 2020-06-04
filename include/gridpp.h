@@ -10,16 +10,19 @@
     #include <omp.h>
 #endif
 
-#define GRIDPP_VERSION "0.4.0a1"
+#define GRIDPP_VERSION "0.4.0b1"
 #define __version__ GRIDPP_VERSION
 
-typedef std::vector<int> ivec;      /**< 1D vector of ints */
-typedef std::vector<float> vec;     /**< 1D vector of floats */
-typedef std::vector<double> dvec;   /**< 1D vector of doubles */
-typedef std::vector<ivec> ivec2;    /**< 2D vector of ints */
-typedef std::vector<vec> vec2;      /**< 2D vector of floats */
-typedef std::vector<dvec> dvec2;    /**< 2D vector of doubles */
-typedef std::vector<vec2> vec3;     /**< 3D vector of floats */
+// Preferred vector types
+typedef std::vector<float> vec;
+typedef std::vector<vec> vec2;
+typedef std::vector<vec2> vec3;
+typedef std::vector<int> ivec;
+typedef std::vector<ivec> ivec2;
+
+// Only use when double is required
+typedef std::vector<double> dvec;
+typedef std::vector<dvec> dvec2;
 
 namespace gridpp {
     // Constants
@@ -39,33 +42,32 @@ namespace gridpp {
 
     /** Methods for extrapolating outside a curve */
     enum Extrapolation {
-            OneToOne = 0,      /**< Continue using a slope of 1 */
-            MeanSlope = 10,    /**< Continue outside the curve using the mean slope of the curve*/
-            NearestSlope = 20, /**< Continue using the slope of the last two points in the curve*/
-            Zero = 30,         /**< Continue using a slope of 0 */
+            OneToOne = 0,      /**< Continue past the end-points using a slope of 1 */
+            MeanSlope = 10,    /**< Continue past the end-points using the mean slope of the curve*/
+            NearestSlope = 20, /**< Continue past the end-points using the slope of the two lowermost or uppermost points in the curve */
+            Zero = 30,         /**< Continue past the end-points using a slope of 0 */
         };
 
     /** Statistical operations to reduce a vector to a scalar */
     enum Statistic {
-        Mean      = 0,
-        Min       = 10,
-        Median    = 20,
-        Max       = 30,
-        Quantile  = 40,
-        Std       = 50,
-        Variance  = 60,
-        Sum       = 70,
-        Unknown   = -1
+        Mean      = 0,  /**< Mean of values */
+        Min       = 10, /**< Minimum of values */
+        Median    = 20, /**< Mean of values */
+        Max       = 30, /**< Maximum of values */
+        Quantile  = 40, /**< A quantile from values */
+        Std       = 50, /**< Standard deviation of values */
+        Variance  = 60, /**< Population variance of values */
+        Sum       = 70, /**< Sum of values */
+        Unknown   = -1  /**< Unknown statistic */
     };
-    /** Convert operation string to enum */
+
+    /** Convert name of a statistic enum */
     Statistic get_statistic(std::string name);
 
     /** The gridpp version
      * @return The gridpp version
     */
     std::string version();
-
-    float* test_array(float* v, int n);
 
     /****************************************
      * Data assimilation methods            *
@@ -646,5 +648,21 @@ namespace gridpp {
             vec2 m_values;
             Interpolator* m_interpolator;
     };
+
+    /** Special function whose presense is needed for SWIG */
+    float* test_array(float* v, int n);
+    /** Testing function for 1D input vector */
+    int test_vec_input(const vec& input);
+    /** Testing function for 2D input vector */
+    int test_vec2_input(const vec2& input);
+    /** Testing function for 3D input vector */
+    int test_vec3_input(const vec3& input);
+    /** Testing function for 1D output vector */
+    vec1 test_vec_output();
+    /** Testing function for 2D output vector */
+    vec2 test_vec2_output();
+    /** Testing function for 3D output vector */
+    vec3 test_vec3_output();
+
 };
 #endif

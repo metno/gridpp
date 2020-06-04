@@ -19,13 +19,15 @@ For information on how to use gridpp, check out the wiki at https://github.com/m
 
 ## Example
 
+The following computes a moving neighbourhood mean with a half-width of 7 gridpoints (i.e. 15x15 neighbourhood)
+
 ```python
 import gridpp
 import numpy as np
 
 field = np.random.rand(300, 200)
-radius = 7
-gridpp.neighbourhood(field, radius, gridpp.Mean)
+halfwidth = 7
+gridpp.neighbourhood(field, halfwidth, gridpp.Mean)
 ```
 
 ## Required dependencies
@@ -94,4 +96,4 @@ Copyright © 2014-2020 Norwegian Meteorological Institute. Gridpp is licensed un
 Public License (LGPL). See LICENSE file.
 
 ## Contact
-E-mail: <thomasn@met.no>
+E-mail: Thomas Nipen <thomasn@met.no>

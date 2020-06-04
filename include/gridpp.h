@@ -215,7 +215,7 @@ namespace gridpp {
       * @return Quantile-mapped output value
       *
     */
-    float quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy);
+    float quantile_mapping(float input, const vec& ref, const vec& fcst, gridpp::Extrapolation policy);
 
     /** Quantile mapping of 2D grid using a parameter interpolator
       * @param grid Grid

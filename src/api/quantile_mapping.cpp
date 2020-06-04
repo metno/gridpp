@@ -31,7 +31,7 @@ vec gridpp::quantile_mapping(const vec& input, const vec& x, const vec& y, gridp
     gridpp::util::not_implemented_error();
     return vec();
 }
-float gridpp::quantile_mapping(float input, const vec& ref, const vec& fcst, gridpp::Extrapolation policy) {
+float gridpp::quantile_mapping(float input, const vec& fcst, const vec& ref, gridpp::Extrapolation policy) {
     float output = gridpp::MV;
     if(gridpp::util::is_valid(input)) {
         float smallestObs  = ref[0];;

@@ -52,38 +52,3 @@ void gridpp::set_omp_threads(int num) {
     omp_set_num_threads(num);
 #endif
 }
-
-float* gridpp::test_array(float* v, int n) {
-    int count = 0;
-    for(int i = 0; i < n; i++)
-        count++;
-    return v;
- }
-int gridpp::test_vec_input(const vec& input) {
-    return 0;
-}
-int gridpp::test_vec2_input(const vec2& input) {
-    return 0;
-}
-int gridpp::test_vec3_input(const vec3& input) {
-    return 0;
-}
-vec1 gridpp::test_vec_output() {
-    vec output(1000, 0);
-    return output;
-}
-vec2 gridpp::test_vec2_output() {
-    vec2 output(1000);
-    for(int i = 0; i < 1000; i++)
-        output[i].resize(1000, 0);
-    return output;
-}
-vec3 gridpp::test_vec3_output() {
-    vec3 output(1000);
-    for(int i = 0; i < 1000; i++) {
-        output[i].resize(1000);
-        for(int j = 0; j < 1000; j++)
-            output[i][j].resize(1000, 0);
-    }
-    return output;
-}

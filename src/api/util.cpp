@@ -324,6 +324,40 @@ vec2 gridpp::util::init_vec2(int Y, int X, float value) {
         output[y].resize(X, value);
     return output;
 }
+float* gridpp::util::test_array(float* v, int n) {
+    int count = 0;
+    for(int i = 0; i < n; i++)
+        count++;
+    return v;
+ }
+int gridpp::util::test_vec_input(const vec& input) {
+    return 0;
+}
+int gridpp::util::test_vec2_input(const vec2& input) {
+    return 0;
+}
+int gridpp::util::test_vec3_input(const vec3& input) {
+    return 0;
+}
+vec gridpp::util::test_vec_output() {
+    vec output(1000, 0);
+    return output;
+}
+vec2 gridpp::util::test_vec2_output() {
+    vec2 output(1000);
+    for(int i = 0; i < 1000; i++)
+        output[i].resize(1000, 0);
+    return output;
+}
+vec3 gridpp::util::test_vec3_output() {
+    vec3 output(1000);
+    for(int i = 0; i < 1000; i++) {
+        output[i].resize(1000);
+        for(int j = 0; j < 1000; j++)
+            output[i][j].resize(1000, 0);
+    }
+    return output;
+}
 #if 0
 vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius) {
     int Y = values.size();

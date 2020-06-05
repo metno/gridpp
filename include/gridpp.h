@@ -401,6 +401,21 @@ namespace gridpp {
         /** Check if the grid is the same size as the 2D vector */
         bool compatible_size(const Grid& grid, const vec2& v);
         bool compatible_size(const Grid& grid, const vec3& v);
+
+        /** Special function whose presense is needed for SWIG */
+        float* test_array(float* v, int n);
+        /** Testing function for 1D input vector */
+        int test_vec_input(const vec& input);
+        /** Testing function for 2D input vector */
+        int test_vec2_input(const vec2& input);
+        /** Testing function for 3D input vector */
+        int test_vec3_input(const vec3& input);
+        /** Testing function for 1D output vector */
+        vec test_vec_output();
+        /** Testing function for 2D output vector */
+        vec2 test_vec2_output();
+        /** Testing function for 3D output vector */
+        vec3 test_vec3_output();
     }
 
     class Point {
@@ -648,21 +663,6 @@ namespace gridpp {
             vec2 m_values;
             Interpolator* m_interpolator;
     };
-
-    /** Special function whose presense is needed for SWIG */
-    float* test_array(float* v, int n);
-    /** Testing function for 1D input vector */
-    int test_vec_input(const vec& input);
-    /** Testing function for 2D input vector */
-    int test_vec2_input(const vec2& input);
-    /** Testing function for 3D input vector */
-    int test_vec3_input(const vec3& input);
-    /** Testing function for 1D output vector */
-    vec1 test_vec_output();
-    /** Testing function for 2D output vector */
-    vec2 test_vec2_output();
-    /** Testing function for 3D output vector */
-    vec3 test_vec3_output();
 
 };
 #endif

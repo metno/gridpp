@@ -263,8 +263,6 @@ namespace gridpp {
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, float elev_gradient);
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2 ivalues, float elev_gradient);
 
-    // vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, int num, const StructureFunction& structure);
-
     /****************************************
      * Diagnosing methods                   *
      ****************************************/

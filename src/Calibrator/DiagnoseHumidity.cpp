@@ -99,7 +99,7 @@ bool CalibratorDiagnoseHumidity::calibrateCore(File& iFile, const ParameterFile*
                      if(mPressure != "")
                         currPressure = (*pressure)(y, x, e);
                      else {
-                        currPressure = gridpp::pressure(0, currElev, 101325);
+                        currPressure = DownscalerPressure::calcPressure(0, 101325, currElev);
                      }
                      output(y, x, e) = computeWetbulb(temperature(y, x, e), currPressure, rh(y, x, e));
                   }

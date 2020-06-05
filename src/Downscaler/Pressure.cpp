@@ -1,45 +1,54 @@
 #include "Pressure.h"
 #include "../File/File.h"
 #include "../Util.h"
-#include "gridpp.h"
 #include <math.h>
+const float DownscalerPressure::mConstant = -1.21e-4;
 
 DownscalerPressure::DownscalerPressure(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
-      Downscaler(iInputVariable, iOutputVariable, iOptions),
-      mTemperatureVariable("") {
-   iOptions.getValue("temperatureVariable", mTemperatureVariable);
+      Downscaler(iInputVariable, iOutputVariable, iOptions) {
    iOptions.check();
 }
 
 void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const {
-   int nY = iOutput.getNumY();
-   int nX = iOutput.getNumX();
+   int nLat = iOutput.getNumY();
+   int nLon = iOutput.getNumX();
    int nEns = iOutput.getNumEns();
    int nTime = iInput.getNumTime();
+
+   vec2 ilats  = iInput.getLats();
+   vec2 ilons  = iInput.getLons();
    vec2 ielevs = iInput.getElevs();
+   vec2 olats  = iOutput.getLats();
+   vec2 olons  = iOutput.getLons();
    vec2 oelevs = iOutput.getElevs();
 
-   gridpp::Grid igrid(iInput.getLats(), iInput.getLons());
-   gridpp::Grid ogrid(iOutput.getLats(), iOutput.getLons());
+   // Get nearest neighbour
+   vec2Int nearestI, nearestJ;
+   getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
-   // Interpolate elevations to new grid
-   vec2 oelevsInterp = gridpp::nearest(igrid, ogrid, ielevs);
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);
       Field& ofield = *iOutput.getField(mOutputVariable, t, true);
-      for(int e = 0; e < nEns; e++) {
-         vec2 ofieldInterp = gridpp::nearest(igrid, ogrid, ifield(e));
-         vec2 tfieldInterp;
-         if(mTemperatureVariable != "") {
-             Field& tfield = *iOutput.getField(mTemperatureVariable, t);
-             vec2 tfieldInterp = gridpp::nearest(igrid, ogrid, tfield(e));
-         }
-         for(int y = 0; y < nY; y++) {
-            for(int x = 0; x < nX; x++) {
-                float temperature = 288.15;
-                if(tfieldInterp.size() != 0)
-                    temperature = tfieldInterp[y][x];
-                ofield(y, x, e) = gridpp::pressure(oelevsInterp[y][x], oelevs[y][x], ofieldInterp[y][x], temperature);
+
+      #pragma omp parallel for
+      for(int i = 0; i < nLat; i++) {
+         for(int j = 0; j < nLon; j++) {
+            int Icenter = nearestI[i][j];
+            int Jcenter = nearestJ[i][j];
+            assert(Icenter < ielevs.size());
+            assert(Jcenter < ielevs[Icenter].size());
+            for(int e = 0; e < nEns; e++) {
+               float currElev = oelevs[i][j];
+               float nearestElev = ielevs[Icenter][Jcenter];
+               if(!Util::isValid(currElev) || !Util::isValid(nearestElev)) {
+                  // Can't adjust if we don't have an elevation, use nearest neighbour
+                  ofield(i,j,e) = ifield(Icenter,Jcenter,e);
+               }
+               else {
+                  float nearestPressure = ifield(Icenter,Jcenter,e);
+                  float currPressure = calcPressure(nearestElev, nearestPressure, currElev);
+                  ofield(i,j,e) = currPressure;
+               }
             }
          }
       }
@@ -47,11 +56,19 @@ void DownscalerPressure::downscaleCore(const File& iInput, File& iOutput) const 
 }
 std::string DownscalerPressure::description(bool full) {
    std::stringstream ss;
-   if(full) {
+   if(full)
       ss << Util::formatDescription("-d pressure", "Adjusts the pressure of the nearest neighbour based on the elevation difference and a standard atmosphere.") << std::endl;
-      ss << Util::formatDescription("   temperatureVariable=undef", "Which variable to read temperature from? If undefined, a temperature of 288.15 K is used.") << std::endl;
-   }
    else
       ss << Util::formatDescription("-d pressure", "Adjusts the pressure based on the elevation differences") << std::endl;
    return ss.str();
+}
+
+float DownscalerPressure::calcPressure(float iElev0, float iPressure0, float iElev1) {
+   if(Util::isValid(iElev0) && Util::isValid(iPressure0) && Util::isValid(iElev1)) {
+      float dElev = iElev1 - iElev0;
+      return iPressure0 * exp(mConstant * (dElev));
+   }
+   else {
+      return Util::MV;
+   }
 }

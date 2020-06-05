@@ -13,8 +13,9 @@ class DownscalerPressure : public Downscaler {
       DownscalerPressure(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions);
       static std::string description(bool full=true);
       std::string name() const {return "pressure";};
+      static float calcPressure(float iElev0, float iPressure0, float iElev1);
    private:
       void downscaleCore(const File& iInput, File& iOutput) const;
-      std::string mTemperatureVariable;
+      static const float mConstant;
 };
 #endif

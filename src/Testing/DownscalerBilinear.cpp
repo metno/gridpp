@@ -75,8 +75,6 @@ namespace {
    TEST_F(TestDownscalerBilinear, description) {
       DownscalerBilinear::description();
    }
-   // TODO: Copy these tests to python tests
-#if 0
    TEST_F(TestDownscalerBilinear, calcParallelogram) {
       float t = Util::MV;
       float s = Util::MV;
@@ -235,7 +233,6 @@ namespace {
    // EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x1,x1,x0,x0,y0,y1,y0,y1,v2,v3,v0,v1));
    // // Put v1,v3 below v0,v1
    // EXPECT_FLOAT_EQ(10.146060606061, DownscalerBilinear::bilinear(1.3,0.6,x0,x0,x1,x1,y1,y0,y1,y0,v1,v0,v3,v2));
-#endif
    TEST_F(TestDownscalerBilinear, downscale) {
       // Same as above, but using an input file
       DownscalerBilinear d(mVariable, mVariable, Options());
@@ -253,7 +250,6 @@ namespace {
       const Field& toT   = *to.getField(mVariable, 0);
       EXPECT_FLOAT_EQ(10.14606060606061, toT(0,0,0));
    }
-#if 0
    TEST_F(TestDownscalerBilinear, outside) {
       DownscalerBilinear d(mVariable, mVariable, Options());
       vec2 lats = make2x2(0, 0, 1, 1);
@@ -304,7 +300,6 @@ namespace {
       EXPECT_EQ(1, J1);
       EXPECT_EQ(2, J2);
    }
-#endif
 }
 int main(int argc, char **argv) {
      ::testing::InitGoogleTest(&argc, argv);

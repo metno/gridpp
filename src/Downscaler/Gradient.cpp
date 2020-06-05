@@ -1,7 +1,6 @@
 #include "Gradient.h"
 #include "../File/File.h"
 #include "../Util.h"
-#include "gridpp.h"
 #include <math.h>
 
 DownscalerGradient::DownscalerGradient(const Variable& iInputVariable, const Variable& iOutputVariable, const Options& iOptions) :
@@ -80,11 +79,12 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
    vec2 oelevs = iOutput.getElevs();
    vec2 olafs = iOutput.getLandFractions();
 
-   gridpp::Grid igrid(ilats, ilons);
-   gridpp::Grid ogrid(olats, olons);
-
    float minAllowed = mOutputVariable.min();
    float maxAllowed = mOutputVariable.max();
+
+   // Get nearest neighbour
+   vec2Int nearestI, nearestJ;
+   getNearestNeighbour(iInput, iOutput, nearestI, nearestJ);
 
    for(int t = 0; t < nTime; t++) {
       Field& ifield = *iInput.getField(mInputVariable, t);
@@ -94,26 +94,21 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
       vec2 elevsInterp;
       vec2 lafsInterp;
       if(mDownscalerName == "nearestNeighbour") {
-         elevsInterp = gridpp::nearest(igrid, ogrid, ielevs);
-         lafsInterp = gridpp::nearest(igrid, ogrid, ilafs);
-         for(int e = 0; e < nEns; e++) {
-             ofield.set(gridpp::nearest(igrid, ogrid, ifield(e)), e);
-         }
+         elevsInterp = DownscalerNearestNeighbour::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         lafsInterp = DownscalerNearestNeighbour::downscaleVec(ilafs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerNearestNeighbour::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
       }
       else if (mDownscalerName == "bilinear") {
-         elevsInterp = gridpp::bilinear(igrid, ogrid, ielevs);
-         lafsInterp = gridpp::bilinear(igrid, ogrid, ilafs);
-         for(int e = 0; e < nEns; e++) {
-             ofield.set(gridpp::bilinear(igrid, ogrid, ifield(e)), e);
-         }
+         elevsInterp = DownscalerBilinear::downscaleVec(ielevs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         lafsInterp = DownscalerBilinear::downscaleVec(ilafs, ilats, ilons, olats, olons, nearestI, nearestJ);
+         DownscalerBilinear::downscaleField(ifield, ofield, ilats, ilons, olats, olons, nearestI, nearestJ);
       }
 
       #pragma omp parallel for
       for(int i = 0; i < nLat; i++) {
          for(int j = 0; j < nLon; j++) {
-            ivec indices = igrid.get_nearest_neighbour(olats[i][j], olons[i][j]);
-            int Icenter = indices[0];
-            int Jcenter = indices[1];
+            int Icenter = nearestI[i][j];
+            int Jcenter = nearestJ[i][j];
             assert(Icenter < ielevs.size());
             assert(Jcenter < ielevs[Icenter].size());
             for(int e = 0; e < nEns; e++) {

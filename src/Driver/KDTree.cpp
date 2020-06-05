@@ -8,7 +8,6 @@
 #include "../Util.h"
 #include "../Options.h"
 #include "../Setup.h"
-#include "../KDTree.h"
 
 int main(int argc, const char *argv[]) {
    double start = Util::clock();

@@ -4,25 +4,6 @@ namespace {
     void separate(const vec& parameters, vec& ref, vec& fcst);
 }
 
-vec2 gridpp::quantile_mapping(const gridpp::Grid& grid, const vec2& input, gridpp::Extrapolation policy, const gridpp::Parameters& parameters) {
-    int Y = input.size();
-    int X = input[0].size();
-    vec2 lats = grid.get_lats();
-    vec2 lons = grid.get_lons();
-    vec2 altitude = grid.get_elevs();
-    vec2 land_area_fraction = grid.get_lafs();
-    vec2 output(Y);
-    for(int y = 0; y < Y; y++) {
-        output[y].resize(X, gridpp::MV);
-        for(int x = 0; x < X; x++) {
-            vec par = parameters.get(lats[y][x], lons[y][x], altitude[y][x], land_area_fraction[y][x]);
-            vec fcst, ref;
-            ::separate(par, ref, fcst);
-            output[y][x] = gridpp::quantile_mapping(input[y][x], ref, fcst, policy);
-        }
-    }
-    return output;
-}
 vec2 gridpp::quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy) {
     gridpp::util::not_implemented_error();
     return vec2();

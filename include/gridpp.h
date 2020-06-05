@@ -290,6 +290,16 @@ namespace gridpp {
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, float elev_gradient);
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2 ivalues, float elev_gradient);
 
+    /** Smart neighbour downscaling grid to grid
+      * @param igrid Input grid
+      * @param ogrid Output points to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @param num Number of neighbours to average
+      * @param structure Structure function for determining similarity
+      * @return Values for the output points
+    */
+    vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, int num, const StructureFunction& structure);
+
     /** For each point, calculates the distance to nearest gridpoint
      *  @param grid Grid
      *  @param points Points
@@ -386,6 +396,8 @@ namespace gridpp {
      *  @returns QNH [pa]
     */
     vec qnh(const vec& pressure, const vec& altitude);
+
+    vec correction(const Points& rpoints, const vec& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, std::string type, vec& count);
 
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);

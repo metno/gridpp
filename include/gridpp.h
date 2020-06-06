@@ -392,6 +392,8 @@ namespace gridpp {
         float* test_array(float* v, int n);
         /** Testing function for 1D input vector */
         int test_vec_input(const vec& input);
+        /** Testing function for 1D input vector */
+        int test_ivec_input(const ivec& input);
         /** Testing function for 2D input vector */
         int test_vec2_input(const vec2& input);
         /** Testing function for 3D input vector */
@@ -402,6 +404,10 @@ namespace gridpp {
         vec2 test_vec2_output();
         /** Testing function for 3D output vector */
         vec3 test_vec3_output();
+
+        /** Testing function for 1D output vector */
+        ivec test_ivec_output();
+        ivec2 test_ivec2_output();
     }
 
     class Point {

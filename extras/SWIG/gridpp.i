@@ -146,9 +146,9 @@ namespace std {
 %typemap(out) std::vector<DTYPE> {
     PRINT_DEBUG("Typemap(out) std::vector<DTYPE>");
     npy_intp dims[1] = {$1.size()};
-    $result = PyArray_ZEROS(1, dims, NPY_FLOAT, 0);
+    $result = PyArray_ZEROS(1, dims, NPY_DTYPE, 0);
     for(long i = 0; i < $1.size(); i++) {
-        float* ref = (float*) PyArray_GETPTR1((PyArrayObject*) $result, i);
+        DTYPE* ref = (DTYPE*) PyArray_GETPTR1((PyArrayObject*) $result, i);
         ref[0] = $1[i];
     }
 }
@@ -253,10 +253,10 @@ namespace std {
     if(s0 != 0)
         s1 = temp[0].size();
     npy_intp dims[2] = {s0, s1};
-    $result = PyArray_ZEROS(2, dims, NPY_FLOAT, 0);
+    $result = PyArray_ZEROS(2, dims, NPY_DTYPE, 0);
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
-            float* ref = (float*) PyArray_GETPTR2((PyArrayObject*) $result, i, j);
+            DTYPE* ref = (DTYPE*) PyArray_GETPTR2((PyArrayObject*) $result, i, j);
             ref[0] = temp[i][j];
         }
     }
@@ -372,11 +372,11 @@ namespace std {
     if(s0 != 0 && s1 != 0)
         s2 = temp[0][0].size();
     npy_intp dims[3] = {s0, s1, s2};
-    $result = PyArray_ZEROS(3, dims, NPY_FLOAT, 0);
+    $result = PyArray_ZEROS(3, dims, NPY_DTYPE, 0);
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
             for(long k = 0; k < s2; k++) {
-                float* ref = (float*) PyArray_GETPTR3((PyArrayObject*) $result, i, j, k);
+                DTYPE* ref = (DTYPE*) PyArray_GETPTR3((PyArrayObject*) $result, i, j, k);
                 ref[0] = temp[i][j][k];
             }
         }

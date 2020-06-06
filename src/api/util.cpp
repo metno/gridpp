@@ -333,6 +333,9 @@ float* gridpp::util::test_array(float* v, int n) {
 int gridpp::util::test_vec_input(const vec& input) {
     return 0;
 }
+int gridpp::util::test_ivec_input(const ivec& input) {
+    return 0;
+}
 int gridpp::util::test_vec2_input(const vec2& input) {
     return 0;
 }
@@ -344,20 +347,32 @@ vec gridpp::util::test_vec_output() {
     return output;
 }
 vec2 gridpp::util::test_vec2_output() {
-    vec2 output(1000);
-    for(int i = 0; i < 1000; i++)
-        output[i].resize(1000, 0);
+    vec2 output(10);
+    for(int i = 0; i < 10; i++)
+        output[i].resize(10, 0);
     return output;
 }
 vec3 gridpp::util::test_vec3_output() {
-    vec3 output(1000);
-    for(int i = 0; i < 1000; i++) {
-        output[i].resize(1000);
-        for(int j = 0; j < 1000; j++)
-            output[i][j].resize(1000, 0);
+    vec3 output(10);
+    for(int i = 0; i < 10; i++) {
+        output[i].resize(10);
+        for(int j = 0; j < 10; j++)
+            output[i][j].resize(10, 0);
     }
     return output;
 }
+
+ivec gridpp::util::test_ivec_output() {
+    ivec output(1000, 0);
+    return output;
+}
+ivec2 gridpp::util::test_ivec2_output() {
+    ivec2 output(10);
+    for(int i = 0; i < 10; i++)
+        output[i].resize(10, 0);
+    return output;
+}
+
 #if 0
 vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius) {
     int Y = values.size();

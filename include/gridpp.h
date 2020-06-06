@@ -10,7 +10,7 @@
     #include <omp.h>
 #endif
 
-#define GRIDPP_VERSION "0.4.0b1"
+#define GRIDPP_VERSION "0.4.2"
 #define __version__ GRIDPP_VERSION
 
 // Preferred vector types

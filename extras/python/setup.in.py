@@ -47,7 +47,7 @@ setup (
     version=__version__,
 
     description='Post-processing software for gridded weather forecasts',
-    long_description="Gridded post-processor\n======================\nGridpp is a command-line tool that post-processes weather forecasts in NetCDF format.  The program performs two types of post-processing: Downscaling and calibration. Gridpp downscales forecast from a coars grid to a finer grid using a variety of interpolation methods. Gridpp then calibrates the forecasts by applying corrections to each gridpoint. Gridpp is modular, so any combination of downscaling and calibration can be selected.\n\nFor information on how to use the software, check out the wiki page: https://github.com/metno/gridpp/wiki",
+    long_description="Gridpp a is post-processing tool for gridded weather forecasts. It consists of a **library** of commonly-used methods and a **command-line tool** that applies these methods to forecast fields in NetCDF files.\n\nFor more information checkout https://github.com/metno/gridpp/wiki.",
 
     # The project's main homepage.
     url='https://github.com/metno/gridpp',
@@ -65,7 +65,7 @@ setup (
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 3 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Science/Research',
@@ -85,7 +85,7 @@ setup (
     ],
 
     # What does your project relate to?
-    keywords='meteorology quality control observation weather',
+    keywords='meteorology post-processing weather forecast',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

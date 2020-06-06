@@ -47,7 +47,7 @@ class build(build_orig):
         self.sub_commands[:] = list(sub_build_ext) + list(rest)
 
 setup(
-    name='gridppOI',
+    name='gridpp',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -55,6 +55,7 @@ setup(
     version=__version__,
 
     description='Post-processing software for gridded weather forecasts',
+    long_description="Gridpp a is post-processing tool for gridded weather forecasts. It consists of a **library** of commonly-used methods and a **command-line tool** that applies these methods to forecast fields in NetCDF files.\n\nFor more information checkout https://github.com/metno/gridpp/wiki.",
 
     # The project's main homepage.
     url='https://github.com/metno/gridpp',
@@ -72,7 +73,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 3 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Science/Research',

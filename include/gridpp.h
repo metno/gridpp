@@ -391,13 +391,13 @@ namespace gridpp {
         /** Special function whose presense is needed for SWIG */
         float* test_array(float* v, int n);
         /** Testing function for 1D input vector */
-        int test_vec_input(const vec& input);
+        float test_vec_input(const vec& input);
         /** Testing function for 1D input vector */
         int test_ivec_input(const ivec& input);
         /** Testing function for 2D input vector */
-        int test_vec2_input(const vec2& input);
+        float test_vec2_input(const vec2& input);
         /** Testing function for 3D input vector */
-        int test_vec3_input(const vec3& input);
+        float test_vec3_input(const vec3& input);
         /** Testing function for 1D output vector */
         vec test_vec_output();
         /** Testing function for 2D output vector */

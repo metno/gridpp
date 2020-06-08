@@ -330,17 +330,37 @@ float* gridpp::util::test_array(float* v, int n) {
         count++;
     return v;
  }
-int gridpp::util::test_vec_input(const vec& input) {
-    return 0;
+float gridpp::util::test_vec_input(const vec& input) {
+    float total = 0;
+    for(int i = 0; i < input.size(); i++)
+        total += input[i];
+    return total;
 }
 int gridpp::util::test_ivec_input(const ivec& input) {
-    return 0;
+    int total = 0;
+    for(int i = 0; i < input.size(); i++)
+        total += input[i];
+    return total;
 }
-int gridpp::util::test_vec2_input(const vec2& input) {
-    return 0;
+float gridpp::util::test_vec2_input(const vec2& input) {
+    float total = 0;
+    for(int i = 0; i < input.size(); i++) {
+        for(int j = 0; j < input[i].size(); j++) {
+            total += input[i][j];
+        }
+    }
+    return total;
 }
-int gridpp::util::test_vec3_input(const vec3& input) {
-    return 0;
+float gridpp::util::test_vec3_input(const vec3& input) {
+    float total = 0;
+    for(int i = 0; i < input.size(); i++) {
+        for(int j = 0; j < input[i].size(); j++) {
+            for(int k = 0; k < input[i][j].size(); k++) {
+                total += input[i][j][k];
+            }
+        }
+    }
+    return total;
 }
 vec gridpp::util::test_vec_output() {
     vec output(1000, 0);

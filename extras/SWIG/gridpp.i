@@ -137,7 +137,9 @@ namespace std {
     if(py_obj0$argnum != NULL)
         Py_DECREF(py_obj0$argnum);
 
-    Py_DECREF(py_obj$argnum);
+    if(py_obj$argnum != NULL)
+        Py_DECREF(py_obj$argnum);
+
     if(ptr$argnum != NULL) {
         delete ptr$argnum;
     }

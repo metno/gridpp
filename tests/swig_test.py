@@ -28,6 +28,15 @@ class SwigTest(unittest.TestCase):
         output = gridpp.test_vec3_output()
         self.assertEqual(type(output[0][0][0]), np.float32)
 
+    def test_vec_input(self):
+        """ Test that list, tuples and numpy arrays work"""
+        ar = [1, 2, 3]
+        self.assertEqual(gridpp.test_vec_input(ar), 6)
+        self.assertEqual(gridpp.test_vec_input((1, 2, 3)), 6)
+        self.assertEqual(gridpp.test_vec_input(np.array(ar)), 6)
+        self.assertEqual(gridpp.test_vec_input(np.array(ar).astype('float32')), 6)
+        self.assertEqual(gridpp.test_vec_input(np.array(ar).astype('int32')), 6)
+
 
 if __name__ == '__main__':
     unittest.main()

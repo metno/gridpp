@@ -1,8 +1,10 @@
-gridpp (0.4.0) bionic; urgency=low
+gridpp (0.4.2) bionic; urgency=low
 
-   * Added an API to the core functionality in gridpp
-   * More exact and efficient neighbourhood quantile calculations
-   * Added window= to -c deaccumulate
+   * General changes:
+     - Changed the licence from GPL-2 to LGPL-3
+     - Exposed an API to a library of core gridpp functionality
+   * Command-line changes:
+     - Added window= to -c deaccumulate
 
 gridpp (0.3.1) precise; urgency=low
 

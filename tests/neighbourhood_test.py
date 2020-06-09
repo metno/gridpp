@@ -93,14 +93,11 @@ class NeighbourhoodTest(unittest.TestCase):
         input = np.reshape(range(25), [5, 5]).astype(float)
         thresholds = [1, 5, 10]
         output = gridpp.neighbourhood_quantile_fast(values, 0.9, 1, thresholds)
-        print(np.array(output))
 
     def test_mean(self):
-        input = np.reshape(range(100*100), [100, 100]).astype(float)
         input = (np.random.rand(1000, 1000)> 0.5).astype(float)
         thresholds = [1, 5, 10]
         output = gridpp.neighbourhood(values, 7, gridpp.Mean)
-        print(np.array(output))
 
 if __name__ == '__main__':
     unittest.main()

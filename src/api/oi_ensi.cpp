@@ -134,7 +134,6 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             nValidEns++;
         }
     }
-    std::cout << "Number of valid ensemble members: " << nValidEns << std::endl;
     // TODO: Deal with single member mode
     bool singleMemberMode = nValidEns < mMinValidEns;
 
@@ -395,9 +394,6 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
                     total += value;
                     count++;
                 }
-                else {
-                    std::cout << "Invalid value " << y << " " << x << " " << e << std::endl;
-                }
             }
             float ensMean = total / count;
             for(int e = 0; e < nValidEns; e++) {
@@ -509,6 +505,5 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
         }
     }
     */
-    std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return output;
 }

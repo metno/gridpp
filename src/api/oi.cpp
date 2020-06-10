@@ -187,7 +187,6 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         }
     }
 
-    std::cout << "OI total time: " << gridpp::util::clock() - s_time << std::endl;
     return output;
 }
 

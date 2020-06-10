@@ -202,7 +202,6 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     }
     if(values_unique.size() > 0) {
         int num_left = num - quantiles.size();
-        // std::cout << "Number of unique values: " << values_unique.size() << std::endl;
         for(int i = 1; i <= num_left; i++) {
             float f = float(i) / (num_left);
             int index = values_unique.size() * f - 1;
@@ -213,34 +212,11 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
             else {
                 std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
                 std::cout << count_lower << " " << values.size() << " " << last_quantile << std::endl;
-                abort();
+                throw std::runtime_error("Internal error in calc_even_quantiles.");
             }
         }
     }
-    // for(int i = 0; i < quantiles.size(); i++)
-    //     std::cout << "Threshold[" << i << "] = " << quantiles[i] << std::endl;
     return quantiles;
-    /*
-       int index = size / num;
-       int step = size / num;
-       count = 1;
-       while(index < Y * X * E) {
-       float value = values[index];
-       std::cout << " " << count << " " << index << " " << step << " " << quantiles.size() << std::endl;
-       if(value != last) {
-       std::cout << "Threshold " << quantiles.size() << " = " << value << std::endl;
-       quantiles.push_back(value);
-       last = value;
-       }
-       else {
-       step = (size - index) / (num - quantiles.size());
-       std::cout << "Same. Step is now: " << step << std::endl;
-       }
-       last = value;
-       index += step;
-       count++;
-       }
-       */
 
 }
 int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {

@@ -68,9 +68,8 @@ namespace std {
 /*
  * 1D vectors
  */
-%typemap(in) std::vector<DTYPE> (std::vector<DTYPE>*ptr, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) std::vector<DTYPE> (std::vector<DTYPE>*ptr=NULL, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) std::vector<DTYPE>");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 1)
@@ -100,9 +99,8 @@ namespace std {
     }
 }
 
-%typemap(in) const std::vector<DTYPE> & (std::vector<DTYPE>*ptr, std::vector<DTYPE> temp, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) const std::vector<DTYPE> & (std::vector<DTYPE>*ptr=NULL, std::vector<DTYPE> temp, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) const std::vector<DTYPE> &");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 1)
@@ -169,9 +167,8 @@ namespace std {
 /*
  * 2D vectors
  */
-%typemap(in) std::vector<std::vector<DTYPE> > (std::vector<std::vector<DTYPE> >*ptr=NULL, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) std::vector<std::vector<DTYPE> > (std::vector<std::vector<DTYPE> >*ptr=NULL, PyArrayObject* py_array=NULL){
     PRINT_DEBUG("Typemap(in) std::vector<std::vector<DTYPE> >");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 2)
@@ -206,9 +203,8 @@ namespace std {
     }
 }
 
-%typemap(in) const std::vector<std::vector<DTYPE> > & (std::vector<std::vector<DTYPE> >*ptr=NULL, std::vector<std::vector<DTYPE> > temp, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) const std::vector<std::vector<DTYPE> > & (std::vector<std::vector<DTYPE> >*ptr=NULL, std::vector<std::vector<DTYPE> > temp, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) const std::vector<std::vector<DTYPE> > &");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 2)
@@ -277,9 +273,8 @@ namespace std {
 /*
  * 3D vectors
  */
-%typemap(in) std::vector<std::vector<std::vector<DTYPE> > > (std::vector<std::vector<std::vector<DTYPE> > >*ptr, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) std::vector<std::vector<std::vector<DTYPE> > > (std::vector<std::vector<std::vector<DTYPE> > >*ptr=NULL, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) std::vector<std::vector<std::vector<DTYPE> > >");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 3)
@@ -319,9 +314,8 @@ namespace std {
     }
 }
 
-%typemap(in) const std::vector<std::vector<std::vector<DTYPE> > > & (std::vector<std::vector<std::vector<DTYPE> > >*ptr, std::vector<std::vector<std::vector<DTYPE> > > temp, PyArrayObject* py_array, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
+%typemap(in) const std::vector<std::vector<std::vector<DTYPE> > > & (std::vector<std::vector<std::vector<DTYPE> > >*ptr=NULL, std::vector<std::vector<std::vector<DTYPE> > > temp, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) const std::vector<std::vector<std::vector<DTYPE> > > &");
-    ptr = NULL;
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 3)

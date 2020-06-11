@@ -6,6 +6,9 @@ Gridpp a is post-processing tool for gridded weather forecasts. It consists of a
 
 Gridpp is written in C++ but offers python bindings to the functions in the library. The tool is used at MET Norway to produce operational weather forecasts for Yr (https://www.yr.no).
 
+Gridpp is currently under active development and the current version is a prototype for testing. Feedback
+is welcome, either by using the issue tracker in Github, or by contacting Thomas Nipen (thomasn@met.no).
+
 ## Documentation
 For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki.
 

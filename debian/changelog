@@ -6,6 +6,8 @@ gridpp (0.4.2) bionic; urgency=low
    * Command-line changes:
      - Added window= to -c deaccumulate
 
+ -- Thomas Nipen <thomasn@met.no>  Mon, 15 Jun 2020 10:00:00 +0200
+
 gridpp (0.3.1) precise; urgency=low
 
   * New features:

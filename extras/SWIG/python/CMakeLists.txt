@@ -1,7 +1,9 @@
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH})
 
-set(CMAKE_SWIG_FLAGS "")
+if(SWIG_VERSION GREATER_EQUAL 4)
+    set(CMAKE_SWIG_FLAGS "-doxygen")
+endif()
 set_source_files_properties(../${PROJECT_NAME}.i PROPERTIES CPLUSPLUS ON)
 include_directories(../../include)
 

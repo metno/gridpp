@@ -33,7 +33,9 @@ module = Extension('_gridpp',
         sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['src/gridppPYTHON_wrap.cxx'],
         #language="c++",
         #swig_opts=['-I./include', '-c++', '-I/usr/include/python3.6m'],
-        libraries=["gsl", "gslcblas", "proj", "armadillo"],
+        libraries=["gsl", "gslcblas", "armadillo"],
+        extra_compile_args="${CMAKE_CXX_FLAGS}".split(),
+        extra_link_args="${CMAKE_CXX_FLAGS}".split(),
         library_dirs=["/usr/lib/x86_64-linux-gnu/"],
         include_dirs=['./include']
 )

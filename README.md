@@ -45,14 +45,14 @@ sudo apt-get update
 sudo apt-get install libboost-all-dev
 sudo apt-get install libgsl0-dev libblas-dev
 sudo apt-get install netcdf-bin libnetcdf-dev
-sudo apt-get install cmake
 sudo apt-get install libarmadillo6 libarmadillo-dev
 ```
 
 Note that Ubuntu Xenial only has Armadillo 6.5 in its apt repository. In that case you need to install  [Armadillo 6.6](http://arma.sourceforge.net/) or later manually.
 
-## Installing the python interface to gridpp only
-The python package is available on [pypi.org](https://pypi.org/project/gridpp/). Provided you have installed the dependencies listed above, you can install the most recent release of the python package as follows:
+## Installing the python bindings from pip
+
+The easiest is to install the latest release of the package using pip. Provided you have installed the dependencies listed above, you can install the most recent release of the python package as follows:
 ```bash
 pip3 install gridpp --user
 ```
@@ -68,31 +68,49 @@ print(gridpp.version())
 1. Either download the source code from the [latest release](https://github.com/metno/gridpp/releases), unzip
    the file and navigate into the extracted folder; or clone the repo from github.
 
-2. Create a build directory
+2. Install extra requirements
+
+These are only required when installing from source
+```
+sudo apt install swig cmake
+```
+
+3. Set up cmake installation
 
 ```bash
 mkdir build
-```
-
-3. Run cmake to set up installation
-
-```bash
 cd build
 cmake ..
 ```
 
-This will set up the gridpp command-line tool to be installed in /usr/local/bin on Ubuntu. To specify a custom installation path, use:
+4. Install the C++ library
+
+```bash
+sudo make install
+```
+This will install the library in `/usr/local/lib/libgridpp.so` and the gridpp command-line client in
+`/usr/local/bin/gridpp`. To specify a custom installation path, use the following in step 3:
 
 ```bash
 cmake .. -DCMAKE_INSTALL_PREFIX=<custom path>
 ```
 
-4. Run cmake to install
+5. Install the python bindings
 
 ```bash
-cmake --build .
-cmake --build . --target install
+make install-python-user
 ```
+
+This installs the python bindings in
+`~/local/lib/python3.6/site-packages/gridpp.py`. To install the python bindings system-wide, use `sudo make install-python` instead.
+
+6. Install the R bindings
+
+```bash
+make build-r
+```
+
+Currently, the R package is not installed centrally, but instead is placed in `extras/SWIG/R/gridpp.R` in the build directory.
 
 ## Copyright and license
 Copyright © 2014-2020 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General

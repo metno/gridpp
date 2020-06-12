@@ -167,7 +167,7 @@ namespace std {
 /*
  * 2D vectors
  */
-%typemap(in) std::vector<std::vector<DTYPE> > (std::vector<std::vector<DTYPE> >*ptr=NULL, PyArrayObject* py_array=NULL){
+%typemap(in) std::vector<std::vector<DTYPE> > (std::vector<std::vector<DTYPE> >*ptr=NULL, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
     PRINT_DEBUG("Typemap(in) std::vector<std::vector<DTYPE> >");
     if(is_array($input)) {
         int num_dims = array_numdims($input);

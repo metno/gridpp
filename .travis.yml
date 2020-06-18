@@ -20,6 +20,7 @@ install:
  - sudo apt-get install libgtest-dev
  - sudo apt-get install lcov
  - sudo apt-get install swig
+ - sudo apt-get install r-base
  - sudo gem install coveralls-lcov
  - sudo apt-get install libarmadillo6 libarmadillo-dev
 

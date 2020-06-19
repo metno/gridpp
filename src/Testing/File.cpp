@@ -15,13 +15,13 @@ namespace {
    };
 
    TEST_F(FileTest, 10x10) {
-      File* file = File::getScheme("testing/files/10x10.nc", Options());
+      File* file = File::getScheme("tests/files/10x10.nc", Options());
       EXPECT_EQ("netcdf", ((FileNetcdf*)file)->name());
    }
    TEST_F(FileTest, 10x10_smart) {
       {
-         FileNetcdf from("testing/files/10x10.nc");
-         FileNetcdf to("testing/files/10x10_copy.nc");
+         FileNetcdf from("tests/files/10x10.nc");
+         FileNetcdf to("tests/files/10x10_copy.nc");
          EXPECT_TRUE(from.hasVariable(mVariable));
          DownscalerSmart d(mVariable, mVariable, Options());
          std::vector<Variable> variables;
@@ -30,28 +30,28 @@ namespace {
 
          to.write(variables);
       }
-      FileNetcdf f1("testing/files/10x10.nc");
-      FileNetcdf f2("testing/files/10x10_copy.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
+      FileNetcdf f2("tests/files/10x10_copy.nc");
       FieldPtr p1 = f1.getField(mVariable, 0);
       FieldPtr p2 = f2.getField(mVariable, 0);
       EXPECT_NE(*p1, *p2);
    }
    TEST_F(FileTest, hasVariable) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       EXPECT_FALSE(from.hasVariable(Variable("precipitation_amount_acc"))); // Can't derive
       EXPECT_TRUE(from.hasVariable(Variable("precipitation_amount")));
       FieldPtr precip = from.getField(Variable("precipitation_amount"), 0);
       EXPECT_FLOAT_EQ(0.911191, (*precip)(5,5,0));
    }
    TEST_F(FileTest, test) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       EXPECT_FALSE(from.hasVariable(Variable("test")));
       FieldPtr field = from.getField(Variable("test"), 0);
       EXPECT_TRUE(from.hasVariable(Variable("test")));
    }
    TEST_F(FileTest, hasSameDimensions) {
-      FileNetcdf f1("testing/files/10x10.nc");
-      FileNetcdf f2("testing/files/10x10_copy.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
+      FileNetcdf f2("tests/files/10x10_copy.nc");
       FileFake f3(Options("nLat=3 nLon=3 nEns=1 nTime=1"));
       EXPECT_TRUE(f1.hasSameDimensions(f2));
       EXPECT_TRUE(f2.hasSameDimensions(f1));
@@ -59,7 +59,7 @@ namespace {
       EXPECT_FALSE(f3.hasSameDimensions(f1));
    }
    TEST_F(FileTest, initNewVariable) {
-      FileNetcdf f1("testing/files/10x10.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
       Variable variable("fake");
       EXPECT_FALSE(f1.hasVariable(variable));
       f1.initNewVariable(variable);
@@ -96,7 +96,7 @@ namespace {
 
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       EXPECT_DEATH(f0.getField(mVariable, 4), ".*");
-      FileNetcdf f1("testing/files/10x10.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
       EXPECT_DEATH(f1.getField(mVariable, 100), ".*");
    }
    TEST_F(FileTest, getFieldInvalidTimeAfterValidAccess) {
@@ -106,7 +106,7 @@ namespace {
       FileFake f0(Options("nLat=3 nLon=3 nEns=1 nTime=3"));
       f0.getField(mVariable, 0);
       EXPECT_DEATH(f0.getField(mVariable, 4), ".*");
-      FileNetcdf f1("testing/files/10x10.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
       EXPECT_DEATH(f1.getField(mVariable, 100), ".*");
    }
    TEST_F(FileTest, getFieldInvalidTimePreviouslyRead) {
@@ -144,14 +144,14 @@ namespace {
       EXPECT_EQ(NULL, f);
    }
    TEST_F(FileTest, factoryNorcom) {
-      File* f = File::getScheme("file=testing/files/norcom.txt", Options("type=norcomQnh lats=60 lons=9 elevs=100 names=Test numTimes=100 startTime=0 endTime=3"));
+      File* f = File::getScheme("file=tests/files/norcom.txt", Options("type=norcomQnh lats=60 lons=9 elevs=100 names=Test numTimes=100 startTime=0 endTime=3"));
       ASSERT_TRUE(f);
       EXPECT_EQ("norcom", f->name());
    }
    /* TODO: Not implemented
    TEST_F(FileTest, deaccumulate) {
       // Create accumulation field
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       Variable var = Variable("precipitation_amount");
 
       // Accumulated    0, 3, 4, 4, 5.5,  10, _,12,12,20

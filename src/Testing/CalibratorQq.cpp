@@ -44,7 +44,7 @@ namespace {
          }
    };
    TEST_F(TestCalibratorQq, 1to1) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(mVariable ,Options("extrapolation=1to1"));
 
@@ -59,7 +59,7 @@ namespace {
       EXPECT_FLOAT_EQ(244.1962, (*after1)(5,5,0)); // 284.1962 // Outside
    }
    TEST_F(TestCalibratorQq, meanSlope) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(mVariable ,Options("extrapolation=meanSlope"));
 
@@ -71,7 +71,7 @@ namespace {
       EXPECT_FLOAT_EQ(238.3924, (*after1)(5,5,0)); // 250 - slope*(5.8038)
    }
    TEST_F(TestCalibratorQq, nearestSlope) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(mVariable ,Options("extrapolation=nearestSlope"));
 
@@ -83,7 +83,7 @@ namespace {
       EXPECT_FLOAT_EQ(244.1962, (*after1)(5,5,0)); // nearest slope = 1
    }
    TEST_F(TestCalibratorQq, zero) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(mVariable ,Options("extrapolation=zero"));
 
@@ -95,7 +95,7 @@ namespace {
       EXPECT_FLOAT_EQ(250, (*after1)(5,5,0));
    }
    TEST_F(TestCalibratorQq, twoEqual) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,270,301,280,301,320,320);
       CalibratorQq cal(mVariable ,Options("extrapolation=1to1"));
 
@@ -105,7 +105,7 @@ namespace {
       EXPECT_FLOAT_EQ(275, (*after)(5,2,0));
    }
    TEST_F(TestCalibratorQq, twoEqualObs) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,280,300,290,302,320,320);
       CalibratorQq cal(mVariable ,Options("extrapolation=1to1"));
 
@@ -115,7 +115,7 @@ namespace {
       EXPECT_FLOAT_EQ(285, (*after)(5,2,0)); // raw = 301
    }
    TEST_F(TestCalibratorQq, missingValues) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       ParameterFileSimple parFile = getParameterFile(250,290,260,300,290,303,300,315);
       CalibratorQq cal(mVariable ,Options("extrapolation=1to1"));
 
@@ -192,7 +192,7 @@ namespace {
    TEST_F(TestCalibratorQq, unevenNumberOfParameters) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       std::vector<float> parValues;
       parValues.resize(7,3.2);
       ParameterFileSimple parFile(parValues);

@@ -13,7 +13,7 @@ namespace {
          virtual ~TestCalibratorBct() {
          }
          void reset10x10() const {
-            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+            Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
          };
          virtual void SetUp() {
          }

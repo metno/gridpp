@@ -9,7 +9,7 @@ namespace {
    class FileNetcdfTest : public ::testing::Test {
       protected:
          void reset10x10() const {
-            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+            Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
          };
          virtual void SetUp() {
              mVariable = Variable("air_temperature_2m");
@@ -21,24 +21,24 @@ namespace {
    };
 
    TEST_F(FileNetcdfTest, isValid) {
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdf1.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdf1.nc");
    }
    TEST_F(FileNetcdfTest, missingY) {
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdf2.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdf2.nc");
       EXPECT_EQ(1, file.getNumY());
       EXPECT_EQ(10, file.getNumX());
       EXPECT_EQ(10, file.getNumEns());
       EXPECT_EQ(2, file.getNumTime());
    }
    TEST_F(FileNetcdfTest, missingTime) {
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdf3.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdf3.nc");
       EXPECT_EQ(3, file.getNumY());
       EXPECT_EQ(3, file.getNumX());
       EXPECT_EQ(1, file.getNumEns());
       EXPECT_EQ(1, file.getNumTime());
    }
    TEST_F(FileNetcdfTest, missingXandTime) {
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdf4.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdf4.nc");
       EXPECT_EQ(10, file.getNumY());
       EXPECT_EQ(1, file.getNumX());
       EXPECT_EQ(1, file.getNumEns());
@@ -50,7 +50,7 @@ namespace {
    TEST_F(FileNetcdfTest, dimNames) {
       // Check that dim and var options are passed to the parser
       // Altitudes have the x and y dimensions reversed, so test that this works.
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdfDimNames.nc", Options("xDim=h2 yDim=h1 timeDim=date ensDim=member latVar=latVar lonVar=lonVar timeVar=date"));
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdfDimNames.nc", Options("xDim=h2 yDim=h1 timeDim=date ensDim=member latVar=latVar lonVar=lonVar timeVar=date"));
       EXPECT_EQ(3, file.getNumY());
       EXPECT_EQ(2, file.getNumX());
       EXPECT_EQ(2, file.getNumEns());
@@ -87,7 +87,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, geopotential) {
       // Test that altitude is computed from surface geopotential
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdfGeopotential.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdfGeopotential.nc");
       vec2 elevs = file.getElevs();
       EXPECT_FLOAT_EQ(90/9.81, elevs[0][0]);
       EXPECT_FLOAT_EQ(30/9.81, elevs[1][0]);
@@ -99,7 +99,7 @@ namespace {
 
    TEST_F(FileNetcdfTest, analysis) {
       // Test that an analysis file is parsed correctly
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdfAnalysis.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdfAnalysis.nc");
       EXPECT_EQ(1, file.getNumTime());
       std::vector<double> times = file.getTimes();
       EXPECT_EQ(1, times.size());
@@ -115,30 +115,30 @@ namespace {
 
    TEST_F(FileNetcdfTest, scalarTime) {
       // Test that an analysis file can use a time variable without a dimension
-      FileNetcdf file = FileNetcdf("testing/files/validNetcdfAnalysis2.nc");
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdfAnalysis2.nc");
       EXPECT_EQ(1, file.getNumTime());
       std::vector<double> times = file.getTimes();
       EXPECT_FLOAT_EQ(1414130400, times[0]);
    }
 
    TEST_F(FileNetcdfTest, overwriteAttribute) {
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       file.setGlobalAttribute("history", "test512");
       EXPECT_EQ("test512", file.getGlobalAttribute("history"));
    }
    TEST_F(FileNetcdfTest, addAttribute) {
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       file.setGlobalAttribute("history2", "test123");
       EXPECT_EQ("test123", file.getGlobalAttribute("history2"));
    }
    TEST_F(FileNetcdfTest, missingAttribute) {
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       std::string att = file.getGlobalAttribute("qowhoiqfhoiqhdow");
       EXPECT_EQ("", att);
    }
    TEST_F(FileNetcdfTest, appendAttribute) {
       // Check that appending and prepending works
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       file.setGlobalAttribute("history", "empty");
       file.prependGlobalAttribute("history",  "testing");
       file.appendGlobalAttribute("history",  "testing2");
@@ -150,7 +150,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, appendAttributeEmpty) {
       // Check that appending and prepending to an empty attribute works
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       file.prependGlobalAttribute("history71623",  "value321");
       file.appendGlobalAttribute("history99311",  "value15");
       EXPECT_EQ("value321", file.getGlobalAttribute("history71623"));
@@ -158,7 +158,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, setAttribute) {
       // Check that appending and prepending to an empty attribute works
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       file.setGlobalAttribute("att1",     "value93824");
       file.appendGlobalAttribute("att1",  "append");
       file.setGlobalAttribute("att1",     "value321192839819");
@@ -171,7 +171,7 @@ namespace {
       std::vector<Variable> vars;
       vars.push_back(mVariable);
       file.write(vars);
-      FileNetcdf file2 = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file2 = FileNetcdf("tests/files/10x10_copy.nc");
       EXPECT_EQ("value321192839819", file.getGlobalAttribute("att1"));
       EXPECT_EQ("value15",  file.getGlobalAttribute("att2"));
       EXPECT_EQ("value73",  file.getAttribute("air_temperature_2m", "att1"));
@@ -179,7 +179,7 @@ namespace {
    }
    TEST_F(FileNetcdfTest, inandoutOfDataMode) {
       // Check that we can go in and out of data mode without error
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       // Define attributes
       file.setAttribute("air_temperature_2m", "att1", "value71");
       EXPECT_EQ("value71",  file.getAttribute("air_temperature_2m", "att1"));
@@ -197,7 +197,7 @@ namespace {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
 
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
 
       // Variable do not exist
       EXPECT_DEATH(file.setAttribute("nonvalid_variable", "units", "value93824"), ".*");
@@ -206,7 +206,7 @@ namespace {
    TEST_F(FileNetcdfTest, setLongAttribute) {
       // Attempt to create a really long attribute
       {
-         FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+         FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
          std::stringstream ss;
          for(int i = 0; i < 1e7; i++) {
             ss << "1234567890";
@@ -218,21 +218,21 @@ namespace {
          file.write(vars);
       }
       // Make sure the attribute hasn't been set to the really long value
-      FileNetcdf file = FileNetcdf("testing/files/10x10_copy.nc");
+      FileNetcdf file = FileNetcdf("tests/files/10x10_copy.nc");
       std::string value = file.getGlobalAttribute("history");
       EXPECT_TRUE(value.size() < 1e8);
    }
    TEST_F(FileNetcdfTest, noTimeDimension) {
-      FileNetcdf file("testing/files/validNetcdf3.nc");
+      FileNetcdf file("tests/files/validNetcdf3.nc");
       EXPECT_EQ(1, file.getNumTime());
    }
    TEST_F(FileNetcdfTest, invalidFile) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(FileNetcdf("testing/files/validText1.nc"), ".*");
+      EXPECT_DEATH(FileNetcdf("tests/files/validText1.nc"), ".*");
    }
    TEST_F(FileNetcdfTest, createNewVariable) {
-      FileNetcdf file("testing/files/10x10_copy.nc");
+      FileNetcdf file("tests/files/10x10_copy.nc");
       std::vector<Variable> vars;
       Variable var("pop");
       vars.push_back(var);

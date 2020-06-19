@@ -13,7 +13,7 @@ namespace {
          virtual ~TestCalibratorZaga() {
          }
          void reset10x10() const {
-            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+            Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
          };
          virtual void SetUp() {
              mVariable = Variable("precipitation_amount");
@@ -252,7 +252,7 @@ namespace {
    /*
    TEST_F(TestCalibratorZaga, aromeVariables) {
       {
-         FileNetcdf to("testing/files/10x10_copy.nc");
+         FileNetcdf to("tests/files/10x10_copy.nc");
          for(int t = 0; t < to.getNumTime(); t++) {
             to.addField(to.getEmptyField(), Variable::PrecipLow, t);
             to.addField(to.getEmptyField(), Variable::PrecipMiddle, t);
@@ -272,8 +272,8 @@ namespace {
          to.write(variables);
       }
 
-      FileNetcdf from("testing/files/10x10.nc");
-      FileNetcdf to("testing/files/10x10_copy.nc");
+      FileNetcdf from("tests/files/10x10.nc");
+      FileNetcdf to("tests/files/10x10_copy.nc");
       ASSERT_TRUE(to.hasVariable(Variable::PrecipMiddle));
       FieldPtr p0 = from.getField(Variable::PrecipMiddle, 1);
       FieldPtr p1 = to.getField(Variable::PrecipMiddle, 1);

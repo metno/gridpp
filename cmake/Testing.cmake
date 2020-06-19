@@ -56,8 +56,8 @@ add_gridpp_library(gridpp-shared SHARED)
 add_custom_target(all-tests)
 add_custom_target(test-data
    COMMAND ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing
-      ${CMAKE_BINARY_DIR}/testing)
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests
+      ${CMAKE_BINARY_DIR}/tests)
 
 file(GLOB TESTS  "src/Testing/*.cpp")
 foreach(test_src ${TESTS})

@@ -17,7 +17,7 @@ namespace {
       protected:
    };
    TEST_F(ParameterFileNetcdfTest, singleTime) {
-      ParameterFileNetcdf file(Options("file=testing/files/10x10_param.nc"));
+      ParameterFileNetcdf file(Options("file=tests/files/10x10_param.nc"));
       ASSERT_EQ(2, file.getTimes().size());
       ASSERT_EQ(100, file.getLocations().size());
       // Location loc(5,5,142.1456);
@@ -32,7 +32,7 @@ namespace {
       EXPECT_FLOAT_EQ(2, par[1]);
    }
    TEST_F(ParameterFileNetcdfTest, singleTime_xy) {
-      ParameterFileNetcdf file(Options("file=testing/files/10x10_param_xy.nc"));
+      ParameterFileNetcdf file(Options("file=tests/files/10x10_param_xy.nc"));
       ASSERT_EQ(2, file.getTimes().size());
       ASSERT_EQ(100, file.getLocations().size());
       // Location loc(5,5,142.1456);
@@ -46,8 +46,8 @@ namespace {
    // 10x10_param_xy.nc has longitude and coefficients with x,y ordering
    // Should still give you the same results
    TEST_F(ParameterFileNetcdfTest, xy_order) {
-      ParameterFileNetcdf file_yx(Options("file=testing/files/10x10_param.nc"));
-      ParameterFileNetcdf file_xy(Options("file=testing/files/10x10_param_xy.nc"));
+      ParameterFileNetcdf file_yx(Options("file=tests/files/10x10_param.nc"));
+      ParameterFileNetcdf file_xy(Options("file=tests/files/10x10_param_xy.nc"));
       EXPECT_EQ(file_yx.getTimes(), file_xy.getTimes());
       std::vector<Location> loc_yx = file_yx.getLocations();
       std::vector<Location> loc_xy = file_yx.getLocations();
@@ -63,7 +63,7 @@ namespace {
    TEST_F(ParameterFileNetcdfTest, write) {
       // Write parameters (make sure it goes out of scope)
       {
-         ParameterFileNetcdf file(Options("file=testing/files/test192837.nc"), true);
+         ParameterFileNetcdf file(Options("file=tests/files/test192837.nc"), true);
          file.setParameters(createParameters(1,2,3), 0, Location(3,2,5));
          file.setParameters(createParameters(4,5,6), 1, Location(3,2,5));
          file.setParameters(createParameters(7,8,9), 1, Location(1,9,2));
@@ -72,7 +72,7 @@ namespace {
       }
 
       // Read them again
-      ParameterFileNetcdf file(Options("file=testing/files/test192837.nc"), false);
+      ParameterFileNetcdf file(Options("file=tests/files/test192837.nc"), false);
       std::vector<Location> locations = file.getLocations();
       ASSERT_EQ(2, locations.size());
       // Time 0
@@ -112,11 +112,11 @@ namespace {
       EXPECT_FLOAT_EQ(9, par[2]);
       }
 
-      // Util::remove("testing/files/test192837.nc");
+      // Util::remove("tests/files/test192837.nc");
    }
    TEST_F(ParameterFileNetcdfTest, invalidFiles) {
-      EXPECT_FALSE(ParameterFileText::isValid("testing/files/parametersf98wey8y8y89rwe.nc"));
-      ParameterFileText p(Options("testing/files/parametersf98wey8y8y89rwe.nc"));
+      EXPECT_FALSE(ParameterFileText::isValid("tests/files/parametersf98wey8y8y89rwe.nc"));
+      ParameterFileText p(Options("tests/files/parametersf98wey8y8y89rwe.nc"));
       EXPECT_FALSE(p.isReadable());
    }
    TEST_F(ParameterFileNetcdfTest, description) {

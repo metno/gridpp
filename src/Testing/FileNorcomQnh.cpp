@@ -15,7 +15,7 @@ namespace {
    };
 
    TEST_F(FileNorcomQnhTest, options) {
-      FileNorcomQnh file("testing/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=2"));
+      FileNorcomQnh file("tests/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=2"));
       vec2 lats = file.getLats();
       vec2 lons = file.getLons();
       vec2 elevs = file.getElevs();
@@ -33,8 +33,8 @@ namespace {
       EXPECT_FLOAT_EQ(120, elevs[0][1]);
    }
    TEST_F(FileNorcomQnhTest, asOutput) {
-      FileNetcdf from("testing/files/10x10.nc");
-      FileNorcomQnh to("testing/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=1"));
+      FileNetcdf from("tests/files/10x10.nc");
+      FileNorcomQnh to("tests/files/test.txt", Options("lats=1,2 lons=2,3 elevs=100,120 names=point1,point2 numTimes=2 startTime=0 endTime=1"));
       DownscalerNearestNeighbour d = DownscalerNearestNeighbour(mVariable, mVariable, Options());
       bool status = d.downscale(from, to);
       EXPECT_TRUE(status);
@@ -48,36 +48,36 @@ namespace {
       FileNorcomQnh::description();
    }
    TEST_F(FileNorcomQnhTest, valid) {
-      FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=300 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
+      FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=300 elevs=3 numTimes=2 startTime=0 endTime=1 names=test"));
    }
    TEST_F(FileNorcomQnhTest, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
       // lats, lons, elevs not the same
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1,2 lons=2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2,3,2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=2 lons=2 elevs=3,2 names=test numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q,w numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1,2 lons=2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=2 lons=2,3,2 elevs=3 names=test numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=2 lons=2 elevs=3,2 names=test numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q,w numTimes=2 startTime=0 endTime=1")), ".*");
 
       // Missing attributes
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 startTime=0")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 elevs=3 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 elevs=3 numTimes=2 startTime=0")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("")), ".*");
 
       // Invalid latitude
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=101 lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=-91 lons=180 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=101 lons=2 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=-91 lons=180 elevs=3 numTimes=2 startTime=0 endTime=1")), ".*");
 
       // Longitudes outside 360, -360 should not be allowed
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=-370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=-370 elevs=3 numTimes=2 startTime=0 endTime=1 names=test")), ".*");
 
       // Start/end time not in ascending order
-      EXPECT_DEATH(FileNorcomQnh("testing/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q numTimes=2 startTime=1 endTime=0")), ".*");
+      EXPECT_DEATH(FileNorcomQnh("tests/files/test.txt", Options("lats=1 lons=2 elevs=3 names=q numTimes=2 startTime=1 endTime=0")), ".*");
    }
 }
 int main(int argc, char **argv) {

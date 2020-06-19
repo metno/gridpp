@@ -53,7 +53,7 @@ namespace {
 
    TEST_F(TestDownscalerPressure, 10x10) {
       DownscalerPressure d(mVariable, mVariable, Options());
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       std::stringstream ss;
       ss << "nLat=1 nLon=4 nEns=1 nTime=" << from.getNumTime();
       FileFake to(Options(ss.str()));

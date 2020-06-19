@@ -8,7 +8,7 @@ namespace {
    class TestDownscalerGradientOld : public ::testing::Test {
       public:
          void SetUp() {
-            mFrom = new FileNetcdf("testing/files/10x10.nc");
+            mFrom = new FileNetcdf("tests/files/10x10.nc");
             std::stringstream ss;
             ss << "nLat=1 nLon=4 nEns=1 nTime=" << mFrom->getNumTime();
             mTo = new FileFake(Options(ss.str()));

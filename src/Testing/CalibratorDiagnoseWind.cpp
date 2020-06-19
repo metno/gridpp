@@ -33,7 +33,7 @@ namespace {
          CalibratorDiagnoseWind* calY;
    };
    TEST_F(TestCalibratorDiagnoseWind, speed) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       FieldPtr fieldX = from.getField(mX, 0);
       FieldPtr fieldY = from.getField(mY, 0);
       // Set some values to missing
@@ -49,7 +49,7 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*field)(3,2,0));
    }
    TEST_F(TestCalibratorDiagnoseWind, direction) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       FieldPtr fieldX = from.getField(mX, 0);
       FieldPtr fieldY = from.getField(mY, 0);
       // Set some values to missing
@@ -72,7 +72,7 @@ namespace {
    TEST_F(TestCalibratorDiagnoseWind, xy) {
       // Diagnose windspeed and direction from u and v. Then change the windspeed to
       // 13 and check that rediagnosis of U/V yields correct winds
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       FieldPtr fieldX = from.getField(mX, 0);
       FieldPtr fieldY = from.getField(mY, 0);
       FieldPtr fieldS = from.getField(mS, 0);

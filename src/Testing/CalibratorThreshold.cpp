@@ -22,7 +22,7 @@ namespace {
    };
 
    TEST_F(TestCalibratorThreshold, 1x1) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorThreshold cal = CalibratorThreshold(mTemperature, Options("thresholds=20 values=0,2"));
       cal.calibrate(from);
 
@@ -38,7 +38,7 @@ namespace {
       EXPECT_FLOAT_EQ(2, (*from.getField(mTemperature, 9))(0,0,0));
    }
    TEST_F(TestCalibratorThreshold, 1x1_equals) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorThreshold cal = CalibratorThreshold(mPrecipitation, Options("thresholds=3,3.5,4 values=-5,11,0,2 equals=0,1,0"));
       cal.calibrate(from);
 
@@ -51,7 +51,7 @@ namespace {
    }
    TEST_F(TestCalibratorThreshold, 1x1_equals2) {
       // Check that equals=1 works on the upper limit
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorThreshold cal = CalibratorThreshold(mPrecipitation, Options("thresholds=3,3.5,10 values=-5,11,0,2 equals=1,0,1"));
       cal.calibrate(from);
 

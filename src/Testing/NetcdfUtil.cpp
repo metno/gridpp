@@ -15,7 +15,7 @@ namespace {
 
    TEST_F(NetcdfUtilTest, get) {
       int file;
-      int status = nc_open("testing/files/10x10.nc", NC_NOWRITE, &file);
+      int status = nc_open("tests/files/10x10.nc", NC_NOWRITE, &file);
       EXPECT_EQ(status, NC_NOERR);
       int var;
       status = nc_inq_varid(file, "air_temperature_2m", &var);

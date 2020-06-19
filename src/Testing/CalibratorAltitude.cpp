@@ -19,8 +19,8 @@ namespace {
          Variable mVariable;
    };
    TEST_F(TestCalibratorAltitude, arome) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileNetcdf par(Options("file=tests/files/10x10_param_zero_altitude.nc"));
       CalibratorAltitude cal = CalibratorAltitude(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -39,8 +39,8 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorAltitude, ec) {
-      FileNetcdf from("testing/files/10x10_ec.nc");
-      ParameterFileNetcdf par(Options("file=testing/files/10x10_param_zero_altitude.nc"));
+      FileNetcdf from("tests/files/10x10_ec.nc");
+      ParameterFileNetcdf par(Options("file=tests/files/10x10_param_zero_altitude.nc"));
       CalibratorAltitude cal = CalibratorAltitude(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -62,8 +62,8 @@ namespace {
    TEST_F(TestCalibratorAltitude, locationIndependent) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/parametersSingleTime.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/parametersSingleTime.txt"));
       CalibratorAltitude cal = CalibratorAltitude(mVariable, Options());
       EXPECT_DEATH(cal.calibrate(from, &par), ".*");
    }

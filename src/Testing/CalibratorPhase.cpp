@@ -43,8 +43,8 @@ namespace {
    };
 
    TEST_F(TestCalibratorPhase, 10x10) {
-      FileNetcdf file("testing/files/10x10.nc");
-      ParameterFileText parFile(Options("file=testing/files/parametersPhase.txt"));
+      FileNetcdf file("tests/files/10x10.nc");
+      ParameterFileText parFile(Options("file=tests/files/parametersPhase.txt"));
       Parameters parameters = parFile.getParameters(0);
       ASSERT_EQ(2, parameters.size());
       EXPECT_FLOAT_EQ(273.7, parameters[0]);

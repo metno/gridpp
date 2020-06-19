@@ -19,7 +19,7 @@ namespace {
          Variable mVariable;
    };
    TEST_F(TestCalibratorNeighbourhood, 10x10_double) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 fast=1"));
 
       cal.calibrate(from);
@@ -47,7 +47,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, 10x10_double_slow) {
       // The slow method should give the same results
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 fast=0"));
 
       cal.calibrate(from);
@@ -73,7 +73,7 @@ namespace {
       EXPECT_FLOAT_EQ(305.35556, (*after)(5,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, calibrateField) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       std::vector<std::string> stats;
       stats.push_back("mean");
       stats.push_back("median");
@@ -95,7 +95,7 @@ namespace {
       }
    }
    TEST_F(TestCalibratorNeighbourhood, 10x10_missingValues) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable, Options("radius=1"));
       FieldPtr field = from.getField(mVariable, 0);
       (*field)(4,1,0) = Util::MV;
@@ -113,7 +113,7 @@ namespace {
       EXPECT_FLOAT_EQ(304.6667, (*field)(5,1,0));
    }
    TEST_F(TestCalibratorNeighbourhood, mean) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=mean"));
 
       cal.calibrate(from);
@@ -125,7 +125,7 @@ namespace {
    }
    TEST_F(TestCalibratorNeighbourhood, sum) {
       // The slow method should give the same results
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=sum fast=1"));
 
       cal.calibrate(from);
@@ -143,7 +143,7 @@ namespace {
       EXPECT_FLOAT_EQ(300*9+61.0, (*after)(8,1,0));
    }
    TEST_F(TestCalibratorNeighbourhood, min) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=min"));
 
       cal.calibrate(from);
@@ -154,7 +154,7 @@ namespace {
       EXPECT_FLOAT_EQ(302, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, max) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=max"));
 
       cal.calibrate(from);
@@ -165,7 +165,7 @@ namespace {
       EXPECT_FLOAT_EQ(320, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, std) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=std"));
 
       cal.calibrate(from);
@@ -176,7 +176,7 @@ namespace {
       EXPECT_FLOAT_EQ(7.0133801, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, median) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=median"));
 
       cal.calibrate(from);
@@ -187,7 +187,7 @@ namespace {
       EXPECT_FLOAT_EQ(305.5, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorNeighbourhood, quantile) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorNeighbourhood cal = CalibratorNeighbourhood(mVariable ,Options("radius=1 stat=quantile quantile=0.9"));
 
       cal.calibrate(from);

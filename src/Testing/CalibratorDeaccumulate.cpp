@@ -24,7 +24,7 @@ namespace {
    };
 
    TEST_F(TestCalibratorDeaccumulate, 1x1) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorDeaccumulate cal = CalibratorDeaccumulate(mPrecipitation, Options("window=3"));
       cal.calibrate(from);
 
@@ -40,7 +40,7 @@ namespace {
       EXPECT_FLOAT_EQ(Util::MV, (*from.getField(mPrecipitation, 9))(0,0,0));
    }
    TEST_F(TestCalibratorDeaccumulate, ) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorDeaccumulate cal = CalibratorDeaccumulate(mTemperature, Options());
       cal.calibrate(from);
 

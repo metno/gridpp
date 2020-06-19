@@ -19,7 +19,7 @@ namespace {
          Variable mVariable;
    };
    TEST_F(TestCalibratorWindow, length1) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=1 stat=mean"));
       cal.calibrate(from);
 
@@ -35,7 +35,7 @@ namespace {
       EXPECT_FLOAT_EQ(23, (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, length5) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=mean"));
       cal.calibrate(from);
 
@@ -51,7 +51,7 @@ namespace {
       EXPECT_FLOAT_EQ(21,        (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, min) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=min"));
       cal.calibrate(from);
 
@@ -67,7 +67,7 @@ namespace {
       EXPECT_FLOAT_EQ(19, (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, max) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=max"));
       cal.calibrate(from);
 
@@ -83,7 +83,7 @@ namespace {
       EXPECT_FLOAT_EQ(23, (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, std) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=std"));
       cal.calibrate(from);
 
@@ -94,7 +94,7 @@ namespace {
       EXPECT_FLOAT_EQ(2,         (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, quantile) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=quantile quantile=0.5"));
       cal.calibrate(from);
 
@@ -105,7 +105,7 @@ namespace {
       EXPECT_FLOAT_EQ(21,   (*from.getField(mVariable, 9))(0,0,0));
    }
    TEST_F(TestCalibratorWindow, median) {
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=5 stat=median"));
       cal.calibrate(from);
 
@@ -117,7 +117,7 @@ namespace {
    }
    TEST_F(TestCalibratorWindow, length100) {
       // A large length forces all values to be the same
-      FileNetcdf from("testing/files/1x1.nc");
+      FileNetcdf from("tests/files/1x1.nc");
       CalibratorWindow cal = CalibratorWindow(mVariable ,Options("length=201 stat=mean"));
       cal.calibrate(from);
 

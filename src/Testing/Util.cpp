@@ -260,21 +260,21 @@ namespace {
       EXPECT_EQ(19, date.size());
    }
    TEST_F(UtilTest, exists) {
-      EXPECT_FALSE(Util::exists("testing/files/parametersw89ey8wehf.txt"));
+      EXPECT_FALSE(Util::exists("tests/files/parametersw89ey8wehf.txt"));
       EXPECT_FALSE(Util::exists("testing/parametersw89ey8wehf.txt"));
       EXPECT_FALSE(Util::exists("testing/q/parametersw89ey8wehf.txt"));
-      EXPECT_TRUE(Util::exists("testing/files/10x10.nc"));
+      EXPECT_TRUE(Util::exists("tests/files/10x10.nc"));
    }
    TEST_F(UtilTest, copy) {
       // Check that copying a file works. Do this by modifying a file, and then overwritiing
       // it with known contents.
-      bool status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      bool status = Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
       EXPECT_TRUE(status);
       // Change 10x10_copy.nc
       Variable variable("air_temperature_2m");
       CalibratorNeighbourhood neighbourhood(variable, Options(""));
-      FileNetcdf f1("testing/files/10x10.nc");
-      FileNetcdf f2("testing/files/10x10_copy.nc");
+      FileNetcdf f1("tests/files/10x10.nc");
+      FileNetcdf f2("tests/files/10x10_copy.nc");
       FieldPtr field1 = f1.getField(variable, 0);
       FieldPtr field2 = f2.getField(variable, 0);
       EXPECT_EQ((*field2)(1,1,0), (*field1)(1,1,0));
@@ -285,9 +285,9 @@ namespace {
       f2.write(vars);
 
       // Use copy. Values should be the same afterwards
-      status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      status = Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
       EXPECT_TRUE(status);
-      FileNetcdf f3("testing/files/10x10_copy.nc");
+      FileNetcdf f3("tests/files/10x10_copy.nc");
       FieldPtr field3 = f3.getField(variable, 0);
       EXPECT_EQ(f1.getNumY(), f2.getNumY());
       EXPECT_EQ(f1.getNumX(), f2.getNumX());
@@ -297,24 +297,24 @@ namespace {
    TEST_F(UtilTest, copyInvalid) {
       bool status = Util::copy("testing/filesDoesNotExist/file1", "testing/filesDoesNotExist/file1");
       EXPECT_FALSE(status);
-      status = Util::copy("testing/files/10x10.nc", "testing/filesDoesNotExist/file1");
+      status = Util::copy("tests/files/10x10.nc", "testing/filesDoesNotExist/file1");
       EXPECT_FALSE(status);
-      status = Util::copy("testing/filesDoesNotExist/file1", "testing/files/10x10_copy.nc");
+      status = Util::copy("testing/filesDoesNotExist/file1", "tests/files/10x10_copy.nc");
       EXPECT_FALSE(status);
-      status = Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+      status = Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
       EXPECT_TRUE(status);
    }
    TEST_F(UtilTest, remove) {
       // Check that removing a file works.
-      std::string tempfile = "testing/files/temp123.nc";
-      bool status = Util::copy("testing/files/10x10.nc", tempfile);
+      std::string tempfile = "tests/files/temp123.nc";
+      bool status = Util::copy("tests/files/10x10.nc", tempfile);
       status = Util::remove(tempfile);
       EXPECT_TRUE(status);
       EXPECT_FALSE(Util::exists(tempfile));
    }
    TEST_F(UtilTest, removeInvalid) {
       // Check that removing a file works.
-      std::string tempfile = "testing/files/temp123.nc";
+      std::string tempfile = "tests/files/temp123.nc";
       bool status = Util::remove(tempfile);
       EXPECT_FALSE(status);
       EXPECT_FALSE(Util::exists(tempfile));
@@ -344,7 +344,7 @@ namespace {
       Util::formatDescription("test", "ad qwi qwio wqio dwqion qdwion", 10, 11, 2); // Very narrow message
    }
    TEST_F(UtilTest, compute) {
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
 
       // Odd-sized neighbourhood
       std::vector<float> hood = getHood(3,0,2);

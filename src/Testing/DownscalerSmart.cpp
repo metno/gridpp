@@ -75,7 +75,7 @@ namespace {
    }
    TEST_F(TestDownscalerSmart, 10x10) {
       DownscalerSmart d(mT, mT, Options("radius=3 num=2"));
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       const Field& fromT  = *from.getField(mT, 0);
       std::stringstream ss;
       ss << "nLat=1 nLon=5 nEns=1 nTime=" << from.getNumTime();
@@ -110,7 +110,7 @@ namespace {
    }
    TEST_F(TestDownscalerSmart, 10x10minElevDiff) {
       DownscalerSmart d(mT, mT, Options("radius=3 num=2 minElevDiff=109"));
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       const Field& fromT  = *from.getField(mT, 0);
       std::stringstream ss;
       ss << "nLat=1 nLon=3 nEns=1 nTime=" << from.getNumTime();

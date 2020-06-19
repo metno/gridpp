@@ -19,7 +19,7 @@ namespace {
    TEST_F(TestCalibratorQnh, 10x10) {
       Variable variableQnh = Variable("qnh");
       Variable variableP = Variable("surface_air_pressure");
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       CalibratorQnh cal = CalibratorQnh(variableQnh, Options("pressureVariable=surface_air_pressure"));
       FieldPtr p = from.getField(variableP, 0);
 

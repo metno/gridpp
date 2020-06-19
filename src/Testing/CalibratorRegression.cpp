@@ -12,7 +12,7 @@ namespace {
          virtual ~TestCalibratorRegression() {
          }
          void reset10x10() const {
-            Util::copy("testing/files/10x10.nc", "testing/files/10x10_copy.nc");
+            Util::copy("tests/files/10x10.nc", "tests/files/10x10_copy.nc");
          };
          virtual void SetUp() {
             mVariable = Variable("air_temperature_2m");
@@ -26,8 +26,8 @@ namespace {
    };
    // Constant correction to 0.3
    TEST_F(TestCalibratorRegression, 10x10_0order) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/regression0order.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/regression0order.txt"));
       CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -41,8 +41,8 @@ namespace {
       EXPECT_FLOAT_EQ(0.3, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, 10x10_1order) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/regression1order.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/regression1order.txt"));
       CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -56,8 +56,8 @@ namespace {
       EXPECT_FLOAT_EQ(384.3, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, 10x10_multivariate) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/regression1order.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/regression1order.txt"));
       CalibratorRegression cal = CalibratorRegression(mVariable, Options("variables=relative_humidity_2m,air_temperature_2m"));
 
       FieldPtr before = from.getField(mVariable, 0);
@@ -71,8 +71,8 @@ namespace {
       EXPECT_FLOAT_EQ(361.48777506, (*after)(5,2,0)); // 0.3*0.9592502 + 1.2*301
    }
    TEST_F(TestCalibratorRegression, 10x10_2order) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/regression2order.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/regression2order.txt"));
       CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -86,8 +86,8 @@ namespace {
       EXPECT_FLOAT_EQ(-81593.90, (*after)(0,9,0));
    }
    TEST_F(TestCalibratorRegression, missing_parameters) {
-      FileNetcdf from("testing/files/10x10.nc");
-      ParameterFileText par(Options("file=testing/files/regressionMissing.txt"));
+      FileNetcdf from("tests/files/10x10.nc");
+      ParameterFileText par(Options("file=tests/files/regressionMissing.txt"));
       CalibratorRegression cal = CalibratorRegression(mVariable, Options());
 
       cal.calibrate(from, &par);
@@ -103,16 +103,16 @@ namespace {
    // Incorrect number of data columns
    TEST_F(TestCalibratorRegression, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-	  FileNetcdf from("testing/files/10x10.nc");
+	  FileNetcdf from("tests/files/10x10.nc");
       Util::setShowError(false);
-      ParameterFileText par(Options("file=testing/files/regressionInvalid1.txt"));
+      ParameterFileText par(Options("file=tests/files/regressionInvalid1.txt"));
       CalibratorRegression calibrator(mVariable, Options());
       EXPECT_DEATH(calibrator.calibrate(from, &par), ".*");
    }
    // Missing parameter file
    TEST_F(TestCalibratorRegression, invalid2) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-	  FileNetcdf from("testing/files/10x10.nc");
+	  FileNetcdf from("tests/files/10x10.nc");
       Util::setShowError(false);
       CalibratorRegression calibrator(mVariable, Options());
       EXPECT_DEATH(calibrator.calibrate(from, NULL), ".*");
@@ -120,7 +120,7 @@ namespace {
    TEST_F(TestCalibratorRegression, training) {
       // R code:
       // data = data.frame(x=c(4,5,9),y=c(3.2,5,14))
-      FileNetcdf from("testing/files/10x10.nc");
+      FileNetcdf from("tests/files/10x10.nc");
       std::vector<ObsEns> obsens;
       Ens ens(3,0);
       ens[0] = 4;

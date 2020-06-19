@@ -15,14 +15,14 @@ namespace {
    };
 
    TEST_F(FileTextTest, asInput) {
-      FileText file("testing/files/validText1.txt", Options());
+      FileText file("tests/files/validText1.txt", Options());
       FieldPtr field0 = file.getField(mVariable, 0);
       EXPECT_FLOAT_EQ(3.2, (*field0)(0,0,0));
       FieldPtr field1 = file.getField(mVariable, 1);
       EXPECT_FLOAT_EQ(4.1, (*field1)(0,0,0));
    }
    TEST_F(FileTextTest, asEnsemble) {
-      FileText file("testing/files/validText2.txt", Options("lat=1 lon=2 elev=3"));
+      FileText file("tests/files/validText2.txt", Options("lat=1 lon=2 elev=3"));
       FieldPtr field0 = file.getField(mVariable, 0);
       ASSERT_EQ(3, field0->getNumEns());
       ASSERT_EQ(2, field0->getNumY());
@@ -45,7 +45,7 @@ namespace {
    TEST_F(FileTextTest, invalid) {
       ::testing::FLAGS_gtest_death_test_style = "threadsafe";
       Util::setShowError(false);
-      EXPECT_DEATH(FileText("testing/files/invalidText1.txt", Options()), ".*");
+      EXPECT_DEATH(FileText("tests/files/invalidText1.txt", Options()), ".*");
    }
 }
 int main(int argc, char **argv) {

@@ -133,7 +133,7 @@ namespace {
       // High precip case
       testInvCdf(0.003, 3, 0.7, par, 0);
       testInvCdf(0.188, 3, 0.7, par, 0);
-      testInvCdf(0.19, 3, 0.7, par, 0.0068841949);
+      testInvCdf(0.19, 3, 0.7, par, 0.0068840724);
       testInvCdf(0.5, 3, 0.7, par, 1.3596177);
       testInvCdf(0.8, 3, 0.7, par, 3.4923909);
       testInvCdf(0.99999, 3, 0.7, par, 24.551832);

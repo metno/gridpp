@@ -48,7 +48,7 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius) const {
         float x1, y1, z1;
         gridpp::KDTree::convert_coordinates(mLats[results[i].second], mLons[results[i].second], x1, y1, z1);
         float dist = gridpp::KDTree::calc_distance(x, y, z, x1, y1, z1);
-        if(dist > 0 && dist <= radius) {
+        if(dist <= radius) {
             ret.push_back(results[i].second);
         }
     }
@@ -59,18 +59,6 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) const
     float x, y, z;
     gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
     point p(x, y, z);
-
-    struct is_not_equal {
-        bool operator()(value const& v) const {
-            float x0 = v.first.get<0>();
-            float y0 = v.first.get<1>();
-            float z0 = v.first.get<2>();
-            return p.get<0>() != x0 || p.get<1>() != y0 || p.get<2>() != z0;
-        };
-        point p;
-    };
-    is_not_equal s;
-    s.p = p;
 
     std::vector<value> results;
     mTree.query(boost::geometry::index::nearest(p, num), std::back_inserter(results));

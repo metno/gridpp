@@ -263,6 +263,38 @@ namespace gridpp {
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2 ivalues, float elev_gradient);
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2 ivalues, float elev_gradient);
 
+    /** For each point, calculates the distance to nearest gridpoint
+     *  @param grid Grid
+     *  @param points Points
+     *  @param num Number of points
+     *  @return Distance [m] to nearest gridpoint for each point
+    */
+    vec distance(const Grid& grid, const Points& points, int num=1);
+
+    /** For each point, counts the number of gridpoints within the radius
+     *  @param grid Grid
+     *  @param points Points
+     *  @param radius Radius [m]
+     *  @return Number of gridpoints
+    */
+    vec count(const Grid& grid, const Points& points, float radius);
+
+    /** For each gridpoint, calculates the distance to nearest point
+     *  @param points Points
+     *  @param grid Grid
+     *  @param num Number of points
+     *  @return Distance [m] to nearest gridpoint for each point
+    */
+    vec2 distance(const Points& points, const Grid& grid, int num=1);
+
+    /** For each gridpoint, counts the number of points within the radius
+     *  @param grid Grid
+     *  @param points Points
+     *  @param radius Radius [m]
+     *  @return Number of points
+    */
+    vec2 count(const Points& points, const Grid& grid, float radius);
+
     /****************************************
      * Diagnosing methods                   *
      ****************************************/

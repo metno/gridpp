@@ -36,7 +36,8 @@ vec2 gridpp::distance(const Points& points, const Grid& grid, int num) {
             ivec indices = points.get_closest_neighbours(ilats[i][j], ilons[i][j], num);
             float max_dist = 0;
             for(int k = 0; k < indices.size(); k++) {
-                float dist = gridpp::KDTree::calc_distance(lats[k], lons[k], ilats[i][j], ilons[i][j]);
+                int index = indices[k];
+                float dist = gridpp::KDTree::calc_distance(lats[index], lons[index], ilats[i][j], ilons[i][j]);
                 if(dist > max_dist)
                     max_dist = dist;
             }

@@ -416,6 +416,17 @@ namespace gridpp {
         */
         vec calc_even_quantiles(const vec& values, int num);
 
+        /** Computes gradients based on values in neighbourhood
+         *  @param grid Grid
+         *  @param base Dependent variable. Missing values are not used.
+         *  @param values Independent variable. Missing values are not used.
+         *  @param radius Neighbourhood radius in number of gridpoints
+         *  @param min_nim Minimum number of points required to compute gradient
+         *  @param min_range Minimum range of base to compute gradient
+         *  @param default_gradient Use this gradient if minimum number is not met
+        */
+        vec calc_gradient(const gridpp::Grid& grid, const vec2& base, const vec2& values, float radius, int min_num=2, float min_range=0, float default_gradient=0);
+
         /** Check if the grid is the same size as the 2D vector */
         bool compatible_size(const Grid& grid, const vec2& v);
         bool compatible_size(const Grid& grid, const vec3& v);

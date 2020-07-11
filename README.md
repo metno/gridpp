@@ -33,6 +33,8 @@ halfwidth = 7
 gridpp.neighbourhood(field, halfwidth, gridpp.Mean)
 ```
 
+![Example](extras/image.gif)
+
 ## Required dependencies
 - [Boost](https://www.boost.org/) >= 1.59
 - [Armadillo](http://arma.sourceforge.net/) >= 6.6

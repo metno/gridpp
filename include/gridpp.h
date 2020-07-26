@@ -59,6 +59,15 @@ namespace gridpp {
         Unknown   = -1  /**< Unknown statistic */
     };
 
+    enum Metric {
+        Ets       = 0,  /**< Mean of values */
+        Ts        = 1,  /**< Mean of values */
+        Kss       = 20, /**< Minimum of values */
+        Pc        = 30, /**< Minimum of values */
+        Bias      = 40, /**< Minimum of values */
+        Hss       = 50, /**< Minimum of values */
+    };
+
     /** Convert name of a statistic enum */
     Statistic get_statistic(std::string name);
 
@@ -224,6 +233,15 @@ namespace gridpp {
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+
+    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric);
+    float get_optimal_threshold2(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
+    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric, vec& scores);
+    vec compute_scores(const vec& ref, const vec& fcst, float othreshold, const vec& fthresholds, float sigma, gridpp::Metric metric);
+    ivec monotonize(const vec2& curve);
+    float calc_score(float a, float b, float c, float d, gridpp::Metric metric);
+    // vec2 quantile_mapping_curve)const vec& ref, const vec& fcst, vec& quantiles=vec());
+    // vec apply_curve(const vec& input, const vec& curve, gridpp::Extrapolation policy);
 
     /****************************************
      * Downscaling methods                  *

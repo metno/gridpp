@@ -180,38 +180,42 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     if(num == 0)
         return quantiles;
 
+    vec sorted = values;
+    std::sort(sorted.begin(), sorted.end());
+
     quantiles.reserve(num);
-    quantiles.push_back(values[0]);
+    quantiles.push_back(sorted[0]);
     int count_lower = 0;
-    for(int i = 0; i < values.size(); i++) {
-        if(values[i] != quantiles[0])
+    for(int i = 0; i < sorted.size(); i++) {
+        if(sorted[i] != quantiles[0])
             break;
         count_lower++;
     }
-    int size = values.size();
+    int size = sorted.size();
     if(count_lower > size / num)
-        quantiles.push_back(values[count_lower]);
+        quantiles.push_back(sorted[count_lower]);
 
     // Remove duplicates
     vec values_unique;
-    values_unique.reserve(values.size());
+    values_unique.reserve(sorted.size());
     float last_quantile = quantiles[quantiles.size() - 1];
-    for(int i = 0; i < values.size(); i++) {
-        if(values[i] > last_quantile && (values_unique.size() == 0 || values[i] != values_unique[values_unique.size() - 1]))
-            values_unique.push_back(values[i]);
+    for(int i = 0; i < sorted.size(); i++) {
+        if(sorted[i] > last_quantile && (values_unique.size() == 0 || sorted[i] != values_unique[values_unique.size() - 1]))
+            values_unique.push_back(sorted[i]);
     }
     if(values_unique.size() > 0) {
         int num_left = num - quantiles.size();
         for(int i = 1; i <= num_left; i++) {
             float f = float(i) / (num_left);
             int index = values_unique.size() * f - 1;
-            if(index > 0) {
+            if(index >= 0) {
                 float value = values_unique[index];
                 quantiles.push_back(value);
+                std::cout << f << " " << index << " " << value << std::endl;
             }
             else {
                 std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
-                std::cout << count_lower << " " << values.size() << " " << last_quantile << std::endl;
+                std::cout << count_lower << " " << sorted.size() << " " << last_quantile << std::endl;
                 throw std::runtime_error("Internal error in calc_even_quantiles.");
             }
         }

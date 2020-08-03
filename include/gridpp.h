@@ -197,34 +197,52 @@ namespace gridpp {
     /****************************************
      * Calibration methods                  *
      ****************************************/
-    /** Quantile mapping of 2D grid using a constant quantile map
-      * @param input Values on grid
-      * @param x X-axis parameters values
-      * @param y Y-axis parameters values
-      * @param policy Extrapolation policy
-      * @return Quantile-mapped values
-    */
-    vec2 quantile_mapping(const vec2& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
 
-    /** Quantile mapping of a vector of value
-      * @param input Input values
-      * @param x X-axis parameters values
-      * @param y Y-axis parameters values
-      * @param policy Extrapolation policy
-      * @return Quantile-mapped output values
-      *
+    /** Apply arbitrary calibration curve to 1D forecasts
+     *  @param fcst 1D vector of forecast values
+     *  @param curve Calibration curve
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
     */
-    vec quantile_mapping(const vec& input, const vec& x, const vec& y, gridpp::Extrapolation policy);
+    vec apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above);
 
-    /** Quantile mapping of a single value
-      * @param input Input value
-      * @param x X-axis parameters values
-      * @param y Y-axis parameters values
-      * @param policy Extrapolation policy
-      * @return Quantile-mapped output value
-      *
+    /** Apply arbitrary calibration curve to 2D forecasts
+     *  @param fcst 2D grid of forecast values
+     *  @param curve Calibration curve
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
     */
-    float quantile_mapping(float input, const vec& ref, const vec& fcst, gridpp::Extrapolation policy);
+    vec2 apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above);
+
+    /** Ensure calibration curve is monotonic, by removing points
+     *  @param curve Calibration curve
+     *  @returns Monotonic calibration curve
+    */
+    vec2 monotonize_curve(const vec2& curve);
+
+    /** Create quantile mapping calibration curve
+     *  @param ref Reference values (observations)
+     *  @param fcst Forecast values
+     *  @param quantiles Vector of quantiles to extract. If empty, use all values.
+     *  @return Calibration curve
+    */
+    vec2 quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles=vec());
+
+    /** Create calibration curve
+     *  @param ref Reference values (observations)
+     *  @param fcst Forecast values
+     *  @param thresholds Thresholds for computing optimal values for
+     *  @param metric A Metric to optimize for
+     *  @return Calibration curve
+    */
+    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric);
+    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
+
+    float calc_score(float a, float b, float c, float d, gridpp::Metric metric);
+    float calc_score(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
+    float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, gridpp::Metric metric);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
@@ -233,15 +251,6 @@ namespace gridpp {
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
-
-    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric);
-    float get_optimal_threshold2(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
-    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric, vec& scores);
-    vec compute_scores(const vec& ref, const vec& fcst, float othreshold, const vec& fthresholds, float sigma, gridpp::Metric metric);
-    ivec monotonize(const vec2& curve);
-    float calc_score(float a, float b, float c, float d, gridpp::Metric metric);
-    // vec2 quantile_mapping_curve)const vec& ref, const vec& fcst, vec& quantiles=vec());
-    // vec apply_curve(const vec& input, const vec& curve, gridpp::Extrapolation policy);
 
     /****************************************
      * Downscaling methods                  *
@@ -413,7 +422,7 @@ namespace gridpp {
         */
         int get_upper_index(float iX, const std::vector<float>& iValues);
 
-        /** Piecewise linear interpolation.o
+        /** Piecewise linear interpolation
          *  If x is outside the range of iX, then the min/max value of iY is used
          *  @param x Interpolation to this point
          *  @param iX Vector of x-axis values. Vector must be sorted.

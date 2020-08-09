@@ -1,4 +1,5 @@
 #include "gridpp.h"
+#include <iostream>
 
 vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
     int N = fcst.size();
@@ -71,61 +72,85 @@ vec2 gridpp::apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolat
     return output;
 }
 vec2 gridpp::monotonize_curve(const vec2& curve) {
+    bool debug = false;
+
     ivec new_indices;
     assert(curve.size() == 2);
     int N = curve[0].size();
-    int Nmiddle = N / 2;
     new_indices.reserve(N);
-    // Upper half
-    int start = 0;
-    float last = curve[0][start];
+
+    int start = 1;
+    float prev = curve[0][0];
+
+    /* A deviation is a part of the curve is not monotonic. This occurs when a set of x values are
+       not in increasing order. Remove all points that are inside the non-increasing setion.
+    */
     bool deviation = false;
     int deviation_index = 0;
-    float x_min = 0;
-    float x_max = 0;
-    float x_min_index = 0;
+    float x_min = curve[0][0]; // The lowest x value in the deviation section
+    float x_max = curve[0][0]; // The highest x value in the deivation section
+
+    new_indices.push_back(0);
+    float tol = 0.1;
     for(int i = start; i < N; i++) {
         float x = curve[0][i];
         float y = curve[1][i];
         if(!gridpp::util::is_valid(x) || !gridpp::util::is_valid(y))
+            // Remove invalid points
             continue;
         if(deviation) {
+            // Currently inside a deviation section
             if(x < x_min) {
                 x_min = x;
-                x_min_index = i;
             }
-            if(x > x_max) {
-                // Stopping criterion
+            if(x > x_max + tol) {
+                // We are past the deviation section
                 x_max = x;
-                // std::cout << "End of loop at " << i << " x=" << x << "(" << x_min << "," << x_max << ")" << std::endl;
-                // Find latest x point
+                if(debug)
+                    std::cout << "End of loop at " << i << " x=" << x << "(" << x_min << "," << x_max << ")" << std::endl;
+                // Remove points inside the deviation section, that is all points above x_min
                 for(int j = new_indices.size() - 1; j >= 0; j--) {
                     int index = new_indices[j];
-                    if(curve[0][index] < x_min)
+                    if(curve[0][index] < x_min - tol)
                         break;
                     else {
-                        // std::cout << "Removing index=" << index << " x=" << curve[0][index] << std::endl;
+                        if(debug)
+                            std::cout << "Removing index=" << index << " x=" << curve[0][index] << std::endl;
                         new_indices.pop_back();
                     }
                 }
                 new_indices.push_back(i);
+                deviation = false;
+                prev = x;
+                x_max = x;
             }
-            deviation = false;
         }
         else {
-            if(x <= last) {
-                // We have a deviation
+            if(x <= prev + tol) {
+                // We have a new deviation
                 deviation = true;
                 deviation_index = i;
                 x_min = x;
-                x_max = x;
-                x_min_index = i;
-                // std::cout << "Detecting loop from " << i << " x=" << x << std::endl;
+                if(debug)
+                    std::cout << "Detecting loop from " << i << " x=" << x << " " << x_max << std::endl;
             }
             else {
                 new_indices.push_back(i);
-                last = x;
+                prev = x;
+                x_max = x;
             }
+        }
+    }
+    if(deviation) {
+        if(debug)
+            std::cout << "Finished in a deviation " << deviation_index << std::endl;
+        // Find latest x point
+        for(int j = new_indices.size() - 1; j >= 0; j--) {
+            if(debug)
+                std::cout << new_indices[j] << " " << deviation_index << std::endl;
+            int index = new_indices[j];
+            if(curve[0][index] >= x_min)
+                new_indices.pop_back();
         }
     }
 

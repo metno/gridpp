@@ -67,9 +67,9 @@ namespace {
             };
             float operator()(double threshold) {
                 float s = - gridpp::calc_score(data.ref, data.fcst, data.threshold, threshold, data.metric);
+                // if(s > -0.0001)
+                //     s = 0;
                 // std::cout << threshold << " " << s << std::endl;
-                if(s > -0.0001)
-                    s = 0;
                 return s;
             }
             float calc_uncertainty(double threshold) {
@@ -129,7 +129,29 @@ float gridpp::get_optimal_threshold(const vec& ref, const vec& fcst, float thres
     int bits = 32;
     Data data(ref, fcst, threshold, metric);
     Score_func func(data);
-    std::pair<double, double> r = brent_find_minima<Score_func, double>(func, data.min, data.max, bits);
+
+    /* Compute values at even intervals, to find where to start optimization search */
+    int B = 10;
+    vec bins(B);
+    vec values(B);
+    int min_index = 0;
+    float min_value = func(data.min);
+    bins[0] = data.min;
+    for(int b = 1; b < B; b++) {
+        bins[b] = data.min + (data.max - data.min) / (B - 1) * b;
+        float curr_x = data.min + (data.max - data.min) / (B - 1) * b;
+        float curr_value = func(curr_x);
+        // std::cout << curr_x << " " << curr_value << " " << min_index << " " << min_value << std::endl;
+        if(curr_value < min_value) {
+            min_index = b;
+            min_value = curr_value;
+        }
+    }
+    int left_index = min_index > 0 ? min_index - 1 : 0;
+    int right_index = min_index < B - 1 ? min_index + 1 : B - 1;
+    // std::cout << "MIN: " << data.min << " " << "MAX: " << data.max << std::endl;
+    // std::cout << "MIN: " << bins[left_index] << " " << "MAX: " << bins[right_index] << std::endl;
+    std::pair<double, double> r = brent_find_minima<Score_func, double>(func, bins[left_index], bins[right_index], bits);
     float x = r.first;
     float score = - r.second;
     if(!gridpp::util::is_valid(score))
@@ -142,7 +164,7 @@ float gridpp::get_optimal_threshold(const vec& ref, const vec& fcst, float thres
             x = gridpp::MV;
         else if(diff > 1e-3)
             x = gridpp::MV;
-        std::cout << threshold << " -> " << r.first << " " << score << " " << diff << " " << x << std::endl;
+        // std::cout << threshold << " -> " << r.first << " " << score << " " << diff << " " << x << std::endl;
     }
     if(remove_at_boundary) {
         float s0 = - func(data.min);

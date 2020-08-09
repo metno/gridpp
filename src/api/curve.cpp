@@ -2,6 +2,12 @@
 #include <iostream>
 
 vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    if(curve.size() != 2 || curve[0].size() == 0 || curve[1].size() == 0)
+        throw std::runtime_error("Invalid curve");
+
+    if(curve[0].size() != curve[1].size())
+        throw std::runtime_error("x and y vectors in curve not the same size");
+
     int N = fcst.size();
     int C = fcst.size();
     vec output(N, gridpp::MV);
@@ -72,6 +78,12 @@ vec2 gridpp::apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolat
     return output;
 }
 vec2 gridpp::monotonize_curve(const vec2& curve) {
+    if(curve.size() != 2 || curve[0].size() == 0 || curve[1].size() == 0)
+        throw std::runtime_error("Invalid curve");
+
+    if(curve[0].size() != curve[1].size())
+        throw std::runtime_error("x and y vectors in curve not the same size");
+
     bool debug = false;
 
     ivec new_indices;

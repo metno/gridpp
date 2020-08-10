@@ -211,7 +211,6 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
             if(index >= 0) {
                 float value = values_unique[index];
                 quantiles.push_back(value);
-                std::cout << f << " " << index << " " << value << std::endl;
             }
             else {
                 std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;

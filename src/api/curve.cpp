@@ -9,7 +9,7 @@ vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolatio
         throw std::runtime_error("x and y vectors in curve not the same size");
 
     int N = fcst.size();
-    int C = fcst.size();
+    int C = curve[0].size();
     vec output(N, gridpp::MV);
     const vec& curve_fcst = curve[0];
     const vec& curve_ref = curve[1];

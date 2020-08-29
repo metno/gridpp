@@ -1,139 +1,196 @@
 #include "gridpp.h"
 #include <iostream>
 
-vec gridpp::correction(const Points& rpoints, const vec& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, std::string type, vec& count) {
-    int s = rpoints.size();
-    int itype = 0;
-    if(type == "qq")
-        itype = 0;
-    else if(type == "mult")
-        itype = 1;
-    else
-        itype = 2;
-    vec output(s, 0);
-    count.clear();
-    count.resize(s, -1);
-    vec n_at_r(s, gridpp::MV);
-    double s_time = gridpp::util::clock();
-    int num_points = 0;
-    vec rlats = rpoints.get_lats();
-    vec rlons = rpoints.get_lons();
-    for(int i = 0; i < s; i++) {
-        ivec I = npoints.get_neighbours(rlats[i], rlons[i], mean_radius);
-        float total = 0;
-        int c = 0;
-        if(I.size() > 0) {
-            for(int j = 0; j < I.size(); j++) {
-                assert(nvalues.size() > I[j]);
-                total += nvalues[I[j]];
-                c++;
-            }
-            if(c > 0) {
-                n_at_r[i] = total / c;
-                num_points++;
-            }
-        }
-    }
-    double e_time = gridpp::util::clock();
-    std::cout << e_time - s_time << std::endl;
-    std::cout << num_points << std::endl;
+vec2 gridpp::correction(const Grid& rgrid,
+        const vec2& rvalues,
+        const Points& npoints,
+        const vec& nvalues,
+        float mean_radius,
+        float outer_radius,
+        float inner_radius,
+        int min_num,
+        int max_num,
+        gridpp::CorrectionType type,
+        vec2& count) {
+    int Y = rgrid.size()[0];
+    int X = rgrid.size()[1];
+
+    vec2 output = gridpp::util::init_vec2(Y, X, 0);
+    count = gridpp::util::init_vec2(Y, X, -1);
+    vec2 rlats = rgrid.get_lats();
+    vec2 rlons = rgrid.get_lons();
+
+    // Compute the average observed at each radar point
+    vec2 n_at_r = gridpp::gridding(rgrid, npoints, nvalues, mean_radius, 1, gridpp::Mean);
+
     int num_corrected = 0;
     int iterations = 0;
 
-    for(int i = 0; i < s; i++) {
-        if(i % int(s / 20) == 0)
-            std::cout << i << "/" << s << std::endl;
-        if(count[i] > 0)
-            continue;
-        iterations++;
-        vec distances;
-        ivec outer = rpoints.get_neighbours_with_distance(rlats[i], rlons[i], outer_radius, distances);
-        outer.push_back(i);
-        distances.push_back(0);
+    for(int y = 0; y < Y; y++) {
+        std::cout << y << "/" << Y << std::endl;
+        for(int x = 0; x < X; x++) {
+            if(count[y][x] > 0)
+                continue;
+            iterations++;
 
-        int J = outer.size();
-        vec x;
-        vec y;
-        x.reserve(J);
-        y.reserve(J);
-        float xtotal = 0;
-        float ytotal = 0;
-        float xtotal0 = 0;
-        float ytotal0 = 0;
-        int num_nonzeros = 0;
-        assert(outer.size() == distances.size());
-        for(int j = 0; j < J; j++) {
-            // if(gridpp::util::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
-            if(gridpp::util::is_valid(n_at_r[outer[j]])) {
-                x.push_back(rvalues[outer[j]]);
-                y.push_back(n_at_r[outer[j]]);
-                xtotal += rvalues[outer[j]];
-                ytotal += n_at_r[outer[j]];
-                if(rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
-                    xtotal0 += rvalues[outer[j]];
-                    ytotal0 += n_at_r[outer[j]];
-                    num_nonzeros++;
+            // Retrive a list of nearby points and distances
+            vec distances;
+            ivec2 outer = rgrid.get_neighbours_with_distance(rlats[y][x], rlons[y][x], outer_radius, distances);
+
+            // add the current gridpoint, since the neighbour search omits this point
+            ivec temp(2);
+            temp[0] = y;
+            temp[1] = x;
+            outer.push_back(temp);
+            distances.push_back(0);
+
+            // Create a curve of observed and radar values based on the neighbourhood points
+            int J = outer.size();
+            vec x_curve;
+            vec y_curve;
+            x_curve.reserve(J);
+            y_curve.reserve(J);
+            float xtotal = 0;
+            float ytotal = 0;
+            float xtotal0 = 0;
+            float ytotal0 = 0;
+            int num_nonzeros = 0;
+            assert(outer.size() == distances.size());
+            for(int j = 0; j < J; j++) {
+                int y_outer = outer[j][0];
+                int x_outer = outer[j][1];
+                // if(gridpp::util::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
+                // Check that we have a point with enough observations
+                assert(y_outer < rvalues.size());
+                assert(y_outer < n_at_r.size());
+                assert(x_outer < rvalues[y_outer].size());
+                assert(x_outer < n_at_r[y_outer].size());
+                float xx = rvalues[y_outer][x_outer];
+                float yy = n_at_r[y_outer][x_outer];
+                if(gridpp::util::is_valid(xx) && gridpp::util::is_valid(yy)) {
+                    x_curve.push_back(xx);
+                    y_curve.push_back(yy);
+                    xtotal += xx;
+                    ytotal += yy;
+                    if(xx > 0 && yy > 0) {
+                        xtotal0 += xx;
+                        ytotal0 += yy;
+                        num_nonzeros++;
+                    }
                 }
             }
-        }
-        x.push_back(0);
-        y.push_back(0);
-        std::sort(x.begin(), x.end());
-        std::sort(y.begin(), y.end());
-        float x_threshold = 0;
-        for(int q = 0; q < x.size(); q++) {
-            if(y[q] > 0) {
-                // std::cout << q << " " << x[q] << " " << y[q] << std::endl;
-                // std::cout << xtotal / x.size() << " " << ytotal / y.size() << std::endl;
-                x_threshold = x[q-1];
-                break;
+            x_curve.push_back(0);
+            y_curve.push_back(0);
+            std::sort(x_curve.begin(), x_curve.end());
+            std::sort(y_curve.begin(), y_curve.end());
+
+            // Find the threshold where should truncate precip to 0
+            float x_threshold = 0;
+            for(int q = 0; q < x_curve.size(); q++) {
+                if(y_curve[q] > 0) {
+                    // std::cout << q << " " << x_curve[q] << " " << y_curve[q] << std::endl;
+                    // std::cout << xtotal / x_curve.size() << " " << ytotal / y_curve.size() << std::endl;
+                    x_threshold = x_curve[q-1];
+                    break;
+                }
             }
-        }
-        int X = x.size();
-        if(X > 20) {
-            x = vec(x.begin(), x.end() - X / 10);
-            y = vec(y.begin(), y.end() - X / 10);
-        }
-        if(J == 0) {
-            output[i] = rvalues[i];
-            count[i] = 0;
-        }
-        for(int j = 0; j < J; j++) {
-            int index = outer[j];
-            if(count[index] >= num_nonzeros)
-                continue;
-            if(distances[j] < inner_radius) {
-                count[index] = num_nonzeros;
-                // count[index] = ytotal / x.size() - xtotal / x.size();
-                if(num_nonzeros >= min_num) {
-                    if(1 || rvalues[index] > 0.1) {
-                        if(itype == 0)
-                            output[index] = gridpp::quantile_mapping(rvalues[index], x, y, gridpp::Zero);
-                        else if (itype == 1)
-                            output[index] = rvalues[index] * ytotal / xtotal;
-                        else {
-                            if(rvalues[index] < x_threshold)
-                                output[index] = 0;
-                            else if(xtotal0 > 0){
-                                output[index] = rvalues[index] * ytotal0 / xtotal0;
-                            }
-                            else {
-                                output[index] = rvalues[index];
-                            }
-                        }
-                        num_corrected++;
-                    }
-                    else {
-                        output[index] = rvalues[index];
-                    }
+            int S = x_curve.size();
+
+            // Remove the extremes of the curve
+            if(S > 20) {
+                x_curve = vec(x_curve.begin(), x_curve.end() - S / 10);
+                y_curve = vec(y_curve.begin(), y_curve.end() - S / 10);
+            }
+            if(J == 0) {
+                output[y][x] = rvalues[y][x];
+                count[y][x] = 0;
+            }
+            vec applied;
+            vec curr_rvalues(J);
+            for(int j = 0; j < J; j++) {
+                int y_outer = outer[j][0];
+                int x_outer = outer[j][1];
+                curr_rvalues[j] = rvalues[y_outer][x_outer];
+            }
+            if(type == gridpp::Qq) {
+                vec2 curve = gridpp::quantile_mapping_curve(y_curve, x_curve);
+                applied = gridpp::apply_curve(curr_rvalues, curve, gridpp::Zero, gridpp::Zero);
+            }
+            else {
+                if(type == gridpp::Multiplicative) {
+                    applied.resize(J);
+                    float ratio = 1;
+                    if(num_nonzeros >= min_num)
+                        ratio = ytotal / xtotal;
+                    assert(ratio >= 0);
+                    assert(ratio <= 100);
+                    for(int j = 0; j < J; j++)
+                        applied[j] = curr_rvalues[j] * ratio;
                 }
                 else {
-                    output[index] = rvalues[index];
-                    count[index] = 1;
+                    applied.resize(J);
+                    float ratio = 1;
+                    if(num_nonzeros >= min_num)
+                        ratio = ytotal0 / xtotal0;
+                    assert(ratio >= 0);
+                    assert(ratio <= 100);
+                    for(int j = 0; j < J; j++) {
+                        if(curr_rvalues[j] < x_threshold)
+                            applied[j] = 0;
+                        else
+                            applied[j] = curr_rvalues[j] * ratio;
+                    }
+                }
+
+            }
+
+            for(int j = 0; j < J; j++) {
+                assert(j < outer.size());
+                int y_outer = outer[j][0];
+                int x_outer = outer[j][1];
+                float curr_count = count[y_outer][x_outer];
+                float curr_r = rvalues[y_outer][x_outer];
+                if(curr_count >= num_nonzeros)
+                    continue;
+                if(distances[j] < inner_radius) {
+                    curr_count = num_nonzeros;
+                    count[y_outer][x_outer] = curr_count;
+                    // curr_count = ytotal / x_curve.size() - xtotal / x_curve.size();
+                    if(num_nonzeros >= min_num) {
+                        if(1 || curr_r > 0.1) {
+                            assert(j < applied.size());
+                            if(applied[j] >= 1000)
+                                std::cout << "APPLIED: " << applied[j] << " " << num_nonzeros << " " << min_num << std::endl;
+                            // assert(applied[j] < 1000);
+                            // assert(applied[j] >= 0);
+                            output[y_outer][x_outer] = applied[j];
+                            // std::cout << applied[j] << std::endl;
+                            /*
+                            else {
+                                if(curr_r < x_threshold)
+                                    output[y_outer][x_outer] = 0;
+                                else if(xtotal0 > 0){
+                                    output[y_outer][x_outer] = curr_r * ytotal0 / xtotal0;
+                                }
+                                else {
+                                    output[y_outer][x_outer] = curr_r;
+                                }
+                            }
+                            */
+                            num_corrected++;
+                        }
+                        else {
+                            output[y_outer][x_outer] = curr_r;
+                        }
+                    }
+                    else {
+                        output[y_outer][x_outer] = curr_r;
+                        count[y_outer][x_outer] = 1;
+                    }
                 }
             }
+            // std::cout << "Size: " << x_curve.size() << " " << xtotal / x_curve.size() << " " << ytotal / y.size() << std::endl;
         }
-        // std::cout << "Size: " << x.size() << " " << xtotal / x.size() << " " << ytotal / y.size() << std::endl;
     }
     std::cout << "Corrected: " << num_corrected << " iterations: " << iterations << std::endl;
     return output;

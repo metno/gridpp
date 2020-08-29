@@ -68,6 +68,12 @@ namespace gridpp {
         Hss       = 50, /**< Minimum of values */
     };
 
+    enum CorrectionType {
+        Qq        = 0,  /**< Quantile mapping */
+        Multiplicative = 10,  /**< Multiplicative */
+        Additive  = 20, /**< Additive */
+    };
+
     /** Convert name of a statistic enum */
     Statistic get_statistic(std::string name);
 
@@ -246,11 +252,21 @@ namespace gridpp {
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
-      * @param radiii Circle radii for each point
+      * @param radii Circle radii for each point
       * @param value Fill in this value
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+
+    /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough observations
+      * @param grid Grid to aggregate to
+      * @param points Points with values
+      * @param values Values at points
+      * @param radius Circle radius for aggregate points [m]
+      * @param min_num Minimum number of points in radius to create a value
+      * @param statistic Statistic to compute on points within radius
+    */
+    vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic);
 
     /****************************************
      * Downscaling methods                  *
@@ -397,7 +413,8 @@ namespace gridpp {
     */
     vec qnh(const vec& pressure, const vec& altitude);
 
-    vec correction(const Points& rpoints, const vec& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, std::string type, vec& count);
+    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+    // vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, std::string type, vec& count);
 
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);

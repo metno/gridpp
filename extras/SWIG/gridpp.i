@@ -404,7 +404,7 @@ namespace std {
 #endif
 
 %apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& output };
-%apply std::vector<float>& OUTPUT { std::vector<float>& count };
+%apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& count };
 %{
 #include "gridpp.h"
 %}

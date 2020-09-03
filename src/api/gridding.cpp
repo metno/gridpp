@@ -18,12 +18,13 @@ vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values,
                     curr[i] = values[I[i]];
                 }
                 output[y][x] = gridpp::util::calc_statistic(curr, statistic);
-                if(output[y][x] >= 1000) {
-                    std::cout << y << " " << x << " " << output[y][x] << std::endl;
-                    for(int i = 0; i < I.size(); i++) {
-                        std::cout << "   " << curr[i] << std::endl;
-                    }
-                }
+                // if(output[y][x] < 0.9) {
+                //     std::cout << y << " " << x << " " << output[y][x] << std::endl;
+                //     for(int i = 0; i < I.size(); i++) {
+                //         std::cout << "   " << curr[i] << std::endl;
+                //     }
+                //     abort();
+                // }
             }
         }
     }

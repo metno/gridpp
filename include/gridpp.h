@@ -414,7 +414,8 @@ namespace gridpp {
     vec qnh(const vec& pressure, const vec& altitude);
 
     vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
-    // vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, std::string type, vec& count);
+    // Apply correction based on multiple timesteps
+    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
 
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
@@ -463,6 +464,9 @@ namespace gridpp {
 
         /** Initialize a vector of size Y, X, with a given value */
         vec2 init_vec2(int Y, int X, float value=gridpp::MV);
+
+        /** Initialize a vector of size Y, X, E, with a given value */
+        vec3 init_vec3(int Y, int X, int E, float value=gridpp::MV);
 
         /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
           *  but including the first number after duplicated values. Include the lowest and highest

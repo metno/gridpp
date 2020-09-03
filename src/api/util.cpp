@@ -303,6 +303,14 @@ vec2 gridpp::util::init_vec2(int Y, int X, float value) {
         output[y].resize(X, value);
     return output;
 }
+vec3 gridpp::util::init_vec3(int Y, int X, int T, float value) {
+    vec3 output(Y);
+    for(int y = 0; y < Y; y++) {
+        for(int x = 0; x < X; x++)
+            output[y][x].resize(T, value);
+    }
+    return output;
+}
 float* gridpp::util::test_array(float* v, int n) {
     int count = 0;
     for(int i = 0; i < n; i++)

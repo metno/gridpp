@@ -268,6 +268,12 @@ namespace gridpp {
     */
     vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic);
 
+    vec2 advection_implicit_y(const vec2& y, const vec2& x, float dt);
+    vec2 advection_implicit_x(const vec2& y, const vec2& x, float dt);
+    vec2 advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord);
+
+    vec2 fill_missing(const vec2& values);
+
     /****************************************
      * Downscaling methods                  *
      ****************************************/

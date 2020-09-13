@@ -289,18 +289,32 @@ vec gridpp::get_neighbourhood_thresholds(const vec3& input, int num_thresholds) 
     return thresholds;
 }
 vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int radius, const vec& thresholds) {
+    vec2 quantile2(1);
+    quantile2[0].resize(1);
+    quantile2[0][0] = quantile;
+    return gridpp::neighbourhood_quantile_fast(input, quantile2, radius, thresholds);
+}
+vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, const vec2& quantile, int radius, const vec& thresholds) {
     if(radius < 0)
         throw std::invalid_argument("Radius must be > 0");
-    if(quantile < 0 || quantile > 1)
-        throw std::invalid_argument("Quantile must be between 0 and 1 inclusive");
 
     if(input.size() == 0 || input[0].size() == 0)
         return vec2();
-    double s_time = gridpp::util::clock();
-    assert(quantile >= 0);
-    assert(quantile <= 1);
+
     int nY = input.size();
     int nX = input[0].size();
+
+    if(!(quantile.size() == 1 && quantile[0].size() == 1) && !(quantile.size() == nY && quantile[0].size() == nX))
+        throw std::invalid_argument("Quantile must be the same size as input, or size (1, 1)");
+
+    for(int y = 0; y < quantile.size(); y++) {
+        for(int x = 0; x < quantile.size(); x++) {
+            if(quantile[y][x] < 0 || quantile[y][x] > 1)
+                throw std::invalid_argument("All quantiles must be >= 0 and <= 1");
+        }
+    }
+
+    double s_time = gridpp::util::clock();
 
     vec2 output(nY);
     for(int y = 0; y < nY; y++) {
@@ -335,9 +349,21 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int 
         }
         stats[t] = gridpp::neighbourhood(temp, radius, gridpp::Mean);
     }
+
+    const bool is_fixed_quantile = quantile.size() == 1 && quantile[0].size() == 1;
+    float fixed_quantile = gridpp::MV;
+    if(is_fixed_quantile)
+        fixed_quantile = quantile[0][0];
+
+    float curr_quantile = gridpp::MV;
+
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         for(int x = 0; x < nX; x++) {
+            if(is_fixed_quantile)
+                curr_quantile = fixed_quantile;
+            else
+                curr_quantile = quantile[y][x];
             vec yarray(thresholds.size(), gridpp::MV);
             bool is_missing = false;
             for(int t = 0; t < thresholds.size(); t++) {
@@ -360,7 +386,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int 
                     is_missing = true;
             }
             if(!is_missing)
-                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
+                output[y][x] = gridpp::util::interpolate(curr_quantile, yarray, thresholds);
         }
     }
 
@@ -370,19 +396,31 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int 
 }
 
 vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds) {
+    vec2 quantile2(1);
+    quantile2[0].resize(1);
+    quantile2[0][0] = quantile;
+    return gridpp::neighbourhood_quantile_fast(input, quantile2, radius, thresholds);
+}
+vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, const vec2& quantile, int radius, const vec& thresholds) {
     if(radius < 0)
         throw std::invalid_argument("Radius must be > 0");
-    if(quantile < 0 || quantile > 1)
-        throw std::invalid_argument("Quantile must be between 0 and 1 inclusive");
 
     if(input.size() == 0 || input[0].size() == 0 || input[0][0].size() == 0)
         return vec2();
     double s_time = gridpp::util::clock();
-    assert(quantile >= 0);
-    assert(quantile <= 1);
     int nY = input.size();
     int nX = input[0].size();
     int nE = input[0][0].size();
+
+    if(!(quantile.size() == 1 && quantile[0].size() == 1) && !(quantile.size() == nY && quantile[0].size() == nX))
+        throw std::invalid_argument("Quantile must have the same Y, X size as input, or have size (1, 1)");
+
+    for(int y = 0; y < quantile.size(); y++) {
+        for(int x = 0; x < quantile.size(); x++) {
+            if(quantile[y][x] < 0 || quantile[y][x] > 1)
+                throw std::invalid_argument("All quantiles must be >= 0 and <= 1");
+        }
+    }
 
     vec2 output(nY);
     for(int y = 0; y < nY; y++) {
@@ -419,9 +457,21 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, float quantile, int 
         }
         stats[t] = gridpp::neighbourhood(temp, radius, gridpp::Mean);
     }
+
+    const bool is_fixed_quantile = quantile.size() == 1 && quantile[0].size() == 1;
+    float fixed_quantile = gridpp::MV;
+    if(is_fixed_quantile)
+        fixed_quantile = quantile[0][0];
+
+    float curr_quantile = gridpp::MV;
+
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         for(int x = 0; x < nX; x++) {
+            if(is_fixed_quantile)
+                curr_quantile = fixed_quantile;
+            else
+                curr_quantile = quantile[y][x];
             vec yarray(thresholds.size(), gridpp::MV);
             bool is_missing = false;
             for(int t = 0; t < thresholds.size(); t++) {
@@ -446,7 +496,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, float quantile, int 
                     is_missing = true;
             }
             if(!is_missing)
-                output[y][x] = gridpp::util::interpolate(quantile, yarray, thresholds);
+                output[y][x] = gridpp::util::interpolate(curr_quantile, yarray, thresholds);
         }
     }
 
@@ -455,6 +505,9 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, float quantile, int 
     return output;
 }
 vec2 gridpp::neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic) {
+    return ::neighbourhood_brute_force(input, iRadius, statistic, 0);
+}
+vec2 gridpp::neighbourhood_brute_force(const vec3& input, int iRadius, gridpp::Statistic statistic) {
     return ::neighbourhood_brute_force(input, iRadius, statistic, 0);
 }
 vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int iRadius) {

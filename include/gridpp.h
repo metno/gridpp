@@ -181,12 +181,29 @@ namespace gridpp {
     */
     vec2 neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
 
+    /** Approximate spatial neighbourhood filter for quantile operation.
+      * @param input 2D grid of values
+      * @param quantile 2D grid of quantiles (between 0 and 1), same size as input
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
+    vec2 neighbourhood_quantile_fast(const vec2& input, const vec2& quantile, int radius, const vec& thresholds);
+
+    /** Approximate neighbourhood filter space and across members for quantile operation
+      * @param input 3D vector with dimensions (Y, X, ensemble)
+      * @param quantile 2D vector of quantiles (between 0 and 1) with dimensions (Y, X) or (1, 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
+    vec2 neighbourhood_quantile_fast(const vec3& input, const vec2& quantile, int radius, const vec& thresholds);
+
     /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
      *  @param input 2D grid of values
      *  @param radius Filter radius in number of gridpoints
      *  @param operation one of min, mean, median, max
     */
     vec2 neighbourhood_brute_force(const vec2& input, int radius, Statistic statistic);
+    vec2 neighbourhood_brute_force(const vec3& input, int radius, Statistic statistic);
 
     /** Calculate appropriate approximation thresholds for neighbourhood quantile
      *  @param input 2D grid of values

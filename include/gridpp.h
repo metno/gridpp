@@ -149,7 +149,7 @@ namespace gridpp {
       * @param radius Filter radius in number of gridpoints
       * @param statistic Statistic to compute
     */
-    vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
+    vec2 neighbourhood(const vec3& input, int radius, Statistic statistic);
 
     /** Spatial neighbourhood filter. An exact but slow algorithm.
      *  @param input 2D grid of values
@@ -163,7 +163,7 @@ namespace gridpp {
      *  @param radius Filter radius in number of gridpoints
      *  @param quantile Quantile to calculate for (between 0 and 1)
     */
-    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius);
+    vec2 neighbourhood_quantile(const vec3& input, float quantile, int radius);
 
     /** Approximate spatial neighbourhood filter for quantile operation.
       * @param input 2D grid of values
@@ -179,7 +179,7 @@ namespace gridpp {
       * @param radius Filter radius in number of gridpoints
       * @param thresholds Vector of thresholds to use to approximate value
     */
-    vec2 neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
+    vec2 neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
 
     /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
      *  @param input 2D grid of values
@@ -199,6 +199,11 @@ namespace gridpp {
      *  @param num_thresholds Number of thresholds
     */
     vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
+
+    // Deprecated
+    vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
+    vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius);
+    vec2 neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
 
     /****************************************
      * Calibration methods                  *
@@ -435,6 +440,7 @@ namespace gridpp {
         void debug(std::string string);
         void warning(std::string string);
         void error(std::string string);
+        void future_deprecation_warning(std::string function, std::string other="");
         bool is_valid(float value);
         float calc_statistic(const vec& array, Statistic statistic);
         float calc_quantile(const vec& array, float quantile);

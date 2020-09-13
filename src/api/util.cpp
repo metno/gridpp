@@ -165,6 +165,14 @@ void gridpp::util::error(std::string iMessage) {
 #endif
     abort();
 }
+void gridpp::util::future_deprecation_warning(std::string function, std::string other) {
+    std::cout << "Future deprecation warning: " << function << " will be deprecated";
+    if(other != "")
+        std::cout << ", use " << other << " instead." << std::endl;
+    else
+        std::cout << "." << std::endl;
+}
+
 double gridpp::util::clock() {
     timeval t;
     gettimeofday(&t, NULL);

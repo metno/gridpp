@@ -4,10 +4,10 @@
 
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile);
-    vec2 neighbourhood_brute_force_ens(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile);
+    vec2 neighbourhood_brute_force(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile);
     vec3 vec2_to_vec3(const vec2& input);
 }
-vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, gridpp::Statistic statistic) {
+vec2 gridpp::neighbourhood(const vec3& input, int iRadius, gridpp::Statistic statistic) {
     vec2 flat(input.size());
     int Y = input.size();
     int X = input[0].size();
@@ -368,7 +368,8 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int 
     // std::cout << e_time - s_time << " s" << std::endl;
     return output;
 }
-vec2 gridpp::neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds) {
+
+vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds) {
     if(radius < 0)
         throw std::invalid_argument("Radius must be > 0");
     if(quantile < 0 || quantile > 1)
@@ -459,9 +460,25 @@ vec2 gridpp::neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::S
 vec2 gridpp::neighbourhood_quantile(const vec2& input, float quantile, int iRadius) {
     return ::neighbourhood_brute_force(input, iRadius, gridpp::Quantile, quantile);
 }
-vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int iRadius) {
-    return ::neighbourhood_brute_force_ens(input, iRadius, gridpp::Quantile, quantile);
+vec2 gridpp::neighbourhood_quantile(const vec3& input, float quantile, int iRadius) {
+    return ::neighbourhood_brute_force(input, iRadius, gridpp::Quantile, quantile);
 }
+// Deprecated functions
+vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, gridpp::Statistic statistic) {
+    gridpp::util::future_deprecation_warning("neighbourhood_ens", "neighbourhood");
+    return gridpp::neighbourhood(input, iRadius, statistic);
+}
+vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int iRadius) {
+    gridpp::util::future_deprecation_warning("neighbourhood_quantile_ens", "neighbourhood_quantile");
+    return ::neighbourhood_brute_force(input, iRadius, gridpp::Quantile, quantile);
+}
+vec2 gridpp::neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds) {
+    gridpp::util::future_deprecation_warning("neighbourhood_quantile_ens_fast", "neighbourhood_quantile_fast");
+    return gridpp::neighbourhood_quantile_fast(input, quantile, radius, thresholds);
+}
+
+
+
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile) {
         if(iRadius < 0)
@@ -509,7 +526,7 @@ namespace {
         }
         return output;
     }
-    vec2 neighbourhood_brute_force_ens(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile) {
+    vec2 neighbourhood_brute_force(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile) {
         if(iRadius < 0)
             throw std::invalid_argument("Radius must be > 0");
         if(input.size() == 0 || input[0].size() == 0 || input[0][0].size() == 0)

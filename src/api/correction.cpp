@@ -91,6 +91,9 @@ vec2 gridpp::correction(const Grid& rgrid,
     for(int t = 0; t < T; t++) {
         n_at_r[t] = gridpp::gridding(rgrid, npoints, nvalues[t], mean_radius, 1, gridpp::Mean);
     }
+    // vec radii(npoints.size(), outer_radius);
+    // vec2 zeros = gridpp::util::init_vec2(Y, X, 0);
+    // vec2 has_obs = gridpp::fill(rgrid, zeros, npoints, radii, 1, false);
 
     int num_corrected = 0;
 
@@ -98,8 +101,14 @@ vec2 gridpp::correction(const Grid& rgrid,
     int iterations = 0;
 
     for(int y = 0; y < Y; y++) {
+        if(y % 100 == 0)
+            std::cout << y << "/" << Y << std::endl;
         for(int x = 0; x < X; x++) {
-            if(count[y][x] > 0)
+            // if(has_obs[y][x] == 0)
+            //     // No point trying to create calibration, because there are no nearby observations
+            //     continue;
+
+            if(count[y][x] > -1)
                 // This mean we have already processed this gridpoint (because it was included in
                 // the search radius of another grid point that was processed earlier)
                 continue;
@@ -166,6 +175,8 @@ vec2 gridpp::correction(const Grid& rgrid,
             }
             int S = x_curve.size();
 
+            // TODO: Deal with case where original is 0. We shouldn't generate precip then, or?
+
             // Remove the extremes of the curve
             if(S > 20) {
                 x_curve = vec(x_curve.begin(), x_curve.end() - S / 10);
@@ -216,21 +227,17 @@ vec2 gridpp::correction(const Grid& rgrid,
                 int x_outer = outer[j][1];
                 float curr_count = count[y_outer][x_outer];
                 float curr_r = apply_values[y_outer][x_outer];
-                if(curr_count >= num_nonzeros)
+                // Don't update this gridpoint if there is less info now
+                if(curr_count >= S)
                     continue;
                 if(distances[j] < inner_radius) {
-                    // curr_count = num_nonzeros;
-                    count[y_outer][x_outer] = curr_count;
-                    // curr_count = ytotal / x_curve.size() - xtotal / x_curve.size();
-                    if(num_nonzeros >= min_num) {
+                    count[y_outer][x_outer] = S;
+                    if(S >= min_num) {
                         output[y_outer][x_outer] = curr_adjusted_values[j];
                         num_corrected++;
                     }
                     else {
                         output[y_outer][x_outer] = curr_r;
-                        // TODO: Is this right? Or are we just doing it so we don't reprocess it
-                        // later?
-                        count[y_outer][x_outer] = 1;
                     }
                 }
             }

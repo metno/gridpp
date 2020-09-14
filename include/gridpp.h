@@ -10,7 +10,7 @@
     #include <omp.h>
 #endif
 
-#define GRIDPP_VERSION "0.4.2"
+#define GRIDPP_VERSION "0.4.3"
 #define __version__ GRIDPP_VERSION
 
 // Preferred vector types
@@ -82,9 +82,9 @@ namespace gridpp {
     */
     std::string version();
 
-    /****************************************
-     * Data assimilation methods            *
-     ****************************************/
+    /** **************************************
+     * @name Data assimilation methods
+     * ***************************************/ /**@{*/
 
     /** Optimal interpolation for a deterministic field
       * @param bgrid Grid of background field
@@ -132,37 +132,21 @@ namespace gridpp {
             const vec2& pbackground,
             const gridpp::StructureFunction& structure,
             int max_points);
+    /**@}*/
 
-    /****************************************
-     * Neighbourhood methods                *
-     ****************************************/
+    /** **************************************
+     * @name Spatial neighbourhood filters
+     * ***************************************/ /**@{*/
 
-    /** Spatial neighbourhood filter
+    /**
+      * Spatial neighbourhood filter
       * @param input 2D grid of values
       * @param radius Filter radius in number of gridpoints
       * @param statistic Statistic to compute
     */
     vec2 neighbourhood(const vec2& input, int radius, Statistic statistic);
-
-    /** Neighbourhood filter in space and across ensemble members
-      * @param input 3D vector with dimensions (Y, X, ensemble)
-      * @param radius Filter radius in number of gridpoints
-      * @param statistic Statistic to compute
-    */
     vec2 neighbourhood(const vec3& input, int radius, Statistic statistic);
-
-    /** Spatial neighbourhood filter. An exact but slow algorithm.
-     *  @param input 2D grid of values
-     *  @param radius Filter radius in number of gridpoints
-     *  @param quantile Quantile to calculate for (between 0 and 1)
-    */
     vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius);
-
-    /** Neighbourhood filter in space and across ensemble members. An exampt but slow algorithm.
-     *  @param input 3D grid of values
-     *  @param radius Filter radius in number of gridpoints
-     *  @param quantile Quantile to calculate for (between 0 and 1)
-    */
     vec2 neighbourhood_quantile(const vec3& input, float quantile, int radius);
 
     /** Approximate spatial neighbourhood filter for quantile operation.
@@ -172,59 +156,36 @@ namespace gridpp {
       * @param thresholds Vector of thresholds to use to approximate value
     */
     vec2 neighbourhood_quantile_fast(const vec2& input, float quantile, int radius, const vec& thresholds);
-
-    /** Approximate neighbourhood filter space and across members for quantile operation
-      * @param input 3D vector with dimensions (Y, X, ensemble)
-      * @param quantile Quantile to compute (between 0 and 1)
-      * @param radius Filter radius in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
-    */
     vec2 neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
-
-    /** Approximate spatial neighbourhood filter for quantile operation.
-      * @param input 2D grid of values
-      * @param quantile 2D grid of quantiles (between 0 and 1), same size as input
-      * @param radius Filter radius in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
-    */
     vec2 neighbourhood_quantile_fast(const vec2& input, const vec2& quantile, int radius, const vec& thresholds);
-
-    /** Approximate neighbourhood filter space and across members for quantile operation
-      * @param input 3D vector with dimensions (Y, X, ensemble)
-      * @param quantile 2D vector of quantiles (between 0 and 1) with dimensions (Y, X) or (1, 1)
-      * @param radius Filter radius in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
-    */
     vec2 neighbourhood_quantile_fast(const vec3& input, const vec2& quantile, int radius, const vec& thresholds);
 
     /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
-     *  @param input 2D grid of values
-     *  @param radius Filter radius in number of gridpoints
-     *  @param operation one of min, mean, median, max
+      * @param input 2D grid of values
+      * @param radius Filter radius in number of gridpoints
+      * @param operation one of min, mean, median, max
     */
     vec2 neighbourhood_brute_force(const vec2& input, int radius, Statistic statistic);
     vec2 neighbourhood_brute_force(const vec3& input, int radius, Statistic statistic);
 
     /** Calculate appropriate approximation thresholds for neighbourhood quantile
-     *  @param input 2D grid of values
-     *  @param num_thresholds Number of thresholds
+      * @param input 2D (Y, X) or 3D (Y, X, T) array of values
+      * @param num_thresholds Number of thresholds
     */
     vec get_neighbourhood_thresholds(const vec2& input, int num_thresholds);
-
-    /** Calculate appropriate approximation thresholds for neighbourhood quantile
-     *  @param input 3D grid of values
-     *  @param num_thresholds Number of thresholds
-    */
     vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
 
-    // Deprecated
+    /** @deprecated Use neighbourhood() function */
     vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
+    /** @deprecated Use neighbourhood_quantile() function */
     vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius);
+    /** @deprecated Use neighbourhood_quantile_fast() function */
     vec2 neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
+    /**@}*/
 
-    /****************************************
-     * Calibration methods                  *
-     ****************************************/
+    /** **************************************
+     * @name Calibration methods              
+     * ***************************************/ /**@{*/
 
     /** Apply arbitrary calibration curve to 1D forecasts
      *  @param fcst 1D vector of forecast values
@@ -280,23 +241,20 @@ namespace gridpp {
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
 
-    /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough observations
-      * @param grid Grid to aggregate to
-      * @param points Points with values
-      * @param values Values at points
-      * @param radius Circle radius for aggregate points [m]
-      * @param min_num Minimum number of points in radius to create a value
-      * @param statistic Statistic to compute on points within radius
-    */
-    vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic);
-
     void advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord);
 
     vec2 fill_missing(const vec2& values);
 
-    /****************************************
-     * Downscaling methods                  *
-     ****************************************/
+    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+    // Apply correction based on multiple timesteps
+    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+
+    /**@}*/
+
+    /** **************************************
+     * @name Downscaling methods
+     * ***************************************/ /**@{*/
+
     /** Nearest neighbour dowscaling grid to grid
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
@@ -341,14 +299,11 @@ namespace gridpp {
       * @return Values for the output points
     */
     vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, int num, const StructureFunction& structure);
+    /**@}*/
 
-    /** For each point, calculates the distance to nearest gridpoint
-     *  @param grid Grid
-     *  @param points Points
-     *  @param num Number of points
-     *  @return Distance [m] to nearest gridpoint for each point
-    */
-    vec distance(const Grid& grid, const Points& points, int num=1);
+    /** **************************************
+     * @name Grid calculations
+     * ***************************************/ /**@{*/
 
     /** For each point, counts the number of gridpoints within the radius
      *  @param grid Grid
@@ -358,14 +313,6 @@ namespace gridpp {
     */
     vec count(const Grid& grid, const Points& points, float radius);
 
-    /** For each gridpoint, calculates the distance to nearest point
-     *  @param points Points
-     *  @param grid Grid
-     *  @param num Number of points
-     *  @return Distance [m] to nearest gridpoint for each point
-    */
-    vec2 distance(const Points& points, const Grid& grid, int num=1);
-
     /** For each gridpoint, counts the number of points within the radius
      *  @param grid Grid
      *  @param points Points
@@ -374,18 +321,37 @@ namespace gridpp {
     */
     vec2 count(const Points& points, const Grid& grid, float radius);
 
-    /****************************************
-     * Diagnosing methods                   *
-     ****************************************/
+    /** For each point, calculates the distance to nearest gridpoint
+     *  @param grid Grid
+     *  @param points Points
+     *  @param num Number of points
+     *  @return Distance [m] to nearest gridpoint for each point
+    */
+    vec distance(const Grid& grid, const Points& points, int num=1);
 
-    /** Diagnose wind speed from its components
-     *  @param xwind X-component of wind [any unit]
-     *  @param ywind Y-component of wind [any unit]
-     *  @return Wind speed [any unit]
-     * */
-    float wind_speed(float xwind, float ywind);
-    vec wind_speed(const vec& xwind, const vec& ywind);
-    vec2 wind_speed(const vec2& xwind, const vec2& ywind);
+    /** For each gridpoint, calculates the distance to nearest point
+     *  @param points Points
+     *  @param grid Grid
+     *  @param num Number of points
+     *  @return Distance [m] to nearest gridpoint for each point
+    */
+    vec2 distance(const Points& points, const Grid& grid, int num=1);
+
+    /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough observations
+      * @param grid Grid to aggregate to
+      * @param points Points with values
+      * @param values Values at points
+      * @param radius Circle radius for aggregate points [m]
+      * @param min_num Minimum number of points in radius to create a value
+      * @param statistic Statistic to compute on points within radius
+    */
+    vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic);
+
+    /**@}*/
+
+    /** ****************************************
+     * @name Diagnosing meteorological variables
+     * *****************************************/ /**@{*/
 
     /** Calculate dewpoint temperature from temperature and relative humidity
      *  @param temperature Temperature [K]
@@ -400,21 +366,6 @@ namespace gridpp {
      *  @returns Dewpoint temperatures [K]
     */
     vec dewpoint(const vec& temperature, const vec& relative_humidity);
-
-    /** Calculate relative humidity from temperature and dewpoint temperature
-     *  @param temperature Temperature [K]
-     *  @param dewpoint Dewpoint temperature [K]
-     *  @returns Relative humidity [1]
-    */
-    float relative_humidity(float temperature, float dewpoint);
-
-    /** Calculate wetbulb temperature from temperature, pressure, and relative humidity
-     *  @param temperature Temperature [K]
-     *  @param pressure Air pressure [pa]
-     *  @param Relative humidity [1]
-     *  @returns Wetbulb temperature [K]
-    */
-    float wetbulb(float temperature, float pressure, float relative_humidity);
 
     /** Calculate pressure at a new elevation
      *  @param ielev Elevation at start point
@@ -439,9 +390,31 @@ namespace gridpp {
     */
     vec qnh(const vec& pressure, const vec& altitude);
 
-    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
-    // Apply correction based on multiple timesteps
-    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+    /** Calculate relative humidity from temperature and dewpoint temperature
+     *  @param temperature Temperature [K]
+     *  @param dewpoint Dewpoint temperature [K]
+     *  @returns Relative humidity [1]
+    */
+    float relative_humidity(float temperature, float dewpoint);
+
+    /** Calculate wetbulb temperature from temperature, pressure, and relative humidity
+     *  @param temperature Temperature [K]
+     *  @param pressure Air pressure [pa]
+     *  @param Relative humidity [1]
+     *  @returns Wetbulb temperature [K]
+    */
+    float wetbulb(float temperature, float pressure, float relative_humidity);
+
+    /** Diagnose wind speed from its components
+     *  @param xwind X-component of wind [any unit]
+     *  @param ywind Y-component of wind [any unit]
+     *  @return Wind speed [any unit]
+     * */
+    float wind_speed(float xwind, float ywind);
+    vec wind_speed(const vec& xwind, const vec& ywind);
+    vec2 wind_speed(const vec2& xwind, const vec2& ywind);
+
+    /**@}*/
 
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);

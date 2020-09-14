@@ -25,10 +25,12 @@ typedef std::vector<double> dvec;
 typedef std::vector<dvec> dvec2;
 
 namespace gridpp {
-    // Constants
+    /** Missing value indicator */
     static const float MV = NAN;
+    /** Missing value indicator in gridpp command-line tool */
     static const float MV_CML = -999;
     static const float pi = 3.14159265;
+    /** Radius of the earth [m] */
     static double radius_earth = 6.37e6;
 
     class KDTree;
@@ -132,6 +134,14 @@ namespace gridpp {
             const vec2& pbackground,
             const gridpp::StructureFunction& structure,
             int max_points);
+
+    /** Fill in values inside or outside a set of circles
+      * @param input Deterministic values with dimensions Y, X
+      * @param radii Circle radii for each point
+      * @param value Fill in this value
+      * @param outside if True, fill outside circles, if False, fill inside circles
+    */
+    vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
     /**@}*/
 
     /** **************************************
@@ -233,17 +243,7 @@ namespace gridpp {
     float calc_score(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
     float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, gridpp::Metric metric);
 
-    /** Fill in values inside or outside a set of circles
-      * @param input Deterministic values with dimensions Y, X
-      * @param radii Circle radii for each point
-      * @param value Fill in this value
-      * @param outside if True, fill outside circles, if False, fill inside circles
-    */
-    vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
-
     void advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord);
-
-    vec2 fill_missing(const vec2& values);
 
     vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
     // Apply correction based on multiple timesteps
@@ -336,6 +336,12 @@ namespace gridpp {
      *  @return Distance [m] to nearest gridpoint for each point
     */
     vec2 distance(const Points& points, const Grid& grid, int num=1);
+
+    /** Fill in missing values based on nearby values
+      * @param values 2D array of values
+      * @return 2D array of values without any missing values
+    */
+    vec2 fill_missing(const vec2& values);
 
     /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough observations
       * @param grid Grid to aggregate to

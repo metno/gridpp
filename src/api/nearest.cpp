@@ -25,6 +25,36 @@ vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     }
     return output;
 }
+vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec3 ivalues) {
+    if(gridpp::util::compatible_size(igrid, ivalues))
+        throw std::invalid_argument("Grid size is not the same as values");
+    vec2 iOutputLats = ogrid.get_lats();
+    vec2 iOutputLons = ogrid.get_lons();
+
+    int nTime = ivalues.size();
+    int nLat = iOutputLats.size();
+    int nLon = iOutputLats[0].size();
+
+    vec3 output(nTime);
+    for(int t = 0; t < nTime; t++) {
+        output[t].resize(nLat);
+        for(int i = 0; i < nLat; i++)
+            output[t][i].resize(nLon);
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < nLat; i++) {
+        for(int j = 0; j < nLon; j++) {
+            ivec indices = igrid.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);
+            int I = indices[0];
+            int J = indices[1];
+            for(int t = 0; t < nTime; t++) {
+                output[t][i][j] = ivalues[t][I][J];
+            }
+        }
+    }
+    return output;
+}
 vec gridpp::nearest(const Grid& igrid, const Points& opoints, vec2 ivalues) {
     if(gridpp::util::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");

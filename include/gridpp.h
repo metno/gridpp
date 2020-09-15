@@ -262,6 +262,8 @@ namespace gridpp {
       * @return Values on the output grid
     */
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3 ivalues);
+
     /** Nearest neighbour dowscaling grid to point
       * @param igrid Input grid
       * @param ogrid Output points to downscale to

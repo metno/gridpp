@@ -35,11 +35,11 @@ namespace {
             for(int j = 0; j < J; j++) {
                 int y_outer = outer[j][0];
                 int x_outer = outer[j][1];
-                // if(gridpp::util::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
+                // if(gridpp::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
                 // Check that we have a point with enough observations
                 float xx = rvalues[t][y_outer][x_outer];
                 float yy = n_at_r[t][y_outer][x_outer];
-                if(gridpp::util::is_valid(xx) && gridpp::util::is_valid(yy)) {
+                if(gridpp::is_valid(xx) && gridpp::is_valid(yy)) {
                     x_curve.push_back(xx);
                     y_curve.push_back(yy);
                     xtotal += xx;
@@ -78,10 +78,10 @@ vec2 gridpp::correction(const Grid& rgrid,
     int X = rgrid.size()[1];
     int T = rvalues.size();
 
-    vec2 output = gridpp::util::init_vec2(Y, X, 0);
+    vec2 output = gridpp::init_vec2(Y, X, 0);
 
     // Store the number of observations used to correct each gridpoint
-    count = gridpp::util::init_vec2(Y, X, -1);
+    count = gridpp::init_vec2(Y, X, -1);
 
     vec2 rlats = rgrid.get_lats();
     vec2 rlons = rgrid.get_lons();
@@ -92,7 +92,7 @@ vec2 gridpp::correction(const Grid& rgrid,
         n_at_r[t] = gridpp::gridding(rgrid, npoints, nvalues[t], mean_radius, 1, gridpp::Mean);
     }
     // vec radii(npoints.size(), outer_radius);
-    // vec2 zeros = gridpp::util::init_vec2(Y, X, 0);
+    // vec2 zeros = gridpp::init_vec2(Y, X, 0);
     // vec2 has_obs = gridpp::fill(rgrid, zeros, npoints, radii, 1, false);
 
     int num_corrected = 0;
@@ -141,11 +141,11 @@ vec2 gridpp::correction(const Grid& rgrid,
                 for(int j = 0; j < J; j++) {
                     int y_outer = outer[j][0];
                     int x_outer = outer[j][1];
-                    // if(gridpp::util::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
+                    // if(gridpp::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
                     // Check that we have a point with enough observations
                     float xx = rvalues[t][y_outer][x_outer];
                     float yy = n_at_r[t][y_outer][x_outer];
-                    if(gridpp::util::is_valid(xx) && gridpp::util::is_valid(yy)) {
+                    if(gridpp::is_valid(xx) && gridpp::is_valid(yy)) {
                         x_curve.push_back(xx);
                         y_curve.push_back(yy);
                         xtotal += xx;
@@ -267,8 +267,8 @@ vec2 gridpp::correction(const Grid& rgrid,
     int Y = rgrid.size()[0];
     int X = rgrid.size()[1];
 
-    vec2 output = gridpp::util::init_vec2(Y, X, gridpp::MV);
-    count = gridpp::util::init_vec2(Y, X, -1);
+    vec2 output = gridpp::init_vec2(Y, X, gridpp::MV);
+    count = gridpp::init_vec2(Y, X, -1);
     vec2 rlats = rgrid.get_lats();
     vec2 rlons = rgrid.get_lons();
 
@@ -314,7 +314,7 @@ vec2 gridpp::correction(const Grid& rgrid,
             for(int j = 0; j < J; j++) {
                 int y_outer = outer[j][0];
                 int x_outer = outer[j][1];
-                // if(gridpp::util::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
+                // if(gridpp::is_valid(n_at_r[outer[j]]) && rvalues[outer[j]] > 0 && n_at_r[outer[j]] > 0) {
                 // Check that we have a point with enough observations
                 assert(y_outer < rvalues.size());
                 assert(y_outer < n_at_r.size());
@@ -322,7 +322,7 @@ vec2 gridpp::correction(const Grid& rgrid,
                 assert(x_outer < n_at_r[y_outer].size());
                 float xx = rvalues[y_outer][x_outer];
                 float yy = n_at_r[y_outer][x_outer];
-                if(gridpp::util::is_valid(xx) && gridpp::util::is_valid(yy)) {
+                if(gridpp::is_valid(xx) && gridpp::is_valid(yy)) {
                     x_curve.push_back(xx);
                     y_curve.push_back(yy);
                     xtotal += xx;

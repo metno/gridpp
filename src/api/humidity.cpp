@@ -1,7 +1,7 @@
 #include "gridpp.h"
 
 float gridpp::dewpoint(float temperature, float relative_humidity) {
-    if(gridpp::util::is_valid(temperature) && gridpp::util::is_valid(relative_humidity)) {
+    if(gridpp::is_valid(temperature) && gridpp::is_valid(relative_humidity)) {
         // Taken from https://github.com/metno/wdb2ts
         float tempC = temperature - 273.15;
         float e = (relative_humidity)*0.611*exp( (17.63 * tempC) / (tempC + 243.04) );
@@ -36,7 +36,7 @@ float gridpp::relative_humidity(float temperature, float dewpoint) {
                                 123.40, 157.46, 199.26, 250.16, 311.69, 385.56,
                                 473.67, 578.09, 701.13, 845.28, 1013.25 };
    // Taken from https://github.com/metno/wdb2ts
-   if(gridpp::util::is_valid(temperature) && gridpp::util::is_valid(dewpoint)) {
+   if(gridpp::is_valid(temperature) && gridpp::is_valid(dewpoint)) {
       if(temperature <= dewpoint)
          return 1;
 
@@ -78,7 +78,7 @@ float gridpp::wetbulb(float temperature, float pressure, float relative_humidity
    float temperatureC = temperature - 273.15;
    if(temperatureC <= -243.04 || relative_humidity <= 0)
       return gridpp::MV;
-   if(gridpp::util::is_valid(temperatureC) && gridpp::util::is_valid(pressure) && gridpp::util::is_valid(relative_humidity)) {
+   if(gridpp::is_valid(temperatureC) && gridpp::is_valid(pressure) && gridpp::is_valid(relative_humidity)) {
       float e  = (relative_humidity)*0.611*exp((17.63*temperatureC)/(temperatureC+243.04));
       float Td = (116.9 + 243.04*log(e))/(16.78-log(e));
       float gamma = 0.00066 * pressure/1000;

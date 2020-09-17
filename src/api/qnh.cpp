@@ -3,7 +3,7 @@
 float gridpp::qnh(float pressure, float altitude) {
    if(pressure == 0)
          return 0;
-   else if(gridpp::util::is_valid(altitude) && gridpp::util::is_valid(pressure)) {
+   else if(gridpp::is_valid(altitude) && gridpp::is_valid(pressure)) {
       float g  = 9.80665;   // m/s2
       float T0 = 288.15;    // K
       float L  = 0.0065;    // K/m

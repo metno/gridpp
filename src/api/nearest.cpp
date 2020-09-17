@@ -2,7 +2,7 @@
 #include <iostream>
 #include <math.h>
 vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -26,7 +26,7 @@ vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     return output;
 }
 vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec3 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -56,7 +56,7 @@ vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec3 ivalues) {
     return output;
 }
 vec gridpp::nearest(const Grid& igrid, const Points& opoints, vec2 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();
@@ -75,7 +75,7 @@ vec gridpp::nearest(const Grid& igrid, const Points& opoints, vec2 ivalues) {
     return output;
 }
 vec2 gridpp::nearest(const Grid& igrid, const Points& opoints, vec3 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
        throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();

@@ -2,7 +2,7 @@
 #include <iostream>
 
 vec2 gridpp::fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside) {
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
     vec lats = points.get_lats();
     vec lons = points.get_lons();
     vec2 output;
@@ -25,7 +25,7 @@ vec2 gridpp::fill(const Grid& igrid, const vec2& input, const Points& points, co
                 output[I[j][0]][I[j][1]] = value;
         }
     }
-    // std::cout << "Fill time: " << gridpp::util::clock() - s_time << std::endl;
+    // std::cout << "Fill time: " << gridpp::clock() - s_time << std::endl;
     return output;
 }
 
@@ -41,11 +41,11 @@ vec2 gridpp::fill_missing(const vec2& values) {
         int next = -1;
         for(int x = 0; x < X; x++) {
             float curr = values[y][x];
-            if(!gridpp::util::is_valid(curr)) {
+            if(!gridpp::is_valid(curr)) {
                 // Find next
                 if(next < x) {
                     for(next = x; next < X; next++) {
-                        if(gridpp::util::is_valid(values[y][next])) {
+                        if(gridpp::is_valid(values[y][next])) {
                             break;
                         }
                     }
@@ -76,11 +76,11 @@ vec2 gridpp::fill_missing(const vec2& values) {
         int next = -1;
         for(int y = 0; y < Y; y++) {
             float curr = values[y][x];
-            if(!gridpp::util::is_valid(curr)) {
+            if(!gridpp::is_valid(curr)) {
                 // Find next
                 if(next < y) {
                     for(next = y; next < Y; next++) {
-                        if(gridpp::util::is_valid(values[next][x])) {
+                        if(gridpp::is_valid(values[next][x])) {
                             break;
                         }
                     }
@@ -106,11 +106,11 @@ vec2 gridpp::fill_missing(const vec2& values) {
         for(int x = 0; x < X; x++) {
             int count = 0;
             float total = 0;
-            if(gridpp::util::is_valid(results_y[y][x])) {
+            if(gridpp::is_valid(results_y[y][x])) {
                 total += results_y[y][x];
                 count++;
             }
-            if(gridpp::util::is_valid(results_x[y][x])) {
+            if(gridpp::is_valid(results_x[y][x])) {
                 total += results_x[y][x];
                 count++;
             }

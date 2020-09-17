@@ -45,7 +45,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     if(psigmas0.size() != points0.size())
         throw std::runtime_error("Ci and points size mismatch");
 
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
     int mX = 0;
     int mY = 0;
     int mMinValidEns = 5;
@@ -99,7 +99,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     std::stringstream ss;
     ss << "Number of observations: " << nS << std::endl;
     ss << "Number of gridpoints: " << nY << " " << nX;
-    gridpp::util::debug(ss.str());
+    gridpp::debug(ss.str());
 
     float localizationRadius = structure.localization_distance();
 
@@ -107,10 +107,10 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     vec2 gY = pbackground;
     vec gYhat(nS);
     for(int i = 0; i < nS; i++) {
-        float mean = gridpp::util::calc_statistic(gY[i], gridpp::Mean);
+        float mean = gridpp::calc_statistic(gY[i], gridpp::Mean);
         for(int e = 0; e < nEns; e++) {
             float value = gY[i][e];
-            if(gridpp::util::is_valid(value) && gridpp::util::is_valid(mean)) {
+            if(gridpp::is_valid(value) && gridpp::is_valid(mean)) {
                 gY[i][e] -= mean;
             }
         }
@@ -125,7 +125,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
         for(int x = 0; x < nX; x++) {
             for(int y = 0; y < nY; y++) {
                 float value = background[y][x][e];
-                if(!gridpp::util::is_valid(value))
+                if(!gridpp::is_valid(value))
                     numInvalid++;
             }
         }
@@ -275,7 +275,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
                 if(cond <= 0) {
                     std::stringstream ss;
                     ss << "Condition number of " << cond << " for radar values. Using raw values";
-                    gridpp::util::warning(ss.str());
+                    gridpp::warning(ss.str());
                     for(int e = 0; e < nEns; e++) {
                         (*output)(y, x, e) = (*field)(y, x, e); // Util::MV;
                     }
@@ -316,7 +316,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             if(cond <= 0) {
                 std::stringstream ss;
                 ss << "Condition number of " << cond << ". Using raw values";
-                gridpp::util::warning(ss.str());
+                gridpp::warning(ss.str());
                 for(int e = 0; e < nEns; e++) {
                     output[y][x][e] = background[y][x][e]; // Util::MV;
                 }
@@ -357,7 +357,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             if(W.n_rows == 0) {
                 std::stringstream ss;
                 ss << "Could not find the real part of W. Using raw values.";
-                gridpp::util::warning(ss.str());
+                gridpp::warning(ss.str());
                 for(int e = 0; e < nEns; e++) {
                     output[y][x][e] = background[y][x][e];
                 }
@@ -389,7 +389,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             for(int e = 0; e < nValidEns; e++) {
                 int ei = validEns[e];
                 float value = background[y][x][ei];
-                if(gridpp::util::is_valid(value)) {
+                if(gridpp::is_valid(value)) {
                     X(e) = value;
                     total += value;
                     count++;
@@ -500,7 +500,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float value = (*output)(y, x, e);
-            if(gridpp::util::is_valid(value))
+            if(gridpp::is_valid(value))
                 (*output)(y, x, e) = invTransform(value);
         }
     }

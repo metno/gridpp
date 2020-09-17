@@ -21,7 +21,7 @@ vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolatio
         float input = fcst[i];
         // Linear interpolation within curve
         if(input > smallestFcst && input < largestFcst) {
-            output[i] = gridpp::util::interpolate(input, curve_fcst, curve_ref);
+            output[i] = gridpp::interpolate(input, curve_fcst, curve_ref);
         }
         // Extrapolate outside curve
         else {
@@ -107,7 +107,7 @@ vec2 gridpp::monotonize_curve(const vec2& curve) {
     for(int i = start; i < N; i++) {
         float x = curve[0][i];
         float y = curve[1][i];
-        if(!gridpp::util::is_valid(x) || !gridpp::util::is_valid(y))
+        if(!gridpp::is_valid(x) || !gridpp::is_valid(y))
             // Remove invalid points
             continue;
         if(deviation) {

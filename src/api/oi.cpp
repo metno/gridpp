@@ -29,7 +29,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const vec& pbackground0,
         const gridpp::StructureFunction& structure,
         int max_points) {
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
 
     // Check input data
     if(max_points < 0)
@@ -54,7 +54,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     int nX = background[0].size();
 
     // Prepare output matrix
-    vec2 output = gridpp::util::init_vec2(nY, nX);
+    vec2 output = gridpp::init_vec2(nY, nX);
 
     vec2 blats = bgrid.get_lats();
     vec2 blons = bgrid.get_lons();
@@ -86,14 +86,14 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     std::stringstream ss;
     ss << "Number of observations: " << nS << std::endl;
     ss << "Number of gridpoints: " << nY << " " << nX;
-    gridpp::util::debug(ss.str());
+    gridpp::debug(ss.str());
 
     float localizationRadius = structure.localization_distance();
 
     // Compute the background value at observation points (Y)
     vec gY = pbackground; // ::compute_background(background, bgrid, points, elev_gradient);
 
-    double curr_time = gridpp::util::clock();
+    double curr_time = gridpp::clock();
     #pragma omp parallel for
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
@@ -211,7 +211,7 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float value = background_transformed[y][x];
-            if(gridpp::util::is_valid(value))
+            if(gridpp::is_valid(value))
                 background_transformed[y][x] = transform.forward(value);
         }
     }
@@ -221,11 +221,11 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
     vec pratios(nS);
     for(int s = 0; s < nS; s++) {
         float value = pbackground_transformed[s];
-        if(gridpp::util::is_valid(value))
+        if(gridpp::is_valid(value))
             pbackground_transformed[s] = transform.forward(value);
 
         value = pobs_transformed[s];
-        if(gridpp::util::is_valid(value))
+        if(gridpp::is_valid(value))
             pobs_transformed[s] = transform.forward(value);
 
         pratios[s] = psigma[s] * psigma[s] / bsigma / bsigma;
@@ -238,7 +238,7 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
     for(int x = 0; x < nX; x++) {
         for(int y = 0; y < nY; y++) {
             float value = analysis[y][x];
-            if(gridpp::util::is_valid(value))
+            if(gridpp::is_valid(value))
                 analysis[y][x] = transform.backward(value);
         }
     }

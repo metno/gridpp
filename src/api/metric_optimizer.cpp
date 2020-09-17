@@ -31,10 +31,10 @@ namespace {
                 min = gridpp::MV;
                 max = gridpp::MV;
                 for(int i = 0; i < N; i++) {
-                    if(!gridpp::util::is_valid(min) || fcst[i] < min) {
+                    if(!gridpp::is_valid(min) || fcst[i] < min) {
                         min = fcst[i];
                     }
-                    if(!gridpp::util::is_valid(max) || fcst[i] > max) {
+                    if(!gridpp::is_valid(max) || fcst[i] > max) {
                         max = fcst[i];
                     }
                 }
@@ -116,7 +116,7 @@ vec2 gridpp::metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& 
     float last_diff = 0;
     for(int i = 0; i < N; i++) {
         float value = gridpp::get_optimal_threshold(ref, fcst, thresholds[i], metric);
-        if(gridpp::util::is_valid(value)) {
+        if(gridpp::is_valid(value)) {
             results[0].push_back(value);
             results[1].push_back(thresholds[i]);
         }
@@ -157,13 +157,13 @@ float gridpp::get_optimal_threshold(const vec& ref, const vec& fcst, float thres
     std::pair<double, double> r = brent_find_minima<Score_func, double>(func, bins[left_index], bins[right_index], bits);
     float x = r.first;
     float score = - r.second;
-    if(!gridpp::util::is_valid(score))
+    if(!gridpp::is_valid(score))
         x = gridpp::MV;
     if(remove_near_zero && score <= 0.0001)
         x = gridpp::MV;
     if(remove_uncertain) {
         float diff = func.calc_uncertainty(r.first);
-        if(!gridpp::util::is_valid(diff))
+        if(!gridpp::is_valid(diff))
             x = gridpp::MV;
         else if(diff > 1e-3)
             x = gridpp::MV;

@@ -15,17 +15,17 @@
 extern "C" void __gcov_flush();
 #endif
 
-bool gridpp::util::is_valid(float value) {
+bool gridpp::is_valid(float value) {
     return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV && value != MV_CML;
 }
-float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic) {
+float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
     // Initialize to missing
     float value = gridpp::MV;
     if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
         float total = 0;
         int count = 0;
         for(int n = 0; n < array.size(); n++) {
-            if(gridpp::util::is_valid(array[n])) {
+            if(gridpp::is_valid(array[n])) {
                 total += array[n];
                 count++;
             }
@@ -47,10 +47,10 @@ float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic
         float K = gridpp::MV;
         int count = 0;
         for(int n = 0; n < array.size(); n++) {
-            if(gridpp::util::is_valid(array[n])) {
-                if(!gridpp::util::is_valid(K))
+            if(gridpp::is_valid(array[n])) {
+                if(!gridpp::is_valid(K))
                     K = array[n];
-                assert(gridpp::util::is_valid(K));
+                assert(gridpp::is_valid(K));
 
                 total  += array[n] - K;
                 total2 += (array[n] - K)*(array[n] - K);
@@ -82,18 +82,18 @@ float gridpp::util::calc_statistic(const vec& array, gridpp::Statistic statistic
             quantile = 1;
         else
             throw std::runtime_error("Internal error. Cannot compute statistic");
-        value = gridpp::util::calc_quantile(array, quantile);
+        value = gridpp::calc_quantile(array, quantile);
     }
     return value;
 }
-float gridpp::util::calc_quantile(const vec& array, float quantile) {
+float gridpp::calc_quantile(const vec& array, float quantile) {
     // Initialize to missing
     float value = gridpp::MV;
     // Remove missing
     std::vector<float> cleanHood;
     cleanHood.reserve(array.size());
     for(int i = 0; i < array.size(); i++) {
-        if(gridpp::util::is_valid(array[i]))
+        if(gridpp::is_valid(array[i]))
             cleanHood.push_back(array[i]);
     }
     int N = cleanHood.size();
@@ -119,40 +119,40 @@ float gridpp::util::calc_quantile(const vec& array, float quantile) {
     }
     return value;
 }
-vec gridpp::util::calc_statistic(const vec2& array, gridpp::Statistic statistic) {
+vec gridpp::calc_statistic(const vec2& array, gridpp::Statistic statistic) {
     int N = array.size();
     vec output(N);
     for(int n = 0; n < N; n++) {
-        output[n] = gridpp::util::calc_statistic(array[n], statistic);
+        output[n] = gridpp::calc_statistic(array[n], statistic);
     }
     return output;
 }
-vec gridpp::util::calc_quantile(const vec2& array, float quantile) {
+vec gridpp::calc_quantile(const vec2& array, float quantile) {
     int N = array.size();
     vec output(N);
     for(int n = 0; n < N; n++) {
-        output[n] = gridpp::util::calc_quantile(array[n], quantile);
+        output[n] = gridpp::calc_quantile(array[n], quantile);
     }
     return output;
 }
-int gridpp::util::num_missing_values(const vec2& iArray) {
+int gridpp::num_missing_values(const vec2& iArray) {
     int count = 0;
     for(int y = 0; y < iArray.size(); y++) {
         for(int x = 0; x < iArray[y].size(); x++) {
-            count += !gridpp::util::is_valid(iArray[y][x]);
+            count += !gridpp::is_valid(iArray[y][x]);
         }
     }
     return count;
 }
-void gridpp::util::debug(std::string string) {
+void gridpp::debug(std::string string) {
     std::cout << string << std::endl;
 }
 
-void gridpp::util::warning(std::string string) {
+void gridpp::warning(std::string string) {
     std::cout << "Warning: " << string << std::endl;
 }
 
-void gridpp::util::error(std::string iMessage) {
+void gridpp::error(std::string iMessage) {
 #ifdef DEBUG
     std::cout << "Error: " << iMessage << std::endl;
     void *array[10];
@@ -165,7 +165,7 @@ void gridpp::util::error(std::string iMessage) {
 #endif
     abort();
 }
-void gridpp::util::future_deprecation_warning(std::string function, std::string other) {
+void gridpp::future_deprecation_warning(std::string function, std::string other) {
     std::cout << "Future deprecation warning: " << function << " will be deprecated";
     if(other != "")
         std::cout << ", use " << other << " instead." << std::endl;
@@ -173,14 +173,14 @@ void gridpp::util::future_deprecation_warning(std::string function, std::string 
         std::cout << "." << std::endl;
 }
 
-double gridpp::util::clock() {
+double gridpp::clock() {
     timeval t;
     gettimeofday(&t, NULL);
     double sec = (t.tv_sec);
     double msec= (t.tv_usec);
     return sec + msec/1e6;
 }
-vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
+vec gridpp::calc_even_quantiles(const vec& values, int num) {
     if(num >= values.size())
         return  values;
 
@@ -230,11 +230,11 @@ vec gridpp::util::calc_even_quantiles(const vec& values, int num) {
     return quantiles;
 
 }
-int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
+int gridpp::get_lower_index(float iX, const std::vector<float>& iValues) {
     int index = gridpp::MV;
     for(int i = 0; i < (int) iValues.size(); i++) {
         float currValue = iValues[i];
-        if(gridpp::util::is_valid(currValue)) {
+        if(gridpp::is_valid(currValue)) {
             if(currValue < iX) {
                 index = i;
             }
@@ -249,11 +249,11 @@ int gridpp::util::get_lower_index(float iX, const std::vector<float>& iValues) {
     }
     return index;
 }
-int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
+int gridpp::get_upper_index(float iX, const std::vector<float>& iValues) {
     int index = gridpp::MV;
     for(int i = iValues.size()-1; i >= 0; i--) {
         float currValue = iValues[i];
-        if(gridpp::util::is_valid(currValue)) {
+        if(gridpp::is_valid(currValue)) {
             if(currValue > iX) {
                 index = i;
             }
@@ -268,7 +268,7 @@ int gridpp::util::get_upper_index(float iX, const std::vector<float>& iValues) {
     }
     return index;
 }
-float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
+float gridpp::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
     if(iX.size() != iY.size())
         throw std::invalid_argument("Dimension mismatch. Cannot interpolate.");
     float y = gridpp::MV;
@@ -296,22 +296,22 @@ float gridpp::util::interpolate(float x, const std::vector<float>& iX, const std
 
     return y;
 }
-void gridpp::util::not_implemented_error() {
-    gridpp::util::error("Not implemented");
+void gridpp::not_implemented_error() {
+    gridpp::error("Not implemented");
 }
-bool gridpp::util::compatible_size(const Grid& grid, const vec2& v) {
+bool gridpp::compatible_size(const Grid& grid, const vec2& v) {
     return v.size() == 0 || grid.size()[0] != v.size() || grid.size()[1] != v[0].size();
 }
-bool gridpp::util::compatible_size(const Grid& grid, const vec3& v) {
+bool gridpp::compatible_size(const Grid& grid, const vec3& v) {
     return v.size() == 0 || v[0].size() == 0 || grid.size()[0] != v[0].size() || grid.size()[1] != v[0][0].size();
 }
-vec2 gridpp::util::init_vec2(int Y, int X, float value) {
+vec2 gridpp::init_vec2(int Y, int X, float value) {
     vec2 output(Y);
     for(int y = 0; y < Y; y++)
         output[y].resize(X, value);
     return output;
 }
-vec3 gridpp::util::init_vec3(int Y, int X, int T, float value) {
+vec3 gridpp::init_vec3(int Y, int X, int T, float value) {
     vec3 output(Y);
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++)
@@ -319,25 +319,25 @@ vec3 gridpp::util::init_vec3(int Y, int X, int T, float value) {
     }
     return output;
 }
-float* gridpp::util::test_array(float* v, int n) {
+float* gridpp::test_array(float* v, int n) {
     int count = 0;
     for(int i = 0; i < n; i++)
         count++;
     return v;
  }
-float gridpp::util::test_vec_input(const vec& input) {
+float gridpp::test_vec_input(const vec& input) {
     float total = 0;
     for(int i = 0; i < input.size(); i++)
         total += input[i];
     return total;
 }
-int gridpp::util::test_ivec_input(const ivec& input) {
+int gridpp::test_ivec_input(const ivec& input) {
     int total = 0;
     for(int i = 0; i < input.size(); i++)
         total += input[i];
     return total;
 }
-float gridpp::util::test_vec2_input(const vec2& input) {
+float gridpp::test_vec2_input(const vec2& input) {
     float total = 0;
     for(int i = 0; i < input.size(); i++) {
         for(int j = 0; j < input[i].size(); j++) {
@@ -346,7 +346,7 @@ float gridpp::util::test_vec2_input(const vec2& input) {
     }
     return total;
 }
-float gridpp::util::test_vec3_input(const vec3& input) {
+float gridpp::test_vec3_input(const vec3& input) {
     float total = 0;
     for(int i = 0; i < input.size(); i++) {
         for(int j = 0; j < input[i].size(); j++) {
@@ -357,17 +357,17 @@ float gridpp::util::test_vec3_input(const vec3& input) {
     }
     return total;
 }
-vec gridpp::util::test_vec_output() {
+vec gridpp::test_vec_output() {
     vec output(1000, 0);
     return output;
 }
-vec2 gridpp::util::test_vec2_output() {
+vec2 gridpp::test_vec2_output() {
     vec2 output(10);
     for(int i = 0; i < 10; i++)
         output[i].resize(10, 0);
     return output;
 }
-vec3 gridpp::util::test_vec3_output() {
+vec3 gridpp::test_vec3_output() {
     vec3 output(10);
     for(int i = 0; i < 10; i++) {
         output[i].resize(10);
@@ -377,11 +377,11 @@ vec3 gridpp::util::test_vec3_output() {
     return output;
 }
 
-ivec gridpp::util::test_ivec_output() {
+ivec gridpp::test_ivec_output() {
     ivec output(1000, 0);
     return output;
 }
-ivec2 gridpp::util::test_ivec2_output() {
+ivec2 gridpp::test_ivec2_output() {
     ivec2 output(10);
     for(int i = 0; i < 10; i++)
         output[i].resize(10, 0);
@@ -389,7 +389,7 @@ ivec2 gridpp::util::test_ivec2_output() {
 }
 
 #if 0
-vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius) {
+vec2 gridpp::calc_gradient(const vec2& values, const vec2& aux, int radius) {
     int Y = values.size();
     int X = values[0].size();
     vec2 ret(values.size());
@@ -416,7 +416,7 @@ vec2 gridpp::util::calc_gradient(const vec2& values, const vec2& aux, int radius
         }
     }
 }
-ivec gridpp::util::regression(const vec& x, const vec& y) {
+ivec gridpp::regression(const vec& x, const vec& y) {
     ivec ret(2, 0;
             float meanXY  = 0; // elev*T
             float meanX   = 0; // elev

@@ -17,7 +17,7 @@ vec2 gridpp::neighbourhood(const vec3& input, int iRadius, gridpp::Statistic sta
     }
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
-            flat[y][x] = gridpp::util::calc_statistic(input[y][x], statistic);
+            flat[y][x] = gridpp::calc_statistic(input[y][x], statistic);
         }
     }
     vec2 results = neighbourhood(flat, iRadius, statistic);
@@ -31,7 +31,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
     if(input.size() == 0 || input[0].size() == 0)
         return vec2();
 
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
     bool fast = true;
     int count_stat = 0;
     int nY = input.size();
@@ -55,14 +55,14 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                 float value = input[i][j];
                 if(j == 0 && i == 0) {
                     // Lower corner
-                    if(gridpp::util::is_valid(value)) {
+                    if(gridpp::is_valid(value)) {
                         values[i][j] = input[i][j];
                         counts[i][j] = 1;
                     }
                 }
                 else if(j == 0) {
                     // Lower row
-                    if(gridpp::util::is_valid(value)) {
+                    if(gridpp::is_valid(value)) {
                         values[i][j] = values[i-1][j] + input[i][j];
                         counts[i][j] = counts[i-1][j] + 1;
                     }
@@ -73,7 +73,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                 }
                 else if(i == 0) {
                     // Left column
-                    if(gridpp::util::is_valid(value)) {
+                    if(gridpp::is_valid(value)) {
                         values[i][j] = values[i][j-1] + input[i][j];
                         counts[i][j] = counts[i][j-1] + 1;
                     }
@@ -84,7 +84,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
 
                 }
                 else {
-                    if(gridpp::util::is_valid(value)) {
+                    if(gridpp::is_valid(value)) {
                         values[i][j] = values[i][j-1] + values[i-1][j] - values[i-1][j-1] + input[i][j];
                         counts[i][j] = counts[i][j-1] + counts[i-1][j] - counts[i-1][j-1] + 1;
                     }
@@ -161,14 +161,14 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                     for(int ii = std::max(0, i-iRadius); ii <= std::min(nY-1, i+iRadius); ii++) {
                         for(int jj = std::max(0, j-iRadius); jj <= std::min(nX-1, j+iRadius); jj++) {
                             float value = input[ii][jj];
-                            if(gridpp::util::is_valid(value)) {
+                            if(gridpp::is_valid(value)) {
                                 assert(index < Ni*Nj);
                                 neighbourhood.push_back(value);
                                 index++;
                             }
                         }
                     }
-                    values[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic);
+                    values[i][j] = gridpp::calc_statistic(neighbourhood, statistic);
                     count_stat += neighbourhood.size();
                 }
             }
@@ -182,7 +182,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                         sliver[count] = input[ii][j];
                         count++;
                     }
-                    slivers[j] = gridpp::util::calc_statistic(sliver, statistic);
+                    slivers[j] = gridpp::calc_statistic(sliver, statistic);
                     count_stat += sliver.size();
                 }
                 for(int j = 0; j < nX; j++) {
@@ -191,7 +191,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
                     for(int jj = std::max(0, j - iRadius); jj <= std::min(nX-1, j + iRadius); jj++) {
                         curr.push_back(slivers[jj]);
                     }
-                    values[i][j] = gridpp::util::calc_statistic(curr, statistic);
+                    values[i][j] = gridpp::calc_statistic(curr, statistic);
                     count_stat += curr.size();
                 }
             }
@@ -231,7 +231,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int iRadius, gridpp::Statistic sta
     else {
         output = gridpp::neighbourhood_brute_force(input, iRadius, statistic);
     }
-    double e_time = gridpp::util::clock() ;
+    double e_time = gridpp::clock() ;
     // std::cout << count_stat << " " << e_time - s_time << " s" << std::endl;
     return output;
 }
@@ -251,13 +251,13 @@ vec gridpp::get_neighbourhood_thresholds(const vec2& input, int num_thresholds) 
     all_values.reserve(size);
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
-            if(gridpp::util::is_valid(input[y][x])) {
+            if(gridpp::is_valid(input[y][x])) {
                 all_values.push_back(input[y][x]);
             }
         }
     }
     std::sort(all_values.begin(), all_values.end());
-    vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
+    vec thresholds = gridpp::calc_even_quantiles(all_values, num_thresholds);
     return thresholds;
 }
 vec gridpp::get_neighbourhood_thresholds(const vec3& input, int num_thresholds) {
@@ -278,14 +278,14 @@ vec gridpp::get_neighbourhood_thresholds(const vec3& input, int num_thresholds) 
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
             for(int e = 0; e < E; e++) {
-                if(gridpp::util::is_valid(input[y][x][e])) {
+                if(gridpp::is_valid(input[y][x][e])) {
                     all_values.push_back(input[y][x][e]);
                 }
             }
         }
     }
     std::sort(all_values.begin(), all_values.end());
-    vec thresholds = gridpp::util::calc_even_quantiles(all_values, num_thresholds);
+    vec thresholds = gridpp::calc_even_quantiles(all_values, num_thresholds);
     return thresholds;
 }
 vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, float quantile, int radius, const vec& thresholds) {
@@ -314,7 +314,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, const vec2& quantile
         }
     }
 
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
 
     vec2 output(nY);
     for(int y = 0; y < nY; y++) {
@@ -337,7 +337,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, const vec2& quantile
             for(int x = 0; x < nX; x++) {
                 int sum = 0;
                 int count = 0;
-                if(gridpp::util::is_valid(input[y][x])) {
+                if(gridpp::is_valid(input[y][x])) {
                     if(input[y][x] <= thresholds[t]) {
                         sum++;
                     }
@@ -369,7 +369,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, const vec2& quantile
             for(int t = 0; t < thresholds.size(); t++) {
                 float sum = 0;
                 int count = 0;
-                if(gridpp::util::is_valid(stats[t][y][x])) {
+                if(gridpp::is_valid(stats[t][y][x])) {
                     sum = stats[t][y][x];
                     count++;
                 }
@@ -386,11 +386,11 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec2& input, const vec2& quantile
                     is_missing = true;
             }
             if(!is_missing)
-                output[y][x] = gridpp::util::interpolate(curr_quantile, yarray, thresholds);
+                output[y][x] = gridpp::interpolate(curr_quantile, yarray, thresholds);
         }
     }
 
-    double e_time = gridpp::util::clock() ;
+    double e_time = gridpp::clock() ;
     // std::cout << e_time - s_time << " s" << std::endl;
     return output;
 }
@@ -407,7 +407,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, const vec2& quantile
 
     if(input.size() == 0 || input[0].size() == 0 || input[0][0].size() == 0)
         return vec2();
-    double s_time = gridpp::util::clock();
+    double s_time = gridpp::clock();
     int nY = input.size();
     int nX = input[0].size();
     int nE = input[0][0].size();
@@ -444,7 +444,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, const vec2& quantile
                 int sum = 0;
                 int count = 0;
                 for(int e = 0; e < nE; e++) {
-                    if(gridpp::util::is_valid(input[y][x][e])) {
+                    if(gridpp::is_valid(input[y][x][e])) {
                         if(input[y][x][e] <= thresholds[t]) {
                             sum++;
                         }
@@ -478,7 +478,7 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, const vec2& quantile
                 float sum = 0;
                 int count = 0;
                 for(int e = 0; e < nE; e++) {
-                    if(gridpp::util::is_valid(stats[t][y][x])) {
+                    if(gridpp::is_valid(stats[t][y][x])) {
                         sum += stats[t][y][x];
                         count++;
                     }
@@ -496,11 +496,11 @@ vec2 gridpp::neighbourhood_quantile_fast(const vec3& input, const vec2& quantile
                     is_missing = true;
             }
             if(!is_missing)
-                output[y][x] = gridpp::util::interpolate(curr_quantile, yarray, thresholds);
+                output[y][x] = gridpp::interpolate(curr_quantile, yarray, thresholds);
         }
     }
 
-    double e_time = gridpp::util::clock() ;
+    double e_time = gridpp::clock() ;
     // std::cout << e_time - s_time << " s" << std::endl;
     return output;
 }
@@ -518,15 +518,15 @@ vec2 gridpp::neighbourhood_quantile(const vec3& input, float quantile, int iRadi
 }
 // Deprecated functions
 vec2 gridpp::neighbourhood_ens(const vec3& input, int iRadius, gridpp::Statistic statistic) {
-    gridpp::util::future_deprecation_warning("neighbourhood_ens", "neighbourhood");
+    gridpp::future_deprecation_warning("neighbourhood_ens", "neighbourhood");
     return gridpp::neighbourhood(input, iRadius, statistic);
 }
 vec2 gridpp::neighbourhood_quantile_ens(const vec3& input, float quantile, int iRadius) {
-    gridpp::util::future_deprecation_warning("neighbourhood_quantile_ens", "neighbourhood_quantile");
+    gridpp::future_deprecation_warning("neighbourhood_quantile_ens", "neighbourhood_quantile");
     return ::neighbourhood_brute_force(input, iRadius, gridpp::Quantile, quantile);
 }
 vec2 gridpp::neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds) {
-    gridpp::util::future_deprecation_warning("neighbourhood_quantile_ens_fast", "neighbourhood_quantile_fast");
+    gridpp::future_deprecation_warning("neighbourhood_quantile_ens_fast", "neighbourhood_quantile_fast");
     return gridpp::neighbourhood_quantile_fast(input, quantile, radius, thresholds);
 }
 
@@ -571,9 +571,9 @@ namespace {
                 }
                 assert(index == Ni*Nj);
                 if(statistic == gridpp::Quantile)
-                    output[i][j] = gridpp::util::calc_quantile(neighbourhood, quantile);
+                    output[i][j] = gridpp::calc_quantile(neighbourhood, quantile);
                 else
-                    output[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic);
+                    output[i][j] = gridpp::calc_statistic(neighbourhood, statistic);
                 count_stat += neighbourhood.size();
             }
         }
@@ -622,9 +622,9 @@ namespace {
                 }
                 assert(index == Ni*Nj);
                 if(statistic == gridpp::Quantile)
-                    output[i][j] = gridpp::util::calc_quantile(neighbourhood, quantile);
+                    output[i][j] = gridpp::calc_quantile(neighbourhood, quantile);
                 else
-                    output[i][j] = gridpp::util::calc_statistic(neighbourhood, statistic);
+                    output[i][j] = gridpp::calc_statistic(neighbourhood, statistic);
                 count_stat += neighbourhood.size();
             }
         }

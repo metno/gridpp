@@ -8,7 +8,7 @@ namespace {
     float calc(const ivec& indices, const vec2& iInputLats, const vec2& iInputLons, const vec2& ivalues, float lat, float lon);
 }
 vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -39,7 +39,7 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
 }
 
 vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
-    if(gridpp::util::compatible_size(igrid, ivalues))
+    if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();
@@ -188,7 +188,7 @@ namespace {
        if(!(s >= 0 && s <= 1 && t >= 0 && t <= 1)) {
           std::stringstream ss;
           ss << "Problem with bilinear interpolation. Grid is rotated/distorted in a way that is not supported. s=" << s << " and t=" << t << " are outside [-0.05,1.05].";
-          gridpp::util::error(ss.str());
+          gridpp::error(ss.str());
        }
        assert(s >= 0 && s <= 1 && t >= 0 && t <= 1);
        float value = P1 * (1 - s) * ( 1 - t) + P2 * s * (1 - t) + P3 * (1 - s) * t + P4 * s * t;
@@ -310,7 +310,7 @@ namespace {
             float v1 = ivalues[I2][J1];
             float v2 = ivalues[I1][J2];
             float v3 = ivalues[I2][J2];
-            if(gridpp::util::is_valid(v0) && gridpp::util::is_valid(v1) &&gridpp::util::is_valid(v2) &&gridpp::util::is_valid(v3)) {
+            if(gridpp::is_valid(v0) && gridpp::is_valid(v1) &&gridpp::is_valid(v2) &&gridpp::is_valid(v3)) {
                 float value = ::bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
                 output = value;
             }

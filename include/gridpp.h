@@ -76,14 +76,6 @@ namespace gridpp {
         Additive  = 20, /**< Additive */
     };
 
-    /** Convert name of a statistic enum */
-    Statistic get_statistic(std::string name);
-
-    /** The gridpp version
-     * @return The gridpp version
-    */
-    std::string version();
-
     /** **************************************
      * @name Data assimilation methods
      * ***************************************/ /**@{*/
@@ -424,102 +416,118 @@ namespace gridpp {
 
     /**@}*/
 
+    /** ****************************************
+     * @name OpenMP settings
+     * *****************************************/ /**@{*/
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
 
     /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
     void initialize_omp();
 
-    /** Helper functions */
-    namespace util {
-        // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
-        // ivec regression(const vec& x, const vec& y);
-        double clock();
-        void debug(std::string string);
-        void warning(std::string string);
-        void error(std::string string);
-        void future_deprecation_warning(std::string function, std::string other="");
-        bool is_valid(float value);
-        float calc_statistic(const vec& array, Statistic statistic);
-        float calc_quantile(const vec& array, float quantile);
-        vec calc_statistic(const vec2& array, Statistic statistic);
-        vec calc_quantile(const vec2& array, float quantile=gridpp::MV);
-        int num_missing_values(const vec2& iArray);
+    /** ****************************************
+     * @name Utilities (helper functions)
+     * *****************************************/ /**@{*/
+    // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
+    // ivec regression(const vec& x, const vec& y);
 
-        /** Find the index in a vector that is equal or just below a value
-         *  @param iX Lookup value
-         *  @param iValues Lookup vector. Must be sorted.
-         *  @return The index into iValues that is equal or just below iX
-        */
-        int get_lower_index(float iX, const std::vector<float>& iValues);
+    /** Convert name of a statistic enum */
+    Statistic get_statistic(std::string name);
 
-        /** Find the index in a vector that is equal or just above a value
-         *  @param iX Lookup value
-         *  @param iValues Lookup vector. Must be sorted.
-         *  @return The index into iValues that is equal or just above iX
-        */
-        int get_upper_index(float iX, const std::vector<float>& iValues);
+    /** The gridpp version
+     * @return The gridpp version
+    */
+    std::string version();
 
-        /** Piecewise linear interpolation
-         *  If x is outside the range of iX, then the min/max value of iY is used
-         *  @param x Interpolation to this point
-         *  @param iX Vector of x-axis values. Vector must be sorted.
-         *  @param iY Vector of y-axis values corresponding to iX.
-         *  @return Y value corresponding to x
-        */
-        float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
-        void not_implemented_error();
+    double clock();
+    void debug(std::string string);
+    void warning(std::string string);
+    void error(std::string string);
+    void future_deprecation_warning(std::string function, std::string other="");
+    bool is_valid(float value);
+    float calc_statistic(const vec& array, Statistic statistic);
+    float calc_quantile(const vec& array, float quantile);
+    vec calc_statistic(const vec2& array, Statistic statistic);
+    vec calc_quantile(const vec2& array, float quantile=gridpp::MV);
+    int num_missing_values(const vec2& iArray);
 
-        /** Initialize a vector of size Y, X, with a given value */
-        vec2 init_vec2(int Y, int X, float value=gridpp::MV);
+    /** Find the index in a vector that is equal or just below a value
+     *  @param iX Lookup value
+     *  @param iValues Lookup vector. Must be sorted.
+     *  @return The index into iValues that is equal or just below iX
+    */
+    int get_lower_index(float iX, const std::vector<float>& iValues);
 
-        /** Initialize a vector of size Y, X, E, with a given value */
-        vec3 init_vec3(int Y, int X, int E, float value=gridpp::MV);
+    /** Find the index in a vector that is equal or just above a value
+     *  @param iX Lookup value
+     *  @param iValues Lookup vector. Must be sorted.
+     *  @return The index into iValues that is equal or just above iX
+    */
+    int get_upper_index(float iX, const std::vector<float>& iValues);
 
-        /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
-          *  but including the first number after duplicated values. Include the lowest and highest
-          *  values.
-          *  @param values vector of values (unsorted, and no invalid values)
-          *  @param num number of thresholds to get
-        */
-        vec calc_even_quantiles(const vec& values, int num);
+    /** Piecewise linear interpolation
+     *  If x is outside the range of iX, then the min/max value of iY is used
+     *  @param x Interpolation to this point
+     *  @param iX Vector of x-axis values. Vector must be sorted.
+     *  @param iY Vector of y-axis values corresponding to iX.
+     *  @return Y value corresponding to x
+    */
+    float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
+    void not_implemented_error();
 
-        /** Computes gradients based on values in neighbourhood
-         *  @param grid Grid
-         *  @param base Dependent variable. Missing values are not used.
-         *  @param values Independent variable. Missing values are not used.
-         *  @param radius Neighbourhood radius in number of gridpoints
-         *  @param min_nim Minimum number of points required to compute gradient
-         *  @param min_range Minimum range of base to compute gradient
-         *  @param default_gradient Use this gradient if minimum number is not met
-        */
-        vec2 calc_gradient(const gridpp::Grid& grid, const vec2& base, const vec2& values, int radius, int min_num=2, float min_range=0, float default_gradient=0);
+    /** Initialize a vector of size Y, X, with a given value */
+    vec2 init_vec2(int Y, int X, float value=gridpp::MV);
 
-        /** Check if the grid is the same size as the 2D vector */
-        bool compatible_size(const Grid& grid, const vec2& v);
-        bool compatible_size(const Grid& grid, const vec3& v);
+    /** Initialize a vector of size Y, X, E, with a given value */
+    vec3 init_vec3(int Y, int X, int E, float value=gridpp::MV);
 
-        /** Special function whose presense is needed for SWIG */
-        float* test_array(float* v, int n);
-        /** Testing function for 1D input vector */
-        float test_vec_input(const vec& input);
-        /** Testing function for 1D input vector */
-        int test_ivec_input(const ivec& input);
-        /** Testing function for 2D input vector */
-        float test_vec2_input(const vec2& input);
-        /** Testing function for 3D input vector */
-        float test_vec3_input(const vec3& input);
-        /** Testing function for 1D output vector */
-        vec test_vec_output();
-        /** Testing function for 2D output vector */
-        vec2 test_vec2_output();
-        /** Testing function for 3D output vector */
-        vec3 test_vec3_output();
+    /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
+      *  but including the first number after duplicated values. Include the lowest and highest
+      *  values.
+      *  @param values vector of values (unsorted, and no invalid values)
+      *  @param num number of thresholds to get
+    */
+    vec calc_even_quantiles(const vec& values, int num);
 
-        /** Testing function for 1D output vector */
-        ivec test_ivec_output();
-        ivec2 test_ivec2_output();
-    }
+    /** Computes gradients based on values in neighbourhood
+     *  @param grid Grid
+     *  @param base Dependent variable. Missing values are not used.
+     *  @param values Independent variable. Missing values are not used.
+     *  @param radius Neighbourhood radius in number of gridpoints
+     *  @param min_nim Minimum number of points required to compute gradient
+     *  @param min_range Minimum range of base to compute gradient
+     *  @param default_gradient Use this gradient if minimum number is not met
+    */
+    vec2 calc_gradient(const gridpp::Grid& grid, const vec2& base, const vec2& values, int radius, int min_num=2, float min_range=0, float default_gradient=0);
+
+    /** Check if the grid is the same size as the 2D vector */
+    bool compatible_size(const Grid& grid, const vec2& v);
+    bool compatible_size(const Grid& grid, const vec3& v);
+
+    /** ****************************************
+     * @name SWIG testing functions
+     * *****************************************/ /**@{*/
+    /** Special function whose presense is needed for SWIG */
+    float* test_array(float* v, int n);
+    /** Testing function for 1D input vector */
+    float test_vec_input(const vec& input);
+    /** Testing function for 1D input vector */
+    int test_ivec_input(const ivec& input);
+    /** Testing function for 2D input vector */
+    float test_vec2_input(const vec2& input);
+    /** Testing function for 3D input vector */
+    float test_vec3_input(const vec3& input);
+    /** Testing function for 1D output vector */
+    vec test_vec_output();
+    /** Testing function for 2D output vector */
+    vec2 test_vec2_output();
+    /** Testing function for 3D output vector */
+    vec3 test_vec3_output();
+
+    /** Testing function for 1D output vector */
+    ivec test_ivec_output();
+    ivec2 test_ivec2_output();
+    /**@}*/
 
     class Point {
         public:

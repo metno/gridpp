@@ -26,7 +26,7 @@ DOXYFILE_ENCODING      = UTF-8
 # identify the project. Note that if you do not use Doxywizard you need
 # to put quotes around the project name if it contains spaces.
 
-PROJECT_NAME           = "Gridded post-processor"
+PROJECT_NAME           = "Gridpp @PROJECT_VERSION@"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
@@ -38,7 +38,7 @@ PROJECT_NUMBER         =
 # for a project that appears at the top of each page and should give viewer
 # a quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "A framework for post-processing gridded weather forecasts"
+PROJECT_BRIEF          = "A post-processing library for gridded weather forecasts"
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is
 # included in the documentation. The maximum height of the logo should not
@@ -648,8 +648,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/api @CMAKE_CURRENT_SOURCE_DIR@/include @CMAKE_CURRENT_SOURCE_DIR@/README.md
-USE_MDFILE_AS_MAINPAGE = README.md
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/api @CMAKE_CURRENT_SOURCE_DIR@/include # @CMAKE_CURRENT_SOURCE_DIR@/README.md
+USE_MDFILE_AS_MAINPAGE = # README.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -729,7 +729,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see
 # the \image command).
 
-IMAGE_PATH             =
+IMAGE_PATH             = @CMAKE_CURRENT_SOURCE_DIR@/extras/image.gif
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1106,7 +1106,7 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 # navigation tree you can set this option to NO if you already set
 # GENERATE_TREEVIEW to YES.
 
-DISABLE_INDEX          = NO
+DISABLE_INDEX          = YES
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information.

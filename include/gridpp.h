@@ -10,7 +10,7 @@
     #include <omp.h>
 #endif
 
-#define GRIDPP_VERSION "0.4.3"
+#define GRIDPP_VERSION "0.5.0"
 #define __version__ GRIDPP_VERSION
 
 // Preferred vector types
@@ -29,9 +29,10 @@ namespace gridpp {
     static const float MV = NAN;
     /** Missing value indicator in gridpp command-line tool */
     static const float MV_CML = -999;
+    /** Mathematical constant pi */
     static const float pi = 3.14159265;
     /** Radius of the earth [m] */
-    static double radius_earth = 6.37e6;
+    static const double radius_earth = 6.37e6;
 
     class KDTree;
     class Points;
@@ -61,6 +62,7 @@ namespace gridpp {
         Unknown   = -1  /**< Unknown statistic */
     };
 
+    /** Binary verification metrics */
     enum Metric {
         Ets       = 0,  /**< Mean of values */
         Ts        = 1,  /**< Mean of values */
@@ -70,6 +72,7 @@ namespace gridpp {
         Hss       = 50, /**< Minimum of values */
     };
 
+    /** Method for statistical correction */
     enum CorrectionType {
         Qq        = 0,  /**< Quantile mapping */
         Multiplicative = 10,  /**< Multiplicative */
@@ -78,6 +81,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Data assimilation methods
+     * Functions that assimilate observations onto a gridded background
      * ***************************************/ /**@{*/
 
     /** Optimal interpolation for a deterministic field
@@ -138,6 +142,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Spatial neighbourhood filters
+     * Functions that apply neighbourhood filters on a grid
      * ***************************************/ /**@{*/
 
     /**
@@ -187,6 +192,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Calibration methods              
+     * Functions that apply statistical methods to data
      * ***************************************/ /**@{*/
 
     /** Apply arbitrary calibration curve to 1D forecasts
@@ -245,6 +251,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Downscaling methods
+     * Functions that interpolate data from one grid to another
      * ***************************************/ /**@{*/
 
     /** Nearest neighbour dowscaling grid to grid
@@ -297,6 +304,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Grid calculations
+     * Functions that calculate statistics on a grid
      * ***************************************/ /**@{*/
 
     /** For each point, counts the number of gridpoints within the radius
@@ -351,6 +359,7 @@ namespace gridpp {
 
     /** ****************************************
      * @name Diagnosing meteorological variables
+     * Functions that diagnose a meteorological variable based on other variables
      * *****************************************/ /**@{*/
 
     /** Calculate dewpoint temperature from temperature and relative humidity
@@ -418,6 +427,7 @@ namespace gridpp {
 
     /** ****************************************
      * @name OpenMP settings
+     * Functions that configure OpenMP
      * *****************************************/ /**@{*/
     /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
@@ -426,7 +436,8 @@ namespace gridpp {
     void initialize_omp();
 
     /** ****************************************
-     * @name Utilities (helper functions)
+     * @name Utilities
+     * Helper functions
      * *****************************************/ /**@{*/
     // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
     // ivec regression(const vec& x, const vec& y);
@@ -506,6 +517,7 @@ namespace gridpp {
 
     /** ****************************************
      * @name SWIG testing functions
+     * Functions for testing the SWIG interface. Not useful for any other purpose.
      * *****************************************/ /**@{*/
     /** Special function whose presense is needed for SWIG */
     float* test_array(float* v, int n);

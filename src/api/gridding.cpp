@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic) {
     int Y = grid.size()[0];
     int X = grid.size()[1];

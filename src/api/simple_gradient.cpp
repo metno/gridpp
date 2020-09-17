@@ -1,4 +1,7 @@
 #include "gridpp.h"
+
+using namespace gridpp;
+
 vec gridpp::simple_gradient(const Grid& igrid, const Points& opoints, vec2 ivalues, float elev_gradient) {
     vec2 ielevs = igrid.get_elevs();
     vec oelevs = opoints.get_elevs();

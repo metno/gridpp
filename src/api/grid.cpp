@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 gridpp::Grid::Grid() {
 
 }

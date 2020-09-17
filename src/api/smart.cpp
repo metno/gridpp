@@ -1,4 +1,7 @@
 #include "gridpp.h"
+
+using namespace gridpp;
+
 namespace {
     template<class T1, class T2> struct sort_pair_first {
         bool operator()(const std::pair<T1,T2>&left, const std::pair<T1,T2>&right) {

@@ -4,6 +4,8 @@
 #include <boost/math/tools/minima.hpp>
 using boost::math::tools::brent_find_minima;
 
+using namespace gridpp;
+
 namespace {
     float partial(float ref_diff, float fcst_diff, float sigma) {
         float total = 0;

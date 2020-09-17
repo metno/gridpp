@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
     if(curve.size() != 2 || curve[0].size() == 0 || curve[1].size() == 0)
         throw std::runtime_error("Invalid curve");

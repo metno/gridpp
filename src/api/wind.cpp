@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <cmath>
 
+using namespace gridpp;
+
 float gridpp::wind_speed(float xwind, float ywind) {
     return sqrt(xwind * xwind + ywind * ywind);
 }

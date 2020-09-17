@@ -1,5 +1,8 @@
 #include "gridpp.h"
 #include <math.h>
+
+using namespace gridpp;
+
 float gridpp::qnh(float pressure, float altitude) {
    if(pressure == 0)
          return 0;

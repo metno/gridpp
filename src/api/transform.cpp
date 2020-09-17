@@ -1,4 +1,7 @@
 #include "gridpp.h"
+
+using namespace gridpp;
+
 vec2 gridpp::Transform::forward(const vec2& input) const {
     int Y = input.size();
     vec2 output(Y);

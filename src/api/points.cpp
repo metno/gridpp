@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 gridpp::Points::Points() {
     // TODO: Deal with the empty case. Can't really find nearest neighbours then
 

@@ -1,6 +1,9 @@
 #include "gridpp.h"
 #include <iostream>
 #include <math.h>
+
+using namespace gridpp;
+
 vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");

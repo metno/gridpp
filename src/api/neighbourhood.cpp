@@ -2,6 +2,8 @@
 #include <exception>
 #include <iostream>
 
+using namespace gridpp;
+
 namespace {
     vec2 neighbourhood_brute_force(const vec2& input, int iRadius, gridpp::Statistic statistic, float quantile);
     vec2 neighbourhood_brute_force(const vec3& input, int iRadius, gridpp::Statistic statistic, float quantile);

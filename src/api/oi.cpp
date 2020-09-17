@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <exception>
 
+using namespace gridpp;
+
 namespace {
     typedef arma::mat mattype;
     typedef arma::vec vectype;

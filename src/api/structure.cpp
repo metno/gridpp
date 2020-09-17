@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 gridpp::StructureFunction::StructureFunction(float localization_distance) {
     if(!gridpp::is_valid(localization_distance) || localization_distance < 0)
         throw std::invalid_argument("Invalid 'localization_distance' in structure");

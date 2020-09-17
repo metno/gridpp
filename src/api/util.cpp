@@ -15,6 +15,8 @@
 extern "C" void __gcov_flush();
 #endif
 
+using namespace gridpp;
+
 bool gridpp::is_valid(float value) {
     return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV && value != MV_CML;
 }

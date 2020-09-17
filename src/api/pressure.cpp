@@ -1,4 +1,7 @@
 #include "gridpp.h"
+
+using namespace gridpp;
+
 float gridpp::pressure(float ielev, float oelev, float ipressure, float itemperature) {
     float g0 = 9.80665;
     float M = 0.0289644;

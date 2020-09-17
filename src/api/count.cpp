@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 vec gridpp::count(const Grid& grid, const Points& points, float radius) {
     int size = points.size();
     vec output(size);

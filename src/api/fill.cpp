@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 vec2 gridpp::fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside) {
     double s_time = gridpp::clock();
     vec lats = points.get_lats();

@@ -13,18 +13,18 @@
 #define GRIDPP_VERSION "0.5.0"
 #define __version__ GRIDPP_VERSION
 
-// Preferred vector types
-typedef std::vector<float> vec;
-typedef std::vector<vec> vec2;
-typedef std::vector<vec2> vec3;
-typedef std::vector<int> ivec;
-typedef std::vector<ivec> ivec2;
-
-// Only use when double is required
-typedef std::vector<double> dvec;
-typedef std::vector<dvec> dvec2;
-
 namespace gridpp {
+    // Preferred vector types
+    typedef std::vector<float> vec;
+    typedef std::vector<vec> vec2;
+    typedef std::vector<vec2> vec3;
+    typedef std::vector<int> ivec;
+    typedef std::vector<ivec> ivec2;
+
+    // Only use when double is required
+    typedef std::vector<double> dvec;
+    typedef std::vector<dvec> dvec2;
+
     /** Missing value indicator */
     static const float MV = NAN;
     /** Missing value indicator in gridpp command-line tool */

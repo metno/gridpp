@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 vec2 gridpp::quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles) {
     vec2 curve(2);
     vec ref_sort = ref;

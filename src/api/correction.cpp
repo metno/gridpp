@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 namespace {
     vec2 get_curve(const gridpp::Grid& rgrid, const vec3& rvalues, const vec3& n_at_r, int y, int x, float outer_radius) {
         vec2 curve;

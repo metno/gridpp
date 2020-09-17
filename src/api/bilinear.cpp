@@ -1,5 +1,8 @@
 #include "gridpp.h"
 #include <math.h>
+
+using namespace gridpp;
+
 namespace {
     bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s);
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);

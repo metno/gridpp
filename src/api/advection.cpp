@@ -1,6 +1,7 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
 
 void gridpp::advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord) {
     int Y = y_dist.size();

@@ -1,6 +1,8 @@
 #include "gridpp.h"
 #include <iostream>
 
+using namespace gridpp;
+
 vec gridpp::distance(const Grid& grid, const Points& points, int num) {
     int size = points.size();
     vec output(size);

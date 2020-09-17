@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+using namespace gridpp;
+
 std::string gridpp::version() {
     return __version__;
 }

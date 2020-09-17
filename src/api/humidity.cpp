@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 float gridpp::dewpoint(float temperature, float relative_humidity) {
     if(gridpp::is_valid(temperature) && gridpp::is_valid(relative_humidity)) {
         // Taken from https://github.com/metno/wdb2ts

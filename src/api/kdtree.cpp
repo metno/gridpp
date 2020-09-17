@@ -1,5 +1,7 @@
 #include "gridpp.h"
 
+using namespace gridpp;
+
 gridpp::KDTree::KDTree(vec lats, vec lons) {
     mLats = lats;
     mLons = lons;

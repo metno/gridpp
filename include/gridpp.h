@@ -15,15 +15,15 @@
 
 namespace gridpp {
     // Preferred vector types
-    typedef std::vector<float> vec;
-    typedef std::vector<vec> vec2;
-    typedef std::vector<vec2> vec3;
-    typedef std::vector<int> ivec;
-    typedef std::vector<ivec> ivec2;
+    typedef std::vector<float> vec;         /**< 1D vector of floats */
+    typedef std::vector<vec> vec2;         /**< 2D vector of floats */
+    typedef std::vector<vec2> vec3;         /**< 3D vector of floats */
+    typedef std::vector<int> ivec;         /**< 1D vector of ints */
+    typedef std::vector<ivec> ivec2;         /**< 2D vector of ints */
 
     // Only use when double is required
-    typedef std::vector<double> dvec;
-    typedef std::vector<dvec> dvec2;
+    typedef std::vector<double> dvec;         /**< 1D vector of doubles */
+    typedef std::vector<dvec> dvec2;         /**< 2D vector of doubles */
 
     /** Missing value indicator */
     static const float MV = NAN;
@@ -94,25 +94,25 @@ namespace gridpp {
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
     */
-    vec2 optimal_interpolation(const gridpp::Grid& bgrid,
+    vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
-            const gridpp::Points& points,
+            const Points& points,
             const vec& pobs,
             const vec& pratios,
             const vec& pbackground,
-            const gridpp::StructureFunction& structure,
+            const StructureFunction& structure,
             int max_points);
 
-    vec2 optimal_interpolation_transform(const gridpp::Grid& bgrid,
+    vec2 optimal_interpolation_transform(const Grid& bgrid,
             const vec2& background,
             float bsigma,
-            const gridpp::Points& points,
+            const Points& points,
             const vec& pobs,
             const vec& psigma,
             const vec& pbackground,
-            const gridpp::StructureFunction& structure,
+            const StructureFunction& structure,
             int max_points,
-            const gridpp::Transform& transform);
+            const Transform& transform);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
@@ -122,13 +122,13 @@ namespace gridpp {
       * @param pci vector of ci values
       * @param points observation points
     */
-    vec3 optimal_interpolation_ensi(const gridpp::Grid& bgrid,
+    vec3 optimal_interpolation_ensi(const Grid& bgrid,
             const vec3& input,
-            const gridpp::Points& points,
+            const Points& points,
             const vec& pobs,
             const vec& psigmas,
             const vec2& pbackground,
-            const gridpp::StructureFunction& structure,
+            const StructureFunction& structure,
             int max_points);
 
     /** Fill in values inside or outside a set of circles
@@ -145,26 +145,64 @@ namespace gridpp {
      * Functions that apply neighbourhood filters on a grid
      * ***************************************/ /**@{*/
 
-    /**
-      * Spatial neighbourhood filter
+    /** Spatial neighbourhood filter, computing a statistic for a sliding square window
       * @param input 2D grid of values
       * @param radius Filter radius in number of gridpoints
       * @param statistic Statistic to compute
     */
     vec2 neighbourhood(const vec2& input, int radius, Statistic statistic);
+
+    /** Spatial neighbourhood filter for an ensemble of fields
+      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param radius Filter radius in number of gridpoints
+      * @param statistic Statistic to compute
+    */
     vec2 neighbourhood(const vec3& input, int radius, Statistic statistic);
+
+    /** Computes a quantile in a sliding square neighbourhood
+      * @param input 2D grid of values
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+    */
     vec2 neighbourhood_quantile(const vec2& input, float quantile, int radius);
+
+    /** Computes a quantile in a sliding square neighbourhood for an ensemble of fields
+      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+    */
     vec2 neighbourhood_quantile(const vec3& input, float quantile, int radius);
 
-    /** Approximate spatial neighbourhood filter for quantile operation.
+    /** Fast and approximate neighbourhood quantile
       * @param input 2D grid of values
       * @param quantile Quantile to compute (between 0 and 1)
       * @param radius Filter radius in number of gridpoints
       * @param thresholds Vector of thresholds to use to approximate value
     */
     vec2 neighbourhood_quantile_fast(const vec2& input, float quantile, int radius, const vec& thresholds);
+
+    /** Fast and approximate neighbourhood quantile for ensemble of fields
+      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param quantile Quantile to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
     vec2 neighbourhood_quantile_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
+
+    /** Fast and approximate neighbourhood quantile, with spatially varying quantile
+      * @param input 2D grid of values
+      * @param quantile 2D grid quantiles to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
     vec2 neighbourhood_quantile_fast(const vec2& input, const vec2& quantile, int radius, const vec& thresholds);
+
+    /** Fast and approximate neighbourhood quantile for ensemble of fields, with spatially varying quantile
+      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param quantile 2D grid quantiles to compute (between 0 and 1)
+      * @param radius Filter radius in number of gridpoints
+      * @param thresholds Vector of thresholds to use to approximate value
+    */
     vec2 neighbourhood_quantile_fast(const vec3& input, const vec2& quantile, int radius, const vec& thresholds);
 
     /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
@@ -202,7 +240,7 @@ namespace gridpp {
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
-    vec apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above);
+    vec apply_curve(const vec& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts
      *  @param fcst 2D grid of forecast values
@@ -211,7 +249,7 @@ namespace gridpp {
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
-    vec2 apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above);
+    vec2 apply_curve(const vec2& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Ensure calibration curve is monotonic, by removing points
      *  @param curve Calibration curve
@@ -234,18 +272,18 @@ namespace gridpp {
      *  @param metric A Metric to optimize for
      *  @return Calibration curve
     */
-    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric);
-    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
+    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
+    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
 
-    float calc_score(float a, float b, float c, float d, gridpp::Metric metric);
-    float calc_score(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric);
-    float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, gridpp::Metric metric);
+    float calc_score(float a, float b, float c, float d, Metric metric);
+    float calc_score(const vec& ref, const vec& fcst, float threshold, Metric metric);
+    float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, Metric metric);
 
     void advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord);
 
-    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, vec2& count);
     // Apply correction based on multiple timesteps
-    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, gridpp::CorrectionType type, vec2& count);
+    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, vec2& count);
 
     /**@}*/
 
@@ -345,7 +383,7 @@ namespace gridpp {
     */
     vec2 fill_missing(const vec2& values);
 
-    /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough observations
+    /** Aggregate points onto a grid. Writes MV where there are not enough observations
       * @param grid Grid to aggregate to
       * @param points Points with values
       * @param values Values at points
@@ -353,7 +391,7 @@ namespace gridpp {
       * @param min_num Minimum number of points in radius to create a value
       * @param statistic Statistic to compute on points within radius
     */
-    vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic);
+    vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, Statistic statistic);
 
     /**@}*/
 
@@ -459,7 +497,7 @@ namespace gridpp {
     float calc_statistic(const vec& array, Statistic statistic);
     float calc_quantile(const vec& array, float quantile);
     vec calc_statistic(const vec2& array, Statistic statistic);
-    vec calc_quantile(const vec2& array, float quantile=gridpp::MV);
+    vec calc_quantile(const vec2& array, float quantile=MV);
     int num_missing_values(const vec2& iArray);
 
     /** Find the index in a vector that is equal or just below a value
@@ -487,10 +525,10 @@ namespace gridpp {
     void not_implemented_error();
 
     /** Initialize a vector of size Y, X, with a given value */
-    vec2 init_vec2(int Y, int X, float value=gridpp::MV);
+    vec2 init_vec2(int Y, int X, float value=MV);
 
     /** Initialize a vector of size Y, X, E, with a given value */
-    vec3 init_vec3(int Y, int X, int E, float value=gridpp::MV);
+    vec3 init_vec3(int Y, int X, int E, float value=MV);
 
     /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
       *  but including the first number after duplicated values. Include the lowest and highest
@@ -509,7 +547,7 @@ namespace gridpp {
      *  @param min_range Minimum range of base to compute gradient
      *  @param default_gradient Use this gradient if minimum number is not met
     */
-    vec2 calc_gradient(const gridpp::Grid& grid, const vec2& base, const vec2& values, int radius, int min_num=2, float min_range=0, float default_gradient=0);
+    vec2 calc_gradient(const Grid& grid, const vec2& base, const vec2& values, int radius, int min_num=2, float min_range=0, float default_gradient=0);
 
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);
@@ -543,7 +581,7 @@ namespace gridpp {
 
     class Point {
         public:
-            Point(float lat, float lon, float elev=gridpp::MV, float laf=gridpp::MV);
+            Point(float lat, float lon, float elev=MV, float laf=MV);
             float lat;
             float lon;
             float elev;
@@ -568,7 +606,7 @@ namespace gridpp {
     /** Simple structure function based on distance, elevation, and land area fraction */
     class BarnesStructure: public StructureFunction {
         public:
-            BarnesStructure(float h, float v=0, float w=0, float hmax=gridpp::MV);
+            BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
         private:

@@ -75,7 +75,7 @@ vec2 gridpp::correction(const Grid& rgrid,
         int min_num,
         int max_num,
         gridpp::CorrectionType type,
-        vec2& count) {
+        ivec2& count) {
     int Y = rgrid.size()[0];
     int X = rgrid.size()[1];
     int T = rvalues.size();
@@ -83,7 +83,7 @@ vec2 gridpp::correction(const Grid& rgrid,
     vec2 output = gridpp::init_vec2(Y, X, 0);
 
     // Store the number of observations used to correct each gridpoint
-    count = gridpp::init_vec2(Y, X, -1);
+    count = gridpp::init_ivec2(Y, X, -1);
 
     vec2 rlats = rgrid.get_lats();
     vec2 rlons = rgrid.get_lons();
@@ -227,7 +227,7 @@ vec2 gridpp::correction(const Grid& rgrid,
                 assert(j < outer.size());
                 int y_outer = outer[j][0];
                 int x_outer = outer[j][1];
-                float curr_count = count[y_outer][x_outer];
+                int curr_count = count[y_outer][x_outer];
                 float curr_r = apply_values[y_outer][x_outer];
                 // Don't update this gridpoint if there is less info now
                 if(curr_count >= S)
@@ -258,7 +258,7 @@ vec2 gridpp::correction(const Grid& rgrid,
         int min_num,
         int max_num,
         gridpp::CorrectionType type,
-        vec2& count) {
+        ivec2& count) {
     vec3 rvalues3(1);
     rvalues3[0] = rvalues;
     vec2 nvalues2(1);

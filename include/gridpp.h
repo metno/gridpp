@@ -20,6 +20,7 @@ namespace gridpp {
     typedef std::vector<vec2> vec3;         /**< 3D vector of floats */
     typedef std::vector<int> ivec;         /**< 1D vector of ints */
     typedef std::vector<ivec> ivec2;         /**< 2D vector of ints */
+    typedef std::vector<ivec2> ivec3;         /**< 3D vector of ints */
 
     // Only use when double is required
     typedef std::vector<double> dvec;         /**< 1D vector of doubles */
@@ -281,9 +282,9 @@ namespace gridpp {
 
     void advection_implicit(const vec2& y_dist, const vec2& x_dist, float dt, ivec2& y_coord, ivec2& x_coord);
 
-    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, vec2& count);
+    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
     // Apply correction based on multiple timesteps
-    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, vec2& count);
+    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
 
     /**@}*/
 
@@ -525,9 +526,11 @@ namespace gridpp {
     void not_implemented_error();
 
     /** Initialize a vector of size Y, X, with a given value */
+    ivec2 init_ivec2(int Y, int X, int value=MV);
     vec2 init_vec2(int Y, int X, float value=MV);
 
     /** Initialize a vector of size Y, X, E, with a given value */
+    ivec3 init_ivec3(int Y, int X, int E, int value=MV);
     vec3 init_vec3(int Y, int X, int E, float value=MV);
 
     /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
@@ -606,6 +609,12 @@ namespace gridpp {
     /** Simple structure function based on distance, elevation, and land area fraction */
     class BarnesStructure: public StructureFunction {
         public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length [m]
+              * @param v: Vertical decorrelation length [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation at this length [m]. If undefined, 3.64 * h.
+            */
             BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;

@@ -76,6 +76,16 @@ float gridpp::relative_humidity(float temperature, float dewpoint) {
    else
       return gridpp::MV;
 }
+vec gridpp::relative_humidity(const vec& temperature, const vec& dewpoint) {
+    if(temperature.size() != dewpoint.size())
+        throw std::invalid_argument("Temperature and dewpoint vectors are not the same size");
+
+    vec ret(temperature.size());
+    for(int y = 0; y < temperature.size(); y++) {
+        ret[y] = gridpp::relative_humidity(temperature[y], dewpoint[y]);
+    }
+    return ret;
+}
 float gridpp::wetbulb(float temperature, float pressure, float relative_humidity) {
    float temperatureC = temperature - 273.15;
    if(temperatureC <= -243.04 || relative_humidity <= 0)
@@ -94,4 +104,16 @@ float gridpp::wetbulb(float temperature, float pressure, float relative_humidity
    else {
       return gridpp::MV;
    }
+}
+vec gridpp::wetbulb(const vec& temperature, const vec& pressure, const vec& relative_humidity){
+    if(temperature.size() != pressure.size())
+        throw std::invalid_argument("Temperature and pressure vectors are not the same size");
+    if(temperature.size() != relative_humidity.size())
+        throw std::invalid_argument("Temperature and relative_humidity vectors are not the same size");
+
+    vec ret(temperature.size());
+    for(int y = 0; y < temperature.size(); y++) {
+        ret[y] = gridpp::wetbulb(temperature[y], pressure[y], relative_humidity[y]);
+    }
+    return ret;
 }

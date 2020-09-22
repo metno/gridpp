@@ -12,3 +12,14 @@ float gridpp::pressure(float ielev, float oelev, float ipressure, float itempera
     return value;
 }
 
+vec gridpp::pressure(const vec& ielev, const vec& oelev, const vec& ipressure, const vec& itemperature) {
+    int N = ielev.size();
+    if(oelev.size() != N || ipressure.size() != N || itemperature.size() != N)
+        throw std::invalid_argument("pressure: Input arguments must be of the same size");
+
+    vec values(N);
+    for(int i = 0; i < N; i++) {
+        values[i] = gridpp::pressure(ielev[i], oelev[i], ipressure[i], itemperature[i]);
+    }
+    return values;
+}

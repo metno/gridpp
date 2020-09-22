@@ -424,6 +424,15 @@ namespace gridpp {
      */
     float pressure(float ielev, float oelev, float ipressure, float itemperature=288.15);
 
+    /** Calculate Vector version of pressure calculation
+     *  @param ielev Elevations at start point
+     *  @param oelev Elevations at new point
+     *  @param ipressure Pressures at start point
+     *  @param itemperature Temperatures at start point
+     *  @return Pressures at new points
+     */
+    vec pressure(const vec& ielev, const vec& oelev, const vec& ipressure, const vec& itemperature);
+
     /** Diagnose QNH from pressure and altitude
      *  @param pressure Pressure at point [pa]
      *  @param altitude Altitude of point [m]
@@ -445,6 +454,13 @@ namespace gridpp {
     */
     float relative_humidity(float temperature, float dewpoint);
 
+    /** Vector version of relative humidity calculation
+     *  @param temperature Temperatures [K]
+     *  @param dewpoint Dewpoint temperatures [K]
+     *  @returns Relative humidities [1]
+    */
+    vec relative_humidity(const vec& temperature, const vec& dewpoint);
+
     /** Calculate wetbulb temperature from temperature, pressure, and relative humidity
      *  @param temperature Temperature [K]
      *  @param pressure Air pressure [pa]
@@ -452,6 +468,14 @@ namespace gridpp {
      *  @returns Wetbulb temperature [K]
     */
     float wetbulb(float temperature, float pressure, float relative_humidity);
+
+    /** Vector version of wetbulb calculation
+     *  @param temperature Temperatures [K]
+     *  @param pressure Air pressures [pa]
+     *  @param Relative humidities [1]
+     *  @returns Wetbulb temperatures [K]
+    */
+    vec wetbulb(const vec& temperature, const vec& pressure, const vec& relative_humidity);
 
     /** Diagnose wind speed from its components
      *  @param xwind X-component of wind [any unit]

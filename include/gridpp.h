@@ -102,7 +102,18 @@ namespace gridpp {
             const vec& pratios,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            float cross_validation_distance=MV);
+
+    vec optimal_interpolation(const Points& bpoints,
+            const vec& background,
+            const Points& points,
+            const vec& pobs,
+            const vec& pratios,
+            const vec& pbackground,
+            const StructureFunction& structure,
+            int max_points,
+            float cross_validation_distance=MV);
 
     vec2 optimal_interpolation_transform(const Grid& bgrid,
             const vec2& background,
@@ -778,6 +789,7 @@ namespace gridpp {
         public:
             Points();
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
+            Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
             int get_nearest_neighbour(float lat, float lon) const;
@@ -811,6 +823,7 @@ namespace gridpp {
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
             int get_num_neighbours(float lat, float lon, float radius) const;
             ivec2 get_closest_neighbours(float lat, float lon, int num) const;
+            Points to_points() const;
 
             vec2 get_lats() const;
             vec2 get_lons() const;

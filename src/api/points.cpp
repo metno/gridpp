@@ -25,6 +25,13 @@ gridpp::Points::Points(vec lats, vec lons, vec elevs, vec lafs) {
             mLafs.push_back(1);
     }
 }
+gridpp::Points::Points(KDTree tree, vec elevs, vec lafs) {
+    mElevs = elevs;
+    mLafs = lafs;
+    mTree = tree;
+    mLats = tree.get_lats();
+    mLons = tree.get_lons();
+}
 
 int gridpp::Points::get_num_neighbours(float lat, float lon, float radius) const {
     return mTree.get_num_neighbours(lat, lon, radius);

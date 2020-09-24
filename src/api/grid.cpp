@@ -108,3 +108,18 @@ ivec gridpp::Grid::size() const {
     indices[1]++;
     return indices;
 }
+Points gridpp::Grid::to_points() const {
+    int Y = size()[0];
+    int X = size()[1];
+    vec elevs(Y * X);
+    vec lafs(Y * X);
+    int count = 0;
+    for(int y = 0; y < Y; y++) {
+        for(int x = 0; x < X; x++) {
+            elevs[count] = mElevs[y][x];
+            lafs[count] = mLafs[y][x];
+            count++;
+        }
+    }
+    return gridpp::Points(mTree, elevs, lafs);
+}

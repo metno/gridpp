@@ -655,11 +655,12 @@ namespace gridpp {
 
     class Point {
         public:
-            Point(float lat, float lon, float elev=MV, float laf=MV);
+            Point(float lat, float lon, float elev=MV, float laf=MV, bool flat=false);
             float lat;
             float lon;
             float elev;
             float laf;
+            float flat;
     };
     /** Covariance structure function */
     class StructureFunction {
@@ -745,7 +746,7 @@ namespace gridpp {
     /** Helper class for Grid and Points */
     class KDTree {
         public:
-            KDTree(vec lats, vec lons);
+            KDTree(vec lats, vec lons, bool flat=false);
             KDTree& operator=(KDTree other);
             KDTree(const KDTree& other);
             KDTree() {};
@@ -793,7 +794,7 @@ namespace gridpp {
              *  @param y_coords vector of y-coordinates [m]
              *  @param z_coords vector of z-coordinates [m]
              * */
-            static bool convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords);
+            bool convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) const;
 
             /** Same as above, but convert a single lat/lon to 3D cartesian coordinates
              *  @param lat latitude [deg]
@@ -802,15 +803,17 @@ namespace gridpp {
              *  @param y_coord y-coordinate [m]
              *  @param z_coord z-coordinate [m]
              * */
-            static bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord);
+            bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const;
             static float deg2rad(float deg);
             static float rad2deg(float deg);
             static float calc_distance(float lat1, float lon1, float lat2, float lon2);
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
-            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2);
+            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, bool flat=false);
+            static float calc_distance_fast(const Point& p1, const Point& p2);
             vec get_lats() const;
             vec get_lons() const;
             int size() const;
+            bool is_flat() const;
         protected:
             typedef boost::geometry::model::point<float, 3, boost::geometry::cs::cartesian> point;
             typedef std::pair<point, unsigned> value;
@@ -818,13 +821,14 @@ namespace gridpp {
             boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > mTree;
             vec mLats;
             vec mLons;
+            bool mFlat;
     };
 
     /** Represents a vector of locations and their metadata */
     class Points  {
         public:
             Points();
-            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec());
+            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), bool flat=false);
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
@@ -841,6 +845,7 @@ namespace gridpp {
             int size() const;
             ivec get_in_domain_indices(const Grid& grid) const;
             Points get_in_domain(const Grid& grid) const;
+            bool is_flat() const;
         private:
             KDTree mTree;
             vec mLats;
@@ -853,7 +858,7 @@ namespace gridpp {
     class Grid {
         public:
             Grid();
-            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2());
+            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), bool flat=false);
             ivec get_nearest_neighbour(float lat, float lon) const;
             ivec2 get_neighbours(float lat, float lon, float radius) const;
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
@@ -866,6 +871,7 @@ namespace gridpp {
             vec2 get_elevs() const;
             vec2 get_lafs() const;
             ivec size() const;
+            bool is_flat() const;
         private:
             KDTree mTree;
             int mX;

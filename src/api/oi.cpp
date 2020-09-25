@@ -136,6 +136,7 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
     vec gY = pbackground;
 
     double curr_time = gridpp::clock();
+    bool flat = points.is_flat();
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         float lat = blats[y];
@@ -171,8 +172,8 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
         lRhos0.reserve(lLocIndices0.size());
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            Point p1(plats[index], plons[index], pelevs[index], plafs[index]);
-            Point p2(lat, lon, elev, laf);
+            Point p1(plats[index], plons[index], pelevs[index], plafs[index], flat);
+            Point p2(lat, lon, elev, laf, flat);
             float rho = structure.corr(p1, p2);
             if(rho > 0) {
                 lRhos0.push_back(std::pair<float,int>(rho, i));

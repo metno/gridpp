@@ -2,9 +2,10 @@
 
 using namespace gridpp;
 
-gridpp::KDTree::KDTree(vec lats, vec lons) {
+gridpp::KDTree::KDTree(vec lats, vec lons, bool flat) {
     mLats = lats;
     mLons = lons;
+    mFlat = flat;
     vec x, y, z;
 
     gridpp::KDTree::convert_coordinates(mLats, mLons, x, y, z);
@@ -79,7 +80,7 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num) const
 int gridpp::KDTree::get_nearest_neighbour(float lat, float lon) const {
     return get_closest_neighbours(lat, lon, 1)[0];
 }
-bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) {
+bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) const {
     int N = lats.size();
     x_coords.resize(N);
     y_coords.resize(N);
@@ -91,14 +92,20 @@ bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& 
     return true;
 }
 
-bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) {
-
-    double lonr = M_PI / 180 * lon;
-    double latr = M_PI / 180 * lat;
-    // std::cout << lon << " " << lat << std::endl;
-    x_coord = std::cos(latr) * std::cos(lonr) * gridpp::radius_earth;
-    y_coord = std::cos(latr) * std::sin(lonr) * gridpp::radius_earth;
-    z_coord = std::sin(latr) * gridpp::radius_earth;
+bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const {
+    if(mFlat) {
+        x_coord = lon;
+        y_coord = lat;
+        z_coord = 0;
+    }
+    else {
+        double lonr = M_PI / 180 * lon;
+        double latr = M_PI / 180 * lat;
+        // std::cout << lon << " " << lat << std::endl;
+        x_coord = std::cos(latr) * std::cos(lonr) * gridpp::radius_earth;
+        y_coord = std::cos(latr) * std::sin(lonr) * gridpp::radius_earth;
+        z_coord = std::sin(latr) * gridpp::radius_earth;
+    }
     return true;
 }
 float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lon2) {
@@ -121,14 +128,25 @@ float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lo
     double dist = acos(ratio)*radiusEarth;
     return (float) dist;
 }
-float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2) {
-    double lat1r = deg2rad(lat1);
-    double lat2r = deg2rad(lat2);
-    double lon1r = deg2rad(lon1);
-    double lon2r = deg2rad(lon2);
-    float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
-    float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
-    return gridpp::radius_earth*sqrt(dx2+dy2);
+float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2, bool flat) {
+    if(flat) {
+        float dx = lon1 - lon2;
+        float dy = lat1 - lat2;
+        return sqrt(dx * dx + dy * dy);
+    }
+    else {
+        double lat1r = deg2rad(lat1);
+        double lat2r = deg2rad(lat2);
+        double lon1r = deg2rad(lon1);
+        double lon2r = deg2rad(lon2);
+        float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
+        float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
+        return gridpp::radius_earth*sqrt(dx2+dy2);
+    }
+}
+float gridpp::KDTree::calc_distance_fast(const Point& p1, const Point& p2) {
+    assert(p1.flat == p2.flat);
+    return calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon, p1.flat);
 }
 float gridpp::KDTree::calc_distance(float x0, float y0, float z0, float x1, float y1, float z1) {
     return sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1) + (z0 - z1)*(z0 - z1));
@@ -148,14 +166,19 @@ vec gridpp::KDTree::get_lons() const {
 int gridpp::KDTree::size() const {
     return mLats.size();
 }
+bool gridpp::KDTree::is_flat() const {
+    return mFlat;
+}
 gridpp::KDTree& gridpp::KDTree::operator=(gridpp::KDTree other) {
     std::swap(mLats, other.mLats);
     std::swap(mLons, other.mLons);
     std::swap(mTree, other.mTree);
+    std::swap(mFlat, other.mFlat);
     return *this;
 }
 gridpp::KDTree::KDTree(const gridpp::KDTree& other) {
     mLats = other.mLats;
     mLons = other.mLons;
     mTree = other.mTree;
+    mFlat = other.mFlat;
 }

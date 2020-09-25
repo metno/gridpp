@@ -58,8 +58,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     gridpp::Points bpoints = bgrid.to_points();
     vec background1(nY * nX);
     int count = 0;
-    for(int x = 0; x < nX; x++) {
-        for(int y = 0; y < nY; y++) {
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
             background1[count] = background[y][x];
             count++;
         }
@@ -67,8 +67,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     vec output1 = optimal_interpolation(bpoints, background1, points, pobs, pratios, pbackground, structure, max_points, cross_validation_distance);
     vec2 output = gridpp::init_vec2(nY, nX);
     count = 0;
-    for(int x = 0; x < nX; x++) {
-        for(int y = 0; y < nY; y++) {
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
             output[y][x] = output1[count];
             count++;
         }

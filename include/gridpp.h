@@ -14,18 +14,26 @@
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
+    /** **************************************
+     * @name Short-hand notation for vectors of different dimensions sizes
+     * ***************************************/ /**@{*/
     // Preferred vector types
-    typedef std::vector<float> vec;         /**< 1D vector of floats */
-    typedef std::vector<vec> vec2;         /**< 2D vector of floats */
-    typedef std::vector<vec2> vec3;         /**< 3D vector of floats */
-    typedef std::vector<int> ivec;         /**< 1D vector of ints */
-    typedef std::vector<ivec> ivec2;         /**< 2D vector of ints */
-    typedef std::vector<ivec2> ivec3;         /**< 3D vector of ints */
+    typedef std::vector<float> vec;
+    typedef std::vector<vec> vec2;
+    typedef std::vector<vec2> vec3;
+    typedef std::vector<int> ivec;
+    typedef std::vector<ivec> ivec2;
+    typedef std::vector<ivec2> ivec3;
 
     // Only use when double is required
-    typedef std::vector<double> dvec;         /**< 1D vector of doubles */
-    typedef std::vector<dvec> dvec2;         /**< 2D vector of doubles */
+    typedef std::vector<double> dvec;
+    typedef std::vector<dvec> dvec2;
+    /**@}*/
 
+    /** **************************************
+     * @name Constants
+     * Functions that assimilate observations onto a gridded background
+     * ***************************************/ /**@{*/
     /** Missing value indicator */
     static const float MV = NAN;
     /** Missing value indicator in gridpp command-line tool */
@@ -34,6 +42,7 @@ namespace gridpp {
     static const float pi = 3.14159265;
     /** Radius of the earth [m] */
     static const double radius_earth = 6.37e6;
+    /**@}*/
 
     class KDTree;
     class Points;
@@ -82,10 +91,10 @@ namespace gridpp {
 
     /** **************************************
      * @name Data assimilation methods
-     * Functions that assimilate observations onto a gridded background
+     * Functions that merge observations with a background field
      * ***************************************/ /**@{*/
 
-    /** Optimal interpolation for a deterministic field
+    /** Optimal interpolation for a deterministic gridded field
       * @param bgrid Grid of background field
       * @param background 2D field of background values
       * @param points Points of observations
@@ -94,6 +103,7 @@ namespace gridpp {
       * @param pbackground Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param cross_validation_distance Exclude observations within this distance of the gridpoint [m]
     */
     vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
@@ -105,6 +115,17 @@ namespace gridpp {
             int max_points,
             float cross_validation_distance=MV);
 
+    /** Optimal interpolation for a deterministic vector of points
+      * @param bpoints Points of background field
+      * @param background 1D field of background values
+      * @param points Points of observations
+      * @param pobs Vector of observations
+      * @param pratios Vector of ratio of observation error variance to background variance
+      * @param pbackground Background with observation operator
+      * @param structure Structure function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param cross_validation_distance Exclude observations within this distance of the gridpoint [m]
+    */
     vec optimal_interpolation(const Points& bpoints,
             const vec& background,
             const Points& points,
@@ -154,7 +175,7 @@ namespace gridpp {
 
     /** **************************************
      * @name Spatial neighbourhood filters
-     * Functions that apply neighbourhood filters on a grid
+     * Functions that apply neighbourhood filters on a gridded field
      * ***************************************/ /**@{*/
 
     /** Spatial neighbourhood filter, computing a statistic for a sliding square window
@@ -223,20 +244,34 @@ namespace gridpp {
       * @param operation one of min, mean, median, max
     */
     vec2 neighbourhood_brute_force(const vec2& input, int radius, Statistic statistic);
+
+    /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
+      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param radius Filter radius in number of gridpoints
+      * @param operation one of min, mean, median, max
+    */
     vec2 neighbourhood_brute_force(const vec3& input, int radius, Statistic statistic);
 
     /** Calculate appropriate approximation thresholds for neighbourhood quantile
-      * @param input 2D (Y, X) or 3D (Y, X, T) array of values
+      * @param input 2D (Y, X) array of values
       * @param num_thresholds Number of thresholds
     */
     vec get_neighbourhood_thresholds(const vec2& input, int num_thresholds);
+
+    /** Calculate appropriate approximation thresholds for neighbourhood quantile based on an * ensemble
+      * @param input 3D (Y, X, T) array of values
+      * @param num_thresholds Number of thresholds
+    */
     vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
 
-    /** @deprecated Use neighbourhood() function */
+    /** Deprecated: Compute neighbourhood statistic on ensemble field
+      * @deprecated Use neighbourhood() function */
     vec2 neighbourhood_ens(const vec3& input, int radius, Statistic statistic);
-    /** @deprecated Use neighbourhood_quantile() function */
+    /** Deprecated: Compute neighbourhood quantiles on ensemble field
+      * @deprecated Use neighbourhood_quantile() function */
     vec2 neighbourhood_quantile_ens(const vec3& input, float quantile, int radius);
-    /** @deprecated Use neighbourhood_quantile_fast() function */
+    /** Deprecated: Compute neighbourhood quantiles fast on ensemble field
+      * @deprecated Use neighbourhood_quantile_fast() function */
     vec2 neighbourhood_quantile_ens_fast(const vec3& input, float quantile, int radius, const vec& thresholds);
     /**@}*/
 
@@ -245,6 +280,23 @@ namespace gridpp {
      * Functions that apply statistical methods to data
      * ***************************************/ /**@{*/
 
+    /** Create quantile mapping calibration curve
+     *  @param ref Reference values (observations)
+     *  @param fcst Forecast values
+     *  @param quantiles Vector of quantiles to extract. If empty, use all values.
+     *  @return Calibration curve
+    */
+    vec2 quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles=vec());
+
+    /** Create calibration curve that optimizes a metric
+     *  @param ref Reference values (observations)
+     *  @param fcst Forecast values
+     *  @param thresholds Thresholds for computing optimal values for
+     *  @param metric A Metric to optimize for
+     *  @return Calibration curve
+    */
+
+    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
     /** Apply arbitrary calibration curve to 1D forecasts
      *  @param fcst 1D vector of forecast values
      *  @param curve Calibration curve
@@ -269,22 +321,6 @@ namespace gridpp {
     */
     vec2 monotonize_curve(const vec2& curve);
 
-    /** Create quantile mapping calibration curve
-     *  @param ref Reference values (observations)
-     *  @param fcst Forecast values
-     *  @param quantiles Vector of quantiles to extract. If empty, use all values.
-     *  @return Calibration curve
-    */
-    vec2 quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles=vec());
-
-    /** Create calibration curve
-     *  @param ref Reference values (observations)
-     *  @param fcst Forecast values
-     *  @param thresholds Thresholds for computing optimal values for
-     *  @param metric A Metric to optimize for
-     *  @return Calibration curve
-    */
-    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
     float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
 
     float calc_score(float a, float b, float c, float d, Metric metric);

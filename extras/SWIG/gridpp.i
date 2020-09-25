@@ -171,11 +171,13 @@ namespace std {
 /* Inputs that are moved to outputs must be appended */
 %typemap(argout) std::vector<DTYPE>& OUTPUT (PyObject* py_obj=NULL) {
     PRINT_DEBUG("Typemap(argout) std::vector<DTYPE>& OUTPUT");
-    npy_intp dims[1] = {$1.size()};
+    const std::vector<DTYPE>& temp = *$1;
+    int s = temp.size();
+    npy_intp dims[1] = {s};
     py_obj = PyArray_ZEROS(1, dims, NPY_DTYPE, 0);
-    for(long i = 0; i < $1.size(); i++) {
+    for(long i = 0; i < s; i++) {
         DTYPE* ref = (DTYPE*) PyArray_GETPTR1((PyArrayObject*) py_obj, i);
-        ref[0] = $1[i];
+        ref[0] = temp[i];
     }
     %append_output(py_obj);
 }
@@ -598,6 +600,7 @@ namespace std {
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& count };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& y_coord };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& x_coord };
+%apply std::vector<float>& OUTPUT { std::vector<float>& distances };
 
 %{
 #include "gridpp.h"

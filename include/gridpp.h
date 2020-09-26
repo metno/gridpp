@@ -535,8 +535,13 @@ namespace gridpp {
      *  @return Wind speed [any unit]
      * */
     float wind_speed(float xwind, float ywind);
+
+    /** Vector version of wind speed calculation
+     *  @param xwind X-components of wind [any unit]
+     *  @param ywind Y-components of wind [any unit]
+     *  @return Wind speeds [any unit]
+     * */
     vec wind_speed(const vec& xwind, const vec& ywind);
-    vec2 wind_speed(const vec2& xwind, const vec2& ywind);
 
     /**@}*/
 

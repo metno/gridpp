@@ -6,12 +6,12 @@ gridpp::Points::Points() {
     // TODO: Deal with the empty case. Can't really find nearest neighbours then
 
 }
-gridpp::Points::Points(vec lats, vec lons, vec elevs, vec lafs, bool flat) {
+gridpp::Points::Points(vec lats, vec lons, vec elevs, vec lafs, CoordinateType type) {
     mLats = lats;
     mLons = lons;
     mElevs = elevs;
     mLafs = lafs;
-    KDTree tree = KDTree(lats, lons, flat);
+    KDTree tree = KDTree(lats, lons, type);
     mTree = tree;
     int N = mLats.size();
     if(mElevs.size() != N) {
@@ -113,8 +113,8 @@ gridpp::Points::Points(const gridpp::Points& other) {
     mLons = other.mLons;
     mElevs = other.mElevs;
     mLafs = other.mLafs;
-    mTree = KDTree(mLats, mLons, mTree.is_flat());
+    mTree = KDTree(mLats, mLons, mTree.get_coordinate_type());
 }
-bool gridpp::Points::is_flat() const {
-    return mTree.is_flat();
+CoordinateType gridpp::Points::get_coordinate_type() const {
+    return mTree.get_coordinate_type();
 }

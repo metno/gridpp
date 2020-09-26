@@ -5,7 +5,7 @@ using namespace gridpp;
 gridpp::Grid::Grid() {
 
 }
-gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs, bool flat) {
+gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs, CoordinateType type) {
     mLats = lats;
     mLons = lons;
     mElevs = elevs;
@@ -22,7 +22,7 @@ gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs, bool flat) {
             count++;
         }
     }
-    KDTree test = KDTree(lats0, lons0, flat);
+    KDTree test = KDTree(lats0, lons0, type);
     mTree = test;
 
     if(mElevs.size() != lats.size() or mElevs[0].size() != lats[0].size()) {
@@ -123,6 +123,6 @@ Points gridpp::Grid::to_points() const {
     }
     return gridpp::Points(mTree, elevs, lafs);
 }
-bool gridpp::Grid::is_flat() const {
-    return mTree.is_flat();
+CoordinateType gridpp::Grid::get_coordinate_type() const {
+    return mTree.get_coordinate_type();
 }

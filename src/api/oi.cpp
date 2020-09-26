@@ -37,8 +37,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
 
-    if(bgrid.is_flat() != points.is_flat()) {
-        throw std::runtime_error("Both background grid and observations points must be of same type (lat/lon or x/y)");
+    if(bgrid.get_coordinate_type() != points.get_coordinate_type()) {
+        throw std::runtime_error("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
     }
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
         std::stringstream ss;
@@ -95,8 +95,8 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
 
-    if(bpoints.is_flat() != points.is_flat()) {
-        throw std::runtime_error("Both background points and observations points must be of same type (lat/lon or x/y)");
+    if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
+        throw std::runtime_error("Both background points and observations points must be of same coordinate type (lat/lon or x/y)");
     }
     if(background.size() != bpoints.size()) {
         std::stringstream ss;
@@ -144,7 +144,7 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
     vec gY = pbackground;
 
     double curr_time = gridpp::clock();
-    bool flat = points.is_flat();
+    CoordinateType coordinate_type = points.get_coordinate_type();
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         float lat = blats[y];
@@ -180,8 +180,8 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
         lRhos0.reserve(lLocIndices0.size());
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            Point p1(plats[index], plons[index], pelevs[index], plafs[index], flat);
-            Point p2(lat, lon, elev, laf, flat);
+            Point p1(plats[index], plons[index], pelevs[index], plafs[index], coordinate_type);
+            Point p2(lat, lon, elev, laf, coordinate_type);
             float rho = structure.corr(p1, p2);
             if(rho > 0) {
                 lRhos0.push_back(std::pair<float,int>(rho, i));
@@ -259,8 +259,8 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
         int max_points,
         const gridpp::Transform& transform) {
 
-    if(bgrid.is_flat() != points.is_flat()) {
-        throw std::runtime_error("Both background grid and observations points must be of same type (lat/lon or x/y)");
+    if(bgrid.get_coordinate_type() != points.get_coordinate_type()) {
+        throw std::runtime_error("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
     }
     int nY = background.size();
     int nX = background[0].size();

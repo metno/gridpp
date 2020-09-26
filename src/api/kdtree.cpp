@@ -2,10 +2,10 @@
 
 using namespace gridpp;
 
-gridpp::KDTree::KDTree(vec lats, vec lons, bool flat) {
+gridpp::KDTree::KDTree(vec lats, vec lons, CoordinateType type) {
     mLats = lats;
     mLons = lons;
-    mFlat = flat;
+    mType = type;
     vec x, y, z;
 
     gridpp::KDTree::convert_coordinates(mLats, mLons, x, y, z);
@@ -93,7 +93,7 @@ bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& 
 }
 
 bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const {
-    if(mFlat) {
+    if(mType == XY) {
         x_coord = lon;
         y_coord = lat;
         z_coord = 0;
@@ -128,8 +128,8 @@ float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lo
     double dist = acos(ratio)*radiusEarth;
     return (float) dist;
 }
-float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2, bool flat) {
-    if(flat) {
+float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type) {
+    if(type == XY) {
         float dx = lon1 - lon2;
         float dy = lat1 - lat2;
         return sqrt(dx * dx + dy * dy);
@@ -145,8 +145,8 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
     }
 }
 float gridpp::KDTree::calc_distance_fast(const Point& p1, const Point& p2) {
-    assert(p1.flat == p2.flat);
-    return calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon, p1.flat);
+    assert(p1.type == p2.type);
+    return calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon, p1.type);
 }
 float gridpp::KDTree::calc_distance(float x0, float y0, float z0, float x1, float y1, float z1) {
     return sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1) + (z0 - z1)*(z0 - z1));
@@ -166,19 +166,19 @@ vec gridpp::KDTree::get_lons() const {
 int gridpp::KDTree::size() const {
     return mLats.size();
 }
-bool gridpp::KDTree::is_flat() const {
-    return mFlat;
+CoordinateType gridpp::KDTree::get_coordinate_type() const {
+    return mType;
 }
 gridpp::KDTree& gridpp::KDTree::operator=(gridpp::KDTree other) {
     std::swap(mLats, other.mLats);
     std::swap(mLons, other.mLons);
     std::swap(mTree, other.mTree);
-    std::swap(mFlat, other.mFlat);
+    std::swap(mType, other.mType);
     return *this;
 }
 gridpp::KDTree::KDTree(const gridpp::KDTree& other) {
     mLats = other.mLats;
     mLons = other.mLons;
     mTree = other.mTree;
-    mFlat = other.mFlat;
+    mType = other.mType;
 }

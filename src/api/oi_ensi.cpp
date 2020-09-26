@@ -40,8 +40,8 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
         int max_points) {
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
-    if(bgrid.is_flat() != points0.is_flat()) {
-        throw std::runtime_error("Both background grid and observations points must be of same type (lat/lon or x/y)");
+    if(bgrid.get_coordinate_type() != points0.get_coordinate_type()) {
+        throw std::runtime_error("Both background grid and observations points must be of same coorindate type (lat/lon or x/y)");
     }
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1])
         throw std::runtime_error("Input field is not the same size as the grid");

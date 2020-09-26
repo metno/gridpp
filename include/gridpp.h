@@ -89,6 +89,11 @@ namespace gridpp {
         Additive  = 20, /**< Additive */
     };
 
+    enum CoordinateType {
+        LatLon = 0,
+        XY = 1,
+    };
+
     /** **************************************
      * @name Data assimilation methods
      * Functions that merge observations with a background field
@@ -655,12 +660,12 @@ namespace gridpp {
 
     class Point {
         public:
-            Point(float lat, float lon, float elev=MV, float laf=MV, bool flat=false);
+            Point(float lat, float lon, float elev=MV, float laf=MV, CoordinateType type=LatLon);
             float lat;
             float lon;
             float elev;
             float laf;
-            float flat;
+            CoordinateType type;
     };
     /** Covariance structure function */
     class StructureFunction {
@@ -746,7 +751,7 @@ namespace gridpp {
     /** Helper class for Grid and Points */
     class KDTree {
         public:
-            KDTree(vec lats, vec lons, bool flat=false);
+            KDTree(vec lats, vec lons, CoordinateType type=LatLon);
             KDTree& operator=(KDTree other);
             KDTree(const KDTree& other);
             KDTree() {};
@@ -808,12 +813,12 @@ namespace gridpp {
             static float rad2deg(float deg);
             static float calc_distance(float lat1, float lon1, float lat2, float lon2);
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
-            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, bool flat=false);
+            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type=LatLon);
             static float calc_distance_fast(const Point& p1, const Point& p2);
             vec get_lats() const;
             vec get_lons() const;
             int size() const;
-            bool is_flat() const;
+            CoordinateType get_coordinate_type() const;
         protected:
             typedef boost::geometry::model::point<float, 3, boost::geometry::cs::cartesian> point;
             typedef std::pair<point, unsigned> value;
@@ -821,7 +826,7 @@ namespace gridpp {
             boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > mTree;
             vec mLats;
             vec mLons;
-            bool mFlat;
+            CoordinateType mType;
     };
 
     /** Represents a vector of locations and their metadata */
@@ -833,9 +838,9 @@ namespace gridpp {
              *  @param lons: vector of longitudes [degrees]
              *  @param elevs: vector of elevations [m]
              *  @param lafs: vector of land area fractions [1]
-             *  @param flat: If true, treat lat and lon as coordinates on a flat surface with units [m]
+             *  @param type: Coordinate type
             */
-            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), bool flat=false);
+            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), CoordinateType type=LatLon);
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
@@ -852,7 +857,7 @@ namespace gridpp {
             int size() const;
             ivec get_in_domain_indices(const Grid& grid) const;
             Points get_in_domain(const Grid& grid) const;
-            bool is_flat() const;
+            CoordinateType get_coordinate_type() const;
         private:
             KDTree mTree;
             vec mLats;
@@ -870,9 +875,9 @@ namespace gridpp {
              *  @param lons: 2D vector of longitudes [degrees]
              *  @param elevs: 2D vector of elevations [m]
              *  @param lafs: 2D vector of land area fractions [1]
-             *  @param flat: If true, treat lat and lon as coordinates on a flat surface with units [m]
+             *  @param type: Coordinate type
             */
-            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), bool flat=false);
+            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=LatLon);
             ivec get_nearest_neighbour(float lat, float lon) const;
             ivec2 get_neighbours(float lat, float lon, float radius) const;
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
@@ -885,7 +890,7 @@ namespace gridpp {
             vec2 get_elevs() const;
             vec2 get_lafs() const;
             ivec size() const;
-            bool is_flat() const;
+            CoordinateType get_coordinate_type() const;
         private:
             KDTree mTree;
             int mX;

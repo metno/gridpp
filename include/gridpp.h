@@ -422,6 +422,14 @@ namespace gridpp {
     */
     vec distance(const Grid& grid, const Points& points, int num=1);
 
+    /** For each output gridpoint, calculate the distance to nearest input gridpoint
+     *  @param grid Grid
+     *  @param ogrid Output grid
+     *  @param num Number of points
+     *  @return Distance [m] to nearest gridpoint for each gridpoint
+    */
+    vec2 distance(const Grid& igrid, const Grid& ogrid, int num=1);
+
     /** For each gridpoint, calculates the distance to nearest point
      *  @param points Points
      *  @param grid Grid

@@ -36,9 +36,13 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     // Check input data
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
+
+    if(bgrid.is_flat() != points.is_flat()) {
+        throw std::runtime_error("Both background grid and observations points must be of same type (lat/lon or x/y)");
+    }
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
         std::stringstream ss;
-        ss << "Input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
+        ss << "input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
         throw std::runtime_error(ss.str());
     }
     if(pobs.size() != points.size()) {
@@ -90,6 +94,10 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
     // Check input data
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
+
+    if(bpoints.is_flat() != points.is_flat()) {
+        throw std::runtime_error("Both background points and observations points must be of same type (lat/lon or x/y)");
+    }
     if(background.size() != bpoints.size()) {
         std::stringstream ss;
         ss << "Input field (" << bpoints.size() << ") is not the same size as the grid (" << background.size() << ")";
@@ -251,6 +259,9 @@ vec2 gridpp::optimal_interpolation_transform(const gridpp::Grid& bgrid,
         int max_points,
         const gridpp::Transform& transform) {
 
+    if(bgrid.is_flat() != points.is_flat()) {
+        throw std::runtime_error("Both background grid and observations points must be of same type (lat/lon or x/y)");
+    }
     int nY = background.size();
     int nX = background[0].size();
     int nS = points.size();

@@ -828,6 +828,13 @@ namespace gridpp {
     class Points  {
         public:
             Points();
+            /** Initialize a new grid
+             *  @param lats: vector of latitudes [degrees]
+             *  @param lons: vector of longitudes [degrees]
+             *  @param elevs: vector of elevations [m]
+             *  @param lafs: vector of land area fractions [1]
+             *  @param flat: If true, treat lat and lon as coordinates on a flat surface with units [m]
+            */
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), bool flat=false);
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
@@ -858,6 +865,13 @@ namespace gridpp {
     class Grid {
         public:
             Grid();
+            /** Initialize a new grid
+             *  @param lats: 2D vector of latitudes [degrees]
+             *  @param lons: 2D vector of longitudes [degrees]
+             *  @param elevs: 2D vector of elevations [m]
+             *  @param lafs: 2D vector of land area fractions [1]
+             *  @param flat: If true, treat lat and lon as coordinates on a flat surface with units [m]
+            */
             Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), bool flat=false);
             ivec get_nearest_neighbour(float lat, float lon) const;
             ivec2 get_neighbours(float lat, float lon, float radius) const;

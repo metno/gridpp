@@ -93,7 +93,7 @@ bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& 
 }
 
 bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const {
-    if(mType == XY) {
+    if(mType == gridpp::Cartesian) {
         x_coord = lon;
         y_coord = lat;
         z_coord = 0;
@@ -108,33 +108,40 @@ bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, f
     }
     return true;
 }
-float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lon2) {
-    if(!(fabs(lat1) <= 90 && fabs(lat2) <= 90 && fabs(lon1) <= 360 && fabs(lon2) <= 360)) {
-        // std::cout << " Cannot calculate distance, invalid lat/lon: (" << lat1 << "," << lon1 << ") (" << lat2 << "," << lon2 << ")";
-        // std::cout << '\n';
-    }
-    if(lat1 == lat2 && lon1 == lon2)
-        return 0;
-
-    double lat1r = deg2rad(lat1);
-    double lat2r = deg2rad(lat2);
-    double lon1r = deg2rad(lon1);
-    double lon2r = deg2rad(lon2);
-    double radiusEarth = 6.378137e6;
-
-    double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
-                   + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
-                   + sin(lat1r)*sin(lat2r);
-    double dist = acos(ratio)*radiusEarth;
-    return (float) dist;
-}
-float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type) {
-    if(type == XY) {
+float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lon2, CoordinateType type) {
+    if(type == gridpp::Cartesian) {
         float dx = lon1 - lon2;
         float dy = lat1 - lat2;
         return sqrt(dx * dx + dy * dy);
     }
-    else {
+    else if(type == gridpp::Geodetic){
+        if(!(fabs(lat1) <= 90 && fabs(lat2) <= 90 && fabs(lon1) <= 360 && fabs(lon2) <= 360)) {
+            // std::cout << " Cannot calculate distance, invalid lat/lon: (" << lat1 << "," << lon1 << ") (" << lat2 << "," << lon2 << ")";
+            // std::cout << '\n';
+        }
+        if(lat1 == lat2 && lon1 == lon2)
+            return 0;
+
+        double lat1r = deg2rad(lat1);
+        double lat2r = deg2rad(lat2);
+        double lon1r = deg2rad(lon1);
+        double lon2r = deg2rad(lon2);
+        double radiusEarth = 6.378137e6;
+
+        double ratio = cos(lat1r)*cos(lon1r)*cos(lat2r)*cos(lon2r)
+                       + cos(lat1r)*sin(lon1r)*cos(lat2r)*sin(lon2r)
+                       + sin(lat1r)*sin(lat2r);
+        double dist = acos(ratio)*radiusEarth;
+        return (float) dist;
+    }
+}
+float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type) {
+    if(type == gridpp::Cartesian) {
+        float dx = lon1 - lon2;
+        float dy = lat1 - lat2;
+        return sqrt(dx * dx + dy * dy);
+    }
+    else if(type == gridpp::Geodetic){
         double lat1r = deg2rad(lat1);
         double lat2r = deg2rad(lat2);
         double lon1r = deg2rad(lon1);
@@ -142,6 +149,9 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
         float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
         return gridpp::radius_earth*sqrt(dx2+dy2);
+    }
+    else {
+        throw std::runtime_error("Unknown coordinate type");
     }
 }
 float gridpp::KDTree::calc_distance_fast(const Point& p1, const Point& p2) {

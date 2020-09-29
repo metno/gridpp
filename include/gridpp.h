@@ -84,14 +84,15 @@ namespace gridpp {
 
     /** Method for statistical correction */
     enum CorrectionType {
-        Qq        = 0,  /**< Quantile mapping */
+        Qq        = 0,        /**< Quantile mapping */
         Multiplicative = 10,  /**< Multiplicative */
-        Additive  = 20, /**< Additive */
+        Additive  = 20,       /**< Additive */
     };
 
+    /** Types of coordinates for position of points */
     enum CoordinateType {
-        LatLon = 0,
-        XY = 1,
+        Geodetic = 0,      /**< Latitude and longitude */
+        Cartesian = 1,     /**< X and Y */
     };
 
     /** **************************************
@@ -141,6 +142,8 @@ namespace gridpp {
             int max_points,
             float cross_validation_distance=MV);
 
+    /** This is its own function because the variance parameterization is different than in the
+      * non-transformed case */
     vec2 optimal_interpolation_transform(const Grid& bgrid,
             const vec2& background,
             float bsigma,
@@ -671,9 +674,17 @@ namespace gridpp {
     ivec2 test_ivec2_output();
     /**@}*/
 
+    /** Represents a single point in some coordinate system */
     class Point {
         public:
-            Point(float lat, float lon, float elev=MV, float laf=MV, CoordinateType type=LatLon);
+            /** Constructor
+              * @param lat: Latitude coordinate
+              * @param lon: Longitude coordinate
+              * @param elev: Elevation
+              * @param laf: Land area fraction (between 0 and 1)
+              * @param type: Coordinate type for lat and lon
+            */
+            Point(float lat, float lon, float elev=MV, float laf=MV, CoordinateType type=Geodetic);
             float lat;
             float lon;
             float elev;
@@ -764,7 +775,7 @@ namespace gridpp {
     /** Helper class for Grid and Points */
     class KDTree {
         public:
-            KDTree(vec lats, vec lons, CoordinateType type=LatLon);
+            KDTree(vec lats, vec lons, CoordinateType type=Geodetic);
             KDTree& operator=(KDTree other);
             KDTree(const KDTree& other);
             KDTree() {};
@@ -824,9 +835,9 @@ namespace gridpp {
             bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const;
             static float deg2rad(float deg);
             static float rad2deg(float deg);
-            static float calc_distance(float lat1, float lon1, float lat2, float lon2);
+            static float calc_distance(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
-            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type=LatLon);
+            static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
             static float calc_distance_fast(const Point& p1, const Point& p2);
             vec get_lats() const;
             vec get_lons() const;
@@ -853,7 +864,7 @@ namespace gridpp {
              *  @param lafs: vector of land area fractions [1]
              *  @param type: Coordinate type
             */
-            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), CoordinateType type=LatLon);
+            Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), CoordinateType type=Geodetic);
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
@@ -890,7 +901,7 @@ namespace gridpp {
              *  @param lafs: 2D vector of land area fractions [1]
              *  @param type: Coordinate type
             */
-            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=LatLon);
+            Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=Geodetic);
             ivec get_nearest_neighbour(float lat, float lon) const;
             ivec2 get_neighbours(float lat, float lon, float radius) const;
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;

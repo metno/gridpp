@@ -322,6 +322,7 @@ ivec2 gridpp::init_ivec2(int Y, int X, int value) {
 vec3 gridpp::init_vec3(int Y, int X, int T, float value) {
     vec3 output(Y);
     for(int y = 0; y < Y; y++) {
+        output[y].resize(X);
         for(int x = 0; x < X; x++)
             output[y][x].resize(T, value);
     }
@@ -330,6 +331,7 @@ vec3 gridpp::init_vec3(int Y, int X, int T, float value) {
 ivec3 gridpp::init_ivec3(int Y, int X, int T, int value) {
     ivec3 output(Y);
     for(int y = 0; y < Y; y++) {
+        output[y].resize(X);
         for(int x = 0; x < X; x++)
             output[y][x].resize(T, value);
     }

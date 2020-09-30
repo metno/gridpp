@@ -18,7 +18,7 @@ extern "C" void __gcov_flush();
 using namespace gridpp;
 
 bool gridpp::is_valid(float value) {
-    return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV && value != MV_CML;
+    return !std::isnan(value) && !std::isinf(value) && value != gridpp::MV;
 }
 float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
     // Initialize to missing

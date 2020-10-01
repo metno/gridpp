@@ -3,11 +3,11 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include <iostream>
-void PRINT_DEBUG(std::string message) {
 #if 0
     std::cout << message << std::endl;
+#else
+    #define PRINT_DEBUG(message) ;
 #endif
-}
 %}
 #if defined(SWIGPYTHON)
 %include "numpy.i"

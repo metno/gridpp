@@ -601,6 +601,7 @@ namespace std {
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& y_coord };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& x_coord };
 %apply std::vector<float>& OUTPUT { std::vector<float>& distances };
+%apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& distances };
 
 %{
 #include "gridpp.h"

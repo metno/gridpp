@@ -406,6 +406,18 @@ ivec2 gridpp::test_ivec2_output() {
     return output;
 }
 
+float gridpp::test_vec_argout(vec& distances) {
+    distances.clear();
+    distances.resize(10, 0);
+    return 0;
+}
+float gridpp::test_vec2_argout(vec2& distances) {
+    distances.clear();
+    distances.resize(10);
+    for(int i = 0; i < 10; i++)
+        distances[i].resize(10, 0);
+    return 0;
+}
 #if 0
 vec2 gridpp::calc_gradient(const vec2& values, const vec2& aux, int radius) {
     int Y = values.size();

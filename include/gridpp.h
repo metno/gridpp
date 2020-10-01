@@ -669,6 +669,11 @@ namespace gridpp {
     /** Testing function for 3D output vector */
     vec3 test_vec3_output();
 
+    /** Testing function for 1D vector treated as output */
+    float test_vec_argout(vec& distances);
+    /** Testing function for 2D vector treated as output */
+    float test_vec2_argout(vec2& distances);
+
     /** Testing function for 1D output vector */
     ivec test_ivec_output();
     ivec2 test_ivec2_output();
@@ -894,6 +899,7 @@ namespace gridpp {
     class Grid {
         public:
             Grid();
+
             /** Initialize a new grid
              *  @param lats: 2D vector of latitudes [degrees]
              *  @param lons: 2D vector of longitudes [degrees]
@@ -907,6 +913,8 @@ namespace gridpp {
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
             int get_num_neighbours(float lat, float lon, float radius) const;
             ivec2 get_closest_neighbours(float lat, float lon, int num) const;
+
+            /** Convert grid to a vector of points */
             Points to_points() const;
 
             vec2 get_lats() const;

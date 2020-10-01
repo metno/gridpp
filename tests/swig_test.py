@@ -37,6 +37,15 @@ class SwigTest(unittest.TestCase):
         self.assertEqual(gridpp.test_vec_input(np.array(ar).astype('float32')), 6)
         self.assertEqual(gridpp.test_vec_input(np.array(ar).astype('int32')), 6)
 
+    def test_vec_argout(self):
+        n, distances = gridpp.test_vec_argout()
+        self.assertEqual(len(distances), 10)
+
+    def test_vec2_argout(self):
+        n, distances = gridpp.test_vec2_argout()
+        self.assertEqual(distances.shape[0], 10)
+        self.assertEqual(distances.shape[1], 10)
+
 
 if __name__ == '__main__':
     unittest.main()

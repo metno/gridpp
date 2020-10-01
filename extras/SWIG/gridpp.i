@@ -2,9 +2,11 @@
 %include "typemaps.i"
 %{
 #define SWIG_FILE_WITH_INIT
-#include <iostream>
+
+#define INVALID_DIMENSIONS_ERROR(N, DTYPE) SWIG_exception(SWIG_RuntimeError, "Could not convert input to " #N "D array of type '" #DTYPE "'");
 #if 0
-    std::cout << message << std::endl;
+    #include <iostream>
+    #define PRINT_DEBUG(message) std::cout << message << std::endl;
 #else
     #define PRINT_DEBUG(message) ;
 #endif
@@ -75,13 +77,13 @@ namespace std {
         if(num_dims != 1)
             SWIG_exception(SWIG_RuntimeError, "Unknown exception");
 
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -93,7 +95,7 @@ namespace std {
         ptr = new std::vector<DTYPE>();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(1, DTYPE);
         }
         $1 = *ptr;
     }
@@ -105,13 +107,13 @@ namespace std {
         int num_dims = array_numdims($input);
         if(num_dims != 1)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 1 dimensional");
-        if(array_type($input) == NPY_FLOAT) {
-            py_obj = PyArray_FROMANY($input, NPY_DTYPE, 1, 1, NPY_ARRAY_DEFAULT);
+        if(array_type($input) == NPY_DTYPE) {
+            py_obj = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -124,7 +126,7 @@ namespace std {
         ptr = new std::vector<DTYPE>();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(1, DTYPE);
         }
         $1 = ptr;
     }
@@ -137,13 +139,13 @@ namespace std {
         int num_dims = array_numdims($input);
         if(num_dims != 1)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 1 dimensional");
-        if(array_type($input) == NPY_FLOAT) {
-            py_obj = PyArray_FROMANY($input, NPY_DTYPE, 1, 1, NPY_ARRAY_DEFAULT);
+        if(array_type($input) == NPY_DTYPE) {
+            py_obj = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 1, 1, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -156,7 +158,7 @@ namespace std {
         ptr = new std::vector<DTYPE>();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(1, DTYPE);
         }
         $1 = ptr;
     }
@@ -233,13 +235,13 @@ namespace std {
         int num_dims = array_numdims($input);
         if(num_dims != 2)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 2 dimensional");
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -256,7 +258,7 @@ namespace std {
         ptr = new std::vector<std::vector<DTYPE> >();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(2, DTYPE);
         }
         $1 = *ptr;
     }
@@ -269,13 +271,13 @@ namespace std {
         if(num_dims != 2)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 2 dimensional");
         py_obj;
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -295,7 +297,7 @@ namespace std {
         swig::asptr($input, &ptr);
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(2, DTYPE);
         }
         $1 = ptr;
     }
@@ -308,13 +310,13 @@ namespace std {
         if(num_dims != 2)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 2 dimensional");
         py_obj;
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 2, 2, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -334,7 +336,7 @@ namespace std {
         swig::asptr($input, &ptr);
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(2, DTYPE);
         }
         $1 = ptr;
     }
@@ -402,13 +404,13 @@ namespace std {
         if(num_dims != 3)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 3 dimensional");
         py_obj;
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -429,7 +431,7 @@ namespace std {
         ptr = new std::vector<std::vector<std::vector<DTYPE> > >();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(3, DTYPE);
         }
         $1 = *ptr;
     }
@@ -442,13 +444,13 @@ namespace std {
         if(num_dims != 3)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 3 dimensional");
         py_obj;
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -471,7 +473,7 @@ namespace std {
         ptr = new std::vector<std::vector<std::vector<DTYPE> > >();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(3, DTYPE);
         }
         $1 = ptr;
     }
@@ -485,13 +487,13 @@ namespace std {
         if(num_dims != 3)
             SWIG_exception(SWIG_RuntimeError, "Vector must be 3 dimensional");
         py_obj;
-        if(array_type($input) == NPY_FLOAT) {
+        if(array_type($input) == NPY_DTYPE) {
             py_obj = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
         }
         else {
             py_obj0 = PyArray_FROMANY($input, array_type($input), 3, 3, NPY_ARRAY_DEFAULT);
             assert(py_obj0 != NULL);
-            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_FLOAT), 0);
+            py_obj = PyArray_CastToType((PyArrayObject*) py_obj0, PyArray_DescrFromType(NPY_DTYPE), 0);
         }
         assert(py_obj != NULL);
         py_array = (PyArrayObject*) py_obj;
@@ -514,7 +516,7 @@ namespace std {
         ptr = new std::vector<std::vector<std::vector<DTYPE> > >();
         int test = swig::asptr($input, &ptr);
         if(ptr == NULL || !SWIG_IsOK(test)) {
-            SWIG_exception(SWIG_RuntimeError, "Could not convert type");
+            INVALID_DIMENSIONS_ERROR(3, DTYPE);
         }
         $1 = ptr;
     }

@@ -664,19 +664,19 @@ namespace gridpp {
     float test_vec3_input(const vec3& input);
     /** Testing function for 1D output vector */
     vec test_vec_output();
+    ivec test_ivec_output();
     /** Testing function for 2D output vector */
     vec2 test_vec2_output();
+    ivec2 test_ivec2_output();
     /** Testing function for 3D output vector */
     vec3 test_vec3_output();
+    ivec3 test_ivec3_output();
 
     /** Testing function for 1D vector treated as output */
     float test_vec_argout(vec& distances);
     /** Testing function for 2D vector treated as output */
     float test_vec2_argout(vec2& distances);
 
-    /** Testing function for 1D output vector */
-    ivec test_ivec_output();
-    ivec2 test_ivec2_output();
     /**@}*/
 
     /** Represents a single point in some coordinate system */

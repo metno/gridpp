@@ -101,7 +101,23 @@ foreach(item gridpp-bin gridpp-train gridpp-kdtree)
 endforeach(item)
 
 if (ENABLE_TESTS)
-   include(Testing)
+    if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+        # Copy the test programs to be next to the gridpp.py package
+        # add_custom_target(tests-data
+        #     COMMAND ${CMAKE_COMMAND} -E copy_directory
+        #     ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        #     ${CMAKE_BINARY_DIR}/extras/SWIG/python/tests)
+
+        # add_custom_target(tests COMMAND nosetests3 extras/SWIG/python -e memory)
+        # add_dependencies(tests tests-data build-python)
+        add_custom_target(coverage
+            COMMAND lcov --directory ${CMAKE_BINARY_DIR}/CMakeFiles/gridpp.dir/ --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
+            COMMAND lcov --remove coverage.info '*/src/Testing/*' '/usr/*' --output-file coverage.info
+            COMMAND lcov --list coverage.info
+            # COMMAND genhtml coverage.info -o coverage
+        )
+        add_dependencies(coverage tests)
+    endif()
 endif()
 
 function(lookup_program result program)

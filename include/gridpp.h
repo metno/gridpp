@@ -677,6 +677,9 @@ namespace gridpp {
     /** Testing function for 2D vector treated as output */
     float test_vec2_argout(vec2& distances);
 
+    /** Default value used to fill array in SWIG testing functions. Not useful for any other purpose. */
+    static const float swig_default_value = -1;
+
     /**@}*/
 
     /** Represents a single point in some coordinate system */

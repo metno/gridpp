@@ -898,6 +898,8 @@ namespace gridpp {
             vec mLafs;
     };
 
+    bool point_in_rectangle(const Point& A, const Point& B, const Point& C, const Point& D, const Point& m );
+
     /** Represents a 2D grid of locations and their metadata */
     class Grid {
         public:
@@ -916,6 +918,8 @@ namespace gridpp {
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;
             int get_num_neighbours(float lat, float lon, float radius) const;
             ivec2 get_closest_neighbours(float lat, float lon, int num) const;
+
+            bool get_box(float lat, float lon, int& Y1, int& X1, int& Y2, int& X2) const;
 
             /** Convert grid to a vector of points */
             Points to_points() const;

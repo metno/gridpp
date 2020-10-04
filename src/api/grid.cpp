@@ -1,7 +1,13 @@
 #include "gridpp.h"
+#include <iostream>
 
 using namespace gridpp;
 
+namespace {
+    float scalar_product(float lat1, float lon1, float lat2, float lon2) {
+        return lat1 * lat2 + lon1 * lon2;
+    }
+}
 gridpp::Grid::Grid() {
 
 }
@@ -125,4 +131,79 @@ Points gridpp::Grid::to_points() const {
 }
 CoordinateType gridpp::Grid::get_coordinate_type() const {
     return mTree.get_coordinate_type();
+}
+bool gridpp::Grid::get_box(float lat, float lon, int& Y1, int& X1, int& Y2, int& X2) const {
+    int xdir = 1;
+    int ydir = 1;
+    ivec nn = get_nearest_neighbour(lat, lon);
+    int Y = nn[0];
+    int X = nn[1];
+    int nY = size()[0];
+    int nX = size()[1];
+    if(Y == 0) {
+        Y1 = 0;
+        Y2 = 1;
+    }
+    else if(Y == nY - 1) {
+        Y1 = nY - 2;
+        Y2 = nY - 1;
+    }
+    if(X == 0) {
+        X1 = 0;
+        X2 = 1;
+    }
+    else if(X == nX - 1) {
+        X1 = nX - 2;
+        X2 = nX - 1;
+    }
+
+    int it = 0;
+    bool found = false;
+    while(it < 4) {
+        xdir = -1 + 2 * (it %2);
+        ydir = -1 + 2 * (it < 2);
+        it++;
+        if(Y == 0 && ydir == -1)
+            continue;
+        else if(Y == nY - 1 && ydir == 1)
+            continue;
+        else if(X == 0 && xdir == -1)
+            continue;
+        else if(X == nX - 1 && xdir == 1)
+            continue;
+        // std::cout << "Iteration " << it << " " << ydir << " " << xdir << std::endl;
+        Point A(mLats[Y][X], mLons[Y][X]);
+        Point B(mLats[Y + ydir][X], mLons[Y + ydir][X]);
+        Point C(mLats[Y + ydir][X + xdir], mLons[Y + ydir][X + xdir]);
+        Point D(mLats[Y][X + xdir], mLons[Y][X + xdir]);
+        Point curr(lat, lon);
+        // std::cout << A.lat << "," << B.lat << "," << C.lat << "," << D.lat << "," << curr.lat << std::endl;
+        // std::cout << A.lon << "," << B.lon << "," << C.lon << "," << D.lon << "," << curr.lon << std::endl;
+        bool inrectangle = point_in_rectangle(A, B, C, D, curr);
+        // std::cout << " inrectangle: " << inrectangle << std::endl;
+        if(inrectangle) {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+        return false;
+
+    if(xdir == 1) {
+        X1 = X;
+        X2 = X + 1;
+    }
+    else if(xdir == -1) {
+        X1 = X - 1;
+        X2 = X;
+    }
+    if(ydir == 1) {
+        Y1 = Y;
+        Y2 = Y + 1;
+    }
+    else if(ydir == -1) {
+        Y1 = Y - 1;
+        Y2 = Y;
+    }
+    return true;
 }

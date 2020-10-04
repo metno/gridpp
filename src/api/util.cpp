@@ -394,3 +394,23 @@ ivec gridpp::regression(const vec& x, const vec& y) {
             return ret;
 }
 #endif
+namespace {
+    Point vect2d(const Point& p1, const Point& p2) {
+        Point temp(0, 0);
+        temp.lon = (p2.lon - p1.lon);
+        temp.lat = -1 * (p2.lat - p1.lat);
+        return temp;
+    }
+}
+// Based on solution posted on Stack Overflow: https://stackoverflow.com/a/42396910/2540278
+bool gridpp::point_in_rectangle(const Point& A, const Point& B, const Point& C, const Point& D, const Point& m) {
+    Point AB = ::vect2d(A, B);  float C1 = -1 * (AB.lat*A.lon + AB.lon*A.lat); float  D1 = (AB.lat*m.lon + AB.lon*m.lat) + C1;
+    Point AD = ::vect2d(A, D);  float C2 = -1 * (AD.lat*A.lon + AD.lon*A.lat); float D2 = (AD.lat*m.lon + AD.lon*m.lat) + C2;
+    Point BC = ::vect2d(B, C);  float C3 = -1 * (BC.lat*B.lon + BC.lon*B.lat); float D3 = (BC.lat*m.lon + BC.lon*m.lat) + C3;
+    Point CD = ::vect2d(C, D);  float C4 = -1 * (CD.lat*C.lon + CD.lon*C.lat); float D4 = (CD.lat*m.lon + CD.lon*m.lat) + C4;
+    // std::cout << " # " << D1 << " " << D2 << " " << D3 << " " << D4 << std::endl;
+    // Clockwise and counter-clockwise alternatives
+    bool opt1 = 0 >= D1 && 0 >= D4 && 0 <= D2 && 0 >= D3;
+    bool opt2 = 0 <= D1 && 0 <= D4 && 0 >= D2 && 0 <= D3;
+    return opt1 || opt2;
+}

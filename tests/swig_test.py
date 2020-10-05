@@ -89,6 +89,10 @@ class SwigTest(unittest.TestCase):
         np.testing.assert_array_equal(gridpp.test_ivec2_output(), [ar, ar, ar])
         np.testing.assert_array_equal(gridpp.test_ivec3_output(), [[ar, ar, ar], [ar, ar, ar], [ar, ar, ar]])
 
+    def test_test_array(self):
+        """Test test_array to complete code coverage. Not a needed function."""
+        ar = [1, 2, 3]
+        gridpp.test_array(ar)
 
 
 if __name__ == '__main__':

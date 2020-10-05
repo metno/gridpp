@@ -3,7 +3,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 
-#define INVALID_DIMENSIONS_ERROR(N, DTYPE) SWIG_exception(SWIG_RuntimeError, "Could not convert input to " #N "D array of type '" #DTYPE "'");
+#define INVALID_DIMENSIONS_ERROR(N, DTYPE) SWIG_exception(SWIG_TypeError, "Could not convert input to " #N "D array of type '" #DTYPE "'");
 #if 0
     #include <iostream>
     #define PRINT_DEBUG(message) std::cout << message << std::endl;
@@ -604,6 +604,10 @@ namespace std {
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& x_coord };
 %apply std::vector<float>& OUTPUT { std::vector<float>& distances };
 %apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& distances };
+%apply int& OUTPUT { int& X1_out };
+%apply int& OUTPUT { int& Y1_out };
+%apply int& OUTPUT { int& X2_out };
+%apply int& OUTPUT { int& Y2_out };
 
 %{
 #include "gridpp.h"

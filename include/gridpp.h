@@ -41,7 +41,7 @@ namespace gridpp {
     /** Mathematical constant pi */
     static const float pi = 3.14159265;
     /** Radius of the earth [m] */
-    static const double radius_earth = 6.37e6;
+    static const double radius_earth = 6.378137e6;
     /**@}*/
 
     class KDTree;
@@ -919,7 +919,7 @@ namespace gridpp {
             int get_num_neighbours(float lat, float lon, float radius) const;
             ivec2 get_closest_neighbours(float lat, float lon, int num) const;
 
-            bool get_box(float lat, float lon, int& Y1, int& X1, int& Y2, int& X2) const;
+            bool get_box(float lat, float lon, int& Y1_out, int& X1_out, int& Y2_out, int& X2_out) const;
 
             /** Convert grid to a vector of points */
             Points to_points() const;

@@ -52,5 +52,25 @@ class KDTreeTest(unittest.TestCase):
         self.assertAlmostEqual(dist[0], 0)
         self.assertAlmostEqual(dist[1], 0)
 
+    def test_rad2deg(self):
+        self.assertAlmostEqual(gridpp.KDTree_rad2deg(1), 180 / 3.14159265, 5)
+        self.assertAlmostEqual(gridpp.KDTree_rad2deg(-1), -180 / 3.14159265, 5)
+        self.assertAlmostEqual(gridpp.KDTree_rad2deg(0), 0, 5)
+
+    def test_calc_distance(self):
+        self.assertAlmostEqual(0, gridpp.KDTree_calc_distance(60,10,60,10));
+        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance(90,10,-90,10));
+        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance(0,0,0,180));
+        self.assertAlmostEqual(16879114, gridpp.KDTree_calc_distance(60.5,5.25,-84.75,-101.75));
+        self.assertAlmostEqual(124080.79, gridpp.KDTree_calc_distance(60,10,61,11), delta=0.1);
+
+    def test_calc_distance_fast(self):
+        self.assertEqual(0, gridpp.KDTree_calc_distance_fast(60,10,60,10));
+        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance_fast(90,10,-90,10), delta=100);
+        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance_fast(0,0,0,180), delta=100);
+        # self.assertAlmostEqual(16879114, gridpp.KDTree_calc_distance_fast(60.5,5.25,-84.75,-101.75), delta=100);
+        self.assertAlmostEqual(124080.79, gridpp.KDTree_calc_distance_fast(60,10,61,11), delta=100);
+
+
 if __name__ == '__main__':
     unittest.main()

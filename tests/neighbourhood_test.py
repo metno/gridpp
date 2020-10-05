@@ -19,22 +19,31 @@ values[1, 3] = np.nan
 values[2, 4] = np.nan
 values = np.array(values)
 
-class NeighbourhoodTest(unittest.TestCase):
+class Test(unittest.TestCase):
+    def test_invalid_arguments(self):
+        """Check that exception is thrown for invalid arguments"""
+        field = np.ones([5, 5])
+        radius = -1
+        stats = [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median]
+
+        for stat in stats:
+            with self.assertRaises(ValueError) as e:
+                gridpp.neighbourhood(field, radius, stat)
+
+        # User should use the _quantile function
+        with self.assertRaises(Exception) as e:
+            gridpp.neighbourhood(field, 1, gridpp.Quantile)
+
     def test_empty(self):
+        """Empty input array"""
         for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
             output = gridpp.neighbourhood([[]], 1, statistic)
             self.assertEqual(len(output.shape), 2)
             self.assertEqual(output.shape[0], 0)
             self.assertEqual(output.shape[1], 0)
-        for quantile in np.arange(0.1,0.9,0.1):
-            for num_thresholds in [1, 2]:
-                thresholds = gridpp.get_neighbourhood_thresholds(values, num_thresholds)
-                output = gridpp.neighbourhood_quantile_fast([[]], 0.9, 1, thresholds)
-                self.assertEqual(len(output.shape), 2)
-                self.assertEqual(output.shape[0], 0)
-                self.assertEqual(output.shape[1], 0)
 
     def test_missing(self):
+        """Missing values in input array"""
         empty = np.zeros([5, 5])
         empty[0:3, 0:3] = np.nan
         for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
@@ -71,28 +80,6 @@ class NeighbourhoodTest(unittest.TestCase):
 
         output = gridpp.neighbourhood(values, 100, gridpp.Max)
         self.assertTrue((np.array(output) == 24).all())
-
-    def test_quantile(self):
-        thresholds = gridpp.get_neighbourhood_thresholds(values, 100)
-        output = np.array(gridpp.neighbourhood_quantile_fast(values, 0.5, 1, thresholds))
-        self.assertEqual(output[2][2], 12)   # Should be 12.5
-        self.assertEqual(output[2][3], 12.5) # Should be 13
-
-        output = np.array(gridpp.neighbourhood_quantile_fast(np.full([100,100], np.nan), 0.5, 1, thresholds))
-        self.assertTrue(np.isnan(np.array(output)).all())
-
-        output = np.array(gridpp.neighbourhood_quantile_fast(np.zeros([100,100]), 0.5, 1, thresholds))
-        self.assertTrue((np.array(output) == 0).all())
-
-        output = np.array(gridpp.neighbourhood_quantile(values, 0.5, 1))
-        self.assertEqual(output[2][2], 12.5)
-        self.assertEqual(output[2][3], 13)
-        self.assertEqual(output[0][4], 4)
-
-    def test_quantile_exceed(self):
-        input = np.reshape(range(25), [5, 5]).astype(float)
-        thresholds = [1, 5, 10]
-        output = gridpp.neighbourhood_quantile_fast(values, 0.9, 1, thresholds)
 
     def test_mean(self):
         input = (np.random.rand(1000, 1000)> 0.5).astype(float)

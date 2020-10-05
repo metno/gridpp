@@ -4,7 +4,7 @@ import gridpp
 import numpy as np
 
 
-class FillMissingTest(unittest.TestCase):
+class Test(unittest.TestCase):
     def test_linear(self):
         """Check that we are able to recover the missing values"""
         values0 = np.reshape(np.arange(25), [5, 5]).astype(float)
@@ -13,8 +13,8 @@ class FillMissingTest(unittest.TestCase):
         values = np.copy(values0)
         values[2, 1:4] = np.nan
         values[1, 1] = np.nan
-        # output = gridpp.fill_missing(values)
-        # np.testing.assert_array_equal(output, values0)
+        output = gridpp.fill_missing(values)
+        np.testing.assert_array_equal(output, values0)
 
     def test_missing_on_edge(self):
         """Check that we can recover when one dimension has missing all the way to the edge"""

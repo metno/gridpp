@@ -79,7 +79,7 @@ vec2 gridpp::apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolat
     }
     return output;
 }
-vec2 gridpp::monotonize_curve(const vec2& curve) {
+vec2 gridpp::monotonize_curve(vec2 curve) {
     if(curve.size() != 2 || curve[0].size() == 0 || curve[1].size() == 0)
         throw std::runtime_error("Invalid curve");
 
@@ -88,9 +88,27 @@ vec2 gridpp::monotonize_curve(const vec2& curve) {
 
     bool debug = false;
 
-    ivec new_indices;
-    assert(curve.size() == 2);
+    // Remove missing
     int N = curve[0].size();
+    ivec keep;
+    keep.reserve(N); // Array of indices to keep (both x and y are valid)
+    for(int i = 0; i < N; i++) {
+        if(gridpp::is_valid(curve[0][i]) && gridpp::is_valid(curve[1][i]))
+            keep.push_back(i);
+    }
+    if(keep.size() != N) {
+        vec2 curve_copy = curve;
+        curve[0].clear();
+        curve[1].clear();
+        curve[0].resize(keep.size(), 0);
+        curve[1].resize(keep.size(), 0);
+        for(int i = 0; i < keep.size(); i++) {
+            curve[0][i] = curve_copy[0][keep[i]];
+            curve[1][i] = curve_copy[1][keep[i]];
+        }
+    }
+    N = curve[0].size();
+    ivec new_indices;
     new_indices.reserve(N);
 
     int start = 1;
@@ -109,9 +127,8 @@ vec2 gridpp::monotonize_curve(const vec2& curve) {
     for(int i = start; i < N; i++) {
         float x = curve[0][i];
         float y = curve[1][i];
-        if(!gridpp::is_valid(x) || !gridpp::is_valid(y))
-            // Remove invalid points
-            continue;
+        assert(gridpp::is_valid(x));
+        assert(gridpp::is_valid(y));
         if(deviation) {
             // Currently inside a deviation section
             if(x < x_min) {

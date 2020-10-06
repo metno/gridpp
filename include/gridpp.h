@@ -327,7 +327,7 @@ namespace gridpp {
      *  @param curve Calibration curve
      *  @returns Monotonic calibration curve
     */
-    vec2 monotonize_curve(const vec2& curve);
+    vec2 monotonize_curve(vec2 curve);
 
     float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
 

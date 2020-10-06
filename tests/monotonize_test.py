@@ -74,6 +74,52 @@ class MonotonizeTest(unittest.TestCase):
         curve_monotonic = gridpp.monotonize_curve(curve)
         np.testing.assert_array_equal([[0, 10, 20, 33], [0, 1, 2, 7]], curve_monotonic)
 
+    def test_with_missing(self):
+        """Check curves with missing values"""
+        q = np.nan
+        m = -1
+        x = [[0, 1, 2, 3, 4, 5, 6],
+             # Missing first value
+             [q, 0, 1, 2, 3, 4, 5, 6],
+             [q, 0, 1, 2, 3, 4, 5, 6],
+             [m, 0, 1, 2, 3, 4, 5, 6],
+             # Two consecutive missing values
+             [0, q, q, 1, 2, 3, 4, 5, 6],
+             [0, q, q, 1, 2, 3, 4, 5, 6],
+             [0, m, m, 1, 2, 3, 4, 5, 6],
+             [0, m, q, 1, 2, 3, 4, 5, 6],
+             # Two non-consecutive missing values
+             [0, 1, q, 2, 3, q, 4, 5, 6],
+             [0, 1, q, 2, 3, q, 4, 5, 6],
+             [0, 1, m, 2, 3, m, 4, 5, 6],
+             # Missing last value
+             [0, 1, 2, 3, 4, 5, 6, q],
+             [0, 1, 2, 3, 4, 5, 6, q],
+             [0, 1, 2, 3, 4, 5, 6, m]]
+        y = [[0, 1, 2, 3, 4, 5, 6],
+             # Missing first value
+             [m, 0, 1, 2, 3, 4, 5, 6],
+             [q, 0, 1, 2, 3, 4, 5, 6],
+             [q, 0, 1, 2, 3, 4, 5, 6],
+             # Two consecutive missing values
+             [0, m, m, 1, 2, 3, 4, 5, 6],
+             [0, q, m, 1, 2, 3, 4, 5, 6],
+             [0, q, q, 1, 2, 3, 4, 5, 6],
+             [0, q, q, 1, 2, 3, 4, 5, 6],
+             # Two non-consecutive missing values
+             [0, 1, m, 2, 3, m, 4, 5, 6],
+             [0, 1, q, 2, 3, m, 4, 5, 6],
+             [0, 1, q, 2, 3, q, 4, 5, 6],
+             # Missing last value
+             [0, 1, 2, 3, 4, 5, 6, m],
+             [0, 1, 2, 3, 4, 5, 6, q],
+             [0, 1, 2, 3, 4, 5, 6, q]]
+        for i in range(len(x)):
+            x0 = x[i]
+            y0 = y[i]
+            curve = np.array([x0, y0], 'float32')
+            curve_monotonic = gridpp.monotonize_curve(curve)
+            np.testing.assert_array_equal([x[0], y[0]], curve_monotonic)
 
 
 if __name__ == '__main__':

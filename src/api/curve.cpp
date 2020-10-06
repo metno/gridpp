@@ -44,7 +44,7 @@ vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolatio
             if(policy == gridpp::Zero) {
                 slope = 0;
             }
-            if(policy == gridpp::OneToOne || N <= 1) {
+            if(policy == gridpp::OneToOne || C <= 1) {
                 slope = 1;
             }
             else if(policy == gridpp::MeanSlope) {
@@ -60,8 +60,8 @@ vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolatio
                     dFcst = curve_fcst[1] - curve_fcst[0];
                 }
                 else {
-                    dObs  = curve_ref[N-1] - curve_ref[N-2];
-                    dFcst = curve_fcst[N-1] - curve_fcst[N-2];
+                    dObs  = curve_ref[C-1] - curve_ref[C-2];
+                    dFcst = curve_fcst[C-1] - curve_fcst[C-2];
                 }
                 slope = dObs / dFcst;
             }

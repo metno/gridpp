@@ -102,6 +102,7 @@ endforeach(item)
 
 if (ENABLE_TESTS)
     if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+        include(Testing)
         # Copy the test programs to be next to the gridpp.py package
         # add_custom_target(tests-data
         #     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -110,13 +111,17 @@ if (ENABLE_TESTS)
 
         # add_custom_target(tests COMMAND nosetests3 extras/SWIG/python -e memory)
         # add_dependencies(tests tests-data build-python)
-        add_custom_target(coverage
+        add_custom_target(coverage BYPRODUCTS coverage.info
             COMMAND lcov --directory ${CMAKE_BINARY_DIR}/CMakeFiles/gridpp.dir/ --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
             COMMAND lcov --remove coverage.info '*/src/Testing/*' '/usr/*' --output-file coverage.info
             COMMAND lcov --list coverage.info
             # COMMAND genhtml coverage.info -o coverage
         )
         add_dependencies(coverage tests)
+        add_custom_target(coverage-html
+            COMMAND genhtml coverage.info -o coverage
+        )
+        add_dependencies(coverage-html coverage)
     endif()
 endif()
 

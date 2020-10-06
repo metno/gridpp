@@ -6,6 +6,27 @@ import numpy as np
 import sys
 
 class Test(unittest.TestCase):
+    def test_empty_curve(self):
+        """Check for exception on empty curve"""
+        with self.assertRaises(Exception) as e:
+            gridpp.apply_curve([0, 1], [[], []], gridpp.OneToOne, gridpp.OneToOne)
+        with self.assertRaises(Exception) as e:
+            gridpp.apply_curve([0, 1], [[1, 2], []], gridpp.OneToOne, gridpp.OneToOne)
+        with self.assertRaises(Exception) as e:
+            gridpp.apply_curve([0, 1], [[], [1, 2]], gridpp.OneToOne, gridpp.OneToOne)
+
+    def test_invalid_curve(self):
+        """Check for exception on invalid curve"""
+        with self.assertRaises(Exception) as e:
+            gridpp.apply_curve([0, 1], [[1, 2, 3], [1, 2]], gridpp.OneToOne, gridpp.OneToOne)
+        with self.assertRaises(Exception) as e:
+            gridpp.apply_curve([0, 1], [[1, 2], [1, 2, 3]], gridpp.OneToOne, gridpp.OneToOne)
+
+    def test_empty_fcst(self):
+        """Check for empty result on empty input"""
+        q = gridpp.apply_curve([], [[1, 2], [1, 2]], gridpp.OneToOne, gridpp.OneToOne)
+        np.testing.assert_array_equal(q, [])
+
     def test_edge(self):
         """Check values on edge of curve"""
         x = [1, 2, 3]

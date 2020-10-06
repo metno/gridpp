@@ -7,6 +7,22 @@ import sys
 import matplotlib.pylab as mpl
 
 class MonotonizeTest(unittest.TestCase):
+    def test_empty_input(self):
+        """Check for exception on empty curve"""
+        with self.assertRaises(Exception) as e:
+            gridpp.monotonize_curve([[], []])
+        with self.assertRaises(Exception) as e:
+            gridpp.monotonize_curve([[1, 2], []])
+        with self.assertRaises(Exception) as e:
+            gridpp.monotonize_curve([[], [1, 2]])
+
+    def test_size_mismatch_input(self):
+        """Check for exception on mismatch between sizes of x and y in curve"""
+        with self.assertRaises(Exception) as e:
+            gridpp.monotonize_curve([[1, 2, 3], [1, 2]])
+        with self.assertRaises(Exception) as e:
+            gridpp.monotonize_curve([[1, 2], [1, 2, 3]])
+
     def test_ok(self):
         x = [1, 2, 3]
         y = [1, 2, 3]
@@ -44,6 +60,14 @@ class MonotonizeTest(unittest.TestCase):
         curve_monotonic = gridpp.monotonize_curve(curve)
         np.testing.assert_array_equal([[0, 1], [0, 1]], curve_monotonic)
 
+    def test_knot(self):
+        """ """
+        x = [0, 3, 2, 1, 5]
+        y = [0, 1, 1, 2, 3]
+        curve = [x, y]
+        curve_monotonic = gridpp.monotonize_curve(curve)
+        np.testing.assert_array_equal([[0, 5], [0, 3]], curve_monotonic)
+
     def test_upper_knot(self):
         """ Check that only the lower two points are kept """
         x = [0, 1, 3, 2]
@@ -60,7 +84,7 @@ class MonotonizeTest(unittest.TestCase):
         # print(curve, curve_monotonic)
         # np.testing.assert_array_equal([[0, 3, 6], [0, 3, 6]], curve_monotonic)
 
-    def test_knot_lower(self):
+    def test_lower_knot(self):
         x = [-8, -9, -7, -6, -3, -1, 0, 1, 2, 3]
         y = [0, 0, 1, 2, 3, 5, 3, 6, 7, 9]
         curve = [x, y]

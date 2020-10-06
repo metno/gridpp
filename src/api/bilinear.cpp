@@ -197,7 +197,7 @@ namespace {
        if(!(s >= 0 && s <= 1 && t >= 0 && t <= 1)) {
           std::stringstream ss;
           ss << "Problem with bilinear interpolation. Grid is rotated/distorted in a way that is not supported. s=" << s << " and t=" << t << " are outside [-0.05,1.05].";
-          gridpp::error(ss.str());
+          throw std::runtime_error(ss.str());
        }
        assert(s >= 0 && s <= 1 && t >= 0 && t <= 1);
        float value = P1 * (1 - s) * ( 1 - t) + P2 * s * (1 - t) + P3 * (1 - s) * t + P4 * s * t;

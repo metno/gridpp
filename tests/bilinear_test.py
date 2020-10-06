@@ -15,6 +15,7 @@ class BilinearTest(unittest.TestCase):
         40  3  4  5
         30  0  1  2
             0 10 20
+        """
         lons, lats = np.meshgrid([0, 10, 20], [30, 40, 50])
         grid = gridpp.Grid(lats, lons)
         values = np.zeros(lons.shape)
@@ -25,7 +26,18 @@ class BilinearTest(unittest.TestCase):
         output = gridpp.bilinear(grid, points, values)
         np.testing.assert_array_equal(output, (0, 3, 6, 0, 3, 6, 1, 4, 7, 2, 5, 8, 2, 5, 8))
 
-        """
+    def test_incompatible_sizes(self):
+        """ Check for exception when input is different size than grid"""
+        lats = [[0, 0, 0, 0], [1, 1, 1, 1]]
+        lons = [[0, 1, 2, 3], [0, 1, 2, 3]]
+        grid = gridpp.Grid(lats, lons)  # 2 x 4 grid
+        points = gridpp.Points([0, 1], [0, 1])
+        for N in [1, 3, 5]:
+            values = np.zeros([N, N])
+            with self.assertRaises(Exception) as e:
+                gridpp.bilinear(grid, grid, values)
+            with self.assertRaises(Exception) as e:
+                gridpp.bilinear(grid, points, values)
 
     def test_rotation(self):
         """Check that the interpolation gives the same result when grid is rotated"""
@@ -77,6 +89,36 @@ class BilinearTest(unittest.TestCase):
             grid = gridpp.Grid(lats, lons)
             output = gridpp.bilinear(grid, gridpp.Points([0], [0]), values)[0]
             self.assertEqual(output, 1.5)
+
+    def test_non_parallelogram(self):
+        """Non-parallelogram quadrilateral"""
+        values = np.array([[0, 1], [2, 3]])
+        lats = [[0, 0], [1, 2]]
+        lons = [[0, 1], [0.1, 1]]
+        grid = gridpp.Grid(lats, lons)
+        output = gridpp.bilinear(grid, gridpp.Points([0.5], [0.5]), values)[0]
+        # TODO: This value has not been confirmed by an independent calculation
+        self.assertAlmostEqual(output, 1.1570623)
+
+    def test_with_missing_values(self):
+        """Check that nearest neighbour is returned when a missing value is in the box"""
+        values = np.array([[0, np.nan, 2, 3], [0, 1, 2, 3]])
+        lats = [[0, 0, 0, 0], [1, 1, 1, 1]]
+        lons = [[0, 1, 2, 3], [0, 1, 2, 3]]
+        grid = gridpp.Grid(lats, lons)
+        # The first three points have a missing value in its box, whereas the 4th does not
+        output = gridpp.bilinear(grid, gridpp.Points([0, 0.3, 0.9, 0.5], [0, 0.3, 0.9, 2.5]), values)
+        np.testing.assert_array_equal([0, 0, 1, 2.5], output)
+
+    def test_grid_to_grid(self):
+        """Check grid to grid itnerpolation"""
+        values = np.reshape(np.arange(4), [2, 2])
+        lons1, lats1 = np.meshgrid([0, 1], [0, 1])
+        lons2, lats2 = np.meshgrid([0, 0.5, 1], [0, 0.5, 1])
+        grid1 = gridpp.Grid(lats1, lons1)
+        grid2 = gridpp.Grid(lats2, lons2)
+        output = gridpp.bilinear(grid1, grid2, values)
+        np.testing.assert_array_equal([[0, 0.5, 1], [1, 1.5, 2], [2, 2.5, 3]], output)
 
     def check(self):
         N = 4

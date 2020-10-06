@@ -14,6 +14,10 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal(grid.get_box(0.4, 1.25), [True, 0, 1, 1, 2])
         np.testing.assert_array_equal(grid.get_box(0.4, 1), [True, 0, 0, 1, 1])
 
+    def test_size(self):
+        np.testing.assert_array_equal([2, 3], gridpp.Grid([[0, 0, 0], [1, 1, 1]], [[0, 1, 2], [0, 1, 2]]).size())
+        np.testing.assert_array_equal([0, 0], gridpp.Grid([[], []], [[], []]).size())
+
 
 if __name__ == '__main__':
     unittest.main()

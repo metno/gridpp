@@ -101,8 +101,8 @@ foreach(item gridpp-bin gridpp-train gridpp-kdtree)
 endforeach(item)
 
 if (ENABLE_TESTS)
+    include(Testing)
     if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-        include(Testing)
         # Copy the test programs to be next to the gridpp.py package
         # add_custom_target(tests-data
         #     COMMAND ${CMAKE_COMMAND} -E copy_directory

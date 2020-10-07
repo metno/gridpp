@@ -649,6 +649,17 @@ namespace gridpp {
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
 
+    /** Checks if a point is located inside a rectangle formed by 4 points. The 4 points must be
+      * provided in an order that draws out a rectangle (either clockwise or counter-clockwise)
+      * @param A: A point in the rectangle
+      * @param B: A point in the rectangle
+      * @param C: A point in the rectangle
+      * @param D: A point in the rectangle
+      * @param m: The point to test if it is inside
+      * @return True if the point is inside, False otherwise
+    */
+    bool point_in_rectangle(const Point& A, const Point& B, const Point& C, const Point& D, const Point& m );
+
     /** ****************************************
      * @name SWIG testing functions
      * Functions for testing the SWIG interface. Not useful for any other purpose.
@@ -899,8 +910,6 @@ namespace gridpp {
             vec mElevs;
             vec mLafs;
     };
-
-    bool point_in_rectangle(const Point& A, const Point& B, const Point& C, const Point& D, const Point& m );
 
     /** Represents a 2D grid of locations and their metadata */
     class Grid {

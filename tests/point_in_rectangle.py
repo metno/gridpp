@@ -12,6 +12,14 @@ class Test(unittest.TestCase):
         D = gridpp.Point(-2.60, 1.5)
         self.assertTrue(gridpp.point_in_rectangle(A, B, C, D, gridpp.Point(-3, -5.20)))
 
+    def test_not_in_order(self):
+        """Check case where 4 points are not in order"""
+        A = gridpp.Point(0, 0)
+        B = gridpp.Point(1, 1)
+        C = gridpp.Point(0, 1)
+        D = gridpp.Point(1, 0)
+        self.assertFalse(gridpp.point_in_rectangle(A, B, C, D, gridpp.Point(0.6, 0.6)))
+
     def test_skew(self):
         A = gridpp.Point(0, 0)
         B = gridpp.Point(1, 0.25)

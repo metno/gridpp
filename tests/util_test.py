@@ -7,6 +7,14 @@ import numpy as np
 class Test(unittest.TestCase):
     def test_get_statistic(self):
         self.assertEqual(gridpp.get_statistic("mean"), gridpp.Mean)
+        self.assertEqual(gridpp.get_statistic("min"), gridpp.Min)
+        self.assertEqual(gridpp.get_statistic("max"), gridpp.Max)
+        self.assertEqual(gridpp.get_statistic("median"), gridpp.Median)
+        self.assertEqual(gridpp.get_statistic("quantile"), gridpp.Quantile)
+        self.assertEqual(gridpp.get_statistic("std"), gridpp.Std)
+        self.assertEqual(gridpp.get_statistic("sum"), gridpp.Sum)
+
+    def test_unknown_statistic(self):
         self.assertEqual(gridpp.get_statistic("mean1"), gridpp.Unknown)
 
     """ Check that it doesn't cause any errors """

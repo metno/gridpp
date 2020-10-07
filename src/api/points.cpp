@@ -49,7 +49,11 @@ ivec gridpp::Points::get_closest_neighbours(float lat, float lon, int num) const
     return mTree.get_closest_neighbours(lat, lon, num);
 }
 int gridpp::Points::get_nearest_neighbour(float lat, float lon) const {
-    return get_closest_neighbours(lat, lon, 1)[0];
+    ivec I = get_closest_neighbours(lat, lon, 1);
+    if(I.size() > 0)
+        return I[0];
+    else
+        return -1;
 }
 vec gridpp::Points::get_lats() const {
     return mLats;
@@ -74,10 +78,9 @@ ivec gridpp::Points::get_in_domain_indices(const gridpp::Grid& grid) const {
     int X = gsize[1];
 
     for(int s = 0; s < size(); s++) {
-        const std::vector<int> ind = grid.get_nearest_neighbour(mLats[s], mLons[s]);
-        int y = ind[0];
-        int x = ind[1];
-        if(x > 0 && x < X-1 && y > 0 && y < Y-1) {
+        int Y1, X1, Y2, X2;
+        bool inside  = grid.get_box(mLats[s], mLons[s], Y1, X1, Y2, X2);
+        if(inside) {
             indices.push_back(s);
         }
     }

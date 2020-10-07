@@ -45,6 +45,11 @@ class Test(unittest.TestCase):
         output = gridpp.neighbourhood_quantile(empty, 0.5, 1)
         self.assertTrue(np.isnan(np.array(output)[0:2,0:2]).all())
 
+    def test_get_neighbourhood_thresholds(self):
+        thresholds = gridpp.get_neighbourhood_thresholds(np.reshape(np.arange(24), [4, 6]), 5)
+        self.assertTrue((thresholds >= 0).all())
+        self.assertTrue((thresholds <= 24).all())
+
     def test_quantile(self):
         thresholds = gridpp.get_neighbourhood_thresholds(values, 100)
         output = np.array(gridpp.neighbourhood_quantile_fast(values, 0.5, 1, thresholds))
@@ -71,6 +76,13 @@ class Test(unittest.TestCase):
         input = (np.random.rand(1000, 1000)> 0.5).astype(float)
         thresholds = [1, 5, 10]
         output = gridpp.neighbourhood(values, 7, gridpp.Mean)
+
+    def test_quantile_fast(self):
+        N = 16
+        input = np.reshape(np.arange(N), [4, 4])
+        thresholds = [-1, N + 5]
+        output = gridpp.neighbourhood_quantile_fast(values, 0.75, 1, thresholds)
+        # self.assertTrue((values == 12
 
 if __name__ == '__main__':
     unittest.main()

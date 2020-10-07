@@ -3,12 +3,10 @@
 
 using namespace gridpp;
 
-namespace {
-    float scalar_product(float lat1, float lon1, float lat2, float lon2) {
-        return lat1 * lat2 + lon1 * lon2;
-    }
-}
 gridpp::Grid::Grid() {
+    vec lats;
+    vec lons;
+    mTree = KDTree(lats, lons);
 
 }
 gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs, CoordinateType type) {
@@ -67,7 +65,11 @@ ivec2 gridpp::Grid::get_closest_neighbours(float lat, float lon, int num) const 
     return get_indices(indices);
 }
 ivec gridpp::Grid::get_nearest_neighbour(float lat, float lon) const {
-    return get_closest_neighbours(lat, lon, 1)[0];
+    ivec2 I = get_closest_neighbours(lat, lon, 1);
+    if(I.size() > 0)
+        return I[0];
+    else
+        return ivec();
 }
 vec2 gridpp::Grid::get_lats() const {
     return mLats;
@@ -139,10 +141,18 @@ bool gridpp::Grid::get_box(float lat, float lon, int& Y1, int& X1, int& Y2, int&
     int xdir = 1;
     int ydir = 1;
     ivec nn = get_nearest_neighbour(lat, lon);
+    if(nn.size() != 2)
+        return false;
     int Y = nn[0];
     int X = nn[1];
     int nY = size()[0];
     int nX = size()[1];
+    Y1 = -1;
+    Y2 = -1;
+    X1 = -1;
+    X2 = -1;
+    if(nX <= 1 || nY <= 1)
+        return false;
     if(Y == 0) {
         Y1 = 0;
         Y2 = 1;

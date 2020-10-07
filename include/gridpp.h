@@ -312,6 +312,7 @@ namespace gridpp {
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
+
     vec apply_curve(const vec& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts
@@ -876,6 +877,7 @@ namespace gridpp {
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
+            // Returns -1 if there are no neighbours
             int get_nearest_neighbour(float lat, float lon) const;
             ivec get_neighbours(float lat, float lon, float radius) const;
             ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances) const;

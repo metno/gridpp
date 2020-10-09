@@ -47,6 +47,7 @@ namespace gridpp {
     class KDTree;
     class Points;
     class Grid;
+    class Point;
     class Nearest;
     class StructureFunction;
     class Transform;

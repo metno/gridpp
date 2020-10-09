@@ -7,6 +7,7 @@ from distutils.core import setup, Extension
 from setuptools import setup, Extension
 import glob
 import itertools
+import numpy
 
 __version__ = '${PROJECT_VERSION}'
 
@@ -34,10 +35,10 @@ module = Extension('_gridpp',
         #language="c++",
         #swig_opts=['-I./include', '-c++', '-I/usr/include/python3.6m'],
         libraries=["gsl", "gslcblas", "armadillo"],
-        extra_compile_args="${CMAKE_CXX_FLAGS}".split(),
-        extra_link_args="${CMAKE_CXX_FLAGS}".split(),
-        library_dirs=["/usr/lib/x86_64-linux-gnu/"],
-        include_dirs=['./include']
+        extra_compile_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}".split(),
+        extra_link_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}".split(),
+        library_dirs=["armadillo-9.800.5", "/usr/lib/x86_64-linux-gnu/"],
+        include_dirs=['./include', 'boost_1_74_0', "armadillo-9.800.5/include", numpy.get_include()]
 )
 
 setup (
@@ -97,7 +98,7 @@ setup (
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy>=1.7', 'scipy', 'six', 'future'],
+    install_requires=['numpy>=1.7'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

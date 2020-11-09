@@ -23,6 +23,6 @@ var searchData=
   ['count_2ecpp',['count.cpp',['../count_8cpp.html',1,'']]],
   ['cressman_5frho',['cressman_rho',['../classgridpp_1_1StructureFunction.html#a438ac10c6dd1e2b610c9096a63a7ac88',1,'gridpp::StructureFunction']]],
   ['cressmanstructure',['CressmanStructure',['../classgridpp_1_1CressmanStructure.html',1,'gridpp::CressmanStructure'],['../classgridpp_1_1CressmanStructure.html#a226ddfb3fd6ee7826f70e70781872408',1,'gridpp::CressmanStructure::CressmanStructure()']]],
-  ['crossvalidation',['CrossValidation',['../classgridpp_1_1CrossValidation.html',1,'gridpp::CrossValidation'],['../classgridpp_1_1CrossValidation.html#ac16ed52025d0bca75b079c4f1d614e2a',1,'gridpp::CrossValidation::CrossValidation()']]],
+  ['crossvalidation',['CrossValidation',['../classgridpp_1_1CrossValidation.html',1,'gridpp::CrossValidation'],['../classgridpp_1_1CrossValidation.html#ac1ac17841601e482fdfd1bf362f197ad',1,'gridpp::CrossValidation::CrossValidation()']]],
   ['curve_2ecpp',['curve.cpp',['../curve_8cpp.html',1,'']]]
 ];

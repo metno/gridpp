@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['transform',['Transform',['../classgridpp_1_1Transform.html',1,'gridpp']]]
+  ['structurefunction',['StructureFunction',['../classgridpp_1_1StructureFunction.html',1,'gridpp']]]
 ];

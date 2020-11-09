@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.5.0a2: /home/thomasn/repos/gridpplib/include/gridpp.h File Reference</title>
+<title>Gridpp 0.5.0: /home/thomasn/repos/gridpplib/include/gridpp.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.5.0a2
+   <div id="projectname">Gridpp 0.5.0
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -87,6 +87,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <code>#include &lt;boost/geometry/geometries/point.hpp&gt;</code><br />
 <code>#include &lt;boost/geometry/geometries/box.hpp&gt;</code><br />
 <code>#include &lt;boost/geometry/index/rtree.hpp&gt;</code><br />
+<code>#include &lt;exception&gt;</code><br />
 </div>
 <p><a href="gridpp_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -112,6 +113,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Log.html">gridpp::Log</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1not__implemented__exception.html">gridpp::not_implemented_exception</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Point.html">gridpp::Point</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a single point in some coordinate system.  <a href="classgridpp_1_1Point.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,7 +136,7 @@ Namespaces</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a30997f7bb508f73aed90bb86c86e3a30"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#a30997f7bb508f73aed90bb86c86e3a30">__version__</a>&#160;&#160;&#160;<a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a></td></tr>
 <tr class="separator:a30997f7bb508f73aed90bb86c86e3a30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a>&#160;&#160;&#160;&quot;0.5.0a2&quot;</td></tr>
+<tr class="memitem:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a>&#160;&#160;&#160;&quot;0.5.0&quot;</td></tr>
 <tr class="separator:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
@@ -308,8 +311,6 @@ Functions</h2></td></tr>
 <tr class="separator:a7c0cdb49d56c572bea92a0c3a72a0f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e60e28bef15870f4d9c5498a61dd985"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9e60e28bef15870f4d9c5498a61dd985">gridpp::calc_score</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;ref, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;fcst, float threshold, float fthreshold, <a class="el" href="namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01">Metric</a> metric)</td></tr>
 <tr class="separator:a9e60e28bef15870f4d9c5498a61dd985"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af45113de2428d6a933923cf6639bb250"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#af45113de2428d6a933923cf6639bb250">gridpp::advection_implicit</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;y_dist, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;x_dist, float dt, <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;y_coord, <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;x_coord)</td></tr>
-<tr class="separator:af45113de2428d6a933923cf6639bb250"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a679a921351e161198561860b1d9a07f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a679a921351e161198561860b1d9a07f7">gridpp::correction</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;rgrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;rvalues, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;npoints, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, <a class="el" href="namespacegridpp.html#aca92081b4647f72000e19e814b99ad10">CorrectionType</a> type, <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;count)</td></tr>
 <tr class="separator:a679a921351e161198561860b1d9a07f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84b8ccbc72beaf9292ec34571d8a23de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a84b8ccbc72beaf9292ec34571d8a23de">gridpp::correction</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;rgrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;rvalues, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;npoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;nvalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, <a class="el" href="namespacegridpp.html#aca92081b4647f72000e19e814b99ad10">CorrectionType</a> type, <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;count)</td></tr>
@@ -406,6 +407,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a0c0c082c1e4aab9ec7dfcb954afdad7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a0c0c082c1e4aab9ec7dfcb954afdad7a">gridpp::wind_speed</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;xwind, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;ywind)</td></tr>
 <tr class="memdesc:a0c0c082c1e4aab9ec7dfcb954afdad7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector version of wind speed calculation.  <a href="namespacegridpp.html#a0c0c082c1e4aab9ec7dfcb954afdad7a">More...</a><br /></td></tr>
 <tr class="separator:a0c0c082c1e4aab9ec7dfcb954afdad7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d3a8fc4f5c03bb52341d51453f5436c"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a8d3a8fc4f5c03bb52341d51453f5436c">gridpp::wind_direction</a> (float xwind, float ywind)</td></tr>
+<tr class="memdesc:a8d3a8fc4f5c03bb52341d51453f5436c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagnose wind direction from its components.  <a href="namespacegridpp.html#a8d3a8fc4f5c03bb52341d51453f5436c">More...</a><br /></td></tr>
+<tr class="separator:a8d3a8fc4f5c03bb52341d51453f5436c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a224d4450c0d71f9a7ec87ec090d9e231"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a224d4450c0d71f9a7ec87ec090d9e231">gridpp::wind_direction</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;xwind, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;ywind)</td></tr>
+<tr class="memdesc:a224d4450c0d71f9a7ec87ec090d9e231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector version of wind direction calculation.  <a href="namespacegridpp.html#a224d4450c0d71f9a7ec87ec090d9e231">More...</a><br /></td></tr>
+<tr class="separator:a224d4450c0d71f9a7ec87ec090d9e231"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">OpenMP settings</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><hr/>
 <p>Functions that configure OpenMP </p>
@@ -457,8 +464,6 @@ Functions</h2></td></tr>
 <tr class="memitem:a18c9cb0bf34070767072a54d57655a18"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a18c9cb0bf34070767072a54d57655a18">gridpp::interpolate</a> (float x, const std::vector&lt; float &gt; &amp;iX, const std::vector&lt; float &gt; &amp;iY)</td></tr>
 <tr class="memdesc:a18c9cb0bf34070767072a54d57655a18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Piecewise linear interpolation If x is outside the range of iX, then the min/max value of iY is used.  <a href="namespacegridpp.html#a18c9cb0bf34070767072a54d57655a18">More...</a><br /></td></tr>
 <tr class="separator:a18c9cb0bf34070767072a54d57655a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34e8bd4909dbcd8705e29fd5450b62b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a34e8bd4909dbcd8705e29fd5450b62b7">gridpp::not_implemented_error</a> ()</td></tr>
-<tr class="separator:a34e8bd4909dbcd8705e29fd5450b62b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a631bb707c7757265090e384798e7c129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a631bb707c7757265090e384798e7c129">gridpp::init_ivec2</a> (int Y, int X, int value)</td></tr>
 <tr class="memdesc:a631bb707c7757265090e384798e7c129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a vector of size Y, X, with a given value.  <a href="namespacegridpp.html#a631bb707c7757265090e384798e7c129">More...</a><br /></td></tr>
 <tr class="separator:a631bb707c7757265090e384798e7c129"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -548,6 +553,8 @@ SWIG testing functions</h2></td></tr>
 <tr class="memitem:aef478463e74bea3cc6715f817bf0a47a"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#aef478463e74bea3cc6715f817bf0a47a">gridpp::test_vec2_argout</a> (<a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;distances)</td></tr>
 <tr class="memdesc:aef478463e74bea3cc6715f817bf0a47a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Testing function for 2D vector treated as output.  <a href="namespacegridpp.html#aef478463e74bea3cc6715f817bf0a47a">More...</a><br /></td></tr>
 <tr class="separator:aef478463e74bea3cc6715f817bf0a47a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a853ca28d00424507209165fe6f2e78e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a853ca28d00424507209165fe6f2e78e6">gridpp::test_not_implemented_exception</a> ()</td></tr>
+<tr class="separator:a853ca28d00424507209165fe6f2e78e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a30997f7bb508f73aed90bb86c86e3a30"></a>
@@ -571,7 +578,7 @@ SWIG testing functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define GRIDPP_VERSION&#160;&#160;&#160;&quot;0.5.0a2&quot;</td>
+          <td class="memname">#define GRIDPP_VERSION&#160;&#160;&#160;&quot;0.5.0&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -581,7 +588,7 @@ SWIG testing functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 27 2020 19:18:04 for Gridpp 0.5.0a2 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Nov 9 2020 12:33:05 for Gridpp 0.5.0 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

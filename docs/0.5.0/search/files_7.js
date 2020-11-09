@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['kdtree_2ecpp',['kdtree.cpp',['../kdtree_8cpp.html',1,'']]]
+  ['metric_5foptimizer_2ecpp',['metric_optimizer.cpp',['../metric__optimizer_8cpp.html',1,'']]]
 ];

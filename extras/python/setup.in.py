@@ -32,13 +32,11 @@ class CustomInstall(install):
 
 module = Extension('_gridpp',
         sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['src/gridppPYTHON_wrap.cxx'],
-        #language="c++",
-        #swig_opts=['-I./include', '-c++', '-I/usr/include/python3.6m'],
         libraries=["gsl", "gslcblas", "armadillo"],
-        extra_compile_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}".split(),
-        extra_link_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}".split(),
-        library_dirs=["armadillo-9.800.5", "/usr/lib/x86_64-linux-gnu/"],
-        include_dirs=['./include', 'boost_1_74_0', "armadillo-9.800.5/include", numpy.get_include()]
+        extra_compile_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
+        extra_link_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
+        library_dirs=["/usr/lib64"],
+        include_dirs=['./include', numpy.get_include()]
 )
 
 setup (

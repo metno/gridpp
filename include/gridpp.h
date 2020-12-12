@@ -718,6 +718,7 @@ namespace gridpp {
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
+    bool compatible_size(const Points& points, const vec& v);
     bool compatible_size(const Points& points, const vec2& v);
 
     /** Checks if a point is located inside a rectangle formed by 4 points. The 4 points must be

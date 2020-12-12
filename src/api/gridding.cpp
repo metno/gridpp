@@ -4,6 +4,8 @@
 using namespace gridpp;
 
 vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic) {
+    if(gridpp::compatible_size(points, values))
+        throw std::invalid_argument("Points size is not the same as values");
     int Y = grid.size()[0];
     int X = grid.size()[1];
     vec2 lats = grid.get_lats();

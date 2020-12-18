@@ -333,10 +333,11 @@ namespace gridpp {
     /** Create quantile mapping calibration curve
      *  @param ref Reference values (observations)
      *  @param fcst Forecast values
+     *  @param output_fcst Output forecast quantiles
      *  @param quantiles Vector of quantiles to extract. If empty, use all values.
-     *  @return Calibration curve
+     *  @return Output reference quantiles
     */
-    vec2 quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles=vec());
+    vec quantile_mapping_curve(const vec& ref, const vec& fcst, vec& output_fcst, vec quantiles=vec());
 
     /** Create calibration curve that optimizes a metric
      *  @param ref Reference values (observations)
@@ -347,30 +348,54 @@ namespace gridpp {
     */
 
     vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
-    /** Apply arbitrary calibration curve to 1D forecasts
-     *  @param fcst 1D vector of forecast values
-     *  @param curve Calibration curve
+
+    /** Apply arbitrary calibration curve to a single value
+     *  @param fcst input forecast
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
+    float apply_curve(float fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
-    vec apply_curve(const vec& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
+    /** Apply arbitrary calibration curve to 1D forecasts
+     *  @param fcst 1D vector of forecast values
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
+    */
+    vec apply_curve(const vec& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts
      *  @param fcst 2D grid of forecast values
-     *  @param curve Calibration curve
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
-    vec2 apply_curve(const vec2& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
+    vec2 apply_curve(const vec2& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
+
+    /** Apply arbitrary calibration curve to 2D forecasts with spatially varying QQ map
+     *  @param fcst 2D grid of forecast values
+     *  @param curve_ref Reference quantiles (Y, X, Q)
+     *  @param curve_fcst Forecast quantiles (Y, X, Q)
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
+    */
+    vec2 apply_curve(const vec2& fcst, const vec3& curve_ref, const vec3& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Ensure calibration curve is monotonic, by removing points
-     *  @param curve Calibration curve
-     *  @returns Monotonic calibration curve
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
+     *  @param output_fcst New forecast quantiles
+     *  @returns New reference quantiles
     */
-    vec2 monotonize_curve(vec2 curve);
+    vec monotonize_curve(vec curve_ref, vec curve_fcst, vec& output_fcst);
 
     float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
 
@@ -720,6 +745,8 @@ namespace gridpp {
     bool compatible_size(const Grid& grid, const vec3& v);
     bool compatible_size(const Points& points, const vec& v);
     bool compatible_size(const Points& points, const vec2& v);
+    bool compatible_size(const vec2& a, const vec3& b);
+    bool compatible_size(const vec3& a, const vec3& b);
 
     /** Checks if a point is located inside a rectangle formed by 4 points. The 4 points must be
       * provided in an order that draws out a rectangle (either clockwise or counter-clockwise)

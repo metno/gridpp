@@ -3,133 +3,165 @@
 
 using namespace gridpp;
 
-vec gridpp::apply_curve(const vec& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
-    if(curve.size() != 2)
-        throw std::invalid_argument("Curve must have a first dimension size of 2");
-    if(curve[0].size() == 0 || curve[1].size() == 0)
-        throw std::invalid_argument("x and y vectors in curve cannot have size 0");
-    if(curve[0].size() != curve[1].size())
-        throw std::invalid_argument("x and y vectors in curve not the same size");
-
-    int N = fcst.size();
-    int C = curve[0].size();
-    vec output(N, gridpp::MV);
-    const vec& curve_fcst = curve[0];
-    const vec& curve_ref = curve[1];
+float gridpp::apply_curve(float input, const vec& curve_ref, const vec& curve_fcst, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    int C = curve_fcst.size();
     float smallestObs  = curve_ref[0];
     float smallestFcst = curve_fcst[0];
     float largestObs   = curve_ref[C-1];
     float largestFcst  = curve_fcst[C-1];
-    #pragma omp parallel for
-    for(int i = 0; i < N; i++) {
-        float input = fcst[i];
-        // Linear interpolation within curve
-        if(input > smallestFcst && input < largestFcst) {
-            output[i] = gridpp::interpolate(input, curve_fcst, curve_ref);
+    float output = gridpp::MV;
+    // Linear interpolation within curve
+    if(input > smallestFcst && input < largestFcst) {
+        output = gridpp::interpolate(input, curve_fcst, curve_ref);
+    }
+    // Extrapolate outside curve
+    else {
+        float nearestObs;
+        float nearestFcst;
+        gridpp::Extrapolation policy;
+        if(input <= smallestFcst) {
+            nearestObs  = smallestObs;
+            nearestFcst = smallestFcst;
+            policy = policy_below;
         }
-        // Extrapolate outside curve
         else {
-            float nearestObs;
-            float nearestFcst;
-            gridpp::Extrapolation policy;
+            nearestObs  = largestObs;
+            nearestFcst = largestFcst;
+            policy = policy_above;
+        }
+        float slope = 1;
+        if(policy == gridpp::Zero) {
+            slope = 0;
+        }
+        if(policy == gridpp::OneToOne || C <= 1) {
+            slope = 1;
+        }
+        else if(policy == gridpp::MeanSlope) {
+            float dObs  = largestObs - smallestObs;
+            float dFcst = largestFcst - smallestFcst;
+            slope = dObs / dFcst;
+        }
+        else if(policy == gridpp::NearestSlope) {
+            float dObs;
+            float dFcst;
             if(input <= smallestFcst) {
-                nearestObs  = smallestObs;
-                nearestFcst = smallestFcst;
-                policy = policy_below;
+                dObs  = curve_ref[1] - curve_ref[0];
+                dFcst = curve_fcst[1] - curve_fcst[0];
             }
             else {
-                nearestObs  = largestObs;
-                nearestFcst = largestFcst;
-                policy = policy_above;
+                dObs  = curve_ref[C-1] - curve_ref[C-2];
+                dFcst = curve_fcst[C-1] - curve_fcst[C-2];
             }
-            float slope = 1;
-            if(policy == gridpp::Zero) {
-                slope = 0;
-            }
-            if(policy == gridpp::OneToOne || C <= 1) {
-                slope = 1;
-            }
-            else if(policy == gridpp::MeanSlope) {
-                float dObs  = largestObs - smallestObs;
-                float dFcst = largestFcst - smallestFcst;
-                slope = dObs / dFcst;
-            }
-            else if(policy == gridpp::NearestSlope) {
-                float dObs;
-                float dFcst;
-                if(input <= smallestFcst) {
-                    dObs  = curve_ref[1] - curve_ref[0];
-                    dFcst = curve_fcst[1] - curve_fcst[0];
-                }
-                else {
-                    dObs  = curve_ref[C-1] - curve_ref[C-2];
-                    dFcst = curve_fcst[C-1] - curve_fcst[C-2];
-                }
-                slope = dObs / dFcst;
-            }
-            output[i] = nearestObs + slope * (input - nearestFcst);
+            slope = dObs / dFcst;
         }
+        output = nearestObs + slope * (input - nearestFcst);
     }
     return output;
 }
-vec2 gridpp::apply_curve(const vec2& fcst, const vec2& curve, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+// QQ on a vector
+vec gridpp::apply_curve(const vec& fcst, const vec& curve_ref, const vec& curve_fcst, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    if(curve_ref.size() != curve_fcst.size())
+        throw std::invalid_argument("curve_ref and curve_fcst must be the same size");
+    if(curve_ref.size() == 0 || curve_ref.size() == 0)
+        throw std::invalid_argument("curve_ref and curve_fcst cannot have size 0");
+
+    int N = fcst.size();
+    vec output(N, gridpp::MV);
+
+    #pragma omp parallel for
+    for(int i = 0; i < N; i++) {
+        float input = fcst[i];
+        output[i] = apply_curve(input, curve_ref, curve_fcst, policy_below, policy_above);
+    }
+    return output;
+}
+// QQ on a grid
+vec2 gridpp::apply_curve(const vec2& fcst, const vec& curve_ref, const vec& curve_fcst, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    int nY = fcst.size();
+    if(curve_ref.size() != curve_fcst.size())
+        throw std::invalid_argument("curve_ref and curve_fcst must be the same size");
+    if(curve_ref.size() == 0 || curve_ref.size() == 0)
+        throw std::invalid_argument("curve_ref and curve_fcst cannot have size 0");
+
+    vec2 output(nY);
+    for(int y = 0; y < nY; y++) {
+        output[y] = apply_curve(fcst[y], curve_ref, curve_fcst, policy_below, policy_above);
+    }
+    return output;
+}
+// Spatially varying QQ map
+vec2 gridpp::apply_curve(const vec2& fcst, const vec3& curve_ref, const vec3& curve_fcst, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    if(!gridpp::compatible_size(curve_ref, curve_fcst))
+        throw std::invalid_argument("curve_ref and curve_fcst dimension sizes mismatch");
+    if(!gridpp::compatible_size(fcst, curve_ref))
+        throw std::invalid_argument("Fcst and curve_ref dimension sizes mismatch");
+    if(!gridpp::compatible_size(fcst, curve_fcst))
+        throw std::invalid_argument("Fcst and curve_fcst dimension sizes mismatch");
+
     int nY = fcst.size();
     int nX = fcst[0].size();
     vec2 output(nY);
     for(int y = 0; y < nY; y++) {
-        output[y] = apply_curve(fcst[y], curve, policy_below, policy_above);
+        output[y].resize(nX, gridpp::MV);
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            float input = fcst[y][x];
+            output[y][x] = apply_curve(input, curve_ref[y][x], curve_fcst[y][x], policy_below, policy_above);
+        }
     }
     return output;
 }
-vec2 gridpp::monotonize_curve(vec2 curve) {
-    if(curve.size() != 2)
-        throw std::invalid_argument("Curve must have a first dimension size of 2");
-    if(curve[0].size() == 0 || curve[1].size() == 0)
-        throw std::invalid_argument("x and y vectors in curve cannot have size 0");
-    if(curve[0].size() != curve[1].size())
-        throw std::invalid_argument("x and y vectors in curve not the same size");
+vec gridpp::monotonize_curve(vec curve_ref, vec curve_fcst, vec& output_fcst) {
+    if(curve_ref.size() != curve_fcst.size())
+        throw std::invalid_argument("curve_ref and curve_fcst must be the same size");
+    if(curve_ref.size() == 0 || curve_ref.size() == 0)
+        throw std::invalid_argument("curve_ref and curve_fcst cannot have size 0");
 
     bool debug = false;
 
     // Remove missing
-    int N = curve[0].size();
+    int N = curve_ref.size();
     ivec keep;
     keep.reserve(N); // Array of indices to keep (both x and y are valid)
     for(int i = 0; i < N; i++) {
-        if(gridpp::is_valid(curve[0][i]) && gridpp::is_valid(curve[1][i]))
+        if(gridpp::is_valid(curve_fcst[i]) && gridpp::is_valid(curve_ref[i]))
             keep.push_back(i);
     }
     if(keep.size() != N) {
-        vec2 curve_copy = curve;
-        curve[0].clear();
-        curve[1].clear();
-        curve[0].resize(keep.size(), 0);
-        curve[1].resize(keep.size(), 0);
+        vec curve_ref_copy = curve_ref;
+        vec curve_fcst_copy = curve_fcst;
+        curve_ref.clear();
+        curve_fcst.clear();
+        curve_ref.resize(keep.size(), 0);
+        curve_fcst.resize(keep.size(), 0);
         for(int i = 0; i < keep.size(); i++) {
-            curve[0][i] = curve_copy[0][keep[i]];
-            curve[1][i] = curve_copy[1][keep[i]];
+            curve_ref[i] = curve_ref_copy[keep[i]];
+            curve_fcst[i] = curve_fcst_copy[keep[i]];
         }
     }
-    N = curve[0].size();
+    N = curve_ref.size();
     ivec new_indices;
     new_indices.reserve(N);
 
     int start = 1;
-    float prev = curve[0][0];
+    float prev = curve_fcst[0];
 
     /* A deviation is a part of the curve is not monotonic. This occurs when a set of x values are
        not in increasing order. Remove all points that are inside the non-increasing setion.
     */
     bool deviation = false;
     int deviation_index = 0;
-    float x_min = curve[0][0]; // The lowest x value in the deviation section
-    float x_max = curve[0][0]; // The highest x value in the deivation section
+    float x_min = curve_fcst[0]; // The lowest x value in the deviation section
+    float x_max = curve_fcst[0]; // The highest x value in the deivation section
 
     new_indices.push_back(0);
     float tol = 0.1;
     for(int i = start; i < N; i++) {
-        float x = curve[0][i];
-        float y = curve[1][i];
+        float x = curve_fcst[i];
+        float y = curve_ref[i];
         assert(gridpp::is_valid(x));
         assert(gridpp::is_valid(y));
         if(deviation) {
@@ -145,11 +177,11 @@ vec2 gridpp::monotonize_curve(vec2 curve) {
                 // Remove points inside the deviation section, that is all points above x_min
                 for(int j = new_indices.size() - 1; j >= 0; j--) {
                     int index = new_indices[j];
-                    if(curve[0][index] < x_min - tol)
+                    if(curve_fcst[index] < x_min - tol)
                         break;
                     else {
                         if(debug)
-                            std::cout << "Removing index=" << index << " x=" << curve[0][index] << std::endl;
+                            std::cout << "Removing index=" << index << " x=" << curve_fcst[index] << std::endl;
                         new_indices.pop_back();
                     }
                 }
@@ -183,18 +215,19 @@ vec2 gridpp::monotonize_curve(vec2 curve) {
             if(debug)
                 std::cout << new_indices[j] << " " << deviation_index << std::endl;
             int index = new_indices[j];
-            if(curve[0][index] >= x_min)
+            if(curve_fcst[index] >= x_min)
                 new_indices.pop_back();
         }
     }
 
-    vec2 new_curve(2);
-    new_curve[0].resize(new_indices.size());
-    new_curve[1].resize(new_indices.size());
+    vec output_ref(2);
+    output_ref.resize(new_indices.size());
+    output_fcst.clear();
+    output_fcst.resize(new_indices.size());
     for(int i = 0; i < new_indices.size(); i++) {
-        assert(curve[0].size() > new_indices[i]);
-        new_curve[0][i] = curve[0][new_indices[i]];
-        new_curve[1][i] = curve[1][new_indices[i]];
+        assert(curve_fcst.size() > new_indices[i]);
+        output_ref[i] = curve_ref[new_indices[i]];
+        output_fcst[i] = curve_fcst[new_indices[i]];
     }
-    return new_curve;
+    return output_ref;
 }

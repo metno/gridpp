@@ -605,6 +605,7 @@ namespace std {
 %apply std::vector<float>& OUTPUT { std::vector<float>& distances };
 %apply std::vector<float>& OUTPUT { std::vector<float>& standard_error };
 %apply std::vector<float>& OUTPUT { std::vector<float>& analysis_variance };
+%apply std::vector<float>& OUTPUT { std::vector<float>& output_fcst };
 %apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& analysis_variance };
 %apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& distances };
 %apply int& OUTPUT { int& X1_out };

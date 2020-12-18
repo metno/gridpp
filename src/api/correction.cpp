@@ -195,8 +195,7 @@ vec2 gridpp::correction(const Grid& rgrid,
             // Compute adjusted values
             vec curr_adjusted_values;
             if(type == gridpp::Qq) {
-                vec2 curve = gridpp::quantile_mapping_curve(y_curve, x_curve);
-                curr_adjusted_values = gridpp::apply_curve(curr_values, curve, gridpp::Zero, gridpp::Zero);
+                curr_adjusted_values = gridpp::apply_curve(curr_values, y_curve, x_curve, gridpp::Zero, gridpp::Zero);
             }
             else {
                 if(type == gridpp::Multiplicative) {

@@ -5,7 +5,7 @@ var searchData=
   ['barnesstructure',['BarnesStructure',['../classgridpp_1_1BarnesStructure.html',1,'gridpp::BarnesStructure'],['../classgridpp_1_1BarnesStructure.html#a518a390a13400b532f3667937a4a4aa9',1,'gridpp::BarnesStructure::BarnesStructure(float h, float v=0, float w=0, float hmax=MV)'],['../classgridpp_1_1BarnesStructure.html#a518a390a13400b532f3667937a4a4aa9',1,'gridpp::BarnesStructure::BarnesStructure(float h, float v=0, float w=0, float hmax=MV)']]],
   ['bias',['Bias',['../namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01a8c11fa342f077d8a1ee689fd85470e16',1,'gridpp']]],
   ['bilinear',['bilinear',['../namespacegridpp.html#addca649f1ce4311d8f47c6d10e6a6cc2',1,'gridpp::bilinear(const Grid &amp;igrid, const Grid &amp;ogrid, const vec2 ivalues)'],['../namespacegridpp.html#a13f0c885c84c7104f764dc4c894a15f4',1,'gridpp::bilinear(const Grid &amp;igrid, const Points &amp;opoints, const vec2 ivalues)']]],
-  ['bilinear_2ecpp',['bilinear.cpp',['../gridpplib2_2src_2api_2bilinear_8cpp.html',1,'(Global Namespace)'],['../gridpplib_2src_2api_2bilinear_8cpp.html',1,'(Global Namespace)']]],
+  ['bilinear_2ecpp',['bilinear.cpp',['../bilinear_8cpp.html',1,'']]],
   ['box',['box',['../classgridpp_1_1KDTree.html#a4ade5ac34e01979f956ef89778af46a1',1,'gridpp::KDTree::box()'],['../classgridpp_1_1KDTree.html#a4ade5ac34e01979f956ef89778af46a1',1,'gridpp::KDTree::box()']]],
   ['boxcox',['BoxCox',['../classgridpp_1_1BoxCox.html',1,'gridpp::BoxCox'],['../classgridpp_1_1BoxCox.html#a32976b0c1b02a1621763086dfe64a57c',1,'gridpp::BoxCox::BoxCox(float threshold)'],['../classgridpp_1_1BoxCox.html#a32976b0c1b02a1621763086dfe64a57c',1,'gridpp::BoxCox::BoxCox(float threshold)']]]
 ];

@@ -15,7 +15,7 @@ namespace {
     // Compute s,t when the points do not form a parallelogram
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
 }
-vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
+vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
@@ -44,8 +44,23 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     }
     return output;
 }
+vec3 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) {
+    if(gridpp::compatible_size(igrid, ivalues))
+       throw std::invalid_argument("Grid size is not the same as values");
 
-vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
+    int nTime = ivalues.size();
+
+    vec3 output(nTime);
+
+    // TODO: Where should the omp parallel be?
+    #pragma omp parallel for
+    for(int t = 0; t < nTime; t++) {
+        output[t] = bilinear(igrid, ogrid, ivalues[t]);
+    }
+    return output;
+}
+
+vec gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
@@ -65,6 +80,21 @@ vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
         float lat = iOutputLats[i];
         float lon = iOutputLons[i];
         output[i] = ::calc(igrid, iInputLats, iInputLons, ivalues, lat, lon);
+    }
+    return output;
+}
+vec2 gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues) {
+    if(gridpp::compatible_size(igrid, ivalues))
+       throw std::invalid_argument("Grid size is not the same as values");
+
+    int nTime = ivalues.size();
+
+    vec2 output(nTime);
+
+    // TODO: Where should the omp parallel be?
+    #pragma omp parallel for
+    for(int t = 0; t < nTime; t++) {
+        output[t] = bilinear(igrid, opoints, ivalues[t]);
     }
     return output;
 }

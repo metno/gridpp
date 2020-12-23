@@ -447,7 +447,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values on the output grid
     */
-    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+    vec3 bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
     /** Bilinear downscaling grid to points
       * @param igrid Input grid
@@ -455,7 +456,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+    vec bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+    vec2 bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient);
     vec3 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient);

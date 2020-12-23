@@ -120,6 +120,28 @@ class BilinearTest(unittest.TestCase):
         output = gridpp.bilinear(grid1, grid2, values)
         np.testing.assert_array_equal([[0, 0.5, 1], [1, 1.5, 2], [2, 2.5, 3]], output)
 
+    def test_grid_to_grid_3d(self):
+        """Check grid to grid itnerpolation"""
+        T = 3
+        values = np.reshape(np.arange(4), [2, 2])
+        values = np.expand_dims(values, 0)
+        values = np.repeat(values, T, axis=0)
+        lons1, lats1 = np.meshgrid([0, 1], [0, 1])
+        lons2, lats2 = np.meshgrid([0, 0.5, 1], [0, 0.5, 1])
+        grid1 = gridpp.Grid(lats1, lons1)
+        grid2 = gridpp.Grid(lats2, lons2)
+        output = gridpp.bilinear(grid1, grid2, values)
+        for t in range(T):
+            np.testing.assert_array_equal([[0, 0.5, 1], [1, 1.5, 2], [2, 2.5, 3]], output[t, ...])
+
+    def test_dimensions_mismatch(self):
+        lons, lats = np.meshgrid([0, 1], [0, 1])
+        grid = gridpp.Grid(lats, lons)
+        values = np.zeros([3, 1, 1])
+        with self.assertRaises(Exception) as e:
+            gridpp.bilinear(grid, grid, values)
+
+
     def check(self):
         N = 4
         lons, lats = np.meshgrid(np.linspace(0, 1, N), np.linspace(0, 1, N))

@@ -420,8 +420,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values on the output grid
     */
-    vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
-    vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3 ivalues);
+    vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+    vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
     /** Nearest neighbour dowscaling grid to point
       * @param igrid Input grid
@@ -429,8 +429,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
-    vec2 nearest(const Grid& igrid, const Points& opoints, const vec3 ivalues);
+    vec nearest(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+    vec2 nearest(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
     /** Nearest neighbour dowscaling point to point
       * @param igrid Input points
@@ -438,8 +438,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec nearest(const Points& ipoints, const Points& opoints, const vec ivalues);
-    vec2 nearest(const Points& ipoints, const Points& opoints, const vec2 ivalues);
+    vec nearest(const Points& ipoints, const Points& opoints, const vec& ivalues);
+    vec2 nearest(const Points& ipoints, const Points& opoints, const vec2& ivalues);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid

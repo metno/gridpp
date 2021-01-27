@@ -1080,6 +1080,7 @@ namespace gridpp {
             Points get_in_domain(const Grid& grid) const;
             CoordinateType get_coordinate_type() const;
             Point get_point(int index) const;
+            Points subset(const ivec& indices) const;
         private:
             KDTree mTree;
             vec mLats;

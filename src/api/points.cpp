@@ -128,3 +128,17 @@ CoordinateType gridpp::Points::get_coordinate_type() const {
 gridpp::Point gridpp::Points::get_point(int index) const {
     return Point(mLats[index], mLons[index], mElevs[index], mLafs[index], get_coordinate_type());
 }
+gridpp::Points gridpp::Points::subset(const ivec& indices) const {
+    int N = indices.size();
+    vec lats(N);
+    vec lons(N);
+    vec elevs(N);
+    vec lafs(N);
+    for(int i = 0; i < N; i++) {
+        lats[i] = mLats[i];
+        lons[i] = mLats[i];
+        elevs[i] = mElevs[i];
+        lafs[i] = mLafs[i];
+    }
+    return gridpp::Points(lats, lons, elevs, lafs);
+}

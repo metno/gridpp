@@ -89,9 +89,18 @@ float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
     return value;
 }
 float gridpp::calc_quantile(const vec& array, float quantile) {
+    int T = array.size();
+    if(quantile < 0 || quantile > 1) {
+        throw std::invalid_argument("calc_quantile: Quantile must be between 0 and 1 inclusive");
+    }
+    if(!gridpp::is_valid(quantile))
+        return gridpp::MV;
+
+    if(T == 0)
+        return gridpp::MV;
     if(quantile == 0) {
         float min = gridpp::MV;
-        for(int i = 0; i < array.size(); i++) {
+        for(int i = 0; i < T; i++) {
             float val = array[i];
             if(!gridpp::is_valid(val))
                 continue;
@@ -104,7 +113,7 @@ float gridpp::calc_quantile(const vec& array, float quantile) {
     }
     else if(quantile == 1) {
         float max = gridpp::MV;
-        for(int i = 0; i < array.size(); i++) {
+        for(int i = 0; i < T; i++) {
             float val = array[i];
             if(!gridpp::is_valid(val))
                 continue;
@@ -479,4 +488,23 @@ bool gridpp::point_in_rectangle(const Point& A, const Point& B, const Point& C, 
     bool opt1 = 0 >= D1 && 0 >= D4 && 0 <= D2 && 0 >= D3;
     bool opt2 = 0 <= D1 && 0 <= D4 && 0 >= D2 && 0 <= D3;
     return opt1 || opt2;
+}
+vec2 gridpp::calc_quantile(const vec3& array, const vec2& quantile) {
+    gridpp::compatible_size(quantile, array);
+    int Y = array.size();
+    if(Y == 0)
+        return vec2();
+    int X = array[0].size();
+    if(X == 0)
+        return vec2();
+    int T = array[0][0].size();
+    if(T == 0)
+        return vec2();
+    vec2 output = gridpp::init_vec2(Y, X);
+    for(int y = 0; y < Y; y++) {
+        for(int x = 0; x < X; x++) {
+            output[y][x] = gridpp::calc_quantile(array[y][x], quantile[y][x]);
+        }
+    }
+    return output;
 }

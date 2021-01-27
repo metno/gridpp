@@ -686,6 +686,13 @@ namespace gridpp {
     float calc_quantile(const vec& array, float quantile);
     vec calc_statistic(const vec2& array, Statistic statistic);
     vec calc_quantile(const vec2& array, float quantile=MV);
+
+    /** Compute quantile with 2D varying quantile
+      * @param array Input array with dimensions (T, Y, X)
+      * @param quantile Quantile array with dimensions (Y, X)
+      * @return Extracted quantile with dimensions (Y, X)
+    */
+    vec2 calc_quantile(const vec3& array, const vec2& quantile);
     int num_missing_values(const vec2& iArray);
 
     /** Find the index in a vector that is equal or just below a value

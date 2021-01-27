@@ -46,6 +46,7 @@ class Test(unittest.TestCase):
         self.assertTrue(np.isnan(gridpp.calc_statistic([], gridpp.Sum)))
 
     def test_calc_quantile(self):
+        self.assertTrue(np.isnan(gridpp.calc_quantile([], 0)))
         self.assertEqual(gridpp.calc_quantile([0, 1, 2], 0), 0)
         self.assertEqual(gridpp.calc_quantile([0, 1, 2], 0.5), 1)
         self.assertEqual(gridpp.calc_quantile([0, 1, 2], 1), 2)
@@ -67,6 +68,12 @@ class Test(unittest.TestCase):
         quantile_of_nan_list = gridpp.calc_quantile([[np.nan, np.nan, np.nan]], 0.5)
         self.assertEqual(len(quantile_of_nan_list), 1)
         self.assertTrue(np.isnan(quantile_of_nan_list[0]))
+
+    def test_calc_quantile_invalid_argument(self):
+        quantiles = [1.1, -0.1, np.nan]
+        for quantile in quantiles:
+            with self.assertRaises(Exception) as e:
+                gridpp.calc_quantile([0, 1, 2], quantile)
 
     def test_num_missing_values(self):
         self.assertEqual(gridpp.num_missing_values([[0, np.nan, 1, np.nan]]), 2)

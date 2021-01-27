@@ -221,6 +221,8 @@ namespace gridpp {
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+    vec2 doping(const Grid& igrid, const vec2& input, const Points& points, const vec& values, int half_width, float max_elev_diff=gridpp::MV);
+
     /**@}*/
 
     /** **************************************

@@ -21,9 +21,9 @@ def main():
     points = dict()
     np.random.seed(1000)
 
-    for i in [10, 50, 100, 200, 1000, 2000, 10000]:
+    for i in [10, 50, 100, 200, 500, 1000, 2000, 10000]:
         input[i] = np.random.rand(i * args.scaling, i)*10
-    for i in [10, 50, 100, 200, 1000]:
+    for i in [10, 50, 100, 200, 500, 1000]:
         grids[i] = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, i), np.linspace(0, 1, i * args.scaling)))
     for i in [1000]:
         # points[i] = gridpp.Points(np.linspace(0, 1, i), np.zeros(i))
@@ -37,8 +37,11 @@ def main():
     run[(gridpp.neighbourhood, "10000²")] = {"expected": 2.05, "args":(np.zeros([10000, 10000]), radius, gridpp.Mean)}
     run[(gridpp.neighbourhood,"2000² max")] = {"expected": 0.99, "args":(input[2000], radius, gridpp.Max)}
     run[(gridpp.neighbourhood_quantile_fast, "2000²")] = {"expected": 1.23, "args":(input[2000], quantile, radius, thresholds)}
+    run[(gridpp.neighbourhood_quantile, "500²")] = {"expected": 1.70, "args":(input[500], quantile, radius)}
     run[(gridpp.bilinear, "1000²")] = {"expected": 1.68, "args":(grids[1000], grids[1000], input[1000])}
+    run[(gridpp.bilinear, "1000² x 50")] = {"expected": 4.42, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
     run[(gridpp.nearest, "1000²")] = {"expected": 1.52, "args":(grids[1000], grids[1000], input[1000])}
+    run[(gridpp.nearest, "1000² x 50")] = {"expected": 2.30, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
     run[(gridpp.optimal_interpolation, "1000² 1000")] = {"expected": 1.57, "args":(grids[1000],
         input[1000], points[1000], np.zeros(1000), np.ones(1000), np.ones(1000), structure, 20)}
     run[(gridpp.dewpoint, "1e7")] = {"expected": 0.53, "args":(np.zeros(10000000) + 273.15, np.zeros(10000000))}
@@ -49,7 +52,7 @@ def main():
     else:
         print("Function                             Expected     Time     Diff")
     num_cores = [1]
-    if args.num_cores is not None:
+    if args.num_cores is not None and args.num_cores != 1:
         num_cores += [args.num_cores]
     for key in run.keys()       :
         timings = dict()

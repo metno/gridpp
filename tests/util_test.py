@@ -70,10 +70,11 @@ class Test(unittest.TestCase):
         self.assertTrue(np.isnan(quantile_of_nan_list[0]))
 
     def test_calc_quantile_invalid_argument(self):
-        quantiles = [1.1, -0.1, np.nan]
+        quantiles = [1.1, -0.1]
         for quantile in quantiles:
             with self.assertRaises(Exception) as e:
                 gridpp.calc_quantile([0, 1, 2], quantile)
+        self.assertTrue(np.isnan(gridpp.calc_quantile([0, 1, 2], np.nan)))
 
     def test_num_missing_values(self):
         self.assertEqual(gridpp.num_missing_values([[0, np.nan, 1, np.nan]]), 2)

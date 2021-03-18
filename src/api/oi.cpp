@@ -214,6 +214,10 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     CoordinateType coordinate_type = points.get_coordinate_type();
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
+        if(!gridpp::is_valid(background[y])) {
+            output[y] = gridpp::MV;
+            continue;
+        }
         float lat = blats[y];
         float lon = blons[y];
         Point p1 = bpoints.get_point(y);

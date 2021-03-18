@@ -100,6 +100,23 @@ class BilinearTest(unittest.TestCase):
         # TODO: This value has not been confirmed by an independent calculation
         self.assertAlmostEqual(output, 1.1570623, 5)
 
+    # Check that this doesn't fail
+    def test_vertical_parallel(self):
+        values = np.array([[0, 1], [2, 3]])
+        lons = np.transpose([[-10, -9], [-11, -10]])
+        lats = np.transpose([[54, 54], [55, 55.1]])
+        lons = [[-10, -11], [-9, -10]]
+        lats = [[54, 55], [54, 55.1]]
+        grid = gridpp.Grid(lats, lons)
+        output = gridpp.bilinear(grid, gridpp.Points([55], [-10]), values)[0]
+
+        # Trygveasp's Ireland example
+        values = np.array([[0, 1], [2, 3]])
+        lons = np.transpose([[-10.2027884, -9.97075176], [-10.2363253, -10.0035467]])
+        lats = np.transpose([[54.8651619, 54.884182], [54.9986267, 55.0177078]])
+        grid = gridpp.Grid(lats, lons)
+        output = gridpp.bilinear(grid, gridpp.Points([55], [-10]), values)[0]
+
     def test_with_missing_values(self):
         """Check that nearest neighbour is returned when a missing value is in the box"""
         values = np.array([[0, np.nan, 2, 3], [0, 1, 2, 3]])

@@ -176,12 +176,19 @@ namespace {
         float X42 = X4 - X2;
         float X43 = X4 - X3;
         if(2 * c * e - 2 * a * g != 0 && 2 * c * f - 2 * b * g != 0) {
+            // Quadratic equation has two solutions
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            if(alpha < 0 || alpha > 1)
+                alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+            if(beta < 0 || beta > 1)
+                beta  = (b * e - a * f - d * g + c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
         }
         else if(2 * c * f - 2 * b * g == 0) {
             // std::cout << "Need to diagnose t" << std::endl;
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+            if(alpha < 0 || alpha > 1)
+                alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             float s = alpha;
             float t;
             if(Y3 + Y43 * s - Y1 - Y21 * s == 0) {
@@ -196,6 +203,8 @@ namespace {
         else if(2 * c * e - 2 * a * g == 0) {
             // std::cout << "Need to diagnose s" << std::endl;
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            if(beta < 0 || beta > 1)
+                beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
             float t =  1 - beta;
             float s;
             if(Y2 + Y42 * t - Y1 - Y31 * t == 0) {

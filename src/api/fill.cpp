@@ -97,7 +97,7 @@ vec2 gridpp::fill_missing(const vec2& values) {
                     }
                 }
                 // Interpolate
-                if(next >= X) {
+                if(next >= Y) {
                     continue;
                 }
                 float value_last = values[last][x];

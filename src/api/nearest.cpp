@@ -58,6 +58,61 @@ vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) 
     }
     return output;
 }
+
+vec2 gridpp::nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalues) {
+    if(ipoints.size() != ivalues.size())
+        throw std::invalid_argument("Points size is not the same as values");
+    vec2 iOutputLats = ogrid.get_lats();
+    vec2 iOutputLons = ogrid.get_lons();
+
+    int nLat = iOutputLats.size();
+    int nLon = iOutputLats[0].size();
+
+    vec2 output(nLat);
+    for(int i = 0; i < nLat; i++)
+        output[i].resize(nLon);
+
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < nLat; i++) {
+        for(int j = 0; j < nLon; j++) {
+            int index = ipoints.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);
+            output[i][j] = ivalues[index];
+        }
+    }
+    return output;
+}
+vec3 gridpp::nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues) {
+    if(gridpp::compatible_size(ipoints, ivalues)) {
+        std::stringstream ss;
+        ss << "Input points (" << ipoints.size() << ") and values (" << ivalues.size() << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    vec2 iOutputLats = ogrid.get_lats();
+    vec2 iOutputLons = ogrid.get_lons();
+
+    int nTime = ivalues.size();
+    int nLat = iOutputLats.size();
+    int nLon = iOutputLats[0].size();
+
+    vec3 output(nTime);
+    for(int t = 0; t < nTime; t++) {
+        output[t].resize(nLat);
+        for(int i = 0; i < nLat; i++)
+            output[t][i].resize(nLon);
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < nLat; i++) {
+        for(int j = 0; j < nLon; j++) {
+            int index = ipoints.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);
+            for(int t = 0; t < nTime; t++) {
+                output[t][i][j] = ivalues[t][index];
+            }
+        }
+    }
+    return output;
+}
+
 vec gridpp::nearest(const Grid& igrid, const Points& opoints, const vec2& ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");

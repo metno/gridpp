@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import argparse
+import collections
 import gridpp
 
 def main():
@@ -32,7 +33,7 @@ def main():
     radius = 7
     quantile = 0.5
     thresholds = np.linspace(0, 1, 11)
-    run = dict()
+    run = collections.OrderedDict()
     run[(gridpp.Grid, "1000²")] = {"expected": 0.74, "args":np.meshgrid(np.linspace(0, 1, 1000 * args.scaling), np.linspace(0, 1, 1000))}
     run[(gridpp.neighbourhood, "10000²")] = {"expected": 2.05, "args":(np.zeros([10000, 10000]), radius, gridpp.Mean)}
     run[(gridpp.neighbourhood,"2000² max")] = {"expected": 0.99, "args":(input[2000], radius, gridpp.Max)}
@@ -68,14 +69,22 @@ def main():
         if args.function is not None:
             if func.__name__ != args.function:
                 continue
-        for num_core in num_cores:
-            gridpp.set_omp_threads(num_core)
-            for it in range(args.iterations):
-                s_time = time.time()
-                func(*run[key]["args"])
-                e_time = time.time()
-                curr_time = e_time - s_time
-                timings[num_core] += curr_time
+
+        # Allow functions to fail (useful when benchmarking older versions of gridpp
+        # where functions may not be defined).
+        try:
+            for num_core in num_cores:
+                gridpp.set_omp_threads(num_core)
+                for it in range(args.iterations):
+                    s_time = time.time()
+                    func(*run[key]["args"])
+                    e_time = time.time()
+                    curr_time = e_time - s_time
+                    timings[num_core] += curr_time
+        except Exception as e:
+            print("Could not run %s" % key)
+            continue
+
                 # print("%s() Expected: %.2f s Time: %.2f s" % (func.__name__, run[key]["expected"], e_time - s_time))
         for num_core in num_cores:
             timings[num_core] /= args.iterations

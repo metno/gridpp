@@ -11,7 +11,8 @@ Gridpp is currently under active development and the current version is a protot
 is welcome, either by using the issue tracker in Github, or by contacting Thomas Nipen (thomasn@met.no).
 
 ## Documentation
-For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki.
+For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki. The API
+reference is found at https://metno.github.io/gridpp/.
 
 ## Features
 - Methods for **downscaling** a forecast from a coarse grid to a fine grid
@@ -28,13 +29,14 @@ The following computes a moving neighbourhood mean with a half-width of 7 gridpo
 ```python
 import gridpp
 import numpy as np
-
-field = np.random.rand(300, 200)
+import scipy.ndimage.filters
+noise = np.random.randn(200, 300)
+input = scipy.ndimage.filters.gaussian_filter(noise, sigma=5)
 halfwidth = 7
-gridpp.neighbourhood(field, halfwidth, gridpp.Mean)
+output = gridpp.neighbourhood(input, halfwidth, gridpp.Mean)
 ```
 
-![Example](extras/image.gif)
+![Example](extras/image.jpg)
 
 ## Required dependencies
 - [Boost](https://www.boost.org/) >= 1.59

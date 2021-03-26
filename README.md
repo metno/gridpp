@@ -118,7 +118,7 @@ make build-r
 Currently, the R package is not installed centrally, but instead is placed in `extras/SWIG/R/gridpp.R` in the build directory.
 
 ## Copyright and license
-Copyright © 2014-2020 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
+Copyright © 2014-2021 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
 Public License (LGPL). See LICENSE file.
 
 ## Contact

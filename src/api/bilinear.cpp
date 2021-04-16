@@ -13,6 +13,9 @@ namespace {
     float bilinear(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float v0, float v1, float v2, float v3);
     // Compute s,t when the points form a parallelogram
     bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s);
+
+    // Check that value is within -tol and 1+tol
+    bool is_within_range(float value);
     // Compute s,t when the points do not form a parallelogram
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
 }
@@ -147,6 +150,10 @@ namespace {
         t = det * ((x - X1) * (-C) + (y - Y1) * (A));
         return true;
     }
+    bool is_within_range(float value) {
+        float tol = 0.01;
+        return value >= -tol && value < 1 + tol;
+    }
 
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
         // std::cout << "Method general" << std::endl;
@@ -175,19 +182,22 @@ namespace {
         float Y43 = Y4 - Y3;
         float X42 = X4 - X2;
         float X43 = X4 - X3;
+        float tol = 0.001;
         if(2 * c * e - 2 * a * g != 0 && 2 * c * f - 2 * b * g != 0) {
             // Quadratic equation has two solutions
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
-            if(alpha < 0 || alpha > 1)
+            if(!is_within_range(alpha))
                 alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
-            if(beta < 0 || beta > 1)
+            if(!is_within_range(beta))
                 beta  = (b * e - a * f - d * g + c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         else if(2 * c * f - 2 * b * g == 0) {
             // std::cout << "Need to diagnose t" << std::endl;
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
-            if(alpha < 0 || alpha > 1)
+            if(!is_within_range(alpha))
                 alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             float s = alpha;
             float t;
@@ -199,11 +209,13 @@ namespace {
                 t = (y - Y1 - Y21 * s) / (Y3 + Y43 * s - Y1 - Y21 * s);
             }
             beta = 1 - t;
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         else if(2 * c * e - 2 * a * g == 0) {
             // std::cout << "Need to diagnose s" << std::endl;
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
-            if(beta < 0 || beta > 1)
+            if(!is_within_range(beta))
                 beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
             float t =  1 - beta;
             float s;
@@ -215,6 +227,8 @@ namespace {
                 s = (y - Y1 - Y31 * t) / (Y2 + Y42 * t - Y1 - Y31 * t);
             }
             alpha = s;
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         s = alpha;
         t = 1 - beta;

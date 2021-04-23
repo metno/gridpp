@@ -768,7 +768,7 @@ namespace gridpp {
      *  @param min_range Minimum range of base to compute gradient
      *  @param default_gradient Use this gradient if minimum number is not met
     */
-    vec2 calc_gradient(const Grid& grid, const vec2& base, const vec2& values, int radius, int min_num=2, float min_range=0, float default_gradient=0);
+    vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);

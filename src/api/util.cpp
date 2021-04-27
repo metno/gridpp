@@ -89,9 +89,18 @@ float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
     return value;
 }
 float gridpp::calc_quantile(const vec& array, float quantile) {
+    int T = array.size();
+    if(quantile < 0 || quantile > 1) {
+        throw std::invalid_argument("calc_quantile: Quantile must be between 0 and 1 inclusive");
+    }
+    if(!gridpp::is_valid(quantile))
+        return gridpp::MV;
+
+    if(T == 0)
+        return gridpp::MV;
     if(quantile == 0) {
         float min = gridpp::MV;
-        for(int i = 0; i < array.size(); i++) {
+        for(int i = 0; i < T; i++) {
             float val = array[i];
             if(!gridpp::is_valid(val))
                 continue;
@@ -104,7 +113,7 @@ float gridpp::calc_quantile(const vec& array, float quantile) {
     }
     else if(quantile == 1) {
         float max = gridpp::MV;
-        for(int i = 0; i < array.size(); i++) {
+        for(int i = 0; i < T; i++) {
             float val = array[i];
             if(!gridpp::is_valid(val))
                 continue;
@@ -147,19 +156,38 @@ float gridpp::calc_quantile(const vec& array, float quantile) {
     }
     return value;
 }
-vec gridpp::calc_statistic(const vec2& array, gridpp::Statistic statistic) {
-    int N = array.size();
-    vec output(N);
-    for(int n = 0; n < N; n++) {
-        output[n] = gridpp::calc_statistic(array[n], statistic);
-    }
-    return output;
-}
 vec gridpp::calc_quantile(const vec2& array, float quantile) {
     int N = array.size();
     vec output(N);
     for(int n = 0; n < N; n++) {
         output[n] = gridpp::calc_quantile(array[n], quantile);
+    }
+    return output;
+}
+vec2 gridpp::calc_quantile(const vec3& array, const vec2& quantile) {
+    gridpp::compatible_size(quantile, array);
+    int Y = array.size();
+    if(Y == 0)
+        return vec2();
+    int X = array[0].size();
+    if(X == 0)
+        return vec2();
+    int T = array[0][0].size();
+    if(T == 0)
+        return vec2();
+    vec2 output = gridpp::init_vec2(Y, X);
+    for(int y = 0; y < Y; y++) {
+        for(int x = 0; x < X; x++) {
+            output[y][x] = gridpp::calc_quantile(array[y][x], quantile[y][x]);
+        }
+    }
+    return output;
+}
+vec gridpp::calc_statistic(const vec2& array, gridpp::Statistic statistic) {
+    int N = array.size();
+    vec output(N);
+    for(int n = 0; n < N; n++) {
+        output[n] = gridpp::calc_statistic(array[n], statistic);
     }
     return output;
 }
@@ -342,6 +370,36 @@ bool gridpp::compatible_size(const Grid& grid, const vec3& v) {
 }
 bool gridpp::compatible_size(const Points& points, const vec2& v) {
     return v.size() == 0 || points.size() != v[1].size();
+}
+bool gridpp::compatible_size(const Points& points, const vec& v) {
+    return points.size() != v.size();
+}
+bool gridpp::compatible_size(const vec2& a, const vec3& b) {
+    // No y
+    if(a.size() == 0 && b.size() == 0)
+        return true;
+    if(a.size() != b.size())
+        return false;
+
+    // No x
+    if(a[0].size() == 0 && b[0].size() == 0)
+        return true;
+    if(a[0].size() != b[0].size())
+        return false;
+    return true;
+}
+bool gridpp::compatible_size(const vec3& a, const vec3& b) {
+    if(a.size() != b.size())
+        return false;
+    for(int t = 0; t < a.size(); t++) {
+        if(a[t].size() != b[t].size())
+            return false;
+        for(int y = 0; y < a[t].size(); y++) {
+            if(a[t][y].size() != b[t][y].size())
+                return false;
+        }
+    }
+    return true;
 }
 vec2 gridpp::init_vec2(int Y, int X, float value) {
     vec2 output(Y);

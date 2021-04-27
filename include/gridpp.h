@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev1"
+#define GRIDPP_VERSION "0.6.0.dev2"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -111,6 +111,7 @@ namespace gridpp {
       * @param pbackground Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
@@ -119,7 +120,8 @@ namespace gridpp {
             const vec& pratios,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic vector of points
       * @param bpoints Points of background field
@@ -130,6 +132,7 @@ namespace gridpp {
       * @param pbackground Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec optimal_interpolation(const Points& bpoints,
             const vec& background,
@@ -138,7 +141,8 @@ namespace gridpp {
             const vec& pratios,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic gridded field including analysis variance
       * @param bpoints Grid of background field
@@ -151,6 +155,7 @@ namespace gridpp {
       * @param bvariance_at_points Variance of background interpolated to observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec2 optimal_interpolation_full(const Grid& bgrid,
             const vec2& background,
@@ -162,7 +167,8 @@ namespace gridpp {
             const vec& bvariance_at_points,
             const StructureFunction& structure,
             int max_points,
-            vec2& analysis_variance);
+            vec2& analysis_variance,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic vector of points including analysis variance
       * @param bpoints Points of background field
@@ -175,6 +181,7 @@ namespace gridpp {
       * @param bvariance_at_points Variance of background interpolated to observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec optimal_interpolation_full(const Points& bpoints,
             const vec& background,
@@ -186,7 +193,8 @@ namespace gridpp {
             const vec& bvariance_at_points,
             const StructureFunction& structure,
             int max_points,
-            vec& analysis_sigmas);
+            vec& analysis_sigmas,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
@@ -203,7 +211,8 @@ namespace gridpp {
             const vec& psigmas,
             const vec2& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     vec2 optimal_interpolation_ensi(const Points& bpoints,
             const vec2& background,
@@ -212,7 +221,8 @@ namespace gridpp {
             const vec& psigmas,
             const vec2& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
@@ -221,6 +231,8 @@ namespace gridpp {
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
+    vec2 doping(const Grid& igrid, const vec2& input, const Points& points, const vec& values, int half_width, float max_elev_diff=gridpp::MV);
+
     /**@}*/
 
     /** **************************************
@@ -333,10 +345,11 @@ namespace gridpp {
     /** Create quantile mapping calibration curve
      *  @param ref Reference values (observations)
      *  @param fcst Forecast values
+     *  @param output_fcst Output forecast quantiles
      *  @param quantiles Vector of quantiles to extract. If empty, use all values.
-     *  @return Calibration curve
+     *  @return Output reference quantiles
     */
-    vec2 quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles=vec());
+    vec quantile_mapping_curve(const vec& ref, const vec& fcst, vec& output_fcst, vec quantiles=vec());
 
     /** Create calibration curve that optimizes a metric
      *  @param ref Reference values (observations)
@@ -347,30 +360,54 @@ namespace gridpp {
     */
 
     vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
-    /** Apply arbitrary calibration curve to 1D forecasts
-     *  @param fcst 1D vector of forecast values
-     *  @param curve Calibration curve
+
+    /** Apply arbitrary calibration curve to a single value
+     *  @param fcst input forecast
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
+    float apply_curve(float fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
-    vec apply_curve(const vec& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
+    /** Apply arbitrary calibration curve to 1D forecasts
+     *  @param fcst 1D vector of forecast values
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
+    */
+    vec apply_curve(const vec& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts
      *  @param fcst 2D grid of forecast values
-     *  @param curve Calibration curve
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
      *  @return Calibrated forecasts
     */
-    vec2 apply_curve(const vec2& fcst, const vec2& curve, Extrapolation policy_below, Extrapolation policy_above);
+    vec2 apply_curve(const vec2& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
+
+    /** Apply arbitrary calibration curve to 2D forecasts with spatially varying QQ map
+     *  @param fcst 2D grid of forecast values
+     *  @param curve_ref Reference quantiles (Y, X, Q)
+     *  @param curve_fcst Forecast quantiles (Y, X, Q)
+     *  @param policy_below Extrapolation policy below curve
+     *  @param policy_above Extrapolation policy above curve
+     *  @return Calibrated forecasts
+    */
+    vec2 apply_curve(const vec2& fcst, const vec3& curve_ref, const vec3& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Ensure calibration curve is monotonic, by removing points
-     *  @param curve Calibration curve
-     *  @returns Monotonic calibration curve
+     *  @param curve_ref Reference quantiles
+     *  @param curve_fcst Forecast quantiles
+     *  @param output_fcst New forecast quantiles
+     *  @returns New reference quantiles
     */
-    vec2 monotonize_curve(vec2 curve);
+    vec monotonize_curve(vec curve_ref, vec curve_fcst, vec& output_fcst);
 
     float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
 
@@ -395,8 +432,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values on the output grid
     */
-    vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
-    vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3 ivalues);
+    vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+    vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
     /** Nearest neighbour dowscaling grid to point
       * @param igrid Input grid
@@ -404,17 +441,26 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec nearest(const Grid& igrid, const Points& opoints, const vec2 ivalues);
-    vec2 nearest(const Grid& igrid, const Points& opoints, const vec3 ivalues);
+    vec nearest(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+    vec2 nearest(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
     /** Nearest neighbour dowscaling point to point
-      * @param igrid Input points
+      * @param ipoints Input points
+      * @param opoints Output points to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @return Values for the output points
+    */
+    vec nearest(const Points& ipoints, const Points& opoints, const vec& ivalues);
+    vec2 nearest(const Points& ipoints, const Points& opoints, const vec2& ivalues);
+
+    /** Nearest neighbour dowscaling point to grid
+      * @param ipoints Input points
       * @param ogrid Output points to downscale to
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec nearest(const Points& ipoints, const Points& opoints, const vec ivalues);
-    vec2 nearest(const Points& ipoints, const Points& opoints, const vec2 ivalues);
+    vec2 nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalues);
+    vec3 nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid
@@ -422,7 +468,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values on the output grid
     */
-    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2 ivalues);
+    vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+    vec3 bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
     /** Bilinear downscaling grid to points
       * @param igrid Input grid
@@ -430,7 +477,8 @@ namespace gridpp {
       * @param ivalues 2D vector of values on the input grid
       * @return Values for the output points
     */
-    vec bilinear(const Grid& igrid, const Points& opoints, const vec2 ivalues);
+    vec bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+    vec2 bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient);
     vec3 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient);
@@ -659,6 +707,13 @@ namespace gridpp {
     float calc_quantile(const vec& array, float quantile);
     vec calc_statistic(const vec2& array, Statistic statistic);
     vec calc_quantile(const vec2& array, float quantile=MV);
+
+    /** Compute quantile with 2D varying quantile
+      * @param array Input array with dimensions (T, Y, X)
+      * @param quantile Quantile array with dimensions (Y, X)
+      * @return Extracted quantile with dimensions (Y, X)
+    */
+    vec2 calc_quantile(const vec3& array, const vec2& quantile);
     int num_missing_values(const vec2& iArray);
 
     /** Find the index in a vector that is equal or just below a value
@@ -718,7 +773,10 @@ namespace gridpp {
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
+    bool compatible_size(const Points& points, const vec& v);
     bool compatible_size(const Points& points, const vec2& v);
+    bool compatible_size(const vec2& a, const vec3& b);
+    bool compatible_size(const vec3& a, const vec3& b);
 
     /** Checks if a point is located inside a rectangle formed by 4 points. The 4 points must be
       * provided in an order that draws out a rectangle (either clockwise or counter-clockwise)
@@ -854,6 +912,17 @@ namespace gridpp {
             float mH;
             float mV;
             float mW;
+    };
+    /** */
+    class VariedStructure: public StructureFunction {
+        public:
+            VariedStructure(const Points& points, float h_max);
+            float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            const Points& m_points;
+            float m_h_max;
+            // StructureFunction* m_structure;
     };
     class CrossValidation: public StructureFunction {
         public:
@@ -1041,6 +1110,7 @@ namespace gridpp {
             Points get_in_domain(const Grid& grid) const;
             CoordinateType get_coordinate_type() const;
             Point get_point(int index) const;
+            Points subset(const ivec& indices) const;
         private:
             KDTree mTree;
             vec mLats;

@@ -11,7 +11,8 @@ Gridpp is currently under active development and the current version is a protot
 is welcome, either by using the issue tracker in Github, or by contacting Thomas Nipen (thomasn@met.no).
 
 ## Documentation
-For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki.
+For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki. The API
+reference is found at https://metno.github.io/gridpp/.
 
 ## Features
 - Methods for **downscaling** a forecast from a coarse grid to a fine grid
@@ -20,6 +21,22 @@ For information on how to use gridpp, check out the wiki at https://github.com/m
 - Data assimilation using **optimal interpolation** (OI) to merge observations and gridded forecasts (deterministic or ensemble)
 - Efficient data structures for nearest location lookup in a vector or grid of locations
 - Command-line client with support for Netcdf files with flexibility in how variables and dimensions are configured
+
+## Example
+
+The following computes a moving neighbourhood mean with a half-width of 7 gridpoints (i.e. 15x15 neighbourhood)
+
+```python
+import gridpp
+import numpy as np
+import scipy.ndimage.filters
+noise = np.random.randn(200, 300)
+input = scipy.ndimage.filters.gaussian_filter(noise, sigma=5)
+halfwidth = 7
+output = gridpp.neighbourhood(input, halfwidth, gridpp.Mean)
+```
+
+![Example](extras/image.jpg)
 
 ## Required dependencies
 - [Boost](https://www.boost.org/) >= 1.59
@@ -87,7 +104,7 @@ Update RPM:
     sudo smhi-yum --enablerepo=<server_name> update SMHI-gridpp-lib
 
 ## Copyright and license
-Copyright © 2014-2020 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
+Copyright © 2014-2021 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
 Public License (LGPL). See LICENSE file.
 
 ## Contact

@@ -7,15 +7,19 @@ using namespace gridpp;
 namespace {
     // Bilinear interpolation for a given point
     float calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec2& ivalues, float lat, float lon);
+    vec calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec3& ivalues, float lat, float lon);
     // Bilinear interpolation based on 4 surrounding points with coordinates (x0,y0), (x1,y1), etc
     // and values v0, v1, etc
     float bilinear(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float v0, float v1, float v2, float v3);
     // Compute s,t when the points form a parallelogram
     bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s);
+
+    // Check that value is within -tol and 1+tol
+    bool is_within_range(float value);
     // Compute s,t when the points do not form a parallelogram
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
 }
-vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
+vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
@@ -44,8 +48,40 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, vec2 ivalues) {
     }
     return output;
 }
+vec3 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) {
+    if(gridpp::compatible_size(igrid, ivalues))
+       throw std::invalid_argument("Grid size is not the same as values");
+    vec2 iOutputLats = ogrid.get_lats();
+    vec2 iOutputLons = ogrid.get_lons();
+    vec2 iInputLats = igrid.get_lats();
+    vec2 iInputLons = igrid.get_lons();
 
-vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
+    int nTime = ivalues.size();
+    int nLat = iOutputLats.size();
+    int nLon = iOutputLats[0].size();
+
+    vec3 output(nTime);
+    for(int t = 0; t < nTime; t++) {
+        output[t].resize(nLat);
+        for(int i = 0; i < nLat; i++)
+            output[t][i].resize(nLon);
+    }
+
+    // To reuse nearest neighbour information across time, we can't call calc on each timestep
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < nLat; i++) {
+        for(int j = 0; j < nLon; j++) {
+            float lat = iOutputLats[i][j];
+            float lon = iOutputLons[i][j];
+            vec temp = ::calc(igrid, iInputLats, iInputLons, ivalues, lat, lon);
+            for(int t = 0; t < nTime; t++)
+                output[t][i][j] = temp[t];
+        }
+    }
+    return output;
+}
+
+vec gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues) {
     if(gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
@@ -68,6 +104,33 @@ vec gridpp::bilinear(const Grid& igrid, const Points& opoints, vec2 ivalues) {
     }
     return output;
 }
+vec2 gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues) {
+    if(gridpp::compatible_size(igrid, ivalues))
+       throw std::invalid_argument("Grid size is not the same as values");
+    vec iOutputLats = opoints.get_lats();
+    vec iOutputLons = opoints.get_lons();
+    vec2 iInputLats = igrid.get_lats();
+    vec2 iInputLons = igrid.get_lons();
+
+    int nTime = ivalues.size();
+    int nPoints = iOutputLats.size();
+
+    vec2 output(nTime);
+    for(int t = 0; t < nTime; t++) {
+        output[t].resize(nPoints);
+    }
+
+    #pragma omp parallel for
+    for(int i = 0; i < nPoints; i++) {
+        float lat = iOutputLats[i];
+        float lon = iOutputLons[i];
+        vec temp = ::calc(igrid, iInputLats, iInputLons, ivalues, lat, lon);
+        for(int t = 0; t < nTime; t++) {
+            output[t][i] = temp[t];
+        }
+    }
+    return output;
+}
 
 namespace {
     bool calcParallelogram(float x, float y, float X1, float X2, float X3, float X4, float Y1, float Y2, float Y3, float Y4, float &t, float &s) {
@@ -86,6 +149,10 @@ namespace {
         s = det * ((x - X1) * (D) + (y - Y1) * (-B));
         t = det * ((x - X1) * (-C) + (y - Y1) * (A));
         return true;
+    }
+    bool is_within_range(float value) {
+        float tol = 0.01;
+        return value >= -tol && value < 1 + tol;
     }
 
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
@@ -115,13 +182,23 @@ namespace {
         float Y43 = Y4 - Y3;
         float X42 = X4 - X2;
         float X43 = X4 - X3;
+        float tol = 0.001;
         if(2 * c * e - 2 * a * g != 0 && 2 * c * f - 2 * b * g != 0) {
+            // Quadratic equation has two solutions
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            if(!is_within_range(alpha))
+                alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+            if(!is_within_range(beta))
+                beta  = (b * e - a * f - d * g + c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         else if(2 * c * f - 2 * b * g == 0) {
             // std::cout << "Need to diagnose t" << std::endl;
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
+            if(!is_within_range(alpha))
+                alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             float s = alpha;
             float t;
             if(Y3 + Y43 * s - Y1 - Y21 * s == 0) {
@@ -132,10 +209,14 @@ namespace {
                 t = (y - Y1 - Y21 * s) / (Y3 + Y43 * s - Y1 - Y21 * s);
             }
             beta = 1 - t;
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         else if(2 * c * e - 2 * a * g == 0) {
             // std::cout << "Need to diagnose s" << std::endl;
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            if(!is_within_range(beta))
+                beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
             float t =  1 - beta;
             float s;
             if(Y2 + Y42 * t - Y1 - Y31 * t == 0) {
@@ -146,6 +227,8 @@ namespace {
                 s = (y - Y1 - Y31 * t) / (Y2 + Y42 * t - Y1 - Y31 * t);
             }
             alpha = s;
+            assert(is_within_range(alpha));
+            assert(is_within_range(beta));
         }
         s = alpha;
         t = 1 - beta;
@@ -238,6 +321,50 @@ namespace {
             // Util::warning("Point is outside domain, cannot bilinearly interpolate");
             ivec nn = grid.get_nearest_neighbour(lat, lon);
             output = ivalues[nn[0]][nn[1]];
+        }
+        return output;
+    }
+    vec calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec3& ivalues, float lat, float lon) {
+        int I1 = gridpp::MV;
+        int I2 = gridpp::MV;
+        int J1 = gridpp::MV;
+        int J2 = gridpp::MV;
+        int T = ivalues.size();
+        vec output(T, gridpp::MV);
+        bool inside = grid.get_box(lat, lon, I1, J1, I2, J2);
+        // std::cout << "Coords: " << I1 << " " << J1 << " " << I2 << " " << J2 << " " << inside << std::endl;
+        if(inside) {
+            float x0 = iInputLons[I1][J1];
+            float x1 = iInputLons[I2][J1];
+            float x2 = iInputLons[I1][J2];
+            float x3 = iInputLons[I2][J2];
+            float y0 = iInputLats[I1][J1];
+            float y1 = iInputLats[I2][J1];
+            float y2 = iInputLats[I1][J2];
+            float y3 = iInputLats[I2][J2];
+
+            for(int t = 0; t < T; t++) {
+                float v0 = ivalues[t][I1][J1];
+                float v1 = ivalues[t][I2][J1];
+                float v2 = ivalues[t][I1][J2];
+                float v3 = ivalues[t][I2][J2];
+                if(gridpp::is_valid(v0) && gridpp::is_valid(v1) && gridpp::is_valid(v2) && gridpp::is_valid(v3)) {
+                    float value = ::bilinear(lon, lat, x0, x1, x2, x3, y0, y1, y2, y3, v0, v1, v2, v3);
+                    output[t] = value;
+                }
+                else {
+                    ivec nn = grid.get_nearest_neighbour(lat, lon);
+                    output[t] = ivalues[t][nn[0]][nn[1]];
+                }
+            }
+        }
+        else {
+            // The point is outside the input domain. Revert to nearest neighbour
+            // Util::warning("Point is outside domain, cannot bilinearly interpolate");
+            ivec nn = grid.get_nearest_neighbour(lat, lon);
+            for(int t = 0; t < T; t++) {
+                output[t] = ivalues[t][nn[0]][nn[1]];
+            }
         }
         return output;
     }

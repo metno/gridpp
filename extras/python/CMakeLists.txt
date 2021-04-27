@@ -36,12 +36,11 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 #    configure_file(${CMAKE_SOURCE_DIR}/include/${F} ${CMAKE_CURRENT_BINARY_DIR}/include/${F})
 #endforeach()
 
+set_source_files_properties(../SWIG/${PROJECT_NAME}.i PROPERTIES CPLUSPLUS ON)
+swig_add_library(gridpp2 TYPE SHARED LANGUAGE python SOURCES ../SWIG/${PROJECT_NAME}.i)
+set_target_properties(_gridpp2 PROPERTIES LINKER_LANGUAGE CXX)
 add_custom_target(package-python
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/extras/SWIG/python/gridppPYTHON_wrap.cxx ${CMAKE_CURRENT_BINARY_DIR}/src
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/extras/SWIG/python/gridpp.py ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${APISRC} ${CMAKE_CURRENT_BINARY_DIR}/src/api
-    COMMAND ${CMAKE_COMMAND} -E copy ${CPP_INCLUDE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/include
-    COMMAND ${CMAKE_COMMAND} -E copy ${SWIG_INTERFACE} ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND python3 ${SETUP_PY_OUT} sdist)
-add_dependencies(package-python build-python)
+    COMMAND ${CMAKE_COMMAND} -E copy ${CPP_INCLUDE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/include)
+add_dependencies(package-python _gridpp2)

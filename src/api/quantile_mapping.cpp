@@ -2,7 +2,7 @@
 
 using namespace gridpp;
 
-vec2 gridpp::quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantiles) {
+vec gridpp::quantile_mapping_curve(const vec& ref, const vec& fcst, vec& output_fcst, vec quantiles) {
     if(ref.size() != fcst.size())
         throw std::invalid_argument("ref and fcst must be of the same size");
 
@@ -13,13 +13,14 @@ vec2 gridpp::quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantil
                 throw std::invalid_argument("Quantiles must be >= 0 and <= 1");
         }
     }
-    vec2 curve(2);
-    if(ref.size() == 0)
-        return curve;
+    output_fcst.clear();
+    if(ref.size() == 0) {
+        output_fcst = fcst;
+        return ref;
+    }
     else if(ref.size() == 1) {
-        curve[0] = fcst;
-        curve[1] = ref;
-        return curve;
+        output_fcst = fcst;
+        return ref;
     }
 
     vec ref_sort = ref;
@@ -29,17 +30,17 @@ vec2 gridpp::quantile_mapping_curve(const vec& ref, const vec& fcst, vec quantil
     int N = quantiles.size();
     int S = fcst_sort.size();
     if(N == 0) {
-        curve[0] = fcst_sort;
-        curve[1] = ref_sort;
+        output_fcst = fcst_sort;
+        return ref_sort;
     }
     else {
-        curve[0].resize(N);
-        curve[1].resize(N);
+        output_fcst.resize(N);
+        vec output_ref(N);
         for(int i = 0; i < N; i++) {
             int index = quantiles[i] * (S - 1);
-            curve[0][i] = fcst[index];
-            curve[1][i] = ref[index];
+            output_fcst[i] = fcst[index];
+            output_ref[i] = ref[index];
         }
+        return output_ref;
     }
-    return curve;
 }

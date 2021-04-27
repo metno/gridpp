@@ -37,7 +37,8 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
         const vec& psigmas,
         const vec2& pbackground,
         const gridpp::StructureFunction& structure,
-        int max_points) {
+        int max_points,
+        bool allow_extrapolation) {
     double s_time = gridpp::clock();
 
     // Check input data
@@ -78,7 +79,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
             count++;
         }
     }
-    vec2 output1 = optimal_interpolation_ensi(bpoints, background1, points, pobs, psigmas, pbackground, structure, max_points);
+    vec2 output1 = optimal_interpolation_ensi(bpoints, background1, points, pobs, psigmas, pbackground, structure, max_points, allow_extrapolation);
     vec3 output = gridpp::init_vec3(nY, nX, nE);
     count = 0;
     for(int y = 0; y < nY; y++) {
@@ -98,7 +99,8 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         const vec& psigmas,   // pci
         const vec2& pbackground,
         const gridpp::StructureFunction& structure,
-        int max_points) {
+        int max_points,
+        bool allow_extrapolation) {
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
     if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
@@ -120,7 +122,6 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     int numParameters = 2;
     float sigmac = 0.5;
     float delta = 1;
-    bool mExtrapolate = false;
     bool mDiagnose = false;
 
     int nY = background.size();
@@ -495,7 +496,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
             ///////////////////////////////
             // Anti-extrapolation filter //
             ///////////////////////////////
-            if(!mExtrapolate) {
+            if(!allow_extrapolation) {
                 // Don't allow a final increment that is larger than any increment
                 // at station points
                 float maxInc = arma::max(lObs - (lY[e] + lYhat));

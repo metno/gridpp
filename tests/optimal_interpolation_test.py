@@ -146,6 +146,28 @@ class Test(unittest.TestCase):
         analysis1 = gridpp.optimal_interpolation(points, background, points1, obs[I], ratios[I], background[I], structure, 100)
         np.testing.assert_array_almost_equal(analysis, analysis1)
 
+    def test_extrapolation(self):
+        """ Check that extrapolation filter works """
+        N = 5
+        y = np.linspace(0, 1000, N)
+        x = np.zeros(N)
+        grid = gridpp.Points(y, x, x, x, gridpp.Cartesian)
+        points = gridpp.Points([0, 100, 900, 1000], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], gridpp.Cartesian)
+        Y = points.size()
+        pratios = 0.1 * np.ones(Y)
+        structure = gridpp.BarnesStructure(500)
+        pobs = [0, 1, 1, 0]
+        background = np.zeros(grid.size())
+        pbackground = np.zeros(Y)
+        max_points = 10
+        output0 = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points, False)
+        output1 = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points, True)
+        # Turning off extrapolation should mean we don't get increments greater than 1
+        self.assertTrue(np.max(output0) == 1)
+        self.assertTrue(np.max(output1) > 1)
+        I = np.where(output1 < 1)[0]
+        np.testing.assert_array_almost_equal(output0[I], output1[I])
+
 
 if __name__ == '__main__':
     unittest.main()

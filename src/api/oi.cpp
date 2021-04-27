@@ -30,7 +30,8 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
         const vec& pratios,
         const vec& pbackground,
         const gridpp::StructureFunction& structure,
-        int max_points) {
+        int max_points,
+        bool allow_extrapolation) {
     double s_time = gridpp::clock();
 
     // Check input data
@@ -73,7 +74,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
             count++;
         }
     }
-    vec output1 = optimal_interpolation(bpoints, background1, points, pobs, pratios, pbackground, structure, max_points);
+    vec output1 = optimal_interpolation(bpoints, background1, points, pobs, pratios, pbackground, structure, max_points, allow_extrapolation);
     vec2 output = gridpp::init_vec2(nY, nX);
     count = 0;
     for(int y = 0; y < nY; y++) {
@@ -92,7 +93,8 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
         const vec& pratios,   // gCi
         const vec& pbackground,
         const gridpp::StructureFunction& structure,
-        int max_points) {
+        int max_points,
+        bool allow_extrapolation) {
     double s_time = gridpp::clock();
 
     // Check input data
@@ -129,7 +131,7 @@ vec gridpp::optimal_interpolation(const gridpp::Points& bpoints,
         bvariance[i] = 1;
     }
     vec analysis_variance;
-    vec analysis = optimal_interpolation_full(bpoints, background, bvariance, points, pobs, obs_variance, pbackground, bvariance_at_points, structure, max_points, analysis_variance);
+    vec analysis = optimal_interpolation_full(bpoints, background, bvariance, points, pobs, obs_variance, pbackground, bvariance_at_points, structure, max_points, analysis_variance, allow_extrapolation);
     return analysis;
 }
 
@@ -143,7 +145,8 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         const vec& bvariance_at_points,
         const gridpp::StructureFunction& structure,
         int max_points,
-        vec& analysis_variance) {
+        vec& analysis_variance,
+        bool allow_extrapolation) {
 
     // Check input data
     if(max_points < 0)
@@ -301,7 +304,25 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         }
         mattype lGSR = lG * arma::inv(lP + lR);
         vectype dx = lGSR * (lObs - lY);
-        output[y] = background[y] + dx[0];
+        float increment = dx[0];
+        if(!allow_extrapolation) {
+            float maxInc = arma::max(lObs - lY);
+            float minInc = arma::min(lObs - lY);
+
+            if(maxInc > 0 && increment > maxInc) {
+               increment = maxInc;
+            }
+            else if(maxInc < 0 && increment > 0) {
+               increment = maxInc;
+            }
+            else if(minInc < 0 && increment < minInc) {
+               increment = minInc;
+            }
+            else if(minInc > 0 && increment < 0) {
+               increment = minInc;
+            }
+        }
+        output[y] = background[y] + increment;
         mattype a = (lGSR * lG.t());
         analysis_variance[y] = bvariance[y] * (1 - a(0, 0));
     }
@@ -318,7 +339,8 @@ vec2 gridpp::optimal_interpolation_full(const gridpp::Grid& bgrid,
         const vec& bvariance_at_points,
         const gridpp::StructureFunction& structure,
         int max_points,
-        vec2& analysis_variance) {
+        vec2& analysis_variance,
+        bool allow_extrapolation) {
 
     // Check input data
     if(max_points < 0)
@@ -363,7 +385,7 @@ vec2 gridpp::optimal_interpolation_full(const gridpp::Grid& bgrid,
         }
     }
     vec analysis_variance1;
-    vec output1 = optimal_interpolation_full(bpoints, background1, bvariance1, points, obs, obs_variance, background_at_points, bvariance_at_points, structure, max_points, analysis_variance1);
+    vec output1 = optimal_interpolation_full(bpoints, background1, bvariance1, points, obs, obs_variance, background_at_points, bvariance_at_points, structure, max_points, analysis_variance1, allow_extrapolation);
     vec2 output = gridpp::init_vec2(nY, nX);
     analysis_variance.clear();
     analysis_variance.resize(nY);

@@ -111,6 +111,7 @@ namespace gridpp {
       * @param pbackground Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
@@ -119,7 +120,8 @@ namespace gridpp {
             const vec& pratios,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic vector of points
       * @param bpoints Points of background field
@@ -130,6 +132,7 @@ namespace gridpp {
       * @param pbackground Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec optimal_interpolation(const Points& bpoints,
             const vec& background,
@@ -138,7 +141,8 @@ namespace gridpp {
             const vec& pratios,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic gridded field including analysis variance
       * @param bpoints Grid of background field
@@ -151,6 +155,7 @@ namespace gridpp {
       * @param bvariance_at_points Variance of background interpolated to observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec2 optimal_interpolation_full(const Grid& bgrid,
             const vec2& background,
@@ -162,7 +167,8 @@ namespace gridpp {
             const vec& bvariance_at_points,
             const StructureFunction& structure,
             int max_points,
-            vec2& analysis_variance);
+            vec2& analysis_variance,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic vector of points including analysis variance
       * @param bpoints Points of background field
@@ -175,6 +181,7 @@ namespace gridpp {
       * @param bvariance_at_points Variance of background interpolated to observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec optimal_interpolation_full(const Points& bpoints,
             const vec& background,
@@ -186,7 +193,8 @@ namespace gridpp {
             const vec& bvariance_at_points,
             const StructureFunction& structure,
             int max_points,
-            vec& analysis_sigmas);
+            vec& analysis_sigmas,
+            bool allow_extrapolation=true);
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)

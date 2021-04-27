@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev2"
+#define GRIDPP_VERSION "0.6.0.dev3"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -912,17 +912,6 @@ namespace gridpp {
             float mH;
             float mV;
             float mW;
-    };
-    /** */
-    class VariedStructure: public StructureFunction {
-        public:
-            VariedStructure(const Points& points, float h_max);
-            float corr(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-        private:
-            const Points& m_points;
-            float m_h_max;
-            // StructureFunction* m_structure;
     };
     class CrossValidation: public StructureFunction {
         public:

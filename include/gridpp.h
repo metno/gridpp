@@ -211,7 +211,8 @@ namespace gridpp {
             const vec& psigmas,
             const vec2& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     vec2 optimal_interpolation_ensi(const Points& bpoints,
             const vec2& background,
@@ -220,7 +221,8 @@ namespace gridpp {
             const vec& psigmas,
             const vec2& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            int max_points,
+            bool allow_extrapolation=true);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X

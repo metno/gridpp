@@ -1,6 +1,6 @@
 Name: SMHI-gridpp-lib
 Version: 0.6
-Release: 0.dev2
+Release: 0.dev3
 Summary: Driver library for SMHI's GridPP version
 License: SMHI
 Group: Applications/System

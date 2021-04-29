@@ -57,6 +57,8 @@ rm -rf $RPM_SOURCE_DIR
 %attr(644,root,root) %{INSTALLDIR}/*.py
 
 %changelog
+* Wed Apr 28 2021 Aliaksandr Rahachou <aliaksandr.rahachou@hiq.se> - 0.6.0.dev3
+- GridPP 0.6.0.dev3, extrapolation flag
 * Mon Dec 7 2020 Aliaksandr Rahachou <aliaksandr.rahachou@hiq.se> - 0.6.0.dev1
 - GridPP 0.6.0.dev1
 * Tue Nov 24 2020 Aliaksandr Rahachou <aliaksandr.rahachou@hiq.se> - 0.5-1

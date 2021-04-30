@@ -4,44 +4,6 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt 
 
-
-def display_gradients(size = 10):
-	laf_values = np.zeros([size,size], float)
-	t_values = np.zeros([size,size], float)
-	for i in range(len(laf_values[:,0])):
-		for j in range(len(laf_values[0,:])):
-			if i + j < 7:
-				laf_values[i,j] = 0
-				t_values[i,j] = 10# + random.randrange(-100, 100)/100.0
-			elif i + j >= 7:
-				laf_values[i,j] = (i + j)/(size**2/5.0)# + random.randrange(-100, 100)/1000.0
-				t_values[i,j] = size +  (i + j)/(size/5.0)# + random.randrange(-100, 100)/100.0
-			else:
-				pass
-
-	gradient = gridpp.calc_gradient(laf_values, t_values, 3)
-
-	fig, (ax1, ax2, ax3) = plt.subplots(figsize=(13, 3), ncols=3)
-	laf = ax1.imshow(laf_values, cmap = 'Blues_r', vmin= 0.0, vmax=1.0)
-	cbar = fig.colorbar(laf, ax=ax1, extend= 'both')
-	cbar.minorticks_on()
-	ax1.set_title('Base')
-
-	t = ax2.imshow(t_values, cmap = 'RdBu_r')
-	cbar2 = fig.colorbar(t, ax=ax2, extend= 'both')
-	cbar2.minorticks_on()
-	ax2.set_title('Values')
-
-	grdnt = ax3.imshow(gradient, cmap = 'Greys')
-	cbar3 = fig.colorbar(grdnt, ax=ax3, extend= 'both')
-	cbar3.minorticks_on()
-	ax3.set_title('gradient')
-
-	plt.savefig('output_gradient.png')
-	plt.close()
-	print(gradient)
-	return
-
 class Test(unittest.TestCase):	
     def setUp(self):
         """ Setup 10x10 matrix with gradual values with/without randomness"""
@@ -93,6 +55,3 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
 	unittest.main()
-
-display_gradients()
-

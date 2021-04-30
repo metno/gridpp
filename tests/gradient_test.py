@@ -2,7 +2,6 @@ import gridpp
 import unittest
 import numpy as np 
 import random
-import matplotlib.pyplot as plt 
 
 class Test(unittest.TestCase):	
     def setUp(self):

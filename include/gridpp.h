@@ -59,6 +59,7 @@ namespace gridpp {
             MeanSlope = 10,    /**< Continue past the end-points using the mean slope of the curve*/
             NearestSlope = 20, /**< Continue past the end-points using the slope of the two lowermost or uppermost points in the curve */
             Zero = 30,         /**< Continue past the end-points using a slope of 0 */
+            Unchanged = 40,    /**< Keep values the way they were */
         };
 
     /** Statistical operations to reduce a vector to a scalar */

@@ -29,32 +29,41 @@ float gridpp::apply_curve(float input, const vec& curve_ref, const vec& curve_fc
             nearestFcst = largestFcst;
             policy = policy_above;
         }
-        float slope = 1;
-        if(policy == gridpp::Zero) {
-            slope = 0;
+
+        if (policy == gridpp::Unchanged) {
+            output = input;
         }
-        if(policy == gridpp::OneToOne || C <= 1) {
-            slope = 1;
-        }
-        else if(policy == gridpp::MeanSlope) {
-            float dObs  = largestObs - smallestObs;
-            float dFcst = largestFcst - smallestFcst;
-            slope = dObs / dFcst;
-        }
-        else if(policy == gridpp::NearestSlope) {
-            float dObs;
-            float dFcst;
-            if(input <= smallestFcst) {
-                dObs  = curve_ref[1] - curve_ref[0];
-                dFcst = curve_fcst[1] - curve_fcst[0];
+        else {
+            float slope = 1;
+            if(policy == gridpp::Zero) {
+                slope = 0;
+            }
+            else if(policy == gridpp::OneToOne || C <= 1) {
+                slope = 1;
+            }
+            else if(policy == gridpp::MeanSlope) {
+                float dObs  = largestObs - smallestObs;
+                float dFcst = largestFcst - smallestFcst;
+                slope = dObs / dFcst;
+            }
+            else if(policy == gridpp::NearestSlope) {
+                float dObs;
+                float dFcst;
+                if(input <= smallestFcst) {
+                    dObs  = curve_ref[1] - curve_ref[0];
+                    dFcst = curve_fcst[1] - curve_fcst[0];
+                }
+                else {
+                    dObs  = curve_ref[C-1] - curve_ref[C-2];
+                    dFcst = curve_fcst[C-1] - curve_fcst[C-2];
+                }
+                slope = dObs / dFcst;
             }
             else {
-                dObs  = curve_ref[C-1] - curve_ref[C-2];
-                dFcst = curve_fcst[C-1] - curve_fcst[C-2];
+                throw std::runtime_error("Unknown extrapolation policy");
             }
-            slope = dObs / dFcst;
+            output = nearestObs + slope * (input - nearestFcst);
         }
-        output = nearestObs + slope * (input - nearestFcst);
     }
     return output;
 }

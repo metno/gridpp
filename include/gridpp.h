@@ -225,6 +225,24 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
+    /** Correction of a gridded field ensuring the distribution of values nearby match that of
+      * observations
+      * @param bgrid grid corresponding to input
+      * @param background 2D field of background values (Y, X)
+      * @param points observation points
+      * @param pobs vector of observations
+      * @param pbackground vector of background values at points
+      * @param structure structure function specifying correlation between points
+      * @param max_points maximum number of points used within localization radius
+    */
+    vec2 local_distribution_correction(const Grid& bgrid,
+            const vec2& background,
+            const Points& points,
+            const vec& pobs,
+            const vec& pbackground,
+            const StructureFunction& structure,
+            int max_points);
+
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X
       * @param radii Circle radii for each point

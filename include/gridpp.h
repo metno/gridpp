@@ -233,7 +233,9 @@ namespace gridpp {
       * @param pobs vector of observations
       * @param pbackground vector of background values at points
       * @param structure structure function specifying correlation between points
-      * @param max_points maximum number of points used within localization radius
+      * @param min_quantile truncate quantile map below this quantile
+      * @param max_quantile truncate quantile map above this quantile
+      * @param max_points maximum number of points used within localization radius (not used at moment)
     */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
@@ -241,7 +243,9 @@ namespace gridpp {
             const vec& pobs,
             const vec& pbackground,
             const StructureFunction& structure,
-            int max_points);
+            float min_quantile,
+            float max_quantile,
+            int max_points=0);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X

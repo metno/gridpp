@@ -245,7 +245,17 @@ namespace gridpp {
             const StructureFunction& structure,
             float min_quantile,
             float max_quantile,
-            int max_points=0);
+            int min_points=0);
+
+    vec2 local_distribution_correction(const Grid& bgrid,
+            const vec2& background,
+            const Points& points,
+            const vec2& pobs,
+            const vec2& pbackground,
+            const StructureFunction& structure,
+            float min_quantile,
+            float max_quantile,
+            int min_points=0);
 
     /** Fill in values inside or outside a set of circles
       * @param input Deterministic values with dimensions Y, X

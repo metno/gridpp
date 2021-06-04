@@ -23,15 +23,36 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
         const StructureFunction& structure,
         float min_quantile,
         float max_quantile,
-        int max_points) {
+        int min_points) {
+    vec2 pobs0;
+    pobs0.push_back(pobs);
+    vec2 pbackground0;
+    pbackground0.push_back(pbackground);
+    return gridpp::local_distribution_correction(bgrid, background, points, pobs0, pbackground0, structure, min_quantile, max_quantile, min_points);
+}
+vec2 gridpp::local_distribution_correction(const Grid& bgrid,
+        const vec2& background,
+        const Points& points,
+        const vec2& pobs,
+        const vec2& pbackground,
+        const StructureFunction& structure,
+        float min_quantile,
+        float max_quantile,
+        int min_points) {
 
     int nY = background.size();
     int nX = background[0].size();
+    int nT = pobs.size();
     vec2 blats = bgrid.get_lats();
     vec2 blons = bgrid.get_lons();
     vec2 output(nY);
 
-    float min_num_stations = 10;
+    if (pobs.size() != pbackground.size()) {
+        std::stringstream ss;
+        ss << "pobs (" << pobs.size() << "," << pobs[0].size() << ") is not the same size as pbackground (" << pbackground.size() << "," << pbackground[0].size() << ")";
+        throw std::invalid_argument(ss.str());
+    }
+
     bool weighted = true;
     float alpha = 0.01;
 
@@ -52,42 +73,38 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
             Point p1 = bgrid.get_point(y, x);
             ivec indices = points.get_neighbours(lat, lon, localizationRadius);
 
-            float sum_rho = 0;
             float sum_below = 0;
-            int S = indices.size();
+            int nS = indices.size();
             std::vector<std::pair<float, float> > ref_rho;
             std::vector<std::pair<float, float> > fcst_rho;
-            ref_rho.reserve(S);
-            fcst_rho.reserve(S);
-            double sum_ref_rho = 0;
-            double sum_fcst_rho = 0;
+            ref_rho.reserve(nS * nT);
+            fcst_rho.reserve(nS * nT);
+            float sum_rho = 0;
             int count = 0;
 
             // Put ref and background into arrays
-            for(int s = 0; s < S; s++) {
+            for(int s = 0; s < nS; s++) {
                 int index = indices[s];
-                if(!gridpp::is_valid(pobs[index]) || !gridpp::is_valid(pbackground[index]))
-                    continue;
-                if(pobs[index] < 0 || pbackground[index] < 0)
-                    continue;
                 Point p2 = points.get_point(index);
                 float curr_rho = structure.corr_background(p1, p2);
                 // curr_rho = 1;
-                sum_rho += curr_rho;
-                if (pbackground[index] < background[y][x])
-                    sum_below += curr_rho;
-                float curr_ref = pobs[index];
-                float curr_fcst = pbackground[index];
-                assert(curr_ref >= 0);
-                assert(curr_fcst >= 0);
-                ref_rho.push_back(std::pair<float, float>(curr_ref, curr_rho));
-                fcst_rho.push_back(std::pair<float, float>(curr_fcst, curr_rho));
-                sum_ref_rho += pobs[index] * curr_rho;
-                sum_fcst_rho += pbackground[index] * curr_rho;
-                count++;
+                for(int t = 0; t < nT; t++) {
+                    if(!gridpp::is_valid(pobs[t][index]) || !gridpp::is_valid(pbackground[t][index]))
+                        continue;
+                    if(pobs[t][index] < 0 || pbackground[t][index] < 0)
+                        continue;
+                    float curr_ref = pobs[t][index];
+                    float curr_fcst = pbackground[t][index];
+                    assert(curr_ref >= 0);
+                    assert(curr_fcst >= 0);
+                    ref_rho.push_back(std::pair<float, float>(curr_ref, curr_rho));
+                    fcst_rho.push_back(std::pair<float, float>(curr_fcst, curr_rho));
+                    sum_rho += curr_rho;
+                    count++;
+                }
             }
 
-            if (count >= min_num_stations) {
+            if (count >= min_points) {
                 // Create a calibration curve of ref,fcst, so that we can adjust the current
                 // background value
                 std::sort(ref_rho.begin(), ref_rho.end(), ::sort_pair_first<float, float>());
@@ -147,11 +164,6 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
                         output[y][x] = new_ref;
                     }
                 }
-                // output[y][x] = q;
-                // output[y][x] = frac_below * sum_ref_rho;
-                // output[y][x] = frac_below; // ref_rho[s].first;
-                // output[y][x] = sum_ref_rho / count; // ref_rho[s].first;
-                // output[y][x] = acc / count; // ref_rho[s].first;
             }
         }
     }

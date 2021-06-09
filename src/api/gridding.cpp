@@ -17,7 +17,7 @@ vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values,
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
             ivec I = points.get_neighbours(lats[y][x], lons[y][x], radius);
-            if(min_num > 0 && I.size() >= min_num) {
+            if(min_num <= 0 || I.size() >= min_num) {
                 vec curr(I.size());
                 for(int i = 0; i < I.size(); i++) {
                     curr[i] = values[I[i]];

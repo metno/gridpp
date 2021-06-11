@@ -247,6 +247,18 @@ namespace gridpp {
             float max_quantile,
             int min_points=0);
 
+    /** Version with multiple number of timesteps. Pool all observations across time in when
+      * computing the calibration curve.
+      * @param bgrid grid corresponding to input
+      * @param background 2D field of background values (Y, X)
+      * @param points observation points
+      * @param pobs 2D vector of observations with dimensions (T, N)
+      * @param pbackground vector of background values at points with dimensions (T, N)
+      * @param structure structure function specifying correlation between points
+      * @param min_quantile truncate quantile map below this quantile
+      * @param max_quantile truncate quantile map above this quantile
+      * @param max_points maximum number of points used within localization radius (not used at moment)
+    */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
             const Points& points,

@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev3"
+#define GRIDPP_VERSION "0.6.0.dev4"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -226,7 +226,7 @@ namespace gridpp {
             bool allow_extrapolation=true);
 
     /** Correction of a gridded field ensuring the distribution of values nearby match that of
-      * observations
+      * observations. This is an experimental method.
       * @param bgrid grid corresponding to input
       * @param background 2D field of background values (Y, X)
       * @param points observation points
@@ -257,14 +257,34 @@ namespace gridpp {
             float max_quantile,
             int min_points=0);
 
-    /** Fill in values inside or outside a set of circles
+    /** Fill in values inside or outside a set of circles (useful for masking)
       * @param input Deterministic values with dimensions Y, X
       * @param radii Circle radii for each point
       * @param value Fill in this value
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
-    vec2 doping(const Grid& igrid, const vec2& input, const Points& points, const vec& values, int half_width, float max_elev_diff=gridpp::MV);
+
+
+    /** Insert observations into gridded field using a square box
+      * @param grid Grid
+      * @param background Deterministic values with dimensions Y, X
+      * @param points Points representing observations
+      * @param observations Vector of observations
+      * @param half_widths Half width of square (in number of grid points) where observations are inserted for each point
+      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+    */
+    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff=gridpp::MV);
+
+    /** Insert observations into gridded field using a circle
+      * @param grid Grid
+      * @param background Deterministic values with dimensions Y, X
+      * @param points Points representing observations
+      * @param observations Vector of observations
+      * @param radii Radius of circle where observations are inserted for each point [m]
+      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+    */
+    vec2 doping_circle(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const vec& radii, float max_elev_diff=gridpp::MV);
 
     /**@}*/
 

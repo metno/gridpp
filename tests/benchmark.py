@@ -26,7 +26,7 @@ def main():
         input[i] = np.random.rand(i * args.scaling, i)*10
     for i in [10, 50, 100, 200, 500, 1000]:
         grids[i] = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, i), np.linspace(0, 1, i * args.scaling)))
-    for i in [1000]:
+    for i in [1000, 100000]:
         # points[i] = gridpp.Points(np.linspace(0, 1, i), np.zeros(i))
         points[i] = gridpp.Points(np.random.rand(i) * 10, np.random.rand(i) * 10)
     structure = gridpp.BarnesStructure(10000)
@@ -46,6 +46,12 @@ def main():
     run[(gridpp.optimal_interpolation, "1000² 1000")] = {"expected": 1.57, "args":(grids[1000],
         input[1000], points[1000], np.zeros(1000), np.ones(1000), np.ones(1000), structure, 20)}
     run[(gridpp.dewpoint, "1e7")] = {"expected": 0.53, "args":(np.zeros(10000000) + 273.15, np.zeros(10000000))}
+    run[(gridpp.fill, "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 5000, 1, False)}
+    run[(gridpp.doping_square, "1e5")] = {"expected": 0.16, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 1, np.ones(100000, 'int') * 5, False)}
+    run[(gridpp.doping_circle, "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
 
     print("Gridpp version %s" % gridpp.version())
     if args.num_cores is not None:

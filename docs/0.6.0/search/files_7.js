@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['metric_5foptimizer_2ecpp',['metric_optimizer.cpp',['../metric__optimizer_8cpp.html',1,'']]]
+  ['local_5fdistribution_5fcorrection_2ecpp',['local_distribution_correction.cpp',['../local__distribution__correction_8cpp.html',1,'']]]
 ];

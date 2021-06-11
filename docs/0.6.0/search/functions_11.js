@@ -14,5 +14,5 @@ var searchData=
   ['test_5fvec_5fargout',['test_vec_argout',['../namespacegridpp.html#ab004eb9651bda65a13d5aa7cee88f669',1,'gridpp']]],
   ['test_5fvec_5finput',['test_vec_input',['../namespacegridpp.html#a8efa7484b7eff862a01d2e74fea4218b',1,'gridpp']]],
   ['test_5fvec_5foutput',['test_vec_output',['../namespacegridpp.html#a5b908d68759978acc57c0445254e8221',1,'gridpp']]],
-  ['to_5fpoints',['to_points',['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid::to_points() const'],['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid::to_points() const']]]
+  ['to_5fpoints',['to_points',['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid']]]
 ];

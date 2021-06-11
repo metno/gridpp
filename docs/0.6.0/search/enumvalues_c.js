@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['std',['Std',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea50dac7e777a4d1606f972838e287c39c',1,'gridpp']]],
-  ['sum',['Sum',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea15852a6be5bdb34ab84fbc887fe8175a',1,'gridpp']]]
+  ['std',['Std',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea8fe5956039806ec9bd44951678633313',1,'gridpp']]],
+  ['sum',['Sum',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea6c441851323ce18fdc0ceab44a5871b9',1,'gridpp']]]
 ];

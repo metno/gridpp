@@ -14,9 +14,9 @@ var searchData=
   ['test_5fvec_5fargout',['test_vec_argout',['../namespacegridpp.html#ab004eb9651bda65a13d5aa7cee88f669',1,'gridpp']]],
   ['test_5fvec_5finput',['test_vec_input',['../namespacegridpp.html#a8efa7484b7eff862a01d2e74fea4218b',1,'gridpp']]],
   ['test_5fvec_5foutput',['test_vec_output',['../namespacegridpp.html#a5b908d68759978acc57c0445254e8221',1,'gridpp']]],
-  ['to_5fpoints',['to_points',['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid::to_points() const'],['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid::to_points() const']]],
+  ['to_5fpoints',['to_points',['../classgridpp_1_1Grid.html#ac02eea644971597bbed0df650118598a',1,'gridpp::Grid']]],
   ['transform',['Transform',['../classgridpp_1_1Transform.html',1,'gridpp']]],
   ['transform_2ecpp',['transform.cpp',['../transform_8cpp.html',1,'']]],
-  ['ts',['Ts',['../namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01ace0ffb808414dde027a7fa13360f1af3',1,'gridpp']]],
+  ['ts',['Ts',['../namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01a1730808e4a240f604b30b20e9e563713',1,'gridpp']]],
   ['type',['type',['../classgridpp_1_1Point.html#a4ae09ba041cfa6b4e93d984e92cbba2b',1,'gridpp::Point']]]
 ];

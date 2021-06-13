@@ -480,10 +480,6 @@ namespace gridpp {
     float calc_score(const vec& ref, const vec& fcst, float threshold, Metric metric);
     float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, Metric metric);
 
-    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
-    // Apply correction based on multiple timesteps
-    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
-
     /**@}*/
 
     /** **************************************

@@ -54,11 +54,11 @@ find_package(GSL REQUIRED)
 
 file(GLOB APISRC "src/api/*.cpp")
 function(list_sources sources)
-   file(GLOB CORESRC "src/*.cpp")
-   file(GLOB CALSRC  "src/Calibrator/*.cpp")
-   file(GLOB DOWNSRC "src/Downscaler/*.cpp")
-   file(GLOB FILESRC "src/File/*.cpp")
-   file(GLOB PARSRC  "src/ParameterFile/*.cpp")
+   file(GLOB CORESRC "src/client/*.cpp")
+   file(GLOB CALSRC  "src/client/Calibrator/*.cpp")
+   file(GLOB DOWNSRC "src/client/Downscaler/*.cpp")
+   file(GLOB FILESRC "src/client/File/*.cpp")
+   file(GLOB PARSRC  "src/client/ParameterFile/*.cpp")
 
    set(${sources}
       ${CORESRC}
@@ -75,30 +75,20 @@ function(add_gridpp_library target lib_type)
    target_include_directories(${target} PUBLIC "${NETCDF_INCLUDE_DIRS}")
    target_include_directories(${target} PUBLIC "${GSL_INCLUDE_DIRS}")
    target_include_directories(${target} PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
-   set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp_cml)
+   set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp_client)
 endfunction()
 
 list_sources(SRC)
-set(DRVSRC  "src/Driver/Gridpp.cpp")
-set(TRAINRC "src/Driver/Train.cpp")
-set(KDTREERC "src/Driver/KDTree.cpp")
+set(DRVSRC  "src/client/Driver/Gridpp.cpp")
 
 add_gridpp_library(gridpp-static STATIC)
 add_executable(gridpp-bin   ${DRVSRC} )
-add_executable(gridpp-train ${TRAINRC})
-add_executable(gridpp-kdtree ${KDTREERC})
 set_target_properties(gridpp-bin   PROPERTIES OUTPUT_NAME gridpp)
-set_target_properties(gridpp-train PROPERTIES OUTPUT_NAME gridpp_train)
-set_target_properties(gridpp-kdtree PROPERTIES OUTPUT_NAME gridpp_kdtree)
-
-foreach(item gridpp-bin gridpp-train gridpp-kdtree)
-   target_link_libraries(${item} gridpp-static)
-
-   target_link_libraries(${item} "${Boost_LIBRARIES}")
-   target_link_libraries(${item} "${NETCDF_LIBRARIES}")
-   target_link_libraries(${item} "${GSL_LIBRARIES}")
-   target_link_libraries(${item} "${ARMADILLO_LIBRARIES}")
-endforeach(item)
+target_link_libraries(gridpp-bin gridpp-static)
+target_link_libraries(gridpp-bin "${Boost_LIBRARIES}")
+target_link_libraries(gridpp-bin "${NETCDF_LIBRARIES}")
+target_link_libraries(gridpp-bin "${GSL_LIBRARIES}")
+target_link_libraries(gridpp-bin "${ARMADILLO_LIBRARIES}")
 
 if (ENABLE_TESTS)
     include(Testing)
@@ -113,7 +103,7 @@ if (ENABLE_TESTS)
         # add_dependencies(tests tests-data build-python)
         add_custom_target(coverage BYPRODUCTS coverage.info
             COMMAND lcov --directory ${CMAKE_BINARY_DIR}/CMakeFiles/gridpp.dir/ --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
-            COMMAND lcov --remove coverage.info '*/src/Testing/*' '/usr/*' --output-file coverage.info
+            COMMAND lcov --remove coverage.info '*/src/client/Testing/*' '/usr/*' --output-file coverage.info
             COMMAND lcov --list coverage.info
             # COMMAND genhtml coverage.info -o coverage
         )
@@ -171,7 +161,7 @@ else()
     message(STATUS "Documentation generation disabled. Doxygen needs to be installed to generate documentation.")
 endif()
 
-install(TARGETS gridpp-bin gridpp-train
+install(TARGETS gridpp-bin
    RUNTIME DESTINATION bin)
 
 

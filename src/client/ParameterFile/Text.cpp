@@ -33,7 +33,7 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
             int currCounter = 0;
             while(ss.good()) {
                std::string value;
-               bool status = ss >> value;
+               bool status = (bool) (ss >> value);
                if(!status) {
                   std::stringstream ss;
                   ss << "Could not read header '" << header << "' from file '" + mFilename + "'";
@@ -67,32 +67,32 @@ ParameterFileText::ParameterFileText(const Options& iOptions, bool iIsNew) : Par
             float elev = Util::MV;
             while(ss.good()) {
                if(currCounter == timePos) {
-                  bool status = ss >> time;
+                  bool status = (bool) (ss >> time);
                   if(!status) {
                      Util::error("Could not read time from file '" + mFilename + "'");
                   }
                }
                else if(currCounter == latPos) {
-                  bool status = ss >> lat;
+                  bool status = (bool) (ss >> lat);
                   if(!status) {
                      Util::error("Could not read lat from file '" + mFilename + "'");
                   }
                }
                else if(currCounter == lonPos) {
-                  bool status = ss >> lon;
+                  bool status = (bool) (ss >> lon);
                   if(!status) {
                      Util::error("Could not read lon from file '" + mFilename + "'");
                   }
                }
                else if(currCounter == elevPos) {
-                  bool status = ss >> elev;
+                  bool status = (bool) (ss >> elev);
                   if(!status) {
                      Util::error("Could not read elev from file '" + mFilename + "'");
                   }
                }
                else {
                   float value;
-                  bool status  = ss >> value;
+                  bool status  = (bool) (ss >> value);
                   if(!status) {
                      Util::error("Could not read value from file '" + mFilename + "'");
                   }

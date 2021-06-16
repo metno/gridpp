@@ -82,13 +82,14 @@ list_sources(SRC)
 set(DRVSRC  "src/client/Driver/Gridpp.cpp")
 
 add_gridpp_library(gridpp-static STATIC)
-add_executable(gridpp-bin   ${DRVSRC} )
-set_target_properties(gridpp-bin   PROPERTIES OUTPUT_NAME gridpp)
-target_link_libraries(gridpp-bin gridpp-static)
-target_link_libraries(gridpp-bin "${Boost_LIBRARIES}")
-target_link_libraries(gridpp-bin "${NETCDF_LIBRARIES}")
-target_link_libraries(gridpp-bin "${GSL_LIBRARIES}")
-target_link_libraries(gridpp-bin "${ARMADILLO_LIBRARIES}")
+set(GRIDPP_CLIENT_EXE gridpp-client)
+add_executable(${GRIDPP_CLIENT_EXE} ${DRVSRC})
+set_target_properties(${GRIDPP_CLIENT_EXE} PROPERTIES OUTPUT_NAME gridpp)
+target_link_libraries(${GRIDPP_CLIENT_EXE} gridpp-static)
+target_link_libraries(${GRIDPP_CLIENT_EXE} "${Boost_LIBRARIES}")
+target_link_libraries(${GRIDPP_CLIENT_EXE} "${NETCDF_LIBRARIES}")
+target_link_libraries(${GRIDPP_CLIENT_EXE} "${GSL_LIBRARIES}")
+target_link_libraries(${GRIDPP_CLIENT_EXE} "${ARMADILLO_LIBRARIES}")
 
 if (ENABLE_TESTS)
     include(Testing)
@@ -115,33 +116,6 @@ if (ENABLE_TESTS)
     endif()
 endif()
 
-function(lookup_program result program)
-   message(STATUS "Looking for ${program}")
-   find_program(${result} "${program}")
-   if(${result})
-      message(STATUS "Looking for ${program} - found")
-   else()
-      message(STATUS "Looking for ${program} - not found")
-   endif()
-endfunction()
-
-lookup_program(WC_TOOL wc)
-if(NOT WC_TOOL)
-   message(STATUS "Line count statistics disabled")
-else()
-   add_custom_target(count
-      COMMAND wc src/*.h src/*.cpp src/*/*.h src/*/*.cpp -l | tail -1
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-lookup_program(CTAGS_TOOL ctags)
-if(NOT CTAGS_TOOL)
-   message(STATUS "Tags generation disabled")
-else()
-   add_custom_target(tags
-      COMMAND ctags -R --c++-kinds=+pl --fields=+iaS --extra=+q -f tags src/*.h src/*.cpp src/*/*.h src/*/*.cpp
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-
 # Documentation
 option(BUILD_DOC "Build documentation" ON)
 find_package(Doxygen)
@@ -161,9 +135,8 @@ else()
     message(STATUS "Documentation generation disabled. Doxygen needs to be installed to generate documentation.")
 endif()
 
-install(TARGETS gridpp-bin
+install(TARGETS gridpp-client
    RUNTIME DESTINATION bin)
-
 
 include_directories(./include)
 file(GLOB SOURCES "src/api/*.cpp")

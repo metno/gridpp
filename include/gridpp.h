@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev4"
+#define GRIDPP_VERSION "0.6.0.dev5"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -737,8 +737,11 @@ namespace gridpp {
      * @name OpenMP settings
      * Functions that configure OpenMP
      * *****************************************/ /**@{*/
-    /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
+    /** Set the number of OpenMP threads to use. Overrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
+
+    /** Get the number of OpenMP threads currently set */
+    int get_omp_threads();
 
     /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
     void initialize_omp();

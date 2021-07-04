@@ -54,3 +54,9 @@ void gridpp::set_omp_threads(int num) {
     omp_set_num_threads(num);
 #endif
 }
+int gridpp::get_omp_threads() {
+#ifdef _OPENMP
+    return omp_get_max_threads();
+#endif
+    return 0;
+}

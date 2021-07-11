@@ -424,7 +424,7 @@ namespace gridpp {
      *  @return Calibration curve
     */
 
-    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
+    vec metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric, vec& output_fcst);
 
     /** Apply arbitrary calibration curve to a single value
      *  @param fcst input forecast

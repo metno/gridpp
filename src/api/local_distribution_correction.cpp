@@ -55,6 +55,9 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
 
     bool weighted = true;
     float alpha = 0.01;
+    bool debug = false;
+    int x_debug = 711;
+    int y_debug = 1297;
 
     float localizationRadius = structure.localization_distance();
 
@@ -112,17 +115,12 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
 
                 // Remove the lowest and highest values
                 int d0 = (int) count * min_quantile;
-                int d1 = count - (int) count * max_quantile;
-                ref_rho = std::vector<std::pair<float, float> >(ref_rho.begin() + d0, ref_rho.end() - d1);
-                fcst_rho = std::vector<std::pair<float, float> >(fcst_rho.begin() + d0, fcst_rho.end() - d1);
-
-                // Don't create precip out of thin air
-                if(fcst_rho[fcst_rho.size() - 1].first < 0.1) {
-                    continue;
-                }
+                int d1 = (int) count * max_quantile;
+                ref_rho = std::vector<std::pair<float, float> >(ref_rho.begin() + d0, ref_rho.begin() + d1);
+                fcst_rho = std::vector<std::pair<float, float> >(fcst_rho.begin() + d0, fcst_rho.begin() + d1);
 
                 // Create a new calculation curve, add an extra point to 0,0.
-                int new_count = count - d0 + 1 - d1;
+                int new_count = fcst_rho.size() + 1;
                 vec ref(new_count, 0);
                 vec ref_quantiles(new_count, 0);
                 vec fcst(new_count, 0);
@@ -139,6 +137,11 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
                 }
                 float sum_ref_quantile = ref_quantiles[new_count - 1];
                 float sum_fcst_quantile = fcst_quantiles[new_count - 1];
+                if(debug && x == x_debug && y == y_debug) {
+                    for(int q = 0; q < new_count; q++) {
+                        std::cout << " " << q << " " << ref[q] << " " << fcst[q] << std::endl;
+                    }
+                }
 
                 // Normalize quantiles to be between min_quantile and max_quantile
                 for(int s = 1; s < new_count; s++) {
@@ -146,13 +149,38 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
                     fcst_quantiles[s] = min_quantile + fcst_quantiles[s] / (sum_fcst_quantile) * (max_quantile - min_quantile);
                 }
 
-                // Correct values above the curve by maintaining the bias at the end of the curve
-                if(background[y][x] > fcst[new_count - 1]) {
+                if(background[y][x] < 0.01) {
+                    // 1) Don't create precip out of thin air.
+                    output[y][x] = 0;
+                }
+                else if(ref[new_count - 1] <= 0) {
+                    // 2) No Netatmo rain
+                    if(background[y][x] < 3 * fcst[new_count - 1])
+                        // 2a) No Netatmo rain, and only small radar values. This can be "clear air return"
+                        //     and look like wide areas of noise.
+                        output[y][x] = 0;
+                    else if(background[y][x] < 0.1)
+                        // 2b) Similar to 2a), but where the factor 3 ratio is not robust for small
+                        //     values
+                        output[y][x] = 0;
+                    else {
+                        // 2c) Large radar values, but no Netatmo. This probably occurs when there
+                        //     are convective showers that are not sufficiently sampled by the
+                        //     Netatmo stations, Thus both ref and fcst are close to 0. In these
+                        //     cases, we do not want to modify the radar values.
+                        continue;
+                    }
+                }
+                else if(background[y][x] >= fcst[new_count - 1]) {
+                    // 3) Radar is above the calibration curve, and we know that there is some
+                    //    Netatmo precipitation recorded. Correct values above the curve by
+                    //    maintaining the bias at the end of the curve.
                     float diff = ref[new_count - 1] - fcst[new_count - 1];
                     float new_ref = background[y][x] + diff;
                     output[y][x] = new_ref;
                 }
                 else {
+                    // 4) Radar is within the calibration curve, interpolate using quantiles
                     float q = gridpp::interpolate(background[y][x], fcst, fcst_quantiles);
                     float new_ref = gridpp::interpolate(q, ref_quantiles, ref);
                     if(weighted) {

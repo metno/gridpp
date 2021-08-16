@@ -15,10 +15,12 @@ var searchData=
   ['get_5fneighbours',['get_neighbours',['../classgridpp_1_1KDTree.html#a1201f4a98b45e7e8002e8560b96da16b',1,'gridpp::KDTree::get_neighbours()'],['../classgridpp_1_1Points.html#adae6fdf71589c635132aa71545b0bb78',1,'gridpp::Points::get_neighbours()'],['../classgridpp_1_1Grid.html#a5040abf6990dce7be0dedfa64ae58d8c',1,'gridpp::Grid::get_neighbours()']]],
   ['get_5fneighbours_5fwith_5fdistance',['get_neighbours_with_distance',['../classgridpp_1_1KDTree.html#aa53740f54e3dee5af371ccc97aa2f575',1,'gridpp::KDTree::get_neighbours_with_distance()'],['../classgridpp_1_1Points.html#a885449e1c67d124aed1bd7aa9e5e93fb',1,'gridpp::Points::get_neighbours_with_distance()'],['../classgridpp_1_1Grid.html#a1d32290dbd6a663f7c5f2b0bfdedb2ee',1,'gridpp::Grid::get_neighbours_with_distance()']]],
   ['get_5fnum_5fneighbours',['get_num_neighbours',['../classgridpp_1_1KDTree.html#afefc9c048b2e1599e227fefbdc74308e',1,'gridpp::KDTree::get_num_neighbours()'],['../classgridpp_1_1Points.html#aa4ef853c86808476f21379dc8831aa3b',1,'gridpp::Points::get_num_neighbours()'],['../classgridpp_1_1Grid.html#a2a799e36985523d197ef3c18f9922619',1,'gridpp::Grid::get_num_neighbours()']]],
+  ['get_5fomp_5fthreads',['get_omp_threads',['../namespacegridpp.html#a3d1db3ef7d351d4b0cc93f94936a1d05',1,'gridpp']]],
   ['get_5foptimal_5fthreshold',['get_optimal_threshold',['../namespacegridpp.html#a8f025aaf4879bf72b2a204dbb66be1f0',1,'gridpp']]],
   ['get_5fpoint',['get_point',['../classgridpp_1_1Points.html#aad0a0b81d2618b2904dee9f0de3cd402',1,'gridpp::Points::get_point()'],['../classgridpp_1_1Grid.html#a529efb0f234c98568a0d6874d95c5850',1,'gridpp::Grid::get_point()']]],
   ['get_5fstatistic',['get_statistic',['../namespacegridpp.html#ab51b6612520aa8c1f7329e8e7115a96f',1,'gridpp']]],
   ['get_5fupper_5findex',['get_upper_index',['../namespacegridpp.html#a474f636d52c72de7477b8d69d94bc0f3',1,'gridpp']]],
   ['grid',['Grid',['../classgridpp_1_1Grid.html#ade94f06329206784aa28b4f0a207ffef',1,'gridpp::Grid::Grid()'],['../classgridpp_1_1Grid.html#aef2883e4287e5c7f4c95c30bd69c59fd',1,'gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=Geodetic)']]],
-  ['gridding',['gridding',['../namespacegridpp.html#aa7bcb0762dfdc245f89df816f9bce3c9',1,'gridpp']]]
+  ['gridding',['gridding',['../namespacegridpp.html#aa7bcb0762dfdc245f89df816f9bce3c9',1,'gridpp']]],
+  ['gridding_5fnearest',['gridding_nearest',['../namespacegridpp.html#aeb3c0e4f45c91f69ebae3a852ef6d07c',1,'gridpp']]]
 ];

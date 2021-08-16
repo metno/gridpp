@@ -6,7 +6,7 @@ var searchData=
   ['median',['Median',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea590200f71e8ac8ff4b473d6226f691eb',1,'gridpp']]],
   ['metric',['Metric',['../namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01',1,'gridpp']]],
   ['metric_5foptimizer_2ecpp',['metric_optimizer.cpp',['../metric__optimizer_8cpp.html',1,'']]],
-  ['metric_5foptimizer_5fcurve',['metric_optimizer_curve',['../namespacegridpp.html#aa96e194c2603c94495b820a8cf53d099',1,'gridpp']]],
+  ['metric_5foptimizer_5fcurve',['metric_optimizer_curve',['../namespacegridpp.html#ae1f0ef22fde9faf1e4f6a4f3377117f6',1,'gridpp']]],
   ['min',['Min',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea228e31a9c1b98ccf236cc24b83d0bfc6',1,'gridpp']]],
   ['mlats',['mLats',['../classgridpp_1_1KDTree.html#a1b976ce39c6dd5f0a1d131ab6f3317e4',1,'gridpp::KDTree']]],
   ['mlocalizationdistance',['mLocalizationDistance',['../classgridpp_1_1StructureFunction.html#a3052ab8319b15c6b597b2608ac241d87',1,'gridpp::StructureFunction']]],

@@ -146,7 +146,7 @@ namespace gridpp {
             bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic gridded field including analysis variance
-      * @param bpoints Grid of background field
+      * @param bgrid Grid of background field
       * @param background 2D field of background values
       * @param bvariance Variance of background field
       * @param points Points of observations
@@ -609,7 +609,7 @@ namespace gridpp {
     */
     vec2 fill_missing(const vec2& values);
 
-    /** Aggregate points onto a grid. Writes MV where there are not enough observations
+    /** Aggregate points onto a grid. Writes MV where there are not enough observations.
       * @param grid Grid to aggregate to
       * @param points Points with values
       * @param values Values at points
@@ -618,6 +618,15 @@ namespace gridpp {
       * @param statistic Statistic to compute on points within radius
     */
     vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, Statistic statistic);
+
+    /** Assign each point to nearest neighbour in grid and aggregate values. Writes MV where there are not enough observations.
+      * @param grid Grid to aggregate to
+      * @param points Points with values
+      * @param values Values at points
+      * @param min_num Minimum number of points in a gridpoint to create a value
+      * @param statistic Statistic to compute on points within gridpoint
+    */
+    vec2 gridding_nearest(const Grid& grid, const Points& points, const vec& values, int min_num, gridpp::Statistic statistic);
 
     /**@}*/
 

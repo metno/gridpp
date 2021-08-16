@@ -97,6 +97,13 @@ namespace gridpp {
         Cartesian = 1,     /**< X and Y */
     };
 
+    /** Types of methods to calculate the gradient*/
+    enum GradientType {
+        MinMax = 0,
+        LinearRegression = 10,
+    };
+
+
     /** **************************************
      * @name Data assimilation methods
      * Functions that merge observations with a background field
@@ -769,6 +776,18 @@ namespace gridpp {
      *  @param default_gradient Use this gradient if minimum number is not met
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
+
+    /** Compute downscale 
+    *@param igrid input grid
+    *@param ogrid output grid 
+    *@param ivalues temperature values from igrid
+    *@param elev_gradient elevation gradient
+    *@param laf_gradient land area fraction gradient
+    */
+    vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
+    /* Debug method. Delete later
+    */
+    vec2 correction(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
 
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);

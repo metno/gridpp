@@ -1,4 +1,5 @@
 #include "gridpp.h"
+#include <iostream>
 
 using namespace gridpp;
 

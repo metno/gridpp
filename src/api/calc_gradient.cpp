@@ -26,6 +26,13 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
     //    throw std::invalid_argument("Base input has no size");
 
     // calculate maximum element and minimum element within halfwidth of each [i][j]
+
+    // check current_base is nan 
+
+    // check current max and cucrrent min is not a nan
+
+    // 
+
     int nY = base.size();
     int nX = base[0].size();
 
@@ -48,8 +55,11 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                 
                 for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){               
                     for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
-
                         float current_base = base[yy][xx];
+                        if(!gridpp::is_valid(current_base)){
+                            continue; 
+                        }
+
                         if(start){
                             start = false;
                             current_max = current_base;
@@ -72,7 +82,11 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                         }
                     }       
                 }
-                if(abs(current_max - current_min) < min_range){
+                if(!gridpp::is_valid(current_max) || !gridpp::is_valid(current_min)){
+                    output[y][x] = default_gradient;
+                }
+
+                else if(abs(current_max - current_min) < min_range){
                     output[y][x] = default_gradient;
                 }
                 else{

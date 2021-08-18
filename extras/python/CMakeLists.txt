@@ -21,6 +21,6 @@ swig_add_library(gridpp2 TYPE SHARED LANGUAGE python SOURCES ../SWIG/${PROJECT_N
 set_target_properties(_gridpp2 PROPERTIES LINKER_LANGUAGE CXX)
 add_custom_target(package-python
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${APISRC}
+    COMMAND ${CMAKE_COMMAND} -E copy ${SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/src
     COMMAND ${CMAKE_COMMAND} -E copy ${CPP_INCLUDE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/include)
 add_dependencies(package-python _gridpp2)

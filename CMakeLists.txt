@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(ENABLE_TESTS "build test suite" OFF)
 if (NOT CMAKE_BUILD_TYPE)
    message(STATUS "CMAKE_BUILD_TYPE is not set, switching to RELEASE")
    set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING
@@ -21,21 +20,6 @@ if (NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-
-if (NOT GTEST_DIR)
-   message(STATUS "GTEST_DIR is not set, assuming ${CMAKE_CURRENT_SOURCE_DIR}/gtest/")
-   set(GTEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gtest/" CACHE STRING
-      "Set the path to gtest tarball/source directory"
-      FORCE)
-endif()
-if(NOT IS_ABSOLUTE "${GTEST_DIR}")
-   if (CMAKE_VERSION VERSION_LESS 3.4.3)
-      message(FATAL_ERROR "GTEST_DIR path should be absolute")
-   else()
-      get_filename_component(GTEST_DIR "${GTEST_DIR}" ABSOLUTE
-         BASE_DIR ${CMAKE_BINARY_DIR})
-   endif()
-endif()
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-sign-compare -Wl,-init,initialize_omp")
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -fPIC -g -pg -rdynamic --coverage")
@@ -48,78 +32,17 @@ else()
     message(FATAL_ERROR "Unknown release type")
 endif()
 
-file(GLOB APISRC "src/api/*.cpp")
-
 # Required packages
 find_package(Boost  1.57 REQUIRED)
 find_package(Armadillo 6.5 REQUIRED)
-option(BUILD_CLIENT "Build gridpp command-line client" OFF)
-if(BUILD_CLIENT)
-    find_package(NetCDF REQUIRED)
-    find_package(GSL REQUIRED)
 
-    function(list_sources sources)
-       file(GLOB CORESRC "src/client/*.cpp")
-       file(GLOB CALSRC  "src/client/Calibrator/*.cpp")
-       file(GLOB DOWNSRC "src/client/Downscaler/*.cpp")
-       file(GLOB FILESRC "src/client/File/*.cpp")
-       file(GLOB PARSRC  "src/client/ParameterFile/*.cpp")
-
-       set(${sources}
-          ${CORESRC}
-          ${CALSRC}
-          ${APISRC}
-          ${FILESRC}
-          ${DOWNSRC}
-          ${PARSRC} PARENT_SCOPE)
-    endfunction(list_sources)
-
-    function(add_gridpp_library target lib_type)
-       add_library(${target} ${lib_type} ${SRC})
-       target_include_directories(${target} PUBLIC "${Boost_INCLUDE_DIR}")
-       target_include_directories(${target} PUBLIC "${NETCDF_INCLUDE_DIRS}")
-       target_include_directories(${target} PUBLIC "${GSL_INCLUDE_DIRS}")
-       target_include_directories(${target} PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
-       set_target_properties(${target} PROPERTIES OUTPUT_NAME gridpp_client)
-    endfunction()
-
-    list_sources(SRC)
-    set(DRVSRC  "src/client/Driver/Gridpp.cpp")
-
-    add_gridpp_library(gridpp-static STATIC)
-    set(GRIDPP_CLIENT_EXE gridpp-client)
-    add_executable(${GRIDPP_CLIENT_EXE} ${DRVSRC})
-    set_target_properties(${GRIDPP_CLIENT_EXE} PROPERTIES OUTPUT_NAME gridpp)
-    target_link_libraries(${GRIDPP_CLIENT_EXE} gridpp-static)
-    target_link_libraries(${GRIDPP_CLIENT_EXE} "${Boost_LIBRARIES}")
-    target_link_libraries(${GRIDPP_CLIENT_EXE} "${NETCDF_LIBRARIES}")
-    target_link_libraries(${GRIDPP_CLIENT_EXE} "${GSL_LIBRARIES}")
-    target_link_libraries(${GRIDPP_CLIENT_EXE} "${ARMADILLO_LIBRARIES}")
-    if (ENABLE_TESTS)
-        include(Testing)
-        if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-            # Copy the test programs to be next to the gridpp.py package
-            # add_custom_target(tests-data
-            #     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            #     ${CMAKE_CURRENT_SOURCE_DIR}/tests
-            #     ${CMAKE_BINARY_DIR}/extras/SWIG/python/tests)
-
-            # add_custom_target(tests COMMAND nosetests3 extras/SWIG/python -e memory)
-            # add_dependencies(tests tests-data build-python)
-            add_custom_target(coverage BYPRODUCTS coverage.info
-                COMMAND lcov --directory ${CMAKE_BINARY_DIR}/CMakeFiles/gridpp.dir/ --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
-                COMMAND lcov --remove coverage.info '*/src/client/Testing/*' '/usr/*' --output-file coverage.info
-                COMMAND lcov --list coverage.info
-                # COMMAND genhtml coverage.info -o coverage
-            )
-            add_dependencies(coverage tests)
-            add_custom_target(coverage-html
-                COMMAND genhtml coverage.info -o coverage
-            )
-            add_dependencies(coverage-html coverage)
-        endif()
-    endif()
-endif()
+include_directories(./include)
+file(GLOB SOURCES "src/api/*.cpp")
+add_library(gridpp ${SOURCES})
+target_link_libraries(gridpp "${Boost_LIBRARIES}")
+target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
+target_include_directories(gridpp PUBLIC "${Boost_INCLUDE_DIR}")
+target_include_directories(gridpp PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
 
 # Documentation
 option(BUILD_DOC "Build documentation" ON)
@@ -140,23 +63,7 @@ else()
     message(STATUS "Documentation generation disabled. Doxygen needs to be installed to generate documentation.")
 endif()
 
-if(BUILD_CLIENT)
-    install(TARGETS gridpp-client
-       RUNTIME DESTINATION bin)
-endif()
-
-include_directories(./include)
-file(GLOB SOURCES "src/api/*.cpp")
-add_library(gridpp ${APISRC})
-target_link_libraries(gridpp "${Boost_LIBRARIES}")
-target_link_libraries(gridpp "${NETCDF_LIBRARIES}")
-target_link_libraries(gridpp "${GSL_LIBRARIES}")
-target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
-# target_link_libraries(gridpp gridpp)
-target_include_directories(gridpp PUBLIC "${Boost_INCLUDE_DIR}")
-target_include_directories(gridpp PUBLIC "${NETCDF_INCLUDE_DIRS}")
-target_include_directories(gridpp PUBLIC "${GSL_INCLUDE_DIRS}")
-target_include_directories(gridpp PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
+add_subdirectory(src/client)
 file(GLOB SWIG_INTERFACE "extras/SWIG/gridpp.i")
 add_subdirectory(extras/SWIG)
 add_subdirectory(extras/python)

@@ -44,6 +44,8 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
    find_package(OpenMP REQUIRED)
    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC ${OpenMP_CXX_FLAGS}")
+else()
+    message(FATAL_ERROR "Unknown release type")
 endif()
 
 # Required packages

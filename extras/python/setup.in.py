@@ -31,7 +31,7 @@ class CustomInstall(install):
 
 
 module = Extension('_gridpp',
-        sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['src/gridppPYTHON_wrap.cxx'],
+        sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['gridppPYTHON_wrap.cxx'],
         libraries=["armadillo"],
         extra_compile_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
         extra_link_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
@@ -97,16 +97,6 @@ setup (
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['numpy>=1.16'],
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    extras_require={
-    #    'dev': ['check-manifest'],
-        'test': ['coverage', 'pep8'],
-    #    'test': ['pytest'],
-    },
 
     test_suite="gridpp.tests",
     ext_modules = [module],

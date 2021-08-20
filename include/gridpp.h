@@ -43,6 +43,18 @@ namespace gridpp {
     static const float pi = 3.14159265;
     /** Radius of the earth [m] */
     static const double radius_earth = 6.378137e6;
+    /** Constant Lapse Rate moist air standard atmosphere [K/m] */
+    static const float lapse_rate=0.0065;
+    /** Temperature at surface in standard atmosphere [K] */
+    static const float standard_surface_temperature = 288.15;
+    /** Gravitational acceleration [m/s^2] */
+    static const float gravit = 9.80665;
+    /** Molar Mass of Dry Air [kg/mol] */
+    static const float molar_mass = 0.0289644;
+    /** Universal Gas Constant [kg*m^2*s^-2/(K*mol)] */
+    static const float gas_constant_mol = 8.31447;
+    /** Universal Gas Constant [J/(kg*K)] */
+    static const float gas_constant_si = 287.05;
     /**@}*/
 
     class KDTree;
@@ -666,6 +678,26 @@ namespace gridpp {
      *  @return Pressures at new points
      */
     vec pressure(const vec& ielev, const vec& oelev, const vec& ipressure, const vec& itemperature);
+
+    /** Convert Surface Pressure to Sea Level Pressure
+     *  @param ps Surface pressure [pa]
+     *  @param altitude Station altitude above sea level [m]
+     *  @param temperature 2m temperature [K]
+     *  @param rh 2m Relative humidity [1]
+     *  @param dewpoint 2m Dewpoint Temperature at station [K]
+     *  @return Sea Level Pressure [pa]
+     */
+    float sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV);
+
+    /** Vector version of Convert Surface Pressure to Sea Level Pressure
+     *  @param ps Surface pressures [pa]
+     *  @param altitude Station altitudes above sea level [m]
+     *  @param temperature 2m temperatures [K]
+     *  @param rh 2m Relative humidities [1]
+     *  @param dewpoint 2m Dewpoint Temperatures at stations [K]
+     *  @return Sea Level Pressure [pa]
+     */
+    vec sea_level_pressure(const vec& ps, const vec& altitude, const vec& temperature, const vec& rh, const vec& dewpoint);
 
     /** Diagnose QNH from pressure and altitude
      *  @param pressure Pressure at point [pa]

@@ -9,7 +9,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
@@ -17,10 +17,17 @@ jobs:
         with:
             python-version: '3.7'
       - name: dependencies
-        run: sudo apt update -qq && sudo apt install swig libboost-dev libarmadillo8 libarmadillo-dev cmake python3-setuptools python3-numpy python3-nose
+        run: |
+            sudo apt update -qq
+            sudo apt install swig libboost-dev libarmadillo9 libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip
       - name: configure
         run: mkdir build && cd build && cmake -DBUILD_R=no ..
       - name: build
         run: cd build && VERBOSE=1 make develop-python-user
       - name: test
-        run: nosetests3
+        run: |
+            /usr/bin/python3 -c "import gridpp; print(gridpp.version())"
+            /usr/bin/python3 -m pip install --upgrade pip
+            /usr/bin/python3 -m pip install coverage nose
+            coverage run --omit */*-packages/*,*tests* -m nose
+            coverage report

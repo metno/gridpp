@@ -29,6 +29,16 @@ float gridpp::sea_level_pressure(float ps, float altitude, float temperature, fl
     // For altitude it is assumed geopotential meters is close to meters.
     // Following https://library.wmo.int/doc_num.php?explnum_id=10616
 
+    if ( !gridpp::is_valid(altitude) ) {
+        throw std::runtime_error("sea_level_pressure: altitude is NAN");
+    } else if ( !gridpp::is_valid(temperature) ){
+        throw std::runtime_error("sea_level_pressure: temperature is NAN");
+    } else if ( ps < 0. || temperature < 0. || rh < 0. || rh > 1. || dewpoint < 0. ){
+        throw std::runtime_error("sea_level_pressure: unphysical values in input");
+    }
+    
+    
+
     float T = temperature - 273.15;
     float Ts = 273.15 + T;
     float g = gridpp::gravit;

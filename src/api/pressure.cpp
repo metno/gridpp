@@ -25,7 +25,7 @@ vec gridpp::pressure(const vec& ielev, const vec& oelev, const vec& ipressure, c
     return values;
 }
 
-float gridpp::slp(float ps, float altitude, float temperature, float rh, float dewpoint) {
+float gridpp::sea_level_pressure(float ps, float altitude, float temperature, float rh, float dewpoint) {
     // For altitude it is assumed geopotential meters is close to meters.
     // Following https://library.wmo.int/doc_num.php?explnum_id=10616
 
@@ -39,7 +39,7 @@ float gridpp::slp(float ps, float altitude, float temperature, float rh, float d
     float Ch = 0.12; // [K/hPa]
     ps = ps*0.01;
 
-    if (rh!=-1.) {
+    if ( gridpp::is_valid(rh) ) {
         float es = 6.11 * pow(10., ((7.5 * T) / (237.3 + T)) );
         e = rh * es;
         float A = 17.625;
@@ -47,12 +47,12 @@ float gridpp::slp(float ps, float altitude, float temperature, float rh, float d
         float C = 6.1094;
         // http://climate.envsci.rutgers.edu/pdf/LawrenceRHdewpointBAMS.pdf
         dewpoint = (B * log(e / C)) / (A - log(e / C));
-    } else if (dewpoint!=-1.) {
+    } else if ( gridpp::is_valid(dewpoint) ) {
         dewpoint = dewpoint - 273.15;
         e = 6.11 * pow(10, ((7.5 * dewpoint) / (237.3 + dewpoint)));
         // float es = 6.11 * pow(10, ((7.5 * T) / (237.3 + T)));
         // rh = e/es;
-    } else if (rh==-1. && dewpoint==-1.) {
+    } else if ( !gridpp::is_valid(rh) && !gridpp::is_valid(dewpoint) ) {
         dewpoint = T - 3.;
     }
 
@@ -69,7 +69,7 @@ float gridpp::slp(float ps, float altitude, float temperature, float rh, float d
     return slp;
 }
 
-vec gridpp::slp(const vec& ps, const vec& altitude, const vec&  temperature, const vec& rh, const vec& dewpoint) {
+vec gridpp::sea_level_pressure(const vec& ps, const vec& altitude, const vec&  temperature, const vec& rh, const vec& dewpoint) {
     int N = ps.size();
     if(altitude.size() != N || temperature.size() != N || rh.size() != N || dewpoint.size() != N)
         throw std::invalid_argument("slp: Input arguments must be of the same size");
@@ -77,7 +77,7 @@ vec gridpp::slp(const vec& ps, const vec& altitude, const vec&  temperature, con
     vec values(N);
     #pragma omp parallel for
     for(int i = 0; i < N; i++) {
-        values[i] = gridpp::slp(ps[i], altitude[i], temperature[i], rh[i], dewpoint[i]);
+        values[i] = gridpp::sea_level_pressure(ps[i], altitude[i], temperature[i], rh[i], dewpoint[i]);
     }
     return values;
 }

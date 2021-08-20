@@ -687,7 +687,7 @@ namespace gridpp {
      *  @param dewpoint 2m Dewpoint Temperature at station [K]
      *  @return Sea Level Pressure [pa]
      */
-    float slp(float ps, float altitude, float temperature, float rh=-1., float dewpoint=-1.);
+    float sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV);
 
     /** Vector version of Convert Surface Pressure to Sea Level Pressure
      *  @param ps Surface pressures [pa]
@@ -697,7 +697,7 @@ namespace gridpp {
      *  @param dewpoint 2m Dewpoint Temperatures at stations [K]
      *  @return Sea Level Pressure [pa]
      */
-    vec slp(const vec& ps, const vec& altitude, const vec& temperature, const vec& rh, const vec& dewpoint);
+    vec sea_level_pressure(const vec& ps, const vec& altitude, const vec& temperature, const vec& rh, const vec& dewpoint);
 
     /** Diagnose QNH from pressure and altitude
      *  @param pressure Pressure at point [pa]

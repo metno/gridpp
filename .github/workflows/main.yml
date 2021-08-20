@@ -19,15 +19,23 @@ jobs:
       - name: dependencies
         run: |
             sudo apt update -qq
-            sudo apt install swig libboost-dev libarmadillo9 libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip
+            sudo apt install swig libboost-dev libarmadillo9 libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip lcov
       - name: configure
-        run: mkdir build && cd build && cmake -DBUILD_R=no ..
+        run: mkdir build && cd build && cmake -DBUILD_R=no -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_TESTS=ON ..
       - name: build
         run: cd build && VERBOSE=1 make develop-python-user
       - name: test
         run: |
-            /usr/bin/python3 -c "import gridpp; print(gridpp.version())"
-            /usr/bin/python3 -m pip install --upgrade pip
+            cd build
             /usr/bin/python3 -m pip install coverage nose
-            coverage run --omit */*-packages/*,*tests* -m nose
-            coverage report
+            make tests
+            lcov --directory CMakeFiles/gridpp.dir/src/api --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' --output-file coverage.info
+            lcov --list coverage.info
+            # - name: test
+            # run: |
+            # /usr/bin/python3 -c "import gridpp; print(gridpp.version())"
+            # /usr/bin/python3 -m pip install --upgrade pip
+            # /usr/bin/python3 -m pip install coverage nose
+            # coverage run --omit */*-packages/*,*tests* -m nose
+            # coverage report

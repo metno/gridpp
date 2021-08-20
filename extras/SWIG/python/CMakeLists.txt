@@ -107,14 +107,12 @@ add_custom_target(develop-python-user
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} develop --user)
 
 if (ENABLE_TESTS)
-    if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-        # Copy the test programs to be next to the gridpp.py package
-        add_custom_target(tests-data
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/tests
-            ${CMAKE_CURRENT_BINARY_DIR}/tests)
+    # Copy the test programs to be next to the gridpp.py package
+    add_custom_target(tests-data
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/tests
+        ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
-        add_custom_target(tests COMMAND nosetests3 -e memory)
-        add_dependencies(tests tests-data build-python)
-    endif()
+    add_custom_target(tests COMMAND ${PYTHON_EXECUTABLE} -m nose -e memory)
+    add_dependencies(tests tests-data build-python)
 endif()

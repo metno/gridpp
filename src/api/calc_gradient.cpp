@@ -3,8 +3,6 @@
 
 using namespace gridpp;
 
-
-
 /*GradientType{
 *   minMax = 0;
 *   LinearRegression = 10;
@@ -16,7 +14,7 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
     if(halfwidth < 0)
         throw std::invalid_argument("halfwidth must be positive");
 
-    std::cout << " Starting ";
+    //std::cout << " Starting ";
 
     int gradientType = 0;
 
@@ -25,13 +23,6 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
     //if(base.size() == 0)
     //    throw std::invalid_argument("Base input has no size");
 
-    // calculate maximum element and minimum element within halfwidth of each [i][j]
-
-    // check current_base is nan 
-
-    // check current max and cucrrent min is not a nan
-
-    // 
 
     int nY = base.size();
     int nX = base[0].size();
@@ -42,8 +33,6 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
     if(gradientType == 0){
         for(int y = 0; y  < base.size(); y++) {
             for(int x = 0; x < base[y].size(); x++){
-                
-
                 bool start = true;
 
                 float current_max = 0;
@@ -52,7 +41,6 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                 int I_maxBase_X = 0;
                 int I_minBase_Y = 0;
                 int I_minBase_X = 0;
-                
                 for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){               
                     for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
                         float current_base = base[yy][xx];
@@ -154,7 +142,6 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                     else{
                         output[y][x] = default_gradient;
                     }
-
                 }
             }
         }        

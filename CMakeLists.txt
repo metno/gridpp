@@ -31,9 +31,10 @@ endif()
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
 if(APPLE)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-sign-compare -Wno-c++11-narrowing")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-Wdelete-non-virtual-dtor -Wno-c++11-narrowing")
 else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-sign-compare -Wl,-init,initialize_omp")
+    # SWIG generates a lot of warnings
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-delete-non-virtual-dtor -Wl,-init,initialize_omp")
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")

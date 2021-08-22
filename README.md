@@ -36,7 +36,7 @@ halfwidth = 7
 output = gridpp.neighbourhood(input, halfwidth, gridpp.Mean)
 ```
 
-![Example](extras/image.jpg)
+![Example](docs/image.jpg)
 
 ## Required dependencies
 - [Boost](https://www.boost.org/) >= 1.59
@@ -109,7 +109,7 @@ This installs the python bindings in
 make build-r
 ```
 
-Currently, the R package is not installed centrally, but instead is placed in `extras/SWIG/R/gridpp.R` in the build directory.
+Currently, the R package is not installed centrally, but instead is placed in `swig/R/gridpp.R` in the build directory.
 
 ## gridpp client installation from source
 

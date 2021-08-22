@@ -64,9 +64,9 @@ if(BUILD_CLIENT)
             # add_custom_target(tests-data
             #     COMMAND ${CMAKE_COMMAND} -E copy_directory
             #     ${CMAKE_CURRENT_SOURCE_DIR}/tests
-            #     ${CMAKE_BINARY_DIR}/extras/SWIG/python/tests)
+            #     ${CMAKE_BINARY_DIR}/swig/python/tests)
 
-            # add_custom_target(tests COMMAND nosetests3 extras/SWIG/python -e memory)
+            # add_custom_target(tests COMMAND nosetests3 swig/python -e memory)
             # add_dependencies(tests tests-data build-python)
             add_custom_target(coverage BYPRODUCTS coverage.info
                 COMMAND lcov --directory ${CMAKE_BINARY_DIR}/CMakeFiles/gridpp.dir/ --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info

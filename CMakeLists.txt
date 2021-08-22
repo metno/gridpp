@@ -83,6 +83,5 @@ if (BUILD_DOC)
 endif()
 
 add_subdirectory(src/client)
-file(GLOB SWIG_INTERFACE "extras/SWIG/gridpp.i")
-add_subdirectory(extras/SWIG)
-add_subdirectory(extras/python)
+file(GLOB SWIG_INTERFACE "swig/gridpp.i")
+add_subdirectory(swig)

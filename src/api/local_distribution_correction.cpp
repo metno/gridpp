@@ -63,6 +63,10 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
 
     for(int y = 0; y < nY; y++) {
         output[y].resize(nX, gridpp::MV);
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int y = 0; y < nY; y++) {
         for(int x = 0; x < nX; x++) {
             // Default to the background value, if there are no observations
             output[y][x] = background[y][x];

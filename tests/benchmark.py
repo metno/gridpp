@@ -54,6 +54,8 @@ def main():
         points[100000], np.ones(100000) * 1, np.ones(100000, 'int') * 5, False)}
     run[("doping_circle", "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
+    run[("local_distribution_correction", "1000² x 1000")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
 
     print("Gridpp version %s" % gridpp.version())
     if args.num_cores is not None:

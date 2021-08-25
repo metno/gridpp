@@ -1,12 +1,11 @@
-#include "gridpp.h"
-
+#include "gridpp.h" 
 using namespace gridpp;
-
+const float gridpp::StructureFunction::default_min_rho = 0.0013;
 gridpp::StructureFunction::StructureFunction(float localization_distance) {
     if(!gridpp::is_valid(localization_distance) || localization_distance < 0)
-        throw std::invalid_argument("Invalid 'h' in structure");
+        throw std::invalid_argument("Structure function initizlied with invalid localization distance");
 
-    mLocalizationDistance = localization_distance;
+    m_localization_distance = localization_distance;
 }
 float gridpp::StructureFunction::corr_background(const Point& p1, const Point& p2) const {
     return corr(p1, p2);
@@ -30,14 +29,16 @@ float gridpp::StructureFunction::cressman_rho(float dist, float length) const {
         return 0;
     return (length * length - dist * dist) / (length * length + dist * dist);
 }
-float gridpp::StructureFunction::localization_distance() const {
-    return mLocalizationDistance;
+float gridpp::StructureFunction::localization_distance(const Point& p) const {
+    return m_localization_distance;
 }
-gridpp::MultipleStructure::MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w):
-    gridpp::StructureFunction(structure_h.localization_distance()) {
+gridpp::MultipleStructure::MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w) {
     m_structure_h = structure_h.clone();
     m_structure_v = structure_v.clone();
     m_structure_w = structure_w.clone();
+}
+float gridpp::MultipleStructure::localization_distance(const Point& p) const {
+    return m_structure_h->localization_distance(p);
 }
 float gridpp::MultipleStructure::corr(const Point& p1, const Point& p2) const {
     Point p1_h(p1.lat, p1.lon, p1.elev, p1.laf, p1.type);
@@ -65,12 +66,14 @@ gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) 
         throw std::invalid_argument("v must be >= 0");
     if(!gridpp::is_valid(w) || w < 0)
         throw std::invalid_argument("w must be >= 0");
+
+    // Override localization distance
     if(gridpp::is_valid(hmax))
-        mLocalizationDistance = hmax;
+        m_localization_distance = hmax;
     else {
         // Calculate the horizontal localization radius. For min_rho=0.0013, the factor is 3.64
         float default_min_rho = 0.0013;
-        mLocalizationDistance = sqrt(-2*log(default_min_rho)) * h;
+        m_localization_distance = sqrt(-2*log(default_min_rho)) * h;
     }
     mH = h;
     mV = v;
@@ -78,7 +81,7 @@ gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) 
 }
 float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     float hdist = gridpp::KDTree::calc_distance_fast(p1, p2);
-    if(hdist > localization_distance())
+    if(hdist > localization_distance(p1))
         return 0;
     float rho = gridpp::StructureFunction::barnes_rho(hdist, mH);
     if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
@@ -92,7 +95,7 @@ float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     return rho;
 }
 gridpp::StructureFunction* gridpp::BarnesStructure::clone() const {
-    gridpp::StructureFunction* val = new gridpp::BarnesStructure(mH, mV, mW, mLocalizationDistance);
+    gridpp::StructureFunction* val = new gridpp::BarnesStructure(mH, mV, mW, m_localization_distance);
     return val;
 }
 
@@ -126,31 +129,16 @@ gridpp::StructureFunction* gridpp::CressmanStructure::clone() const {
 }
 
 /** Density */
-gridpp::DensityStructure::DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float hmax) :
-    gridpp::StructureFunction(0), m_grid(grid) {
+gridpp::DensityStructure::DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho) :
+        m_grid(grid),
+        m_min_rho(min_rho),
+        mH(h),
+        mV(v),
+        mW(w) {
     if(grid.size()[0] != h.size() || grid.size()[0] != v.size() || grid.size()[0] != w.size())
         throw std::invalid_argument("Grid size not the same as scale size");
     if(grid.size()[1] != h[0].size() || grid.size()[1] != v[0].size() || grid.size()[1] != w[0].size())
         throw std::invalid_argument("Grid size not the same as scale size");
-
-    if(gridpp::is_valid(hmax))
-        mLocalizationDistance = hmax;
-    else {
-        // Calculate the horizontal localization radius. For min_rho=0.0013, the factor is 3.64
-        float default_min_rho = 0.0013;
-        mLocalizationDistance = 0;
-        for(int y = 0; y < h.size(); y++) {
-            for(int x = 0; x < h[y].size(); x++) {
-                float curr = sqrt(-2*log(default_min_rho)) * h[y][x];
-                if(curr > mLocalizationDistance)
-                    mLocalizationDistance = curr;
-            }
-        }
-    }
-    Grid m_grid;
-    mH = h;
-    mV = v;
-    mW = w;
 }
 float gridpp::DensityStructure::corr(const Point& p1, const Point& p2) const {
     ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
@@ -181,7 +169,7 @@ float gridpp::DensityStructure::corr(const Point& p1, const Point& p2) const {
 
     float hdist = gridpp::KDTree::calc_distance_fast(p1, p2);
     // TODO:
-    if(hdist > localization_distance())
+    if(hdist > localization_distance(p1))
         return 0;
     float rho = gridpp::StructureFunction::barnes_rho(hdist, h);
     if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
@@ -198,14 +186,19 @@ float gridpp::DensityStructure::corr_background(const Point& p1, const Point& p2
     return corr(p1, p2);
     float hdist = gridpp::KDTree::calc_distance_fast(p1, p2);
     // TODO:
-    if(hdist > localization_distance())
+    if(hdist > localization_distance(p1))
         return 0;
     // TODO
     float rho = gridpp::StructureFunction::barnes_rho(hdist, 10000);
     return rho;
 }
+float gridpp::DensityStructure::localization_distance(const Point& p) const {
+    ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
+    float curr = sqrt(-2*log(m_min_rho)) * mH[I[0]][I[1]];
+    return curr;
+}
 gridpp::StructureFunction* gridpp::DensityStructure::clone() const {
-    gridpp::StructureFunction* val = new gridpp::DensityStructure(m_grid, mH, mV, mW, mLocalizationDistance);
+    gridpp::StructureFunction* val = new gridpp::DensityStructure(m_grid, mH, mV, mW, m_min_rho);
     return val;
 }
 
@@ -214,7 +207,6 @@ gridpp::CrossValidation::CrossValidation(StructureFunction& structure, float dis
         StructureFunction(0){
     if(!gridpp::is_valid(dist) || dist < 0)
         throw std::invalid_argument("Invalid 'dist' in CrossValidation structure");
-    mLocalizationDistance = structure.localization_distance();
     m_structure = structure.clone();
     m_dist = dist;
 }
@@ -233,4 +225,6 @@ gridpp::StructureFunction* gridpp::CrossValidation::clone() const {
     gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure);
     return val;
 }
-
+float gridpp::CrossValidation::localization_distance(const Point& p) const {
+    return m_structure->localization_distance(p);
+}

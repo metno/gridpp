@@ -1157,15 +1157,16 @@ namespace gridpp {
     /** Covariance structure function */
     class StructureFunction {
         public:
-            StructureFunction(float localization_distance);
+            StructureFunction(float localization_distance=0);
             /** Correlation between two points */
             virtual float corr(const Point& p1, const Point& p2) const = 0;
             virtual float corr_background(const Point& p1, const Point& p2) const;
             /** Maximum distance for which an observation can have an impact (localization)
               * @return Distance [m]
             */
-            float localization_distance() const;
+            virtual float localization_distance(const Point& p) const;
             virtual StructureFunction* clone() const = 0;
+            static const float default_min_rho;
         protected:
             /** Barnes correlation function
               * @param dist Distance between points. Same units as 'length'
@@ -1178,7 +1179,7 @@ namespace gridpp {
               * @param length Length scale
             */
             float cressman_rho(float dist, float length) const;
-            float mLocalizationDistance;
+            float m_localization_distance;
     };
     class MultipleStructure: public StructureFunction {
         public:
@@ -1191,6 +1192,7 @@ namespace gridpp {
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
+            float localization_distance(const Point& p) const;
         private:
             StructureFunction* m_structure_h;
             StructureFunction* m_structure_v;
@@ -1226,18 +1228,20 @@ namespace gridpp {
             float mW;
     };
 
-    /** Simple structure function based on distance, elevation, and land area fraction */
+    /** Spatially varying Barnes structure function */
     class DensityStructure: public StructureFunction {
         public:
-            DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float hmax=MV);
+            DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
             float corr_background(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
+            float localization_distance(const Point& p) const;
         private:
             Grid m_grid;
             vec2 mH;
             vec2 mV;
             vec2 mW;
+            float m_min_rho;
     };
     class CrossValidation: public StructureFunction {
         public:
@@ -1249,6 +1253,7 @@ namespace gridpp {
             float corr(const Point& p1, const Point& p2) const;
             float corr_background(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
+            float localization_distance(const Point& p) const;
         private:
             StructureFunction* m_structure;
             float m_dist;

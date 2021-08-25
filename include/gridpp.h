@@ -967,133 +967,6 @@ namespace gridpp {
             float laf;
             CoordinateType type;
     };
-    /** Covariance structure function */
-    class StructureFunction {
-        public:
-            StructureFunction(float localization_distance);
-            /** Correlation between two points */
-            virtual float corr(const Point& p1, const Point& p2) const = 0;
-            virtual float corr_background(const Point& p1, const Point& p2) const;
-            /** Maximum distance for which an observation can have an impact (localization)
-              * @return Distance [m]
-            */
-            float localization_distance() const;
-            virtual StructureFunction* clone() const = 0;
-        protected:
-            /** Barnes correlation function
-              * @param dist Distance between points. Same units as 'length'
-              * @param length Length scale
-            */
-            float barnes_rho(float dist, float length) const;
-
-            /** Cressman correlation function
-              * @param dist Distance between points. Same units as 'length'
-              * @param length Length scale
-            */
-            float cressman_rho(float dist, float length) const;
-            float mLocalizationDistance;
-    };
-    class MultipleStructure: public StructureFunction {
-        public:
-            /** Exponential structure function
-              * @param h: Horizontal decorrelation length >=0 [m]
-              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
-              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
-              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
-            */
-            MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
-            float corr(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-        private:
-            StructureFunction* m_structure_h;
-            StructureFunction* m_structure_v;
-            StructureFunction* m_structure_w;
-    };
-    /** Simple structure function based on distance, elevation, and land area fraction */
-    class BarnesStructure: public StructureFunction {
-        public:
-            /** Exponential structure function
-              * @param h: Horizontal decorrelation length >=0 [m]
-              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
-              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
-              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
-            */
-            BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
-            float corr(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-        private:
-            float mH;
-            float mV;
-            float mW;
-    };
-
-    /** Simple structure function based on distance, elevation, and land area fraction */
-    class CressmanStructure: public StructureFunction {
-        public:
-            CressmanStructure(float h, float v=0, float w=0);
-            float corr(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-        private:
-            float mH;
-            float mV;
-            float mW;
-    };
-    class CrossValidation: public StructureFunction {
-        public:
-            /** Structure function for performing cross validation experiments
-              * @param dist: Force background-to-obs correlation to 0 for points within
-              *   this distance [m]. If MV, disable this.
-            */
-            CrossValidation(StructureFunction& structure, float dist=MV);
-            float corr(const Point& p1, const Point& p2) const;
-            float corr_background(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-        private:
-            StructureFunction* m_structure;
-            float m_dist;
-    };
-
-    class Transform {
-        public:
-            // Note these cannot be pure virtual, otherwise SWIG does not expose
-            // the vector functions (with the same name) in python. Therefore, make sure these
-            // functions are overloaded in the subclass implementation
-            virtual float forward(float value) const;
-            virtual float backward(float value) const;
-
-            vec forward(const vec& input) const;
-            vec backward(const vec& input) const;
-            vec2 forward(const vec2& input) const;
-            vec2 backward(const vec2& input) const;
-            vec3 forward(const vec3& input) const;
-            vec3 backward(const vec3& input) const;
-    };
-    class Identity : public Transform {
-        public:
-            // SWIG requires these "using" statements to enable the vectorized versions in the
-            // subclasses
-            using Transform::forward;
-            using Transform::backward;
-            float forward(float value) const;
-            float backward(float value) const;
-    };
-    class Log : public Transform {
-        public:
-            using Transform::forward;
-            using Transform::backward;
-            float forward(float value) const;
-            float backward(float value) const;
-    };
-    class BoxCox : public Transform {
-        public:
-            BoxCox(float threshold);
-            using Transform::forward;
-            using Transform::backward;
-            float forward(float value) const;
-            float backward(float value) const;
-        private:
-            float mThreshold;
-    };
 
     /** Helper class for Grid and Points */
     class KDTree {
@@ -1279,6 +1152,148 @@ namespace gridpp {
     {
         public:
             not_implemented_exception() : std::logic_error("Function not yet implemented") { };
+    };
+
+    /** Covariance structure function */
+    class StructureFunction {
+        public:
+            StructureFunction(float localization_distance);
+            /** Correlation between two points */
+            virtual float corr(const Point& p1, const Point& p2) const = 0;
+            virtual float corr_background(const Point& p1, const Point& p2) const;
+            /** Maximum distance for which an observation can have an impact (localization)
+              * @return Distance [m]
+            */
+            float localization_distance() const;
+            virtual StructureFunction* clone() const = 0;
+        protected:
+            /** Barnes correlation function
+              * @param dist Distance between points. Same units as 'length'
+              * @param length Length scale
+            */
+            float barnes_rho(float dist, float length) const;
+
+            /** Cressman correlation function
+              * @param dist Distance between points. Same units as 'length'
+              * @param length Length scale
+            */
+            float cressman_rho(float dist, float length) const;
+            float mLocalizationDistance;
+    };
+    class MultipleStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
+            float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            StructureFunction* m_structure_h;
+            StructureFunction* m_structure_v;
+            StructureFunction* m_structure_w;
+    };
+    /** Simple structure function based on distance, elevation, and land area fraction */
+    class BarnesStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
+            float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            float mH;
+            float mV;
+            float mW;
+    };
+
+    /** Simple structure function based on distance, elevation, and land area fraction */
+    class CressmanStructure: public StructureFunction {
+        public:
+            CressmanStructure(float h, float v=0, float w=0);
+            float corr(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            float mH;
+            float mV;
+            float mW;
+    };
+
+    /** Simple structure function based on distance, elevation, and land area fraction */
+    class DensityStructure: public StructureFunction {
+        public:
+            DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float hmax=MV);
+            float corr(const Point& p1, const Point& p2) const;
+            float corr_background(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+    };
+    class CrossValidation: public StructureFunction {
+        public:
+            /** Structure function for performing cross validation experiments
+              * @param dist: Force background-to-obs correlation to 0 for points within
+              *   this distance [m]. If MV, disable this.
+            */
+            CrossValidation(StructureFunction& structure, float dist=MV);
+            float corr(const Point& p1, const Point& p2) const;
+            float corr_background(const Point& p1, const Point& p2) const;
+            StructureFunction* clone() const;
+        private:
+            StructureFunction* m_structure;
+            float m_dist;
+    };
+
+    class Transform {
+        public:
+            // Note these cannot be pure virtual, otherwise SWIG does not expose
+            // the vector functions (with the same name) in python. Therefore, make sure these
+            // functions are overloaded in the subclass implementation
+            virtual float forward(float value) const;
+            virtual float backward(float value) const;
+
+            vec forward(const vec& input) const;
+            vec backward(const vec& input) const;
+            vec2 forward(const vec2& input) const;
+            vec2 backward(const vec2& input) const;
+            vec3 forward(const vec3& input) const;
+            vec3 backward(const vec3& input) const;
+    };
+    class Identity : public Transform {
+        public:
+            // SWIG requires these "using" statements to enable the vectorized versions in the
+            // subclasses
+            using Transform::forward;
+            using Transform::backward;
+            float forward(float value) const;
+            float backward(float value) const;
+    };
+    class Log : public Transform {
+        public:
+            using Transform::forward;
+            using Transform::backward;
+            float forward(float value) const;
+            float backward(float value) const;
+    };
+    class BoxCox : public Transform {
+        public:
+            BoxCox(float threshold);
+            using Transform::forward;
+            using Transform::backward;
+            float forward(float value) const;
+            float backward(float value) const;
+        private:
+            float mThreshold;
     };
 };
 #endif

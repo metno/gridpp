@@ -53,6 +53,7 @@
 %apply int& OUTPUT { int& Y1_out };
 %apply int& OUTPUT { int& X2_out };
 %apply int& OUTPUT { int& Y2_out };
+%apply std::vector<std::vector<std::vector<float> > >& OUTPUT { std::vector<std::vector<std::vector<float> > >& output };
 
 %{
 #include "gridpp.h"

@@ -7,7 +7,7 @@ import gridpp
 def main():
     parser = argparse.ArgumentParser(description='Runs gridpp benchmarks for processing performance')
     parser.add_argument('-j', type=int, help='Run multiple cores', dest='num_cores')
-    parser.add_argument('-s', type=int, default=1, help='Enlarge the inputs by this scaling factor to run a bigger test', dest='scaling')
+    parser.add_argument('-s', type=float, default=1, help='Enlarge the inputs by this scaling factor to run a bigger test', dest='scaling')
     parser.add_argument('-n', type=int, default=1, help='Number of iterations to average over', dest='iterations')
     parser.add_argument('-t', help='Run only this function', dest="function")
 
@@ -23,9 +23,9 @@ def main():
     np.random.seed(1000)
 
     for i in [10, 50, 100, 200, 500, 1000, 2000, 10000]:
-        input[i] = np.random.rand(i * args.scaling, i)*10
+        input[i] = np.random.rand(int(i * args.scaling), i)*10
     for i in [10, 50, 100, 200, 500, 1000]:
-        grids[i] = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, i), np.linspace(0, 1, i * args.scaling)))
+        grids[i] = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, i), np.linspace(0, 1, int(i * args.scaling))))
     for i in [1000, 100000]:
         # points[i] = gridpp.Points(np.linspace(0, 1, i), np.zeros(i))
         points[i] = gridpp.Points(np.random.rand(i) * 10, np.random.rand(i) * 10)
@@ -34,7 +34,7 @@ def main():
     quantile = 0.5
     thresholds = np.linspace(0, 1, 11)
     run = collections.OrderedDict()
-    run[("Grid", "1000²")] = {"expected": 0.74, "args":np.meshgrid(np.linspace(0, 1, 1000 * args.scaling), np.linspace(0, 1, 1000))}
+    run[("Grid", "1000²")] = {"expected": 0.74, "args":np.meshgrid(np.linspace(0, 1, int(1000 * args.scaling)), np.linspace(0, 1, 1000))}
     run[("neighbourhood", "10000²")] = {"expected": 2.05, "args":(np.zeros([10000, 10000]), radius, gridpp.Mean)}
     run[("neighbourhood","2000² max")] = {"expected": 0.99, "args":(input[2000], radius, gridpp.Max)}
     run[("neighbourhood_quantile_fast", "2000²")] = {"expected": 1.23, "args":(input[2000], quantile, radius, thresholds)}
@@ -56,6 +56,8 @@ def main():
         points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
     run[("local_distribution_correction", "1000² x 1000")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
+    run[("gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
+    run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.zeros([1000,1000]), np.zeros([1000,1000]), 3, 0, 0, 0)}
 
     print("Gridpp version %s" % gridpp.version())
     if args.num_cores is not None:

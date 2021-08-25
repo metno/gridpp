@@ -566,6 +566,19 @@ namespace gridpp {
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient);
     vec2 simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient);
 
+    /** Elevation and land area fraction downscaling
+    *@param igrid input grid
+    *@param ogrid output grid
+    *@param ivalues values from igrid
+    *@param elev_gradient elevation gradient
+    *@param laf_gradient land area fraction gradient
+    */
+    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
+
+    /* Elevation and land area fraction downscaling with debug output fields
+    */
+    vec3 full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
+
     /** Smart neighbour downscaling grid to grid
       * @param igrid Input grid
       * @param ogrid Output points to downscale to
@@ -881,19 +894,6 @@ namespace gridpp {
      *  @param default_gradient Use this gradient if minimum number is not met
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
-
-    /** Compute downscale 
-    *@param igrid input grid
-    *@param ogrid output grid 
-    *@param ivalues temperature values from igrid
-    *@param elev_gradient elevation gradient
-    *@param laf_gradient land area fraction gradient
-    */
-    vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
-    
-    /* Debug method. Delete later
-    */
-    vec3 gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
 
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);

@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev3"
+#define GRIDPP_VERSION "0.6.0.dev6"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -43,6 +43,18 @@ namespace gridpp {
     static const float pi = 3.14159265;
     /** Radius of the earth [m] */
     static const double radius_earth = 6.378137e6;
+    /** Constant Lapse Rate moist air standard atmosphere [K/m] */
+    static const float lapse_rate=0.0065;
+    /** Temperature at surface in standard atmosphere [K] */
+    static const float standard_surface_temperature = 288.15;
+    /** Gravitational acceleration [m/s^2] */
+    static const float gravit = 9.80665;
+    /** Molar Mass of Dry Air [kg/mol] */
+    static const float molar_mass = 0.0289644;
+    /** Universal Gas Constant [kg*m^2*s^-2/(K*mol)] */
+    static const float gas_constant_mol = 8.31447;
+    /** Universal Gas Constant [J/(kg*K)] */
+    static const float gas_constant_si = 287.05;
     /**@}*/
 
     class KDTree;
@@ -59,6 +71,7 @@ namespace gridpp {
             MeanSlope = 10,    /**< Continue past the end-points using the mean slope of the curve*/
             NearestSlope = 20, /**< Continue past the end-points using the slope of the two lowermost or uppermost points in the curve */
             Zero = 30,         /**< Continue past the end-points using a slope of 0 */
+            Unchanged = 40,    /**< Keep values the way they were */
         };
 
     /** Statistical operations to reduce a vector to a scalar */
@@ -152,7 +165,7 @@ namespace gridpp {
             bool allow_extrapolation=true);
 
     /** Optimal interpolation for a deterministic gridded field including analysis variance
-      * @param bpoints Grid of background field
+      * @param bgrid Grid of background field
       * @param background 2D field of background values
       * @param bvariance Variance of background field
       * @param points Points of observations
@@ -231,14 +244,78 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Fill in values inside or outside a set of circles
+    /** Correction of a gridded field ensuring the distribution of values nearby match that of
+      * observations. This is an experimental method.
+      * @param bgrid grid corresponding to input
+      * @param background 2D field of background values (Y, X)
+      * @param points observation points
+      * @param pobs vector of observations
+      * @param pbackground vector of background values at points
+      * @param structure structure function specifying correlation between points
+      * @param min_quantile truncate quantile map below this quantile
+      * @param max_quantile truncate quantile map above this quantile
+      * @param max_points maximum number of points used within localization radius (not used at moment)
+    */
+    vec2 local_distribution_correction(const Grid& bgrid,
+            const vec2& background,
+            const Points& points,
+            const vec& pobs,
+            const vec& pbackground,
+            const StructureFunction& structure,
+            float min_quantile,
+            float max_quantile,
+            int min_points=0);
+
+    /** Version with multiple number of timesteps. Pool all observations across time in when
+      * computing the calibration curve.
+      * @param bgrid grid corresponding to input
+      * @param background 2D field of background values (Y, X)
+      * @param points observation points
+      * @param pobs 2D vector of observations with dimensions (T, N)
+      * @param pbackground vector of background values at points with dimensions (T, N)
+      * @param structure structure function specifying correlation between points
+      * @param min_quantile truncate quantile map below this quantile
+      * @param max_quantile truncate quantile map above this quantile
+      * @param max_points maximum number of points used within localization radius (not used at moment)
+    */
+    vec2 local_distribution_correction(const Grid& bgrid,
+            const vec2& background,
+            const Points& points,
+            const vec2& pobs,
+            const vec2& pbackground,
+            const StructureFunction& structure,
+            float min_quantile,
+            float max_quantile,
+            int min_points=0);
+
+    /** Fill in values inside or outside a set of circles (useful for masking)
       * @param input Deterministic values with dimensions Y, X
       * @param radii Circle radii for each point
       * @param value Fill in this value
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
     vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
-    vec2 doping(const Grid& igrid, const vec2& input, const Points& points, const vec& values, int half_width, float max_elev_diff=gridpp::MV);
+
+
+    /** Insert observations into gridded field using a square box
+      * @param grid Grid
+      * @param background Deterministic values with dimensions Y, X
+      * @param points Points representing observations
+      * @param observations Vector of observations
+      * @param half_widths Half width of square (in number of grid points) where observations are inserted for each point
+      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+    */
+    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff=gridpp::MV);
+
+    /** Insert observations into gridded field using a circle
+      * @param grid Grid
+      * @param background Deterministic values with dimensions Y, X
+      * @param points Points representing observations
+      * @param observations Vector of observations
+      * @param radii Radius of circle where observations are inserted for each point [m]
+      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+    */
+    vec2 doping_circle(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const vec& radii, float max_elev_diff=gridpp::MV);
 
     /**@}*/
 
@@ -366,7 +443,7 @@ namespace gridpp {
      *  @return Calibration curve
     */
 
-    vec2 metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric);
+    vec metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric, vec& output_fcst);
 
     /** Apply arbitrary calibration curve to a single value
      *  @param fcst input forecast
@@ -421,10 +498,6 @@ namespace gridpp {
     float calc_score(float a, float b, float c, float d, Metric metric);
     float calc_score(const vec& ref, const vec& fcst, float threshold, Metric metric);
     float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, Metric metric);
-
-    vec2 correction(const Grid& rgrid, const vec2& rvalues, const Points& npoints, const vec& nvalues, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
-    // Apply correction based on multiple timesteps
-    vec2 correction(const Grid& rgrid, const vec3& rvalues, const Points& npoints, const vec2& nvalues, const vec2& apply_values, float mean_radius, float outer_radius, float inner_radius, int min_num, int max_num, CorrectionType type, ivec2& count);
 
     /**@}*/
 
@@ -555,7 +628,7 @@ namespace gridpp {
     */
     vec2 fill_missing(const vec2& values);
 
-    /** Aggregate points onto a grid. Writes MV where there are not enough observations
+    /** Aggregate points onto a grid. Writes MV where there are not enough observations.
       * @param grid Grid to aggregate to
       * @param points Points with values
       * @param values Values at points
@@ -564,6 +637,15 @@ namespace gridpp {
       * @param statistic Statistic to compute on points within radius
     */
     vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, Statistic statistic);
+
+    /** Assign each point to nearest neighbour in grid and aggregate values. Writes MV where there are not enough observations.
+      * @param grid Grid to aggregate to
+      * @param points Points with values
+      * @param values Values at points
+      * @param min_num Minimum number of points in a gridpoint to create a value
+      * @param statistic Statistic to compute on points within gridpoint
+    */
+    vec2 gridding_nearest(const Grid& grid, const Points& points, const vec& values, int min_num, gridpp::Statistic statistic);
 
     /**@}*/
 
@@ -603,6 +685,26 @@ namespace gridpp {
      *  @return Pressures at new points
      */
     vec pressure(const vec& ielev, const vec& oelev, const vec& ipressure, const vec& itemperature);
+
+    /** Convert Surface Pressure to Sea Level Pressure
+     *  @param ps Surface pressure [pa]
+     *  @param altitude Station altitude above sea level [m]
+     *  @param temperature 2m temperature [K]
+     *  @param rh 2m Relative humidity [1]
+     *  @param dewpoint 2m Dewpoint Temperature at station [K]
+     *  @return Sea Level Pressure [pa]
+     */
+    float sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV);
+
+    /** Vector version of Convert Surface Pressure to Sea Level Pressure
+     *  @param ps Surface pressures [pa]
+     *  @param altitude Station altitudes above sea level [m]
+     *  @param temperature 2m temperatures [K]
+     *  @param rh 2m Relative humidities [1]
+     *  @param dewpoint 2m Dewpoint Temperatures at stations [K]
+     *  @return Sea Level Pressure [pa]
+     */
+    vec sea_level_pressure(const vec& ps, const vec& altitude, const vec& temperature, const vec& rh, const vec& dewpoint);
 
     /** Diagnose QNH from pressure and altitude
      *  @param pressure Pressure at point [pa]
@@ -683,8 +785,11 @@ namespace gridpp {
      * @name OpenMP settings
      * Functions that configure OpenMP
      * *****************************************/ /**@{*/
-    /** Set the number of OpenMP threads to use. Overwrides OMP_NUM_THREAD env variable. */
+    /** Set the number of OpenMP threads to use. Overrides OMP_NUM_THREAD env variable. */
     void set_omp_threads(int num);
+
+    /** Get the number of OpenMP threads currently set */
+    int get_omp_threads();
 
     /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
     void initialize_omp();

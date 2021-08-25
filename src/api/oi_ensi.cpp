@@ -50,7 +50,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     }
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
         std::stringstream ss;
-        ss << "input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
+        ss << "Input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
         throw std::invalid_argument(ss.str());
     }
     if(pobs.size() != points.size()) {
@@ -61,6 +61,13 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     if(psigmas.size() != points.size()) {
         std::stringstream ss;
         ss << "Sigmas (" << psigmas.size() << ") and points (" << points.size() << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+
+    // Check ensemble size is consistent
+    if(background[0][0].size() != pbackground[0].size()) {
+        std::stringstream ss;
+        ss << "Ensemble members in gridded background (" << background[0][0].size() << ") is not the same as in the point background (" << pbackground[0].size() << ")";
         throw std::invalid_argument(ss.str());
     }
 

@@ -2,44 +2,51 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+import setuptools.command.install
+import shutil
+from distutils.sysconfig import get_python_lib
 from distutils.command.build import build as build_orig
-from distutils.core import setup, Extension
-from setuptools import setup, Extension
-import glob
+from distutils.core import Extension
 import itertools
-import numpy
 
 __version__ = '${PROJECT_VERSION}'
 
-# We need to swap the order of build_py and build_ext
-# https://stackoverflow.com/questions/12491328/python-distutils-not-include-the-swig-generated-module
-from distutils.command.build import build
-from setuptools.command.install import install
-import distutils.command.install as orig
+class CompiledLibInstall(setuptools.command.install.install):
+    """
+    Specialized install to install to python libs
+    """
 
-class CustomBuild(build):
     def run(self):
-        self.run_command('build_ext')
-        build.run(self)
+        """
+        Run method called by setup
+        :return:
+        """
+        # Get filenames from CMake variable
+        filenames = '${PYTHON_INSTALL_FILES}'.split(';')
+
+        # Directory to install to
+        install_dir = get_python_lib()
+        install_dir = self.install_libbase
+
+        # Install files
+        print("INSTALL DIR", install_dir)
+        # print(self.__dict__)
+        [shutil.copy(filename, install_dir) for filename in filenames]
+
+def partition(pred, iterable):
+    t1, t2 = itertools.tee(iterable)
+    return itertools.filterfalse(pred, t1), filter(pred, t2)
 
 
-class CustomInstall(install):
-    def run(self):
-        self.run_command('build_ext')
-        # self.do_egg_install()
-        orig.install.run(self)
+class build(build_orig):
 
+    def finalize_options(self):
+        super().finalize_options()
+        condition = lambda el: el[0] == 'build_ext'
+        rest, sub_build_ext = partition(condition, self.sub_commands)
+        self.sub_commands[:] = list(sub_build_ext) + list(rest)
 
-module = Extension('_gridpp',
-        sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['src/gridppPYTHON_wrap.cxx'],
-        libraries=["gsl", "gslcblas", "armadillo"],
-        extra_compile_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
-        extra_link_args="${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -std=c++${CMAKE_CXX_STANDARD}".split(),
-        library_dirs=["/usr/lib64"],
-        include_dirs=['./include', numpy.get_include()]
-)
-
-setup (
+setup(
     name='gridpp',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
@@ -86,7 +93,7 @@ setup (
     ],
 
     # What does your project relate to?
-    keywords='meteorology post-processing weather forecast',
+    keywords='meteorology quality control observation weather',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -96,7 +103,7 @@ setup (
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy>=1.7'],
+    install_requires=['numpy'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -109,11 +116,30 @@ setup (
     },
 
     test_suite="gridpp.tests",
-    ext_modules = [module],
-    py_modules = ["gridpp"],
+
+    # If there are data files included in your packages that need to be
+    # installed, specify them here.  If using Python 2.6 or less, then these
+    # have to be included in MANIFEST.in as well.
+    #package_data={
+    #    'sample': ['package_data.dat'],
+    #},
+    py_modules=['gridpp'],
+
+    cmdclass={'install': CompiledLibInstall},
     # cmdclass={'build': build},
-    cmdclass={'build': CustomBuild, 'install': CustomInstall},
 
-    include_package_data=True,
+    # Although 'package_data' is the preferred approach, in some case you may
+    # need to place data files outside of your packages. See:
+    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
+    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
+    #data_files=[('my_data', ['data/data_file'])],
 
+    # To provide executable scripts, use entry points in preference to the
+    # "scripts" keyword. Entry points provide cross-platform support and allow
+    # pip to create the appropriate form of executable for the target platform.
+    # entry_points={
+    #     'console_scripts': [
+    #         'verif=verif:main',
+    #     ],
+    # },
 )

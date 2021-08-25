@@ -34,20 +34,30 @@ def main():
     quantile = 0.5
     thresholds = np.linspace(0, 1, 11)
     run = collections.OrderedDict()
-    run[(gridpp.Grid, "1000²")] = {"expected": 0.74, "args":np.meshgrid(np.linspace(0, 1, int(1000 * args.scaling)), np.linspace(0, 1, 1000))}
-    run[(gridpp.neighbourhood, "10000²")] = {"expected": 2.05, "args":(np.zeros([10000, 10000]), radius, gridpp.Mean)}
-    run[(gridpp.neighbourhood,"2000² max")] = {"expected": 0.99, "args":(input[2000], radius, gridpp.Max)}
-    run[(gridpp.neighbourhood_quantile_fast, "2000²")] = {"expected": 1.23, "args":(input[2000], quantile, radius, thresholds)}
-    run[(gridpp.neighbourhood_quantile, "500²")] = {"expected": 1.70, "args":(input[500], quantile, radius)}
-    run[(gridpp.bilinear, "1000²")] = {"expected": 1.68, "args":(grids[1000], grids[1000], input[1000])}
-    run[(gridpp.bilinear, "1000² x 50")] = {"expected": 4.42, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
-    run[(gridpp.nearest, "1000²")] = {"expected": 1.52, "args":(grids[1000], grids[1000], input[1000])}
-    run[(gridpp.nearest, "1000² x 50")] = {"expected": 2.30, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
-    run[(gridpp.optimal_interpolation, "1000² 1000")] = {"expected": 1.57, "args":(grids[1000],
+    run[("Grid", "1000²")] = {"expected": 0.74, "args":np.meshgrid(np.linspace(0, 1, int(1000 * args.scaling)), np.linspace(0, 1, 1000))}
+    run[("neighbourhood", "10000²")] = {"expected": 2.05, "args":(np.zeros([10000, 10000]), radius, gridpp.Mean)}
+    run[("neighbourhood","2000² max")] = {"expected": 0.99, "args":(input[2000], radius, gridpp.Max)}
+    run[("neighbourhood_quantile_fast", "2000²")] = {"expected": 1.23, "args":(input[2000], quantile, radius, thresholds)}
+    run[("neighbourhood_quantile", "500²")] = {"expected": 1.70, "args":(input[500], quantile, radius)}
+    run[("bilinear", "1000²")] = {"expected": 1.68, "args":(grids[1000], grids[1000], input[1000])}
+    run[("bilinear", "1000² x 50")] = {"expected": 4.42, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
+    run[("nearest", "1000²")] = {"expected": 1.52, "args":(grids[1000], grids[1000], input[1000])}
+    run[("nearest", "1000² x 50")] = {"expected": 2.30, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
+    run[("gridding", "1000² 100000")] = {"expected": 0.53, "args":(grids[1000], points[100000], np.zeros([100000]), 5000, 1, gridpp.Mean)}
+    run[("gridding_nearest", "1000² 100000")] = {"expected": 0.13, "args":(grids[1000], points[100000], np.zeros([100000]), 1, gridpp.Mean)}
+    run[("optimal_interpolation", "1000² 1000")] = {"expected": 1.57, "args":(grids[1000],
         input[1000], points[1000], np.zeros(1000), np.ones(1000), np.ones(1000), structure, 20)}
-    run[(gridpp.dewpoint, "1e7")] = {"expected": 0.53, "args":(np.zeros(10000000) + 273.15, np.zeros(10000000))}
-    run[(gridpp.gradient, "1000²")] = {"expected": 3.55, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
-    run[(gridpp.calc_gradient, "1000²")] = {"expected": 1.55, "args": (np.zeros([1000,1000]), np.zeros([1000,1000]), 3, 0, 0, 0)}
+    run[("dewpoint", "1e7")] = {"expected": 0.53, "args":(np.zeros(10000000) + 273.15, np.zeros(10000000))}
+    run[("fill", "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 5000, 1, False)}
+    run[("doping_square", "1e5")] = {"expected": 0.16, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 1, np.ones(100000, 'int') * 5, False)}
+    run[("doping_circle", "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
+    run[("local_distribution_correction", "1000² x 1000")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+        points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
+    run[("gridpp.gradient", "1000²")] = {"expected": 3.55, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
+    run[("gridpp.calc_gradient", "1000²")] = {"expected": 1.55, "args": (np.zeros([1000,1000]), np.zeros([1000,1000]), 3, 0, 0, 0)}
 
     print("Gridpp version %s" % gridpp.version())
     if args.num_cores is not None:
@@ -58,23 +68,23 @@ def main():
     if args.num_cores is not None and args.num_cores != 1:
         num_cores += [args.num_cores]
     for key in run.keys()       :
-        timings = dict()
-        for num_core in num_cores:
-            timings[num_core] = 0
-
-        if isinstance(key, tuple):
-            name = key[0].__name__ + " " + str(key[1])
-            func = key[0]
-        else:
-            name = key.__name__
-            func = key
-        if args.function is not None:
-            if func.__name__ != args.function:
-                continue
-
-        # Allow functions to fail (useful when benchmarking older versions of gridpp
-        # where functions may not be defined).
         try:
+            timings = dict()
+            for num_core in num_cores:
+                timings[num_core] = 0
+
+            if isinstance(key, tuple):
+                name = key[0] + " " + str(key[1])
+                func = eval("gridpp." + key[0])
+            else:
+                name = key
+                func = eval("gridpp." + key)
+            if args.function is not None:
+                if func.__name__ != args.function:
+                    continue
+
+            # Allow functions to fail (useful when benchmarking older versions of gridpp
+            # where functions may not be defined).
             for num_core in num_cores:
                 gridpp.set_omp_threads(num_core)
                 for it in range(args.iterations):
@@ -84,7 +94,7 @@ def main():
                     curr_time = e_time - s_time
                     timings[num_core] += curr_time
         except Exception as e:
-            print("Could not run %s" % key)
+            print("Could not run", key, e)
             continue
 
                 # print("%s() Expected: %.2f s Time: %.2f s" % (func.__name__, run[key]["expected"], e_time - s_time))

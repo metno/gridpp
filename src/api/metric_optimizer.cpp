@@ -102,7 +102,7 @@ namespace {
     };
 }
 
-vec2 gridpp::metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric) {
+vec gridpp::metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, gridpp::Metric metric, vec& output_fcst) {
     if(ref.size() != fcst.size())
         throw std::invalid_argument("ref and fcst not the same size");
 
@@ -111,22 +111,27 @@ vec2 gridpp::metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& 
     vec y(N);
     float min = 0;
     float max = 10;
-    vec2 results(2);
-    results[0].reserve(N);
-    results[1].reserve(N);
+    vec output_ref;
+    output_ref.reserve(N);
+    output_fcst.clear();
+    output_fcst.reserve(N);
 
     float last_diff = 0;
     for(int i = 0; i < N; i++) {
         float value = gridpp::get_optimal_threshold(ref, fcst, thresholds[i], metric);
+        // std::cout << i << " " << thresholds[i] << " " << value << std::endl;
         if(gridpp::is_valid(value)) {
-            results[0].push_back(value);
-            results[1].push_back(thresholds[i]);
+            output_ref.push_back(value);
+            output_fcst.push_back(thresholds[i]);
         }
     }
-    return results;
+    return output_ref;
 }
 
 float gridpp::get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, gridpp::Metric metric) {
+    /*  For large vectors, the expense comes at 1) finding the starting point and 2) finding the
+     *  optimal point.
+     */
     bool remove_near_zero = true;
     bool remove_uncertain = false;
     bool remove_at_boundary = true;
@@ -186,14 +191,18 @@ float gridpp::calc_score(const vec& ref, const vec& fcst, float threshold, float
     float a = 0, b = 0, c = 0, d = 0;
     int N = fcst.size();
     for(int t = 0; t < N; t++) {
-        if((ref[t] > threshold) && (fcst[t] > fthreshold))
-            a++;
-        else if((ref[t] <= threshold) && (fcst[t] > fthreshold))
-            b++;
-        else if((ref[t] > threshold) && (fcst[t] <= fthreshold))
-            c++;
-        else if((ref[t] <= threshold) && (fcst[t] <= fthreshold))
-            d++;
+        if(fcst[t] > fthreshold) {
+            if(ref[t] > threshold)
+                a++;
+            else if(ref[t] <= threshold)
+                b++;
+        }
+        else {
+            if(ref[t] > threshold)
+                c++;
+            else if(ref[t] <= threshold)
+                d++;
+        }
     }
     return calc_score(a, b, c, d, metric);
 }

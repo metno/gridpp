@@ -25,7 +25,7 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
          // Loop over each value
          std::vector<float> currValues;
          int time;
-         bool status = ss >> time;
+         bool status = (bool) (ss >> time);
          if(!status) {
             Util::error("Could not read time from file '" + iFilename + "'");
          }
@@ -33,19 +33,19 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
 
          Location location(Util::MV, Util::MV, Util::MV);
          float lat;
-         status = ss >> lat;
+         status = (bool) (ss >> lat);
          if(!status) {
             Util::error("Could not read lat from file '" + iFilename + "'");
          }
 
          float lon;
-         status = ss >> lon;
+         status = (bool) (ss >> lon);
          if(!status) {
             Util::error("Could not read lon from file '" + iFilename + "'");
          }
 
          float elev;
-         status = ss >> elev;
+         status = (bool) (ss >> elev);
          if(!status) {
             Util::error("Could not read elev from file '" + iFilename + "'");
          }
@@ -53,7 +53,7 @@ FileText::FileText(std::string iFilename, const Options& iOptions) :
 
          while(ss.good()) {
             float value;
-            bool status  = ss >> value;
+            bool status  = (bool) (ss >> value);
             if(!status) {
                Util::error("Could not read value from file '" + iFilename + "'");
             }

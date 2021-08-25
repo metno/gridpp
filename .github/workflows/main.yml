@@ -1,6 +1,6 @@
 name: C/C++ CI
 
-on: [push]
+on: [push, pull_request]
 
 # push:
 #    branches: [ master ]
@@ -9,15 +9,33 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+            python-version: '3.7'
       - name: dependencies
-        run: sudo apt update -qq && sudo apt install swig libboost-dev libarmadillo8 libarmadillo-dev cmake netcdf-bin libnetcdf-dev libgsl-dev python3-setuptools python3-numpy python3-nose
+        run: |
+            sudo apt update -qq
+            sudo apt install swig libboost-dev libarmadillo9 libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip lcov
       - name: configure
-        run: mkdir build && cd build && cmake -DBUILD_R=no ..
+        run: mkdir build && cd build && cmake -DBUILD_R=no -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_TESTS=ON ..
       - name: build
         run: cd build && VERBOSE=1 make develop-python-user
       - name: test
-        run: nosetests3
+        run: |
+            cd build
+            /usr/bin/python3 -m pip install coverage nose
+            make tests
+            lcov --directory CMakeFiles/gridpp.dir/src/api --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' --output-file coverage.info
+            lcov --list coverage.info
+            # - name: test
+            # run: |
+            # /usr/bin/python3 -c "import gridpp; print(gridpp.version())"
+            # /usr/bin/python3 -m pip install --upgrade pip
+            # /usr/bin/python3 -m pip install coverage nose
+            # coverage run --omit */*-packages/*,*tests* -m nose
+            # coverage report

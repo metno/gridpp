@@ -36,24 +36,18 @@ halfwidth = 7
 output = gridpp.neighbourhood(input, halfwidth, gridpp.Mean)
 ```
 
-![Example](extras/image.jpg)
+![Example](docs/image.jpg)
 
 ## Required dependencies
 - [Boost](https://www.boost.org/) >= 1.59
 - [Armadillo](http://arma.sourceforge.net/) >= 6.6
-- [GNU Scientific Library](https://www.gnu.org/software/gsl/)
-- [Netcdf](https://www.unidata.ucar.edu/software/netcdf/)
 
 On Ubuntu Bionic, these can be installed like this:
 ```bash
 sudo apt-get update
 sudo apt-get install libboost-all-dev
-sudo apt-get install libgsl0-dev libblas-dev
-sudo apt-get install netcdf-bin libnetcdf-dev
 sudo apt-get install libarmadillo6 libarmadillo-dev
 ```
-
-Note that Ubuntu Xenial only has Armadillo 6.5 in its apt repository. In that case you need to install  [Armadillo 6.6](http://arma.sourceforge.net/) or later manually.
 
 ## Installing the python bindings from pip
 
@@ -115,7 +109,25 @@ This installs the python bindings in
 make build-r
 ```
 
-Currently, the R package is not installed centrally, but instead is placed in `extras/SWIG/R/gridpp.R` in the build directory.
+Currently, the R package is not installed centrally, but instead is placed in `swig/R/gridpp.R` in the build directory.
+
+## gridpp client installation from source
+
+1. Extra dependencies
+The gridpp commando-line client requires the following extra dependencies:
+- [GNU Scientific Library](https://www.gnu.org/software/gsl/)
+- [Netcdf](https://www.unidata.ucar.edu/software/netcdf/)
+
+On Ubuntu Bionic, these can be installed like this:
+```bash
+sudo apt-get install libgsl0-dev libblas-dev
+sudo apt-get install netcdf-bin libnetcdf-dev
+```
+
+2. Install the client
+```bash
+make gridpp-client
+```
 
 ## Copyright and license
 Copyright © 2014-2021 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General

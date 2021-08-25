@@ -46,12 +46,22 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal(gridpp.apply_curve([0,4], y, x, gridpp.Zero, gridpp.Zero), [2,6])
         np.testing.assert_array_equal(gridpp.apply_curve([0,4], y, x, gridpp.MeanSlope, gridpp.MeanSlope), [0,8])
         np.testing.assert_array_equal(gridpp.apply_curve([0,4], y, x, gridpp.NearestSlope, gridpp.NearestSlope), [-1,7])
+        np.testing.assert_array_equal(gridpp.apply_curve([0,4], y, x, gridpp.Unchanged, gridpp.Unchanged), [0,4])
 
     def test_3d(self):
         curve_fcst = np.random.rand(3, 2, 4)
         curve_ref = np.random.rand(3, 2, 4)
         field = np.random.rand(3, 2)
         gridpp.apply_curve(field, curve_ref, curve_fcst, gridpp.OneToOne, gridpp.OneToOne)
+
+    def test_all_extrapolation_policies(self):
+        """Check that all policies work"""
+        for policy in [gridpp.OneToOne, gridpp.Zero, gridpp.NearestSlope, gridpp.MeanSlope, gridpp.Unchanged]:
+            curve_fcst = np.random.rand(3, 2, 4)
+            curve_ref = np.random.rand(3, 2, 4)
+            field = np.random.rand(3, 2)
+            gridpp.apply_curve(field, curve_ref, curve_fcst, policy, policy)
+
 
 if __name__ == '__main__':
     unittest.main()

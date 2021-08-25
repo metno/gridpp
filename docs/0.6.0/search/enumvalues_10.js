@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zero',['Zero',['../namespacegridpp.html#a874f509d3b9c062842ed23de0e6e5f85a216a4f2d21e85ef0feaf74f79956df2c',1,'gridpp']]]
+  ['variance',['Variance',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea97f0eec25840de562575feb9b6f81d3f',1,'gridpp']]]
 ];

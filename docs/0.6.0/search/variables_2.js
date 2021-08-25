@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['mlats',['mLats',['../classgridpp_1_1KDTree.html#a1b976ce39c6dd5f0a1d131ab6f3317e4',1,'gridpp::KDTree']]],
-  ['mlocalizationdistance',['mLocalizationDistance',['../classgridpp_1_1StructureFunction.html#a3052ab8319b15c6b597b2608ac241d87',1,'gridpp::StructureFunction']]],
-  ['mlons',['mLons',['../classgridpp_1_1KDTree.html#aed3cdf7d116c0277501a5db01bdac73e',1,'gridpp::KDTree']]],
-  ['mtree',['mTree',['../classgridpp_1_1KDTree.html#aec97a4064df5916098b9b80fb88359c4',1,'gridpp::KDTree']]],
-  ['mtype',['mType',['../classgridpp_1_1KDTree.html#ad5b59b44a4c088c93f933e4212bacf09',1,'gridpp::KDTree']]],
-  ['mv',['MV',['../namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa',1,'gridpp']]],
-  ['mv_5fcml',['MV_CML',['../namespacegridpp.html#a9eedb2e274a858f189438e48ff9a1ea5',1,'gridpp']]]
+  ['laf',['laf',['../classgridpp_1_1Point.html#a3e8d6d4316b257cbfac9cfe74cbba162',1,'gridpp::Point']]],
+  ['lapse_5frate',['lapse_rate',['../namespacegridpp.html#a80fb379cdf53e8c68bfd62e300477032',1,'gridpp']]],
+  ['lat',['lat',['../classgridpp_1_1Point.html#ae334a25d93596e9e81cd0e6d354252fa',1,'gridpp::Point']]],
+  ['lon',['lon',['../classgridpp_1_1Point.html#a34674133438ed528d07c432240cdf3e9',1,'gridpp::Point']]]
 ];

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['laf',['laf',['../classgridpp_1_1Point.html#a3e8d6d4316b257cbfac9cfe74cbba162',1,'gridpp::Point']]],
-  ['lat',['lat',['../classgridpp_1_1Point.html#ae334a25d93596e9e81cd0e6d354252fa',1,'gridpp::Point']]],
-  ['lon',['lon',['../classgridpp_1_1Point.html#a34674133438ed528d07c432240cdf3e9',1,'gridpp::Point']]]
+  ['gas_5fconstant_5fmol',['gas_constant_mol',['../namespacegridpp.html#a1467bf4aafab1f3929934c3e4a5ab586',1,'gridpp']]],
+  ['gas_5fconstant_5fsi',['gas_constant_si',['../namespacegridpp.html#ab47d92a1590dc880181971db34821a26',1,'gridpp']]],
+  ['gravit',['gravit',['../namespacegridpp.html#adb567528f5b136a8a6df5739540080c6',1,'gridpp']]]
 ];

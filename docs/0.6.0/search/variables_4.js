@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['radius_5fearth',['radius_earth',['../namespacegridpp.html#afd1721333759896e182d3175a34ab4be',1,'gridpp']]]
+  ['pi',['pi',['../namespacegridpp.html#a3ca41a1266b028c5b48dc2c32b3b3b09',1,'gridpp']]]
 ];

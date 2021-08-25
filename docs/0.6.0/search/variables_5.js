@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['swig_5fdefault_5fvalue',['swig_default_value',['../namespacegridpp.html#a7d5dc7a812ab19350d9e344468af84f1',1,'gridpp']]]
+  ['radius_5fearth',['radius_earth',['../namespacegridpp.html#afd1721333759896e182d3175a34ab4be',1,'gridpp']]]
 ];

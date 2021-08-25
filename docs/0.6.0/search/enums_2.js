@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['metric',['Metric',['../namespacegridpp.html#a58bc0350ffe93f9116cff6e2ee6a7d01',1,'gridpp']]]
+  ['gradienttype',['GradientType',['../namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700e',1,'gridpp']]]
 ];

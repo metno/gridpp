@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['gas_5fconstant_5fmol',['gas_constant_mol',['../namespacegridpp.html#a1467bf4aafab1f3929934c3e4a5ab586',1,'gridpp']]],
+  ['gas_5fconstant_5fsi',['gas_constant_si',['../namespacegridpp.html#ab47d92a1590dc880181971db34821a26',1,'gridpp']]],
   ['geodetic',['Geodetic',['../namespacegridpp.html#a2ad8e1533595470eee173fed2301446da1ebd63b8e57e792bf15682c6d7ae0481',1,'gridpp']]],
   ['get_5fbox',['get_box',['../classgridpp_1_1Grid.html#a8a1241bd50f92c2e7778b2582012f9ae',1,'gridpp::Grid']]],
   ['get_5fclosest_5fneighbours',['get_closest_neighbours',['../classgridpp_1_1KDTree.html#a7ad4b8276b0a6a914f0674af33b21bcd',1,'gridpp::KDTree::get_closest_neighbours()'],['../classgridpp_1_1Points.html#a95c33c5e1c1221b20fb4f8268c311b1b',1,'gridpp::Points::get_closest_neighbours()'],['../classgridpp_1_1Grid.html#a2601b1babcf59fc2062394676d9445ff',1,'gridpp::Grid::get_closest_neighbours()']]],
@@ -21,6 +23,9 @@ var searchData=
   ['get_5fpoint',['get_point',['../classgridpp_1_1Points.html#aad0a0b81d2618b2904dee9f0de3cd402',1,'gridpp::Points::get_point()'],['../classgridpp_1_1Grid.html#a529efb0f234c98568a0d6874d95c5850',1,'gridpp::Grid::get_point()']]],
   ['get_5fstatistic',['get_statistic',['../namespacegridpp.html#ab51b6612520aa8c1f7329e8e7115a96f',1,'gridpp']]],
   ['get_5fupper_5findex',['get_upper_index',['../namespacegridpp.html#a474f636d52c72de7477b8d69d94bc0f3',1,'gridpp']]],
+  ['gradient_2ecpp',['gradient.cpp',['../gradient_8cpp.html',1,'']]],
+  ['gradienttype',['GradientType',['../namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700e',1,'gridpp']]],
+  ['gravit',['gravit',['../namespacegridpp.html#adb567528f5b136a8a6df5739540080c6',1,'gridpp']]],
   ['grid',['Grid',['../classgridpp_1_1Grid.html',1,'gridpp::Grid'],['../classgridpp_1_1Grid.html#ade94f06329206784aa28b4f0a207ffef',1,'gridpp::Grid::Grid()'],['../classgridpp_1_1Grid.html#aef2883e4287e5c7f4c95c30bd69c59fd',1,'gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=Geodetic)']]],
   ['grid_2ecpp',['grid.cpp',['../grid_8cpp.html',1,'']]],
   ['gridding',['gridding',['../namespacegridpp.html#aa7bcb0762dfdc245f89df816f9bce3c9',1,'gridpp']]],

@@ -785,9 +785,10 @@ namespace gridpp {
     *@param laf_gradient land area fraction gradient
     */
     vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
+    
     /* Debug method. Delete later
     */
-    vec2 correction(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
+    vec3 correction(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
 
     /** Check if the grid is the same size as the 2D vector */
     bool compatible_size(const Grid& grid, const vec2& v);

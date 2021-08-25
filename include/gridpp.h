@@ -1208,12 +1208,24 @@ namespace gridpp {
               * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
             */
             BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
+            /** Barnes structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: Horizontal decorrelation length field >=0, same size as grid [m]
+              * @param v: Vertical decorrelation length field >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: Land/sea decorrelation length field >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho less than this value [m].
+            */
+            BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunction* clone() const;
+            float localization_distance(const Point& p) const;
         private:
-            float mH;
-            float mV;
-            float mW;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
     };
 
     /** Simple structure function based on distance, elevation, and land area fraction */
@@ -1228,21 +1240,6 @@ namespace gridpp {
             float mW;
     };
 
-    /** Spatially varying Barnes structure function */
-    class DensityStructure: public StructureFunction {
-        public:
-            DensityStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
-            float corr(const Point& p1, const Point& p2) const;
-            float corr_background(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
-            float localization_distance(const Point& p) const;
-        private:
-            Grid m_grid;
-            vec2 mH;
-            vec2 mV;
-            vec2 mW;
-            float m_min_rho;
-    };
     class CrossValidation: public StructureFunction {
         public:
             /** Structure function for performing cross validation experiments

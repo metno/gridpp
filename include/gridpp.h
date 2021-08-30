@@ -891,6 +891,16 @@ namespace gridpp {
     */
     vec2 gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
     
+    /** Compute 2d array with weighted thresholds () 
+    * @param vec2 array
+    * @param vec2 searcg array
+    * @param int halfwidth
+    * @param int search criteria
+    * @param int search_target
+    */
+
+    vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, int search_criteria , int search_target);
+
     /* Debug method. Delete later
     */
     vec3 correction(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);

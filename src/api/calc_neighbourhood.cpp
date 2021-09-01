@@ -34,12 +34,12 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             int I_maxSearchArray_Y = 0;
             int I_maxSearchArray_X = 0;
 
-            if(search_array[y][x] <= search_criteria_min){
+            if(search_array[y][x] < search_criteria_min){
                 output[y][x] = array[y][x];
                 continue;
             }
             
-            if(search_array[y][x] > search_target_max){
+            if(search_array[y][x] >= search_criteria_max){
                 output[y][x] = array[y][x];
                 continue;
             }
@@ -48,11 +48,13 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
                     
                     float current_array = search_array[yy][xx];
+
                     if(!gridpp::is_valid(current_array)){
                         continue;
                     } 
 
                     if(start){
+                        // Do we even need if-start statement????
                         start = false;
                         current_max = current_array;
                         I_maxSearchArray_Y = yy;
@@ -64,16 +66,16 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         I_maxSearchArray_Y = yy;
                         I_maxSearchArray_X = xx;
                     }
-                    
-                    //std::cout << "inner loop";
-                    
                 }
-            }
-            
+            }            
             
             if(!gridpp::is_valid(current_max)){
                 output[y][x] = 0;
             }
+
+            else if(current_max < search_target_min){
+                output[y][x] = array[y][x];
+            } 
 
             else{
                 output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
@@ -83,18 +85,3 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
     std::cout << " ends ";
     return output;
 }
-/*  array = input temperature
-*        search_array = input_lafs
-*       halfwidth = radius to search for
-*      search_criteria = value in which search is instigated 
-*     search_target = accpetance value of laf.
-*/
-
-
- /* 
- array (vec2)
- laf ( vec2) (search array)
- halfwidth (int)
- max_laf (float) search criteria
- min_laf (float) search target
-*/

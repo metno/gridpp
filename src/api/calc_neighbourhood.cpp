@@ -28,18 +28,12 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
     for(int y = 0; y < array.size(); y++){
         for(int x = 0; x < array[y].size(); x++){
             
-            bool start = true;
+            float current_max = gridpp::MV;
 
-            float current_max = 0;
             int I_maxSearchArray_Y = 0;
             int I_maxSearchArray_X = 0;
 
-            if(search_array[y][x] < search_criteria_min){
-                output[y][x] = array[y][x];
-                continue;
-            }
-            
-            if(search_array[y][x] >= search_criteria_max){
+            if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
                 output[y][x] = array[y][x];
                 continue;
             }
@@ -53,15 +47,13 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         continue;
                     } 
 
-                    if(start){
-                        // Do we even need if-start statement????
-                        start = false;
+                    else if(!gridpp::is_valid(current_max)){
                         current_max = current_array;
                         I_maxSearchArray_Y = yy;
                         I_maxSearchArray_X = xx;
                     }
 
-                    else if(current_array > current_max){
+                    else if(current_array >= current_max){
                         current_max = current_array;
                         I_maxSearchArray_Y = yy;
                         I_maxSearchArray_X = xx;
@@ -70,7 +62,7 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             }            
             
             if(!gridpp::is_valid(current_max)){
-                output[y][x] = 0;
+                output[y][x] = array[y][x];
             }
 
             else if(current_max < search_target_min){

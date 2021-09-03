@@ -73,6 +73,13 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                             counter++; //counter = counter + 1
                             accum_temp = accum_temp + array[yy][xx];
                         }
+
+                        if(current_array >= current_max){
+                            //should this be else if??? consequence: current_max is maximum value outside the search_target
+                            current_max = current_array;
+                            I_maxSearchArray_Y = yy;
+                            I_maxSearchArray_X = xx;
+                        }
                     }
 
                     else{
@@ -85,20 +92,21 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 output[y][x] = array[y][x];
             }
 
-            //else if(current_max < search_target_min){
-            //    output[y][x] = array[y][x];
-            //} 
+            /*else if(current_max < search_target_min){
+                output[y][x] = array[y][x];
+            }*/ 
 
             /*else{
                 output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
             }*/
 
             else if(counter > 0){
-                //std::cout << accum_temp;
-                std::cout << counter;
-                std::cout << " ";
                 output[y][x] = accum_temp / counter;  
             }
+
+            //else if(current_max < search_target_min){
+            //    output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
+            //} 
 
             else{
                 output[y][x] = array[y][x];

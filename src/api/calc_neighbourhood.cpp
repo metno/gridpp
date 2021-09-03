@@ -33,6 +33,9 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             int I_maxSearchArray_Y = 0;
             int I_maxSearchArray_X = 0;
 
+            int counter = 0;
+            float accum_temp = 0;
+
             if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
                 output[y][x] = array[y][x];
                 continue;
@@ -42,6 +45,9 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
                     
                     float current_array = search_array[yy][xx];
+
+                    int I_SearchArray_Y = 0;
+                    int I_SearchArray_X = 0;
 
                     if(!gridpp::is_valid(current_array)){
                         continue;
@@ -53,24 +59,49 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         I_maxSearchArray_X = xx;
                     }
 
-                    else if(current_array >= current_max){
+                    /*else if(current_array >= current_max){
                         current_max = current_array;
                         I_maxSearchArray_Y = yy;
                         I_maxSearchArray_X = xx;
+                    }*/
+                    else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
+                        if(current_array >= search_target_min && current_array <= search_target_max){
+                            //accum = accum + current_array;
+                            //I_SearchArray_Y = yy;
+                            //I_SearchArray_X = xx;
+                        
+                            counter++; //counter = counter + 1
+                            accum_temp = accum_temp + array[yy][xx];
+                        }
+                    }
+
+                    else{
+                        continue;
                     }
                 }
-            }            
+            }         
             
             if(!gridpp::is_valid(current_max)){
                 output[y][x] = array[y][x];
             }
 
-            else if(current_max < search_target_min){
-                output[y][x] = array[y][x];
-            } 
+            //else if(current_max < search_target_min){
+            //    output[y][x] = array[y][x];
+            //} 
+
+            /*else{
+                output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
+            }*/
+
+            else if(counter > 0){
+                //std::cout << accum_temp;
+                std::cout << counter;
+                std::cout << " ";
+                output[y][x] = accum_temp / counter;  
+            }
 
             else{
-                output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
+                output[y][x] = array[y][x];
             }
         }
     }

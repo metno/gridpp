@@ -92,3 +92,29 @@ vec2 gridpp::distance(const Points& points, const Grid& grid, int num) {
     }
     return output;
 }
+
+vec gridpp::distance(const Points& ipoints, const Points& opoints, int num) {
+    if(ipoints.get_coordinate_type() != opoints.get_coordinate_type())
+        throw std::invalid_argument("Incompatible coordinate types");
+
+    int size = opoints.size();
+    vec output(size);
+    vec ilats = ipoints.get_lats();
+    vec ilons = ipoints.get_lons();
+    CoordinateType coordinate_type = ipoints.get_coordinate_type();
+    vec lats = opoints.get_lats();
+    vec lons = opoints.get_lons();
+    #pragma omp parallel for
+    for(int i = 0; i < size; i++) {
+        ivec indices = ipoints.get_closest_neighbours(lats[i], lons[i], num);
+        float max_dist = 0;
+        for(int k = 0; k < indices.size(); k++) {
+            int index = indices[k];
+            float dist = gridpp::KDTree::calc_distance(lats[i], lons[i], ilats[index], ilons[index], coordinate_type);
+            if(dist > max_dist)
+                max_dist = dist;
+        }
+        output[i] = max_dist;
+    }
+    return output;
+}

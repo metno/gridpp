@@ -611,6 +611,8 @@ namespace gridpp {
     */
     vec2 count(const Points& points, const Grid& grid, float radius);
 
+    // TODO: Add grid to grid and point to point versions
+
     /** For each point, calculates the distance to nearest gridpoint
      *  @param grid Grid
      *  @param points Points
@@ -634,6 +636,14 @@ namespace gridpp {
      *  @return Distance [m] to nearest gridpoint for each point
     */
     vec2 distance(const Points& points, const Grid& grid, int num=1);
+
+    /** For each output point, calculates the distance to nearest input point
+     *  @param ipoints Input points
+     *  @param opoints Output points
+     *  @param num Number of points
+     *  @return Distance [m] to nearest point for each point
+    */
+    vec distance(const Points& ipoints, const Points& opoint, int num=1);
 
     /** Fill in missing values based on nearby values
       * @param values 2D array of values

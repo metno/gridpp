@@ -3,7 +3,7 @@
 using namespace gridpp;
 
 vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff) {
-    if(gridpp::compatible_size(igrid, background))
+    if(!gridpp::compatible_size(igrid, background))
         throw std::invalid_argument("Grid size is not the same as observations");
     if(points.size() != observations.size())
         throw std::invalid_argument("Points size is not the same as observations size");
@@ -48,7 +48,7 @@ vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Poin
 }
 
 vec2 gridpp::doping_circle(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const vec& radii, float max_elev_diff) {
-    if(gridpp::compatible_size(igrid, background))
+    if(!gridpp::compatible_size(igrid, background))
         throw std::invalid_argument("Grid size is not the same as observations");
     if(points.size() != observations.size())
         throw std::invalid_argument("Points size is not the same as observations size");

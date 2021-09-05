@@ -5,7 +5,7 @@
 using namespace gridpp;
 
 vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec2& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -29,7 +29,7 @@ vec2 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec2& ivalues) 
     return output;
 }
 vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -82,7 +82,7 @@ vec2 gridpp::nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalue
     return output;
 }
 vec3 gridpp::nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues) {
-    if(gridpp::compatible_size(ipoints, ivalues)) {
+    if(!gridpp::compatible_size(ipoints, ivalues)) {
         std::stringstream ss;
         ss << "Input points (" << ipoints.size() << ") and values (" << ivalues.size() << ") size mismatch";
         throw std::invalid_argument(ss.str());
@@ -114,7 +114,7 @@ vec3 gridpp::nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalu
 }
 
 vec gridpp::nearest(const Grid& igrid, const Points& opoints, const vec2& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();
@@ -133,7 +133,7 @@ vec gridpp::nearest(const Grid& igrid, const Points& opoints, const vec2& ivalue
     return output;
 }
 vec2 gridpp::nearest(const Grid& igrid, const Points& opoints, const vec3& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
        throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();
@@ -175,9 +175,9 @@ vec gridpp::nearest(const Points& ipoints, const Points& opoints, const vec& iva
     return output;
 }
 vec2 gridpp::nearest(const Points& ipoints, const Points& opoints, const vec2& ivalues) {
-    if(gridpp::compatible_size(ipoints, ivalues)) {
+    if(!gridpp::compatible_size(ipoints, ivalues)) {
         std::stringstream ss;
-        ss << "Input points (" << ipoints.size() << ") and values (" << ivalues.size() << ") size mismatch";
+        ss << "Input points (" << ipoints.size() << ") and values (" << ivalues[0].size() << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
     vec iOutputLats = opoints.get_lats();

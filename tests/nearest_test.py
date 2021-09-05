@@ -100,6 +100,15 @@ class Test(unittest.TestCase):
         output = gridpp.nearest(ipoints, points, values)
         np.testing.assert_array_equal(output, [[0, 1], [9, 6]])
 
+    def test_points_to_points_1_time(self):
+        """Check that point to point with a single timestep works"""
+        ipoints = gridpp.Points([0, 5, 10], [0, 5, 10])
+        points = gridpp.Points([-1, 6], [-1, 6])
+        values = np.zeros([1, 3])
+        values[0, :] = [0, 1, 2]
+        output = gridpp.nearest(ipoints, points, values)
+        np.testing.assert_array_equal(output, [[0, 1]])
+
 
 
 if __name__ == '__main__':

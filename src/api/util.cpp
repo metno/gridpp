@@ -363,16 +363,16 @@ float gridpp::interpolate(float x, const std::vector<float>& iX, const std::vect
     return y;
 }
 bool gridpp::compatible_size(const Grid& grid, const vec2& v) {
-    return v.size() == 0 || grid.size()[0] != v.size() || grid.size()[1] != v[0].size();
+    return v.size() == 0 || (grid.size()[0] == v.size() && grid.size()[1] == v[0].size());
 }
 bool gridpp::compatible_size(const Grid& grid, const vec3& v) {
-    return v.size() == 0 || v[0].size() == 0 || grid.size()[0] != v[0].size() || grid.size()[1] != v[0][0].size();
+    return v.size() == 0 || (v[0].size() == 0 || (grid.size()[0] == v[0].size() && grid.size()[1] == v[0][0].size()));
 }
 bool gridpp::compatible_size(const Points& points, const vec2& v) {
-    return v.size() == 0 || points.size() != v[1].size();
+    return v.size() == 0 || points.size() == v[0].size();
 }
 bool gridpp::compatible_size(const Points& points, const vec& v) {
-    return points.size() != v.size();
+    return points.size() == v.size();
 }
 bool gridpp::compatible_size(const vec2& a, const vec3& b) {
     // No y

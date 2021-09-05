@@ -895,7 +895,9 @@ namespace gridpp {
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
-    /** Check if the grid is the same size as the 2D vector */
+    /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
+     * they are incompatible
+    */
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
     bool compatible_size(const Points& points, const vec& v);

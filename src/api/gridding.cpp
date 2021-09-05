@@ -4,7 +4,7 @@
 using namespace gridpp;
 
 vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic) {
-    if(gridpp::compatible_size(points, values))
+    if(!gridpp::compatible_size(points, values))
         throw std::invalid_argument("Points size is not the same as values");
     int Y = grid.size()[0];
     int X = grid.size()[1];
@@ -29,7 +29,7 @@ vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values,
     return output;
 }
 vec2 gridpp::gridding_nearest(const Grid& grid, const Points& points, const vec& values, int min_num, gridpp::Statistic statistic) {
-    if(gridpp::compatible_size(points, values))
+    if(!gridpp::compatible_size(points, values))
         throw std::invalid_argument("Points size is not the same as values");
     int Y = grid.size()[0];
     int X = grid.size()[1];

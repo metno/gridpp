@@ -5,7 +5,7 @@
 using namespace gridpp;
 
 vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, 
-    float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max){
+    float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta){
 
     std::cout << "starting";
 
@@ -33,8 +33,15 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             int I_maxSearchArray_Y = 0;
             int I_maxSearchArray_X = 0;
 
+
+            int nearest_target = gridpp::MV;
+            int I_nearestSearchArray_Y = 0;
+            int I_nearestSearchArray_X = 0;
+
             int counter = 0;
             float accum_temp = 0;
+
+            bool use_nearest_target = false;
 
             if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
                 output[y][x] = array[y][x];
@@ -74,23 +81,35 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                             accum_temp = accum_temp + array[yy][xx];
                         }
 
-                        if(current_array >= current_max){
-                            //should this be else if??? consequence: current_max is maximum value outside the search_target
-                            current_max = current_array;
-                            I_maxSearchArray_Y = yy;
-                            I_maxSearchArray_X = xx;
+                        else if(search_array[yy][xx] - search_array[y][x] >= search_delta){
+                            use_nearest_target = true;
+                            if(!gridpp::is_valid(nearest_target)){
+                                nearest_target = search_array[yy][xx];
+                                I_nearestSearchArray_Y = yy;
+                                I_nearestSearchArray_X = xx;                          
+                            }
+                            else if(std::min(std::abs(search_array[yy][xx] - search_target_min), std::abs(search_array[yy][xx] - search_target_max))
+                                < std::min(std::abs(nearest_target - search_target_min), std::abs(nearest_target - search_target_max))){
+                                nearest_target = search_array[yy][xx];
+                                I_nearestSearchArray_Y = yy;
+                                I_nearestSearchArray_X = xx;
+                                //std::cout << array[yy][xx];
+                            }
                         }
-                    }
 
-                    else{
-                        continue;
+                        //if(current_array >= current_max){
+                        //    //should this be else if??? consequence: current_max is maximum value outside the search_target
+                        //    current_max = current_array;
+                        //    I_maxSearchArray_Y = yy;
+                        //    I_maxSearchArray_X = xx;
+                        //}
                     }
                 }
             }         
             
-            if(!gridpp::is_valid(current_max)){
-                output[y][x] = array[y][x];
-            }
+            //if(!gridpp::is_valid(current_max)){
+            //    output[y][x] = array[y][x];
+            //}
 
             /*else if(current_max < search_target_min){
                 output[y][x] = array[y][x];
@@ -100,11 +119,15 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
             }*/
 
-            else if(counter > 0){
+            if(counter > 0){
                 output[y][x] = accum_temp / counter;  
             }
 
-            //else if(current_max < search_target_min){
+            else if(use_nearest_target == true){
+                output[y][x] = array[I_nearestSearchArray_Y][I_nearestSearchArray_X];
+            }
+
+            //      else if(current_max < search_target_min){
             //    output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
             //} 
 

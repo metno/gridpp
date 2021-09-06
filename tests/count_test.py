@@ -32,6 +32,14 @@ class Test(unittest.TestCase):
             output = gridpp.count(points, grid, radius)
             np.testing.assert_array_equal(output, ((2,1), (3,1), (2,1)))
 
+    def test_grid_to_grid(self):
+        for coordinate_type in coordinate_types:
+            igrid = get_grid(coordinate_type)
+            ogrid = get_grid(coordinate_type)
+            radius = 120000
+            output = gridpp.count(igrid, ogrid, radius)
+            np.testing.assert_array_equal(output, ((3,3), (4,4), (3,3)))
+
     def test_grid_to_point(self):
         for coordinate_type in coordinate_types:
             grid = get_grid(coordinate_type)
@@ -39,6 +47,14 @@ class Test(unittest.TestCase):
             radius = 120000
             output = gridpp.count(grid, points, radius)
             np.testing.assert_array_equal(output, [3, 4, 3])
+
+    def test_point_to_point(self):
+        for coordinate_type in coordinate_types:
+            ipoints = get_points(coordinate_type)
+            opoints = get_points(coordinate_type)
+            radius = 120000
+            output = gridpp.count(ipoints, opoints, radius)
+            np.testing.assert_array_equal(output, [2, 3, 2])
 
 
 if __name__ == '__main__':

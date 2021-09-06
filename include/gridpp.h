@@ -603,6 +603,14 @@ namespace gridpp {
     */
     vec count(const Grid& grid, const Points& points, float radius);
 
+    /** For each gridpoint, counts the number of gridpoints within the radius
+     *  @param igrid Input grid
+     *  @param ogrid Output grid
+     *  @param radius Radius [m]
+     *  @return Number of gridpoints
+    */
+    vec2 count(const Grid& igrid, const Grid& ogrid, float radius);
+
     /** For each gridpoint, counts the number of points within the radius
      *  @param grid Grid
      *  @param points Points
@@ -611,7 +619,13 @@ namespace gridpp {
     */
     vec2 count(const Points& points, const Grid& grid, float radius);
 
-    // TODO: Add grid to grid and point to point versions
+    /** For each point, counts the number of points within the radius
+     *  @param ipoints Input points
+     *  @param opoints Output points
+     *  @param radius Radius [m]
+     *  @return Number of points
+    */
+    vec count(const Points& ipoints, const Points& opoints, float radius);
 
     /** For each point, calculates the distance to nearest gridpoint
      *  @param grid Grid

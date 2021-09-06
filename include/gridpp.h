@@ -899,7 +899,7 @@ namespace gridpp {
     * @param int search_target
     */
 
-    vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max);
+    vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
 
     /* Debug method. Delete later
     */

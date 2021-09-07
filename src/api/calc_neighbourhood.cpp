@@ -23,14 +23,13 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
     int nX = array[0].size();
 
     
-    for(int y = 0; y < array.size(); y++){
+    for(int y = 0; y < array.size(); y++){ 
         for(int x = 0; x < array[y].size(); x++){
+            /* 
+            Loop over each element in array
+            */
             
             float current_max = gridpp::MV;
-
-            int I_maxSearchArray_Y = 0;
-            int I_maxSearchArray_X = 0;
-
 
             int nearest_target = gridpp::MV;
             int I_nearestSearchArray_Y = 0;
@@ -42,12 +41,18 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             bool use_nearest_target = false;
 
             if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
+                /*
+                Ignore values outside of range of scope (outside search_criteria min and max)
+                */
                 output[y][x] = array[y][x];
                 continue;
             }
 
             for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
+                    /*
+                    Loop over neighbourhood of y and x 
+                    */
                     
                     float current_array = search_array[yy][xx];
 
@@ -58,29 +63,27 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         continue;
                     } 
 
-                    else if(!gridpp::is_valid(current_max)){
-                        current_max = current_array;
-                        I_maxSearchArray_Y = yy;
-                        I_maxSearchArray_X = xx;
-                    }
-
-
                     else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
+                        /*condition search array inside of scope */
                         
                         if(current_array >= search_target_min && current_array <= search_target_max){
+                            /* Count all and add all values*/
                             counter++;
                             accum_temp = accum_temp + array[yy][xx];
                         }
 
-                        else if(search_array[yy][xx] - search_array[y][x] >= search_delta){
+                        else if(search_array[yy][xx] - search_array[y][x] >= search_delta && counter == 0){
+                            /* Finding nearest value that's outside of the search target range*/
                             use_nearest_target = true;
                             if(!gridpp::is_valid(nearest_target)){
+                                /* Set first value*/
                                 nearest_target = search_array[yy][xx];
                                 I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;                          
                             }
                             else if(std::min(std::abs(search_array[yy][xx] - search_target_min), std::abs(search_array[yy][xx] - search_target_max))
                                 < std::min(std::abs(nearest_target - search_target_min), std::abs(nearest_target - search_target_max))){
+                                /* If next search array is closer to search target, assign new value*/
                                 nearest_target = search_array[yy][xx];
                                 I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;
@@ -92,14 +95,17 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             
 
             if(counter > 0){
+                /* find mean value of accumulated values */
                 output[y][x] = accum_temp / counter;  
             }
 
             else if(use_nearest_target == true){
+                /* If no values found inside target, and nearest target was used, assign the value from that location*/
                 output[y][x] = array[I_nearestSearchArray_Y][I_nearestSearchArray_X];
             }
 
             else{
+                /* If no methods use, use original value*/
                 output[y][x] = array[y][x];
             }
         }

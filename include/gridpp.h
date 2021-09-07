@@ -905,6 +905,24 @@ namespace gridpp {
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
+    /** Compute downscale 
+    *@param igrid input grid
+    *@param ogrid output grid 
+    *@param ivalues temperature values from igrid
+    *@param elev_gradient elevation gradient
+    *@param laf_gradient land area fraction gradient
+    */
+    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
+
+    /** Compute 2d array with weighted thresholds () 
+    * @param vec2 array
+    * @param vec2 searcg array
+    * @param int halfwidth
+    * @param int search criteria
+    * @param int search_target
+    */
+    vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
+
     /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
      * they are incompatible
     */

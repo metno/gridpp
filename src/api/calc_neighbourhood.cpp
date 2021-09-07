@@ -7,8 +7,6 @@ using namespace gridpp;
 vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, 
     float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta){
 
-    std::cout << "starting";
-
     if(search_criteria_min > search_criteria_max){
         throw std::invalid_argument("Search_criteria_min must be smaller than search_criteria_max");
     }
@@ -66,18 +64,11 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         I_maxSearchArray_X = xx;
                     }
 
-                    /*else if(current_array >= current_max){
-                        current_max = current_array;
-                        I_maxSearchArray_Y = yy;
-                        I_maxSearchArray_X = xx;
-                    }*/
+
                     else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
-                        if(current_array >= search_target_min && current_array <= search_target_max){
-                            //accum = accum + current_array;
-                            //I_SearchArray_Y = yy;
-                            //I_SearchArray_X = xx;
                         
-                            counter++; //counter = counter + 1
+                        if(current_array >= search_target_min && current_array <= search_target_max){
+                            counter++;
                             accum_temp = accum_temp + array[yy][xx];
                         }
 
@@ -93,31 +84,12 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                                 nearest_target = search_array[yy][xx];
                                 I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;
-                                //std::cout << array[yy][xx];
                             }
                         }
-
-                        //if(current_array >= current_max){
-                        //    //should this be else if??? consequence: current_max is maximum value outside the search_target
-                        //    current_max = current_array;
-                        //    I_maxSearchArray_Y = yy;
-                        //    I_maxSearchArray_X = xx;
-                        //}
                     }
                 }
             }         
             
-            //if(!gridpp::is_valid(current_max)){
-            //    output[y][x] = array[y][x];
-            //}
-
-            /*else if(current_max < search_target_min){
-                output[y][x] = array[y][x];
-            }*/ 
-
-            /*else{
-                output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
-            }*/
 
             if(counter > 0){
                 output[y][x] = accum_temp / counter;  
@@ -127,15 +99,10 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 output[y][x] = array[I_nearestSearchArray_Y][I_nearestSearchArray_X];
             }
 
-            //      else if(current_max < search_target_min){
-            //    output[y][x] = array[I_maxSearchArray_Y][I_maxSearchArray_X];
-            //} 
-
             else{
                 output[y][x] = array[y][x];
             }
         }
     }
-    std::cout << " ends ";
     return output;
 }

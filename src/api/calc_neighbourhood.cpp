@@ -29,15 +29,11 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             Loop over each element in array
             */
             
-            float current_max = gridpp::MV;
-
             int nearest_target = gridpp::MV;
             int I_nearestSearchArray_Y = 0;
             int I_nearestSearchArray_X = 0;
-
             int counter = 0;
             float accum_temp = 0;
-
             bool use_nearest_target = false;
 
             if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
@@ -53,20 +49,17 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                     /*
                     Loop over neighbourhood of y and x 
                     */
-                    
-                    float current_array = search_array[yy][xx];
-
                     int I_SearchArray_Y = 0;
                     int I_SearchArray_X = 0;
 
-                    if(!gridpp::is_valid(current_array)){
+                    if(!gridpp::is_valid(search_array[yy][xx])){
                         continue;
                     } 
 
                     else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
                         /*condition search array inside of scope */
                         
-                        if(current_array >= search_target_min && current_array <= search_target_max){
+                        if(search_array[yy][xx] >= search_target_min && search_array[yy][xx] <= search_target_max){
                             /* Count all and add all values*/
                             counter++;
                             accum_temp = accum_temp + array[yy][xx];

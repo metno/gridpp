@@ -28,15 +28,15 @@ vec2 gridpp::smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, in
     for(int i = 0; i < nLat; i++)
         output[i].resize(nLon);
 
-    float dist = structure.localization_distance();
-
     // #pragma omp parallel for
     for(int i = 0; i < nLat; i++) {
         for(int j = 0; j < nLon; j++) {
+            Point p1 = ogrid.get_point(i, j);
+            float dist = structure.localization_distance(p1);
             ivec2 indices = igrid.get_neighbours(olats[i][j], olons[i][j], dist);
             std::vector<std::pair<float,int> > rhos;
             rhos.reserve(indices.size());
-            Point p1 = ogrid.get_point(i, j);
+
             for(int s = 0; s < indices.size(); s++) {
                 int ii = indices[s][0];
                 int jj = indices[s][1];

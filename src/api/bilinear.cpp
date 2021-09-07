@@ -20,7 +20,7 @@ namespace {
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s);
 }
 vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -49,7 +49,7 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues)
     return output;
 }
 vec3 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
        throw std::invalid_argument("Grid size is not the same as values");
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
@@ -82,7 +82,7 @@ vec3 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues)
 }
 
 vec gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();
@@ -105,7 +105,7 @@ vec gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalu
     return output;
 }
 vec2 gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
        throw std::invalid_argument("Grid size is not the same as values");
     vec iOutputLats = opoints.get_lats();
     vec iOutputLons = opoints.get_lons();

@@ -4,7 +4,7 @@
 using namespace gridpp;
 
 vec2 gridpp::fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside) {
-    if(gridpp::compatible_size(igrid, input))
+    if(!gridpp::compatible_size(igrid, input))
         throw std::invalid_argument("Grid size is not the same as values");
     if(points.size() != radii.size())
         throw std::invalid_argument("Points size is not the same as radii size");

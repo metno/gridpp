@@ -3,7 +3,7 @@
 using namespace gridpp;
 
 vec gridpp::simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 ielevs = igrid.get_elevs();
     vec oelevs = opoints.get_elevs();
@@ -25,7 +25,7 @@ vec gridpp::simple_gradient(const Grid& igrid, const Points& opoints, const vec2
 }
 
 vec2 gridpp::simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 ielevs = igrid.get_elevs();
     vec2 oelevs = ogrid.get_elevs();
@@ -55,7 +55,7 @@ vec2 gridpp::simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& i
 }
 
 vec2 gridpp::simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 ielevs = igrid.get_elevs();
     vec oelevs = opoints.get_elevs();
@@ -85,7 +85,7 @@ vec2 gridpp::simple_gradient(const Grid& igrid, const Points& opoints, const vec
 }
 
 vec3 gridpp::simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient) {
-    if(gridpp::compatible_size(igrid, ivalues))
+    if(!gridpp::compatible_size(igrid, ivalues))
         throw std::invalid_argument("Grid size is not the same as values");
     vec2 ielevs = igrid.get_elevs();
     vec2 oelevs = ogrid.get_elevs();

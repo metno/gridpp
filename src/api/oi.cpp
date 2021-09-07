@@ -208,8 +208,6 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     vec pelevs = points.get_elevs();
     vec plafs = points.get_lafs();
 
-    float localizationRadius = structure.localization_distance();
-
     // Compute the background value at observation points (Y)
     vec gY = pbackground;
 
@@ -224,6 +222,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         float lat = blats[y];
         float lon = blons[y];
         Point p1 = bpoints.get_point(y);
+        float localizationRadius = structure.localization_distance(p1);
 
         // Find observations within localization radius
         // TODO: Check that the chosen ones have elevation

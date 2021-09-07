@@ -106,6 +106,26 @@ class Test(unittest.TestCase):
         self.assertEqual(3, gridpp.get_upper_index(1, [0, 0, 1, 1]))
         self.assertEqual(0, gridpp.get_lower_index(0, [0, 0, 1, 1]))
         self.assertEqual(1, gridpp.get_upper_index(0, [0, 0, 1, 1]))
+    def test_compatible_size_grid_vec2(self):
+        lons, lats = np.meshgrid([0, 10, 20, 30], [30, 40, 50])
+        grid = gridpp.Grid(lats, lons)  # 3 x 4
+        self.assertFalse(gridpp.compatible_size(grid, np.zeros([2, 4])))
+        self.assertTrue(gridpp.compatible_size(grid, np.zeros([3, 4])))
+
+    def test_compatible_size_grid_vec3(self):
+        lons, lats = np.meshgrid([0, 10, 20, 30], [30, 40, 50])
+        grid = gridpp.Grid(lats, lons)  # 3 x 4
+        self.assertFalse(gridpp.compatible_size(grid, np.zeros([3, 2, 4])))
+        self.assertTrue(gridpp.compatible_size(grid, np.zeros([3, 3, 4])))
+
+    def test_compatible_size_points_vec(self):
+        points = gridpp.Points([0, 1, 2], [0, 1, 2])
+        self.assertTrue(gridpp.compatible_size(points, [0, 0, 0]))
+
+    def test_compatible_size_points_vec2(self):
+        points = gridpp.Points([0, 1, 2], [0, 1, 2])
+        self.assertTrue(gridpp.compatible_size(points, np.zeros([1, 3])))
+        self.assertTrue(gridpp.compatible_size(points, np.zeros([2, 3])))
 
 
 if __name__ == '__main__':

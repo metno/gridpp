@@ -59,8 +59,6 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
     int x_debug = 711;
     int y_debug = 1297;
 
-    float localizationRadius = structure.localization_distance();
-
     for(int y = 0; y < nY; y++) {
         output[y].resize(nX, gridpp::MV);
     }
@@ -78,6 +76,8 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
             float lat = blats[y][x];
             float lon = blons[y][x];
             Point p1 = bgrid.get_point(y, x);
+            float localizationRadius = structure.localization_distance(p1);
+
             ivec indices = points.get_neighbours(lat, lon, localizationRadius);
 
             float sum_below = 0;

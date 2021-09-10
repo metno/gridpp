@@ -45,14 +45,25 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
 
+    int nY = bgrid.size()[0];
+    int nX = bgrid.size()[1];
+
+    if(nY == 0 || nX == 0) {
+        std::stringstream ss;
+        ss << "Grid size (" << nY << "," << nX << ") cannot be zero";
+        throw std::invalid_argument(ss.str());
+    }
+
     if(bgrid.get_coordinate_type() != points.get_coordinate_type()) {
         throw std::invalid_argument("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
     }
-    if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
+    if(background.size() != nY || background[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
+        ss << "Input field (" << background.size() << "," << background[0].size() << ") is not the same size as the grid (" << nY << "," << nX << ")";
         throw std::invalid_argument(ss.str());
     }
+    int nE = background[0][0].size();
+
     if(pobs.size() != points.size()) {
         std::stringstream ss;
         ss << "Observations (" << pobs.size() << ") and points (" << points.size() << ") size mismatch";
@@ -65,15 +76,11 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     }
 
     // Check ensemble size is consistent
-    if(background[0][0].size() != pbackground[0].size()) {
+    if(nE != pbackground[0].size()) {
         std::stringstream ss;
-        ss << "Ensemble members in gridded background (" << background[0][0].size() << ") is not the same as in the point background (" << pbackground[0].size() << ")";
+        ss << "Ensemble members in gridded background (" << nE << ") is not the same as in the point background (" << pbackground[0].size() << ")";
         throw std::invalid_argument(ss.str());
     }
-
-    int nY = background.size();
-    int nX = background[0].size();
-    int nE = background[0][0].size();
 
     gridpp::Points bpoints = bgrid.to_points();
     vec2 background1 = gridpp::init_vec2(nY * nX, nE);

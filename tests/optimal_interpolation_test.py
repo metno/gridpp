@@ -168,6 +168,18 @@ class Test(unittest.TestCase):
         I = np.where(output1 < 1)[0]
         np.testing.assert_array_almost_equal(output0[I], output1[I])
 
+    def test_no_obs(self):
+        grid = gridpp.Points([0], [0])
+        points = gridpp.Points([], [])
+        pratios = []
+        structure = gridpp.BarnesStructure(500)
+        pobs = []
+        background = np.zeros(grid.size())
+        pbackground = []
+        max_points = 10
+        output0 = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points)
+        np.testing.assert_almost_equal(output0, background)
+
 
 if __name__ == '__main__':
     unittest.main()

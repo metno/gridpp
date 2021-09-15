@@ -186,6 +186,8 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     }
     int nY = background.size();
     int nS = points.size();
+    if(nS == 0)
+        return background;
 
     // Initialize sigma to background (for points where there are no observations)
     analysis_variance = bvariance;

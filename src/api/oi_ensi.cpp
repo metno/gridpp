@@ -45,6 +45,10 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     if(max_points < 0)
         throw std::invalid_argument("max_points must be >= 0");
 
+    int nS = points.size();
+    if(nS == 0)
+        return background;
+
     int nY = bgrid.size()[0];
     int nX = bgrid.size()[1];
 
@@ -129,9 +133,12 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     if(pbackground.size() != points.size())
         throw std::invalid_argument("Background and points size mismatch");
 
+    int nS = points.size();
+    if(nS == 0)
+        return background;
+
     double s_time = gridpp::clock();
-    int mX = -1;
-    int mY = -1;
+    int mY = -1;  // Write debug information for this station index
     int mMinValidEns = 5;
     int numParameters = 2;
     float sigmac = 0.5;
@@ -156,7 +163,6 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     vec plons = points.get_lons();
     vec pelevs = points.get_elevs();
     vec plafs = points.get_lafs();
-    int nS = plats.size();
 
     // Compute Y
     vec2 gY = pbackground;

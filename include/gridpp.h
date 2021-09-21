@@ -914,12 +914,20 @@ namespace gridpp {
     */
     vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
 
+    vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
+
+    vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
+
+    vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
     /** Compute 2d array with weighted thresholds () 
-    * @param vec2 array
-    * @param vec2 searcg array
-    * @param int halfwidth
-    * @param int search criteria
-    * @param int search_target
+    * @param vec2 array input array
+    * @param vec2 searcg array values used to modify array
+    * @param int halfwidth search radius
+    * @param float search criteria_min minimum value 
+    * @param float search criteria_max maximum value
+    * @param float search_target_min minimum value where values are assigned with
+    * @param float search_target_max maximum value where values are assigned with
+    * @param float search_delta if no search_target values are found, minimum difference between original value of search_array and any value inside the search radius.
     */
     vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
 

@@ -60,3 +60,11 @@ int gridpp::get_omp_threads() {
 #endif
     return 0;
 }
+
+void gridpp::set_debug_level(int level) {
+    gridpp::_debug_level = level;
+}
+
+int gridpp::get_debug_level() {
+    return gridpp::_debug_level;
+}

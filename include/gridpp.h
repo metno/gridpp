@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev6"
+#define GRIDPP_VERSION "0.6.0.dev7"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -837,6 +837,14 @@ namespace gridpp {
      * *****************************************/ /**@{*/
     // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
     // ivec regression(const vec& x, const vec& y);
+
+    /** Set the verbosity of debug messages. Use 0 for no messages. */
+    void set_debug_level(int level);
+
+    static int _debug_level = 0;
+
+    /** Get the currently set level of debug messages */
+    int get_debug_level();
 
     /** Convert name of a statistic enum */
     Statistic get_statistic(std::string name);

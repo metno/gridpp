@@ -189,16 +189,14 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     if(nS == 0)
         return background;
 
-    // Initialize sigma to background (for points where there are no observations)
-    analysis_variance = bvariance;
-
     vec pratios(nS);
     for(int s = 0; s < nS; s++) {
         pratios[s] = obs_variance[s] / bvariance_at_points[s];
     }
 
-    // Prepare output matrix
-    vec output(nY);
+    // Initialize output and analysis error to background values
+    analysis_variance = bvariance;
+    vec output = background;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -213,12 +211,9 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     // Compute the background value at observation points (Y)
     vec gY = pbackground;
 
-    double curr_time = gridpp::clock();
-    CoordinateType coordinate_type = points.get_coordinate_type();
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         if(!gridpp::is_valid(background[y])) {
-            output[y] = gridpp::MV;
             continue;
         }
         float lat = blats[y];
@@ -231,7 +226,6 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         ivec lLocIndices0 = points.get_neighbours(lat, lon, localizationRadius);
         if(lLocIndices0.size() == 0) {
             // If we have too few observations though, then use the background
-            output[y] = background[y];
             continue;
         }
         std::vector<int> lLocIndices;
@@ -277,7 +271,6 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         int lS = lLocIndices.size();
         if(lS == 0) {
             // If we have too few observations though, then use the background
-            output[y] = background[y];
             continue;
         }
 

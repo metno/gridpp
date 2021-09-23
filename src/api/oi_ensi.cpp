@@ -137,23 +137,21 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     if(nS == 0)
         return background;
 
-    double s_time = gridpp::clock();
     int mY = -1;  // Write debug information for this station index
-    int mMinValidEns = 5;
-    int numParameters = 2;
+    int num_parameters = 2;
     float sigmac = 0.5;
     float delta = 1;
-    bool mDiagnose = false;
+    bool diagnose = false;
 
     int nY = background.size();
     int nEns = background[0].size();
 
     // Prepare output matrix
-    vec2 output;
-    output.resize(nY);
-    for(int y = 0; y < nY; y++) {
-        output[y].resize(nEns);
-    }
+    vec2 output = background;
+
+    int num_condition_warning = 0;
+    int num_real_part_warning = 0;
+
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
     vec belevs = bpoints.get_elevs();
@@ -193,10 +191,8 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
             nValidEns++;
         }
     }
-    // TODO: Deal with single member mode
-    bool singleMemberMode = nValidEns < mMinValidEns;
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         float lat = blats[y];
         float lon = blons[y];
@@ -209,7 +205,6 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         ivec lLocIndices0 = points.get_neighbours(lat, lon, localizationRadius);
         if(lLocIndices0.size() == 0) {
             // If we have too few observations though, then use the background
-            output[y] = background[y];
             continue;
         }
         std::vector<int> lLocIndices;
@@ -254,7 +249,6 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         int lS = lLocIndices.size();
         if(lS == 0) {
             // If we have too few observations though, then use the background
-            output[y] = background[y];
             continue;
         }
 
@@ -284,13 +278,13 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
 
         // Compute Rinv
         mattype Rinv(lS, lS, arma::fill::zeros);
-        if(numParameters == 2) {
+        if(num_parameters == 2) {
             for(int i = 0; i < lS; i++) {
                 int index = lLocIndices[i];
                 Rinv(i, i) = lRhos[i] / (psigmas[index] * psigmas[index]);
             }
         }
-        else if(numParameters == 3) {
+        else if(num_parameters == 3) {
             /*
             // Inverting the matrix is more complicated, since the radar observations
             // have covariances. Therefore invert the covariance matrix for the radar part and
@@ -375,12 +369,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         Pinv = C * lY + diag * arma::eye<mattype>(nValidEns, nValidEns);
         float cond = arma::rcond(Pinv);
         if(cond <= 0) {
-            std::stringstream ss;
-            ss << "Condition number of " << cond << ". Using raw values";
-            gridpp::warning(ss.str());
-            for(int e = 0; e < nEns; e++) {
-                output[y][e] = background[y][e]; // Util::MV;
-            }
+            num_condition_warning++;
             continue;
         }
 
@@ -416,12 +405,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         mattype W = arma::real(Wcx);
 
         if(W.n_rows == 0) {
-            std::stringstream ss;
-            ss << "Could not find the real part of W. Using raw values.";
-            gridpp::warning(ss.str());
-            for(int e = 0; e < nEns; e++) {
-                output[y][e] = background[y][e];
-            }
+            num_real_part_warning++;
             continue;
         }
 
@@ -431,7 +415,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
 
         // Compute w
         vectype w(nValidEns);
-        if(mDiagnose)
+        if(diagnose)
             w = PC * (arma::ones<vectype>(lS));
         else
             w = PC * (lObs - lYhat);
@@ -554,16 +538,15 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         }
     }
 
-    // Back-transform
-    /*
-    #pragma omp parallel for
-    for(int x = 0; x < nX; x++) {
-        for(int y = 0; y < nY; y++) {
-            float value = (*output)(y, x, e);
-            if(gridpp::is_valid(value))
-                (*output)(y, x, e) = invTransform(value);
-        }
+    if(num_condition_warning > 0) {
+        std::stringstream ss;
+        ss << "Condition number error in " << num_condition_warning << " points. Using raw values in those points.";
+        gridpp::warning(ss.str());
     }
-    */
+    if(num_real_part_warning > 0) {
+        std::stringstream ss;
+        ss << "Could not find the real part of W in " << num_real_part_warning << " points. Using raw values in those points.";
+        gridpp::warning(ss.str());
+    }
     return output;
 }

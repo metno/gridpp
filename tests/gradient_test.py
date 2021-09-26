@@ -24,15 +24,18 @@ class Test(unittest.TestCase):
 
 
     def test_nan_input(self):
-        """ Check gradient of inputs, where bases and values are nan, output should also be nan like base and values"""
-        self.input_base =  [[np.nan, np.nan, np.nan, np.nan]]*4
-        np.testing.assert_array_almost_equal(gridpp.calc_gradient(self.input_base,self.input_values, 3), np.nan)
+        """ Check gradient of inputs, where bases and values are nan, output should be equal to default gradient"""
+        input_base =  [[np.nan, np.nan, np.nan, np.nan]]*4
+        default_gradient = -1
+        np.testing.assert_array_almost_equal(gridpp.calc_gradient(input_base,self.input_values,
+            3, 0, 0, default_gradient), default_gradient * np.ones(np.array(self.input_values).shape))
 
-    def test_nan_ouput(self):
-        """ If an matrix contains a field with no changing base numberrs, test the output is nan"""
+    def test_non_changing_base(self):
+        """ If an matrix contains a field with no changing base numberrs, test the output is default gradient"""
         self.input_base = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-        output = gridpp.calc_gradient(self.input_base, self.input_values, 3)
-        np.testing.assert_equal(output[0,0], np.nan)       
+        default_gradient = -1
+        output = gridpp.calc_gradient(self.input_base, self.input_values, 3, 0, 0, default_gradient)
+        np.testing.assert_equal(output[0,0], default_gradient)
 
     def test_empty_input(self):
         """ Check empty input returns and empty output. 

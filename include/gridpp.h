@@ -302,10 +302,10 @@ namespace gridpp {
       * @param background Deterministic values with dimensions Y, X
       * @param points Points representing observations
       * @param observations Vector of observations
-      * @param half_widths Half width of square (in number of grid points) where observations are inserted for each point
+      * @param halfwidths Half width of square (in number of grid points) where observations are inserted for each point
       * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
     */
-    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff=gridpp::MV);
+    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& halfwidths, float max_elev_diff=gridpp::MV);
 
     /** Insert observations into gridded field using a circle
       * @param grid Grid

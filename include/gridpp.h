@@ -835,7 +835,6 @@ namespace gridpp {
      * @name Utilities
      * Helper functions
      * *****************************************/ /**@{*/
-    // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
     // ivec regression(const vec& x, const vec& y);
 
     /** Set the verbosity of debug messages. Use 0 for no messages. */
@@ -925,7 +924,7 @@ namespace gridpp {
      *  @param min_range Minimum range of base to compute gradient
      *  @param default_gradient Use this gradient if minimum number is not met
     */
-    vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
+    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
     /** Compute downscale 
     *@param igrid input grid

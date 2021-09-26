@@ -6,29 +6,27 @@ using namespace gridpp;
 vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType gradientType,
     int halfwidth , int min_num, float min_range, float default_gradient){
 
-    if(halfwidth < 0)
-        throw std::invalid_argument("halfwidth must be positive");
+    if(halfwidth <= 0)
+        throw std::invalid_argument("Halwidth cannot be <= 0; must be positive integer");
+    if(min_range < 0)
+        throw std::invalid_argument("min_range must be >= 0");
 
     int gradientType = MinMax;
 
-    if(halfwidth <= 0)
-        throw std::invalid_argument("Halwidth cannot be <= 0; must be positive integer");
     if(base.size() == 0)
         throw std::invalid_argument("Base input has no size");
 
     int nY = base.size();
     int nX = base[0].size();
 
-    vec2 output = gridpp::init_vec2(base.size(), base[0].size());
+    vec2 output = gridpp::init_vec2(base.size(), base[0].size(), default_gradient);
 
     // Min Max Gradient 
     if(gradientType == MinMax){
         for(int y = 0; y  < base.size(); y++) {
             for(int x = 0; x < base[y].size(); x++){
-                bool start = true;
-
-                float current_max = 0;
-                float current_min = 0;
+                float current_max = gridpp::MV;
+                float current_min = gridpp::MV;
                 int I_maxBase_Y = 0;
                 int I_maxBase_X = 0;
                 int I_minBase_Y = 0;
@@ -39,23 +37,15 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                         if(!gridpp::is_valid(current_base)){
                             continue;
                         }
+                        if(!gridpp::is_valid(values[yy][xx]))
+                            continue;
 
-                        if(start){
-                            start = false;
-                            current_max = current_base;
-                            I_maxBase_Y = yy;
-                            I_maxBase_X = xx;
-                            current_min = current_base;
-                            I_minBase_Y = yy;
-                            I_minBase_X = xx;
-                        }
-
-                        else if(current_base > current_max){
+                        if(!gridpp::is_valid(current_max) || current_base > current_max){
                             current_max = current_base;
                             I_maxBase_Y = yy;
                             I_maxBase_X = xx;
                         }
-                        else if(current_base < current_min){
+                        if(!gridpp::is_valid(current_min) || current_base < current_min){
                             current_min = current_base;
                             I_minBase_Y = yy;
                             I_minBase_X = xx;
@@ -66,7 +56,7 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, //GradientType 
                     output[y][x] = default_gradient;
                 }
 
-                else if(abs(current_max - current_min) < min_range){
+                else if(abs(current_max - current_min) <= min_range){
                     output[y][x] = default_gradient;
                 }
                 else{

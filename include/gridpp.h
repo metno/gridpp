@@ -11,7 +11,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev6"
+#define GRIDPP_VERSION "0.6.0.dev7"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -302,10 +302,10 @@ namespace gridpp {
       * @param background Deterministic values with dimensions Y, X
       * @param points Points representing observations
       * @param observations Vector of observations
-      * @param half_widths Half width of square (in number of grid points) where observations are inserted for each point
+      * @param halfwidths Half width of square (in number of grid points) where observations are inserted for each point
       * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
     */
-    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff=gridpp::MV);
+    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& halfwidths, float max_elev_diff=gridpp::MV);
 
     /** Insert observations into gridded field using a circle
       * @param grid Grid
@@ -603,6 +603,14 @@ namespace gridpp {
     */
     vec count(const Grid& grid, const Points& points, float radius);
 
+    /** For each gridpoint, counts the number of gridpoints within the radius
+     *  @param igrid Input grid
+     *  @param ogrid Output grid
+     *  @param radius Radius [m]
+     *  @return Number of gridpoints
+    */
+    vec2 count(const Grid& igrid, const Grid& ogrid, float radius);
+
     /** For each gridpoint, counts the number of points within the radius
      *  @param grid Grid
      *  @param points Points
@@ -611,7 +619,13 @@ namespace gridpp {
     */
     vec2 count(const Points& points, const Grid& grid, float radius);
 
-    // TODO: Add grid to grid and point to point versions
+    /** For each point, counts the number of points within the radius
+     *  @param ipoints Input points
+     *  @param opoints Output points
+     *  @param radius Radius [m]
+     *  @return Number of points
+    */
+    vec count(const Points& ipoints, const Points& opoints, float radius);
 
     /** For each point, calculates the distance to nearest gridpoint
      *  @param grid Grid
@@ -821,8 +835,15 @@ namespace gridpp {
      * @name Utilities
      * Helper functions
      * *****************************************/ /**@{*/
-    // vec2 calc_gradient(const vec2& values, const vec2& aux, int radius);
     // ivec regression(const vec& x, const vec& y);
+
+    /** Set the verbosity of debug messages. Use 0 for no messages. */
+    void set_debug_level(int level);
+
+    static int _debug_level = 0;
+
+    /** Get the currently set level of debug messages */
+    int get_debug_level();
 
     /** Convert name of a statistic enum */
     Statistic get_statistic(std::string name);
@@ -903,7 +924,7 @@ namespace gridpp {
      *  @param min_range Minimum range of base to compute gradient
      *  @param default_gradient Use this gradient if minimum number is not met
     */
-    vec2 calc_gradient(const vec2& base, const vec2& values, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
+    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
     /** Compute downscale 
     *@param igrid input grid

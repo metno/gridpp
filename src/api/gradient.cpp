@@ -8,17 +8,20 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
     int nY = ogrid.size()[0];
     int nX = ogrid.size()[1];
 
-    //if(ivalues.size() != nY || ivalues[0].size() != nX)
-    //    throw std::invalid_argument("Values is the wrong size");
 
-    /*if(laf_gradient.size() > 0)
-        if(laf_gradient.size() != nY || laf_gradient[0].size() != nX)
+    if(ivalues.size() != igrid.size()[0] || ivalues[0].size() != igrid.size()[1])
+        throw std::invalid_argument("Values is the wrong size");
+
+    if(laf_gradient.size() > 0)
+        if(laf_gradient.size() != igrid.size()[0] || laf_gradient[0].size() != igrid.size()[1])
+
             throw std::invalid_argument("Laf gradient is the wrong size");
 
     if(elev_gradient.size() > 0)
-        if(elev_gradient.size() != nY || elev_gradient[0].size() != nX)
+        if(elev_gradient.size() != igrid.size()[0] || elev_gradient[0].size() != igrid.size()[1])
             throw std::invalid_argument("Elevation gradient is the wrong size");
-    */
+    
+    
     //Inputs
     vec2 ilats = igrid.get_lats();
     vec2 ilons = igrid.get_lons();
@@ -45,15 +48,19 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
             float ielev = ielevs[indices[0]][indices[1]];
 
             //Calculate LAF and elevation difference between output and input
-            float laf_diff = olaf - ilaf;
-            float elev_diff = oelev - ielev;
-
             float laf_correction = 0;
             float elev_correction = 0;
-            if(laf_gradient.size() > 0)
+            float laf_diff = 0;
+            if(laf_gradient.size() > 0 && gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                laf_diff = olaf - ilaf;
                 laf_correction = laf_gradient[indices[0]][indices[1]]*laf_diff;
-            if(elev_gradient.size() > 0)
+            }
+
+            float elev_diff = 0;
+            if(elev_gradient.size() > 0 && gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                elev_diff = oelev - ielev;
                 elev_correction = elev_gradient[indices[0]][indices[1]]*elev_diff;
+            }
 
             //Calculate temperature
             float temp = ivalues[indices[0]][indices[1]] + laf_correction + elev_correction;

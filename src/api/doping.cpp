@@ -2,13 +2,13 @@
 
 using namespace gridpp;
 
-vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& half_widths, float max_elev_diff) {
+vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& halfwidth, float max_elev_diff) {
     if(!gridpp::compatible_size(igrid, background))
         throw std::invalid_argument("Grid size is not the same as observations");
     if(points.size() != observations.size())
         throw std::invalid_argument("Points size is not the same as observations size");
-    if(points.size() != half_widths.size())
-        throw std::invalid_argument("Points size is not the same as half_widths size");
+    if(points.size() != halfwidth.size())
+        throw std::invalid_argument("Points size is not the same as halfwidth size");
     if(gridpp::is_valid(max_elev_diff) && max_elev_diff < 0)
         throw std::invalid_argument("max_elev_diff must be greater than or equal to 0");
 
@@ -23,8 +23,8 @@ vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Poin
     int X = igrid.size()[1];
 
     for(int i = 0; i < N; i++) {
-        if(half_widths[i] < 0)
-            throw std::invalid_argument("All half_widths must be greater than or equal to 0");
+        if(halfwidth[i] < 0)
+            throw std::invalid_argument("All halfwidth must be greater than or equal to 0");
     }
 
     vec2 output = background;
@@ -32,8 +32,8 @@ vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Poin
     for(int i = 0; i < N; i++) {
         ivec index = igrid.get_nearest_neighbour(lats[i], lons[i]);
         float curr = observations[i];
-        for(int yy = std::max(0, index[0] - half_widths[i]); yy <= std::min(Y - 1, index[0] + half_widths[i]); yy++) {
-            for(int xx = std::max(0, index[1] - half_widths[i]); xx <= std::min(X - 1, index[0] + half_widths[i]); xx++) {
+        for(int yy = std::max(0, index[0] - halfwidth[i]); yy <= std::min(Y - 1, index[0] + halfwidth[i]); yy++) {
+            for(int xx = std::max(0, index[1] - halfwidth[i]); xx <= std::min(X - 1, index[0] + halfwidth[i]); xx++) {
                 if(check_elev) {
                     float diff = fabs(elevs[i] - ielevs[yy][xx]);
                     if(diff > max_elev_diff)

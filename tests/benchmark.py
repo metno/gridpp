@@ -6,16 +6,15 @@ import gridpp
 
 def main():
     parser = argparse.ArgumentParser(description='Runs gridpp benchmarks for processing performance')
-    parser.add_argument('-j', type=int, help='Run multiple cores', dest='num_cores')
+    parser.add_argument('-j', type=int, help='Do a scaling test, by running on multiple cores (>= 2)', dest='num_cores')
     parser.add_argument('-s', type=float, default=1, help='Enlarge the inputs by this scaling factor to run a bigger test', dest='scaling')
     parser.add_argument('-n', type=int, default=1, help='Number of iterations to average over', dest='iterations')
     parser.add_argument('-t', help='Run only this function', dest="function")
 
-    # if len(sys.argv) == 1:
-    #     parser.print_help()
-    #     sys.exit(1)
-
     args = parser.parse_args()
+
+    if args.num_cores is not None and args.num_cores < 2:
+        raise Exception("Error: Number of cores must be 2 or more")
 
     input = dict()
     grids = dict()
@@ -54,18 +53,23 @@ def main():
         points[100000], np.ones(100000) * 1, np.ones(100000, 'int') * 5, False)}
     run[("doping_circle", "1e5")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
-    run[("local_distribution_correction", "1000² x 1000")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
+    run[("local_distribution_correction", "")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
-    run[("gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
+    run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
     run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.zeros([1000,1000]), np.zeros([1000,1000]), 3, 0, 0, 0)}
 
-    print("Gridpp version %s" % gridpp.version())
     if args.num_cores is not None:
-        print("Function                             Expected     Time     Diff    Scaling")
+        print("Gridd parallelization test (gridpp version %s)" % gridpp.version())
+    else:
+        print("Gridd benchmark (gridpp version %s)" % gridpp.version())
+        print("Expected results from Intel i7 3.40 Ghz")
+    print("-----------------------------------------------------------------")
+    if args.num_cores is not None:
+        print("Function                               1 core %2d cores  Scaling" % args.num_cores)
     else:
         print("Function                             Expected     Time     Diff")
     num_cores = [1]
-    if args.num_cores is not None and args.num_cores != 1:
+    if args.num_cores is not None:
         num_cores += [args.num_cores]
     for key in run.keys()       :
         try:
@@ -97,21 +101,20 @@ def main():
             print("Could not run", key, e)
             continue
 
-                # print("%s() Expected: %.2f s Time: %.2f s" % (func.__name__, run[key]["expected"], e_time - s_time))
         for num_core in num_cores:
             timings[num_core] /= args.iterations
 
-        diff = (timings[1] - run[key]["expected"] * args.scaling) / (run[key]["expected"]  * args.scaling) * 100
-        string = "%-36s %8.2f %8.2f %8.2f %%" % (name, run[key]["expected"] * args.scaling, timings[1], diff)
-        if args.num_cores is not None:
+        if args.num_cores is None:
+            diff = (timings[1] - run[key]["expected"] * args.scaling) / (run[key]["expected"]  * args.scaling) * 100
+            string = "%-36s %8.2f %8.2f %8.2f %%" % (name, run[key]["expected"] * args.scaling, timings[1], diff)
+        else:
             scaling = timings[1] / timings[args.num_cores] / args.num_cores
             expected = timings[1] / args.num_cores
             scaling = 1 - (timings[args.num_cores] - expected) / (timings[1] - expected)
             # scaling = (1 - timings[args.num_cores] / timings[1]) * (args.num_cores + 1)
 
-            string += " %8.2f %%" % (scaling * 100)
+            string = "%-36s %8.2f %8.2f %8.2f %%" % (name, timings[1], timings[args.num_cores], scaling * 100)
         print(string)
-    # gridpp.neighbourhood(input, radius, gridpp.Mean)
 
 
 if __name__ == "__main__":

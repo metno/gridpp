@@ -566,7 +566,7 @@ namespace gridpp {
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient);
     vec2 simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient);
 
-    /** Elevation and land area fraction downscaling
+    /** Compute Downscale
     *@param igrid input grid
     *@param ogrid output grid
     *@param ivalues values from igrid
@@ -574,6 +574,22 @@ namespace gridpp {
     *@param laf_gradient land area fraction gradient
     */
     vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
+
+    vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
+
+    vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
+
+    vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);    
+
+    vec2 full_gradient(const Points& ipoints, const Grid& ogrid, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient);
+
+    vec3 full_gradient(const Points& ipoints, const Grid& ogrid, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
+
+    vec full_gradient(const Points& ipoints, const Points& opoints, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient);
+
+    vec2 full_gradient(const Points& ipoints, const Points& opoints, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
+
+    
 
     /* Elevation and land area fraction downscaling with debug output fields
     */
@@ -926,20 +942,6 @@ namespace gridpp {
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
-    /** Compute downscale 
-    *@param igrid input grid
-    *@param ogrid output grid 
-    *@param ivalues temperature values from igrid
-    *@param elev_gradient elevation gradient
-    *@param laf_gradient land area fraction gradient
-    */
-    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient);
-
-    vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
-
-    vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
-
-    vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
     /** Compute 2d array with weighted thresholds () 
     * @param vec2 array input array
     * @param vec2 searcg array values used to modify array

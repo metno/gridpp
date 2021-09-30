@@ -21,7 +21,7 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
         if(elev_gradient.size() != igrid.size()[0] || elev_gradient[0].size() != igrid.size()[1])
             throw std::invalid_argument("Elevation gradient is the wrong size");
     
-    
+
     //Inputs
     vec2 ilats = igrid.get_lats();
     vec2 ilons = igrid.get_lons();
@@ -211,13 +211,34 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3&
             if(elev_gradient.size() > 0)    
                 elev_correction = elev_gradient[t][I][J] * elev_diff;
 
-
             float temp = ivalues[t][I][J] + laf_correction + elev_correction;
 
             output[t][i] = temp;
         }
     }
     return output;
+}
+
+vec2 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
+    vec ilats = ipoints.get_lats();
+    vec ilons = ipoints.get_lons();
+
+    vec2 olats = ogrid.get_lats();
+    vec2 olons = ogrid.get_lons();
+
+    int nPoints = olats.size();
+}
+
+vec3 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
+
+}
+
+vec gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
+
+}
+
+vec2 gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
+
 }
 
 vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient){

@@ -222,23 +222,48 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3&
 vec2 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
     vec ilats = ipoints.get_lats();
     vec ilons = ipoints.get_lons();
+    vec ilafs = ipoints.get_lons();
+    vec ielevs = ipoints.get_elevs();
 
     vec2 olats = ogrid.get_lats();
     vec2 olons = ogrid.get_lons();
+    vec2 olafs = ogrid.get_lafs();
+    vec2 oelevs = ogrid.get_elevs();
 
     int nPoints = olats.size();
+
+    int nY = olats.size();
+    int nX = olats[0].size();
+
+    throw std::invalid_argument("Not implemented points to grid 2D");
+
+    /*vec2 output = gridpp::init_vec2(nPoints);
+
+    for(int i = 0; i < nYs, i++){
+        output[i].resize(nX);
+    }
+
+    for(int i = 0; i < nY; i++){
+        for(int j = 0; i < nX; i++){
+            indices = ipoints.
+        }
+    } 
+    */
 }
 
 vec3 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
-
+    throw std::invalid_argument("Not Implemented Points to grid 3d");
+    
 }
 
 vec gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
-
+    throw std::invalid_argument("Not Implemented Points to points");
+    
 }
 
 vec2 gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
-
+    throw std::invalid_argument("Not Implemented Points to points 2D");
+    
 }
 
 vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient){

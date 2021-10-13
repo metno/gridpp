@@ -34,7 +34,6 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             int I_nearestSearchArray_X = 0;
             int counter = 0;
             float accum_temp = 0;
-            bool use_nearest_target = false;
 
             if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
                 /*
@@ -53,34 +52,35 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
 
                     if(!gridpp::is_valid(search_array[yy][xx])){
                         continue;
-                    } 
-
+                    }
                     else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
                         /*condition search array inside of scope */
-                        
+
                         if(search_array[yy][xx] >= search_target_min && search_array[yy][xx] <= search_target_max){
                             /* Count all and add all values*/
                             counter++;
                             accum_temp = accum_temp + array[yy][xx];
                         }
-
-                        else if(search_array[yy][xx] - search_array[y][x] >= search_delta && counter == 0){
-                            /* Finding nearest value that's outside of the search target range*/
-                            use_nearest_target = true;
+                        else if (counter > 0)
+                            /*  We have decided that we will only use values within th search target */
+                            continue;
+                        else if(std::abs(search_array[yy][xx] - search_array[y][x]) >= search_delta) {
+                            /* Finding nearest value that's outside of the search target range */
                             if(!gridpp::is_valid(nearest_target)){
                                 /* Set first value*/
                                 nearest_target = search_array[yy][xx];
                                 I_nearestSearchArray_Y = yy;
-                                I_nearestSearchArray_X = xx;                          
-                            }
-
-                            
-                            else if(std::min(std::abs(search_array[yy][xx] - search_target_min), std::abs(search_array[yy][xx] - search_target_max))
-                                < std::min(std::abs(nearest_target - search_target_min), std::abs(nearest_target - search_target_max))){
-                                // If next search array is closer to search target, assign new value*
-                                nearest_target = search_array[yy][xx];
-                                I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;
+                            }
+                            else {
+                                float curr_dist_to_target = std::min(std::abs(search_array[yy][xx] - search_target_min), std::abs(search_array[yy][xx] - search_target_max));
+                                float best_dist_to_target = std::min(std::abs(nearest_target - search_target_min), std::abs(nearest_target - search_target_max));
+                                if(curr_dist_to_target < best_dist_to_target) {
+                                    // If next search array is closer to search target, assign new value*
+                                    nearest_target = search_array[yy][xx];
+                                    I_nearestSearchArray_Y = yy;
+                                    I_nearestSearchArray_X = xx;
+                                }
                             }
                         }
                     }
@@ -89,10 +89,10 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
 
             if(counter > 0){
                 /* find mean value of accumulated values */
-                output[y][x] = accum_temp / counter;  
+                output[y][x] = accum_temp / counter;
             }
 
-            else if(use_nearest_target == true){
+            else if(gridpp::is_valid(nearest_target)){
                 /* If no values found inside target, and nearest target was used, assign the value from that location*/
                 output[y][x] = array[I_nearestSearchArray_Y][I_nearestSearchArray_X];
             }

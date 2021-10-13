@@ -29,7 +29,7 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             Loop over each element in array
             */
             
-            int nearest_target = gridpp::MV;
+            float nearest_target = gridpp::MV;
             int I_nearestSearchArray_Y = 0;
             int I_nearestSearchArray_X = 0;
             int counter = 0;
@@ -43,7 +43,6 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                 output[y][x] = array[y][x];
                 continue;
             }
-
             for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
                     /*
@@ -74,9 +73,11 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                                 I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;                          
                             }
+
+                            
                             else if(std::min(std::abs(search_array[yy][xx] - search_target_min), std::abs(search_array[yy][xx] - search_target_max))
                                 < std::min(std::abs(nearest_target - search_target_min), std::abs(nearest_target - search_target_max))){
-                                /* If next search array is closer to search target, assign new value*/
+                                // If next search array is closer to search target, assign new value*
                                 nearest_target = search_array[yy][xx];
                                 I_nearestSearchArray_Y = yy;
                                 I_nearestSearchArray_X = xx;
@@ -84,8 +85,7 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
                         }
                     }
                 }
-            }         
-            
+            }
 
             if(counter > 0){
                 /* find mean value of accumulated values */

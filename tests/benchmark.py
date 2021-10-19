@@ -56,7 +56,9 @@ def main():
     run[("local_distribution_correction", "")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
     run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
-    run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.zeros([1000,1000]), np.zeros([1000,1000]), 3, 0, 0, 0)}
+    run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.random.rand(1000, 1000) *
+        100, np.zeros([1000,1000]), gridpp.LinearRegression, 10, 0, 0, 0)}
+    run[("window", "1000²")] = {"expected": 0.78, "args": (np.random.rand(1000, 1000), 100, gridpp.Mean, False, False)}
 
     if args.num_cores is not None:
         print("Gridd parallelization test (gridpp version %s)" % gridpp.version())

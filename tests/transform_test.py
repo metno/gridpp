@@ -64,6 +64,12 @@ class Test(unittest.TestCase):
                 output = transform.backward(a)
                 np.testing.assert_almost_equal(output, i, 5)
 
+    def test_zero_size(self):
+        x = np.zeros([0, 1])
+        transform = gridpp.Identity()
+        y = transform.forward(x)
+        self.assertEqual(y.shape, (0, 0))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -138,14 +138,13 @@ float gridpp::Gamma::forward(float value) const {
         return gridpp::MV;
     float cdf = boost::math::cdf(m_gamma_dist, value + m_tolerance);
     float result = boost::math::quantile(m_norm_dist, cdf);
-    std::cout << value << " " << cdf << " " << result << std::endl;
     return result;
 }
 float gridpp::Gamma::backward(float value) const {
     if(!gridpp::is_valid(value))
         return gridpp::MV;
    float cdf = boost::math::cdf(m_norm_dist, value);
-   float result = boost::math::quantile(m_gamma_dist, cdf);
+   float result = boost::math::quantile(m_gamma_dist, cdf) - m_tolerance;
    return result;
 }
 float gridpp::Identity::forward(float value) const {

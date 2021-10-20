@@ -43,7 +43,7 @@ vec2 gridpp::optimal_interpolation(const gridpp::Grid& bgrid,
     }
     if(background.size() != bgrid.size()[0] || background[0].size() != bgrid.size()[1]) {
         std::stringstream ss;
-        ss << "input field (" << bgrid.size()[0] << "," << bgrid.size()[1] << ") is not the same size as the grid (" << background.size() << "," << background[0].size() << ")";
+        ss << "input field (" << background.size() << "," << background[0].size() << ") is not the same size as the grid (" << bgrid.size()[0] << "," << bgrid.size()[1] << ")";
         throw std::invalid_argument(ss.str());
     }
     if(pobs.size() != points.size()) {

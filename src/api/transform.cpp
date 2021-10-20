@@ -1,3 +1,4 @@
+#include <iostream>
 #include "gridpp.h"
 
 using namespace gridpp;
@@ -120,6 +121,32 @@ float gridpp::BoxCox::backward(float value) const {
    if(rValue <= 0)
       rValue = 0;
    return rValue;
+}
+gridpp::Gamma::Gamma(float shape, float scale, float tolerance) : m_gamma_dist(1, 1), m_norm_dist(), m_tolerance(tolerance) {
+    // Initialize the gamma distribution to something that works, and then overwrite it so that
+    // we can check for argument errors gracefully
+    if(shape <= 0)
+        throw std::invalid_argument("Shape parameter must be > 0 in the gamma distribution");
+    if(scale <= 0)
+        throw std::invalid_argument("Scale parameter must be > 0 in the gamma distribution");
+    if(tolerance < 0)
+        throw std::invalid_argument("Tolerance must be > 0 in the gamma distribution");
+    m_gamma_dist = boost::math::gamma_distribution<> (shape, scale);
+}
+float gridpp::Gamma::forward(float value) const {
+    if(!gridpp::is_valid(value))
+        return gridpp::MV;
+    float cdf = boost::math::cdf(m_gamma_dist, value + m_tolerance);
+    float result = boost::math::quantile(m_norm_dist, cdf);
+    std::cout << value << " " << cdf << " " << result << std::endl;
+    return result;
+}
+float gridpp::Gamma::backward(float value) const {
+    if(!gridpp::is_valid(value))
+        return gridpp::MV;
+   float cdf = boost::math::cdf(m_norm_dist, value);
+   float result = boost::math::quantile(m_gamma_dist, cdf);
+   return result;
 }
 float gridpp::Identity::forward(float value) const {
     return value;

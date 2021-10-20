@@ -64,6 +64,26 @@ class Test(unittest.TestCase):
                 output = transform.backward(a)
                 np.testing.assert_almost_equal(output, i, 5)
 
+    def test_gamma(self):
+        transform = gridpp.Gamma(1, 2, 0.01)
+        input = [0, 1.99]
+        answer = [-2.576693, 0.3374749]
+        for k in range(len(input)):
+            # Check scalars
+            self.assertAlmostEqual(answer[k], transform.forward(input[k]), 5)
+            self.assertAlmostEqual(input[k], transform.backward(answer[k]), 5)
+
+            # Check vector versions
+            shapes = [[1], [2,2], [2, 0], [3,3,3], [3, 3, 0]]
+            for shape in shapes:
+                i = input[k] * np.ones(shape)
+                a = answer[k] * np.ones(shape)
+                output = transform.forward(i)
+                np.testing.assert_almost_equal(output, a, 5)
+
+                output = transform.backward(a)
+                np.testing.assert_almost_equal(output, i, 5)
+
     def test_zero_size(self):
         x = np.zeros([0, 1])
         transform = gridpp.Identity()

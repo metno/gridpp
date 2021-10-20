@@ -6,6 +6,8 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#include <boost/math/distributions/gamma.hpp>
+#include <boost/math/distributions/normal.hpp>
 #ifdef _OPENMP
     #include <omp.h>
 #endif
@@ -1362,6 +1364,21 @@ namespace gridpp {
             float backward(float value) const;
         private:
             float mThreshold;
+    };
+    class Gamma : public Transform {
+        /** Transforms values to cdf from a gamma distribution and subsequantly extracts the
+         *  cdf from a standard normal distribution.
+        */
+        public:
+            Gamma(float shape, float scale, float tolerance=0.01);
+            using Transform::forward;
+            using Transform::backward;
+            float forward(float value) const;
+            float backward(float value) const;
+        private:
+            float m_tolerance;
+            boost::math::gamma_distribution<> m_gamma_dist;
+            boost::math::normal m_norm_dist;
     };
 };
 #endif

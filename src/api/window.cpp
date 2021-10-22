@@ -16,90 +16,109 @@ vec2 gridpp::window(const vec2& array,
     int nY = array.size();
     int nX = array[0].size();
 
-    for(int y = 0; y < array.size(); y++){       
-        for(int x = 0; x < array[y].size(); x++){
-            if(x == 0){
-                if(gridpp::is_valid(array[y][x])){
-                    values[y][x] = array[y][x]; 
-                    counts[y][x] = 1;
+    if(length % 2 == 0 && before == false){
+        throw std::invalid_argument("Length variable must be an odd number");
+    }
+
+    for(int y = 0; y < array.size(); y++){
+        if (statistic == gridpp::Mean || statistic == gridpp::Sum){   
+            for(int x = 0; x < array[y].size(); x++){
+                if(x == 0){
+                    if(gridpp::is_valid(array[y][x])){
+                        values[y][x] = array[y][x]; 
+                        counts[y][x] = 1;
+                    }
+                    else{
+                        values[y][x] = 0;
+                        counts[y][x] = 0;
+                    }
                 }
+
                 else{
-                    values[y][x] = 0;
-                    counts[y][x] = 0;
+                    if(gridpp::is_valid(array[y][x])){
+                        values[y][x] = array[y][x] + values[y][x-1]; 
+                        counts[y][x] = counts[y][x-1] + 1;
+                    }
+                    else{
+                        values[y][x] = values[y][x-1];
+                        counts[y][x] = counts[y][x-1];
+                    }
                 }
             }
 
-            else{
-                if(gridpp::is_valid(array[y][x])){
-                    values[y][x] = array[y][x] + values[y][x-1]; 
-                    counts[y][x] = counts[y][x-1] + 1;
+            for(int x = 0; x < array[y].size(); x++){
+                int start;
+                int end;
+
+                // Compute Start and End points
+                if(before == true){
+                    start = std::max(0, x - length + 1);
+                    end = x;
+                }
+                // Implement later (even numbers)
+                //else if(length % 2 == 0){ // && before == false
+                //    start = std::max(0, x - length / 2 - 1);
+                //    end = std::min(nx - 1, x + length / 2 - 1)
+                //}
+                else{
+                    start = std::max(0, x - length / 2);
+                    end = std::min(nX - 1, x + length / 2);
+                }
+
+                // 
+                if(start - 1 >= 0){
+                    if(counts[y][end] - counts[y][start-1] == 0){
+                        output[y][x] = gridpp::MV;
+                    }
+                    // Implement later (even numbers)
+                    //else if(length % 2 == 0 && before == false){
+                    //    output[y][x] = (values[y][end] + values[y][start]) / 2 + (values[y][end - 1] - values[y][start]);
+                    //}
+
+                    else{
+                        output[y][x] = values[y][end] - values[y][start - 1];
+                    }
                 }
                 else{
-                    values[y][x] = values[y][x-1];
-                    counts[y][x] = counts[y][x-1];
+                    if(counts[y][end] == 0){
+                        output[y][x] = gridpp::MV;
+                    }
+                    else{
+                        output[y][x] = values[y][end];
+                    }
+                }
+
+                if(statistic == gridpp::Mean){
+                    if(counts[y][end] == 0){
+                        output[y][x] = gridpp::MV;
+                    }
+                    else{
+                        output[y][x] = output[y][x] / (counts[y][end] - counts[y][start-1]);
+                    }
+                }
+
+                if(keep_missing == true){
+                    if(counts[y][end] - counts[y][start - 1] < (end - (start - 1 ))){
+                        output[y][x] = gridpp::MV;
+                    }
+                }
+            
+                if(missing_edges == true){
+                    if(before == false){
+                        if(x < length / 2 || x + length / 2  + 1 > array[y].size()){
+                            output[y][x] = gridpp::MV;
+                        }
+                    }
+                    else{
+                        if(x < length - 1){
+                            output[y][x] = gridpp::MV;
+                        }
+                    }
                 }
             }
         }
-
-        for(int x = 0; x < array[y].size(); x++){
-            int start;
-            int end;
-
-            // Compute Start and End points
-            if(before == true){
-                start = std::max(0, x - length + 1);
-                end = x;
-            }
-            else{
-                start = std::max(0, x - length / 2);
-                end = std::min(nX - 1, x + length / 2);
-            }
-
-            // 
-            if(start - 1 >= 0){
-                if(counts[y][end] - counts[y][start-1] == 0){
-                    output[y][x] = gridpp::MV;
-                }
-                else{
-                    output[y][x] = values[y][end] - values[y][start - 1];
-                }
-            }
-            else{
-                if(counts[y][end] == 0){
-                    output[y][x] = gridpp::MV;
-                }
-                else{
-                    output[y][x] = values[y][end];
-                }
-            }
-
-            if(statistic == gridpp::Mean){
-                if(counts[y][end] == 0){
-                    output[y][x] = gridpp::MV;
-                }
-                else{
-                    output[y][x] = output[y][x] / (counts[y][end] - counts[y][start-1]);
-                }
-            }
-
-            if(keep_missing == true){
-                if(counts[y][end] - counts[y][start - 1] < (end - (start - 1 ))){
-                    output[y][x] = gridpp::MV;
-                }
-            }
-        
-            if(missing_edges == true){
-                if(before == false){
-                    if(x < length / 2 || x + length / 2  + 1 > array[y].size()){
-                        output[y][x] = gridpp::MV;
-                    }
-                }
-                else{
-                    if(x < length / 2){
-                        output[y][x] = gridpp::MV;
-                    }
-                }
-            }
+        else{
+            throw std::invalid_argument("Statistic currently not supported"); 
         }
     }
     return output;

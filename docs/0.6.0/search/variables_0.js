@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['elev',['elev',['../classgridpp_1_1Point.html#abe09ae3531f56524f13555e6e44aec73',1,'gridpp::Point']]]
+  ['_5fdebug_5flevel',['_debug_level',['../namespacegridpp.html#a7f374962ed9e2bbeed158b1180e729bc',1,'gridpp']]]
 ];

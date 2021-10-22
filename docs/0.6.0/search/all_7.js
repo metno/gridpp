@@ -1,11 +1,13 @@
 var searchData=
 [
+  ['gamma',['Gamma',['../classgridpp_1_1Gamma.html',1,'gridpp::Gamma'],['../classgridpp_1_1Gamma.html#a0bc2450121e74e9a778d75504aacf376',1,'gridpp::Gamma::Gamma()']]],
   ['gas_5fconstant_5fmol',['gas_constant_mol',['../namespacegridpp.html#a1467bf4aafab1f3929934c3e4a5ab586',1,'gridpp']]],
   ['gas_5fconstant_5fsi',['gas_constant_si',['../namespacegridpp.html#ab47d92a1590dc880181971db34821a26',1,'gridpp']]],
   ['geodetic',['Geodetic',['../namespacegridpp.html#a2ad8e1533595470eee173fed2301446da1ebd63b8e57e792bf15682c6d7ae0481',1,'gridpp']]],
   ['get_5fbox',['get_box',['../classgridpp_1_1Grid.html#a8a1241bd50f92c2e7778b2582012f9ae',1,'gridpp::Grid']]],
   ['get_5fclosest_5fneighbours',['get_closest_neighbours',['../classgridpp_1_1KDTree.html#a7ad4b8276b0a6a914f0674af33b21bcd',1,'gridpp::KDTree::get_closest_neighbours()'],['../classgridpp_1_1Points.html#a95c33c5e1c1221b20fb4f8268c311b1b',1,'gridpp::Points::get_closest_neighbours()'],['../classgridpp_1_1Grid.html#a2601b1babcf59fc2062394676d9445ff',1,'gridpp::Grid::get_closest_neighbours()']]],
   ['get_5fcoordinate_5ftype',['get_coordinate_type',['../classgridpp_1_1KDTree.html#a8528a12939db1e798aea689e70552500',1,'gridpp::KDTree::get_coordinate_type()'],['../classgridpp_1_1Points.html#ad75d38ec1c27d9dbdf24f762b7194159',1,'gridpp::Points::get_coordinate_type()'],['../classgridpp_1_1Grid.html#ac28ea315f3a861cf53975571a12b2e80',1,'gridpp::Grid::get_coordinate_type()']]],
+  ['get_5fdebug_5flevel',['get_debug_level',['../namespacegridpp.html#a2f25934dd00b9fb79e7ea153e8a13119',1,'gridpp']]],
   ['get_5felevs',['get_elevs',['../classgridpp_1_1Points.html#a3c5b0e915b0d9e416676b8299c9cfac7',1,'gridpp::Points::get_elevs()'],['../classgridpp_1_1Grid.html#a05de26c86287657755a0f14f3c4c9a2b',1,'gridpp::Grid::get_elevs()']]],
   ['get_5fin_5fdomain',['get_in_domain',['../classgridpp_1_1Points.html#a6889862a1fb82d580f55bdecd42422ab',1,'gridpp::Points']]],
   ['get_5fin_5fdomain_5findices',['get_in_domain_indices',['../classgridpp_1_1Points.html#a7c6960973ef1ee66d5adc1b30d6b7081',1,'gridpp::Points']]],

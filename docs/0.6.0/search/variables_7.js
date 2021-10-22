@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['type',['type',['../classgridpp_1_1Point.html#a4ae09ba041cfa6b4e93d984e92cbba2b',1,'gridpp::Point']]]
+  ['radius_5fearth',['radius_earth',['../namespacegridpp.html#afd1721333759896e182d3175a34ab4be',1,'gridpp']]]
 ];

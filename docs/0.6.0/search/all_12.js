@@ -1,6 +1,7 @@
 var searchData=
 [
   ['sea_5flevel_5fpressure',['sea_level_pressure',['../namespacegridpp.html#a0082d0939646347bd20fab0281b58280',1,'gridpp::sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV)'],['../namespacegridpp.html#a40c108f21166e34490ab79cfc6ee0d2d',1,'gridpp::sea_level_pressure(const vec &amp;ps, const vec &amp;altitude, const vec &amp;temperature, const vec &amp;rh, const vec &amp;dewpoint)']]],
+  ['set_5fdebug_5flevel',['set_debug_level',['../namespacegridpp.html#a482fd86e9ee31e95a757ee9dd86b30fe',1,'gridpp']]],
   ['set_5fomp_5fthreads',['set_omp_threads',['../namespacegridpp.html#ac0463caa59fb399f307593c1a72b382e',1,'gridpp']]],
   ['simple_5fgradient',['simple_gradient',['../namespacegridpp.html#a1f363f06a020b356e6e731968574bd04',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Grid &amp;ogrid, const vec2 &amp;ivalues, float elev_gradient)'],['../namespacegridpp.html#a7b52629cb6f819edcba551668ee3aaa6',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Grid &amp;ogrid, const vec3 &amp;ivalues, float elev_gradient)'],['../namespacegridpp.html#a856d5d26d0b9ec193bd1e334448f2088',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Points &amp;opoints, const vec2 &amp;ivalues, float elev_gradient)'],['../namespacegridpp.html#a45b61f5084375ba03c0955443170d11c',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Points &amp;opoints, const vec3 &amp;ivalues, float elev_gradient)']]],
   ['simple_5fgradient_2ecpp',['simple_gradient.cpp',['../simple__gradient_8cpp.html',1,'']]],
@@ -11,7 +12,7 @@ var searchData=
   ['statistic',['Statistic',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4e',1,'gridpp']]],
   ['std',['Std',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea8fe5956039806ec9bd44951678633313',1,'gridpp']]],
   ['structure_2ecpp',['structure.cpp',['../structure_8cpp.html',1,'']]],
-  ['structurefunction',['StructureFunction',['../classgridpp_1_1StructureFunction.html',1,'gridpp::StructureFunction'],['../classgridpp_1_1StructureFunction.html#a96c4e6ca99c70e872c8900bedb342a62',1,'gridpp::StructureFunction::StructureFunction()']]],
+  ['structurefunction',['StructureFunction',['../classgridpp_1_1StructureFunction.html',1,'gridpp::StructureFunction'],['../classgridpp_1_1StructureFunction.html#ab6e435d924c8adb959beb70c15144b8f',1,'gridpp::StructureFunction::StructureFunction()']]],
   ['subset',['subset',['../classgridpp_1_1Points.html#a55bcf1e9c8e5d7ffefe678131e0a978e',1,'gridpp::Points']]],
   ['sum',['Sum',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea6c441851323ce18fdc0ceab44a5871b9',1,'gridpp']]],
   ['swig_2ecpp',['swig.cpp',['../swig_8cpp.html',1,'']]],

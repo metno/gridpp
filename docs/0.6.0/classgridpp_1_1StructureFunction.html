@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.6.0.dev6: gridpp::StructureFunction Class Reference</title>
+<title>Gridpp 0.6.0.dev8: gridpp::StructureFunction Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.6.0.dev6
+   <div id="projectname">Gridpp 0.6.0.dev8
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -74,6 +74,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classgridpp_1_1StructureFunction-members.html">List of all members</a>  </div>
@@ -105,11 +106,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae989c48dbbe59c0b49a352d3846c961b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac02428930323ca1f14ce8865ce91ab7d"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ac02428930323ca1f14ce8865ce91ab7d">corr_background</a> (const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p1, const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p2) const</td></tr>
 <tr class="separator:ac02428930323ca1f14ce8865ce91ab7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74a8870915bb2f5730a0f537f94a401f"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#a74a8870915bb2f5730a0f537f94a401f">localization_distance</a> () const</td></tr>
-<tr class="memdesc:a74a8870915bb2f5730a0f537f94a401f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance for which an observation can have an impact (localization)  <a href="#a74a8870915bb2f5730a0f537f94a401f">More...</a><br /></td></tr>
-<tr class="separator:a74a8870915bb2f5730a0f537f94a401f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96c4e6ca99c70e872c8900bedb342a62"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#a96c4e6ca99c70e872c8900bedb342a62">StructureFunction</a> (float <a class="el" href="classgridpp_1_1StructureFunction.html#a74a8870915bb2f5730a0f537f94a401f">localization_distance</a>)</td></tr>
-<tr class="separator:a96c4e6ca99c70e872c8900bedb342a62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd9865a4d15b90f5a6a6c41d5bc1af41"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#afd9865a4d15b90f5a6a6c41d5bc1af41">localization_distance</a> (const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p) const</td></tr>
+<tr class="memdesc:afd9865a4d15b90f5a6a6c41d5bc1af41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance for which an observation can have an impact (localization)  <a href="#afd9865a4d15b90f5a6a6c41d5bc1af41">More...</a><br /></td></tr>
+<tr class="separator:afd9865a4d15b90f5a6a6c41d5bc1af41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6e435d924c8adb959beb70c15144b8f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ab6e435d924c8adb959beb70c15144b8f">StructureFunction</a> (float <a class="el" href="classgridpp_1_1StructureFunction.html#afd9865a4d15b90f5a6a6c41d5bc1af41">localization_distance</a>=0)</td></tr>
+<tr class="separator:ab6e435d924c8adb959beb70c15144b8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:aa614a833a4f00f00c283e59eadb64c39"><td class="memItemLeft" align="right" valign="top">static const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#aa614a833a4f00f00c283e59eadb64c39">default_min_rho</a> = 0.0013</td></tr>
+<tr class="separator:aa614a833a4f00f00c283e59eadb64c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -122,14 +128,14 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a3052ab8319b15c6b597b2608ac241d87"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#a3052ab8319b15c6b597b2608ac241d87">mLocalizationDistance</a></td></tr>
-<tr class="separator:a3052ab8319b15c6b597b2608ac241d87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2e2e2b1e9b5956827820deee467d5bc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ab2e2e2b1e9b5956827820deee467d5bc">m_localization_distance</a></td></tr>
+<tr class="separator:ab2e2e2b1e9b5956827820deee467d5bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Covariance structure function. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a96c4e6ca99c70e872c8900bedb342a62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a96c4e6ca99c70e872c8900bedb342a62">&#9670;&nbsp;</a></span>StructureFunction()</h2>
+<a id="ab6e435d924c8adb959beb70c15144b8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6e435d924c8adb959beb70c15144b8f">&#9670;&nbsp;</a></span>StructureFunction()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -138,7 +144,7 @@ Protected Attributes</h2></td></tr>
           <td class="memname">gridpp::StructureFunction::StructureFunction </td>
           <td>(</td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>localization_distance</em></td><td>)</td>
+          <td class="paramname"><em>localization_distance</em> = <code>0</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -342,29 +348,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a74a8870915bb2f5730a0f537f94a401f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74a8870915bb2f5730a0f537f94a401f">&#9670;&nbsp;</a></span>localization_distance()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float gridpp::StructureFunction::localization_distance </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Maximum distance for which an observation can have an impact (localization) </p>
-<dl class="section return"><dt>Returns</dt><dd>Distance [m] </dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="a3052ab8319b15c6b597b2608ac241d87"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3052ab8319b15c6b597b2608ac241d87">&#9670;&nbsp;</a></span>mLocalizationDistance</h2>
+<a id="afd9865a4d15b90f5a6a6c41d5bc1af41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd9865a4d15b90f5a6a6c41d5bc1af41">&#9670;&nbsp;</a></span>localization_distance()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -373,7 +358,61 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">float gridpp::StructureFunction::mLocalizationDistance</td>
+          <td class="memname">float gridpp::StructureFunction::localization_distance </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;&#160;</td>
+          <td class="paramname"><em>p</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum distance for which an observation can have an impact (localization) </p>
+<dl class="section return"><dt>Returns</dt><dd>Distance [m] </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classgridpp_1_1CrossValidation.html#aafec439a52ba41d5b2e5b8612b4e276a">gridpp::CrossValidation</a>, <a class="el" href="classgridpp_1_1BarnesStructure.html#ac0e147ea201b75abd292562e0ae8777f">gridpp::BarnesStructure</a>, and <a class="el" href="classgridpp_1_1MultipleStructure.html#aa50f60d787dfed21b0f35cc3be66bfea">gridpp::MultipleStructure</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aa614a833a4f00f00c283e59eadb64c39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa614a833a4f00f00c283e59eadb64c39">&#9670;&nbsp;</a></span>default_min_rho</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const float gridpp::StructureFunction::default_min_rho = 0.0013</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab2e2e2b1e9b5956827820deee467d5bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2e2e2b1e9b5956827820deee467d5bc">&#9670;&nbsp;</a></span>m_localization_distance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float gridpp::StructureFunction::m_localization_distance</td>
         </tr>
       </table>
   </td>
@@ -392,7 +431,7 @@ Protected Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 25 2021 14:19:31 for Gridpp 0.6.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Oct 22 2021 20:47:47 for Gridpp 0.6.0.dev8 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

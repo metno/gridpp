@@ -1,11 +1,6 @@
 var searchData=
 [
-  ['mlats',['mLats',['../classgridpp_1_1KDTree.html#a1b976ce39c6dd5f0a1d131ab6f3317e4',1,'gridpp::KDTree']]],
-  ['mlocalizationdistance',['mLocalizationDistance',['../classgridpp_1_1StructureFunction.html#a3052ab8319b15c6b597b2608ac241d87',1,'gridpp::StructureFunction']]],
-  ['mlons',['mLons',['../classgridpp_1_1KDTree.html#aed3cdf7d116c0277501a5db01bdac73e',1,'gridpp::KDTree']]],
-  ['molar_5fmass',['molar_mass',['../namespacegridpp.html#a8d9b7fdee7842201cabbf979e7f6f607',1,'gridpp']]],
-  ['mtree',['mTree',['../classgridpp_1_1KDTree.html#aec97a4064df5916098b9b80fb88359c4',1,'gridpp::KDTree']]],
-  ['mtype',['mType',['../classgridpp_1_1KDTree.html#ad5b59b44a4c088c93f933e4212bacf09',1,'gridpp::KDTree']]],
-  ['mv',['MV',['../namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa',1,'gridpp']]],
-  ['mv_5fcml',['MV_CML',['../namespacegridpp.html#a9eedb2e274a858f189438e48ff9a1ea5',1,'gridpp']]]
+  ['gas_5fconstant_5fmol',['gas_constant_mol',['../namespacegridpp.html#a1467bf4aafab1f3929934c3e4a5ab586',1,'gridpp']]],
+  ['gas_5fconstant_5fsi',['gas_constant_si',['../namespacegridpp.html#ab47d92a1590dc880181971db34821a26',1,'gridpp']]],
+  ['gravit',['gravit',['../namespacegridpp.html#adb567528f5b136a8a6df5739540080c6',1,'gridpp']]]
 ];

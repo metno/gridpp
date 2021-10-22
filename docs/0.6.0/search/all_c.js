@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['m_5flocalization_5fdistance',['m_localization_distance',['../classgridpp_1_1StructureFunction.html#ab2e2e2b1e9b5956827820deee467d5bc',1,'gridpp::StructureFunction']]],
   ['max',['Max',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4eaf986b1d946f35c66b97980405be7f17f',1,'gridpp']]],
   ['mean',['Mean',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4eab0313db808f3d77b344110ebdf0d4ce2',1,'gridpp']]],
   ['meanslope',['MeanSlope',['../namespacegridpp.html#a874f509d3b9c062842ed23de0e6e5f85a81d4ef1937646d68ba34199896f1b404',1,'gridpp']]],
@@ -10,7 +11,6 @@ var searchData=
   ['min',['Min',['../namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea228e31a9c1b98ccf236cc24b83d0bfc6',1,'gridpp']]],
   ['minmax',['MinMax',['../namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700eabd187b1466911f0aace2af17a3aeb874',1,'gridpp']]],
   ['mlats',['mLats',['../classgridpp_1_1KDTree.html#a1b976ce39c6dd5f0a1d131ab6f3317e4',1,'gridpp::KDTree']]],
-  ['mlocalizationdistance',['mLocalizationDistance',['../classgridpp_1_1StructureFunction.html#a3052ab8319b15c6b597b2608ac241d87',1,'gridpp::StructureFunction']]],
   ['mlons',['mLons',['../classgridpp_1_1KDTree.html#aed3cdf7d116c0277501a5db01bdac73e',1,'gridpp::KDTree']]],
   ['molar_5fmass',['molar_mass',['../namespacegridpp.html#a8d9b7fdee7842201cabbf979e7f6f607',1,'gridpp']]],
   ['monotonize_5fcurve',['monotonize_curve',['../namespacegridpp.html#a3f80952025dcf8425e3a9671359f8904',1,'gridpp']]],

@@ -13,7 +13,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev7"
+#define GRIDPP_VERSION "0.6.0.dev8"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -956,12 +956,19 @@ namespace gridpp {
     */
     vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
 
-    /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
-     * they are incompatible
+    /** Compute window statistics
+    *  @param array input array with dimensions (case, time)
+    *  @param length window length in number of timesteps
+    *  @param statistic statistic to apply to window
+    *  @param before if true, make the window end at the particular time. If false, centre it.
+    *  @param keep_missing if true, window value will be missing if one or more values in window are missing
+    *  @param missing_edges if true put missing values at the edges, where window overshoots the edge
     */
 
     vec2 window(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);
 
+    /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
+    * they are incompatible
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
     bool compatible_size(const Points& points, const vec& v);

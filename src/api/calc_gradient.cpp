@@ -127,13 +127,12 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         vec2 base_x_base = gridpp::init_vec2(base.size(), base[0].size(), gridpp::MV);
         vec2 base_x_values = gridpp::init_vec2(base.size(), base[0].size(), gridpp::MV);
 
-
         vec2 meanX = gridpp::neighbourhood(base, halfwidth, gridpp::Mean);
         vec2 meanY = gridpp::neighbourhood(values, halfwidth, gridpp::Mean);
         for(int y = 0; y < base.size(); y++){
             for(int x = 0; base[x].size(); x++){
                 base_x_base[y][x] = pow(base[y][x], 2);
-                base_x_values[y][x] = base[y][x] * values[y][x]; 
+                base_x_values[y][x] = base[y][x] * values[y][x];
             }
         }
 
@@ -145,6 +144,7 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
                 if(meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0){
                     output[y][x] = (meanXY[y][x] - meanX[y][x]*meanY[y][x])/(meanXX[y][x] - meanX[y][x]*meanX[y][x]);
                 }
+
                 else{
                     output[y][x] = default_gradient;
                 }

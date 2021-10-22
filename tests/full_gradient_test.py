@@ -25,6 +25,7 @@ class Test(unittest.TestCase):
         self.igrid = gridpp.Grid(self.ilats, self.ilons, self.ielevs, self.ilafs)
         self.ogrid = gridpp.Grid(self.olats, self.olons, self.oelevs, self.olafs)
 
+        self.ipoints = gridpp.Points([10, 10, 20, 20], [45, 50, 45, 50], [0,0,0,0], [0.5, 0.5, 0.5, 0.5])
         self.opoints = gridpp.Points([10,10,10, 15, 15, 15, 20, 20, 20], [40, 45, 50, 40, 45, 50, 40, 45, 50], [0,100,0,0,200,0,0,100,0], [0,1,0,0,1,0,0,1,0])
 
     def test_grid_to_grid_all_2d(self):
@@ -120,6 +121,10 @@ class Test(unittest.TestCase):
                                             [[12,15,12], [12,12,12], [12,15,12]], 
                                             [[13,13,13], [13,9,13], [13,13,13]], 
                                             [[14,11,14], [14,6,14], [14,11,14]]])
+
+    def test_grid_to_point_laf_3d(self):
+        
+
 
 
 if __name__ == '__main__':

@@ -3,8 +3,110 @@
 
 using namespace gridpp;
 
-
 vec2 gridpp::window(const vec2& array, 
+    int length, gridpp::Statistic statistic, bool before, 
+    bool keep_missing, bool missing_edges){
+
+    vec2 output = gridpp::init_vec2(array.size(), array[0].size(), 0);
+
+    vec2 values = gridpp::init_vec2(array.size(), array[0].size(), 0);
+
+    vec2 counts = gridpp::init_vec2(array.size(), array[0].size(), 0);
+
+    int nY = array.size();
+    int nX = array[0].size();
+
+    for(int y = 0; y < array.size(); y++){       
+        for(int x = 0; x < array[y].size(); x++){
+            if(x == 0){
+                if(gridpp::is_valid(array[y][x])){
+                    values[y][x] = array[y][x]; 
+                    counts[y][x] = 1;
+                }
+                else{
+                    values[y][x] = 0;
+                    counts[y][x] = 0;
+                }
+            }
+
+            else{
+                if(gridpp::is_valid(array[y][x])){
+                    values[y][x] = array[y][x] + values[y][x-1]; 
+                    counts[y][x] = counts[y][x-1] + 1;
+                }
+                else{
+                    values[y][x] = values[y][x-1];
+                    counts[y][x] = counts[y][x-1];
+                }
+            }
+        }
+
+        for(int x = 0; x < array[y].size(); x++){
+            int start;
+            int end;
+
+            // Compute Start and End points
+            if(before == true){
+                start = std::max(0, x - length + 1);
+                end = x;
+            }
+            else{
+                start = std::max(0, x - length / 2);
+                end = std::min(nX - 1, x + length / 2);
+            }
+
+            // 
+            if(start - 1 >= 0){
+                if(counts[y][end] - counts[y][start-1] == 0){
+                    output[y][x] = gridpp::MV;
+                }
+                else{
+                    output[y][x] = values[y][end] - values[y][start - 1];
+                }
+            }
+            else{
+                if(counts[y][end] == 0){
+                    output[y][x] = gridpp::MV;
+                }
+                else{
+                    output[y][x] = values[y][end];
+                }
+            }
+
+            if(statistic == gridpp::Mean){
+                if(counts[y][end] == 0){
+                    output[y][x] = gridpp::MV;
+                }
+                else{
+                    output[y][x] = output[y][x] / (counts[y][end] - counts[y][start-1]);
+                }
+            }
+
+            if(keep_missing == true){
+                if(counts[y][end] - counts[y][start - 1] < (end - (start - 1 ))){
+                    output[y][x] = gridpp::MV;
+                }
+            }
+        
+            if(missing_edges == true){
+                if(before == false){
+                    if(x < length / 2 || x + length / 2  + 1 > array[y].size()){
+                        output[y][x] = gridpp::MV;
+                    }
+                }
+                else{
+                    if(x < length / 2){
+                        output[y][x] = gridpp::MV;
+                    }
+                }
+            }
+        }
+    }
+    return output;
+}
+
+
+vec2 gridpp::window_old(const vec2& array, 
     int length, gridpp::Statistic statistic, bool before, 
     bool keep_missing, bool missing_edges){
 
@@ -12,6 +114,7 @@ vec2 gridpp::window(const vec2& array,
 
     int nY = array.size();
     int nX = array[0].size();
+
 
     for(int y = 0; y < array.size(); y++){
         for(int x = 0; x < array[y].size(); x++){
@@ -41,7 +144,7 @@ vec2 gridpp::window(const vec2& array,
                     if(missing_edges == true){
                         // MISSING_EDGES BOOLEAN: set the window value to missing, 
                         // if the window goes outside the edges
-                        accum = std::nanf("1");
+                        accum = gridpp::MV;
                         break;
                     }
                     else{
@@ -49,11 +152,11 @@ vec2 gridpp::window(const vec2& array,
                     }
                 }
      
-                if(std::isnan(array[y][xx])){
+                if(!gridpp::is_valid(array[y][xx])){
                     if(keep_missing == true){
                         // KEEP_MISSING BOOLEAN: set window value to missing if
                         // one or more values in window is missing
-                        accum = std::nanf("1");
+                        accum = gridpp::MV;
                         break;
                     }
                     else{
@@ -88,7 +191,7 @@ vec2 gridpp::window(const vec2& array,
 
             if(counter == 0){ 
                 // If all values inside window are nans, output is nan.
-                output[y][x] = std::nan("1");
+                output[y][x] = gridpp::MV;
                 continue;
             }
             if(statistic == gridpp::Sum){
@@ -115,3 +218,7 @@ vec2 gridpp::window(const vec2& array,
     }
     return output;
 }
+
+
+
+

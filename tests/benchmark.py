@@ -58,7 +58,7 @@ def main():
     run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
     run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.random.rand(1000, 1000) *
         100, np.zeros([1000,1000]), gridpp.LinearRegression, 10, 0, 0, 0)}
-    run[("window", "1000²")] = {"expected": 0.21, "args": (np.random.rand(10000, 1000), 101, gridpp.Mean, False, False)}
+    run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
 
 
     if args.num_cores is not None:

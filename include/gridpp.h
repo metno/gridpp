@@ -960,6 +960,7 @@ namespace gridpp {
 
     vec2 window(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);
 
+    vec2 window_old(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);
 
 
     bool compatible_size(const Grid& grid, const vec2& v);

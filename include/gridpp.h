@@ -968,7 +968,7 @@ namespace gridpp {
     vec2 window(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);
 
     /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
-    * they are incompatible
+    * they are incompatible */
     bool compatible_size(const Grid& grid, const vec2& v);
     bool compatible_size(const Grid& grid, const vec3& v);
     bool compatible_size(const Points& points, const vec& v);

@@ -25,9 +25,7 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
     
     for(int y = 0; y < array.size(); y++){ 
         for(int x = 0; x < array[y].size(); x++){
-            /* 
-            Loop over each element in array
-            */
+            /* Loop over each element in array */
             
             float nearest_target = gridpp::MV;
             int I_nearestSearchArray_Y = 0;
@@ -35,24 +33,29 @@ vec2 gridpp::calc_neighbourhood(const vec2& array, const vec2& search_array,int 
             int counter = 0;
             float accum_temp = 0;
 
-            if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
-                /*
-                Ignore values outside of range of scope (outside search_criteria min and max)
-                */
+            if(!gridpp::is_valid(search_array[y][x])){
+                /* if current search_array is invalid, set output equal to array (input) */
                 output[y][x] = array[y][x];
                 continue;
             }
+
+            if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max){
+                /* Ignore values outside of range of scope (outside search_criteria min and max) */
+                output[y][x] = array[y][x];
+                continue;
+            }
+
+
             for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
-                    /*
-                    Loop over neighbourhood of y and x 
-                    */
+                    /* Loop over neighbourhood of y and x */
                     int I_SearchArray_Y = 0;
                     int I_SearchArray_X = 0;
 
-                    if(!gridpp::is_valid(search_array[yy][xx])){
+                    if(!gridpp::is_valid(search_array[yy][xx]) || !gridpp::is_valid(array[yy][xx])){
                         continue;
                     }
+
                     else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max){
                         /*condition search array inside of scope */
 

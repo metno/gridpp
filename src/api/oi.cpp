@@ -236,7 +236,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         lRhos0.reserve(lLocIndices0.size());
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            if(gridpp::is_valid(pobs[index])) {
+            if(gridpp::is_valid(pobs[index]) && gridpp::is_valid(pbackground[index])) {
                 Point p2 = points.get_point(index);
                 float rho = structure.corr_background(p1, p2);
                 if(rho > 0) {

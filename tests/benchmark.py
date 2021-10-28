@@ -59,6 +59,8 @@ def main():
     run[("calc_gradient", "1000²")] = {"expected": 0.18, "args": (np.random.rand(1000, 1000) *
         100, np.zeros([1000,1000]), gridpp.LinearRegression, 10, 0, 0, 0)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
+    run[("neighbourhood_search", "2000² 7x7")] = {"expected": 0.89, "args": (np.random.rand(2000, 2000),
+        np.random.rand(2000, 2000), 3, 0, 0.5, 0.7, 1, 0.1)}
 
 
     if args.num_cores is not None:

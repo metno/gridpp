@@ -944,17 +944,20 @@ namespace gridpp {
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
 
-    /** Compute 2d array with weighted thresholds () 
-    * @param vec2 array input array
-    * @param vec2 searcg array values used to modify array
+    /** Find suitable value in neighbourhood based on a search criteria. If search value is within a
+    * criteria range, then the most suitable point is used. This is the nearest value of any point
+    * within the search_target range; or if no point fulfills this, the point with the highest
+    * search value.
+    * @param vec2 array input array (e.g temperatures)
+    * @param vec2 search array array used to search
     * @param int halfwidth search radius
-    * @param float search criteria_min minimum value 
-    * @param float search criteria_max maximum value
+    * @param float search criteria_min perform search if local search value is above this
+    * @param float search criteria_max perform search if local search value is below this
     * @param float search_target_min minimum value where values are assigned with
     * @param float search_target_max maximum value where values are assigned with
     * @param float search_delta if no search_target values are found, minimum difference between original value of search_array and any value inside the search radius.
     */
-    vec2 calc_neighbourhood(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
+    vec2 neighbourhood_search(const vec2& array, const vec2& search_array,int halfwidth, float search_criteria_min, float search_criteria_max , float search_target_min, float search_target_max, float search_delta);
 
     /** Compute window statistics
     *  @param array input array with dimensions (case, time)

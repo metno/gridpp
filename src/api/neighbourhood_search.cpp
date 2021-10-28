@@ -59,7 +59,7 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
                     }
 
                     //else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max) {
-                    if(apply_array[y][x] == 1){
+                    if(!use_apply_array || apply_array[y][x] == 1){
                         /*condition search array inside of scope */
 
                         if(search_array[yy][xx] >= search_target_min && search_array[yy][xx] <= search_target_max) {

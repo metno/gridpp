@@ -74,12 +74,13 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         }
     }
     else if(gradientType == LinearRegression){
+        // Compute neighbourhood means for different moments. Ensure we only use base and values
+        // where both of them are defined
+        vec2 base0 = gridpp::init_vec2(nY, nX, gridpp::MV);
+        vec2 values0 = gridpp::init_vec2(nY, nX, gridpp::MV);
         vec2 base_x_base = gridpp::init_vec2(nY, nX, gridpp::MV);
         vec2 base_x_values = gridpp::init_vec2(nY, nX, gridpp::MV);
         vec2 is_valid = gridpp::init_vec2(nY, nX, 0);
-
-        vec2 meanX = gridpp::neighbourhood(base, halfwidth, gridpp::Mean);
-        vec2 meanY = gridpp::neighbourhood(values, halfwidth, gridpp::Mean);
 
         #pragma omp parallel for collapse(2)
         for(int y = 0; y < nY; y++){
@@ -88,13 +89,18 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
                     base_x_base[y][x] = pow(base[y][x], 2);
                     base_x_values[y][x] = base[y][x] * values[y][x];
                     is_valid[y][x] = 1;
+                    base0[y][x] = base[y][x];
+                    values0[y][x] = values[y][x];
                 }
             }
         }
 
+        vec2 meanX = gridpp::neighbourhood(base0, halfwidth, gridpp::Mean);
+        vec2 meanY = gridpp::neighbourhood(values0, halfwidth, gridpp::Mean);
+
         vec2 meanXX = gridpp::neighbourhood(base_x_base, halfwidth, gridpp::Mean);
         vec2 meanXY = gridpp::neighbourhood(base_x_values, halfwidth, gridpp::Mean);
-        vec2 count = gridpp::neighbourhood(is_valid, halfwidth, gridpp::Mean);
+        vec2 count = gridpp::neighbourhood(is_valid, halfwidth, gridpp::Sum);
 
         #pragma omp parallel for collapse(2)
         for(int y = 0; y < nY; y++){

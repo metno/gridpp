@@ -10,14 +10,15 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         throw std::invalid_argument("Halwidth cannot be <= 0; must be positive integer");
     if(min_range < 0)
         throw std::invalid_argument("min_range must be >= 0");
-
     if(base.size() == 0)
-        throw std::invalid_argument("Base input has no size");
+        throw std::invalid_argument("base input has no size");
+    if(!gridpp::compatible_size(base, values))
+        throw std::invalid_argument("base is not the same size as values");
 
     int nY = base.size();
     int nX = base[0].size();
 
-    vec2 output = gridpp::init_vec2(base.size(), base[0].size(), default_gradient);
+    vec2 output = gridpp::init_vec2(nY, nX, default_gradient);
 
     // Min Max Gradient 
     if(gradientType == MinMax){
@@ -65,72 +66,16 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
             }
         }
     }
-    // Linear Regression Gradient
     else if(gradientType == LinearRegression){
-        for(int y = 0; y  < base.size(); y++) {
-            for(int x = 0; x < base[y].size(); x++){
-                float current_max = gridpp::MV;
-                float current_min = gridpp::MV;
-
-                float meanX = 0;
-                float meanY = 0;
-                float meanXY = 0;
-                float meanXX = 0;
-
-                int counter = 0;
-
-                for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++){
-                    for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++){
-                        float current_base = base[yy][xx];
-                        float current_values = values[yy][xx];
-                        if(!gridpp::is_valid(current_max))
-                            continue;
-                        if(!gridpp::is_valid(current_values))
-                            continue;
-
-                        if(!gridpp::is_valid(current_max) || current_base > current_max){
-                            current_max = current_base;
-                        }
-
-                        else if(!gridpp::is_valid(current_min) || current_base < current_min){
-                            current_min = current_base;
-                        }
-
-                        meanX = meanX + current_base;
-                        meanY = meanY + current_values;
-                        meanXX = meanXX + current_base*current_base;
-                        meanXY = meanXY + current_base*current_values;
-                        counter = counter + 1;
-                    }
-                }
-
-                if(counter == 0 || abs(current_max - current_min) <= min_range){
-                    output[y][x] = default_gradient;
-                }
-                else {
-                    meanX = meanX / counter;
-                    meanY = meanY / counter;
-                    meanXX = meanXX / counter;
-                    meanXY = meanXY / counter;
-                    if(meanXX - meanX*meanX != 0){
-                        output[y][x] = (meanXY - meanX*meanY)/(meanXX - meanX*meanX);
-                    }
-                    else{
-                        output[y][x] = default_gradient;
-                    }
-                }
-            }
-        }
-    }
-
-    else if(gradientType == LinearRegression){
-        vec2 base_x_base = gridpp::init_vec2(base.size(), base[0].size(), gridpp::MV);
-        vec2 base_x_values = gridpp::init_vec2(base.size(), base[0].size(), gridpp::MV);
+        vec2 base_x_base = gridpp::init_vec2(nY, nX, gridpp::MV);
+        vec2 base_x_values = gridpp::init_vec2(nY, nX, gridpp::MV);
 
         vec2 meanX = gridpp::neighbourhood(base, halfwidth, gridpp::Mean);
         vec2 meanY = gridpp::neighbourhood(values, halfwidth, gridpp::Mean);
-        for(int y = 0; y < base.size(); y++){
-            for(int x = 0; base[x].size(); x++){
+
+        #pragma omp parallel for collapse(2)
+        for(int y = 0; y < nY; y++){
+            for(int x = 0; x < nX; x++){
                 base_x_base[y][x] = pow(base[y][x], 2);
                 base_x_values[y][x] = base[y][x] * values[y][x];
             }
@@ -139,12 +84,13 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         vec2 meanXX = gridpp::neighbourhood(base_x_base, halfwidth, gridpp::Mean);
         vec2 meanXY = gridpp::neighbourhood(base_x_values, halfwidth, gridpp::Mean);
 
-        for(int y = 0; y < base.size(); y++){
-            for(int x = 0; x < base[y].size(); x++){
+        #pragma omp parallel for collapse(2)
+        for(int y = 0; y < nY; y++){
+            for(int x = 0; x < nX; x++){
                 if(meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0){
-                    output[y][x] = (meanXY[y][x] - meanX[y][x]*meanY[y][x])/(meanXX[y][x] - meanX[y][x]*meanX[y][x]);
+                    output[y][x] = (meanXY[y][x] - meanX[y][x] * meanY[y][x]) /
+                                   (meanXX[y][x] - meanX[y][x] * meanX[y][x]);
                 }
-
                 else{
                     output[y][x] = default_gradient;
                 }

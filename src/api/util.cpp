@@ -374,6 +374,15 @@ bool gridpp::compatible_size(const Points& points, const vec2& v) {
 bool gridpp::compatible_size(const Points& points, const vec& v) {
     return points.size() == v.size();
 }
+bool gridpp::compatible_size(const vec2& a, const vec2& b) {
+    if(a.size() != b.size())
+        return false;
+    for(int y = 0; y < a.size(); y++) {
+        if(a[y].size() != b[y].size())
+            return false;
+    }
+    return true;
+}
 bool gridpp::compatible_size(const vec2& a, const vec3& b) {
     // No y
     if(a.size() == 0 && b.size() == 0)

@@ -975,6 +975,7 @@ namespace gridpp {
     bool compatible_size(const Grid& grid, const vec3& v);
     bool compatible_size(const Points& points, const vec& v);
     bool compatible_size(const Points& points, const vec2& v);
+    bool compatible_size(const vec2& a, const vec2& b);
     bool compatible_size(const vec2& a, const vec3& b);
     bool compatible_size(const vec3& a, const vec3& b);
 

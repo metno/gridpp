@@ -4,8 +4,7 @@
 
 using namespace gridpp;
 
-vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, const vec2& apply_array, int halfwidth, float search_target_min,
-    float search_target_max, float search_delta) {
+vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array) {
 
 
     if(search_target_min > search_target_max) {
@@ -14,12 +13,16 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, c
     if(halfwidth < 0) {
         throw std::invalid_argument("halfwidth must be positive");
     }
+    if(search_array.size() != array.size() || search_array[0].size() != array[0].size()) {
 
-    if(!gridpp::is_valid(apply_array)){
-        vec2 apply_array = gridpp::init_vec2(array.size(), array[0].size(), 0);
+        throw std::invalid_argument("search_array must either be the same size as array");
+    }
+    if(apply_array.size() > 1 && (apply_array.size() != array.size() || apply_array[0].size() != array[0].size())) {
+        throw std::invalid_argument("apply_array must either be empty or same size as array");
     }
 
     vec2 output = gridpp::init_vec2(array.size(), array[0].size());
+    bool use_apply_array = apply_array.size() > 0;
 
     int nY = array.size();
     int nX = array[0].size();
@@ -31,7 +34,7 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, c
             int I_nearestSearchArray_Y = 0;
             int I_nearestSearchArray_X = 0;
             int counter = 0;
-            float accum_temp = 0; 
+            float accum_temp = 0;
 
             if(!gridpp::is_valid(search_array[y][x])) {
                 /* if current search_array is invalid, set output equal to array (input) */
@@ -39,7 +42,7 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, c
                 continue;
             }
 
-            if(apply_array[y][x] == 0 || !gridpp::is_valid(apply_array[y][x])){
+            if(use_apply_array && (apply_array[y][x] == 0 || !gridpp::is_valid(apply_array[y][x]))){
                 /* Ignore values outside of range of scope (outside search_criteria min and max) */
                 output[y][x] = array[y][x];
                 continue;

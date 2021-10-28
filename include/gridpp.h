@@ -950,13 +950,13 @@ namespace gridpp {
     * search value.
     * @param vec2 array input array (e.g temperatures)
     * @param vec2 search array array used to search
-    * @param vec2 apply_array array of 0 and 1. 1 -> apply neighbourhood_search, 0 -> return input
       @param int halfwidth search radius
     * @param float search_target_min minimum value where values are assigned with
     * @param float search_target_max maximum value where values are assigned with
     * @param float search_delta if no search_target values are found, minimum difference between original value of search_array and any value inside the search radius.
+    * @param vec2 apply_array array of 0 and 1. 1 -> apply neighbourhood_search, 0 -> use input
     */
-    vec2 neighbourhood_search(const vec2& array, const vec2& search_array, const vec2& apply_array, int halfwidth, float search_target_min, float search_target_max, float search_delta);
+    vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array=ivec2());
 
     /** Compute window statistics
     *  @param array input array with dimensions (case, time)

@@ -4,21 +4,25 @@
 
 using namespace gridpp;
 
-vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,int halfwidth,
-    float search_criteria_min, float search_criteria_max, float search_target_min,
-    float search_target_max, float search_delta) {
+vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array) {
 
-    if(search_criteria_min > search_criteria_max) {
-        throw std::invalid_argument("Search_criteria_min must be smaller than search_criteria_max");
-    }
+
     if(search_target_min > search_target_max) {
         throw std::invalid_argument("Search_target_min must be smaller than search_target_max");
     }
     if(halfwidth < 0) {
         throw std::invalid_argument("halfwidth must be positive");
     }
+    if(search_array.size() != array.size() || search_array[0].size() != array[0].size()) {
+
+        throw std::invalid_argument("search_array must either be the same size as array");
+    }
+    if(apply_array.size() > 1 && (apply_array.size() != array.size() || apply_array[0].size() != array[0].size())) {
+        throw std::invalid_argument("apply_array must either be empty or same size as array");
+    }
 
     vec2 output = gridpp::init_vec2(array.size(), array[0].size());
+    bool use_apply_array = apply_array.size() > 0;
 
     int nY = array.size();
     int nX = array[0].size();
@@ -38,12 +42,11 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,in
                 continue;
             }
 
-            if(search_array[y][x] < search_criteria_min || search_array[y][x] >= search_criteria_max) {
+            if(use_apply_array && (apply_array[y][x] == 0 || !gridpp::is_valid(apply_array[y][x]))){
                 /* Ignore values outside of range of scope (outside search_criteria min and max) */
                 output[y][x] = array[y][x];
                 continue;
             }
-
 
             for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++) {
                 for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++) {
@@ -55,7 +58,8 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,in
                         continue;
                     }
 
-                    else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max) {
+                    //else if(search_array[y][x] >= search_criteria_min && search_array[y][x] <= search_criteria_max) {
+                    if(apply_array[y][x] == 1){
                         /*condition search array inside of scope */
 
                         if(search_array[yy][xx] >= search_target_min && search_array[yy][xx] <= search_target_max) {

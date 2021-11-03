@@ -136,6 +136,12 @@ vec2 gridpp::window(const vec2& array,
                     end = x + length / 2;
                 }
 
+                //float [end - start] = gridpp::MV;
+
+
+                // gridpp::calc_statistic(array[y][start:end], gridpp::Max)
+                // gridpp::calc_statistic(array[y][start:end], gridpp::Min)
+
                 for(int xx = start; xx <= end; xx++){
                     if(xx < 0 || xx >= nX){
                         if(missing_edges == true){

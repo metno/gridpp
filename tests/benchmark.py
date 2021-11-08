@@ -56,11 +56,11 @@ def main():
     run[("local_distribution_correction", "")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
     run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
-    run[("calc_gradient", "2000²")] = {"expected": 0.32, "args": (np.random.rand(2000, 2000) *
+    run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
         100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 0, 0)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
-    run[("neighbourhood_search", "2000² 7x7")] = {"expected": 0.89, "args": (np.random.rand(2000, 2000),
-        np.random.rand(2000, 2000), 3, 0.7, 1, 0.1)}
+    run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
+        np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
 
 
     if args.num_cores is not None:

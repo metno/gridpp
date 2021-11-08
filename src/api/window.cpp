@@ -18,6 +18,8 @@ vec2 gridpp::window(const vec2& array,
 
     #pragma omp parallel for
     for(int y = 0; y < array.size(); y++){
+        
+        // Mean and Sum Statistic 
         if (statistic == gridpp::Mean || statistic == gridpp::Sum) {
             vec values = vec(array[y].size(), 0);
             vec counts = vec(array[y].size(), 0);
@@ -55,11 +57,7 @@ vec2 gridpp::window(const vec2& array,
                     start = std::max(0, x - length + 1);
                     end = x;
                 }
-                // Implement later (even numbers)
-                //else if(length % 2 == 0){ // && before == false
-                //    start = std::max(0, x - length / 2 - 1);
-                //    end = std::min(nx - 1, x + length / 2 - 1)
-                //}
+
                 else{
                     start = std::max(0, x - length / 2);
                     end = std::min(nX - 1, x + length / 2);
@@ -70,10 +68,6 @@ vec2 gridpp::window(const vec2& array,
                     if(counts[end] - counts[start-1] == 0){
                         output[y][x] = gridpp::MV;
                     }
-                    // Implement later (even numbers)
-                    //else if(length % 2 == 0 && before == false){
-                    //    output[y][x] = (values[end] + values[start]) / 2 + (values[end - 1] - values[start]);
-                    //}
 
                     else{
                         output[y][x] = values[end] - values[start - 1];
@@ -117,26 +111,101 @@ vec2 gridpp::window(const vec2& array,
                 }
             }
         }
-        else{
+
+
+        /*else if(statistic == gridpp:: Max || statistic == gridpp::Min){
             throw std::invalid_argument("Statistic currently not supported");
+        }*/
+
+
+
+        // METHOD: use built in calc_Statistic 
+        /*
+        else if(statistic == gridpp::Max || statistic == gridpp::Min){
+            for(int x = 0; x < array[y].size(); x++){
+                int start;
+                int end;
+
+                float minimum = gridpp::MV;
+                float maximum = gridpp::MV;
+
+                if(before == true){
+                    start = std::max(0, x - length + 1);
+                    end = x;
+                }
+                else{
+                    start = std::max(0, x - length / 2);
+                    end = std::min(nX - 1, x + length / 2);
+                }
+
+                std::vector <float> stat_array (end - start, 0);
+                for(int i = 0; i <= end - start; i++){
+                    if(0 > x - length / 2){
+                        stat_array[i] = array[y][x + i];
+                    }
+                    else{
+                        stat_array[i] = array[y][x + i - 1];
+
+                    }
+                }                
+
+                std::cout << " --------- " << "\n";
+                int array_size = (sizeof(stat_array));
+                std::cout << array_size  << "\n";
+
+                for(int i = 0; i <= end - start; i++){
+                    if( 0 > x - length / 2){
+                        std::cout << y << " " << x + i << " " << stat_array[i] << "\n";
+                    }
+
+                    else{
+                        std::cout << y << " " << x + i - 1 << " " << stat_array[i] << "\n";
+                    }
+                }
+
+                std::cout << " ===> ";
+                std::cout << "\n";
+
+                //if(keep_missing == true){
+                //    std::vector<int>::iterator it;
+                //    it = std::find(stat_array.begin(), stat_array.end(), gridpp::MV);
+                //    if (it != stat_array.end()) {
+                //        output[y][x] = gridpp::MV;
+                //    }
+                //}
+
+                if(statistic == gridpp::Min){
+                    minimum = gridpp::calc_statistic(stat_array, statistic);
+                    output[y][x] = minimum;
+                    std::cout << minimum << " " << output[y][x]; 
+                }
+
+                std::cout << "\n";
+                std::cout << " :::::: ";
+                std::cout << "\n";
+
+                if(statistic == gridpp::Max){
+                    maximum = gridpp::calc_statistic(stat_array, statistic);
+                    output[y][x] = maximum;
+                    std::cout << maximum;
+                }
+
+
+                if(missing_edges == true){
+                    if(0 > x - length / 2 || nX - 1 < x + length / 2){
+                        output[y][x] = gridpp::MV;
+                    }
+                }
+            }
         }
-    }
-    return output;
-}
+        */
 
 
-namespace {
-    vec2 window_old(const vec2& array,
-        int length, gridpp::Statistic statistic, bool before,
-        bool keep_missing, bool missing_edges){
 
-        vec2 output = gridpp::init_vec2(array.size(), array[0].size(), 0);
-
-        int nY = array.size();
-        int nX = array[0].size();
-
-
-        for(int y = 0; y < array.size(); y++){
+        
+        // Max and Min statistic
+        // Use Method: maunally calculate max and min 
+        else if(statistic == gridpp::Max || statistic == gridpp::Min){
             for(int x = 0; x < array[y].size(); x++){
 
                 float accum = 0;
@@ -148,6 +217,9 @@ namespace {
                 float max_value = gridpp::MV;
                 float min_value = gridpp::MV;
 
+                float minimum = gridpp::MV;
+                float maximum = gridpp::MV;
+
                 if(before == true){
                     // BEFORE BOOLEAN: window end at the timestep
                     start = x - length + 1;
@@ -158,6 +230,9 @@ namespace {
                     start = x - length / 2;
                     end = x + length / 2;
                 }
+
+                // gridpp::calc_statistic(array[y][start:end], gridpp::Max)
+                // gridpp::calc_statistic(array[y][start:end], gridpp::Min)
 
                 for(int xx = start; xx <= end; xx++){
                     if(xx < 0 || xx >= nX){
@@ -208,34 +283,25 @@ namespace {
                         }
                     }
                 }
-
                 if(counter == 0){ 
                     // If all values inside window are nans, output is nan.
                     output[y][x] = gridpp::MV;
                     continue;
-                }
-                if(statistic == gridpp::Sum){
-                    // If statistic is Sum
-                    output[y][x] = accum;
                 }  
-                else if(statistic == gridpp::Mean){
-                    //If statistic is Mean
-                    output[y][x] = accum / counter;
-                }
-                else if(statistic == gridpp::Median){
-                    throw std::invalid_argument("Statistic Method not Implemented");
-                }
                 else if(statistic == gridpp::Max){
-                    output[y][x] = max_value;            
+                    //output[y][x] = max_value;     
+                    output[y][x] = maximum;       
                 }
                 else if(statistic == gridpp::Min){
-                    output[y][x] = min_value;
+                    //output[y][x] = min_value;
+                    output[y][x] = minimum; 
                 }
-                else{
-                    throw std::invalid_argument("Statistic Method not implemented");
-                }
-            }
+            }            
         }
-        return output;
+        
+        else{
+            throw std::invalid_argument("Statistic currently not supported");
+        }
     }
+    return output;
 }

@@ -41,6 +41,10 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal([[10, 20],[20, 20]],
                 gridpp.neighbourhood_search(self.input_values_nan, self.input_base_nan, 1,0.7, 1.0, 0.1, apply_array))
 
+    def test_simple(self):
+        output = gridpp.neighbourhood_search([[0, 1, 2]], [[0.5, 0.5, 1]], 1, 0.7, 1, 0.1)
+        np.testing.assert_array_equal(output, [[0, 2, 2]])
+
 
 if __name__ == '__main__':
     unittest.main()

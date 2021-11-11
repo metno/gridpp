@@ -117,7 +117,8 @@ FileNetcdf::FileNetcdf(std::string iFilename, const Options& iOptions, bool iRea
       vec2 elevs = getLatLonVariable(mElevVar);
       for(int i = 0; i < getNumY(); i++) {
          for(int j = 0; j < getNumX(); j++) {
-            elevs[i][j] *= elevScale;
+            if(Util::isValid(elevs[i][j]))
+               elevs[i][j] *= elevScale;
          }
       }
       setElevs(elevs);

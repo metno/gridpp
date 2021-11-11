@@ -21,7 +21,17 @@ namespace {
    };
 
    TEST_F(FileNetcdfTest, isValid) {
+      // FileNetcdf file = FileNetcdf("tests/files/validNetcdf1.nc");
+   }
+   TEST_F(FileNetcdfTest, missingAltitude) {
       FileNetcdf file = FileNetcdf("tests/files/validNetcdf1.nc");
+      vec2 elevs = file.getElevs();
+      EXPECT_EQ(Util::MV, elevs[0][0]);
+   }
+   TEST_F(FileNetcdfTest, missingGeopoential) {
+      FileNetcdf file = FileNetcdf("tests/files/validNetcdfMissingGeopotential.nc");
+      vec2 elevs = file.getElevs();
+      EXPECT_EQ(Util::MV, elevs[0][0]);
    }
    TEST_F(FileNetcdfTest, missingY) {
       FileNetcdf file = FileNetcdf("tests/files/validNetcdf2.nc");

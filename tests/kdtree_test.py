@@ -13,7 +13,7 @@ class KDTreeTest(unittest.TestCase):
         np.testing.assert_array_equal(tree.get_neighbours(60, 10, 112000), [0, 1])
 
     def test_flat(self):
-        tree = gridpp.KDTree([0, 1000, 2000], [0, 1000, 2000], True)
+        tree = gridpp.KDTree([0, 1000, 2000], [0, 1000, 2000], gridpp.Cartesian)
         q, dist = tree.get_neighbours_with_distance(100, 100, 1000)
         self.assertEqual(dist, 100 * np.sqrt(2))
 
@@ -84,6 +84,10 @@ class KDTreeTest(unittest.TestCase):
         np.testing.assert_array_equal(I, [0, 1])
         I = points.get_neighbours(0, 0, 1001, False)
         np.testing.assert_array_equal(I, [1])
+
+    def test_empty_constructor(self):
+        tree = gridpp.KDTree()
+        self.assertEqual(tree.get_coordinate_type(), gridpp.Geodetic)
 
 
 if __name__ == '__main__':

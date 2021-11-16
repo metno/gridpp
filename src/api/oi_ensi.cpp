@@ -192,7 +192,10 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         }
     }
 
-    #pragma omp parallel for
+    // This causes segmentation fault when building the gridpp pypi package
+    // 1) Tested removing num_condition_warning and num_real_part_warning from the parallel loop
+    //    but it doesnt seem to help
+    // #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         float lat = blats[y];
         float lon = blons[y];

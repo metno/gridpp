@@ -102,10 +102,19 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         vec2 meanXY = gridpp::neighbourhood(base_x_values, halfwidth, gridpp::Mean);
         vec2 count = gridpp::neighbourhood(is_valid, halfwidth, gridpp::Sum);
 
+
+        vec2 minimum = gridpp::neighbourhood(base0, halfwidth, gridpp::Min);
+        vec2 maximum = gridpp::neighbourhood(base0, halfwidth, gridpp::Max);
         #pragma omp parallel for collapse(2)
         for(int y = 0; y < nY; y++){
             for(int x = 0; x < nX; x++){
-                if(count[y][x] >= num_min && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
+                //Check if neighbourhood is flat -> default gradient
+                if(maximum[y][x] - minimum[y][x] < min_range){
+                    output[y][x] = default_gradient;
+                    std::cout << "flat";
+                }
+
+                else if(count[y][x] >= num_min && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
                     output[y][x] = (meanXY[y][x] - meanX[y][x] * meanY[y][x]) /
                                    (meanXX[y][x] - meanX[y][x] * meanX[y][x]);
                 }

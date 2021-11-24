@@ -4,7 +4,9 @@
 
 using namespace gridpp;
 
-vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array) {
+vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, 
+    int halfwidth, float search_target_min, float search_target_max, 
+    float search_delta, const ivec2& apply_array, bool expand, float r1, float r2) {
 
 
     if(search_target_min > search_target_max) {
@@ -27,6 +29,10 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
     int nY = array.size();
     int nX = array[0].size();
 
+    int expand_count = 0;
+    int expand_count_r1 = 0;
+    int expand_count_r2 = 0;
+
     for(int y = 0; y < array.size(); y++) {
         for(int x = 0; x < array[y].size(); x++) {
             /* Loop over each element in array */
@@ -35,6 +41,11 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
             int I_nearestSearchArray_X = 0;
             int counter = 0;
             float accum_temp = 0;
+
+            int search_array_count = 0;
+            float search_array_sum = 0;
+
+            int search_radius = halfwidth;
 
             if(!gridpp::is_valid(search_array[y][x])) {
                 /* if current search_array is invalid, set output equal to array (input) */
@@ -48,8 +59,41 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
                 continue;
             }
 
-            for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++) {
-                for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++) {
+            if(expand == true){
+                int max_count = 0;
+                for(int yy = std::max(0, y - halfwidth); yy <= std::min(nY - 1, y + halfwidth); yy++) {
+                    for(int xx = std::max(0, x - halfwidth); xx <= std::min(nX - 1, x + halfwidth); xx++) {
+                        if(yy == y && xx == x){
+                            search_array_count = search_array_count;
+                            search_array_sum = search_array_sum;
+                        }
+                        else{
+                            search_array_count++;
+                            search_array_sum = search_array_sum + search_array[yy][xx];
+                            if(search_array[yy][xx] > search_target_min){
+                                max_count++;
+                            }
+                        }   
+                    }
+                }
+
+                if(search_array[y][x] * r2 > (1.0 / search_array_count)  * search_array_sum && max_count <= 2){
+                    search_radius = halfwidth + 2;
+                    expand_count_r2++;
+                }
+                else if(search_array[y][x] * r1 > (1.0 / search_array_count)  * search_array_sum && max_count <= 2){
+                    search_radius = halfwidth + 1;
+                    expand_count_r1++;
+                }
+
+                else{
+                    search_radius = halfwidth; 
+                }
+            }               
+
+
+            for(int yy = std::max(0, y - search_radius); yy <= std::min(nY - 1, y + search_radius); yy++) {
+                for(int xx = std::max(0, x - search_radius); xx <= std::min(nX - 1, x + search_radius); xx++) {
                     /* Loop over neighbourhood of y and x */
                     int I_SearchArray_Y = 0;
                     int I_SearchArray_X = 0;
@@ -66,11 +110,14 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
                             /* Count all and add all values*/
                             counter++;
                             accum_temp = accum_temp + array[yy][xx];
+                            expand_count++;
                         }
                         else if (counter > 0)
                             /*  We have decided that we will only use values within th search target */
                             continue;
+
                         else if(std::abs(search_array[yy][xx] - search_array[y][x]) >= search_delta) {
+                            expand_count++;
                             /* Finding nearest value that's outside of the search target range */
                             if(!gridpp::is_valid(nearest_target)) {
                                 /* Set first value*/
@@ -109,5 +156,9 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
             }
         }
     }
+
+    std::cout << "Total number of points using neighbourhood_search: " << expand_count << "\n";
+    std::cout << "Number of points using 7x7 (r1):" << expand_count_r1 << "\n";
+    std::cout << "Number of points using 9x9 (r2):" << expand_count_r2 << "\n\n";
     return output;
 }

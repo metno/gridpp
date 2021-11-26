@@ -959,14 +959,6 @@ namespace gridpp {
     vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, 
        const ivec2& apply_array=ivec2(), bool expand = false, float r1 = 2.0/3, float r2 = 1.0/2);
 
-    /** Specific case if not a suitable neighbourhood is found to correct temperature
-    * @param vec2 base
-    * @param vec2 values
-    * @param int halfwidth
-    * @param int search_radius
-    */
-    vec2 peninsula(const vec2& base, const vec2& values, int halfwidth, int search_radius, float ratio);
-
     /** Compute window statistics
     *  @param array input array with dimensions (case, time)
     *  @param length window length in number of timesteps

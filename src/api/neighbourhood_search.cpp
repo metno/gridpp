@@ -110,14 +110,14 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,
                             /* Count all and add all values*/
                             counter++;
                             accum_temp = accum_temp + array[yy][xx];
-                            expand_count++;
+                            //expand_count++;
                         }
                         else if (counter > 0)
                             /*  We have decided that we will only use values within th search target */
                             continue;
 
                         else if(std::abs(search_array[yy][xx] - search_array[y][x]) >= search_delta) {
-                            expand_count++;
+                            //expand_count++;
                             /* Finding nearest value that's outside of the search target range */
                             if(!gridpp::is_valid(nearest_target)) {
                                 /* Set first value*/
@@ -143,11 +143,13 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,
             if(counter > 0) {
                 /* find mean value of accumulated values */
                 output[y][x] = accum_temp / counter;
+                expand_count++;
             }
 
             else if(gridpp::is_valid(nearest_target)) {
                 /* If no values found inside target, and nearest target was used, assign the value from that location*/
                 output[y][x] = array[I_nearestSearchArray_Y][I_nearestSearchArray_X];
+                expand_count++;
             }
 
             else{
@@ -158,7 +160,7 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,
     }
 
     std::cout << "Total number of points using neighbourhood_search: " << expand_count << "\n";
-    std::cout << "Number of points using 7x7 (r1):" << expand_count_r1 << "\n";
-    std::cout << "Number of points using 9x9 (r2):" << expand_count_r2 << "\n\n";
+    std::cout << "Number of points using 7x7 (r1): " << expand_count_r1 << "\n";
+    std::cout << "Number of points using 9x9 (r2): " << expand_count_r2 << "\n\n";
     return output;
 }

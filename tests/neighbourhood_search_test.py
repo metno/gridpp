@@ -14,6 +14,9 @@ class Test(unittest.TestCase):
         self.input_base_nan = [[np.nan, 0.5],[0.7,1.0]]
         self.input_values_nan = [[10,15],[np.nan, 20]]
 
+        self.input_base_expand = [[0,0.5,0],[0,0.5,0],[0.75,1.0,0.75]]
+        self.input_values_expand = [[10,15,10],[10,15,10],[17.5,20,17.5]]
+
     def get_apply_array(self, base, min_value, max_value):
         return (np.array(base) >= min_value) & (np.array(base) <= max_value)
 
@@ -44,6 +47,13 @@ class Test(unittest.TestCase):
     def test_simple(self):
         output = gridpp.neighbourhood_search([[0, 1, 2]], [[0.5, 0.5, 1]], 1, 0.7, 1, 0.1)
         np.testing.assert_array_equal(output, [[0, 2, 2]])
+
+    def test_expand(self):
+        apply_array = self.get_apply_array(self.input_base_expand, 0, 0.95)
+        output = gridpp.neighbourhood_search(self.input_values_expand, self.input_base_expand, 1, 0.7, 1.0, 0.1, apply_array, True, 2.0/3, 1.0/2)
+        np.testing.assert_array_almost_equal(output, [[15, 18 + 1.0/3, 15],[18.75, 18 + 1.0/3, 18.75],[18.75, 20, 18.75]])
+
+
 
 
 if __name__ == '__main__':

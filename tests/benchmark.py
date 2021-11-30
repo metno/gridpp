@@ -113,10 +113,12 @@ def main():
             diff = (timings[1] - run[key]["expected"] * args.scaling) / (run[key]["expected"]  * args.scaling) * 100
             string = "%-36s %8.2f %8.2f %8.2f %%" % (name, run[key]["expected"] * args.scaling, timings[1], diff)
         else:
-            scaling = timings[1] / timings[args.num_cores] / args.num_cores
-            expected = timings[1] / args.num_cores
-            scaling = 1 - (timings[args.num_cores] - expected) / (timings[1] - expected)
-            # scaling = (1 - timings[args.num_cores] / timings[1]) * (args.num_cores + 1)
+            maximum_speedup = args.num_cores
+            minimum_speedup = 1
+            actual_speedup = timings[1] / timings[args.num_cores]
+
+            # Compute the fraction between minimum and maximum speedup
+            scaling = ((actual_speedup - minimum_speedup) / (maximum_speedup - minimum_speedup))
 
             string = "%-36s %8.2f %8.2f %8.2f %%" % (name, timings[1], timings[args.num_cores], scaling * 100)
         print(string)

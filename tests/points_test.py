@@ -98,6 +98,20 @@ class Test(unittest.TestCase):
         self.assertEqual(points.get_nearest_neighbour(2, 0, False), 1)
         self.assertTrue(points.get_nearest_neighbour(2, 0, True) in [2, 3])
 
+    def test_subset(self):
+        points = gridpp.Points([0, 1], [10, 11], [20, 21], [30, 31])
+        points2 = points.subset([1])
+        np.testing.assert_array_almost_equal(points2.get_lats(), [1])
+        np.testing.assert_array_almost_equal(points2.get_lons(), [11])
+        np.testing.assert_array_almost_equal(points2.get_elevs(), [21])
+        np.testing.assert_array_almost_equal(points2.get_lafs(), [31])
+
+        points2 = points.subset([])
+        np.testing.assert_array_almost_equal(points2.get_lats(), [])
+        np.testing.assert_array_almost_equal(points2.get_lons(), [])
+        np.testing.assert_array_almost_equal(points2.get_elevs(), [])
+        np.testing.assert_array_almost_equal(points2.get_lafs(), [])
+
 
 if __name__ == '__main__':
     unittest.main()

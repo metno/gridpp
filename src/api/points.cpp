@@ -135,10 +135,11 @@ gridpp::Points gridpp::Points::subset(const ivec& indices) const {
     vec elevs(N);
     vec lafs(N);
     for(int i = 0; i < N; i++) {
-        lats[i] = mLats[i];
-        lons[i] = mLats[i];
-        elevs[i] = mElevs[i];
-        lafs[i] = mLafs[i];
+        int index = indices[i];
+        lats[i] = mLats[index];
+        lons[i] = mLons[index];
+        elevs[i] = mElevs[index];
+        lafs[i] = mLafs[index];
     }
     return gridpp::Points(lats, lons, elevs, lafs);
 }

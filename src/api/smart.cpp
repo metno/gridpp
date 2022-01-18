@@ -108,8 +108,8 @@ def get_smart_neighbour(const Grid& grid, float lat, float lon, float altitude, 
         // but placed in 1D array, to simplify sort
         elevDiff.reserve(numSearch);
         // Keep track of which I/J corresponds to indices in elevDiff
-        std::vector<int> Ilookup;
-        std::vector<int> Jlookup;
+        ivec Ilookup;
+        ivec Jlookup;
         Ilookup.reserve(numSearch);
         Jlookup.reserve(numSearch);
 

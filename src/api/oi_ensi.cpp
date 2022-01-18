@@ -178,7 +178,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
 
     // Calculate number of valid members
     int nValidEns = 0;
-    std::vector<int> validEns;
+    ivec validEns;
     for(int e = 0; e < nEns; e++) {
         int numInvalid = 0;
         for(int y = 0; y < nY; y++) {
@@ -210,7 +210,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
             // If we have too few observations though, then use the background
             continue;
         }
-        std::vector<int> lLocIndices;
+        ivec lLocIndices;
         lLocIndices.reserve(lLocIndices0.size());
         std::vector<std::pair<float,int> > lRhos0;
         // Calculate gridpoint to observation rhos
@@ -295,9 +295,9 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
             // std::cout << "Computing R matrix" << std::endl;
             // R = get_precipitation_r(gRadarL, pci, lLocIndices, lRhos);
             // Compute little R
-            std::vector<int> gRadarIndices;
+            ivec gRadarIndices;
             gRadarIndices.reserve(lS);
-            std::vector<int> lRadarIndices;
+            ivec lRadarIndices;
             lRadarIndices.reserve(lS);
             for(int i = 0; i < lS; i++) {
                 int index = lLocIndices[i];

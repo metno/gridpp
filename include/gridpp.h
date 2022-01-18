@@ -895,14 +895,14 @@ namespace gridpp {
      *  @param iValues Lookup vector. Must be sorted.
      *  @return The index into iValues that is equal or just below iX
     */
-    int get_lower_index(float iX, const std::vector<float>& iValues);
+    int get_lower_index(float iX, const vec& iValues);
 
     /** Find the index in a vector that is equal or just above a value
      *  @param iX Lookup value
      *  @param iValues Lookup vector. Must be sorted.
      *  @return The index into iValues that is equal or just above iX
     */
-    int get_upper_index(float iX, const std::vector<float>& iValues);
+    int get_upper_index(float iX, const vec& iValues);
 
     /** Piecewise linear interpolation
      *  If x is outside the range of iX, then the min/max value of iY is used. If there are multiple
@@ -915,7 +915,7 @@ namespace gridpp {
      *  @param iY Vector of y-axis values corresponding to iX.
      *  @return Y value corresponding to x
     */
-    float interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY);
+    float interpolate(float x, const vec& iX, const vec& iY);
 
     /** Initialize a vector of size Y, X, with a given value */
     ivec2 init_ivec2(int Y, int X, int value);

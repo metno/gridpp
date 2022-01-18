@@ -127,7 +127,7 @@ float gridpp::calc_quantile(const vec& array, float quantile) {
     // Initialize to missing
     float value = gridpp::MV;
     // Remove missing
-    std::vector<float> cleanHood;
+    vec cleanHood;
     cleanHood.reserve(array.size());
     for(int i = 0; i < array.size(); i++) {
         if(gridpp::is_valid(array[i]))
@@ -286,7 +286,7 @@ vec gridpp::calc_even_quantiles(const vec& values, int num) {
     return quantiles;
 
 }
-int gridpp::get_lower_index(float iX, const std::vector<float>& iValues) {
+int gridpp::get_lower_index(float iX, const vec& iValues) {
     int index = gridpp::MV;
     for(int i = 0; i < (int) iValues.size(); i++) {
         float currValue = iValues[i];
@@ -305,7 +305,7 @@ int gridpp::get_lower_index(float iX, const std::vector<float>& iValues) {
     }
     return index;
 }
-int gridpp::get_upper_index(float iX, const std::vector<float>& iValues) {
+int gridpp::get_upper_index(float iX, const vec& iValues) {
     int index = gridpp::MV;
     for(int i = iValues.size()-1; i >= 0; i--) {
         float currValue = iValues[i];
@@ -324,7 +324,7 @@ int gridpp::get_upper_index(float iX, const std::vector<float>& iValues) {
     }
     return index;
 }
-float gridpp::interpolate(float x, const std::vector<float>& iX, const std::vector<float>& iY) {
+float gridpp::interpolate(float x, const vec& iX, const vec& iY) {
     if(!gridpp::is_valid(x))
         return gridpp::MV;
     if(iX.size() != iY.size())

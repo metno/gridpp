@@ -228,7 +228,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
             // If we have too few observations though, then use the background
             continue;
         }
-        std::vector<int> lLocIndices;
+        ivec lLocIndices;
         lLocIndices.reserve(lLocIndices0.size());
         std::vector<std::pair<float,int> > lRhos0;
 

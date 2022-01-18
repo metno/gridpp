@@ -153,7 +153,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int halfwidth, gridpp::Statistic s
                 // Regular way
                 for(int j = 0; j < nX; j++) {
                     // Put neighbourhood into vector
-                    std::vector<float> neighbourhood;
+                    vec neighbourhood;
                     int Ni = std::min(nY-1, i+halfwidth) - std::max(0, i-halfwidth) + 1;
                     int Nj = std::min(nX-1, j+halfwidth) - std::max(0, j-halfwidth) + 1;
                     assert(Ni > 0);
@@ -176,9 +176,9 @@ vec2 gridpp::neighbourhood(const vec2& input, int halfwidth, gridpp::Statistic s
             }
             else {
                 // Fast way: Compute stats on each sliver
-                std::vector<float> slivers(nX, 0);
+                vec slivers(nX, 0);
                 for(int j = 0; j < nX; j++) {
-                    std::vector<float> sliver(2*halfwidth+1, 0);
+                    vec sliver(2*halfwidth+1, 0);
                     int count = 0;
                     for(int ii = i - halfwidth; ii <= i + halfwidth; ii++) {
                         sliver[count] = input[ii][j];
@@ -188,7 +188,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int halfwidth, gridpp::Statistic s
                     count_stat += sliver.size();
                 }
                 for(int j = 0; j < nX; j++) {
-                    std::vector<float> curr;
+                    vec curr;
                     curr.reserve(2*halfwidth);
                     for(int jj = std::max(0, j - halfwidth); jj <= std::min(nX-1, j + halfwidth); jj++) {
                         curr.push_back(slivers[jj]);
@@ -572,7 +572,7 @@ namespace {
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 // Put neighbourhood into vector
-                std::vector<float> neighbourhood;
+                vec neighbourhood;
                 int Ni = std::min(nY-1, i+halfwidth) - std::max(0, i-halfwidth) + 1;
                 int Nj = std::min(nX-1, j+halfwidth) - std::max(0, j-halfwidth) + 1;
                 assert(Ni > 0);
@@ -621,7 +621,7 @@ namespace {
         for(int i = 0; i < nY; i++) {
             for(int j = 0; j < nX; j++) {
                 // Put neighbourhood into vector
-                std::vector<float> neighbourhood;
+                vec neighbourhood;
                 int Ni = std::min(nY-1, i+halfwidth) - std::max(0, i-halfwidth) + 1;
                 int Nj = std::min(nX-1, j+halfwidth) - std::max(0, j-halfwidth) + 1;
                 assert(Ni > 0);

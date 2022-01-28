@@ -319,6 +319,18 @@ namespace gridpp {
     */
     vec2 doping_circle(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const vec& radii, float max_elev_diff=gridpp::MV);
 
+    /** **************************************
+     * @name Distributions
+     * Functions that extract values from probability distributions
+     * ***************************************/ /**@{*/
+
+    /**
+     * @param shape Shape parameter of gamma distribution
+     * @param scale Scale parameter of gamma distribution
+     * @param levels Quantile levels to retrieve
+    */
+    vec gamma_inv(const vec& levels, const vec& shape, const vec& scale);
+
     /**@}*/
 
     /** **************************************

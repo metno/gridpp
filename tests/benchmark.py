@@ -61,6 +61,9 @@ def main():
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
         np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
+    run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
+    run[("gamma_inv", "50*201*476")] = {"expected": 1.67, "args": (np.random.rand(50*201*476),
+        np.random.rand(50*201*476), np.random.rand(50*201*476)*0.9 + 0.05)}
 
 
     if args.num_cores is not None:

@@ -58,6 +58,10 @@ class Test(unittest.TestCase):
         output = gridpp.full_gradient(self.igrid, self.opoints, self.ivalues, self.elev_gradient, self.laf_gradient) 
         np.testing.assert_array_equal(output, [15,14,15,15,13,15,15,14,15])
 
+    def test_zeros_elev_gradient(self):
+        output = gridpp.full_gradient(self.igrid, self.opoints, np.zeros([10, 2, 2]), np.zeros([0, 0, 0]), np.zeros([10, 2, 2]))
+        np.testing.assert_array_equal(output, [15,14,15,15,13,15,15,14,15])
+
     def test_grid_to_grid_laf_3d(self):
         ivalues = np.ones([5,2,2])*15
         elev_gradient = np.zeros([5,2,2])

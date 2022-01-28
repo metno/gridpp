@@ -90,7 +90,14 @@ vec3 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& iva
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
 
-    vec3 output = gridpp::init_vec3(nTime, nY, nX); 
+    vec3 output = gridpp::init_vec3(nTime, nY, nX);
+
+    if(laf_gradient.size() > 0) {
+        assert(gridpp::compatible_size(laf_gradient, ivalues));
+    }
+    if(elev_gradient.size() > 0) {
+        assert(gridpp::compatible_size(elev_gradient, ivalues));
+    }
 
     for(int y = 0; y < nY ; y++){
         for(int x = 0; x < nX; x++){
@@ -143,6 +150,15 @@ vec gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec2& 
 
     vec output(nPoints);
 
+    if(laf_gradient.size() > 0) {
+        assert(laf_gradient.size() == ivalues.size());
+        assert(laf_gradient[0].size() == ivalues[0].size());
+    }
+    if(elev_gradient.size() > 0) {
+        assert(elev_gradient.size() == ivalues.size());
+        assert(elev_gradient[0].size() == ivalues[0].size());
+    }
+
     for(int i = 0; i < nPoints; i++){
         ivec indices = igrid.get_nearest_neighbour(olats[i], olons[i]);
         int I = indices[0];
@@ -162,12 +178,12 @@ vec gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec2& 
 
         if(laf_gradient.size() > 0)
             laf_correction = laf_gradient[I][J]*laf_diff;
-        if(elev_gradient.size() > 0)    
+        if(elev_gradient.size() > 0)
             elev_correction = elev_gradient[I][J]*elev_diff;
 
         float temp = ivalues[I][J] + laf_correction + elev_correction;
 
-        output[i] = temp;    
+        output[i] = temp;
     }
     return output;
 }
@@ -187,6 +203,17 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3&
     int nTime = ivalues.size();
 
     vec2 output = gridpp::init_vec2(nTime, nPoints);
+
+    if(laf_gradient.size() > 0) {
+        assert(laf_gradient.size() == nTime);
+        assert(laf_gradient.size() == ivalues.size());
+        assert(laf_gradient[0].size() == ivalues[0].size());
+    }
+    if(elev_gradient.size() > 0) {
+        assert(elev_gradient.size() == nTime);
+        assert(elev_gradient.size() == ivalues.size());
+        assert(elev_gradient[0].size() == ivalues[0].size());
+    }
 
     for(int i = 0; i < nPoints; i++){
         ivec indices = igrid.get_nearest_neighbour(olats[i], olons[i]);
@@ -208,7 +235,7 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3&
 
             if(laf_gradient.size() > 0)
                 laf_correction = laf_gradient[t][I][J] * laf_diff;
-            if(elev_gradient.size() > 0)    
+            if(elev_gradient.size() > 0)
                 elev_correction = elev_gradient[t][I][J] * elev_diff;
 
             float temp = ivalues[t][I][J] + laf_correction + elev_correction;

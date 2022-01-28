@@ -105,7 +105,7 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         #pragma omp parallel for collapse(2)
         for(int y = 0; y < nY; y++){
             for(int x = 0; x < nX; x++){
-                if(count[y][x] >= num_min && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
+                if(count[y][x] >= num_min && gridpp::is_valid(meanXX[y][x]) && gridpp::is_valid(meanXY[y][x]) && gridpp::is_valid(meanX[y][x]) && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
                     output[y][x] = (meanXY[y][x] - meanX[y][x] * meanY[y][x]) /
                                    (meanXX[y][x] - meanX[y][x] * meanX[y][x]);
                 }

@@ -53,6 +53,18 @@ class Test(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             gridpp.calc_gradient(base, values, method, halfwidth, min_num, -1, dg)
 
+    def test_nan(self):
+        base = np.random.rand(10, 10) # np.zeros([10, 10])
+        base[3:8, 3:8] = np.nan
+        values = np.random.rand(10, 10)
+        method = gridpp.LinearRegression
+        min_num = 0
+        min_range = 0
+        halfwidth = 1
+        default_gradient = 1
+        output = gridpp.calc_gradient(base, values, method, halfwidth, min_num, min_range, default_gradient)
+        print(output)
+
 
 if __name__ == '__main__':
     unittest.main()

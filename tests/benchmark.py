@@ -62,8 +62,15 @@ def main():
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
         np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
-    run[("gamma_inv", "50*201*476")] = {"expected": 1.67, "args": (np.random.rand(50*201*476),
-        np.random.rand(50*201*476), np.random.rand(50*201*476)*0.9 + 0.05)}
+    run[("gamma_inv", "5*201*476")] = {"expected": 1.168, "args": (np.random.rand(5*201*476)*0.9 + 0.05,
+        np.random.rand(5*201*476), np.random.rand(5*201*476))}
+    run[("apply_curve", "")] = {"expected": 0.06, "args": (np.random.rand(2000, 2000),
+        np.random.rand(2000), np.random.rand(2000), gridpp.OneToOne,
+        gridpp.OneToOne)}
+    x = np.sort(np.random.rand(2000, 2000, 10).astype(np.float32), axis=2)
+    y = np.sort(np.random.rand(2000, 2000, 10).astype(np.float32), axis=2)
+    run[("apply_curve", "gridded")] = {"expected": 0.87, "args": (np.random.rand(2000,
+        2000).astype(np.float32), x, y, gridpp.OneToOne, gridpp.OneToOne)}
 
 
     if args.num_cores is not None:

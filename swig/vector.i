@@ -213,6 +213,7 @@ namespace std {
         int s0 = array_size($input, 0);
         int s1 = array_size($input, 1);
         std::vector<std::vector<DTYPE> > temp = std::vector<std::vector<DTYPE> >(s0);
+        #pragma omp parallel for
         for(int i = 0; i < s0; i++) {
             temp[i] = std::vector<DTYPE>(arg + i*s1, arg + i*s1 + s1);
         }
@@ -250,6 +251,7 @@ namespace std {
         int s0 = array_size($input, 0);
         int s1 = array_size($input, 1);
         temp = std::vector<std::vector<DTYPE> >(s0);
+        #pragma omp parallel for
         for(int i = 0; i < s0; i++) {
             temp[i] = std::vector<DTYPE>(arg + i*s1, arg + i*s1 + s1);
         }
@@ -288,6 +290,7 @@ namespace std {
         int s0 = array_size($input, 0);
         int s1 = array_size($input, 1);
         temp = std::vector<std::vector<DTYPE> >(s0);
+        #pragma omp parallel for
         for(int i = 0; i < s0; i++) {
             temp[i] = std::vector<DTYPE>(arg + i*s1, arg + i*s1 + s1);
         }
@@ -320,6 +323,7 @@ namespace std {
         s1 = temp[0].size();
     npy_intp dims[2] = {s0, s1};
     py_obj = PyArray_ZEROS(2, dims, NPY_DTYPE, 0);
+    #pragma omp parallel for collapse(2)
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
             DTYPE* ref = (DTYPE*) PyArray_GETPTR2((PyArrayObject*) py_obj, i, j);
@@ -338,6 +342,7 @@ namespace std {
         s1 = temp[0].size();
     npy_intp dims[2] = {s0, s1};
     $result = PyArray_ZEROS(2, dims, NPY_DTYPE, 0);
+    #pragma omp parallel for collapse(2)
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
             DTYPE* ref = (DTYPE*) PyArray_GETPTR2((PyArrayObject*) $result, i, j);
@@ -383,6 +388,9 @@ namespace std {
         std::vector<std::vector<std::vector<DTYPE> > > temp = std::vector<std::vector<std::vector<DTYPE> > >(s0);
         for(int i = 0; i < s0; i++) {
             temp[i].resize(s1);
+        }
+        #pragma omp parallel for collapse(2)
+        for(int i = 0; i < s0; i++) {
             for(int j = 0; j < s1; j++) {
                 temp[i][j] = std::vector<DTYPE>(arg + i * s1 * s2 + j * s2, arg + i * s1 * s2 + (j + 1) * s2);
             }
@@ -424,6 +432,9 @@ namespace std {
         temp = std::vector<std::vector<std::vector<DTYPE> > >(s0);
         for(int i = 0; i < s0; i++) {
             temp[i].resize(s1);
+        }
+        #pragma omp parallel for collapse(2)
+        for(int i = 0; i < s0; i++) {
             for(int j = 0; j < s1; j++) {
                 temp[i][j] = std::vector<DTYPE>(arg + i * s1 * s2 + j * s2, arg + i * s1 * s2 + (j + 1) * s2);
             }
@@ -442,7 +453,7 @@ namespace std {
 
 /* Same as the const version above */
 %typemap(in) std::vector<std::vector<std::vector<DTYPE> > > & (std::vector<std::vector<std::vector<DTYPE> > >*ptr=NULL, std::vector<std::vector<std::vector<DTYPE> > > temp, PyArrayObject* py_array=NULL, PyObject* py_obj=NULL, PyObject* py_obj0=NULL){
-    PRINT_DEBUG("Typemap(in) const std::vector<std::vector<std::vector<DTYPE> > > &");
+    PRINT_DEBUG("Typemap(in) std::vector<std::vector<std::vector<DTYPE> > > &");
     if(is_array($input)) {
         int num_dims = array_numdims($input);
         if(num_dims != 3)
@@ -466,6 +477,9 @@ namespace std {
         temp = std::vector<std::vector<std::vector<DTYPE> > >(s0);
         for(int i = 0; i < s0; i++) {
             temp[i].resize(s1);
+        }
+        #pragma omp parallel for collapse(2)
+        for(int i = 0; i < s0; i++) {
             for(int j = 0; j < s1; j++) {
                 temp[i][j] = std::vector<DTYPE>(arg + i * s1 * s2 + j * s2, arg + i * s1 * s2 + (j + 1) * s2);
             }
@@ -501,6 +515,7 @@ namespace std {
         s2 = temp[0][0].size();
     npy_intp dims[3] = {s0, s1, s2};
     py_obj = PyArray_ZEROS(3, dims, NPY_DTYPE, 0);
+    #pragma omp parallel for collapse(3)
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
             for(long k = 0; k < s2; k++) {
@@ -524,6 +539,7 @@ namespace std {
         s2 = temp[0][0].size();
     npy_intp dims[3] = {s0, s1, s2};
     $result = PyArray_ZEROS(3, dims, NPY_DTYPE, 0);
+    #pragma omp parallel for collapse(3)
     for(long i = 0; i < s0; i++) {
         for(long j = 0; j < s1; j++) {
             for(long k = 0; k < s2; k++) {

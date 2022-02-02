@@ -1,0 +1,11 @@
+#!/bin/bash
+
+rm -rf build
+mkdir build
+cd build
+LD_LIBRARY_PATH=/usr/local/lib/ cmake .. -DPYTHON_LIBRARY=/usr/local/lib/libpython3.8.so -DPYTHON_INCLUDE_DIR=/usr/local/include/python3.8/ -DPYTHON_EXECUTABLE=/usr/local/bin/python3.8
+
+# rm -rf build_debug
+# mkdir build_debug
+# cd build_debug
+# LD_LIBRARY_PATH=/usr/local/lib/ cmake .. -DPYTHON_LIBRARY=/usr/local/lib/libpython3.8.so -DPYTHON_INCLUDE_DIR=/usr/local/include/python3.8/ -DPYTHON_EXECUTABLE=/usr/local/bin/python3.8 -DCMAKE_BUILD_TYPE=DEBUG

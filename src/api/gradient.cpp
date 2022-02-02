@@ -2,7 +2,7 @@
 
 using namespace gridpp;
 
-vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient){
+vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient, int halfwidth){
 
     // Sizes;
     int nY = ogrid.size()[0];
@@ -20,7 +20,6 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
     if(elev_gradient.size() > 0)
         if(elev_gradient.size() != igrid.size()[0] || elev_gradient[0].size() != igrid.size()[1])
             throw std::invalid_argument("Elevation gradient is the wrong size");
-    
 
     //Inputs
     vec2 ilats = igrid.get_lats();
@@ -47,10 +46,35 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
             float oelev = oelevs[y][x];
             float ielev = ielevs[indices[0]][indices[1]];
 
+            //Calculate Max and minimum temperature in neighbourhood
+            //int start = std::max(0, );
+            //int end = std::min()
+
+            float max = gridpp::MV;
+            float min = gridpp::MV;
+
+            for(int yy = 0 - halfwidth; yy <= halfwidth; yy++){
+                for(int xx = 0 - halfwidth; xx <= halfwidth; xx++){
+                    int I = std::min(std::max(0, indices[0] + yy), nY - 1);
+                    int J = std::min(std::max(0, indices[1] + xx), nX - 1);
+
+                    //if(ivalues[indices[0] + yy][indices[1] + xx] > max){
+                    if(ivalues[I][J] > max || !gridpp::is_valid(max)){
+                        max = ivalues[I][J];
+                    } 
+                    //else if(ivalues[indices[0] + yy][indices[1] + xx] < min ){
+                    else if(ivalues[I][J] < min || !gridpp::is_valid(min)){
+                        min = ivalues[I][J];
+                    } 
+                }
+            }
+
             //Calculate LAF and elevation difference between output and input
             float laf_correction = 0;
             float elev_correction = 0;
             float laf_diff = 0;
+
+            // Apply 
             if(laf_gradient.size() > 0 && gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
                 laf_diff = olaf - ilaf;
                 laf_correction = laf_gradient[indices[0]][indices[1]]*laf_diff;
@@ -64,6 +88,10 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
 
             //Calculate temperature
             float temp = ivalues[indices[0]][indices[1]] + laf_correction + elev_correction;
+
+            temp = std::min(temp, max);
+            temp = std::max(temp, min);
+
 
             //Assign value to output
             output[y][x] = temp;

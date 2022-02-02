@@ -575,7 +575,7 @@ namespace gridpp {
     *@param elev_gradient elevation gradient
     *@param laf_gradient land area fraction gradient
     */
-    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
+    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2(), int halfwidth = 1);
 
     vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
 

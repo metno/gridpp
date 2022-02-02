@@ -67,13 +67,13 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array,
                             search_array_count = search_array_count;
                             search_array_sum = search_array_sum;
                         }
-                        else{
+                        else if(gridpp::is_valid(search_array[yy][xx])){
                             search_array_count++;
                             search_array_sum = search_array_sum + search_array[yy][xx];
                             if(search_array[yy][xx] > search_target_min){
                                 max_count++;
                             }
-                        }   
+                        } 
                     }
                 }
 

@@ -118,6 +118,11 @@ namespace gridpp {
         LinearRegression = 10,
     };
 
+    /** Types of simple downscaling methods */
+    enum Downscaler {
+        Nearest = 0,
+        Bilinear = 1,
+    };
 
     /** **************************************
      * @name Data assimilation methods
@@ -520,6 +525,22 @@ namespace gridpp {
      * Functions that interpolate data from one grid to another
      * ***************************************/ /**@{*/
 
+    /** Generic downscaler for simple methods that don't use information other than the grids
+      * @param igrid Input grid
+      * @param ogrid Output grid to downscale to
+      * @param ivalues 2D vector of values on the input grid
+      * @param downscaler Downscaling method
+      * @return Values on the output grid
+    */
+    vec2 downscaling(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, Downscaler downscaler);
+    vec3 downscaling(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, Downscaler downscaler);
+    vec downscaling(const Grid& igrid, const Points& opoints, const vec2& ivalues, Downscaler downscaler);
+    vec2 downscaling(const Grid& igrid, const Points& opoints, const vec3& ivalues, Downscaler downscaler);
+    // vec downscaling(const Points& ipoints, const Points& opoints, const vec& ivalues, Downscaler downscaler);
+    // vec2 downscaling(const Points& ipoints, const Points& opoints, const vec2& ivalues, Downscaler downscaler);
+    // vec2 downscaling(const Points& ipoints, const Grid& ogrid, const vec& ivalues, Downscaler downscaler);
+    // vec3 downscaling(const Points& ipoints, const Grid& ogrid, const vec2& ivalues, Downscaler downscaler);
+
     /** Nearest neighbour dowscaling grid to grid
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
@@ -574,11 +595,11 @@ namespace gridpp {
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues);
     vec2 bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
-    vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient);
-    vec3 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient);
+    vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
+    vec3 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
 
-    vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient);
-    vec2 simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient);
+    vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
+    vec2 simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
 
     /** Compute Downscale
     *@param igrid input grid
@@ -587,27 +608,14 @@ namespace gridpp {
     *@param elev_gradient elevation gradient
     *@param laf_gradient land area fraction gradient
     */
-    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
-
-    vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);
-
-    vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
-
-    vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient);    
-
-    vec2 full_gradient(const Points& ipoints, const Grid& ogrid, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient);
-
-    vec3 full_gradient(const Points& ipoints, const Grid& ogrid, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
-
-    vec full_gradient(const Points& ipoints, const Points& opoints, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient);
-
-    vec2 full_gradient(const Points& ipoints, const Points& opoints, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient);
-
-    
+    vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2(), Downscaler downscaler=Nearest);
+    vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler=Nearest);
+    vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler=Nearest);
+    vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler=Nearest);
 
     /* Elevation and land area fraction downscaling with debug output fields
     */
-    vec3 full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2());
+    vec3 full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2(), Downscaler downscaler=Nearest);
 
     /** Smart neighbour downscaling grid to grid
       * @param igrid Input grid

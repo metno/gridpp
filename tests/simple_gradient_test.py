@@ -118,6 +118,58 @@ class Test(unittest.TestCase):
         expected = [expected, expected]
         np.testing.assert_array_almost_equal(output, expected)
 
+    def test_generic(self):
+        lats, lons = np.meshgrid([0, 1, 2], [0, 1])
+        elevs = np.reshape(np.arange(6), [2, 3])
+        grid = gridpp.Grid(lats, lons, elevs)
+        gridt = gridpp.Grid(lats.transpose(), lons.transpose(), elevs.transpose())
+        lat = 0.9
+        lon = 0.9
+        elev = 10
+        expected = 10-4
+
+        gradient = 1
+        values = np.zeros([2, 3])
+
+        self.compute_different_forms(gridpp.simple_gradient, gridt, values.transpose(), lat, lon, elev, expected, gradient)
+
+    def compute_different_forms(self, func, grid, values, lat, lon, elev, expected, *args):
+        T = 3
+        P = 5
+
+        lats = np.full([P, 1], lat)
+        lons = np.full([P, 1], lon)
+        elevs = np.full([P, 1], elev)
+        ogrid = gridpp.Grid(lats, lons, elevs)
+        opoints = gridpp.Points(lats.flatten(), lons.flatten(), elevs.flatten())
+
+        pexpected2 = np.full([P], expected)
+        pexpected3 = np.full([T, P], expected)
+        gexpected2 = np.full([P, 1], expected)
+        gexpected3 = np.full([T, P, 1], expected)
+
+        values3 = np.zeros([T, values.shape[0], values.shape[1]])
+        for t in range(T):
+            values3[t, ...] = values
+            gexpected3[t, ...] = gexpected2
+            pexpected3[t, ...] = pexpected2
+
+        # Grid to grid 2D
+        output = func(grid, ogrid, values, *args)
+        np.testing.assert_array_almost_equal(output, gexpected2)
+
+        # Grid to grid 3D
+        output = func(grid, ogrid, values3, *args)
+        np.testing.assert_array_almost_equal(output, gexpected3)
+
+        # Grid to points 2D
+        output = func(grid, opoints, values, *args)
+        np.testing.assert_array_almost_equal(output, pexpected2)
+
+        # Grid to points 3D
+        output = func(grid, opoints, values3, *args)
+        np.testing.assert_array_almost_equal(output, pexpected3)
+
 
 if __name__ == '__main__':
     unittest.main()

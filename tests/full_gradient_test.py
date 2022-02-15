@@ -123,9 +123,64 @@ class Test(unittest.TestCase):
                                             [[14,11,14], [14,6,14], [14,11,14]]])
 
     def test_grid_to_point_laf_3d(self):
-        pass 
-        
+        pass
 
+    def test_generic(self):
+        lats, lons = np.meshgrid([0, 1, 2], [0, 1])
+        elevs = np.reshape(np.arange(6), [2, 3])
+        grid = gridpp.Grid(lats, lons, elevs)
+        gridt = gridpp.Grid(lats.transpose(), lons.transpose(), elevs.transpose())
+        lat = 0.9
+        lon = 0.9
+        elev = 10
+        expected = 10-4
+
+        values = np.zeros([2, 3])
+        elev_gradient = np.ones([2, 3])
+        laf_gradient = np.ones([2, 3])
+
+        self.compute_different_forms(grid, values, elev_gradient, laf_gradient, lat, lon, elev, expected)
+        self.compute_different_forms(gridt, values.transpose(), elev_gradient.transpose(), laf_gradient.transpose(), lat, lon, elev, expected)
+
+
+    def compute_different_forms(self, grid, values, elev_gradient, laf_gradient, lat, lon, elev, expected, *args):
+        T = 3
+        P = 5
+
+        lats = np.full([P, 1], lat)
+        lons = np.full([P, 1], lon)
+        elevs = np.full([P, 1], elev)
+        ogrid = gridpp.Grid(lats, lons, elevs)
+        opoints = gridpp.Points(lats.flatten(), lons.flatten(), elevs.flatten())
+
+        pexpected2 = np.full([P], expected)
+        pexpected3 = np.full([T, P], expected)
+        gexpected2 = np.full([P, 1], expected)
+        gexpected3 = np.full([T, P, 1], expected)
+
+        values3 = np.zeros([T, values.shape[0], values.shape[1]])
+        elev_gradient3 = np.zeros([T, values.shape[0], values.shape[1]])
+        laf_gradient3 = np.zeros([T, values.shape[0], values.shape[1]])
+        for t in range(T):
+            values3[t, ...] = values
+            laf_gradient3[t, ...] = laf_gradient
+            elev_gradient3[t, ...] = elev_gradient
+
+        # Grid to grid 2D
+        output = gridpp.full_gradient(grid, ogrid, values, elev_gradient, laf_gradient, *args)
+        np.testing.assert_array_almost_equal(output, gexpected2)
+
+        # Grid to grid 3D
+        output = gridpp.full_gradient(grid, ogrid, values3, elev_gradient3, laf_gradient3, *args)
+        np.testing.assert_array_almost_equal(output, gexpected3)
+
+        # Grid to points 2D
+        output = gridpp.full_gradient(grid, opoints, values, elev_gradient, laf_gradient, *args)
+        np.testing.assert_array_almost_equal(output, pexpected2)
+
+        # Grid to points 3D
+        output = gridpp.full_gradient(grid, opoints, values3, elev_gradient3, laf_gradient3, *args)
+        np.testing.assert_array_almost_equal(output, pexpected3)
 
 
 if __name__ == '__main__':

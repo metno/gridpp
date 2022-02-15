@@ -2,7 +2,7 @@
 
 using namespace gridpp;
 
-vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient){
+vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler) {
 
     // Sizes;
     int nY = ogrid.size()[0];
@@ -20,280 +20,213 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
     if(elev_gradient.size() > 0)
         if(elev_gradient.size() != igrid.size()[0] || elev_gradient[0].size() != igrid.size()[1])
             throw std::invalid_argument("Elevation gradient is the wrong size");
-    
-
-    //Inputs
-    vec2 ilats = igrid.get_lats();
-    vec2 ilons = igrid.get_lons();
-    vec2 ielevs = igrid.get_elevs();
-    vec2 ilafs = igrid.get_lafs();
 
     //Outputs
-    vec2 olats = ogrid.get_lats();
-    vec2 olons = ogrid.get_lons();
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
 
-    vec2 output = gridpp::init_vec2(nY, nX);
+    vec2 output = gridpp::downscaling(igrid, ogrid, ivalues, downscaler);
+    vec2 delev_gradient;
+    vec2 delevs;
+    if(elev_gradient.size() != 0) {
+        delev_gradient = gridpp::downscaling(igrid, ogrid, elev_gradient, downscaler);
+        delevs = gridpp::downscaling(igrid, ogrid, igrid.get_elevs(), downscaler);
+    }
+    vec2 dlaf_gradient;
+    vec2 dlafs;
+    if(laf_gradient.size() != 0) {
+        dlaf_gradient = gridpp::downscaling(igrid, ogrid, laf_gradient, downscaler);
+        dlafs = gridpp::downscaling(igrid, ogrid, igrid.get_lafs(), downscaler);
+    }
 
+    #pragma omp parallel for collapse(2)
     for(int y = 0; y < nY ; y++){
         for(int x = 0; x < nX; x++){
-            //collect index for nearest neighbour
-            ivec indices = igrid.get_nearest_neighbour(olats[y][x], olons[y][x]);
-
-            //Collect output and input LAF and elevations
-            float olaf = olafs[y][x];
-            float ilaf = ilafs[indices[0]][indices[1]];
-            float oelev = oelevs[y][x];
-            float ielev = ielevs[indices[0]][indices[1]];
-
             //Calculate LAF and elevation difference between output and input
             float laf_correction = 0;
+            if(dlaf_gradient.size() > 0) {
+                float olaf = olafs[y][x];
+                float ilaf = dlafs[y][x];
+                if(gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                    float laf_diff = olaf - ilaf;
+                    laf_correction = dlaf_gradient[y][x]*laf_diff;
+                }
+            }
+
             float elev_correction = 0;
-            float laf_diff = 0;
-            if(laf_gradient.size() > 0 && gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
-                laf_diff = olaf - ilaf;
-                laf_correction = laf_gradient[indices[0]][indices[1]]*laf_diff;
+            if(delev_gradient.size() > 0) {
+                float oelev = oelevs[y][x];
+                float ielev = delevs[y][x];
+                if(gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                    float elev_diff = oelev - ielev;
+                    elev_correction = delev_gradient[y][x]*elev_diff;
+                }
             }
 
-            float elev_diff = 0;
-            if(elev_gradient.size() > 0 && gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
-                elev_diff = oelev - ielev;
-                elev_correction = elev_gradient[indices[0]][indices[1]]*elev_diff;
-            }
-
-            //Calculate temperature
-            float temp = ivalues[indices[0]][indices[1]] + laf_correction + elev_correction;
-
-            //Assign value to output
-            output[y][x] = temp;
+            output[y][x] += laf_correction + elev_correction;
         }
     }
     return output;
 }
 
-vec3 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient){
+vec3 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler) {
     // Sizes;
     int nY = ogrid.size()[0];
     int nX = ogrid.size()[1];
     int nTime = ivalues.size();
 
-    //Inputs
-    vec2 ilats = igrid.get_lats();
-    vec2 ilons = igrid.get_lons();
-    vec2 ielevs = igrid.get_elevs();
-    vec2 ilafs = igrid.get_lafs();
-
     //Outputs
-    vec2 olats = ogrid.get_lats();
-    vec2 olons = ogrid.get_lons();
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
 
-    vec3 output = gridpp::init_vec3(nTime, nY, nX);
-
-    if(laf_gradient.size() > 0) {
-        assert(gridpp::compatible_size(laf_gradient, ivalues));
-    }
-    if(elev_gradient.size() > 0) {
+    vec3 output = gridpp::downscaling(igrid, ogrid, ivalues, downscaler);
+    vec2 delevs;
+    vec3 delev_gradient;
+    if(elev_gradient.size() != 0) {
         assert(gridpp::compatible_size(elev_gradient, ivalues));
+        delev_gradient = gridpp::downscaling(igrid, ogrid, elev_gradient, downscaler);
+        delevs = gridpp::downscaling(igrid, ogrid, igrid.get_elevs(), downscaler);
+    }
+    vec3 dlaf_gradient;
+    vec2 dlafs;
+    if(laf_gradient.size() != 0) {
+        assert(gridpp::compatible_size(laf_gradient, ivalues));
+        dlaf_gradient = gridpp::downscaling(igrid, ogrid, laf_gradient, downscaler);
+        dlafs = gridpp::downscaling(igrid, ogrid, igrid.get_lafs(), downscaler);
     }
 
+    #pragma omp parallel for collapse(2)
     for(int y = 0; y < nY ; y++){
         for(int x = 0; x < nX; x++){
-            ivec indices = igrid.get_nearest_neighbour(olats[y][x], olons[y][x]);
-            int I = indices[0];
-            int J = indices[1];
-
-            //Collect output and input LAF and elevations
-            float olaf = olafs[y][x];
-            float ilaf = ilafs[I][J];
-            float oelev = oelevs[y][x];
-            float ielev = ielevs[I][J];
-
-            //Calculate LAF and elevation difference between output and input
-            float laf_diff = olaf - ilaf;
-            float elev_diff = oelev - ielev;
-
-
             for(int t = 0; t < nTime; t++){
-
                 float laf_correction = 0;
+                if(dlaf_gradient.size() > 0) {
+                    float olaf = olafs[y][x];
+                    float ilaf = dlafs[y][x];
+                    if(gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                        float laf_diff = olaf - ilaf;
+                        laf_correction = dlaf_gradient[t][y][x]*laf_diff;
+                    }
+                }
+
                 float elev_correction = 0;
+                if(delev_gradient.size() > 0) {
+                    float oelev = oelevs[y][x];
+                    float ielev = delevs[y][x];
+                    if(gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                        float elev_diff = oelev - ielev;
+                        elev_correction = delev_gradient[t][y][x]*elev_diff;
+                    }
+                }
 
-                if(laf_gradient.size() > 0)
-                    laf_correction = laf_gradient[t][I][J]*laf_diff;
-                if(elev_gradient.size() > 0)
-                    elev_correction = elev_gradient[t][I][J]*elev_diff;
-
-                float temp = ivalues[t][I][J] + laf_correction + elev_correction;
-                
-                output[t][y][x] = temp;
+                output[t][y][x] += laf_correction + elev_correction;
             }
         }
     }
     return output;
 }
 
-vec gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
-    vec olats = opoints.get_lats();
-    vec olons = opoints.get_lons();
+vec gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler) {
     vec olafs = opoints.get_lafs();
     vec oelevs = opoints.get_elevs();
 
-    vec2 ilats = igrid.get_lats();
-    vec2 ilons = igrid.get_lons();
-    vec2 ilafs = igrid.get_lafs();
-    vec2 ielevs = igrid.get_elevs();
+    int nPoints = opoints.size();
 
-    int nPoints = olats.size();
-
-    vec output(nPoints);
-
-    if(laf_gradient.size() > 0) {
-        assert(laf_gradient.size() == ivalues.size());
-        assert(laf_gradient[0].size() == ivalues[0].size());
-    }
-    if(elev_gradient.size() > 0) {
+    vec output = gridpp::downscaling(igrid, opoints, ivalues, downscaler);
+    vec delev_gradient;
+    vec delevs;
+    if(elev_gradient.size() != 0) {
         assert(elev_gradient.size() == ivalues.size());
         assert(elev_gradient[0].size() == ivalues[0].size());
+        delev_gradient = gridpp::downscaling(igrid, opoints, elev_gradient, downscaler);
+        delevs = gridpp::downscaling(igrid, opoints, igrid.get_elevs(), downscaler);
+    }
+    vec dlaf_gradient;
+    vec dlafs;
+    if(laf_gradient.size() != 0) {
+        assert(laf_gradient.size() == ivalues.size());
+        assert(laf_gradient[0].size() == ivalues[0].size());
+        dlaf_gradient = gridpp::downscaling(igrid, opoints, laf_gradient, downscaler);
+        dlafs = gridpp::downscaling(igrid, opoints, igrid.get_lafs(), downscaler);
     }
 
     for(int i = 0; i < nPoints; i++){
-        ivec indices = igrid.get_nearest_neighbour(olats[i], olons[i]);
-        int I = indices[0];
-        int J = indices[1];
-
-        float olaf = olafs[i];
-        float ilaf = ilafs[I][J];
-        float oelev = oelevs[i];
-        float ielev = ielevs[I][J];
-
         //Calculate LAF and elevation difference between output and input
-        float laf_diff = olaf - ilaf;
-        float elev_diff = oelev - ielev;
-
         float laf_correction = 0;
+        if(dlaf_gradient.size() > 0) {
+            float olaf = olafs[i];
+            float ilaf = dlafs[i];
+            if(gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                float laf_diff = olaf - ilaf;
+                laf_correction = dlaf_gradient[i]*laf_diff;
+            }
+        }
+
         float elev_correction = 0;
+        if(delev_gradient.size() > 0) {
+            float oelev = oelevs[i];
+            float ielev = delevs[i];
+            if(gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                float elev_diff = oelev - ielev;
+                elev_correction = delev_gradient[i]*elev_diff;
+            }
+        }
 
-        if(laf_gradient.size() > 0)
-            laf_correction = laf_gradient[I][J]*laf_diff;
-        if(elev_gradient.size() > 0)
-            elev_correction = elev_gradient[I][J]*elev_diff;
-
-        float temp = ivalues[I][J] + laf_correction + elev_correction;
-
-        output[i] = temp;
+        output[i] += laf_correction + elev_correction;
     }
     return output;
 }
 
-vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient){
-    vec olats = opoints.get_lats();
-    vec olons = opoints.get_lons();
+vec2 gridpp::full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler) {
     vec olafs = opoints.get_lafs();
     vec oelevs = opoints.get_elevs();
 
-    vec2 ilats = igrid.get_lats();
-    vec2 ilons = igrid.get_lons();
-    vec2 ilafs = igrid.get_lafs();
-    vec2 ielevs = igrid.get_elevs();
-
-    int nPoints = olats.size();
+    int nPoints = opoints.size();
     int nTime = ivalues.size();
 
-    vec2 output = gridpp::init_vec2(nTime, nPoints);
-
-    if(laf_gradient.size() > 0) {
-        assert(laf_gradient.size() == nTime);
-        assert(laf_gradient.size() == ivalues.size());
-        assert(laf_gradient[0].size() == ivalues[0].size());
+    vec2 output = gridpp::downscaling(igrid, opoints, ivalues, downscaler);
+    vec2 delev_gradient;
+    vec delevs;
+    if(elev_gradient.size() != 0) {
+        delev_gradient = gridpp::downscaling(igrid, opoints, elev_gradient, downscaler);
+        delevs = gridpp::downscaling(igrid, opoints, igrid.get_elevs(), downscaler);
     }
-    if(elev_gradient.size() > 0) {
-        assert(elev_gradient.size() == nTime);
-        assert(elev_gradient.size() == ivalues.size());
-        assert(elev_gradient[0].size() == ivalues[0].size());
+    vec2 dlaf_gradient;
+    vec dlafs;
+    if(laf_gradient.size() != 0) {
+        dlaf_gradient = gridpp::downscaling(igrid, opoints, laf_gradient, downscaler);
+        dlafs = gridpp::downscaling(igrid, opoints, igrid.get_lafs(), downscaler);
     }
 
     for(int i = 0; i < nPoints; i++){
-        ivec indices = igrid.get_nearest_neighbour(olats[i], olons[i]);
-        int I = indices[0];
-        int J = indices[1];
-
-        float olaf = olafs[i];
-        float ilaf = ilafs[I][J];
-        float oelev = oelevs[i];
-        float ielev = ielevs[I][J];
-
-        //Calculate LAF and elevation difference between output and input
-        float laf_diff = olaf - ilaf;
-        float elev_diff = oelev - ielev;
-
-        for(int t; t <nTime; t++){
+        for(int t = 0; t < nTime; t++){
             float laf_correction = 0;
+            if(dlaf_gradient.size() > 0) {
+                float olaf = olafs[i];
+                float ilaf = dlafs[i];
+                if(gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                    float laf_diff = olaf - ilaf;
+                    laf_correction = dlaf_gradient[t][i]*laf_diff;
+                }
+            }
+
             float elev_correction = 0;
+            if(delev_gradient.size() > 0) {
+                float oelev = oelevs[i];
+                float ielev = delevs[i];
+                if(gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                    float elev_diff = oelev - ielev;
+                    elev_correction = delev_gradient[t][i]*elev_diff;
+                }
+            }
 
-            if(laf_gradient.size() > 0)
-                laf_correction = laf_gradient[t][I][J] * laf_diff;
-            if(elev_gradient.size() > 0)
-                elev_correction = elev_gradient[t][I][J] * elev_diff;
-
-            float temp = ivalues[t][I][J] + laf_correction + elev_correction;
-
-            output[t][i] = temp;
+            output[t][i] += laf_correction + elev_correction;
         }
     }
     return output;
 }
 
-vec2 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
-    vec ilats = ipoints.get_lats();
-    vec ilons = ipoints.get_lons();
-    vec ilafs = ipoints.get_lons();
-    vec ielevs = ipoints.get_elevs();
-
-    vec2 olats = ogrid.get_lats();
-    vec2 olons = ogrid.get_lons();
-    vec2 olafs = ogrid.get_lafs();
-    vec2 oelevs = ogrid.get_elevs();
-
-    int nPoints = olats.size();
-
-    int nY = olats.size();
-    int nX = olats[0].size();
-
-    throw std::invalid_argument("Not implemented points to grid 2D");
-
-    /*vec2 output = gridpp::init_vec2(nPoints);
-
-    for(int i = 0; i < nYs, i++){
-        output[i].resize(nX);
-    }
-
-    for(int i = 0; i < nY; i++){
-        for(int j = 0; i < nX; i++){
-            indices = ipoints.
-        }
-    } 
-    */
-}
-
-vec3 gridpp::full_gradient(const Points& ipoints, const Grid& ogrid, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
-    throw std::invalid_argument("Not Implemented Points to grid 3d");
-    
-}
-
-vec gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec&ivalues, const vec& elev_gradient, const vec& laf_gradient){
-    throw std::invalid_argument("Not Implemented Points to points");
-    
-}
-
-vec2 gridpp::full_gradient(const Points& ipoints, const Points& opoints, const vec2&ivalues, const vec2& elev_gradient, const vec2& laf_gradient){
-    throw std::invalid_argument("Not Implemented Points to points 2D");
-    
-}
-
-vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient){
+vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler) {
     // Sizes;
     int nY = ogrid.size()[0];
     int nX = ogrid.size()[1];
@@ -312,8 +245,6 @@ vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec
     */
 
     //Inputs
-    vec2 ilats = igrid.get_lats();
-    vec2 ilons = igrid.get_lons();
     vec2 ielevs = igrid.get_elevs();
     vec2 ilafs = igrid.get_lafs();
 
@@ -321,39 +252,56 @@ vec3 gridpp::full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec
     vec2 i_elevs_gradient = elev_gradient;
 
     //Outputs
-    vec2 olats = ogrid.get_lats();
-    vec2 olons = ogrid.get_lons();
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
 
     vec3 output = gridpp::init_vec3(nY, nX, 9);
+    vec2 dvalues = gridpp::downscaling(igrid, ogrid, ivalues, downscaler);
+    vec2 delev_gradient;
+    vec2 delevs;
+    if(elev_gradient.size() != 0) {
+        delev_gradient = gridpp::downscaling(igrid, ogrid, elev_gradient, downscaler);
+        delevs = gridpp::downscaling(igrid, ogrid, igrid.get_elevs(), downscaler);
+    }
+    vec2 dlaf_gradient;
+    vec2 dlafs;
+    if(laf_gradient.size() != 0) {
+        dlaf_gradient = gridpp::downscaling(igrid, ogrid, laf_gradient, downscaler);
+        dlafs = gridpp::downscaling(igrid, ogrid, igrid.get_lafs(), downscaler);
+    }
 
     for(int y = 0; y < nY ; y++){
         for(int x = 0; x < nX; x++){
-            //collect index for nearest neighbour
-            ivec indices = igrid.get_nearest_neighbour(olats[y][x], olons[y][x]);
-
             //Collect output and input LAF and elevations
             float olaf = olafs[y][x];
-            float ilaf = ilafs[indices[0]][indices[1]];
+            float ilaf = dlafs[y][x];
             float oelev = oelevs[y][x];
-            float ielev = ielevs[indices[0]][indices[1]];
+            float ielev = delevs[y][x];
 
             //Calculate LAF and elevation difference between output and input
             float laf_diff = olaf - ilaf;
             float elev_diff = oelev - ielev;
 
             float laf_correction = 0;
+            if(dlaf_gradient.size() > 0) {
+                if(gridpp::is_valid(olaf) && gridpp::is_valid(ilaf)) {
+                    float laf_diff = olaf - ilaf;
+                    laf_correction = dlaf_gradient[y][x]*laf_diff;
+                }
+            }
+
             float elev_correction = 0;
-            if(laf_gradient.size() > 0)
-                laf_correction = laf_gradient[indices[0]][indices[1]]*laf_diff;
-            if(elev_gradient.size() > 0)
-                elev_correction = elev_gradient[indices[0]][indices[1]]*elev_diff;
+            if(delev_gradient.size() > 0) {
+                if(gridpp::is_valid(oelev) && gridpp::is_valid(ielev)) {
+                    float elev_diff = oelev - ielev;
+                    elev_correction = delev_gradient[y][x]*elev_diff;
+                }
+            }
 
             //Calculate temperature
-            float temp = ivalues[indices[0]][indices[1]] + laf_correction + elev_correction;
-            float temp_laf_c = ivalues[indices[0]][indices[1]] + laf_correction;
-            float temp_elev_c = ivalues[indices[0]][indices[1]]+ elev_correction;
+            float temp = dvalues[y][x] + laf_correction + elev_correction;
+            float temp_laf_c = dvalues[y][x] + laf_correction;
+            float temp_elev_c = dvalues[y][x]+ elev_correction;
 
             //Assign value to output
             output[y][x][0] = temp;

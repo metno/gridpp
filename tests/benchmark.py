@@ -58,7 +58,6 @@ def main():
     run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
     run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
         100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 0, 0)}
-    run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
         np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
@@ -71,6 +70,8 @@ def main():
     y = np.sort(np.random.rand(2000, 2000, 10).astype(np.float32), axis=2)
     run[("apply_curve", "gridded")] = {"expected": 0.87, "args": (np.random.rand(2000,
         2000).astype(np.float32), x, y, gridpp.OneToOne, gridpp.OneToOne)}
+    run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([2000, 2000, 10],
+        np.float32),)}
 
 
     if args.num_cores is not None:

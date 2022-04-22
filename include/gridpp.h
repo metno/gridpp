@@ -13,7 +13,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev13"
+#define GRIDPP_VERSION "0.6.0.dev14"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {

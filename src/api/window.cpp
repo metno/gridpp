@@ -19,7 +19,7 @@ vec2 gridpp::window(const vec2& array,
     #pragma omp parallel for
     for(int y = 0; y < array.size(); y++) {
         // Use the accumulation/deaccumulation trick for Mean and Sum
-        if (statistic == gridpp::Mean || statistic == gridpp::Sum) {
+        if (statistic == gridpp::Mean || statistic == gridpp::Sum || statistic == gridpp::Count) {
             vec values = vec(array[y].size(), 0);
             vec counts = vec(array[y].size(), 0);
 
@@ -68,27 +68,31 @@ vec2 gridpp::window(const vec2& array,
                     }
                 }
 
-                if(statistic == gridpp::Mean) {
-                    if(counts[end] != 0) {
-                        output[y][x] = output[y][x] / (counts[end] - counts[start-1]);
-                    }
+                if(statistic == gridpp::Count) {
+                    output[y][x] = counts[end] - counts[start - 1];
                 }
-
-                if(keep_missing) {
-                    if(counts[end] - counts[start - 1] < (end - (start - 1 ))) {
-                        output[y][x] = gridpp::MV;
+                else {
+                    if(statistic == gridpp::Mean) {
+                        if(counts[end] != 0) {
+                            output[y][x] = output[y][x] / (counts[end] - counts[start-1]);
+                        }
                     }
-                }
-
-                if(missing_edges) {
-                    if(before == false) {
-                        if(x < length / 2 || x + length / 2  + 1 > array[y].size()) {
+                    if(keep_missing) {
+                        if(counts[end] - counts[start - 1] < (end - (start - 1 ))) {
                             output[y][x] = gridpp::MV;
                         }
                     }
-                    else{
-                        if(x < length - 1) {
-                            output[y][x] = gridpp::MV;
+
+                    if(missing_edges) {
+                        if(before == false) {
+                            if(x < length / 2 || x + length / 2  + 1 > array[y].size()) {
+                                output[y][x] = gridpp::MV;
+                            }
+                        }
+                        else{
+                            if(x < length - 1) {
+                                output[y][x] = gridpp::MV;
+                            }
                         }
                     }
                 }

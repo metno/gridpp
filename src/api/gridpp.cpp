@@ -31,6 +31,9 @@ gridpp::Statistic gridpp::get_statistic(std::string name) {
     else if(name == "sum") {
         type = gridpp::Sum;
     }
+    else if(name == "count") {
+        type = gridpp::Count;
+    }
     else {
         type = gridpp::Unknown;
     }

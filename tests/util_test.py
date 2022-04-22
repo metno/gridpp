@@ -38,6 +38,13 @@ class Test(unittest.TestCase):
         self.assertTrue(np.isnan(gridpp.calc_statistic([np.nan, np.nan, np.nan], gridpp.Mean)))
         self.assertTrue(np.isnan(gridpp.calc_statistic([], gridpp.Mean)))
 
+    def test_calc_statistic_count(self):
+        self.assertEqual(gridpp.calc_statistic([0, 1, 2], gridpp.Count), 3)
+        self.assertEqual(gridpp.calc_statistic([0, 1, np.nan], gridpp.Count), 2)
+        self.assertEqual(gridpp.calc_statistic([np.nan, 1, np.nan], gridpp.Count), 1)
+        self.assertEqual(gridpp.calc_statistic([np.nan, np.nan, np.nan], gridpp.Count), 0)
+        self.assertEqual(gridpp.calc_statistic([], gridpp.Count), 0)
+
     def test_calc_statistic_sum(self):
         self.assertEqual(gridpp.calc_statistic([0, 1, 2], gridpp.Sum), 3)
         self.assertEqual(gridpp.calc_statistic([0, 1, np.nan], gridpp.Sum), 1)

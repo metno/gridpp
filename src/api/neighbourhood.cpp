@@ -42,7 +42,7 @@ vec2 gridpp::neighbourhood(const vec2& input, int halfwidth, gridpp::Statistic s
     for(int y = 0; y < nY; y++) {
         output[y].resize(nX, gridpp::MV);
     }
-    if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
+    if(statistic == gridpp::Mean || statistic == gridpp::Sum || statistic == gridpp::Count) {
         dvec2 values;
         ivec2 counts;
         values.resize(nY);
@@ -131,7 +131,10 @@ vec2 gridpp::neighbourhood(const vec2& input, int halfwidth, gridpp::Statistic s
                 }
                 double value = value11 + value00 - value10 - value01;
                 int count = count11 + count00 - count10 - count01;
-                if(count > 0) {
+                if(statistic == gridpp::Count) {
+                    output[i][j] = count;
+                }
+                else if(count > 0) {
                     if(statistic == gridpp::Mean) {
                         value /= count;
                     }

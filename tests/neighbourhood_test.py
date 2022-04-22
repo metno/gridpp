@@ -49,10 +49,13 @@ class Test(unittest.TestCase):
         """Missing values in input array"""
         empty = np.zeros([5, 5])
         empty[0:3, 0:3] = np.nan
-        for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
-            for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
+        for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
+            for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
                 output = func(empty, 1, statistic)
                 self.assertTrue(np.isnan(np.array(output)[0:2,0:2]).all())
+
+            output = func(empty, 1, gridpp.Count)
+            np.testing.assert_array_almost_equal(output, [[0, 0, 2, 4, 4], [0, 0, 3, 6, 6], [2, 3, 5, 7, 6], [4, 6, 7, 8, 6], [4, 6, 6, 6, 4]])
 
     def test_mean(self):
         for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
@@ -67,6 +70,21 @@ class Test(unittest.TestCase):
             I = np.where(np.isnan(output) == 0)[0]
             self.assertTrue((np.isnan(output) == np.isnan(values.flatten())).all())
             self.assertTrue((output[I] == values.flatten()[I]).all())
+
+    def test_count(self):
+        for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
+            output = func(values, 1, gridpp.Count)
+            self.assertEqual(output[2][2], 8)
+            self.assertAlmostEqual(output[0][4], 3)
+
+            output = func(values, 100, gridpp.Count)
+            self.assertTrue((np.abs(np.array(output) - 23)<0.0001).all())
+
+            output = np.array(func(values, 0, gridpp.Count))
+            num_missing = np.sum(np.isnan(output))
+            I = np.where(np.isnan(output) == 0)[0]
+            I0 = np.where(output == 0)[0]
+            np.testing.assert_array_almost_equal(output, [[1, 1, 1, 1, 1], [1, 1, 1, 0, 1], [1, 1, 1, 1, 0], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
 
     def test_min(self):
         for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
@@ -86,7 +104,7 @@ class Test(unittest.TestCase):
             output = func(values, 100, gridpp.Max)
             self.assertTrue((np.array(output) == 24).all())
 
-    def test_mean(self):
+    def test_mean0(self):
         for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
             input = (np.random.rand(1000, 1000)> 0.5).astype(float)
             thresholds = [1, 5, 10]

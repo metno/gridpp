@@ -86,6 +86,7 @@ namespace gridpp {
         Std       = 50, /**< Standard deviation of values */
         Variance  = 60, /**< Population variance of values */
         Sum       = 70, /**< Sum of values */
+        Count     = 80, /**< Count of values */
         Unknown   = -1  /**< Unknown statistic */
     };
 

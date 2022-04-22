@@ -23,7 +23,7 @@ bool gridpp::is_valid(float value) {
 float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
     // Initialize to missing
     float value = gridpp::MV;
-    if(statistic == gridpp::Mean || statistic == gridpp::Sum) {
+    if(statistic == gridpp::Mean || statistic == gridpp::Sum || statistic == gridpp::Count) {
         float total = 0;
         int count = 0;
         for(int n = 0; n < array.size(); n++) {
@@ -32,7 +32,9 @@ float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
                 count++;
             }
         }
-        if(count > 0) {
+        if (statistic == gridpp::Count)
+            value = count;
+        else if(count > 0) {
             if(statistic == gridpp::Mean)
                 value = total / count;
             else

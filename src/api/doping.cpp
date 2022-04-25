@@ -33,7 +33,7 @@ vec2 gridpp::doping_square(const Grid& igrid, const vec2& background, const Poin
         ivec index = igrid.get_nearest_neighbour(lats[i], lons[i]);
         float curr = observations[i];
         for(int yy = std::max(0, index[0] - halfwidth[i]); yy <= std::min(Y - 1, index[0] + halfwidth[i]); yy++) {
-            for(int xx = std::max(0, index[1] - halfwidth[i]); xx <= std::min(X - 1, index[0] + halfwidth[i]); xx++) {
+            for(int xx = std::max(0, index[1] - halfwidth[i]); xx <= std::min(X - 1, index[1] + halfwidth[i]); xx++) {
                 if(check_elev) {
                     float diff = fabs(elevs[i] - ielevs[yy][xx]);
                     if(diff > max_elev_diff)

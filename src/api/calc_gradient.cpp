@@ -102,32 +102,22 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
         vec2 meanXY = gridpp::neighbourhood(base_x_values, halfwidth, gridpp::Mean);
         vec2 count = gridpp::neighbourhood(is_valid, halfwidth, gridpp::Sum);
 
-
-        vec2 min;
-        vec2 max;
-        if(gridpp::is_valid(min_range)) {
-            min = gridpp::neighbourhood(base0, halfwidth, gridpp::Min);
-            max = gridpp::neighbourhood(base0, halfwidth, gridpp::Max);
-        }
-
         #pragma omp parallel for collapse(2)
         for(int y = 0; y < nY; y++){
             for(int x = 0; x < nX; x++){
-                bool valid_range = true;
-                if(gridpp::is_valid(min_range)) {
-                    if(!gridpp::is_valid(min[y][x]))
-                        valid_range = false;
-                    else if(!gridpp::is_valid(max[y][x]))
-                        valid_range = false;
-                    else if(max[y][x] - min[y][x] < min_range)
-                        valid_range = false;
-                }
-                if(valid_range && count[y][x] >= num_min && gridpp::is_valid(meanXX[y][x]) && gridpp::is_valid(meanXY[y][x]) && gridpp::is_valid(meanX[y][x]) && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
-                    output[y][x] = (meanXY[y][x] - meanX[y][x] * meanY[y][x]) /
-                                   (meanXX[y][x] - meanX[y][x] * meanX[y][x]);
-                }
-                else{
-                    output[y][x] = default_gradient;
+                output[y][x] = default_gradient;
+                if(count[y][x] >= num_min && gridpp::is_valid(meanXX[y][x]) && gridpp::is_valid(meanXY[y][x]) && gridpp::is_valid(meanX[y][x]) && meanXX[y][x] - meanX[y][x] * meanX[y][x] != 0) {
+                    bool valid_range = true;
+                    if(gridpp::is_valid(min_range)) {
+                        // Use the STD as a measure of range, since this is more efficient
+                        float range = sqrt(meanXX[y][x] - meanX[y][x] * meanX[y][x]);
+                        if(!gridpp::is_valid(range))
+                            valid_range = false;
+                        else if(range < min_range)
+                            valid_range = false;
+                    }
+                    if(valid_range)
+                        output[y][x] = (meanXY[y][x] - meanX[y][x] * meanY[y][x]) / (meanXX[y][x] - meanX[y][x] * meanX[y][x]);
                 }
             }
         }

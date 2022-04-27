@@ -968,13 +968,13 @@ namespace gridpp {
     * criteria range, then the most suitable point is used. This is the nearest value of any point
     * within the search_target range; or if no point fulfills this, the point with the highest
     * search value.
-    * @param vec2 array input array (e.g temperatures)
-    * @param vec2 search array array used to search
-      @param int halfwidth search radius
-    * @param float search_target_min minimum value where values are assigned with
-    * @param float search_target_max maximum value where values are assigned with
-    * @param float search_delta if no search_target values are found, minimum difference between original value of search_array and any value inside the search radius.
-    * @param vec2 apply_array array of 0 and 1. 1 -> apply neighbourhood_search, 0 -> use input
+    * @param base base values (e.g elevation)
+    * @param values values to compute gradients for (e.g. temperatures)
+    * @param gradient_type what gradient type to compute
+    * @param halfwidth neighbourhood halfwidth to compute gradient for
+    * @param min_num minimum number of valid points needed to compute gradient
+    * @param min_range minimum range of base values to compute gradient (for LinearRegression, this is the standard deviation of values
+    * @param default_gradient The gradient to use when a gradient cannot be computed
     */
     vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array=ivec2());
 

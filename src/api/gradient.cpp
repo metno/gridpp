@@ -3,11 +3,9 @@
 using namespace gridpp;
 
 vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler) {
-
     // Sizes;
     int nY = ogrid.size()[0];
     int nX = ogrid.size()[1];
-
 
     if(ivalues.size() != igrid.size()[0] || ivalues[0].size() != igrid.size()[1])
         throw std::invalid_argument("Values is the wrong size");
@@ -21,22 +19,39 @@ vec2 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& iva
         if(elev_gradient.size() != igrid.size()[0] || elev_gradient[0].size() != igrid.size()[1])
             throw std::invalid_argument("Elevation gradient is the wrong size");
 
-    //Outputs
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
+    double s_time = gridpp::clock();
 
-    vec2 output = gridpp::downscaling(igrid, ogrid, ivalues, downscaler);
+    // Stack all fields to be downscaled into a single vec3 to save time
+    vec3 fields;
+    fields.push_back(ivalues);
+    if(elev_gradient.size() != 0) {
+        fields.push_back(elev_gradient);
+        fields.push_back(igrid.get_elevs());
+    }
+    if(laf_gradient.size() != 0) {
+        fields.push_back(laf_gradient);
+        fields.push_back(igrid.get_lafs());
+    }
+    vec3 fields_downscaled = gridpp::downscaling(igrid, ogrid, fields, downscaler);
+
+    // Extract fields
+    vec2 output = fields_downscaled[0];
     vec2 delev_gradient;
     vec2 delevs;
+    int c = 1;
     if(elev_gradient.size() != 0) {
-        delev_gradient = gridpp::downscaling(igrid, ogrid, elev_gradient, downscaler);
-        delevs = gridpp::downscaling(igrid, ogrid, igrid.get_elevs(), downscaler);
+        delev_gradient = fields_downscaled[c];
+        delevs = fields_downscaled[c + 1];
+        c += 2;
     }
     vec2 dlaf_gradient;
     vec2 dlafs;
     if(laf_gradient.size() != 0) {
-        dlaf_gradient = gridpp::downscaling(igrid, ogrid, laf_gradient, downscaler);
-        dlafs = gridpp::downscaling(igrid, ogrid, igrid.get_lafs(), downscaler);
+        dlaf_gradient = fields_downscaled[c];
+        dlafs = fields_downscaled[c + 1];
+        c += 2;
     }
 
     #pragma omp parallel for collapse(2)
@@ -79,20 +94,52 @@ vec3 gridpp::full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& iva
     vec2 oelevs = ogrid.get_elevs();
     vec2 olafs = ogrid.get_lafs();
 
-    vec3 output = gridpp::downscaling(igrid, ogrid, ivalues, downscaler);
+    // Stack all fields to be downscaled into a single vec3 to save time
+    vec3 fields;
+    for(int t = 0; t < nTime; t++) {
+        fields.push_back(ivalues[t]);
+    }
+    if(elev_gradient.size() != 0) {
+        assert(gridpp::compatible_size(elev_gradient, ivalues));
+        for(int t = 0; t < nTime; t++) {
+            fields.push_back(elev_gradient[t]);
+        }
+        fields.push_back(igrid.get_elevs());
+    }
+    if(laf_gradient.size() != 0) {
+        assert(gridpp::compatible_size(laf_gradient, ivalues));
+        for(int t = 0; t < nTime; t++) {
+            fields.push_back(laf_gradient[t]);
+        }
+        fields.push_back(igrid.get_lafs());
+    }
+    vec3 fields_downscaled = gridpp::downscaling(igrid, ogrid, fields, downscaler);
+
+    // Extract fields
+    vec3 output;
+    for(int t = 0; t < nTime; t++) {
+        output.push_back(fields_downscaled[t]);
+    }
+    int c = output.size();
     vec2 delevs;
     vec3 delev_gradient;
     if(elev_gradient.size() != 0) {
-        assert(gridpp::compatible_size(elev_gradient, ivalues));
-        delev_gradient = gridpp::downscaling(igrid, ogrid, elev_gradient, downscaler);
-        delevs = gridpp::downscaling(igrid, ogrid, igrid.get_elevs(), downscaler);
+        for(int t = 0; t < nTime; t++) {
+            delev_gradient.push_back(fields_downscaled[c]);
+            c++;
+        }
+        delevs = fields_downscaled[c];
+        c++;
     }
     vec3 dlaf_gradient;
     vec2 dlafs;
     if(laf_gradient.size() != 0) {
-        assert(gridpp::compatible_size(laf_gradient, ivalues));
-        dlaf_gradient = gridpp::downscaling(igrid, ogrid, laf_gradient, downscaler);
-        dlafs = gridpp::downscaling(igrid, ogrid, igrid.get_lafs(), downscaler);
+        for(int t = 0; t < nTime; t++) {
+            dlaf_gradient.push_back(fields_downscaled[c]);
+            c++;
+        }
+        dlafs = fields_downscaled[c];
+        c++;
     }
 
     #pragma omp parallel for collapse(2)

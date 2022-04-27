@@ -39,6 +39,24 @@ vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) 
     int nLon = iOutputLats[0].size();
 
     vec3 output(nTime);
+
+    // Fetch the nearest neighbours first, because we do not want time to be the inner loop. For
+    // large number of times, the memory access gets slow when time is the inner loop.
+    ivec2 I(nLat);
+    ivec2 J(nLat);
+    for(int i = 0; i < nLat; i++) {
+        I[i].resize(nLon);
+        J[i].resize(nLon);
+    }
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < nLat; i++) {
+        for(int j = 0; j < nLon; j++) {
+            ivec indices = igrid.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);
+            I[i][j] = indices[0];
+            J[i][j] = indices[1];
+        }
+    }
+
     for(int t = 0; t < nTime; t++) {
         output[t].resize(nLat);
         for(int i = 0; i < nLat; i++)
@@ -46,13 +64,12 @@ vec3 gridpp::nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues) 
     }
 
     #pragma omp parallel for collapse(2)
-    for(int i = 0; i < nLat; i++) {
-        for(int j = 0; j < nLon; j++) {
-            ivec indices = igrid.get_nearest_neighbour(iOutputLats[i][j], iOutputLons[i][j]);
-            int I = indices[0];
-            int J = indices[1];
-            for(int t = 0; t < nTime; t++) {
-                output[t][i][j] = ivalues[t][I][J];
+    for(int t = 0; t < nTime; t++) {
+        for(int i = 0; i < nLat; i++) {
+            for(int j = 0; j < nLon; j++) {
+                int II = I[i][j];
+                int JJ = J[i][j];
+                output[t][i][j] = ivalues[t][II][JJ];
             }
         }
     }
@@ -141,18 +158,26 @@ vec2 gridpp::nearest(const Grid& igrid, const Points& opoints, const vec3& ivalu
     int nPoints = iOutputLats.size();
     int nTime = ivalues.size();
 
+    // Fetch the nearest neighbours first, because we do not want time to be the inner loop. For
+    // large number of times, the memory access gets slow when time is the inner loop.
+    ivec I(nPoints);
+    ivec J(nPoints);
+    #pragma omp parallel for
+    for(int i = 0; i < nPoints; i++) {
+        ivec indices = igrid.get_nearest_neighbour(iOutputLats[i], iOutputLons[i]);
+        I[i] = indices[0];
+        J[i] = indices[1];
+    }
+
     vec2 output(nTime);
     for(int t = 0; t < nTime; t++) {
         output[t].resize(nPoints, gridpp::MV);
     }
 
-    #pragma omp parallel for
-    for(int i = 0; i < nPoints; i++) {
-        ivec indices = igrid.get_nearest_neighbour(iOutputLats[i], iOutputLons[i]);
-        int I = indices[0];
-        int J = indices[1];
-        for(int t = 0; t < nTime; t++) {
-            output[t][i] = ivalues[t][I][J];
+    #pragma omp parallel for collapse(2)
+    for(int t = 0; t < nTime; t++) {
+        for(int i = 0; i < nPoints; i++) {
+            output[t][i] = ivalues[t][I[i]][J[i]];
         }
     }
     return output;

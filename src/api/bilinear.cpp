@@ -4,6 +4,11 @@
 
 using namespace gridpp;
 
+// Notes:
+// Bilinear should have roughly the same performance as nearest. THe exception is for 3D arrays
+// where the number of timesteps is large. In this case, nearest processes time in the outer loop to
+// prevent inefficient memory access. This is too complicated to implement here at the moment.
+
 namespace {
     // Bilinear interpolation for a given point
     float calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec2& ivalues, float lat, float lon);

@@ -9,7 +9,7 @@ def main():
     parser.add_argument('-j', type=int, help='Do a scaling test, by running on multiple cores (>= 2)', dest='num_cores')
     parser.add_argument('-s', type=float, default=1, help='Enlarge the inputs by this scaling factor to run a bigger test', dest='scaling')
     parser.add_argument('-n', type=int, default=1, help='Number of iterations to average over', dest='iterations')
-    parser.add_argument('-t', help='Run only this function', dest="function")
+    parser.add_argument('-t', help='Run only this function', dest="functions", nargs='*')
 
     args = parser.parse_args()
 
@@ -40,8 +40,8 @@ def main():
     run[("neighbourhood_quantile", "500²")] = {"expected": 1.70, "args":(input[500], quantile, radius)}
     run[("bilinear", "1000²")] = {"expected": 1.68, "args":(grids[1000], grids[1000], input[1000])}
     run[("bilinear", "1000² x 50")] = {"expected": 4.42, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
-    run[("nearest", "1000²")] = {"expected": 1.52, "args":(grids[1000], grids[1000], input[1000])}
-    run[("nearest", "1000² x 50")] = {"expected": 2.30, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
+    run[("nearest", "1000²")] = {"expected": 1.52, "args":(grids[1000], grids[1000], np.zeros([1000,1000]))}
+    run[("nearest", "1000² x 50")] = {"expected": 1.93, "args":(grids[1000], grids[1000], np.repeat(np.expand_dims(input[1000], 0), 50, axis=0))}
     run[("gridding", "1000² 100000")] = {"expected": 0.53, "args":(grids[1000], points[100000], np.zeros([100000]), 5000, 1, gridpp.Mean)}
     run[("gridding_nearest", "1000² 100000")] = {"expected": 0.13, "args":(grids[1000], points[100000], np.zeros([100000]), 1, gridpp.Mean)}
     run[("optimal_interpolation", "1000² 1000")] = {"expected": 1.57, "args":(grids[1000],
@@ -55,7 +55,8 @@ def main():
         points[100000], np.ones(100000) * 1, np.ones(100000) * 5000, False)}
     run[("local_distribution_correction", "")] = {"expected": 0.52, "args":(grids[1000], np.zeros([1000, 1000]),
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
-    run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000], np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
+    run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000],
+        np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
     run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
         100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 100, 0)}
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
@@ -75,9 +76,9 @@ def main():
 
 
     if args.num_cores is not None:
-        print("Gridd parallelization test (gridpp version %s)" % gridpp.version())
+        print("Gridpp parallelization test (gridpp version %s)" % gridpp.version())
     else:
-        print("Gridd benchmark (gridpp version %s)" % gridpp.version())
+        print("Gridpp benchmark (gridpp version %s)" % gridpp.version())
         print("Expected results from Intel i7 3.40 Ghz")
     print("-----------------------------------------------------------------")
     if args.num_cores is not None:
@@ -99,8 +100,8 @@ def main():
             else:
                 name = key
                 func = eval("gridpp." + key)
-            if args.function is not None:
-                if func.__name__ != args.function:
+            if args.functions is not None:
+                if func.__name__ not in args.functions:
                     continue
 
             # Allow functions to fail (useful when benchmarking older versions of gridpp

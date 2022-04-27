@@ -8,7 +8,7 @@ vec2 gridpp::calc_gradient(const vec2& base, const vec2& values, GradientType gr
 
     if(halfwidth <= 0)
         throw std::invalid_argument("Halwidth cannot be <= 0; must be positive integer");
-    if(min_range < 0)
+    if(gridpp::is_valid(min_range) && min_range < 0)
         throw std::invalid_argument("min_range must be >= 0");
     if(num_min < 0)
         throw std::invalid_argument("num_min must be >= 0");

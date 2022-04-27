@@ -963,8 +963,7 @@ namespace gridpp {
      *  @param min_range Minimum range of base to compute gradient
      *  @param default_gradient Use this gradient if minimum number is not met
     */
-    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0);
-
+    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=gridpp::MV, float default_gradient=0);
     /** Find suitable value in neighbourhood based on a search criteria. If search value is within a
     * criteria range, then the most suitable point is used. This is the nearest value of any point
     * within the search_target range; or if no point fulfills this, the point with the highest

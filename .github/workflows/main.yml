@@ -23,33 +23,13 @@ jobs:
       - name: configure
         run: mkdir build && cd build && cmake -DBUILD_R=no -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_TESTS=ON ..
       - name: build
-        run: cd build && VERBOSE=1 make develop-python-user
-      - name: test
-        run: |
-            cd build
-            /usr/bin/python3 -m pip install coverage nose
-            make tests
-            lcov --directory CMakeFiles/gridpp.dir/src/api --capture --output-file coverage.info
-            lcov --remove coverage.info '/usr/*' --output-file coverage.info
-            lcov --list coverage.info
-            # - name: test
-            # run: |
-            # /usr/bin/python3 -c "import gridpp; print(gridpp.version())"
-            # /usr/bin/python3 -m pip install --upgrade pip
-            # /usr/bin/python3 -m pip install coverage nose
-            # coverage run --omit */*-packages/*,*tests* -m nose
-            # coverage report
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04] # , windows-2019, macos-10.15]
-
-    steps:
-      - uses: actions/checkout@v2
+        run: cd build && VERBOSE=1 make package-python
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.4.0
+        env:
+            CIBW_BEFORE_BUILD="pip install numpy==1.17.3 setuptools"
+        with:
+            package-dir: build/swig/python-packaging
         # to supply options, put them in 'env', like:
         # env:
         #   CIBW_SOME_OPTION: value

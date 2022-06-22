@@ -125,6 +125,14 @@ namespace gridpp {
         Bilinear = 1,
     };
 
+    /** Types of comparison operators*/
+    enum ComparisonOperator {
+        lt = 0,         /** Lower than, < */
+        leq = 1,        /** Lower or equal than, <= */
+        gt = 2,         /** Greater than, > */
+        geq = 3         /** Greater or equal than, >= */
+    };
+
     /** **************************************
      * @name Data assimilation methods
      * Functions that merge observations with a background field
@@ -577,6 +585,14 @@ namespace gridpp {
     */
     vec2 nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalues);
     vec3 nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues);
+
+    /** Nearest downscaling grid to grid and interpolation in one
+      * @param igrid Input grid
+      * @param ogrid Output grid to downscale to
+      * @param ivalues 3D vector of values on the input grid
+      * @return Values on the output grid
+    */
+    vec2 downscale_probability(const vec3& ivalues, const Grid& igrid, const vec2& threshold, const Grid& ogrid, ComparisonOperator comparisonoperator);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid

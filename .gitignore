@@ -17,3 +17,5 @@ data
 coverage.*
 debian/gridpp*
 build*
+env/
+.vscode

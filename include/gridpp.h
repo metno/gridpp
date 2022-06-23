@@ -127,10 +127,10 @@ namespace gridpp {
 
     /** Types of comparison operators*/
     enum ComparisonOperator {
-        lt = 0,         /** Lower than, < */
-        leq = 1,        /** Lower or equal than, <= */
-        gt = 2,         /** Greater than, > */
-        geq = 3,         /** Greater or equal than, >= */
+        lt    = 0,         /** Lower than, < */
+        leq   = 10,        /** Lower or equal than, <= */
+        gt    = 20,        /** Greater than, > */
+        geq   = 30,        /** Greater or equal than, >= */
     };
 
     /** **************************************
@@ -586,13 +586,15 @@ namespace gridpp {
     vec2 nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalues);
     vec3 nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues);
 
-    /** Nearest downscaling grid to grid and interpolation in one
+    /** Nearest neighbour downscaling grid to grid and probability in one
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
       * @param ivalues 3D vector of values on the input grid
+      * @param threshold 2D vector of threshold values
+      * @param comparisonoperator lower than, lower or equal than, greater than, great or equal than
       * @return Values on the output grid
     */
-    vec2 downscale_probability(const vec3& ivalues, const Grid& igrid, const vec2& threshold, const Grid& ogrid, ComparisonOperator comparisonoperator);
+    vec2 downscale_probability(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec2& threshold, const ComparisonOperator& comparisonoperator);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid

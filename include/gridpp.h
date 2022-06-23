@@ -127,12 +127,12 @@ namespace gridpp {
 
     /** Types of comparison operators*/
     enum ComparisonOperator {
-        lt    = 0,         /** Lower than, < */
-        leq   = 10,        /** Lower or equal than, <= */
-        gt    = 20,        /** Greater than, > */
-        geq   = 30,        /** Greater or equal than, >= */
+        lt    = 0,         /**< Lower than, < */
+        leq   = 10,        /**< Lower or equal than, <= */
+        gt    = 20,        /**< Greater than, > */
+        geq   = 30,        /**< Greater or equal than, >= */
     };
-    
+
     /** **************************************
      * @name Data assimilation methods
      * Functions that merge observations with a background field

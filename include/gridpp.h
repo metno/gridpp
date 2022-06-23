@@ -132,7 +132,7 @@ namespace gridpp {
         gt    = 20,        /** Greater than, > */
         geq   = 30,        /** Greater or equal than, >= */
     };
-
+    
     /** **************************************
      * @name Data assimilation methods
      * Functions that merge observations with a background field

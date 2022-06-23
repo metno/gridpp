@@ -130,7 +130,7 @@ namespace gridpp {
         lt = 0,         /** Lower than, < */
         leq = 1,        /** Lower or equal than, <= */
         gt = 2,         /** Greater than, > */
-        geq = 3         /** Greater or equal than, >= */
+        geq = 3,         /** Greater or equal than, >= */
     };
 
     /** **************************************

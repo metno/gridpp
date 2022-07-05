@@ -46,8 +46,8 @@ vec2 gridpp::downscale_probability(const Grid& igrid, const Grid& ogrid, const v
                     }   
                 }       
             }
-            std::cout << "total[" << i <<"][" << j << "]:" << total << std::endl;
-            std::cout << "count[" << i <<"][" << j << "]:" << count << std::endl;
+            // std::cout << "total[" << i <<"][" << j << "]:" << total << std::endl;
+            // std::cout << "count[" << i <<"][" << j << "]:" << count << std::endl;
 
             float prob;
             if (count == 0) {
@@ -55,7 +55,7 @@ vec2 gridpp::downscale_probability(const Grid& igrid, const Grid& ogrid, const v
             }
             else {
                 prob = (float)total / (float)count;
-                std::cout << "prob[" << i <<"][" << j << "]:" << prob << std::endl;
+                // std::cout << "prob[" << i <<"][" << j << "]:" << prob << std::endl;
             }
 
             output[i][j] = prob;

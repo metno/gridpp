@@ -127,10 +127,10 @@ namespace gridpp {
 
     /** Types of comparison operators*/
     enum ComparisonOperator {
-        lt    = 0,         /**< Lower than, < */
-        leq   = 10,        /**< Lower or equal than, <= */
-        gt    = 20,        /**< Greater than, > */
-        geq   = 30,        /**< Greater or equal than, >= */
+        Lt    = 0,         /**< Lower than, < */
+        Leq   = 10,        /**< Lower or equal than, <= */
+        Gt    = 20,        /**< Greater than, > */
+        Geq   = 30,        /**< Greater or equal than, >= */
     };
 
     /** **************************************
@@ -589,24 +589,24 @@ namespace gridpp {
     /** Nearest neighbour downscaling grid to grid and probability in one
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
-      * @param ivalues 3D vector of values on the input grid
+      * @param ivalues 3D vector of values on the input grid (Y, X, E)
       * @param threshold 2D vector of threshold values
-      * @param comparisonoperator lower than, lower or equal than, greater than, great or equal than
+      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
       * @return Values on the output grid
     */
-    vec2 downscale_probability(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec2& threshold, const ComparisonOperator& comparisonoperator);
+    vec2 downscale_probability(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec2& threshold, const ComparisonOperator& comparison_operator);
 
     /** Nearest neighbour downscaling grid to grid and threshold and consensus in one
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
-      * @param ivalues 3D vector of values on the input grid
-      * @param threshold_values 3D vector of values, which defines the mask array for ivalues after applying the theshold
+      * @param ivalues 3D vector of values on the input grid (Y, X, E)
+      * @param threshold_values 3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold
       * @param threshold 2D vector of threshold values
-      * @param comparisonoperator lower than, lower or equal than, greater than, great or equal than
+      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
       * @param statistic statistic to compute over the ensemble dimension
       * @return Values on the output grid
     */
-    vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparisonoperator, const Statistic& statistic);
+    vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid

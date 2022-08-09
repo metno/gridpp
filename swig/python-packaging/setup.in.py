@@ -96,7 +96,11 @@ setup (
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy>=1.16'],
+    # TODO: Could introduce python version-specific numpy versions
+    # However, since the earliest precompiled numpy versions have been used when compiling gridpp,
+    # it is unlikely the user will have an older version of numpy
+    # install_requires=['numpy<=1.12.1; python_version < "3"'],
+    install_requires=['numpy'],
 
     test_suite="gridpp.tests",
     ext_modules = [module],

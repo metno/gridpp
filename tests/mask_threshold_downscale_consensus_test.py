@@ -17,30 +17,34 @@ class Test(unittest.TestCase):
         self.thresholds = np.array([ [-2., -0.5, 0.5],
                                 [0., 1., -1.], 
                                 [2., 0.5, 0.]])
-        self.values = np.moveaxis(np.array([ [[10., 5.],[3., 2.]], 
+        self.valuestrue = np.moveaxis(np.array([ [[10., 5.],[3., 2.]], 
                             [[0., 1.],  [4., 0.]], 
                             [[3., 0.],  [0., 6.]]
                             ]), 0, -1)
+        self.valuesfalse = np.moveaxis(np.array([ [[0., 0.],[0., 0.]], 
+                            [[0., 0.],  [0., 0.]], 
+                            [[0., 0.],  [0., 0.]]
+                            ]), 0, -1)
 
     def test_mask_threshold_leq_downscale_consensus_mean(self):
-        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.values, self.threshold_values, self.thresholds, gridpp.Leq, gridpp.Mean)
+        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Leq, gridpp.Mean)
         np.testing.assert_array_equal(output, np.array([[0., 3 + 1./3., 2.], [2 + 1./3., 2 + 1./3., 2./3.], [2 + 1./3., 2 + 1./3., 2./3.]], dtype=np.float32))
 
     def test_mask_threshold_leq_downscale_consensus_sum(self):
-        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.values, self.threshold_values, self.thresholds, gridpp.Leq, gridpp.Sum)
+        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Leq, gridpp.Sum)
         np.testing.assert_array_equal(output, np.array([[0., 10., 6.], [7., 7., 2.], [7., 7., 2.]], dtype=np.float32))
 
     def test_mask_threshold_gt_downscale_consensus_median(self):
-        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.values, self.threshold_values, self.thresholds, gridpp.Gt, gridpp.Median)
+        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Gt, gridpp.Median)
         np.testing.assert_array_equal(output, np.array([[3., 0., 0.], [0., 0., 0.], [0., 0., 0.]], dtype=np.float32))
 
     def test_mask_threshold_lt_downscale_consensus_max(self):
-        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.values, self.threshold_values, self.thresholds, gridpp.Lt, gridpp.Max)
+        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Lt, gridpp.Max)
         np.testing.assert_array_equal(output, np.array([[0., 10., 5.], [3., 4., 0.], [4., 4., 2.]], dtype=np.float32))    
 
     def test_mask_threshold_geq_downscale_consensus_count(self):
         self.threshold_values[0, 1, 0] = np.NaN
-        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.values, self.threshold_values, self.thresholds, gridpp.Geq, gridpp.Count)
+        output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Geq, gridpp.Count)
         np.testing.assert_array_equal(output, np.array([[3., 3., 2.], [3., 3., 3.], [3., 3., 3.]], dtype=np.float32))   
 
     

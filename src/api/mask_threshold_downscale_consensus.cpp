@@ -4,13 +4,13 @@
 
 using namespace gridpp;
 
-vec2 gridpp::mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& threshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic) {
+vec2 gridpp::mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivaluestrue, const vec3& ivaluesfalse, const vec3& threshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic) {
     vec2 iOutputLats = ogrid.get_lats();
     vec2 iOutputLons = ogrid.get_lons();
 
     int nLat = iOutputLats.size();
     int nLon = iOutputLats[0].size();
-    int nEns = ivalues[0][0].size();
+    int nEns = ivaluestrue[0][0].size();
 
     vec2 output(nLat);
     for(int i = 0; i < nLat; i++)
@@ -28,31 +28,31 @@ vec2 gridpp::mask_threshold_downscale_consensus(const Grid& igrid, const Grid& o
                 if (gridpp::is_valid(threshold_values[I][J][k] )) {
                     if (comparison_operator == gridpp::Leq) {
                         if (threshold_values[I][J][k] <= threshold[i][j]) {
-                            masked_ivalues[k] = ivalues[I][J][k];
+                            masked_ivalues[k] = ivaluestrue[I][J][k];
                         }
                         else {
-                            masked_ivalues[k] = 0.0;
+                            masked_ivalues[k] = ivaluesfalse[I][J][k];
                         }
                     } else if (comparison_operator == gridpp::Lt) {
                         if (threshold_values[I][J][k] < threshold[i][j]) {
-                            masked_ivalues[k] = ivalues[I][J][k];
+                            masked_ivalues[k] = ivaluestrue[I][J][k];
                         }
                         else {
-                            masked_ivalues[k] = 0.0;
+                            masked_ivalues[k] = ivaluesfalse[I][J][k];
                         }
                     } else if (comparison_operator == gridpp::Geq) {
                         if (threshold_values[I][J][k] >= threshold[i][j]) {
-                            masked_ivalues[k] = ivalues[I][J][k];
+                            masked_ivalues[k] = ivaluestrue[I][J][k];
                         }
                         else {
-                            masked_ivalues[k] = 0.0;
+                            masked_ivalues[k] = ivaluesfalse[I][J][k];
                         }
                     } else if (comparison_operator == gridpp::Gt) {
                         if (threshold_values[I][J][k] > threshold[i][j]) {
-                            masked_ivalues[k] = ivalues[I][J][k];
+                            masked_ivalues[k] = ivaluestrue[I][J][k];
                         }
                         else {
-                            masked_ivalues[k] = 0.0;
+                            masked_ivalues[k] = ivaluesfalse[I][J][k];
                         }
                     }    
                 }

@@ -599,14 +599,15 @@ namespace gridpp {
     /** Nearest neighbour downscaling grid to grid and threshold and consensus in one
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to
-      * @param ivalues 3D vector of values on the input grid (Y, X, E)
+      * @param ivaluestrue 3D vector of values on the input grid (Y, X, E)
+      * @param ivaluesfalse 3D vector of values on the input grid (Y, X, E)
       * @param threshold_values 3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold
       * @param threshold 2D vector of threshold values
       * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
       * @param statistic statistic to compute over the ensemble dimension
       * @return Values on the output grid
     */
-    vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic);
+    vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivaluestrue, const vec3& ivaluesfalse, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic);
 
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid

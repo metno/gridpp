@@ -13,7 +13,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.6.0.dev17"
+#define GRIDPP_VERSION "0.6.0.dev18"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -753,6 +753,9 @@ namespace gridpp {
       * @param statistic Statistic to compute on points within gridpoint
     */
     vec2 gridding_nearest(const Grid& grid, const Points& points, const vec& values, int min_num, gridpp::Statistic statistic);
+
+    /** Compute a score for a metric of all points within a radius */
+    vec2 neighbourhood_score(const Grid& grid, const Points& points, const vec2& fcst, const vec& ref, int half_width, gridpp::Metric metric, float threshold);
 
     /**@}*/
 

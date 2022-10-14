@@ -1,9 +1,11 @@
 var searchData=
 [
   ['gamma',['Gamma',['../classgridpp_1_1Gamma.html',1,'gridpp::Gamma'],['../classgridpp_1_1Gamma.html#a0bc2450121e74e9a778d75504aacf376',1,'gridpp::Gamma::Gamma()']]],
+  ['gamma_5finv',['gamma_inv',['../namespacegridpp.html#abf290b2cc0dd8a533f19eddefc0fae9d',1,'gridpp']]],
   ['gas_5fconstant_5fmol',['gas_constant_mol',['../namespacegridpp.html#a1467bf4aafab1f3929934c3e4a5ab586',1,'gridpp']]],
   ['gas_5fconstant_5fsi',['gas_constant_si',['../namespacegridpp.html#ab47d92a1590dc880181971db34821a26',1,'gridpp']]],
   ['geodetic',['Geodetic',['../namespacegridpp.html#a2ad8e1533595470eee173fed2301446da1ebd63b8e57e792bf15682c6d7ae0481',1,'gridpp']]],
+  ['geq',['Geq',['../namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a64faab78c13a3bf76408de5c28140034',1,'gridpp']]],
   ['get_5fbox',['get_box',['../classgridpp_1_1Grid.html#a8a1241bd50f92c2e7778b2582012f9ae',1,'gridpp::Grid']]],
   ['get_5fclosest_5fneighbours',['get_closest_neighbours',['../classgridpp_1_1KDTree.html#a7ad4b8276b0a6a914f0674af33b21bcd',1,'gridpp::KDTree::get_closest_neighbours()'],['../classgridpp_1_1Points.html#a95c33c5e1c1221b20fb4f8268c311b1b',1,'gridpp::Points::get_closest_neighbours()'],['../classgridpp_1_1Grid.html#a2601b1babcf59fc2062394676d9445ff',1,'gridpp::Grid::get_closest_neighbours()']]],
   ['get_5fcoordinate_5ftype',['get_coordinate_type',['../classgridpp_1_1KDTree.html#a8528a12939db1e798aea689e70552500',1,'gridpp::KDTree::get_coordinate_type()'],['../classgridpp_1_1Points.html#ad75d38ec1c27d9dbdf24f762b7194159',1,'gridpp::Points::get_coordinate_type()'],['../classgridpp_1_1Grid.html#ac28ea315f3a861cf53975571a12b2e80',1,'gridpp::Grid::get_coordinate_type()']]],
@@ -14,7 +16,7 @@ var searchData=
   ['get_5flafs',['get_lafs',['../classgridpp_1_1Points.html#a0788472e6af4fdaa4c682411a53f96a4',1,'gridpp::Points::get_lafs()'],['../classgridpp_1_1Grid.html#a5335e1af9acb091b638391cb30c016c1',1,'gridpp::Grid::get_lafs()']]],
   ['get_5flats',['get_lats',['../classgridpp_1_1KDTree.html#aa37f8b4cb01f124a8c2aa9083e51b85c',1,'gridpp::KDTree::get_lats()'],['../classgridpp_1_1Points.html#a692bdfbd5aae1a31d256b4f703d14c51',1,'gridpp::Points::get_lats()'],['../classgridpp_1_1Grid.html#a101d834c6ebc72f6cb0b0460680993af',1,'gridpp::Grid::get_lats()']]],
   ['get_5flons',['get_lons',['../classgridpp_1_1KDTree.html#aac81fb7b4495d36b409e90fe5e9a3717',1,'gridpp::KDTree::get_lons()'],['../classgridpp_1_1Points.html#a3e17cf8ca31e20a2217b25902be04dad',1,'gridpp::Points::get_lons()'],['../classgridpp_1_1Grid.html#a3fa12fe431030677cb35c4454363adb7',1,'gridpp::Grid::get_lons()']]],
-  ['get_5flower_5findex',['get_lower_index',['../namespacegridpp.html#a2627ca943f5f3d99f892c680664eab8c',1,'gridpp']]],
+  ['get_5flower_5findex',['get_lower_index',['../namespacegridpp.html#a79b0709d3a4b625c3c614b5fe4e86998',1,'gridpp']]],
   ['get_5fnearest_5fneighbour',['get_nearest_neighbour',['../classgridpp_1_1KDTree.html#a5168db241f39e98ebce7d8830aa79a6b',1,'gridpp::KDTree::get_nearest_neighbour()'],['../classgridpp_1_1Points.html#ab9837a2fcd8c148b9339bfb098ff6eb4',1,'gridpp::Points::get_nearest_neighbour()'],['../classgridpp_1_1Grid.html#a3f86145a2bf1586496ba396bf0ca4e2a',1,'gridpp::Grid::get_nearest_neighbour()']]],
   ['get_5fneighbourhood_5fthresholds',['get_neighbourhood_thresholds',['../namespacegridpp.html#a516cb49da9ae4c0941eb1a91f86128f6',1,'gridpp::get_neighbourhood_thresholds(const vec2 &amp;input, int num_thresholds)'],['../namespacegridpp.html#af91358ca3dc7da8df4abfd7fc931ad84',1,'gridpp::get_neighbourhood_thresholds(const vec3 &amp;input, int num_thresholds)']]],
   ['get_5fneighbours',['get_neighbours',['../classgridpp_1_1KDTree.html#a1201f4a98b45e7e8002e8560b96da16b',1,'gridpp::KDTree::get_neighbours()'],['../classgridpp_1_1Points.html#adae6fdf71589c635132aa71545b0bb78',1,'gridpp::Points::get_neighbours()'],['../classgridpp_1_1Grid.html#a5040abf6990dce7be0dedfa64ae58d8c',1,'gridpp::Grid::get_neighbours()']]],
@@ -24,7 +26,7 @@ var searchData=
   ['get_5foptimal_5fthreshold',['get_optimal_threshold',['../namespacegridpp.html#a8f025aaf4879bf72b2a204dbb66be1f0',1,'gridpp']]],
   ['get_5fpoint',['get_point',['../classgridpp_1_1Points.html#aad0a0b81d2618b2904dee9f0de3cd402',1,'gridpp::Points::get_point()'],['../classgridpp_1_1Grid.html#a529efb0f234c98568a0d6874d95c5850',1,'gridpp::Grid::get_point()']]],
   ['get_5fstatistic',['get_statistic',['../namespacegridpp.html#ab51b6612520aa8c1f7329e8e7115a96f',1,'gridpp']]],
-  ['get_5fupper_5findex',['get_upper_index',['../namespacegridpp.html#a474f636d52c72de7477b8d69d94bc0f3',1,'gridpp']]],
+  ['get_5fupper_5findex',['get_upper_index',['../namespacegridpp.html#a4754eabf9f76fbe8fd5d745ec3500f46',1,'gridpp']]],
   ['gradient_2ecpp',['gradient.cpp',['../gradient_8cpp.html',1,'']]],
   ['gradienttype',['GradientType',['../namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700e',1,'gridpp']]],
   ['gravit',['gravit',['../namespacegridpp.html#adb567528f5b136a8a6df5739540080c6',1,'gridpp']]],
@@ -36,5 +38,6 @@ var searchData=
   ['gridpp',['gridpp',['../namespacegridpp.html',1,'']]],
   ['gridpp_2ecpp',['gridpp.cpp',['../gridpp_8cpp.html',1,'']]],
   ['gridpp_2eh',['gridpp.h',['../gridpp_8h.html',1,'']]],
-  ['gridpp_5fversion',['GRIDPP_VERSION',['../gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c',1,'gridpp.h']]]
+  ['gridpp_5fversion',['GRIDPP_VERSION',['../gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c',1,'gridpp.h']]],
+  ['gt',['Gt',['../namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a7dc7b65160ee7386939544194b9ad871',1,'gridpp']]]
 ];

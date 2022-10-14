@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.6.0.dev8: gridpp Namespace Reference</title>
+<title>Gridpp 0.6.0: gridpp Namespace Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.6.0.dev8
+   <div id="projectname">Gridpp 0.6.0
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -136,6 +136,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a13c9d0804a67ddc328b58ce1918a1671"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a13c9d0804a67ddc328b58ce1918a1671">doping_circle</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;background, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;points, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;observations, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;radii, float max_elev_diff=<a class="el" href="namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa">gridpp::MV</a>)</td></tr>
 <tr class="memdesc:a13c9d0804a67ddc328b58ce1918a1671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert observations into gridded field using a circle.  <a href="#a13c9d0804a67ddc328b58ce1918a1671">More...</a><br /></td></tr>
 <tr class="separator:a13c9d0804a67ddc328b58ce1918a1671"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Distributions</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><hr/>
+<p>Functions that extract values from probability distributions </p>
+</div></td></tr>
+<tr class="memitem:abf290b2cc0dd8a533f19eddefc0fae9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#abf290b2cc0dd8a533f19eddefc0fae9d">gamma_inv</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;levels, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;shape, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;scale)</td></tr>
+<tr class="separator:abf290b2cc0dd8a533f19eddefc0fae9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Spatial neighbourhood filters</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><hr/>
 <p>Functions that apply neighbourhood filters on a gridded field </p>
@@ -222,6 +228,15 @@ Functions</h2></td></tr>
 <tr><td colspan="2"><div class="groupText"><hr/>
 <p>Functions that interpolate data from one grid to another </p>
 </div></td></tr>
+<tr class="memitem:a5be71d717aed700b69f2217c92428234"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a5be71d717aed700b69f2217c92428234">downscaling</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler)</td></tr>
+<tr class="memdesc:a5be71d717aed700b69f2217c92428234"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic downscaler for simple methods that don't use information other than the grids.  <a href="#a5be71d717aed700b69f2217c92428234">More...</a><br /></td></tr>
+<tr class="separator:a5be71d717aed700b69f2217c92428234"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab9695e4abd7a43be3f30d940661c2e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#aab9695e4abd7a43be3f30d940661c2e9">downscaling</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler)</td></tr>
+<tr class="separator:aab9695e4abd7a43be3f30d940661c2e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a080679c615eef786aaea4ab643a68074"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a080679c615eef786aaea4ab643a68074">downscaling</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler)</td></tr>
+<tr class="separator:a080679c615eef786aaea4ab643a68074"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e39bb7c253933630eb2becf6472a22d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a6e39bb7c253933630eb2becf6472a22d">downscaling</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler)</td></tr>
+<tr class="separator:a6e39bb7c253933630eb2becf6472a22d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab96056777b40e8b7db16fd51dbc32469"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab96056777b40e8b7db16fd51dbc32469">nearest</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues)</td></tr>
 <tr class="memdesc:ab96056777b40e8b7db16fd51dbc32469"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest neighbour dowscaling grid to grid.  <a href="#ab96056777b40e8b7db16fd51dbc32469">More...</a><br /></td></tr>
 <tr class="separator:ab96056777b40e8b7db16fd51dbc32469"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,6 +257,12 @@ Functions</h2></td></tr>
 <tr class="separator:a3340a6d04edea3aec0f845eb9ea4f372"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd27b4ec267e5bd13eac4de5f4067700"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#acd27b4ec267e5bd13eac4de5f4067700">nearest</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;ipoints, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues)</td></tr>
 <tr class="separator:acd27b4ec267e5bd13eac4de5f4067700"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9050f3ef04b388c1edcb35895b8a9f88"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9050f3ef04b388c1edcb35895b8a9f88">downscale_probability</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;threshold, const <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">ComparisonOperator</a> &amp;comparison_operator)</td></tr>
+<tr class="memdesc:a9050f3ef04b388c1edcb35895b8a9f88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest neighbour downscaling grid to grid and probability in one.  <a href="#a9050f3ef04b388c1edcb35895b8a9f88">More...</a><br /></td></tr>
+<tr class="separator:a9050f3ef04b388c1edcb35895b8a9f88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d93d34bf44cc54246d4fe98a807c240"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a4d93d34bf44cc54246d4fe98a807c240">mask_threshold_downscale_consensus</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues_true, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues_false, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;theshold_values, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;threshold, const <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">ComparisonOperator</a> &amp;comparison_operator, const <a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4e">Statistic</a> &amp;statistic)</td></tr>
+<tr class="memdesc:a4d93d34bf44cc54246d4fe98a807c240"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest neighbour downscaling grid to grid and threshold and consensus in one.  <a href="#a4d93d34bf44cc54246d4fe98a807c240">More...</a><br /></td></tr>
+<tr class="separator:a4d93d34bf44cc54246d4fe98a807c240"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8365a0f3fd96a027b8ef3f7a79cc6cb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a8365a0f3fd96a027b8ef3f7a79cc6cb2">bilinear</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues)</td></tr>
 <tr class="memdesc:a8365a0f3fd96a027b8ef3f7a79cc6cb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bilinear downscaling grid to grid.  <a href="#a8365a0f3fd96a027b8ef3f7a79cc6cb2">More...</a><br /></td></tr>
 <tr class="separator:a8365a0f3fd96a027b8ef3f7a79cc6cb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,33 +273,25 @@ Functions</h2></td></tr>
 <tr class="separator:ab33bab95f1560b3e492f9ec6a3e1e62a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a44218eb52ee411eb99de78993050b07f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a44218eb52ee411eb99de78993050b07f">bilinear</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues)</td></tr>
 <tr class="separator:a44218eb52ee411eb99de78993050b07f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f363f06a020b356e6e731968574bd04"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a1f363f06a020b356e6e731968574bd04">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, float elev_gradient)</td></tr>
-<tr class="separator:a1f363f06a020b356e6e731968574bd04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b52629cb6f819edcba551668ee3aaa6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a7b52629cb6f819edcba551668ee3aaa6">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, float elev_gradient)</td></tr>
-<tr class="separator:a7b52629cb6f819edcba551668ee3aaa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a856d5d26d0b9ec193bd1e334448f2088"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a856d5d26d0b9ec193bd1e334448f2088">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, float elev_gradient)</td></tr>
-<tr class="separator:a856d5d26d0b9ec193bd1e334448f2088"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45b61f5084375ba03c0955443170d11c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a45b61f5084375ba03c0955443170d11c">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, float elev_gradient)</td></tr>
-<tr class="separator:a45b61f5084375ba03c0955443170d11c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3d214b37cff5917592a5cc1708186b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab3d214b37cff5917592a5cc1708186b5">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient=<a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>())</td></tr>
-<tr class="memdesc:ab3d214b37cff5917592a5cc1708186b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Downscale.  <a href="#ab3d214b37cff5917592a5cc1708186b5">More...</a><br /></td></tr>
-<tr class="separator:ab3d214b37cff5917592a5cc1708186b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbaae04e8778057eafc244a862c39b1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#acbaae04e8778057eafc244a862c39b1e">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:acbaae04e8778057eafc244a862c39b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83e41306912725f0b03ad1043c319c36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a83e41306912725f0b03ad1043c319c36">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:a83e41306912725f0b03ad1043c319c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7e309d62340de57e0fc58f874e6eec8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab7e309d62340de57e0fc58f874e6eec8">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:ab7e309d62340de57e0fc58f874e6eec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93a7b0d0c21e299ec590650b2f35886e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a93a7b0d0c21e299ec590650b2f35886e">full_gradient</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;ipoints, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:a93a7b0d0c21e299ec590650b2f35886e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d01c31873b088be03523b9c5bf5adcf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a5d01c31873b088be03523b9c5bf5adcf">full_gradient</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;ipoints, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:a5d01c31873b088be03523b9c5bf5adcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91dca2fb551f61f6aa54ed6c5d168236"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a91dca2fb551f61f6aa54ed6c5d168236">full_gradient</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;ipoints, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:a91dca2fb551f61f6aa54ed6c5d168236"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4068686f9a731526661d8cf2de04c339"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a4068686f9a731526661d8cf2de04c339">full_gradient</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;ipoints, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient)</td></tr>
-<tr class="separator:a4068686f9a731526661d8cf2de04c339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a3ff6b2558220e17552c57e54abc98a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9a3ff6b2558220e17552c57e54abc98a">full_gradient_debug</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient=<a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>())</td></tr>
-<tr class="separator:a9a3ff6b2558220e17552c57e54abc98a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dd2924fcba550ed9f51a54b087a6ed7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a7dd2924fcba550ed9f51a54b087a6ed7">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, float elev_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:a7dd2924fcba550ed9f51a54b087a6ed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a983ea61ecefaa8fd8dd25e4a4454c352"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a983ea61ecefaa8fd8dd25e4a4454c352">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, float elev_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:a983ea61ecefaa8fd8dd25e4a4454c352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a547803687b79c39691e4c6d0152b75de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a547803687b79c39691e4c6d0152b75de">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, float elev_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:a547803687b79c39691e4c6d0152b75de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae513756d8dd3294a5648879886b243d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ae513756d8dd3294a5648879886b243d1">simple_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, float elev_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:ae513756d8dd3294a5648879886b243d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0ab7acd154ab66655091fa94328c337"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#af0ab7acd154ab66655091fa94328c337">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient=<a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>(), <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="memdesc:af0ab7acd154ab66655091fa94328c337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Downscale.  <a href="#af0ab7acd154ab66655091fa94328c337">More...</a><br /></td></tr>
+<tr class="separator:af0ab7acd154ab66655091fa94328c337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c0d8fb9a703705e98fdbd7cb3e7b6a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9c0d8fb9a703705e98fdbd7cb3e7b6a8">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;laf_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:a9c0d8fb9a703705e98fdbd7cb3e7b6a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab75949dce6990847dd38588893439a81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab75949dce6990847dd38588893439a81">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:ab75949dce6990847dd38588893439a81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7c1951940fcb520ca52aba20b6bb178"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ae7c1951940fcb520ca52aba20b6bb178">full_gradient</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;opoints, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;laf_gradient, <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:ae7c1951940fcb520ca52aba20b6bb178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a959d043fc3e571abd6a5b4ea0c7150f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a959d043fc3e571abd6a5b4ea0c7150f2">full_gradient_debug</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;elev_gradient, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;laf_gradient=<a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>(), <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> downscaler=<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a>)</td></tr>
+<tr class="separator:a959d043fc3e571abd6a5b4ea0c7150f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62c326bb39e31bf6b0d2b93b6f162a09"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a62c326bb39e31bf6b0d2b93b6f162a09">smart</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;igrid, const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;ogrid, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;ivalues, int num, const <a class="el" href="classgridpp_1_1StructureFunction.html">StructureFunction</a> &amp;structure)</td></tr>
 <tr class="memdesc:a62c326bb39e31bf6b0d2b93b6f162a09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smart neighbour downscaling grid to grid.  <a href="#a62c326bb39e31bf6b0d2b93b6f162a09">More...</a><br /></td></tr>
 <tr class="separator:a62c326bb39e31bf6b0d2b93b6f162a09"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -424,6 +437,13 @@ Variables</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:a99c1c55ccf373117225b99992a285e00"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">ComparisonOperator</a> { <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a2792212c2380ec9b1c569e151652410d">Lt</a> = 0, 
+<a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a9a795da77cb80ea38367458c9c66bc9a">Leq</a> = 10, 
+<a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a7dc7b65160ee7386939544194b9ad871">Gt</a> = 20, 
+<a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00a64faab78c13a3bf76408de5c28140034">Geq</a> = 30
+ }<tr class="memdesc:a99c1c55ccf373117225b99992a285e00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Types of comparison operators.  <a href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">More...</a><br /></td></tr>
+</td></tr>
+<tr class="separator:a99c1c55ccf373117225b99992a285e00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ad8e1533595470eee173fed2301446d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> { <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446da1ebd63b8e57e792bf15682c6d7ae0481">Geodetic</a> = 0, 
 <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446daa5920501d43a6fbe45311db6194a4aaa">Cartesian</a> = 1
  }<tr class="memdesc:a2ad8e1533595470eee173fed2301446d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Types of coordinates for position of points.  <a href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">More...</a><br /></td></tr>
@@ -435,6 +455,11 @@ Enumerations</h2></td></tr>
  }<tr class="memdesc:aca92081b4647f72000e19e814b99ad10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method for statistical correction.  <a href="namespacegridpp.html#aca92081b4647f72000e19e814b99ad10">More...</a><br /></td></tr>
 </td></tr>
 <tr class="separator:aca92081b4647f72000e19e814b99ad10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8854df1af03a54f3df56dcbe1ab8b00"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a> { <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a> = 0, 
+<a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00ad7e14e2096bb46e07e43c8e9d02d513b">Bilinear</a> = 1
+ }<tr class="memdesc:af8854df1af03a54f3df56dcbe1ab8b00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Types of simple downscaling methods.  <a href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">More...</a><br /></td></tr>
+</td></tr>
+<tr class="separator:af8854df1af03a54f3df56dcbe1ab8b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a874f509d3b9c062842ed23de0e6e5f85"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a874f509d3b9c062842ed23de0e6e5f85">Extrapolation</a> { <br />
 &#160;&#160;<a class="el" href="namespacegridpp.html#a874f509d3b9c062842ed23de0e6e5f85a8429615ad66b49e7397791da369347ba">OneToOne</a> = 0, 
 <a class="el" href="namespacegridpp.html#a874f509d3b9c062842ed23de0e6e5f85a81d4ef1937646d68ba34199896f1b404">MeanSlope</a> = 10, 
@@ -474,7 +499,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea97f0eec25840de562575feb9b6f81d3f">Variance</a> = 60, 
 <a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea6c441851323ce18fdc0ceab44a5871b9">Sum</a> = 70, 
 <br />
-&#160;&#160;<a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea130084e69e51c026d9f47853f34835f1">Unknown</a> = -1
+&#160;&#160;<a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea2da17e7c46f3451a798661548f8b7637">Count</a> = 80, 
+<a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4ea130084e69e51c026d9f47853f34835f1">Unknown</a> = -1
 <br />
  }<tr class="memdesc:a232191788fcb9015e7ee56848e8c6e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Statistical operations to reduce a vector to a scalar.  <a href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4e">More...</a><br /></td></tr>
 </td></tr>
@@ -564,15 +590,15 @@ Utilities</h2></td></tr>
 <tr class="separator:a8da7b6dc1438b3b526c9164b1ea3fe43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab473e205e70327bab09edd92143da578"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab473e205e70327bab09edd92143da578">num_missing_values</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;iArray)</td></tr>
 <tr class="separator:ab473e205e70327bab09edd92143da578"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2627ca943f5f3d99f892c680664eab8c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a2627ca943f5f3d99f892c680664eab8c">get_lower_index</a> (float iX, const std::vector&lt; float &gt; &amp;iValues)</td></tr>
-<tr class="memdesc:a2627ca943f5f3d99f892c680664eab8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the index in a vector that is equal or just below a value.  <a href="#a2627ca943f5f3d99f892c680664eab8c">More...</a><br /></td></tr>
-<tr class="separator:a2627ca943f5f3d99f892c680664eab8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a474f636d52c72de7477b8d69d94bc0f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a474f636d52c72de7477b8d69d94bc0f3">get_upper_index</a> (float iX, const std::vector&lt; float &gt; &amp;iValues)</td></tr>
-<tr class="memdesc:a474f636d52c72de7477b8d69d94bc0f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the index in a vector that is equal or just above a value.  <a href="#a474f636d52c72de7477b8d69d94bc0f3">More...</a><br /></td></tr>
-<tr class="separator:a474f636d52c72de7477b8d69d94bc0f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18c9cb0bf34070767072a54d57655a18"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a18c9cb0bf34070767072a54d57655a18">interpolate</a> (float x, const std::vector&lt; float &gt; &amp;iX, const std::vector&lt; float &gt; &amp;iY)</td></tr>
-<tr class="memdesc:a18c9cb0bf34070767072a54d57655a18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Piecewise linear interpolation If x is outside the range of iX, then the min/max value of iY is used.  <a href="#a18c9cb0bf34070767072a54d57655a18">More...</a><br /></td></tr>
-<tr class="separator:a18c9cb0bf34070767072a54d57655a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79b0709d3a4b625c3c614b5fe4e86998"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a79b0709d3a4b625c3c614b5fe4e86998">get_lower_index</a> (float iX, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;iValues)</td></tr>
+<tr class="memdesc:a79b0709d3a4b625c3c614b5fe4e86998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the index in a vector that is equal or just below a value.  <a href="#a79b0709d3a4b625c3c614b5fe4e86998">More...</a><br /></td></tr>
+<tr class="separator:a79b0709d3a4b625c3c614b5fe4e86998"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4754eabf9f76fbe8fd5d745ec3500f46"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a4754eabf9f76fbe8fd5d745ec3500f46">get_upper_index</a> (float iX, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;iValues)</td></tr>
+<tr class="memdesc:a4754eabf9f76fbe8fd5d745ec3500f46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the index in a vector that is equal or just above a value.  <a href="#a4754eabf9f76fbe8fd5d745ec3500f46">More...</a><br /></td></tr>
+<tr class="separator:a4754eabf9f76fbe8fd5d745ec3500f46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbe06743ef2211329d113ad00a034ea5"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#acbe06743ef2211329d113ad00a034ea5">interpolate</a> (float x, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;iX, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;iY)</td></tr>
+<tr class="memdesc:acbe06743ef2211329d113ad00a034ea5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Piecewise linear interpolation If x is outside the range of iX, then the min/max value of iY is used.  <a href="#acbe06743ef2211329d113ad00a034ea5">More...</a><br /></td></tr>
+<tr class="separator:acbe06743ef2211329d113ad00a034ea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a631bb707c7757265090e384798e7c129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a631bb707c7757265090e384798e7c129">init_ivec2</a> (int Y, int X, int value)</td></tr>
 <tr class="memdesc:a631bb707c7757265090e384798e7c129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a vector of size Y, X, with a given value.  <a href="#a631bb707c7757265090e384798e7c129">More...</a><br /></td></tr>
 <tr class="separator:a631bb707c7757265090e384798e7c129"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -586,12 +612,12 @@ Utilities</h2></td></tr>
 <tr class="memitem:a500b9e6d54efeb40ada79a33827bcf30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a500b9e6d54efeb40ada79a33827bcf30">calc_even_quantiles</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;values, int num)</td></tr>
 <tr class="memdesc:a500b9e6d54efeb40ada79a33827bcf30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get reasonably spaced quantiles from a vector of values, ignoring duplicate values but including the first number after duplicated values.  <a href="#a500b9e6d54efeb40ada79a33827bcf30">More...</a><br /></td></tr>
 <tr class="separator:a500b9e6d54efeb40ada79a33827bcf30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c6680d76f952b0d11cba15b90c568e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a2c6680d76f952b0d11cba15b90c568e5">calc_gradient</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;base, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;values, <a class="el" href="namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700e">GradientType</a> gradient_type, int halfwidth, int min_num=2, float min_range=0, float default_gradient=0)</td></tr>
-<tr class="memdesc:a2c6680d76f952b0d11cba15b90c568e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes gradients based on values in neighbourhood.  <a href="#a2c6680d76f952b0d11cba15b90c568e5">More...</a><br /></td></tr>
-<tr class="separator:a2c6680d76f952b0d11cba15b90c568e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4454366e740a25024b31fd264438b3e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a4454366e740a25024b31fd264438b3e2">calc_neighbourhood</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;array, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;search_array, int halfwidth, float search_criteria_min, float search_criteria_max, float search_target_min, float search_target_max, float search_delta)</td></tr>
-<tr class="memdesc:a4454366e740a25024b31fd264438b3e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute 2d array with weighted thresholds ()  <a href="#a4454366e740a25024b31fd264438b3e2">More...</a><br /></td></tr>
-<tr class="separator:a4454366e740a25024b31fd264438b3e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad27f94ae464a4731b66ab5e62c986cdc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ad27f94ae464a4731b66ab5e62c986cdc">calc_gradient</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;base, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;values, <a class="el" href="namespacegridpp.html#aef58d497e4d0b48f91da7f30d979700e">GradientType</a> gradient_type, int halfwidth, int min_num=2, float min_range=<a class="el" href="namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa">gridpp::MV</a>, float default_gradient=0)</td></tr>
+<tr class="memdesc:ad27f94ae464a4731b66ab5e62c986cdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes gradients based on values in neighbourhood.  <a href="#ad27f94ae464a4731b66ab5e62c986cdc">More...</a><br /></td></tr>
+<tr class="separator:ad27f94ae464a4731b66ab5e62c986cdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7587d405470680ad8a2f0dab92fb6cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#af7587d405470680ad8a2f0dab92fb6cb">neighbourhood_search</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;array, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;apply_array=<a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a>())</td></tr>
+<tr class="memdesc:af7587d405470680ad8a2f0dab92fb6cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find suitable value in neighbourhood based on a search criteria.  <a href="#af7587d405470680ad8a2f0dab92fb6cb">More...</a><br /></td></tr>
+<tr class="separator:af7587d405470680ad8a2f0dab92fb6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af65ccfa5c04b12de29e38d5b68f8c146"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#af65ccfa5c04b12de29e38d5b68f8c146">window</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;array, int length, <a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4e">gridpp::Statistic</a> statistic, bool before=false, bool keep_missing=false, bool missing_edges=true)</td></tr>
 <tr class="memdesc:af65ccfa5c04b12de29e38d5b68f8c146"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute window statistics.  <a href="#af65ccfa5c04b12de29e38d5b68f8c146">More...</a><br /></td></tr>
 <tr class="separator:af65ccfa5c04b12de29e38d5b68f8c146"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -604,6 +630,8 @@ Utilities</h2></td></tr>
 <tr class="separator:a6a2e9bad6b3578af74a0bb383eb1b72d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cab33bb79ed039243bb009c376d9b97"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a0cab33bb79ed039243bb009c376d9b97">compatible_size</a> (const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;points, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;v)</td></tr>
 <tr class="separator:a0cab33bb79ed039243bb009c376d9b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae04502491d400ffc0f8c63de2ca94ab5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ae04502491d400ffc0f8c63de2ca94ab5">compatible_size</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;a, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;b)</td></tr>
+<tr class="separator:ae04502491d400ffc0f8c63de2ca94ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3cdb32a3f035219704e768f9466ba55"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ae3cdb32a3f035219704e768f9466ba55">compatible_size</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;a, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;b)</td></tr>
 <tr class="separator:ae3cdb32a3f035219704e768f9466ba55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a462d5dd6eeacea898068ef80faef830d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a462d5dd6eeacea898068ef80faef830d">compatible_size</a> (const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;a, const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;b)</td></tr>
@@ -774,6 +802,32 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="a99c1c55ccf373117225b99992a285e00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99c1c55ccf373117225b99992a285e00">&#9670;&nbsp;</a></span>ComparisonOperator</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">gridpp::ComparisonOperator</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Types of comparison operators. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a99c1c55ccf373117225b99992a285e00a2792212c2380ec9b1c569e151652410d"></a>Lt&#160;</td><td class="fielddoc"><p>Lower than, &lt;. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a99c1c55ccf373117225b99992a285e00a9a795da77cb80ea38367458c9c66bc9a"></a>Leq&#160;</td><td class="fielddoc"><p>Lower or equal than, &lt;=. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a99c1c55ccf373117225b99992a285e00a7dc7b65160ee7386939544194b9ad871"></a>Gt&#160;</td><td class="fielddoc"><p>Greater than, &gt; </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a99c1c55ccf373117225b99992a285e00a64faab78c13a3bf76408de5c28140034"></a>Geq&#160;</td><td class="fielddoc"><p>Greater or equal than, &gt;=. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a id="a2ad8e1533595470eee173fed2301446d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2ad8e1533595470eee173fed2301446d">&#9670;&nbsp;</a></span>CoordinateType</h2>
 
@@ -816,6 +870,26 @@ SWIG testing functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="aca92081b4647f72000e19e814b99ad10a75786473bea976c5331bd907ba472154"></a>Additive&#160;</td><td class="fielddoc"><p>Additive. </p>
 </td></tr>
+</table>
+
+</div>
+</div>
+<a id="af8854df1af03a54f3df56dcbe1ab8b00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8854df1af03a54f3df56dcbe1ab8b00">&#9670;&nbsp;</a></span>Downscaler</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">gridpp::Downscaler</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Types of simple downscaling methods. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613"></a>Nearest&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="af8854df1af03a54f3df56dcbe1ab8b00ad7e14e2096bb46e07e43c8e9d02d513b"></a>Bilinear&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -927,6 +1001,8 @@ SWIG testing functions</h2></td></tr>
 <tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea97f0eec25840de562575feb9b6f81d3f"></a>Variance&#160;</td><td class="fielddoc"><p>Population variance of values. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea6c441851323ce18fdc0ceab44a5871b9"></a>Sum&#160;</td><td class="fielddoc"><p>Sum of values. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea2da17e7c46f3451a798661548f8b7637"></a>Count&#160;</td><td class="fielddoc"><p>Count of values. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea130084e69e51c026d9f47853f34835f1"></a>Unknown&#160;</td><td class="fielddoc"><p>Unknown statistic. </p>
 </td></tr>
@@ -1366,8 +1442,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a2c6680d76f952b0d11cba15b90c568e5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2c6680d76f952b0d11cba15b90c568e5">&#9670;&nbsp;</a></span>calc_gradient()</h2>
+<a id="ad27f94ae464a4731b66ab5e62c986cdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad27f94ae464a4731b66ab5e62c986cdc">&#9670;&nbsp;</a></span>calc_gradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1406,7 +1482,7 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>min_range</em> = <code>0</code>, </td>
+          <td class="paramname"><em>min_range</em> = <code><a class="el" href="namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa">gridpp::MV</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1432,85 +1508,6 @@ SWIG testing functions</h2></td></tr>
     <tr><td class="paramname">min_nim</td><td>Minimum number of points required to compute gradient </td></tr>
     <tr><td class="paramname">min_range</td><td>Minimum range of base to compute gradient </td></tr>
     <tr><td class="paramname">default_gradient</td><td>Use this gradient if minimum number is not met </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a4454366e740a25024b31fd264438b3e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4454366e740a25024b31fd264438b3e2">&#9670;&nbsp;</a></span>calc_neighbourhood()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::calc_neighbourhood </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>array</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>search_array</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>halfwidth</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>search_criteria_min</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>search_criteria_max</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>search_target_min</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>search_target_max</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>search_delta</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Compute 2d array with weighted thresholds () </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">vec2</td><td>array input array </td></tr>
-    <tr><td class="paramname">vec2</td><td>searcg array values used to modify array </td></tr>
-    <tr><td class="paramname">int</td><td>halfwidth search radius </td></tr>
-    <tr><td class="paramname">float</td><td>search criteria_min minimum value </td></tr>
-    <tr><td class="paramname">float</td><td>search criteria_max maximum value </td></tr>
-    <tr><td class="paramname">float</td><td>search_target_min minimum value where values are assigned with </td></tr>
-    <tr><td class="paramname">float</td><td>search_target_max maximum value where values are assigned with </td></tr>
-    <tr><td class="paramname">float</td><td>search_delta if no search_target values are found, minimum difference between original value of search_array and any value inside the search radius. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1817,7 +1814,7 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <a id="a82c83dc14b5404caf72dce626f5cddfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82c83dc14b5404caf72dce626f5cddfe">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[1/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c83dc14b5404caf72dce626f5cddfe">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[1/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1848,7 +1845,7 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <a id="aa90bfd512bc5371bfab4a255b3cf3aaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa90bfd512bc5371bfab4a255b3cf3aaa">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[2/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa90bfd512bc5371bfab4a255b3cf3aaa">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[2/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1876,7 +1873,7 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <a id="a6a2e9bad6b3578af74a0bb383eb1b72d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a2e9bad6b3578af74a0bb383eb1b72d">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[3/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a2e9bad6b3578af74a0bb383eb1b72d">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[3/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1904,7 +1901,7 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <a id="a0cab33bb79ed039243bb009c376d9b97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0cab33bb79ed039243bb009c376d9b97">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[4/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cab33bb79ed039243bb009c376d9b97">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[4/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1931,8 +1928,36 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ae04502491d400ffc0f8c63de2ca94ab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae04502491d400ffc0f8c63de2ca94ab5">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[5/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gridpp::compatible_size </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ae3cdb32a3f035219704e768f9466ba55"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae3cdb32a3f035219704e768f9466ba55">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[5/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3cdb32a3f035219704e768f9466ba55">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[6/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1960,7 +1985,7 @@ SWIG testing functions</h2></td></tr>
 </div>
 </div>
 <a id="a462d5dd6eeacea898068ef80faef830d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a462d5dd6eeacea898068ef80faef830d">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[6/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a462d5dd6eeacea898068ef80faef830d">&#9670;&nbsp;</a></span>compatible_size() <span class="overload">[7/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2571,6 +2596,237 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a9050f3ef04b388c1edcb35895b8a9f88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9050f3ef04b388c1edcb35895b8a9f88">&#9670;&nbsp;</a></span>downscale_probability()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::downscale_probability </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>ogrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>threshold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">ComparisonOperator</a> &amp;&#160;</td>
+          <td class="paramname"><em>comparison_operator</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nearest neighbour downscaling grid to grid and probability in one. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">igrid</td><td>Input grid </td></tr>
+    <tr><td class="paramname">ogrid</td><td>Output grid to downscale to </td></tr>
+    <tr><td class="paramname">ivalues</td><td>3D vector of values on the input grid (Y, X, E) </td></tr>
+    <tr><td class="paramname">threshold</td><td>2D vector of threshold values </td></tr>
+    <tr><td class="paramname">comparison_operator</td><td>lower than, lower or equal than, greater than, great or equal than </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Values on the output grid </dd></dl>
+
+</div>
+</div>
+<a id="a5be71d717aed700b69f2217c92428234"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5be71d717aed700b69f2217c92428234">&#9670;&nbsp;</a></span>downscaling() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::downscaling </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>ogrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Generic downscaler for simple methods that don't use information other than the grids. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">igrid</td><td>Input grid </td></tr>
+    <tr><td class="paramname">ogrid</td><td>Output grid to downscale to </td></tr>
+    <tr><td class="paramname">ivalues</td><td>2D vector of values on the input grid </td></tr>
+    <tr><td class="paramname">downscaler</td><td>Downscaling method </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Values on the output grid </dd></dl>
+
+</div>
+</div>
+<a id="aab9695e4abd7a43be3f30d940661c2e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab9695e4abd7a43be3f30d940661c2e9">&#9670;&nbsp;</a></span>downscaling() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> gridpp::downscaling </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>ogrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a080679c615eef786aaea4ab643a68074"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a080679c615eef786aaea4ab643a68074">&#9670;&nbsp;</a></span>downscaling() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> gridpp::downscaling </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
+          <td class="paramname"><em>opoints</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6e39bb7c253933630eb2becf6472a22d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e39bb7c253933630eb2becf6472a22d">&#9670;&nbsp;</a></span>downscaling() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::downscaling </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
+          <td class="paramname"><em>opoints</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="acbe1ce217b51e781135225b9b6c77223"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acbe1ce217b51e781135225b9b6c77223">&#9670;&nbsp;</a></span>error()</h2>
 
@@ -2679,8 +2935,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab3d214b37cff5917592a5cc1708186b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3d214b37cff5917592a5cc1708186b5">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[1/8]</span></h2>
+<a id="af0ab7acd154ab66655091fa94328c337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0ab7acd154ab66655091fa94328c337">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2713,7 +2969,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em> = <code><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>()</code>&#160;</td>
+          <td class="paramname"><em>laf_gradient</em> = <code><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2737,8 +2999,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="acbaae04e8778057eafc244a862c39b1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acbaae04e8778057eafc244a862c39b1e">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[2/8]</span></h2>
+<a id="a9c0d8fb9a703705e98fdbd7cb3e7b6a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c0d8fb9a703705e98fdbd7cb3e7b6a8">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2771,7 +3033,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
+          <td class="paramname"><em>laf_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2783,8 +3051,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a83e41306912725f0b03ad1043c319c36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83e41306912725f0b03ad1043c319c36">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[3/8]</span></h2>
+<a id="ab75949dce6990847dd38588893439a81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab75949dce6990847dd38588893439a81">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2817,7 +3085,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
+          <td class="paramname"><em>laf_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2829,8 +3103,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab7e309d62340de57e0fc58f874e6eec8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab7e309d62340de57e0fc58f874e6eec8">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[4/8]</span></h2>
+<a id="ae7c1951940fcb520ca52aba20b6bb178"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c1951940fcb520ca52aba20b6bb178">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2863,7 +3137,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
+          <td class="paramname"><em>laf_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2875,192 +3155,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a93a7b0d0c21e299ec590650b2f35886e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93a7b0d0c21e299ec590650b2f35886e">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[5/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::full_gradient </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>ipoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
-          <td class="paramname"><em>ogrid</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>ivalues</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5d01c31873b088be03523b9c5bf5adcf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d01c31873b088be03523b9c5bf5adcf">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[6/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> gridpp::full_gradient </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>ipoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
-          <td class="paramname"><em>ogrid</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>ivalues</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a91dca2fb551f61f6aa54ed6c5d168236"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a91dca2fb551f61f6aa54ed6c5d168236">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[7/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> gridpp::full_gradient </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>ipoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>opoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>ivalues</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a4068686f9a731526661d8cf2de04c339"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4068686f9a731526661d8cf2de04c339">&#9670;&nbsp;</a></span>full_gradient() <span class="overload">[8/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::full_gradient </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>ipoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classgridpp_1_1Points.html">Points</a> &amp;&#160;</td>
-          <td class="paramname"><em>opoints</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>ivalues</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9a3ff6b2558220e17552c57e54abc98a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a3ff6b2558220e17552c57e54abc98a">&#9670;&nbsp;</a></span>full_gradient_debug()</h2>
+<a id="a959d043fc3e571abd6a5b4ea0c7150f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a959d043fc3e571abd6a5b4ea0c7150f2">&#9670;&nbsp;</a></span>full_gradient_debug()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3093,7 +3189,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
-          <td class="paramname"><em>laf_gradient</em> = <code><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>()</code>&#160;</td>
+          <td class="paramname"><em>laf_gradient</em> = <code><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3133,6 +3235,48 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
+<a id="abf290b2cc0dd8a533f19eddefc0fae9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf290b2cc0dd8a533f19eddefc0fae9d">&#9670;&nbsp;</a></span>gamma_inv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> gridpp::gamma_inv </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>levels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>shape</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">shape</td><td>Shape parameter of gamma distribution </td></tr>
+    <tr><td class="paramname">scale</td><td>Scale parameter of gamma distribution </td></tr>
+    <tr><td class="paramname">levels</td><td>Quantile levels to retrieve </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a2f25934dd00b9fb79e7ea153e8a13119"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2f25934dd00b9fb79e7ea153e8a13119">&#9670;&nbsp;</a></span>get_debug_level()</h2>
 
@@ -3152,8 +3296,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a2627ca943f5f3d99f892c680664eab8c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2627ca943f5f3d99f892c680664eab8c">&#9670;&nbsp;</a></span>get_lower_index()</h2>
+<a id="a79b0709d3a4b625c3c614b5fe4e86998"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79b0709d3a4b625c3c614b5fe4e86998">&#9670;&nbsp;</a></span>get_lower_index()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3167,7 +3311,7 @@ SWIG testing functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
           <td class="paramname"><em>iValues</em>&#160;</td>
         </tr>
         <tr>
@@ -3343,8 +3487,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a474f636d52c72de7477b8d69d94bc0f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a474f636d52c72de7477b8d69d94bc0f3">&#9670;&nbsp;</a></span>get_upper_index()</h2>
+<a id="a4754eabf9f76fbe8fd5d745ec3500f46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4754eabf9f76fbe8fd5d745ec3500f46">&#9670;&nbsp;</a></span>get_upper_index()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3358,7 +3502,7 @@ SWIG testing functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
           <td class="paramname"><em>iValues</em>&#160;</td>
         </tr>
         <tr>
@@ -3675,8 +3819,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a18c9cb0bf34070767072a54d57655a18"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18c9cb0bf34070767072a54d57655a18">&#9670;&nbsp;</a></span>interpolate()</h2>
+<a id="acbe06743ef2211329d113ad00a034ea5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbe06743ef2211329d113ad00a034ea5">&#9670;&nbsp;</a></span>interpolate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3690,13 +3834,13 @@ SWIG testing functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
           <td class="paramname"><em>iX</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
           <td class="paramname"><em>iY</em>&#160;</td>
         </tr>
         <tr>
@@ -3907,6 +4051,86 @@ SWIG testing functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a4d93d34bf44cc54246d4fe98a807c240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d93d34bf44cc54246d4fe98a807c240">&#9670;&nbsp;</a></span>mask_threshold_downscale_consensus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::mask_threshold_downscale_consensus </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>igrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;&#160;</td>
+          <td class="paramname"><em>ogrid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues_true</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>ivalues_false</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;&#160;</td>
+          <td class="paramname"><em>theshold_values</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>threshold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a99c1c55ccf373117225b99992a285e00">ComparisonOperator</a> &amp;&#160;</td>
+          <td class="paramname"><em>comparison_operator</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a232191788fcb9015e7ee56848e8c6e4e">Statistic</a> &amp;&#160;</td>
+          <td class="paramname"><em>statistic</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nearest neighbour downscaling grid to grid and threshold and consensus in one. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">igrid</td><td>Input grid </td></tr>
+    <tr><td class="paramname">ogrid</td><td>Output grid to downscale to </td></tr>
+    <tr><td class="paramname">ivalues_true</td><td>3D vector of values on the input grid (Y, X, E) </td></tr>
+    <tr><td class="paramname">ivalues_false</td><td>3D vector of values on the input grid (Y, X, E) </td></tr>
+    <tr><td class="paramname">threshold_values</td><td>3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold </td></tr>
+    <tr><td class="paramname">threshold</td><td>2D vector of threshold values </td></tr>
+    <tr><td class="paramname">comparison_operator</td><td>lower than, lower or equal than, greater than, great or equal than </td></tr>
+    <tr><td class="paramname">statistic</td><td>statistic to compute over the ensemble dimension </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Values on the output grid </dd></dl>
 
 </div>
 </div>
@@ -4908,6 +5132,78 @@ SWIG testing functions</h2></td></tr>
     <tr><td class="paramname">quantile</td><td>2D grid quantiles to compute (between 0 and 1) </td></tr>
     <tr><td class="paramname">halfwidth</td><td>Filter halfwidth in number of gridpoints </td></tr>
     <tr><td class="paramname">thresholds</td><td>Vector of thresholds to use to approximate value </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af7587d405470680ad8a2f0dab92fb6cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7587d405470680ad8a2f0dab92fb6cb">&#9670;&nbsp;</a></span>neighbourhood_search()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> gridpp::neighbourhood_search </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>array</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>search_array</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>halfwidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>search_target_min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>search_target_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>search_delta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a> &amp;&#160;</td>
+          <td class="paramname"><em>apply_array</em> = <code><a class="el" href="namespacegridpp.html#a13a02343378719c38e15d63994a59f81">ivec2</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Find suitable value in neighbourhood based on a search criteria. </p>
+<p>If search value is within a criteria range, then the most suitable point is used. This is the nearest value of any point within the search_target range; or if no point fulfills this, the point with the highest search value. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">base</td><td>base values (e.g elevation) </td></tr>
+    <tr><td class="paramname">values</td><td>values to compute gradients for (e.g. temperatures) </td></tr>
+    <tr><td class="paramname">gradient_type</td><td>what gradient type to compute </td></tr>
+    <tr><td class="paramname">halfwidth</td><td>neighbourhood halfwidth to compute gradient for </td></tr>
+    <tr><td class="paramname">min_num</td><td>minimum number of valid points needed to compute gradient </td></tr>
+    <tr><td class="paramname">min_range</td><td>minimum range of base values to compute gradient (for LinearRegression, this is the standard deviation of values </td></tr>
+    <tr><td class="paramname">default_gradient</td><td>The gradient to use when a gradient cannot be computed </td></tr>
   </table>
   </dd>
 </dl>
@@ -5995,8 +6291,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1f363f06a020b356e6e731968574bd04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f363f06a020b356e6e731968574bd04">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[1/4]</span></h2>
+<a id="a7dd2924fcba550ed9f51a54b087a6ed7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7dd2924fcba550ed9f51a54b087a6ed7">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6023,7 +6319,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>&#160;</td>
+          <td class="paramname"><em>elev_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -6035,8 +6337,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7b52629cb6f819edcba551668ee3aaa6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b52629cb6f819edcba551668ee3aaa6">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[2/4]</span></h2>
+<a id="a983ea61ecefaa8fd8dd25e4a4454c352"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a983ea61ecefaa8fd8dd25e4a4454c352">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6063,7 +6365,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>&#160;</td>
+          <td class="paramname"><em>elev_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -6075,8 +6383,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a856d5d26d0b9ec193bd1e334448f2088"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a856d5d26d0b9ec193bd1e334448f2088">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[3/4]</span></h2>
+<a id="a547803687b79c39691e4c6d0152b75de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a547803687b79c39691e4c6d0152b75de">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6103,7 +6411,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>&#160;</td>
+          <td class="paramname"><em>elev_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -6115,8 +6429,8 @@ SWIG testing functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a45b61f5084375ba03c0955443170d11c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a45b61f5084375ba03c0955443170d11c">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[4/4]</span></h2>
+<a id="ae513756d8dd3294a5648879886b243d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae513756d8dd3294a5648879886b243d1">&#9670;&nbsp;</a></span>simple_gradient() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6143,7 +6457,13 @@ SWIG testing functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>elev_gradient</em>&#160;</td>
+          <td class="paramname"><em>elev_gradient</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00">Downscaler</a>&#160;</td>
+          <td class="paramname"><em>downscaler</em> = <code><a class="el" href="namespacegridpp.html#af8854df1af03a54f3df56dcbe1ab8b00a5ff1282ac10187a77502e67880905613">Nearest</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -7125,7 +7445,7 @@ SWIG testing functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Oct 22 2021 20:47:47 for Gridpp 0.6.0.dev8 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Oct 14 2022 19:33:51 for Gridpp 0.6.0 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

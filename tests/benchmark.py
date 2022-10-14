@@ -73,6 +73,7 @@ def main():
         2000).astype(np.float32), x, y, gridpp.OneToOne, gridpp.OneToOne)}
     run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([2000, 2000, 10],
         np.float32),)}
+    run[("mask_threshold_downscale_consensus", "1000²")] = {"expected": 0.91, "args":(grids[100], grids[1000], np.random.rand(100, 100, 10), np.random.rand(100, 100, 10), np.random.rand(1000, 1000, 10), np.random.rand(1000, 1000), gridpp.Lt, gridpp.Mean)}
 
 
     if args.num_cores is not None:

@@ -109,8 +109,6 @@ vec gridpp::metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& t
     int N = thresholds.size();
     vec x(N);
     vec y(N);
-    float min = 0;
-    float max = 10;
     vec output_ref;
     output_ref.reserve(N);
     output_fcst.clear();

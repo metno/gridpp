@@ -21,6 +21,9 @@ def main():
     points = dict()
     np.random.seed(1000)
 
+    version_major = int(gridpp.version().split('.')[0])
+    version_minor = int(gridpp.version().split('.')[1])
+
     for i in [10, 50, 100, 200, 500, 1000, 2000, 10000]:
         input[i] = np.random.rand(int(i * args.scaling), i)*10
     for i in [10, 50, 100, 200, 500, 1000]:
@@ -57,8 +60,10 @@ def main():
         points[1000], np.ones(1000) * 1, np.ones(1000) * 1, structure, 0.1, 0.9, 5)}
     run[("full_gradient", "1000²")] = {"expected": 1.59, "args": (grids[1000], grids[1000],
         np.zeros([1000,1000]), np.zeros([1000,1000]), np.zeros([1000,1000]))}
-    run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
-        100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 100, 0)}
+    if version_major > 0 or version_minor > 6:
+        run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
+            100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 100, 0)}
+        run[("mask_threshold_downscale_consensus", "1000²")] = {"expected": 0.91, "args":(grids[100], grids[1000], np.random.rand(100, 100, 10), np.random.rand(100, 100, 10), np.random.rand(1000, 1000, 10), np.random.rand(1000, 1000), gridpp.Lt, gridpp.Mean)}
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
         np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}
@@ -73,7 +78,6 @@ def main():
         2000).astype(np.float32), x, y, gridpp.OneToOne, gridpp.OneToOne)}
     run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([2000, 2000, 10],
         np.float32),)}
-    run[("mask_threshold_downscale_consensus", "1000²")] = {"expected": 0.91, "args":(grids[100], grids[1000], np.random.rand(100, 100, 10), np.random.rand(100, 100, 10), np.random.rand(1000, 1000, 10), np.random.rand(1000, 1000), gridpp.Lt, gridpp.Mean)}
 
 
     if args.num_cores is not None:

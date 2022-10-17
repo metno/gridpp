@@ -46,11 +46,14 @@ grid = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, 200), np.linspace(0, 1, 200)))
 points = gridpp.Points(np.random.rand(10), np.random.rand(10))
 obs = np.random.randn(10) / 2
 pobs = gridpp.nearest(grid, points, input)
-variance_ratio = 0.5*np.ones(10)
+obs_to_background_variance_ratio = 0.5*np.ones(10)
 
 # Run optimal interpolation with a Barnes structure function (10km e-folding distance)
 structure = gridpp.BarnesStructure(10000)
-output = gridpp.optimal_interpolation(grid, field, points, obs, variance_ratio, pobs, structure, 10)
+max_points = 10
+output = gridpp.optimal_interpolation(grid, field, points, obs,
+                                      obs_to_background_variance_ratio,
+                                      pobs, structure, max_points)
 ```
 
 ![Example](docs/image.jpg)

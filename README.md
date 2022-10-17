@@ -58,20 +58,6 @@ output = gridpp.optimal_interpolation(grid, field, points, obs,
 
 ![Example](docs/image.jpg)
 
-## Installing the python bindings on Linux
-
-The easiest is to install the latest release of the package using pip, which comes with precompiled binaries so no non-python dependencies are required:
-```bash
-pip install gridpp --user
-```
-
-To check that the installation worked, run the following in python:
-```python
-import gridpp
-print(gridpp.version())
-```
-
-
 ## Full gridpp installation from source
 
 ### 1) Install dependencies

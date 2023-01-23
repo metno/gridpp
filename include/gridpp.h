@@ -609,6 +609,19 @@ namespace gridpp {
     */
     vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues_true, const vec3& ivalues_false, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic);
 
+    /** Nearest neighbour downscaling grid to grid and threshold and quantile in one
+      * @param igrid Input grid
+      * @param ogrid Output grid to downscale to
+      * @param ivalues_true 3D vector of values on the input grid (Y, X, E)
+      * @param ivalues_false 3D vector of values on the input grid (Y, X, E)
+      * @param threshold_values 3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold
+      * @param threshold 2D vector of threshold values
+      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
+      * @param quantile quantile (value between 0-1) to compute
+      * @return Values on the output grid
+    */
+    vec2 mask_threshold_downscale_quantile(const Grid& igrid, const Grid& ogrid, const vec3& ivalues_true, const vec3& ivalues_false, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const float quantile);
+
     /** Bilinear downscaling grid to grid
       * @param igrid Input grid
       * @param ogrid Output grid to downscale to

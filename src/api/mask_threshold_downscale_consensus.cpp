@@ -71,10 +71,12 @@ namespace {
                     }
 
                 }
-                if(statistic == gridpp::Quantile)
-                    output[i][j] = gridpp::calc_quantile(neighbourhood, quantile);
-                else
-                    output[i][j] = gridpp::calc_statistic(neighbourhood, statistic);             
+                if(statistic == gridpp::Quantile) {
+                    output[i][j] = gridpp::calc_quantile(masked_ivalues, quantile);
+                }
+                else {
+                    output[i][j] = gridpp::calc_statistic(masked_ivalues, statistic);
+                }
             }
         }
         return output;

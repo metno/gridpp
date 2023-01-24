@@ -47,4 +47,7 @@ class Test(unittest.TestCase):
         output = gridpp.mask_threshold_downscale_consensus(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Geq, gridpp.Count)
         np.testing.assert_array_equal(output, np.array([[3., 3., 2.], [3., 3., 3.], [3., 3., 3.]], dtype=np.float32))   
 
-    
+    def test_mask_threshold_leq_downscale_quantile(self):
+        quantile = 0.25
+        output = gridpp.mask_threshold_downscale_quantile(self.grid1, self.grid2, self.valuestrue, self.valuesfalse, self.threshold_values, self.thresholds, gridpp.Leq, quantile)
+        np.testing.assert_array_equal(output, np.array([[0., 0., 0.5], [1.5, 1.5, 0.], [1.5, 1.5, 0.]], dtype=np.float32))  

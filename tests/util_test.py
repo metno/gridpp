@@ -13,6 +13,7 @@ class Test(unittest.TestCase):
         self.assertEqual(gridpp.get_statistic("quantile"), gridpp.Quantile)
         self.assertEqual(gridpp.get_statistic("std"), gridpp.Std)
         self.assertEqual(gridpp.get_statistic("sum"), gridpp.Sum)
+        self.assertEqual(gridpp.get_statistic("randomchoice"), gridpp.RandomChoice)
 
     def test_unknown_statistic(self):
         self.assertEqual(gridpp.get_statistic("mean1"), gridpp.Unknown)
@@ -82,6 +83,12 @@ class Test(unittest.TestCase):
             with self.assertRaises(Exception) as e:
                 gridpp.calc_quantile([0, 1, 2], quantile)
         self.assertTrue(np.isnan(gridpp.calc_quantile([0, 1, 2], np.nan)))
+
+    def test_calc_statistic_randomchoice(self):
+        # since this is random, just check that we don't get unreasonable results
+        for i in range(10):
+            self.assertGreaterEqual(gridpp.calc_statistic([0, 1, 2], gridpp.RandomChoice), 0)
+            self.assertLessEqual(gridpp.calc_statistic([0, 1, 2], gridpp.RandomChoice), 2)
 
     def test_num_missing_values(self):
         self.assertEqual(gridpp.num_missing_values([[0, np.nan, 1, np.nan]]), 2)

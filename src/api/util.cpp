@@ -76,6 +76,28 @@ float gridpp::calc_statistic(const vec& array, gridpp::Statistic statistic) {
             }
         }
     }
+    else if (statistic == gridpp::RandomChoice) {
+        int num_valid = 0;
+        for(int n = 0; n < array.size(); n++) {
+            if(gridpp::is_valid(array[n])) {
+                num_valid++;
+            }
+        }
+        if(num_valid > 0) {
+            int random_index = rand() % num_valid;
+            assert(random_index < array.size());
+            int count = 0;
+            for(int n = 0; n < array.size(); n++) {
+                if(gridpp::is_valid(array[n])) {
+                    if(count == random_index) {
+                        value = array[n];
+                        break;
+                    }
+                    count++;
+                }
+            }
+        }
+    }
     else {
         float quantile = gridpp::MV;
         if(statistic == gridpp::Min)

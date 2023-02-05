@@ -110,6 +110,11 @@ class Test(unittest.TestCase):
             thresholds = [1, 5, 10]
             output = func(values, 7, gridpp.Mean)
 
+    def test_randomchoice(self):
+        for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
+            output = func(values, 1, gridpp.RandomChoice)
+            output = func(values, 11, gridpp.RandomChoice)
+
     def test_3d(self):
         np.random.seed(1000)
         values = np.random.rand(200, 200)

@@ -572,30 +572,47 @@ namespace {
             output[y].resize(nX, gridpp::MV);
         }
         #pragma omp parallel for
-        for(int i = 0; i < nY; i++) {
-            for(int j = 0; j < nX; j++) {
+        for(int y = 0; y < nY; y++) {
+            for(int x = 0; x < nX; x++) {
                 // Put neighbourhood into vector
                 vec neighbourhood;
-                int Ni = std::min(nY-1, i+halfwidth) - std::max(0, i-halfwidth) + 1;
-                int Nj = std::min(nX-1, j+halfwidth) - std::max(0, j-halfwidth) + 1;
-                assert(Ni > 0);
-                assert(Nj > 0);
-                neighbourhood.resize(Ni*Nj, gridpp::MV);
-                int index = 0;
-                for(int ii = std::max(0, i-halfwidth); ii <= std::min(nY-1, i+halfwidth); ii++) {
-                    for(int jj = std::max(0, j-halfwidth); jj <= std::min(nX-1, j+halfwidth); jj++) {
-                        float value = input[ii][jj];
-                        assert(index < Ni*Nj);
-                        neighbourhood[index] = value;
-                        index++;
-                    }
+                int curr_nY = std::min(nY-1, y+halfwidth) - std::max(0, y-halfwidth) + 1;
+                int curr_nX = std::min(nX-1, x+halfwidth) - std::max(0, x-halfwidth) + 1;
+                assert(curr_nY > 0);
+                assert(curr_nX > 0);
+
+                if(statistic == gridpp::RandomChoice) {
+                    int start_y = std::max(0, y-halfwidth);
+                    int start_x = std::max(0, x-halfwidth);
+
+                    int random_x = rand() % (curr_nX);
+                    int random_y = rand() % (curr_nY);
+                    assert(random_x < curr_nX);
+                    assert(random_y < curr_nY);
+                    assert(start_y + random_y >= 0);
+                    assert(start_y + random_y < nY);
+                    assert(start_x + random_x >= 0);
+                    assert(start_x + random_x < nX);
+                    output[y][x] = input[start_y + random_y][start_x + random_x];
                 }
-                assert(index == Ni*Nj);
-                if(statistic == gridpp::Quantile)
-                    output[i][j] = gridpp::calc_quantile(neighbourhood, quantile);
-                else
-                    output[i][j] = gridpp::calc_statistic(neighbourhood, statistic);
-                count_stat += neighbourhood.size();
+                else {
+                    neighbourhood.resize(curr_nY*curr_nX, gridpp::MV);
+                    int index = 0;
+                    for(int ii = std::max(0, y-halfwidth); ii <= std::min(nY-1, y+halfwidth); ii++) {
+                        for(int jj = std::max(0, x-halfwidth); jj <= std::min(nX-1, x+halfwidth); jj++) {
+                            float value = input[ii][jj];
+                            assert(index < curr_nY*curr_nX);
+                            neighbourhood[index] = value;
+                            index++;
+                        }
+                    }
+                    assert(index == curr_nY*curr_nX);
+                    if(statistic == gridpp::Quantile)
+                        output[y][x] = gridpp::calc_quantile(neighbourhood, quantile);
+                    else
+                        output[y][x] = gridpp::calc_statistic(neighbourhood, statistic);
+                    count_stat += neighbourhood.size();
+                }
             }
         }
         return output;

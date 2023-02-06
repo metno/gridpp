@@ -158,6 +158,30 @@ class BilinearTest(unittest.TestCase):
         with self.assertRaises(Exception) as e:
             gridpp.bilinear(grid, grid, values)
 
+    def test_empty_output_points(self):
+        lons, lats = np.meshgrid([0, 10, 20], [30, 40, 50])
+        grid = gridpp.Grid(lats, lons)
+        values = np.zeros(lons.shape)
+
+        points = gridpp.Points([], [])
+        output = gridpp.bilinear(grid, points, values)
+        np.testing.assert_array_equal(output, [])
+
+    def test_empty_input_grid(self):
+        igrid = gridpp.Grid([[]], [[]])
+        points = gridpp.Points([0, 5, 10], [0, 5, 10])
+        output = gridpp.bilinear(igrid, points, np.zeros([0, 0]))
+        np.testing.assert_array_equal(output, [np.nan, np.nan, np.nan])
+
+    def test_empty_output_grid(self):
+        lons, lats = np.meshgrid([0, 10, 20], [30, 40, 50])
+        igrid = gridpp.Grid(lats, lons)
+        values = np.zeros(lons.shape)
+
+        grid = gridpp.Grid([[]], [[]])
+        output = gridpp.bilinear(igrid, grid, values)
+        np.testing.assert_array_equal(output, [[]])
+
 
     def check(self):
         N = 4

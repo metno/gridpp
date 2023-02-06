@@ -35,10 +35,9 @@ vec2 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues)
     int nLat = iOutputLats.size();
     int nLon = iOutputLats[0].size();
 
-    vec2 output;
-    output.resize(nLat);
-    for(int i = 0; i < nLat; i++)
-        output[i].resize(nLon);
+    vec2 output = gridpp::init_vec2(nLat, nLon, gridpp::MV);
+    if(igrid.size()[0] == 0 || igrid.size()[1] == 0)
+        return output;
 
     // Algorithm from here:
     #pragma omp parallel for collapse(2)
@@ -65,12 +64,9 @@ vec3 gridpp::bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues)
     int nLat = iOutputLats.size();
     int nLon = iOutputLats[0].size();
 
-    vec3 output(nTime);
-    for(int t = 0; t < nTime; t++) {
-        output[t].resize(nLat);
-        for(int i = 0; i < nLat; i++)
-            output[t][i].resize(nLon);
-    }
+    vec3 output = gridpp::init_vec3(nTime, nLat, nLon, gridpp::MV);
+    if(igrid.size()[0] == 0 || igrid.size()[1] == 0)
+        return output;
 
     // To reuse nearest neighbour information across time, we can't call calc on each timestep
     #pragma omp parallel for collapse(2)
@@ -97,6 +93,8 @@ vec gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalu
     int nPoints = iOutputLats.size();
 
     vec output(nPoints, gridpp::MV);
+    if(igrid.size()[0] == 0 || igrid.size()[1] == 0)
+        return output;
 
     // Algorithm from here:
     #pragma omp parallel for
@@ -120,10 +118,9 @@ vec2 gridpp::bilinear(const Grid& igrid, const Points& opoints, const vec3& ival
     int nTime = ivalues.size();
     int nPoints = iOutputLats.size();
 
-    vec2 output(nTime);
-    for(int t = 0; t < nTime; t++) {
-        output[t].resize(nPoints);
-    }
+    vec2 output = gridpp::init_vec2(nTime, nPoints, gridpp::MV);
+    if(igrid.size()[0] == 0 || igrid.size()[1] == 0)
+        return output;
 
     #pragma omp parallel for
     for(int i = 0; i < nPoints; i++) {

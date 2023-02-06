@@ -109,6 +109,31 @@ class Test(unittest.TestCase):
         output = gridpp.nearest(ipoints, points, values)
         np.testing.assert_array_equal(output, [[0, 1]])
 
+    def test_empty_input_points(self):
+        ipoints = gridpp.Points([], [])
+        points = gridpp.Points([0, 5, 10], [0, 5, 10])
+        output = gridpp.nearest(ipoints, points, np.zeros([0]))
+        np.testing.assert_array_equal(output, [np.nan, np.nan, np.nan])
+
+    def test_empty_output_points(self):
+        ipoints = gridpp.Points([0, 5, 10], [0, 5, 10])
+        points = gridpp.Points([], [])
+        output = gridpp.nearest(ipoints, points, np.zeros([3]))
+        np.testing.assert_array_equal(output, [])
+
+    def test_empty_input_grid(self):
+        igrid = gridpp.Grid([[]], [[]])
+        points = gridpp.Points([0, 5, 10], [0, 5, 10])
+        output = gridpp.nearest(igrid, points, np.zeros([0, 0]))
+        np.testing.assert_array_equal(output, [np.nan, np.nan, np.nan])
+
+    def test_empty_output_grid(self):
+        ipoints = gridpp.Points([0, 5, 10], [0, 5, 10])
+        grid = gridpp.Grid([[]], [[]])
+        output = gridpp.nearest(ipoints, grid, [0, 1, 2])
+        np.testing.assert_array_equal(output, [[]])
+
+
 
 
 if __name__ == '__main__':

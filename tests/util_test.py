@@ -90,6 +90,11 @@ class Test(unittest.TestCase):
             self.assertGreaterEqual(gridpp.calc_statistic([0, 1, 2], gridpp.RandomChoice), 0)
             self.assertLessEqual(gridpp.calc_statistic([0, 1, 2], gridpp.RandomChoice), 2)
 
+    def test_calc_statistic_randomchoice_most_missing(self):
+        ar = np.nan * np.zeros([1000])
+        ar[100] = 1
+        self.assertEqual(gridpp.calc_statistic(ar, gridpp.RandomChoice), 1)
+
     def test_num_missing_values(self):
         self.assertEqual(gridpp.num_missing_values([[0, np.nan, 1, np.nan]]), 2)
         self.assertEqual(gridpp.num_missing_values([[np.nan, np.nan]]), 2)

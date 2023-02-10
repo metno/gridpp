@@ -182,6 +182,24 @@ class BilinearTest(unittest.TestCase):
         output = gridpp.bilinear(igrid, grid, values)
         np.testing.assert_array_equal(output, [[]])
 
+    def test_weird(self):
+        x = np.reshape([-117.3010559, -116.8340607, -117.2735291, -116.803299], [2, 2]).transpose()
+        y = np.reshape([57.71018982, 57.69472504, 57.95975876, 57.94418716], [2, 2]).transpose()
+        x0 = -117.299057 - x[0][0]
+        y0 = 57.71475601 - y[0][0]
+        x = x - x[0][0]
+        y = y - y[0][0]
+        values = np.reshape(np.arange(4), [2, 2]).transpose()
+
+        for do_transpose in [False, True]:
+            with self.subTest(structure=do_transpose):
+                x = x.transpose()
+                y = y.transpose()
+                values = values.transpose()
+                grid = gridpp.Grid(y, x)
+                points = gridpp.Points([y0], [x0])
+                q = gridpp.bilinear(grid, points, values)
+                self.assertAlmostEqual(q[0], 0.04017778, 6)
 
     def check(self):
         N = 4

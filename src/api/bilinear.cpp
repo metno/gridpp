@@ -159,40 +159,71 @@ namespace {
 
     bool calcGeneral(float x, float y, float x0, float x1, float x2, float x3, float y0, float y1, float y2, float y3, float &t, float &s) {
         // std::cout << "Method general" << std::endl;
-        float a = -x0 + x2;
-        float b = -x0 + x1;
-        float c = x0 - x1 - x2 + x3;
-        float d = x - x0;
-        float e = -y0 + y2;
-        float f = -y0 + y1;
-        float g = y0 - y1 - y2 + y3;
-        float h = y - y0;
-        float alpha=gridpp::MV, beta=gridpp::MV;
-        float Y1 = y1;
-        float Y2 = y3;
-        float Y3 = y0;
-        float Y4 = y2;
-        float X1 = x1;
-        float X2 = x3;
-        float X3 = x0;
-        float X4 = x2;
-        float X31 = X3 - X1;
-        float X21 = X2 - X1;
-        float Y42 = Y4 - Y2;
-        float Y21 = Y2 - Y1;
-        float Y31 = Y3 - Y1;
-        float Y43 = Y4 - Y3;
-        float X42 = X4 - X2;
-        float X43 = X4 - X3;
-        float tol = 0.001;
+        double a = -x0 + x2;
+        double b = -x0 + x1;
+        double c = x0 - x1 - x2 + x3;
+        double d = x - x0;
+        double e = -y0 + y2;
+        double f = -y0 + y1;
+        double g = y0 - y1 - y2 + y3;
+        double h = y - y0;
+        double alpha=gridpp::MV, beta=gridpp::MV;
+        double Y1 = y1;
+        double Y2 = y3;
+        double Y3 = y0;
+        double Y4 = y2;
+        double X1 = x1;
+        double X2 = x3;
+        double X3 = x0;
+        double X4 = x2;
+        double X31 = X3 - X1;
+        double X21 = X2 - X1;
+        double Y42 = Y4 - Y2;
+        double Y21 = Y2 - Y1;
+        double Y31 = Y3 - Y1;
+        double Y43 = Y4 - Y3;
+        double X42 = X4 - X2;
+        double X43 = X4 - X3;
+        double tol = 0.001;
+        /*
+        std::cout << "a " << a << std::endl;
+        std::cout << "b " << b << std::endl;
+        std::cout << "c " << c << std::endl;
+        std::cout << "d " << d << std::endl;
+        std::cout << "e " << e << std::endl;
+        std::cout << "f " << f << std::endl;
+        std::cout << "g " << g << std::endl;
+        std::cout << "h " << h << std::endl;
+  */
         if(2 * c * e - 2 * a * g != 0 && 2 * c * f - 2 * b * g != 0) {
             // Quadratic equation has two solutions
             alpha = -(b * e - a * f + d * g - c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             beta  = (b * e - a * f - d * g + c * h + sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            /*
+            std::cout << "alpha " << alpha << " beta " << beta << std::endl;
+            std::cout << "sqrt " << sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)) << std::endl;
+            std::cout << "first part " << b * e - a * f + d * g - c * h << std::endl;
+            std::cout << "second part " << b * e - a * f - d * g + c * h << std::endl;
+            */
             if(!is_within_range(alpha))
                 alpha = -(b * e - a * f + d * g - c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h, 2)))/(2 * c * e - 2 * a * g);
             if(!is_within_range(beta))
                 beta  = (b * e - a * f - d * g + c * h - sqrt(-4 * (c * e - a * g) * (d * f - b * h) + pow(b * e - a * f + d * g - c * h,2)))/(2 * c * f - 2 * b * g);
+            if(!is_within_range(alpha) || !is_within_range(beta)) {
+            }
+            /*
+            std::cout << std::setprecision(10) << "alpha " << alpha << " beta " << beta << std::endl;
+            std::cout << std::setprecision(10) << x << std::endl;
+            std::cout << std::setprecision(10) << y << std::endl;
+            std::cout << std::setprecision(10) << x0 << std::endl;
+            std::cout << std::setprecision(10) << x1 << std::endl;
+            std::cout << std::setprecision(10) << x2 << std::endl;
+            std::cout << std::setprecision(10) << x3 << std::endl;
+            std::cout << std::setprecision(10) << y0 << std::endl;
+            std::cout << std::setprecision(10) << y1 << std::endl;
+            std::cout << std::setprecision(10) << y2 << std::endl;
+            std::cout << std::setprecision(10) << y3 << std::endl;
+  */
             assert(is_within_range(alpha));
             assert(is_within_range(beta));
         }

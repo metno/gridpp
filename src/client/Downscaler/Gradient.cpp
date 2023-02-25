@@ -171,7 +171,12 @@ void DownscalerGradient::downscaleCore(const File& iInput, File& iOutput) const 
                   float currElev = oelevs[i][j];
                   if(Util::isValid(currElev) && Util::isValid(baseElev)) {
                      float dElev = currElev - baseElev;
-                     value += dElev * elevGradient;
+                     if(mLogTransform) {
+                         value *= exp(dElev * elevGradient);
+                     }
+                     else {
+                         value += dElev * elevGradient;
+                     }
                   }
                   if(Util::isValid(currLaf) && Util::isValid(baseLaf) && Util::isValid(lafGradient)) {
                      float dLaf = currLaf - baseLaf;
@@ -476,7 +481,7 @@ std::string DownscalerGradient::description(bool full) {
       ss << Util::formatDescription("   lafSearchRadii=1,2,3", "Compute LAF gradients using neighbourhoods with these sizes.") << std::endl;
       ss << Util::formatDescription("   lafWeights=undef", "Weights when computing the average LAF gradient in different neighbourhoods.") << std::endl;
 
-      ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev) * exp(gradient * dLaf). Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
+      ss << Util::formatDescription("   logTransform=0", "Should the variable be log-transformed first? I.e should a linear gradient be applied to log(variable)? T = T(nn) * exp(gradient * dElev). Only applied to elevation gradients. Useful for pressure variables. Can be used together with constantElevGradient.") << std::endl;
       ss << Util::formatDescription("   averageNeighbourhood=0", "Should the average forecast, elevation, and LAF within the search radius be used when determining what value to apply the gradient to?") << std::endl;
       ss << Util::formatDescription("   saveGradient=""", "Store the gradient instead of the value for debugging purposes. Use elev to store the elevation gradient; Use laf to store the laf gradient.") << std::endl;
       ss << Util::formatDescription("   downscaler=nearestNeighbour", "Use this downscaler on the field and on the altitudes before applying gradients.") << std::endl;

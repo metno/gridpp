@@ -10,8 +10,11 @@ float gridpp::apply_curve(float input, const vec& curve_ref, const vec& curve_fc
     float largestObs   = curve_ref[C-1];
     float largestFcst  = curve_fcst[C-1];
     float output = gridpp::MV;
+
     // Linear interpolation within curve
-    if(input > smallestFcst && input < largestFcst) {
+    // Use equality here, because interpolate handles the case where the lowest and highest values
+    // are identical. In this case, we want the average.
+    if(input >= smallestFcst && input <= largestFcst) {
         output = gridpp::interpolate(input, curve_fcst, curve_ref);
     }
     // Extrapolate outside curve

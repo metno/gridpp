@@ -147,7 +147,7 @@ make gridpp-client
 ```
 
 ## Copyright and license
-Copyright © 2014-2022 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
+Copyright © 2014-2023 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
 Public License (LGPL). See LICENSE file.
 
 ## Contact

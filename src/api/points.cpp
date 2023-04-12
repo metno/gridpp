@@ -136,6 +136,11 @@ gridpp::Points gridpp::Points::subset(const ivec& indices) const {
     vec lafs(N);
     for(int i = 0; i < N; i++) {
         int index = indices[i];
+        if(index >= mLats.size()) {
+            std::stringstream ss;
+            ss << "Index " << index << " exceeds number of points " << mLats.size();
+            throw std::invalid_argument(ss.str());
+        }
         lats[i] = mLats[index];
         lons[i] = mLons[index];
         elevs[i] = mElevs[index];

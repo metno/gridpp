@@ -60,5 +60,18 @@ class Test(unittest.TestCase):
         """ Check if all x-values are identical """
         self.assertAlmostEqual(0.5, gridpp.interpolate(0, [0, 0, 0, 0, 0, 0], [0, 0.1, 0.4, 0.6, 0.9, 1]), 5)
 
+    def test_empty_vector(self):
+        np.testing.assert_array_almost_equal([], gridpp.interpolate([], [0, 0, 0, 0, 0, 0], [0, 0.1, 0.4, 0.6, 0.9, 1]), 5)
+
+    def test_vector(self):
+        np.testing.assert_array_almost_equal([0.5], gridpp.interpolate([0], [0, 0, 0, 0, 0, 0], [0, 0.1, 0.4, 0.6, 0.9, 1]), 5)
+
+    def test_invalid_arguments(self):
+        with self.assertRaises(ValueError) as e:
+            gridpp.interpolate(0, [0, 1, 2], [0, 1])
+
+        with self.assertRaises(ValueError) as e:
+            gridpp.interpolate([0], [0, 1, 2], [0, 1])
+
 if __name__ == '__main__':
     unittest.main()

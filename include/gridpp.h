@@ -1005,6 +1005,15 @@ namespace gridpp {
     */
     float interpolate(float x, const vec& iX, const vec& iY);
 
+    /** Piecewise linear interpolation
+     *  Same as above, but for a vector of points to interpolate for
+     *  @param x Interpolation to these points
+     *  @param iX Vector of x-axis values. Vector must be sorted.
+     *  @param iY Vector of y-axis values corresponding to iX.
+     *  @return Y values corresponding to x
+    */
+    vec interpolate(const vec& x, const vec& iX, const vec& iY);
+
     /** Initialize a vector of size Y, X, with a given value */
     ivec2 init_ivec2(int Y, int X, int value);
     vec2 init_vec2(int Y, int X, float value=MV);

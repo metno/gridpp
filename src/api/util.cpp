@@ -386,6 +386,15 @@ float gridpp::interpolate(float x, const vec& iX, const vec& iY) {
 
     return y;
 }
+vec gridpp::interpolate(const vec& x, const vec& iX, const vec& iY) {
+    vec y(x.size());
+
+    #pragma omp parallel for
+    for(int i; i < x.size(); i++) {
+        y[i] = interpolate(x[i], iX, iY);
+    }
+    return y;
+}
 bool gridpp::compatible_size(const Grid& grid, const vec2& v) {
     return v.size() == 0 || (grid.size()[0] == v.size() && grid.size()[1] == v[0].size());
 }

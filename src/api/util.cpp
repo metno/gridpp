@@ -390,7 +390,7 @@ vec gridpp::interpolate(const vec& x, const vec& iX, const vec& iY) {
     vec y(x.size());
 
     #pragma omp parallel for
-    for(int i; i < x.size(); i++) {
+    for(int i = 0; i < x.size(); i++) {
         y[i] = interpolate(x[i], iX, iY);
     }
     return y;

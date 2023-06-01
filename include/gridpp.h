@@ -1236,6 +1236,10 @@ namespace gridpp {
                 private:
                     point p;
             };
+            // Checks that a lat-coordinate is valid (based on the coordinate type)
+            bool check_lat(float lat) const;
+            // Checks that a lon-coordinate is valid (based on the coordinate type)
+            bool check_lon(float lon) const;
     };
 
     /** Represents a vector of locations and their metadata */

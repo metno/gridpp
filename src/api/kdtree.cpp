@@ -1,4 +1,5 @@
 #include "gridpp.h"
+#include <iostream>
 
 using namespace gridpp;
 
@@ -117,6 +118,11 @@ bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& 
 }
 
 bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const {
+    if(!check_lat(lat) || !check_lon(lon)) {
+        std::stringstream ss;
+        ss << "Invalid coords: " << lat << "," << lon << std::endl;
+        throw std::invalid_argument(ss.str());
+    }
     if(mType == gridpp::Cartesian) {
         x_coord = lon;
         y_coord = lat;
@@ -245,4 +251,13 @@ bool gridpp::KDTree::is_not_equal::operator()(value const& v) const {
     float y0 = v.first.get<1>();
     float z0 = v.first.get<2>();
     return p.get<0>() != x0 || p.get<1>() != y0 || p.get<2>() != z0;
+}
+
+bool gridpp::KDTree::check_lat(float lat) const {
+    if(get_coordinate_type() == gridpp::Cartesian)
+        return gridpp::is_valid(lat);
+    return gridpp::is_valid(lat) && (lat >= -90.001) && (lat <= 90.001);
+};
+bool gridpp::KDTree::check_lon(float lon) const {
+    return gridpp::is_valid(lon);
 }

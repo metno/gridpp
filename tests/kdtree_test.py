@@ -89,6 +89,44 @@ class KDTreeTest(unittest.TestCase):
         tree = gridpp.KDTree()
         self.assertEqual(tree.get_coordinate_type(), gridpp.Geodetic)
 
+    def test_invalid_coords(self):
+        lats = [91, -91, np.nan, 0]
+        lons = [0, 0, 0, np.nan]
+        for i in range(len(lats)):
+            curr_lats = [lats[i]]
+            curr_lons = [lons[i]]
+            with self.subTest(lat=lats[i], lon=lons[i]):
+                with self.assertRaises(ValueError) as e:
+                    tree = gridpp.KDTree(curr_lats, curr_lons, gridpp.Geodetic)
+
+    def test_valid_coords(self):
+        lats = [90.000001, -90.0000001]
+        lons = [0, 0]
+        for i in range(len(lats)):
+            curr_lats = [0, lats[i]]
+            curr_lons = [0, lons[i]]
+            with self.subTest(lat=lats[i], lon=lons[i]):
+                tree = gridpp.KDTree(curr_lats, curr_lons, gridpp.Geodetic)
+                I = tree.get_nearest_neighbour(0, 0)
+                self.assertEqual(I, 0)
+
+    def test_wrap_lon(self):
+        """Check that longitudes outside [-180, 180] are correctly handled"""
+        lons = [-360, 0, 360]
+        for i in range(len(lons)):
+            curr_lats = [0]
+            curr_lons = [lons[i]]
+            with self.subTest(lon=lons[i]):
+                tree = gridpp.KDTree(curr_lats, curr_lons, gridpp.Geodetic)
+                I, dist = tree.get_neighbours_with_distance(0, 0, 1e9)
+                self.assertEqual(I[0], 0)
+                self.assertAlmostEqual(dist[0], 0)
+
+                I, dist = tree.get_neighbours_with_distance(0, 180, 1e9)
+                self.assertEqual(I[0], 0)
+                diameter_of_earth = 12756274.0
+                self.assertAlmostEqual(dist[0], diameter_of_earth)
+
 
 if __name__ == '__main__':
     unittest.main()

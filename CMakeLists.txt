@@ -7,60 +7,67 @@ string(REGEX REPLACE "^.+define GRIDPP_VERSION \"([^\n]+)\".+" "\\1" PROJECT_VER
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Boost 1.75 and above requires c++14 for the geometry library. For creating the python packages on
-# CentOS5, c++11 is more readily available, so this is preferred.
-find_package(Boost REQUIRED)
-find_package(Armadillo 6.5 REQUIRED)
-if(${Boost_MINOR_VERSION} GREATER 74)
-    set(CMAKE_CXX_STANDARD 14)
+option(BUILD_PACKAGE "Build package" OFF)
+
+if (BUILD_PACKAGE)
+
 else()
-    set(CMAKE_CXX_STANDARD 11)
-endif()
-
-# Set compiler flags
-enable_language(CXX)
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-if (NOT CMAKE_BUILD_TYPE)
-   message(STATUS "CMAKE_BUILD_TYPE is not set, switching to RELEASE")
-   set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING
-      "Choose the type of build, options are: NONE DEBUG RELEASE."
-      FORCE)
-endif()
-string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-
-if(APPLE)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-Wdelete-non-virtual-dtor -Wno-c++11-narrowing")
-else()
-    # SWIG generates a lot of warnings
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-delete-non-virtual-dtor -Wl,-init,initialize_omp")
-endif()
-
-if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
-   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -fPIC -g -pg -rdynamic --coverage")
-   set(CMAKE_LFLAGS_DEBUG " --coverage")
-   add_definitions("-DDEBUG")
-elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
-   find_package(OpenMP REQUIRED)
-   if(APPLE)
-        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC")
+    # Boost 1.75 and above requires c++14 for the geometry library. For creating the python packages on
+    # CentOS5, c++11 is more readily available, so this is preferred.
+    find_package(Boost REQUIRED)
+    find_package(Armadillo 6.5 REQUIRED)
+    if(${Boost_MINOR_VERSION} GREATER 74)
+        set(CMAKE_CXX_STANDARD 14)
     else()
-        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC ${OpenMP_CXX_FLAGS}")
+        set(CMAKE_CXX_STANDARD 11)
     endif()
-else()
-    message(FATAL_ERROR "Unknown release type")
+
+    # Set compiler flags
+    enable_language(CXX)
+
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    if (NOT CMAKE_BUILD_TYPE)
+       message(STATUS "CMAKE_BUILD_TYPE is not set, switching to RELEASE")
+       set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING
+          "Choose the type of build, options are: NONE DEBUG RELEASE."
+          FORCE)
+    endif()
+    string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+
+    if(APPLE)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-Wdelete-non-virtual-dtor -Wno-c++11-narrowing")
+    else()
+        # SWIG generates a lot of warnings
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wno-reorder -Wno-unused-variable -Wno-unused-value -Wno-narrowing -Wno-sign-compare -Wno-delete-non-virtual-dtor -Wl,-init,initialize_omp")
+    endif()
+
+    if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
+       set(CMAKE_CXX_FLAGS_DEBUG "-O0 -fPIC -g -pg -rdynamic --coverage")
+       set(CMAKE_LFLAGS_DEBUG " --coverage")
+       add_definitions("-DDEBUG")
+    elseif(CMAKE_BUILD_TYPE MATCHES "RELEASE")
+       find_package(OpenMP REQUIRED)
+       if(APPLE)
+            set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC")
+        else()
+            set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC ${OpenMP_CXX_FLAGS}")
+        endif()
+    else()
+        message(FATAL_ERROR "Unknown release type")
+    endif()
+
+    # Required packages
+
+    add_library(gridpp ${SOURCES})
+    target_link_libraries(gridpp "${Boost_LIBRARIES}")
+    target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
+    target_include_directories(gridpp PUBLIC "${Boost_INCLUDE_DIR}")
+    target_include_directories(gridpp PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
+
 endif()
-
-# Required packages
-
 include_directories(./include)
 file(GLOB SOURCES "src/api/*.cpp")
-add_library(gridpp ${SOURCES})
-target_link_libraries(gridpp "${Boost_LIBRARIES}")
-target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
-target_include_directories(gridpp PUBLIC "${Boost_INCLUDE_DIR}")
-target_include_directories(gridpp PUBLIC "${ARMADILLO_INCLUDE_DIRS}")
 
 # Documentation
 option(BUILD_DOC "Build documentation" ON)

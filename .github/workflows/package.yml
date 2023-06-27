@@ -1,0 +1,103 @@
+name: Packaging
+
+# on: [push]
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  setup:
+    name: Build SWIG wrappers
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install numpy
+        run: python -m pip install numpy
+
+      - run: bash swig/python-packaging/setup.sh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: build/swig/python-packaging/
+      - name: List
+        run: pwd && ls build/swig/python-packaging
+
+  build_wheels:
+    needs: setup
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # os: [ubuntu-20.04, windows-2019, macos-11]
+        os: [ubuntu-20.04, macos-11]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.13.1
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: my-artifact
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          # Use boost 1_72, since this allows c++11. We need c++11, since manylinux2014 only has gcc 4.8
+          # Can't use boost 1.53 (default on linux) because it doesn't have rtree functionality
+          # CIBW_BUILD: cp36-manylinux_x86_64 cp36-win_amd64 cp36-macosx_x86_64
+          # CIBW_BUILD: cp310-macosx_x86_64
+          # PyPy compilation on MACOS doesn't work, possibly since there is no available numpy release for this
+          # Armadillo isn't available for i687 on Centos 7, making compilation more complicated
+          # # Musllinux doesn't use yum as its package manager
+          CIBW_SKIP: pp*-macosx* *i686* *musllinux*
+          CIBW_BEFORE_ALL_LINUX: |
+              yum install -y lapack-devel armadillo-devel
+              curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz
+              tar -xf boost_1_72_0.tar.gz
+              cd boost_1_72_0
+              cp -r boost /usr/include
+          CIBW_BEFORE_ALL_MACOS: |
+              # Other than the latest version, Brew only has boost 1.76. Therefore we must install boost from source
+              # brew reinstall gcc lapack gsl armadillo
+              brew reinstall lapack armadillo
+              curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz
+              tar -xf boost_1_72_0.tar.gz
+              cd boost_1_72_0
+              cp -r boost /usr/local/include
+              # Link in gcc, otherwise the default Apple compiler will be used, which doesn't support openmp by default
+              # ln -s /usr/local/bin/gcc-13 /usr/local/bin/gcc
+              # ln -s /usr/local/bin/g++-13 /usr/local/bin/g++
+          # CIBW_ENVIRONMENT_MACOS: CC='/usr/local/bin/gcc' LDSHARED='/usr/local/bin/gcc' CXX='/usr/local/bin/g++'
+          CIBW_ENVIRONMENT_MACOS: CFLAGS='-Wno-c++11-narrowing'
+          CIBW_BEFORE_ALL_WINDOWS: choco install -y lapack-devel
+          CIBW_TEST_COMMAND: >
+              python {project}/tests/check_installation.py
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: ./wheelhouse/*.whl
+
+
+  pypi-publish:
+    needs: build_wheels
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: wheelhouse
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: wheelhouse/
+          name: pypi
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          url: https://pypi.org/p/gridpp
+          skip_existing: true

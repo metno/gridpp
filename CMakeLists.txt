@@ -8,6 +8,7 @@ string(REGEX REPLACE "^.+define GRIDPP_VERSION \"([^\n]+)\".+" "\\1" PROJECT_VER
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(BUILD_PACKAGE "Build package" OFF)
+file(GLOB SOURCES "src/api/*.cpp")
 
 if (BUILD_PACKAGE)
 
@@ -57,8 +58,6 @@ else()
         message(FATAL_ERROR "Unknown release type")
     endif()
 
-    # Required packages
-
     add_library(gridpp ${SOURCES})
     target_link_libraries(gridpp "${Boost_LIBRARIES}")
     target_link_libraries(gridpp "${ARMADILLO_LIBRARIES}")
@@ -67,7 +66,6 @@ else()
 
 endif()
 include_directories(./include)
-file(GLOB SOURCES "src/api/*.cpp")
 
 # Documentation
 option(BUILD_DOC "Build documentation" ON)

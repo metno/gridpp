@@ -57,17 +57,17 @@ include_directories(${NUMPY_INCLUDE_DIRS})
 
 # Add swig module
 #set(CMAKE_SWIG_FLAGS -interface _pygridpp)
-swig_add_library(gridpp TYPE SHARED LANGUAGE python SOURCES ../${PROJECT_NAME}.i)
+swig_add_library(gridpp_swig TYPE SHARED LANGUAGE python SOURCES ../${PROJECT_NAME}.i)
 #swig_link_libraries(gridpp ${PROJECT_NAME} ${PYTHON_LIBRARIES})
-swig_link_libraries(gridpp gridpp ${PYTHON_LIBRARIES})
+swig_link_libraries(gridpp_swig gridpp ${PYTHON_LIBRARIES})
 #set_property(TARGET _pygridpp PROPERTY OUTPUT_NAME gridpp)
 if(APPLE)
-    set_property(TARGET _gridpp PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES ON)
-    set_target_properties(_gridpp PROPERTIES
+    set_property(TARGET gridpp_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES ON)
+    set_target_properties(gridpp_swig PROPERTIES
        SUFFIX ".so"
        INSTALL_RPATH"@loader_path;@loader_path/../../${PROJECT_NAME}/.libs"
        )
-     set_property(TARGET _gridpp APPEND PROPERTY
+     set_property(TARGET gridpp_swig APPEND PROPERTY
        LINK_FLAGS "-flat_namespace -undefined suppress"
        )
 endif()
@@ -76,7 +76,7 @@ endif()
 # Files to install with Python
 set(PYTHON_INSTALL_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/gridpp.py
-        ${CMAKE_CURRENT_BINARY_DIR}/_gridpp.so)
+        ${CMAKE_CURRENT_BINARY_DIR}/gridpp_swig.so)
 
 # Configure setup.py and copy to output directory
 set(SETUP_PY_IN ${CMAKE_CURRENT_SOURCE_DIR}/setup.in.py)
@@ -89,23 +89,23 @@ configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT})
 
 # Install target to call setup.py
 add_custom_target(install-python
-        DEPENDS _gridpp
+        DEPENDS gridpp_swig
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} install)
 
 add_custom_target(install-python-user
-        DEPENDS _gridpp
+        DEPENDS gridpp_swig
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} install --user)
 
 add_custom_target(build-python
-        DEPENDS _gridpp
+        DEPENDS gridpp_swig
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} build)
 
 add_custom_target(develop-python
-        DEPENDS _gridpp
+        DEPENDS gridpp_swig
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} develop)
 
 add_custom_target(develop-python-user
-        DEPENDS _gridpp
+        DEPENDS gridpp_swig
         COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} develop --user)
 
 if (ENABLE_TESTS)

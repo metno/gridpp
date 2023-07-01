@@ -7,8 +7,8 @@ Gridpp a is post-processing tool for gridded weather forecasts. It consists of a
 
 Gridpp is written in C++ but offers python bindings to the functions in the library. The tool is used at MET Norway to produce operational weather forecasts for Yr (https://www.yr.no).
 
-Gridpp is currently under active development and the current version is a prototype for testing. Feedback
-is welcome, either by using the issue tracker in Github, or by contacting Thomas Nipen (thomasn@met.no).
+Gridpp is currently under active development and the current version is a prototype for testing. We welcome
+suggesions for improvements.
 
 ## Features
 - Methods for **downscaling** a forecast from a coarse grid to a fine grid
@@ -18,9 +18,11 @@ is welcome, either by using the issue tracker in Github, or by contacting Thomas
 - Efficient data structures for nearest location lookup in a vector or grid of locations
 - Command-line client with support for Netcdf files with flexibility in how variables and dimensions are configured
 
-## Documentation
+## Resources
 For information on how to use gridpp, check out the wiki at https://github.com/metno/gridpp/wiki. The API
-reference is found at https://metno.github.io/gridpp/.
+reference is found at https://metno.github.io/gridpp/. Found a bug? Please report it in the **issue
+tracker** at https://github.com/metno/gridpp/issues. Reach out to the gridpp community in the **discussions**
+at https://github.com/metno/gridpp/discussions. Or contact Thomas Nipen (thomasn@met.no) directly.
 
 ## Getting started
 
@@ -149,6 +151,3 @@ make gridpp-client
 ## Copyright and license
 Copyright © 2014-2023 Norwegian Meteorological Institute. Gridpp is licensed under the GNU LEsser General
 Public License (LGPL). See LICENSE file.
-
-## Contact
-E-mail: Thomas Nipen (thomasn@met.no)

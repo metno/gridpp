@@ -62,7 +62,7 @@ def main():
     if version_major > 0 or version_minor > 6:
         run[("calc_gradient", "2000²")] = {"expected": 0.45, "args": (np.random.rand(2000, 2000) *
             100, np.zeros([2000,2000]), gridpp.LinearRegression, 10, 0, 100, 0)}
-        run[("mask_threshold_downscale_consensus", "1000²")] = {"expected": 0.91, "args":(grids[100], grids[1000], np.random.rand(100, 100, 10), np.random.rand(100, 100, 10), np.random.rand(1000, 1000, 10), np.random.rand(1000, 1000), gridpp.Lt, gridpp.Mean)}
+        run[("mask_threshold_downscale_consensus", "")] = {"expected": 0.91, "args":(grids[100], grids[1000], np.random.rand(100, 100, 10), np.random.rand(100, 100, 10), np.random.rand(1000, 1000, 10), np.random.rand(1000, 1000), gridpp.Lt, gridpp.Mean)}
     run[("neighbourhood_search", "2000² 7x7")] = {"expected": 1.11, "args": (np.random.rand(2000, 2000),
         np.random.rand(2000, 2000), 3, 0.7, 1, 0.1, np.random.rand(2000, 2000) < 0.5)}
     run[("window", "1000²")] = {"expected": 1.67, "args": (np.random.rand(100000, 1000), 101, gridpp.Mean, False, False)}

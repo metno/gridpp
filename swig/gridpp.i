@@ -54,9 +54,16 @@
 %apply int& OUTPUT { int& X2_out };
 %apply int& OUTPUT { int& Y2_out };
 %apply std::vector<std::vector<std::vector<float> > >& OUTPUT { std::vector<std::vector<std::vector<float> > >& output };
+// This turns on automatic description of function arguments in the python package. The
+// problem is that it doesn't fetch any of the comments in the header file describing each
+// parameter, so only the type is shown.
+// A different approach is to use -doxygen with swig
+%feature("autodoc", "2");
 
 %{
 #include "gridpp.h"
 %}
-
+// This is how you add description in the docstring in python. The problem is
+// that the comment is added at the end (after the description of function parameters)
+// %feature("docstring") gridpp::nearest "Nearest neighbour interpolation"
 %include "gridpp.h"

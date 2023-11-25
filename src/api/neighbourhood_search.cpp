@@ -68,7 +68,7 @@ vec2 gridpp::neighbourhood_search(const vec2& array, const vec2& search_array, i
                             accum_temp = accum_temp + array[yy][xx];
                         }
                         else if (counter > 0)
-                            /*  We have decided that we will only use values within th search target */
+                            /*  We have decided that we will only use values within the search target */
                             continue;
                         else if(std::abs(search_array[yy][xx] - search_array[y][x]) >= search_delta) {
                             /* Finding nearest value that's outside of the search target range */

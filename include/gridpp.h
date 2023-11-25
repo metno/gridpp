@@ -142,20 +142,20 @@ namespace gridpp {
     /** Optimal interpolation for a deterministic gridded field
       * @param bgrid Grid of background field
       * @param background 2D field of background values
-      * @param points Points of observations
-      * @param pobs Vector of observations
-      * @param pratios Vector of ratio of observation error variance to background variance
-      * @param pbackground Background with observation operator
+      * @param obs_points Points of observations
+      * @param obs Vector of observations
+      * @param variance_ratios Vector of ratio of observation error variance to background variance
+      * @param background_at_points Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
-            const Points& points,
-            const vec& pobs,
-            const vec& pratios,
-            const vec& pbackground,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& variance_ratios,
+            const vec& background_at_points,
             const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);
@@ -163,20 +163,20 @@ namespace gridpp {
     /** Optimal interpolation for a deterministic vector of points
       * @param bpoints Points of background field
       * @param background 1D field of background values
-      * @param points Points of observations
-      * @param pobs Vector of observations
-      * @param pratios Vector of ratio of observation error variance to background variance
-      * @param pbackground Background with observation operator
+      * @param obs_points Points of observations
+      * @param obs Vector of observations
+      * @param variance_ratios Vector of ratio of observation error variance to background variance
+      * @param background_at_points Background with observation operator
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec optimal_interpolation(const Points& bpoints,
             const vec& background,
-            const Points& points,
-            const vec& pobs,
-            const vec& pratios,
-            const vec& pbackground,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& variance_ratios,
+            const vec& background_at_points,
             const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);
@@ -185,7 +185,7 @@ namespace gridpp {
       * @param bgrid Grid of background field
       * @param background 2D field of background values
       * @param bvariance Variance of background field
-      * @param points Points of observations
+      * @param obs_points Points of observations
       * @param obs Vector of observations
       * @param obs_variance Variance of observations
       * @param background_at_points Background interpolated to observation points
@@ -197,7 +197,7 @@ namespace gridpp {
     vec2 optimal_interpolation_full(const Grid& bgrid,
             const vec2& background,
             const vec2& bvariance,
-            const Points& points,
+            const Points& obs_points,
             const vec& obs,
             const vec& obs_variance,
             const vec& background_at_points,
@@ -211,7 +211,7 @@ namespace gridpp {
       * @param bpoints Points of background field
       * @param background 1D field of background values
       * @param bvariance Variance of background field
-      * @param points Points of observations
+      * @param obs_points Observations points
       * @param obs Vector of observations
       * @param obs_variance Variance of observations
       * @param background_at_points Background interpolated to observation points
@@ -223,7 +223,7 @@ namespace gridpp {
     vec optimal_interpolation_full(const Points& bpoints,
             const vec& background,
             const vec& bvariance,
-            const Points& points,
+            const Points& obs_points,
             const vec& obs,
             const vec& obs_variance,
             const vec& background_at_points,
@@ -235,28 +235,44 @@ namespace gridpp {
 
     /** Optimal interpolation using a structure function based on an ensemble 
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
-      * @param input 3D field of background values (Y, X, E)
-      * @param bgrid grid corresponding to input
-      * @param pobs vector of observations
-      * @param pci vector of ci values
-      * @param points observation points
+      * @param bgrid Grid corresponding to background
+      * @param background 3D field of background values (Y, X, ensemble_member)
+      * @param obs_points Observations points
+      * @param obs vector of observations
+      * @param obs_standard_deviations vector of observation standard deviations
+      * @param background_at_points Background interpolated to observation points
+      * @param structure Structure function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
     */
     vec3 optimal_interpolation_ensi(const Grid& bgrid,
             const vec3& background,
-            const Points& points,
-            const vec& pobs,
-            const vec& psigmas,
-            const vec2& pbackground,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& obs_standard_deviations,
+            const vec2& background_at_points,
             const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);
 
+    /** Optimal interpolation using a structure function based on an ensemble 
+      * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
+      * @param bpoints Points corresponding to background
+      * @param background 2D field of background values (points, ensemble_member)
+      * @param obs_points Observations points
+      * @param obs vector of observations
+      * @param obs_standard_deviations vector of observation standard deviations
+      * @param background_at_points Background interpolated to observation points
+      * @param structure Structure function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+    */
     vec2 optimal_interpolation_ensi(const Points& bpoints,
             const vec2& background,
-            const Points& points,
-            const vec& pobs,
-            const vec& psigmas,
-            const vec2& pbackground,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& obs_standard_deviations,
+            const vec2& background_at_points,
             const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);
@@ -265,9 +281,9 @@ namespace gridpp {
       * observations. This is an experimental method.
       * @param bgrid grid corresponding to input
       * @param background 2D field of background values (Y, X)
-      * @param points observation points
-      * @param pobs vector of observations
-      * @param pbackground vector of background values at points
+      * @param obs_points observation points
+      * @param obs vector of observations
+      * @param background_at_points vector of background values at points
       * @param structure structure function specifying correlation between points
       * @param min_quantile truncate quantile map below this quantile
       * @param max_quantile truncate quantile map above this quantile
@@ -275,9 +291,9 @@ namespace gridpp {
     */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
-            const Points& points,
-            const vec& pobs,
-            const vec& pbackground,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& background_at_points,
             const StructureFunction& structure,
             float min_quantile,
             float max_quantile,
@@ -287,9 +303,9 @@ namespace gridpp {
       * computing the calibration curve.
       * @param bgrid grid corresponding to input
       * @param background 2D field of background values (Y, X)
-      * @param points observation points
-      * @param pobs 2D vector of observations with dimensions (T, N)
-      * @param pbackground vector of background values at points with dimensions (T, N)
+      * @param obs_points observation points
+      * @param obs 2D vector of observations with dimensions (T, N)
+      * @param background_at_points vector of background values at points with dimensions (T, N)
       * @param structure structure function specifying correlation between points
       * @param min_quantile truncate quantile map below this quantile
       * @param max_quantile truncate quantile map above this quantile
@@ -297,22 +313,28 @@ namespace gridpp {
     */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
-            const Points& points,
-            const vec2& pobs,
-            const vec2& pbackground,
+            const Points& obs_points,
+            const vec2& obs,
+            const vec2& background_at_points,
             const StructureFunction& structure,
             float min_quantile,
             float max_quantile,
             int min_points=0);
 
     /** Fill in values inside or outside a set of circles (useful for masking)
+      * @param igrid Grid corresponding to input field
       * @param input Deterministic values with dimensions Y, X
+      * @param points Points to fill in
       * @param radii Circle radii for each point
       * @param value Fill in this value
       * @param outside if True, fill outside circles, if False, fill inside circles
     */
-    vec2 fill(const Grid& igrid, const vec2& input, const Points& points, const vec& radii, float value, bool outside);
-
+    vec2 fill(const Grid& igrid,
+            const vec2& input,
+            const Points& points,
+            const vec& radii,
+            float value,
+            bool outside);
 
     /** Insert observations into gridded field using a square box
       * @param grid Grid
@@ -322,7 +344,12 @@ namespace gridpp {
       * @param halfwidths Half width of square (in number of grid points) where observations are inserted for each point
       * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
     */
-    vec2 doping_square(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const ivec& halfwidths, float max_elev_diff=gridpp::MV);
+    vec2 doping_square(const Grid& igrid,
+            const vec2& background,
+            const Points& points,
+            const vec& observations,
+            const ivec& halfwidths,
+            float max_elev_diff=gridpp::MV);
 
     /** Insert observations into gridded field using a circle
       * @param grid Grid
@@ -332,7 +359,12 @@ namespace gridpp {
       * @param radii Radius of circle where observations are inserted for each point [m]
       * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
     */
-    vec2 doping_circle(const Grid& igrid, const vec2& background, const Points& points, const vec& observations, const vec& radii, float max_elev_diff=gridpp::MV);
+    vec2 doping_circle(const Grid& igrid,
+            const vec2& background,
+            const Points& points,
+            const vec& observations,
+            const vec& radii,
+            float max_elev_diff=gridpp::MV);
 
     /** **************************************
      * @name Distributions
@@ -438,6 +470,32 @@ namespace gridpp {
       * @param num_thresholds Number of thresholds
     */
     vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
+
+    /** Computes gradients based on values in neighbourhood
+     *  @param grid Grid
+     *  @param base Dependent variable. Missing values are not used.
+     *  @param values Independent variable. Missing values are not used.
+     *  @param radius Neighbourhood radius in number of gridpoints
+     *  @param min_nim Minimum number of points required to compute gradient
+     *  @param min_range Minimum range of base to compute gradient
+     *  @param default_gradient Use this gradient if minimum number is not met
+    */
+    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=gridpp::MV, float default_gradient=0);
+
+    /** Find suitable value in neighbourhood based on a search criteria. If search value is within a
+    * criteria range, then the most suitable point is used. This is the nearest value of any point
+    * within the search_target range; or if no point fulfills this, the point with the highest
+    * search value.
+    * @param array 2D input field (Y, X)
+    * @param search_array 2D array of values to search for a match (Y, X)
+    * @param halfwidth Neighbourhood halfwidth to search in
+    * @param search_target_min Lower bound of search range
+    * @param search_target_max Upper bound of search range
+    * @param search_delta Only use nearest point if it is further from the search range than this delta
+    * @param apply_array If provided, only correct values where array equals 1
+    * @returns 2D output field (Y, X)
+    */
+    vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array=ivec2());
 
     /** Deprecated: Compute neighbourhood statistic on ensemble field
       * @deprecated Use neighbourhood() function */
@@ -1030,37 +1088,14 @@ namespace gridpp {
     */
     vec calc_even_quantiles(const vec& values, int num);
 
-    /** Computes gradients based on values in neighbourhood
-     *  @param grid Grid
-     *  @param base Dependent variable. Missing values are not used.
-     *  @param values Independent variable. Missing values are not used.
-     *  @param radius Neighbourhood radius in number of gridpoints
-     *  @param min_nim Minimum number of points required to compute gradient
-     *  @param min_range Minimum range of base to compute gradient
-     *  @param default_gradient Use this gradient if minimum number is not met
-    */
-    vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=gridpp::MV, float default_gradient=0);
-    /** Find suitable value in neighbourhood based on a search criteria. If search value is within a
-    * criteria range, then the most suitable point is used. This is the nearest value of any point
-    * within the search_target range; or if no point fulfills this, the point with the highest
-    * search value.
-    * @param base base values (e.g elevation)
-    * @param values values to compute gradients for (e.g. temperatures)
-    * @param gradient_type what gradient type to compute
-    * @param halfwidth neighbourhood halfwidth to compute gradient for
-    * @param min_num minimum number of valid points needed to compute gradient
-    * @param min_range minimum range of base values to compute gradient (for LinearRegression, this is the standard deviation of values
-    * @param default_gradient The gradient to use when a gradient cannot be computed
-    */
-    vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array=ivec2());
-
-    /** Compute window statistics
+    /** Compute time window statistics
     *  @param array input array with dimensions (case, time)
     *  @param length window length in number of timesteps
     *  @param statistic statistic to apply to window
     *  @param before if true, make the window end at the particular time. If false, centre it.
     *  @param keep_missing if true, window value will be missing if one or more values in window are missing
     *  @param missing_edges if true put missing values at the edges, where window overshoots the edge
+    *  @returns 2D vector of time statistics (case, time)
     */
 
     vec2 window(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);

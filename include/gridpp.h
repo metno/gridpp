@@ -230,7 +230,7 @@ namespace gridpp {
             const vec& bvariance_at_points,
             const StructureFunction& structure,
             int max_points,
-            vec& analysis_sigmas,
+            vec& analysis_variance,
             bool allow_extrapolation=true);
 
     /** Optimal interpolation using a structure function based on an ensemble 

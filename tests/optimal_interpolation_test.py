@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         output = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points)
         np.testing.assert_array_almost_equal(output, np.array([[np.exp(-0.5)/1.1, 1/1.1, np.exp(-0.5*9)/1.1]]))
 
-    def test_simple_1d_full(self):
+    def test_simple_grid_full(self):
         N = 3
         y = [[0, 0, 0]]
         x = [[0, 2500, 10000]]
@@ -76,12 +76,33 @@ class Test(unittest.TestCase):
         background = np.zeros([1, N])
         background_at_points = [0]
         max_points = 10
-        output, sigma = gridpp.optimal_interpolation_full(grid, background, bvariance, points, pobs,
+        output, variance = gridpp.optimal_interpolation_full(grid, background, bvariance, points, pobs,
                 obs_variance, background_at_points, bvariance_at_points,
                 structure, max_points)
         # np.testing.assert_array_almost_equal(output, np.array([[np.exp(-0.5)/1.1, 1/1.1, np.exp(-0.5*9)/1.1]]))
-        # np.testing.assert_array_almost_equal(sigma, np.array([[0, np.sqrt(0.1/1.1), 1]]))
-        self.assertAlmostEqual(sigma[0, 1], 0.1/1.1)
+        # np.testing.assert_array_almost_equal(variance, np.array([[0, np.sqrt(0.1/1.1), 1]]))
+        self.assertAlmostEqual(variance[0, 1], 0.1/1.1)
+
+    def test_simple_points_full(self):
+        N = 3
+        y = [0, 0, 0]
+        x = [0, 2500, 10000]
+        grid = gridpp.Points(y, x, y, y, gridpp.Cartesian)
+        points = gridpp.Points([0], [2500], [0], [0], gridpp.Cartesian)
+        bvariance = np.ones([N])
+        obs_variance = np.array([0.1])
+        bvariance_at_points = np.array([1])
+        structure = gridpp.BarnesStructure(2500)
+        pobs = np.array([1])
+        background = np.zeros([N])
+        background_at_points = np.array([0])
+        max_points = 10
+        output, variance = gridpp.optimal_interpolation_full(grid, background, bvariance, points, pobs,
+                obs_variance, background_at_points, bvariance_at_points,
+                structure, max_points)
+        # np.testing.assert_array_almost_equal(output, np.array([[np.exp(-0.5)/1.1, 1/1.1, np.exp(-0.5*9)/1.1]]))
+        # np.testing.assert_array_almost_equal(variance, np.array([[0, np.sqrt(0.1/1.1), 1]]))
+        self.assertAlmostEqual(variance[1], 0.1/1.1)
 
     def test_cross_validation(self):
         y = np.array([0, 1000, 2000, 3000])

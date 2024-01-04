@@ -28,14 +28,14 @@ gridpp::Grid::Grid(vec2 lats, vec2 lons, vec2 elevs, vec2 lafs, CoordinateType t
     KDTree test = KDTree(lats0, lons0, type);
     mTree = test;
 
-    if(mElevs.size() != lats.size() or mElevs[0].size() != lats[0].size()) {
+    if(mElevs.size() != lats.size() || mElevs[0].size() != lats[0].size()) {
         mElevs.clear();
         mElevs.resize(lats.size());
         for(int i = 0; i < lats.size(); i++) {
             mElevs[i].resize(lats[0].size(), gridpp::MV);
         }
     }
-    if(mLafs.size() != lats.size() or mLafs[0].size() != lats[0].size()) {
+    if(mLafs.size() != lats.size() || mLafs[0].size() != lats[0].size()) {
         mLafs.clear();
         mLafs.resize(lats.size());
         for(int i = 0; i < lats.size(); i++) {

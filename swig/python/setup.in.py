@@ -125,7 +125,8 @@ setup(
     #},
     py_modules=['gridpp'],
 
-    cmdclass={'install': CompiledLibInstall},
+    # Don't seem to need this anymore
+    # cmdclass={'install': CompiledLibInstall},
     # cmdclass={'build': build},
 
     # Although 'package_data' is the preferred approach, in some case you may

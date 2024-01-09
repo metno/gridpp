@@ -73,10 +73,10 @@ if(APPLE)
 endif()
 
 
-# Files to install with Python
-set(PYTHON_INSTALL_FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/gridpp.py
-        ${CMAKE_CURRENT_BINARY_DIR}/gridpp_swig.so)
+# Files to install with Python. Not needed anymore.
+# set(PYTHON_INSTALL_FILES
+#         ${CMAKE_CURRENT_BINARY_DIR}/gridpp.py
+#         ${CMAKE_CURRENT_BINARY_DIR}/_gridpp_swig.so)
 
 # Configure setup.py and copy to output directory
 set(SETUP_PY_IN ${CMAKE_CURRENT_SOURCE_DIR}/setup.in.py)

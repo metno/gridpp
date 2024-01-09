@@ -7,10 +7,21 @@ vec2 gridpp::window(const vec2& array,
     int length, gridpp::Statistic statistic, bool before,
     bool keep_missing, bool missing_edges) {
 
-    vec2 output = gridpp::init_vec2(array.size(), array[0].size(), gridpp::MV);
+    if(length <= 0) {
+        throw std::invalid_argument("Length variable must be > 0");
+    }
 
     int nY = array.size();
+    if(nY == 0) {
+        return gridpp::init_vec2(0, 0);
+    }
+
     int nX = array[0].size();
+    if(nX == 0) {
+        return gridpp::init_vec2(nY, 0);
+    }
+
+    vec2 output = gridpp::init_vec2(nY, nX, gridpp::MV);
 
     if(length % 2 == 0 && !before) {
         throw std::invalid_argument("Length variable must be an odd number");

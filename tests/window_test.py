@@ -68,6 +68,7 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal(output, [[0,1,3,6,9],[1,3,6,9,12],[2,5,9,12,15],[3,7,12,np.nan,np.nan],[4,9,15,18,21]])
 
     def test_edge_case(self):
+        # Check when window is beigger than array
         output = gridpp.window(self.small_inputs, 5, gridpp.Sum, False, False, False)
         np.testing.assert_array_equal(output, [[2,2],[2,2]])
 
@@ -103,8 +104,35 @@ class Test(unittest.TestCase):
         output = gridpp.window(input, 3, gridpp.Sum, False, True, True)
         np.testing.assert_array_equal(output, [[np.nan, 3, np.nan, np.nan, np.nan, 12, np.nan]])
 
+    def test_no_times(self):
+        input = np.zeros([10, 0])
+        output = gridpp.window(input, 3, gridpp.Sum)
+        np.testing.assert_array_equal(output, input)
+
+    def test_no_cases(self):
+        input = np.zeros([0, 10], np.float32)
+        output = gridpp.window(input, 3, gridpp.Sum)
+        np.testing.assert_array_equal(output, np.zeros([0,0]))
+
+    def test_no_anything(self):
+        input = np.zeros([0, 0], np.float32)
+        output = gridpp.window(input, 3, gridpp.Sum)
+        np.testing.assert_array_equal(output, np.zeros([0,0]))
+
+    def test_invalid_length(self):
+        input = np.zeros([10, 3], np.float32)
+        for length in [0, -1]:
+            with self.assertRaises(ValueError) as e:
+                output = gridpp.window(input, length, gridpp.Sum)
+
+    def test_long_length(self):
+        # Check when window is beigger than array
+        output = gridpp.window([[0, 1, 2, 3]], 1001, gridpp.Sum, False, False, False)
+        np.testing.assert_array_equal(output, [[6, 6, 6, 6]])
+
+    def test_time_length_1(self):
+        output = gridpp.window([[1], [2]], 1001, gridpp.Sum, False, False, False)
+        np.testing.assert_array_equal(output, [[1], [2]])
+
 if __name__ == '__main__':
     unittest.main()
-
-
-#if window is beigger than array () # Edge cases

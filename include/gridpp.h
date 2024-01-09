@@ -21,15 +21,23 @@ namespace gridpp {
      * @name Short-hand notation for vectors of different dimensions sizes
      * ***************************************/ /**@{*/
     // Preferred vector types
+    /** 1D float vector */
     typedef std::vector<float> vec;
+    /** 2D float vector */
     typedef std::vector<vec> vec2;
+    /** 3D float vector */
     typedef std::vector<vec2> vec3;
+    /** 1D integer vector */
     typedef std::vector<int> ivec;
+    /** 2D integer vector */
     typedef std::vector<ivec> ivec2;
+    /** 3D integer vector */
     typedef std::vector<ivec2> ivec3;
 
-    // Only use when double is required
+    // Only use these when double is required
+    /** 1D double vector */
     typedef std::vector<double> dvec;
+    /** 2D double vector */
     typedef std::vector<dvec> dvec2;
     /**@}*/
 
@@ -122,8 +130,8 @@ namespace gridpp {
 
     /** Types of simple downscaling methods */
     enum Downscaler {
-        Nearest = 0,
-        Bilinear = 1,
+        Nearest = 0,      /**< Nearest neighour downscaler */
+        Bilinear = 1,     /**< Bilinear downscaler */
     };
 
     /** Types of comparison operators*/
@@ -143,12 +151,13 @@ namespace gridpp {
       * @param bgrid Grid of background field
       * @param background 2D field of background values
       * @param obs_points Points of observations
-      * @param obs Vector of observations
-      * @param variance_ratios Vector of ratio of observation error variance to background variance
-      * @param background_at_points Background with observation operator
+      * @param obs 1D vector of observations
+      * @param variance_ratios 1D vector of ratio of observation to background error variance
+      * @param background_at_points 1D vector of background at observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations points
+      * @returns 2D vector of analised values
     */
     vec2 optimal_interpolation(const Grid& bgrid,
             const vec2& background,
@@ -164,12 +173,13 @@ namespace gridpp {
       * @param bpoints Points of background field
       * @param background 1D field of background values
       * @param obs_points Points of observations
-      * @param obs Vector of observations
-      * @param variance_ratios Vector of ratio of observation error variance to background variance
-      * @param background_at_points Background with observation operator
+      * @param obs 1D vector of observations
+      * @param variance_ratios 1D vector of ratio of observation to background error variance
+      * @param background_at_points 1D vector of background at observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations points
+      * @returns 1D vector of analised values
     */
     vec optimal_interpolation(const Points& bpoints,
             const vec& background,
@@ -183,16 +193,18 @@ namespace gridpp {
 
     /** Optimal interpolation for a deterministic gridded field including analysis variance
       * @param bgrid Grid of background field
-      * @param background 2D field of background values
-      * @param bvariance Variance of background field
+      * @param background 2D vector of background values
+      * @param bvariance 2D vector of background variances
       * @param obs_points Points of observations
-      * @param obs Vector of observations
-      * @param obs_variance Variance of observations
-      * @param background_at_points Background interpolated to observation points
-      * @param bvariance_at_points Variance of background interpolated to observation points
+      * @param obs 1D vector of observations
+      * @param obs_variance 1D vector of observation variances
+      * @param background_at_points 1D vector of background at observation points
+      * @param bvariance_at_points 1D vector of background variance at observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param analysis_variance 2D output vector of analysis variance
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analysed values
     */
     vec2 optimal_interpolation_full(const Grid& bgrid,
             const vec2& background,
@@ -209,16 +221,18 @@ namespace gridpp {
 
     /** Optimal interpolation for a deterministic vector of points including analysis variance
       * @param bpoints Points of background field
-      * @param background 1D field of background values
-      * @param bvariance Variance of background field
-      * @param obs_points Observations points
-      * @param obs Vector of observations
-      * @param obs_variance Variance of observations
-      * @param background_at_points Background interpolated to observation points
-      * @param bvariance_at_points Variance of background interpolated to observation points
+      * @param background 1D vector of background values
+      * @param bvariance 1D vector of background variance
+      * @param obs_points Points of observations
+      * @param obs 1D vector of observations
+      * @param obs_variance 1D vector of observation variances
+      * @param background_at_points 1D vector of background at observation points
+      * @param bvariance_at_points 1D vector of background variance at observation points
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param analysis_variance 1D output vector of analysis variance
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values
     */
     vec optimal_interpolation_full(const Points& bpoints,
             const vec& background,
@@ -233,17 +247,18 @@ namespace gridpp {
             vec& analysis_variance,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation using a structure function based on an ensemble 
+    /** Optimal interpolation for an ensemble gridded field
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
-      * @param bgrid Grid corresponding to background
-      * @param background 3D field of background values (Y, X, ensemble_member)
-      * @param obs_points Observations points
-      * @param obs vector of observations
-      * @param obs_standard_deviations vector of observation standard deviations
-      * @param background_at_points Background interpolated to observation points
+      * @param bgrid Grid of background field
+      * @param background 3D vector of background values (Y, X, E)
+      * @param obs_points observation points
+      * @param obs 1D vector of observations
+      * @param obs_standard_deviations 1D vector of observation standard deviations
+      * @param background_at_points 2D vector of background at observation points (L, E)
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 3D vector of analised values (Y, X, E)
     */
     vec3 optimal_interpolation_ensi(const Grid& bgrid,
             const vec3& background,
@@ -255,17 +270,18 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation using a structure function based on an ensemble 
+    /** Optimal interpolation for an ensemble point field
       * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
-      * @param bpoints Points corresponding to background
-      * @param background 2D field of background values (points, ensemble_member)
-      * @param obs_points Observations points
-      * @param obs vector of observations
-      * @param obs_standard_deviations vector of observation standard deviations
-      * @param background_at_points Background interpolated to observation points
+      * @param bpoints Points of background field
+      * @param background 2D vector of background values (L, E)
+      * @param obs_points Observation points
+      * @param obs 1D vector of observations
+      * @param obs_standard_deviations 1D vector of observation standard deviations
+      * @param background_at_points 2D vector of background at observation points (L, E)
       * @param structure Structure function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (L, E)
     */
     vec2 optimal_interpolation_ensi(const Points& bpoints,
             const vec2& background,
@@ -279,15 +295,16 @@ namespace gridpp {
 
     /** Correction of a gridded field ensuring the distribution of values nearby match that of
       * observations. This is an experimental method.
-      * @param bgrid grid corresponding to input
-      * @param background 2D field of background values (Y, X)
-      * @param obs_points observation points
-      * @param obs vector of observations
-      * @param background_at_points vector of background values at points
-      * @param structure structure function specifying correlation between points
-      * @param min_quantile truncate quantile map below this quantile
-      * @param max_quantile truncate quantile map above this quantile
-      * @param max_points maximum number of points used within localization radius (not used at moment)
+      * @param bgrid Grid of background field
+      * @param background 2D vector of background values (Y, X)
+      * @param obs_points Points of observations
+      * @param obs 1D vector of observations
+      * @param background_at_points 1D vector of background values at observation points
+      * @param structure Structure function
+      * @param min_quantile Truncate quantile map below this quantile level
+      * @param max_quantile Truncate quantile map above this quantile level
+      * @param max_points Maximum number of points used within localization radius (not used at moment)
+      * @returns 2D vector of corrected values
     */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
@@ -299,17 +316,19 @@ namespace gridpp {
             float max_quantile,
             int min_points=0);
 
-    /** Version with multiple number of timesteps. Pool all observations across time in when
-      * computing the calibration curve.
-      * @param bgrid grid corresponding to input
-      * @param background 2D field of background values (Y, X)
-      * @param obs_points observation points
-      * @param obs 2D vector of observations with dimensions (T, N)
-      * @param background_at_points vector of background values at points with dimensions (T, N)
-      * @param structure structure function specifying correlation between points
-      * @param min_quantile truncate quantile map below this quantile
-      * @param max_quantile truncate quantile map above this quantile
-      * @param max_points maximum number of points used within localization radius (not used at moment)
+    /** Correction of a gridded field ensuring the distribution of values nearby match that of
+      * observations. This is an experimental method. Version with multiple number of timesteps. Pool
+      * all observations across time in when computing the calibration curve.
+      * @param bgrid Grid of background
+      * @param background 2D vector of background values (Y, X)
+      * @param obs_points Points of observations
+      * @param obs 2D vector of observations (Time, Points)
+      * @param background_at_points 2D vector of background values at observation points (Time, Points)
+      * @param structure structure function
+      * @param min_quantile Truncate quantile map below this quantile
+      * @param max_quantile Truncate quantile map above this quantile
+      * @param max_points Maximum number of points used within localization radius (not used at moment)
+      * @returns 2D vector of corrected values
     */
     vec2 local_distribution_correction(const Grid& bgrid,
             const vec2& background,
@@ -322,12 +341,13 @@ namespace gridpp {
             int min_points=0);
 
     /** Fill in values inside or outside a set of circles (useful for masking)
-      * @param igrid Grid corresponding to input field
-      * @param input Deterministic values with dimensions Y, X
+      * @param igrid Grid of input
+      * @param input 2D vector of values (Y, X)
       * @param points Points to fill in
-      * @param radii Circle radii for each point
-      * @param value Fill in this value
-      * @param outside if True, fill outside circles, if False, fill inside circles
+      * @param radii 1D vector of circle radii for each point [m]
+      * @param value Value to fill in
+      * @param outside If True, fill outside circles, if False, fill inside circles
+      * @returns 2D vector of final field
     */
     vec2 fill(const Grid& igrid,
             const vec2& input,
@@ -337,12 +357,13 @@ namespace gridpp {
             bool outside);
 
     /** Insert observations into gridded field using a square box
-      * @param grid Grid
-      * @param background Deterministic values with dimensions Y, X
-      * @param points Points representing observations
-      * @param observations Vector of observations
+      * @param grid Grid of background
+      * @param background 2D vector of background values (Y, X)
+      * @param points Points of observations
+      * @param observations 1D vector of observations
       * @param halfwidths Half width of square (in number of grid points) where observations are inserted for each point
-      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+      * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value [m]
+      * @returns 2D vector of final field
     */
     vec2 doping_square(const Grid& igrid,
             const vec2& background,
@@ -352,12 +373,13 @@ namespace gridpp {
             float max_elev_diff=gridpp::MV);
 
     /** Insert observations into gridded field using a circle
-      * @param grid Grid
-      * @param background Deterministic values with dimensions Y, X
-      * @param points Points representing observations
-      * @param observations Vector of observations
+      * @param grid Grid of background
+      * @param background 2D vector of background values with (Y, X)
+      * @param points Points of observations
+      * @param observations 1D vector of observations
       * @param radii Radius of circle where observations are inserted for each point [m]
       * @param max_elev_diff Only insert where elevation difference between grid and point is less than this value
+      * @returns 2D vector of final field
     */
     vec2 doping_circle(const Grid& igrid,
             const vec2& background,
@@ -371,10 +393,11 @@ namespace gridpp {
      * Functions that extract values from probability distributions
      * ***************************************/ /**@{*/
 
-    /**
-     * @param shape Shape parameter of gamma distribution
-     * @param scale Scale parameter of gamma distribution
-     * @param levels Quantile levels to retrieve
+    /** Extract quantiles from a gamma distribution
+     * @param levels 1D vector of quantile levels to retrieve
+     * @param shape 1D vector of shape parameter of gamma distribution
+     * @param scale 1D vector of scale parameter of gamma distribution
+     * @returns 1D vector of quantiles
     */
     vec gamma_inv(const vec& levels, const vec& shape, const vec& scale);
 
@@ -386,115 +409,129 @@ namespace gridpp {
      * ***************************************/ /**@{*/
 
     /** Spatial neighbourhood filter, computing a statistic for a sliding square window
-      * @param input 2D grid of values
+      * @param input 2D vector of input values (Y, X)
       * @param halfwidth Filter halfwidth in number of gridpoints
       * @param statistic Statistic to compute
+      * @returns 2D vector of final field (Y, x)
     */
     vec2 neighbourhood(const vec2& input, int halfwidth, Statistic statistic);
 
-    /** Spatial neighbourhood filter for an ensemble of fields
-      * @param input 3D grid of values with dimensions (Y, X, E)
+    /** Spatial neighbourhood filter for an ensemble of fields. Computes static across neighbourhood
+      * and all members
+      * @param input 3D vector of input values (Y, X, E)
       * @param halfwidth Filter halfwidth in number of gridpoints
       * @param statistic Statistic to compute
+      * @returns 2D vector of final field (Y, x)
     */
     vec2 neighbourhood(const vec3& input, int halfwidth, Statistic statistic);
 
     /** Computes a quantile in a sliding square neighbourhood
-      * @param input 2D grid of values
+      * @param input 2D vector of values
       * @param quantile Quantile to compute (between 0 and 1)
       * @param halfwidth Filter halfwidth in number of gridpoints
+      * @returns 2D vector of final field (Y, x)
     */
     vec2 neighbourhood_quantile(const vec2& input, float quantile, int halfwidth);
 
-    /** Computes a quantile in a sliding square neighbourhood for an ensemble of fields
-      * @param input 3D grid of values with dimensions (Y, X, E)
+    /** Computes a quantile in a sliding square neighbourhood across ensemble members
+      * @param input 3D vector of values (Y, X, E)
       * @param quantile Quantile to compute (between 0 and 1)
       * @param halfwidth Filter halfwidth in number of gridpoints
+      * @returns 2D vector of final field (Y, x)
     */
     vec2 neighbourhood_quantile(const vec3& input, float quantile, int halfwidth);
 
     /** Fast and approximate neighbourhood quantile
-      * @param input 2D grid of values
+      * @param input 2D vector of values (Y, X)
       * @param quantile Quantile to compute (between 0 and 1)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
+      * @param thresholds 1D vector of thresholds to use to approximate value
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_quantile_fast(const vec2& input, float quantile, int halfwidth, const vec& thresholds);
 
     /** Fast and approximate neighbourhood quantile for ensemble of fields
-      * @param input 3D grid of values with dimensions (Y, X, E)
+      * @param input 3D vector of values (Y, X, E)
       * @param quantile Quantile to compute (between 0 and 1)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
+      * @param thresholds 1D vector of thresholds to use to approximate value
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_quantile_fast(const vec3& input, float quantile, int halfwidth, const vec& thresholds);
 
-    /** Fast and approximate neighbourhood quantile, with spatially varying quantile
-      * @param input 2D grid of values
-      * @param quantile 2D grid quantiles to compute (between 0 and 1)
+    /** Fast and approximate neighbourhood quantile, with spatially varying quantile levels
+      * @param input 2D vector of values (Y, X)
+      * @param quantile 2D vector quantile levels to compute (between 0 and 1) (Y, X)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
+      * @param thresholds 1D vector of thresholds to use to approximate value
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_quantile_fast(const vec2& input, const vec2& quantile, int halfwidth, const vec& thresholds);
 
     /** Fast and approximate neighbourhood quantile for ensemble of fields, with spatially varying quantile
-      * @param input 3D grid of values with dimensions (Y, X, E)
-      * @param quantile 2D grid quantiles to compute (between 0 and 1)
+      * @param input 3D vector of values with dimensions (Y, X, E)
+      * @param quantile 2D vector of quantile levels to compute (between 0 and 1) (Y, X)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param thresholds Vector of thresholds to use to approximate value
+      * @param thresholds 1D vector of thresholds to use to approximate value
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_quantile_fast(const vec3& input, const vec2& quantile, int halfwidth, const vec& thresholds);
 
     /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
-      * @param input 2D grid of values
+      * @param input 2D vector of values (Y, X)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param operation one of min, mean, median, max
+      * @param statistic Statistic to compute
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_brute_force(const vec2& input, int halfwidth, Statistic statistic);
 
-    /** Spatial neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
-      * @param input 3D grid of values with dimensions (Y, X, E)
+    /** Spatial ensemble neighbourhood filter without any shortcuts. This is quite slow and is only useful for testing.
+      * @param input 3D vector of values (Y, X, E)
       * @param halfwidth Filter halfwidth in number of gridpoints
-      * @param operation one of min, mean, median, max
+      * @param statistic Statistic to compute
+      * @returns 2D vector of final field (Y, X)
     */
     vec2 neighbourhood_brute_force(const vec3& input, int halfwidth, Statistic statistic);
 
-    /** Calculate appropriate approximation thresholds for neighbourhood quantile
-      * @param input 2D (Y, X) array of values
+    /** Calculate appropriate approximation thresholds for fast neighbourhood quantile
+      * @param input 2D vector of values (Y, X)
       * @param num_thresholds Number of thresholds
+      * @returns 1D vector of approximation thresholds
     */
     vec get_neighbourhood_thresholds(const vec2& input, int num_thresholds);
 
-    /** Calculate appropriate approximation thresholds for neighbourhood quantile based on an * ensemble
-      * @param input 3D (Y, X, T) array of values
+    /** Calculate appropriate approximation thresholds for neighbourhood quantile based on an ensemble
+      * @param input 3D vector of values (Y, X, T)
       * @param num_thresholds Number of thresholds
+      * @returns 1D vector of approximation thresholds
     */
     vec get_neighbourhood_thresholds(const vec3& input, int num_thresholds);
 
     /** Computes gradients based on values in neighbourhood
-     *  @param grid Grid
-     *  @param base Dependent variable. Missing values are not used.
-     *  @param values Independent variable. Missing values are not used.
-     *  @param radius Neighbourhood radius in number of gridpoints
+     *  @param base 2D vector of dependent values, missing values are ignored (Y, X)
+     *  @param values 2D vector of independent values, missing values are ignored (Y, X)
+     *  @param gradient_type What gradient type to compute
+     *  @param halfwidth Neighbourhood half width in number of gridpoints
      *  @param min_nim Minimum number of points required to compute gradient
      *  @param min_range Minimum range of base to compute gradient
-     *  @param default_gradient Use this gradient if minimum number is not met
+     *  @param default_gradient Use this gradient if minimum number of points not available
+     *  @returns 2D vector of gradients (Y, X)
     */
     vec2 calc_gradient(const vec2& base, const vec2& values, GradientType gradient_type, int halfwidth, int min_num=2, float min_range=gridpp::MV, float default_gradient=0);
 
-    /** Find suitable value in neighbourhood based on a search criteria. If search value is within a
-    * criteria range, then the most suitable point is used. This is the nearest value of any point
-    * within the search_target range; or if no point fulfills this, the point with the highest
-    * search value.
-    * @param array 2D input field (Y, X)
-    * @param search_array 2D array of values to search for a match (Y, X)
-    * @param halfwidth Neighbourhood halfwidth to search in
-    * @param search_target_min Lower bound of search range
-    * @param search_target_max Upper bound of search range
-    * @param search_delta Only use nearest point if it is further from the search range than this delta
-    * @param apply_array If provided, only correct values where array equals 1
-    * @returns 2D output field (Y, X)
-    */
+    /** Find suitable value in neighbourhood that match a search criteria. If values are found
+     * within the range, then the average of the values are used. If not, the closest point to the
+     * range is used, provided this is within search_delta of the criteria range. if no point
+     * fulfills this, the original value is not modified.
+     * @param input 2D vector of input values, e.g. temperatures (Y, X)
+     * @param search_array 2D vector to search in, e.g. land area fraction (Y, X)
+     * @param halfwidth Neighbourhood halfwidth to search in
+     * @param search_target_min Lower bound of criteria, e.g. a land area fraction value
+     * @param search_target_Max Upper bound of criteria, e.g. a land area fraction value
+     * @param search_delta Max distance outside target range where the most suitable point is still used
+     * @param apply_array 2D integer vector of 1 (correct this grid point) or 0 (don't correct)
+     * @returns 2D vector of output values (Y, X)
+     */
     vec2 neighbourhood_search(const vec2& array, const vec2& search_array, int halfwidth, float search_target_min, float search_target_max, float search_delta, const ivec2& apply_array=ivec2());
 
     /** Deprecated: Compute neighbourhood statistic on ensemble field
@@ -514,76 +551,109 @@ namespace gridpp {
      * ***************************************/ /**@{*/
 
     /** Create quantile mapping calibration curve
-     *  @param ref Reference values (observations)
-     *  @param fcst Forecast values
-     *  @param output_fcst Output forecast quantiles
-     *  @param quantiles Vector of quantiles to extract. If empty, use all values.
-     *  @return Output reference quantiles
+     *  @param ref 1D vector of reference values (observations)
+     *  @param fcst 1D vector of forecast values
+     *  @param output_fcst 1D vector of output forecast quantiles
+     *  @param quantiles 1D vector of quantile levels to extract. If empty, use all values.
+     *  @returns 1D vector of output reference quantiles
     */
     vec quantile_mapping_curve(const vec& ref, const vec& fcst, vec& output_fcst, vec quantiles=vec());
 
     /** Create calibration curve that optimizes a metric
-     *  @param ref Reference values (observations)
-     *  @param fcst Forecast values
-     *  @param thresholds Thresholds for computing optimal values for
+     *  @param ref 1D vector of reference values (observations)
+     *  @param fcst 1d vector of forecast values
+     *  @param thresholds 1D vector of thresholds for computing optimal values for
      *  @param metric A Metric to optimize for
-     *  @return Calibration curve
+     *  @param output_fcst 1D vector of output forecast quantiles
+     *  @returns 1D vector of output reference quantiles
     */
-
     vec metric_optimizer_curve(const vec& ref, const vec& fcst, const vec& thresholds, Metric metric, vec& output_fcst);
 
     /** Apply arbitrary calibration curve to a single value
-     *  @param fcst input forecast
-     *  @param curve_ref Reference quantiles
-     *  @param curve_fcst Forecast quantiles
+     *  @param fcst 1D vector of forecast values to correct
+     *  @param curve_ref 1D vector of reference curve values
+     *  @param curve_fcst 1D vector of forecast curve values
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
-     *  @return Calibrated forecasts
+     *  @returns Calibrated forecasts
     */
     float apply_curve(float fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 1D forecasts
-     *  @param fcst 1D vector of forecast values
-     *  @param curve_ref Reference quantiles
-     *  @param curve_fcst Forecast quantiles
+     *  @param fcst 1D vector of forecast values to correct
+     *  @param curve_ref 1D vector of reference curve values
+     *  @param curve_fcst 1D vector of forecast curve values
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
-     *  @return Calibrated forecasts
+     *  @returns 1D vector of calibrated forecasts
     */
     vec apply_curve(const vec& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts
-     *  @param fcst 2D grid of forecast values
-     *  @param curve_ref Reference quantiles
-     *  @param curve_fcst Forecast quantiles
+     *  @param fcst 2D vector of forecast values to correct
+     *  @param curve_ref 1D vector of reference curve values
+     *  @param curve_fcst 1D vector of forecast curve values
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
-     *  @return Calibrated forecasts
+     *  @returns 2D array of calibrated forecasts (Y, X)
     */
     vec2 apply_curve(const vec2& fcst, const vec& curve_ref, const vec& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
     /** Apply arbitrary calibration curve to 2D forecasts with spatially varying QQ map
-     *  @param fcst 2D grid of forecast values
-     *  @param curve_ref Reference quantiles (Y, X, Q)
-     *  @param curve_fcst Forecast quantiles (Y, X, Q)
+     *  @param fcst 2D vector of forecast values to correct
+     *  @param curve_ref 3D vector of reference curve values (Y, X, Curve)
+     *  @param curve_fcst 3D vector of Forecast curve values (Y, X, Curve)
      *  @param policy_below Extrapolation policy below curve
      *  @param policy_above Extrapolation policy above curve
-     *  @return Calibrated forecasts
+     *  @returns 2D vector of calibrated forecasts (Y, X)
     */
     vec2 apply_curve(const vec2& fcst, const vec3& curve_ref, const vec3& curve_fcst, Extrapolation policy_below, Extrapolation policy_above);
 
-    /** Ensure calibration curve is monotonic, by removing points
-     *  @param curve_ref Reference quantiles
-     *  @param curve_fcst Forecast quantiles
-     *  @param output_fcst New forecast quantiles
-     *  @returns New reference quantiles
+    /** Ensure calibration curve is monotonic, by removing points on the curve
+     *  @param curve_ref 1D vector of reference curve values
+     *  @param curve_fcst 1D vector of forecast curve values
+     *  @param output_fcst 1D vector of output forecast curve values
+     *  @returns 1D vector of output reference curve values
     */
     vec monotonize_curve(vec curve_ref, vec curve_fcst, vec& output_fcst);
 
-    float get_optimal_threshold(const vec& ref, const vec& fcst, float threshold, Metric metric);
+    /** Compute the optimal threshold to remap an input threshold to
+     *  @param curve_ref 1D vector of reference curve values
+     *  @param curve_fcst 1D vector of reference curve values
+     *  @param threshold Input threshold
+     *  @param metric Metric to optimize
+     *  @returns Optimal remapping threshold
+    */
+    float get_optimal_threshold(const vec& curve_ref, const vec& curve_fcst, float threshold, Metric metric);
 
+    /** Compute the score for a 2x2 contingency table
+     *  @param a Fraction of hits
+     *  @param b Fraction of false alarms
+     *  @param c Fraction of misses
+     *  @param d Fraction of correct rejections
+     *  @param metric Metric to conpute score for
+     *  @returns Score
+    */
     float calc_score(float a, float b, float c, float d, Metric metric);
+
+    /** Compute the score for a 2x2 contingency table by thresholding
+     *  @param ref 1D vector of reference values
+     *  @param fcst 1D vector forecast values
+     *  @param threshold Threshold to compute score for
+     *  @param metric Metric to conpute score for
+     *  @returns Score
+    */
     float calc_score(const vec& ref, const vec& fcst, float threshold, Metric metric);
+
+    /** Compute the score for a 2x2 contingency table by thresholding and allowing a different
+     *  threshold for the forecast 
+     *  @param ref 1D vector of reference values
+     *  @param fcst 1D vector forecast values
+     *  @param threshold Threshold for the reference values
+     *  @param fthreshold Threshold for the forecast values
+     *  @param metric Metric to conpute score for
+     *  @returns Score
+    */
     float calc_score(const vec& ref, const vec& fcst, float threshold, float fthreshold, Metric metric);
 
     /**@}*/
@@ -593,116 +663,216 @@ namespace gridpp {
      * Functions that interpolate data from one grid to another
      * ***************************************/ /**@{*/
 
-    /** Generic downscaler for simple methods that don't use information other than the grids
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues 2D vector of values on the input grid
+    /** Downscale a gridded field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of values on the input grid (Yi, Xi)
       * @param downscaler Downscaling method
-      * @return Values on the output grid
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 downscaling(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, Downscaler downscaler);
-    vec3 downscaling(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, Downscaler downscaler);
-    vec downscaling(const Grid& igrid, const Points& opoints, const vec2& ivalues, Downscaler downscaler);
-    vec2 downscaling(const Grid& igrid, const Points& opoints, const vec3& ivalues, Downscaler downscaler);
-    // vec downscaling(const Points& ipoints, const Points& opoints, const vec& ivalues, Downscaler downscaler);
-    // vec2 downscaling(const Points& ipoints, const Points& opoints, const vec2& ivalues, Downscaler downscaler);
-    // vec2 downscaling(const Points& ipoints, const Grid& ogrid, const vec& ivalues, Downscaler downscaler);
-    // vec3 downscaling(const Points& ipoints, const Grid& ogrid, const vec2& ivalues, Downscaler downscaler);
 
-    /** Nearest neighbour dowscaling grid to grid
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values on the output grid
+    /** Downscale a gridded ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of values on the input grid (E, Yi, Xi)
+      * @param downscaler Downscaling method
+      * @returns 3D vector of output values (E, Yo, Xo)
+    */
+    vec3 downscaling(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, Downscaler downscaler);
+
+    /** Downscale a gridded field to points
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 2D vector of values on the input grid (Yi, Xi)
+      * @param downscaler Downscaling method
+      * @returns 1D vector of output values
+    */
+    vec downscaling(const Grid& igrid, const Points& opoints, const vec2& ivalues, Downscaler downscaler);
+
+    /** Downscale a gridded ensemble field to points
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 3D vector of values on the input grid (E, Yi, Xi)
+      * @param downscaler Downscaling method
+      * @returns 2D vector of output values (E, Points)
+    */
+    vec2 downscaling(const Grid& igrid, const Points& opoints, const vec3& ivalues, Downscaler downscaler);
+
+    /** Nearest neighbour dowscaling grid to grid for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of input values (Yi, Xi)
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 nearest(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+
+    /** Nearest neighbour dowscaling grid to grid for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @returns 3D vector of output values (E, Yo, Xo)
+    */
     vec3 nearest(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
-    /** Nearest neighbour dowscaling grid to point
-      * @param igrid Input grid
-      * @param ogrid Output points to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values for the output points
+    /** Nearest neighbour dowscaling grid to point for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 2D vector of input values grid (Yi, Xi)
+      * @returns 1D vector of output values
     */
     vec nearest(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+
+    /** Nearest neighbour dowscaling grid to point for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @returns 2D vector of output values (E, Points)
+    */
     vec2 nearest(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
-    /** Nearest neighbour dowscaling point to point
-      * @param ipoints Input points
-      * @param opoints Output points to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values for the output points
+    /** Nearest neighbour dowscaling point to point for a deterministic field
+      * @param ipoints Points of input
+      * @param opoints Points of downscaled output
+      * @param ivalues 1D vector of input values
+      * @returns Values 1D vector of output values
     */
     vec nearest(const Points& ipoints, const Points& opoints, const vec& ivalues);
+
+    /** Nearest neighbour dowscaling point to point for an ensemble field
+      * @param ipoints Points of input (Pi)
+      * @param opoints Points of downscaled output Po)
+      * @param ivalues 2D vector of input values (E, Pi)
+      * @returns 2D vector of output values (E, Po)
+    */
     vec2 nearest(const Points& ipoints, const Points& opoints, const vec2& ivalues);
 
-    /** Nearest neighbour dowscaling point to grid
-      * @param ipoints Input points
-      * @param ogrid Output points to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values for the output points
+    /** Nearest neighbour dowscaling point to grid for a deterministic field
+      * @param ipoints Points of input
+      * @param ogrid Grid of downscaled output
+      * @param ivalues 1D vector of values for the input points
+      * @returns 2D vector of output values (Y, X)
     */
     vec2 nearest(const Points& ipoints, const Grid& ogrid, const vec& ivalues);
+
+    /** Nearest neighbour dowscaling point to grid for an ensemble field
+      * @param ipoints Points of input
+      * @param ogrid Grid of downscaled output
+      * @param ivalues 2D vector input values (E, Points)
+      * @returns 3D vector of output values (E, Y, X)
+    */
     vec3 nearest(const Points& ipoints, const Grid& ogrid, const vec2& ivalues);
 
     /** Nearest neighbour downscaling grid to grid and probability in one
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues 3D vector of values on the input grid (Y, X, E)
-      * @param threshold 2D vector of threshold values
-      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
-      * @return Values on the output grid
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of input values (Yi, Xi, E)
+      * @param threshold 2D vector of threshold values (Yo, Xo)
+      * @param comparison_operator Comparison operator to create probability
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 downscale_probability(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec2& threshold, const ComparisonOperator& comparison_operator);
 
-    /** Nearest neighbour downscaling grid to grid and threshold and consensus in one
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues_true 3D vector of values on the input grid (Y, X, E)
-      * @param ivalues_false 3D vector of values on the input grid (Y, X, E)
-      * @param threshold_values 3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold
-      * @param threshold 2D vector of threshold values
-      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
-      * @param statistic statistic to compute over the ensemble dimension
-      * @return Values on the output grid
+    /** Masked ensemble downscaling and consensus. This method computes a high-resolution consensus
+      * from a low-resolution ensemble, without downscaling all members. See the wiki for more
+      * details.
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues_true 3D vector of input values to use when condition is true (Yi, Xi, E)
+      * @param ivalues_false 3D vector of input values to use when condition is false (Yi, Xi, E)
+      * @param threshold_values 3D vector of values (Yi, Xi, E) defining the mask for ivalues after applying the theshold
+      * @param threshold 2D vector of thresholds on output grid that is upscaled to input grid (Yo, Xo)
+      * @param comparison_operator Comparison operator to create probability
+      * @param statistic statistic to compute over the ensemble dimension after downscaling
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 mask_threshold_downscale_consensus(const Grid& igrid, const Grid& ogrid, const vec3& ivalues_true, const vec3& ivalues_false, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const Statistic& statistic);
 
-    /** Nearest neighbour downscaling grid to grid and threshold and quantile in one
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues_true 3D vector of values on the input grid (Y, X, E)
-      * @param ivalues_false 3D vector of values on the input grid (Y, X, E)
-      * @param threshold_values 3D vector of values (Y, X, E), which defines the mask array for ivalues after applying the theshold
-      * @param threshold 2D vector of threshold values
-      * @param comparison_operator lower than, lower or equal than, greater than, great or equal than
-      * @param quantile quantile (value between 0-1) to compute
-      * @return Values on the output grid
+    /** Masked ensemble downscaling and quantile extraction. This method extractes a quantile for a
+      * high-resolution grid from a low-resolution ensemble, without downscaling all members. See
+      * the wiki for more details.
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues_true 3D vector of input values to use when condition is true (Yi, Xi, E)
+      * @param ivalues_false 3D vector of input values to use when condition is false (Yi, Xi, E)
+      * @param threshold_values 3D vector of values (Yi, Xi, E) defining the mask for ivalues after applying the theshold
+      * @param threshold 2D vector of thresholds on output grid that is upscaled to input grid (Yo, Xo)
+      * @param comparison_operator Comparison operator to create probability
+      * @param quantile_level Quantile level (between 0 and 1) to extract
+      * @returns 2D vector of output values (Yo, Xo)
     */
-    vec2 mask_threshold_downscale_quantile(const Grid& igrid, const Grid& ogrid, const vec3& ivalues_true, const vec3& ivalues_false, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const float quantile);
+    vec2 mask_threshold_downscale_quantile(const Grid& igrid, const Grid& ogrid, const vec3& ivalues_true, const vec3& ivalues_false, const vec3& theshold_values, const vec2& threshold, const ComparisonOperator& comparison_operator, const float quantile_level);
 
-    /** Bilinear downscaling grid to grid
-      * @param igrid Input grid
-      * @param ogrid Output grid to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values on the output grid
+    /** Bilinear downscaling grid to grid for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of input values (Yi, Xi)
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 bilinear(const Grid& igrid, const Grid& ogrid, const vec2& ivalues);
+
+    /** Bilinear dowscaling grid to grid for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @returns 3D vector of output values (E, Yo, Xo)
+    */
     vec3 bilinear(const Grid& igrid, const Grid& ogrid, const vec3& ivalues);
 
-    /** Bilinear downscaling grid to points
-      * @param igrid Input grid
-      * @param ogrid Output points to downscale to
-      * @param ivalues 2D vector of values on the input grid
-      * @return Values for the output points
+    /** Bilinear dowscaling grid to point for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 2D vector of input values grid (Yi, Xi)
+      * @returns 1D vector of output values
     */
     vec bilinear(const Grid& igrid, const Points& opoints, const vec2& ivalues);
+
+    /** Bilinear dowscaling grid to point for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @returns 2D vector of output values (E, Points)
+    */
     vec2 bilinear(const Grid& igrid, const Points& opoints, const vec3& ivalues);
 
+    /** Elevation correction dowscaling grid to grid for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of input values (Yi, Xi)
+      * @param elev_gradient Elevation gradient [input unit/m]
+      * @param downscaler Downscaling method
+      * @returns 2D vector of output values (Yo, Xo)
+    */
     vec2 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
+
+    /** Elevation correction dowscaling grid to grid for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @param elev_gradient Elevation gradient [input unit/m]
+      * @param downscaler Downscaling method
+      * @returns 3D vector of output values (E, Yo, Xo)
+    */
     vec3 simple_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
 
+    /** Elevation correction dowscaling grid to point for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 2D vector of input values grid (Yi, Xi)
+      * @param elev_gradient Elevation gradient [input unit/m]
+      * @param downscaler Downscaling method
+      * @returns 1D vector of output values
+    */
     vec simple_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
+
+    /** Elevation correction dowscaling grid to point for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @param elev_gradient Elevation gradient [input unit/m]
+      * @param downscaler Downscaling method
+      * @returns 2D vector of output values (E, Points)
+    */
     vec2 simple_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, float elev_gradient, Downscaler downscaler=Nearest);
 
     /** Compute Downscale
@@ -712,22 +882,61 @@ namespace gridpp {
     *@param elev_gradient elevation gradient
     *@param laf_gradient land area fraction gradient
     */
+    /** Spatially varying gradient dowscaling grid to grid for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of input values (Yi, Xi)
+      * @param elev_gradient 2D vector of elevation gradients (Yi, Xi) [input unit/m]
+      * @param laf_gradient 2D vector of land-area-fraction gradients (Yi, Xi) [input unit/1]
+      * @param downscaler Downscaling method
+      * @returns 2D vector of output values (Yo, Xo)
+    */
     vec2 full_gradient(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2(), Downscaler downscaler=Nearest);
+
+    /** Spatially varying gradient dowscaling grid to grid for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @param elev_gradient 3D vector of elevation gradients (Yi, Xi, E) [input unit/m]
+      * @param laf_gradient 3D vector of land-area-fraction gradients (Yi, Xi, E) [input unit/1]
+      * @param downscaler Downscaling method
+      * @returns 3D vector of output values (E, Yo, Xo)
+    */
     vec3 full_gradient(const Grid& igrid, const Grid& ogrid, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler=Nearest);
+
+    /** Spatially varying gradient dowscaling grid to point for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 2D vector of input values grid (Yi, Xi)
+      * @param elev_gradient 2D vector of elevation gradients (Yi, Xi) [input unit/m]
+      * @param laf_gradient 2D vector of land-area-fraction gradients (Yi, Xi) [input unit/1]
+      * @param downscaler Downscaling method
+      * @returns 1D vector of output values
+    */
     vec full_gradient(const Grid& igrid, const Points& opoints, const vec2& ivalues, const vec2& elev_gradient, const vec2& laf_gradient, Downscaler downscaler=Nearest);
+
+    /** Spatially varying gradient dowscaling grid to point for an ensemble field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param opoints Points of downscaled output
+      * @param ivalues 3D vector of input values (E, Yi, Xi)
+      * @param elev_gradient 3D vector of elevation gradients (E, Yi, Xi) [input unit/m]
+      * @param laf_gradient 3D vector of land-area-fraction gradients (E, Yi, Xi) [input unit/1]
+      * @param downscaler Downscaling method
+      * @returns 2D vector of output values (E, Points)
+    */
     vec2 full_gradient(const Grid& igrid, const Points& opoints, const vec3& ivalues, const vec3& elev_gradient, const vec3& laf_gradient, Downscaler downscaler=Nearest);
 
-    /* Elevation and land area fraction downscaling with debug output fields
+    /* Elevation and land area fraction downscaling with debug output fields. For debugging only,
     */
     vec3 full_gradient_debug(const Grid& igrid, const Grid& ogrid, const vec2& ivalues,  const vec2& elev_gradient, const vec2& laf_gradient=vec2(), Downscaler downscaler=Nearest);
 
-    /** Smart neighbour downscaling grid to grid
-      * @param igrid Input grid
-      * @param ogrid Output points to downscale to
-      * @param ivalues 2D vector of values on the input grid
+    /** Smart neighbour downscaling grid to grid for a deterministic field
+      * @param igrid Grid of input (Yi, Xi)
+      * @param ogrid Grid of downscaled output (Yo, Xo)
+      * @param ivalues 2D vector of input values (Yi, Xi)
       * @param num Number of neighbours to average
-      * @param structure Structure function for determining similarity
-      * @return Values for the output points
+      * @param structure Structure function for determining how similar neighbour gridpoints are
+      * @returns 2D vector of output values (Yo, Xo)
     */
     vec2 smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, int num, const StructureFunction& structure);
     /**@}*/
@@ -738,10 +947,10 @@ namespace gridpp {
      * ***************************************/ /**@{*/
 
     /** For each point, counts the number of gridpoints within the radius
-     *  @param grid Grid
-     *  @param points Points
+     *  @param grid Input grid
+     *  @param points Output points
      *  @param radius Radius [m]
-     *  @return Number of gridpoints
+     *  @returns 1D vector of number of gridpoints
     */
     vec count(const Grid& grid, const Points& points, float radius);
 
@@ -749,23 +958,23 @@ namespace gridpp {
      *  @param igrid Input grid
      *  @param ogrid Output grid
      *  @param radius Radius [m]
-     *  @return Number of gridpoints
+     *  @returns 2D vector of number of gridpoints
     */
     vec2 count(const Grid& igrid, const Grid& ogrid, float radius);
 
     /** For each gridpoint, counts the number of points within the radius
-     *  @param grid Grid
-     *  @param points Points
+     *  @param points Input points
+     *  @param grid Output grid
      *  @param radius Radius [m]
-     *  @return Number of points
+     *  @returns 2D vector of number of points
     */
     vec2 count(const Points& points, const Grid& grid, float radius);
 
     /** For each point, counts the number of points within the radius
-     *  @param ipoints Input points
-     *  @param opoints Output points
+     *  @param ipoints Input points (Pi)
+     *  @param opoints Output points (Po)
      *  @param radius Radius [m]
-     *  @return Number of points
+     *  @returns 1D vector of number of points (Po)
     */
     vec count(const Points& ipoints, const Points& opoints, float radius);
 
@@ -773,15 +982,15 @@ namespace gridpp {
      *  @param grid Grid
      *  @param points Points
      *  @param num Number of points
-     *  @return Distance [m] to nearest gridpoint for each point
+     *  @returns 1D vector of distance [m] to nearest gridpoint for each point
     */
     vec distance(const Grid& grid, const Points& points, int num=1);
 
     /** For each output gridpoint, calculate the distance to nearest input gridpoint
-     *  @param grid Grid
-     *  @param ogrid Output grid
+     *  @param grid Grid (Yi, Xi)
+     *  @param ogrid Output grid /Yo, Xo)
      *  @param num Number of points
-     *  @return Distance [m] to nearest gridpoint for each gridpoint
+     *  @returns 2D vector of distance [m] to nearest gridpoint for each gridpoint (Yo, Xo)
     */
     vec2 distance(const Grid& igrid, const Grid& ogrid, int num=1);
 
@@ -789,63 +998,69 @@ namespace gridpp {
      *  @param points Points
      *  @param grid Grid
      *  @param num Number of points
-     *  @return Distance [m] to nearest gridpoint for each point
+     *  @returns 2D vector of distance [m] to nearest point for each gridpoint
     */
     vec2 distance(const Points& points, const Grid& grid, int num=1);
 
     /** For each output point, calculates the distance to nearest input point
-     *  @param ipoints Input points
-     *  @param opoints Output points
+     *  @param ipoints Input points (Pi)
+     *  @param opoints Output points (Po)
      *  @param num Number of points
-     *  @return Distance [m] to nearest point for each point
+     *  @returns 1D vector of distance [m] to nearest point for each point (Po)
     */
     vec distance(const Points& ipoints, const Points& opoint, int num=1);
 
     /** Fill in missing values based on nearby values
-      * @param values 2D array of values
-      * @return 2D array of values without any missing values
+      * @param values 2D vector of values
+      * @returns 2D vector of values without any missing values
     */
     vec2 fill_missing(const vec2& values);
 
-    /** Aggregate points onto a grid. Writes MV where there are not enough observations.
-      * @param grid Grid to aggregate to
-      * @param points Points with values
-      * @param values Values at points
-      * @param radius Circle radius for aggregate points [m]
+    /** Aggregate points onto a grid. Writes gridpp::MV where there are not enough points.
+      * @param grid Output grid to aggregate to
+      * @param points Input points
+      * @param values 1D vector of input values
+      * @param radius Circle radius for aggregating points [m]
       * @param min_num Minimum number of points in radius to create a value
       * @param statistic Statistic to compute on points within radius
+      * @returns 2D vector of output values
     */
     vec2 gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, Statistic statistic);
 
-    /** Aggregate points onto a points. Writes MV where there are not enough observations.
-      * @param opoints Points to aggregate to
-      * @param ipoints Points with values
-      * @param values Values at points
+    /** Aggregate points onto a points. Writes gridpp::MV where there are not enough points.
+      * @param opoints Output points to aggregate to
+      * @param ipoints Input points
+      * @param values 1D vector of input Values
       * @param radius Circle radius for aggregate points [m]
       * @param min_num Minimum number of points in radius to create a value
       * @param statistic Statistic to compute on points within radius
+      * @returns 1D vector of output values
     */
     vec gridding(const Points& opoints, const Points& ipoints, const vec& values, float radius, int min_num, Statistic statistic);
 
-    /** Assign each point to nearest neighbour in grid and aggregate values. Writes MV where there are not enough observations.
-      * @param grid Grid to aggregate to
-      * @param points Points with values
-      * @param values Values at points
+    /** Assign each point to nearest neighbour in grid and aggregate values. Writes gridpp::MV where
+      * there are not enough observations.
+      * @param grid Output grid to aggregate to
+      * @param points Input points
+      * @param values Input values
       * @param min_num Minimum number of points in a gridpoint to create a value
       * @param statistic Statistic to compute on points within gridpoint
+      * @returns 2D vector of output values
     */
     vec2 gridding_nearest(const Grid& grid, const Points& points, const vec& values, int min_num, gridpp::Statistic statistic);
 
-    /** Assign each ipoint to nearest neighbour in opoints and aggregate values. Writes MV where there are not enough observations.
-      * @param opoints Points to aggregate to
-      * @param ipoints Points with values
-      * @param values Values at points
+    /** Assign each ipoint to nearest neighbour in opoints and aggregate values. Writes gridpp::MV
+      * where there are not enough observations.
+      * @param opoints Output points to aggregate to
+      * @param ipoints Input points
+      * @param values Input values
       * @param min_num Minimum number of points in a gridpoint to create a value
       * @param statistic Statistic to compute on points within gridpoint
+      * @returns 1D vector of output values
     */
     vec gridding_nearest(const Points& opoints, const Points& ipoints, const vec& values, int min_num, gridpp::Statistic statistic);
 
-    /** Compute a score for a metric of all points within a radius */
+    /** Compute a score for a metric of all points within a radius. This is an experimental method. */
     vec2 neighbourhood_score(const Grid& grid, const Points& points, const vec2& fcst, const vec& ref, int half_width, gridpp::Metric metric, float threshold);
 
     /**@}*/
@@ -863,61 +1078,61 @@ namespace gridpp {
     float dewpoint(float temperature, float relative_humidity);
 
     /** Vector version of dewpoint calculation
-     *  @param temperature Temperatures [K]
-     *  @param relative_humidity Relative humidities [1]
-     *  @returns Dewpoint temperatures [K]
+     *  @param temperature 1D vector of temperature [K]
+     *  @param relative_humidity 1D vector of relative humidity [1]
+     *  @returns 1D vector of dewpoint temperature [K]
     */
     vec dewpoint(const vec& temperature, const vec& relative_humidity);
 
     /** Calculate pressure at a new elevation
-     *  @param ielev Elevation at start point
-     *  @param oelev Elevation at new point
-     *  @param ipressure Pressure at start point
-     *  @param itemperature Temperature at start point
-     *  @return Pressure at new point
+     *  @param ielev Elevation at start point [m]
+     *  @param oelev Elevation at new point [m]
+     *  @param ipressure Pressure at start point [Pa]
+     *  @param itemperature Temperature at start point [K]
+     *  @returns Pressure at new point [Pa]
      */
     float pressure(float ielev, float oelev, float ipressure, float itemperature=288.15);
 
     /** Calculate Vector version of pressure calculation
-     *  @param ielev Elevations at start point
-     *  @param oelev Elevations at new point
-     *  @param ipressure Pressures at start point
-     *  @param itemperature Temperatures at start point
-     *  @return Pressures at new points
+     *  @param ielev 1D vector of elevation at start point [m]
+     *  @param oelev 1D vector of elevation at new point [m]
+     *  @param ipressure 1D vector of pressure at start point [Pa]
+     *  @param itemperature 1D vector of temperature at start point [K]
+     *  @returns 1D vector of pressure at new points [Pa]
      */
     vec pressure(const vec& ielev, const vec& oelev, const vec& ipressure, const vec& itemperature);
 
     /** Convert Surface Pressure to Sea Level Pressure
-     *  @param ps Surface pressure [pa]
+     *  @param ps Surface pressure [Pa]
      *  @param altitude Station altitude above sea level [m]
      *  @param temperature 2m temperature [K]
      *  @param rh 2m Relative humidity [1]
      *  @param dewpoint 2m Dewpoint Temperature at station [K]
-     *  @return Sea Level Pressure [pa]
+     *  @returns Sea Level Pressure [Pa]
      */
     float sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV);
 
     /** Vector version of Convert Surface Pressure to Sea Level Pressure
-     *  @param ps Surface pressures [pa]
-     *  @param altitude Station altitudes above sea level [m]
-     *  @param temperature 2m temperatures [K]
-     *  @param rh 2m Relative humidities [1]
-     *  @param dewpoint 2m Dewpoint Temperatures at stations [K]
-     *  @return Sea Level Pressure [pa]
+     *  @param ps 1D vector of Surface pressures [Pa]
+     *  @param altitude 1D vector of station altitudes above sea level [m]
+     *  @param temperature 1D vector of temperature [K]
+     *  @param rh 1D vector of relative humidity [1]
+     *  @param dewpoint 1D vector of dewpoint temperature [K]
+     *  @returns 1D vector of sea Level pressure [Pa]
      */
     vec sea_level_pressure(const vec& ps, const vec& altitude, const vec& temperature, const vec& rh, const vec& dewpoint);
 
     /** Diagnose QNH from pressure and altitude
-     *  @param pressure Pressure at point [pa]
+     *  @param pressure Pressure at point [Pa]
      *  @param altitude Altitude of point [m]
-     *  @returns QNH [pa]
+     *  @returns QNH [Pa]
     */
     float qnh(float pressure, float altitude);
 
     /** Vector version of QNH calculation
-     *  @param pressure Pressures at points [pa]
-     *  @param altitude Altitudes of points [m]
-     *  @returns QNH [pa]
+     *  @param pressure 1D vector of Pressure [Pa]
+     *  @param altitude 1D vector of altitude [m]
+     *  @returns 1D vector of QNH [Pa]
     */
     vec qnh(const vec& pressure, const vec& altitude);
 
@@ -929,24 +1144,24 @@ namespace gridpp {
     float relative_humidity(float temperature, float dewpoint);
 
     /** Vector version of relative humidity calculation
-     *  @param temperature Temperatures [K]
-     *  @param dewpoint Dewpoint temperatures [K]
-     *  @returns Relative humidities [1]
+     *  @param temperature 1D vector of temperature [K]
+     *  @param dewpoint 1D vector of dewpoint temperature [K]
+     *  @returns 1D vector of relative humidity [1]
     */
     vec relative_humidity(const vec& temperature, const vec& dewpoint);
 
     /** Calculate wetbulb temperature from temperature, pressure, and relative humidity
      *  @param temperature Temperature [K]
-     *  @param pressure Air pressure [pa]
-     *  @param Relative humidity [1]
+     *  @param pressure Air pressure [Pa]
+     *  @param relative_humidity Relative humidity [1]
      *  @returns Wetbulb temperature [K]
     */
     float wetbulb(float temperature, float pressure, float relative_humidity);
 
     /** Vector version of wetbulb calculation
-     *  @param temperature Temperatures [K]
-     *  @param pressure Air pressures [pa]
-     *  @param Relative humidities [1]
+     *  @param temperature 1D vector of temperature [K]
+     *  @param pressure 1D vector of air pressure [pa]
+     *  @param relative_humidity 1D vector of Relative humidity [1]
      *  @returns Wetbulb temperatures [K]
     */
     vec wetbulb(const vec& temperature, const vec& pressure, const vec& relative_humidity);
@@ -954,14 +1169,14 @@ namespace gridpp {
     /** Diagnose wind speed from its components
      *  @param xwind X-component of wind [any unit]
      *  @param ywind Y-component of wind [any unit]
-     *  @return Wind speed [any unit]
+     *  @returns Wind speed [any unit]
      * */
     float wind_speed(float xwind, float ywind);
 
     /** Vector version of wind speed calculation
-     *  @param xwind X-components of wind [any unit]
-     *  @param ywind Y-components of wind [any unit]
-     *  @return Wind speeds [any unit]
+     *  @param xwind 1D vector of X-component of wind [any unit]
+     *  @param ywind 1D vector of Y-component of wind [any unit]
+     *  @returns 1D vector of wind speeds [any unit]
      * */
     vec wind_speed(const vec& xwind, const vec& ywind);
 
@@ -969,14 +1184,14 @@ namespace gridpp {
      *  is 180
      *  @param xwind X-component of wind [any unit]
      *  @param ywind Y-component of wind [any unit]
-     *  @return Wind direction [degrees]
+     *  @returns Wind direction [degrees]
      * */
     float wind_direction(float xwind, float ywind);
 
     /** Vector version of wind direction calculation
-     *  @param xwind X-components of wind [any unit]
-     *  @param ywind Y-components of wind [any unit]
-     *  @return Wind direction [degrees]
+     *  @param xwind 1D vector of X-component of wind [any unit]
+     *  @param ywind 1D vector of Y-component of wind [any unit]
+     *  @returns 1D vector of wind direction [degrees]
      * */
     vec wind_direction(const vec& xwind, const vec& ywind);
 
@@ -986,10 +1201,14 @@ namespace gridpp {
      * @name OpenMP settings
      * Functions that configure OpenMP
      * *****************************************/ /**@{*/
-    /** Set the number of OpenMP threads to use. Overrides OMP_NUM_THREAD env variable. */
+    /** Set the number of OpenMP threads to use. Overrides OMP_NUM_THREAD env variable.
+     *  @param num Number of threads
+    */
     void set_omp_threads(int num);
 
-    /** Get the number of OpenMP threads currently set */
+    /** Get the number of OpenMP threads currently set
+     *  @returns Number of threads
+    */
     int get_omp_threads();
 
     /** Sets the number of OpenMP threads to 1 if OMP_NUM_THREADS undefined */
@@ -1001,52 +1220,113 @@ namespace gridpp {
      * *****************************************/ /**@{*/
     // ivec regression(const vec& x, const vec& y);
 
-    /** Set the verbosity of debug messages. Use 0 for no messages. */
+    /** Set the verbosity of debug messages. Use 0 for no messages.s
+     *  @param level Debug level
+    */
     void set_debug_level(int level);
 
     static int _debug_level = 0;
 
-    /** Get the currently set level of debug messages */
+    /** Get the currently set level of debug messagess
+     *  @returns Currently set debug level
+    */
     int get_debug_level();
 
-    /** Convert name of a statistic enum */
+    /** Convert name of a statistic enums
+     *  @param name Name of a statistic
+     *  @returns Statistic
+    */
     Statistic get_statistic(std::string name);
 
     /** The gridpp version
-     * @return The gridpp version
+     *  @returns The gridpp version
     */
     std::string version();
 
+    /** The current time
+     *  @returns The current time in seconds since 1870-01-01 00:00:00Z [s]
+    */
     double clock();
+
+    /** Writes a debug message to standard out
+     *  @param string Write this string
+    */
     void debug(std::string string);
+
+    /** Writes a warning message to standard out
+     *  @param string Write this string
+    */
     void warning(std::string string);
+
+    /** Writes an error message to standard out
+     *  @param string Write this string
+    */
     void error(std::string string);
+
+    /** Writes an deprecation warning to standard out
+     *  @param string Name of the deprecated function
+     *  @param other Additional message to write
+    */
     void future_deprecation_warning(std::string function, std::string other="");
+
+    /** Checks if a value is valid
+     *  @param value Value to check
+     *  @returns True if the value is valid, False if it is NaN, Inf, or other invalid value
+    */
     bool is_valid(float value);
+
+    /** Compute a statistic on a 1D vector
+     *  @param array 1D vector of values
+     *  @param statistic Statistic to compute
+     *  @returns Computed value
+    */
     float calc_statistic(const vec& array, Statistic statistic);
-    float calc_quantile(const vec& array, float quantile);
+
+    /** Compute a quantile from a 1D vector
+     *  @param array 1D vector of values
+     *  @param quantile_level Quantile level to compute
+     *  @returns Computed quantile
+    */
+    float calc_quantile(const vec& array, float quantile_level);
+
+    /** Compute a statistic on a 2D vector
+     *  @param array 2D vector of values (Y, X)
+     *  @param statistic Statistic to compute
+     *  @returns 1D vector of computed values (Y)
+    */
     vec calc_statistic(const vec2& array, Statistic statistic);
+
+    /** Compute a quantile from a 2D vector
+     *  @param array 2D vector of values (Y, X)
+     *  @param quantile_level Quantile level to compute
+     *  @returns 1D vector of computed quantiles (Y)
+    */
     vec calc_quantile(const vec2& array, float quantile=MV);
 
-    /** Compute quantile with 2D varying quantile
-      * @param array Input array with dimensions (T, Y, X)
-      * @param quantile Quantile array with dimensions (Y, X)
-      * @return Extracted quantile with dimensions (Y, X)
+    /** Compute quantile with 2D varying quantile level
+      * @param array 3D input vector (T, Y, X)
+      * @param quantile 2D vector of Quantile levels (Y, X)
+      * @returns Extracted quantiles (Y, X)
     */
-    vec2 calc_quantile(const vec3& array, const vec2& quantile);
+    vec2 calc_quantile(const vec3& array, const vec2& quantile_levels);
+
+    /** Count the number of missing values in a vector
+      * @param array 2D vector
+      * @returns Number of invalid values
+    */
     int num_missing_values(const vec2& iArray);
 
-    /** Find the index in a vector that is equal or just below a value
+    /** Find the index in a vector that is equal to or just below a value
      *  @param iX Lookup value
-     *  @param iValues Lookup vector. Must be sorted.
-     *  @return The index into iValues that is equal or just below iX
+     *  @param iValues 1D vector of lookup values. Must be sorted.
+     *  @returns The index into iValues that is equal to or just below iX
     */
     int get_lower_index(float iX, const vec& iValues);
 
-    /** Find the index in a vector that is equal or just above a value
+    /** Find the index in a vector that is equal to or just above a value
      *  @param iX Lookup value
-     *  @param iValues Lookup vector. Must be sorted.
-     *  @return The index into iValues that is equal or just above iX
+     *  @param iValues 1D vector of lookup values. Must be sorted.
+     *  @returns The index into iValues that is equal to or just above iX
     */
     int get_upper_index(float iX, const vec& iValues);
 
@@ -1057,67 +1337,131 @@ namespace gridpp {
      *  interpolation curve. In that case, the y-value at the end of the interval further away from
      *  the boundary of the curve is used.
      *  @param x Interpolation to this point
-     *  @param iX Vector of x-axis values. Vector must be sorted.
-     *  @param iY Vector of y-axis values corresponding to iX.
-     *  @return Y value corresponding to x
+     *  @param iX 1D vector of x-axis values. Vector must be sorted.
+     *  @param iY 1D vector of y-axis values corresponding to iX.
+     *  @returns Y value corresponding to x
     */
     float interpolate(float x, const vec& iX, const vec& iY);
 
-    /** Piecewise linear interpolation
-     *  Same as above, but for a vector of points to interpolate for
-     *  @param x Interpolation to these points
-     *  @param iX Vector of x-axis values. Vector must be sorted.
-     *  @param iY Vector of y-axis values corresponding to iX.
-     *  @return Y values corresponding to x
+    /** Piecewise linear interpolation, vectorised version.
+     *  @param x 1D vector of values to interpolate to
+     *  @param iX 1D vector of x-axis values. Vector must be sorted.
+     *  @param iY 1D vector of y-axis values corresponding to iX.
+     *  @returns 1D vector of y-axis values corresponding to x
     */
     vec interpolate(const vec& x, const vec& iX, const vec& iY);
 
-    /** Initialize a vector of size Y, X, with a given value */
+    /** Initialize a 2D integer vector of size Y, X, with a given value
+     *  @param Y Size of first dimension
+     *  @param X Size of second dimension
+     *  @patam value Initialize with this value
+     *  @returns 2D interger vector
+    */
     ivec2 init_ivec2(int Y, int X, int value);
+
+    /** Initialize a 2D float vector of size Y, X, with a given value
+     *  @param Y Size of first dimension
+     *  @param X Size of second dimension
+     *  @patam value Initialize with this value
+     *  @returns 2D float vector
+    */
     vec2 init_vec2(int Y, int X, float value=MV);
 
-    /** Initialize a vector of size Y, X, E, with a given value */
+    /** Initialize a 3D integer vector of size Y, X, E, with a given value
+     *  @param Y Size of first dimension
+     *  @param X Size of second dimension
+     *  @param E Size of third dimension
+     *  @patam value Initialize with this value
+     *  @returns 3D integer vector
+    */
     ivec3 init_ivec3(int Y, int X, int E, int value);
+
+    /** Initialize a 3D float vector of size Y, X, E, with a given value
+     *  @param Y Size of first dimension
+     *  @param X Size of second dimension
+     *  @param E Size of third dimension
+     *  @patam value Initialize with this value
+     *  @returns 3D float vector
+    */
     vec3 init_vec3(int Y, int X, int E, float value=MV);
 
-    /** Get reasonably spaced quantiles from a vector of values, ignoring duplicate values
+    /** Get reasonably spaced quantile levels from a vector of values, ignoring duplicate values
       *  but including the first number after duplicated values. Include the lowest and highest
       *  values.
-      *  @param values vector of values (unsorted, and no invalid values)
+      *  @param values 1D vector of values (unsorted, and no invalid values)
       *  @param num number of thresholds to get
+      *  @returns 1D vector of sorted quantile levels
     */
     vec calc_even_quantiles(const vec& values, int num);
 
-    /** Compute time window statistics
-    *  @param array input array with dimensions (case, time)
-    *  @param length window length in number of timesteps
-    *  @param statistic statistic to apply to window
-    *  @param before if true, make the window end at the particular time. If false, centre it.
-    *  @param keep_missing if true, window value will be missing if one or more values in window are missing
-    *  @param missing_edges if true put missing values at the edges, where window overshoots the edge
-    *  @returns 2D vector of time statistics (case, time)
+    /** Compute window statistics across time, independently for each case
+    *  @param array 2D vector of input values (Case, Time)
+    *  @param length Window length in number of timesteps
+    *  @param statistic Statistic to apply to window
+    *  @param before If true, make the window end at the particular time. If false, centre it.
+    *  @param keep_missing If true, window value will be missing if one or more values in window are missing
+    *  @param missing_edges If true put missing values at the edges, where window overshoots the edge
+    *  @returns 2D vector of output values (Case, Time)
     */
-
     vec2 window(const vec2& array, int length, gridpp::Statistic statistic, bool before=false, bool keep_missing=false, bool missing_edges=true);
 
-    /** Check if the grid is the same size as the 2D vector. If True, they are compatible, if false
-    * they are incompatible */
+    /** Check if the grid is the same size as the 2D vector
+     *  @param grid Grid (Y, X)
+     *  @param v 2D vector (Y, X)
+     *  @returns True if compatible
+    */
     bool compatible_size(const Grid& grid, const vec2& v);
+
+    /** Check if the grid is compatible with 3D vector
+     *  @param grid Grid (Y, X)
+     *  @param v 3D vector (T, Y, X)
+     *  @returns True if compatible
+    */
     bool compatible_size(const Grid& grid, const vec3& v);
+
+    /** Check if the points are compatible with a 1D vector
+     *  @param grid Points
+     *  @param v 1D vector
+     *  @returns True if compatible
+    */
     bool compatible_size(const Points& points, const vec& v);
+
+    /** Check if the points are compatible with a 2D vector
+     *  @param grid Points (P)
+     *  @param v 2D vector (T, P)
+     *  @returns True if compatible
+    */
     bool compatible_size(const Points& points, const vec2& v);
+
+    /** Check if two 2D vectors are compatible
+     *  @param a 2D vector (Y, X)
+     *  @param b 2D vector (Y, X)
+     *  @returns True if compatible
+    */
     bool compatible_size(const vec2& a, const vec2& b);
+
+    /** Check if a 2D and 3D vectors are compatible
+     *  @param a 2D vector (Y, X)
+     *  @param b 3D vector (Y, X, E)
+     *  @returns True if compatible
+    */
     bool compatible_size(const vec2& a, const vec3& b);
+
+    /** Check if two 3D vectors are compatible
+     *  @param a 3D vector (Y, X, E)
+     *  @param b 3D vector (Y, X, E)
+     *  @returns True if compatible
+    */
     bool compatible_size(const vec3& a, const vec3& b);
 
     /** Checks if a point is located inside a rectangle formed by 4 points. The 4 points must be
-      * provided in an order that draws out a rectangle (either clockwise or counter-clockwise)
+      * provided in an order that draws out a rectangle (either clockwise or counter-clockwise).
       * @param A: A point in the rectangle
       * @param B: A point in the rectangle
       * @param C: A point in the rectangle
       * @param D: A point in the rectangle
       * @param m: The point to test if it is inside
-      * @return True if the point is inside, False otherwise
+      * @returns True if the point is inside, False otherwise
     */
     bool point_in_rectangle(const Point& A, const Point& B, const Point& C, const Point& D, const Point& m );
 
@@ -1157,12 +1501,12 @@ namespace gridpp {
 
     /**@}*/
 
-    /** Represents a single point in some coordinate system */
+/** Represents a single point in some coordinate system */
     class Point {
         public:
             /** Constructor
-              * @param lat: Latitude coordinate
-              * @param lon: Longitude coordinate
+              * @param lat: Latitude (or y) coordinate
+              * @param lon: Longitude (or x) coordinate
               * @param elev: Elevation
               * @param laf: Land area fraction (between 0 and 1)
               * @param type: Coordinate type for lat and lon
@@ -1175,7 +1519,7 @@ namespace gridpp {
             CoordinateType type;
     };
 
-    /** Helper class for Grid and Points */
+    /** Helper class for Grid and Points representing a tree of points */
     class KDTree {
         public:
             KDTree(vec lats, vec lons, CoordinateType type=Geodetic);
@@ -1282,32 +1626,87 @@ namespace gridpp {
         public:
             Points();
             /** Initialize a new grid
-             *  @param lats: vector of latitudes [degrees]
-             *  @param lons: vector of longitudes [degrees]
-             *  @param elevs: vector of elevations [m]
-             *  @param lafs: vector of land area fractions [1]
+             *  @param lats: 1D vector of latitudes [degrees]
+             *  @param lons: 1D vector of longitudes [degrees]
+             *  @param elevs: 1D vector of elevations [m]
+             *  @param lafs: 1D vector of land area fractions [1]
              *  @param type: Coordinate type
             */
             Points(vec lats, vec lons, vec elevs=vec(), vec lafs=vec(), CoordinateType type=Geodetic);
             Points(KDTree tree, vec elevs=vec(), vec lafs=vec());
             Points& operator=(Points other);
             Points(const Points& other);
-            // Returns -1 if there are no neighbours
+
+            /* Get the index of the nearest neighbour
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns Index of nearest neighbour (-1 if there are no neighbours).
+            */
             int get_nearest_neighbour(float lat, float lon, bool include_match=true) const;
+
+            /* Get the indices of all neighbours within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 1D vector of indices of neighbours within radius
+            */
             ivec get_neighbours(float lat, float lon, float radius, bool include_match=true) const;
+
+            /* Get the indices and distances to all neighbours within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param distances 1D output vector of distances to each point [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 1D vector of indices of neighbours within radius
+            */
             ivec get_neighbours_with_distance(float lat, float lon, float radius, vec& distances, bool include_match=true) const;
+
+            /* Get the number of neighbouring points within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns the number of neighbours within radius
+            */
             int get_num_neighbours(float lat, float lon, float radius, bool include_match=true) const;
+
+            /* Get the N nearest neighbouring points
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param num Number of nearest neighbours
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 1D vector of indices of neighbours
+            */
             ivec get_closest_neighbours(float lat, float lon, int num, bool include_match=true) const;
 
             vec get_lats() const;
             vec get_lons() const;
             vec get_elevs() const;
             vec get_lafs() const;
+
             int size() const;
+
+            /** Get point indices that are inside the envelope of a grid
+             *  @param grid Grid
+             *  @returns 1D vector of indices
+            */
             ivec get_in_domain_indices(const Grid& grid) const;
+
+            /** Get points that are inside the envelope of a grid
+             *  @param grid Grid
+             *  @returns A new points object containing points within grid
+            */
             Points get_in_domain(const Grid& grid) const;
             CoordinateType get_coordinate_type() const;
             Point get_point(int index) const;
+
+            /** Subset the points
+             *  @param indices 1D vector of point indices
+             *  @returns A new points object containing the indexed points
+            */
             Points subset(const ivec& indices) const;
         private:
             KDTree mTree;
@@ -1323,22 +1722,71 @@ namespace gridpp {
             Grid();
 
             /** Initialize a new grid
-             *  @param lats: 2D vector of latitudes [degrees]
-             *  @param lons: 2D vector of longitudes [degrees]
+             *  @param lats: 2D vector of latitudes [degrees] (or y-values)
+             *  @param lons: 2D vector of longitudes [degrees] (or x-values)
              *  @param elevs: 2D vector of elevations [m]
              *  @param lafs: 2D vector of land area fractions [1]
              *  @param type: Coordinate type
             */
             Grid(vec2 lats, vec2 lons, vec2 elevs=vec2(), vec2 lafs=vec2(), CoordinateType type=Geodetic);
+
+            /* Get the index of the nearest neighbour
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 1D vector of (x, y) index (empty vector if no neighbours)
+            */
             ivec get_nearest_neighbour(float lat, float lon, bool include_match=true) const;
+
+            /* Get the indices of all neighbours within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 2D vector (Point, 2) of x,y-indices of neighbours within radius
+            */
             ivec2 get_neighbours(float lat, float lon, float radius, bool include_match=true) const;
+
+            /* Get the indices and distances to all neighbours within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param distances 1D output vector of distances to each point [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 2D vector (Point, 2) of x,y-indices of neighbours within radius
+            */
             ivec2 get_neighbours_with_distance(float lat, float lon, float radius, vec& distances, bool include_match=true) const;
+
+            /* Get the number of neighbouring points within a search radius
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param radius Neighbourhood radius [m]
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns the number of neighbours within radius
+            */
             int get_num_neighbours(float lat, float lon, float radius, bool include_match=true) const;
+
+            /* Get the N nearest neighbouring points
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param num Number of nearest neighbours
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 2D vector (Point, 2) of x,y-indices of neighbours
+            */
             ivec2 get_closest_neighbours(float lat, float lon, int num, bool include_match=true) const;
 
+            /* Get the N nearest neighbouring points
+             * @param lat Lookup latitude (or y-axis value)
+             * @param lon Lookup longitude (or x-axis value)
+             * @param Y1_out Number of nearest neighbours
+             * @param include_match Return matching points. If false, don't use this point.
+             * @returns 2D vector (Point, 2) of x,y-indices of neighbours
+            */
             bool get_box(float lat, float lon, int& Y1_out, int& X1_out, int& Y2_out, int& X2_out) const;
 
-            /** Convert grid to a vector of points */
+            /** Convert grid to a vector of points
+             *  @returns Points object containing all gridpoints serialised into a vector
+            */
             Points to_points() const;
 
             vec2 get_lats() const;
@@ -1369,11 +1817,22 @@ namespace gridpp {
     class StructureFunction {
         public:
             StructureFunction(float localization_distance=0);
-            /** Correlation between two points */
+            /** Correlation between two points
+             *  @param p1 First point
+             *  @param p2 Other point
+             *  @returns Correlation between points
+            */
             virtual float corr(const Point& p1, const Point& p2) const = 0;
+
+            /** Correlation between a background point and an observation points
+             *  @param p1 Background point
+             *  @param p2 Observation point
+             *  @returns Correlation between background and observation points
+            */
             virtual float corr_background(const Point& p1, const Point& p2) const;
+
             /** Maximum distance for which an observation can have an impact (localization)
-              * @return Distance [m]
+              * @returns Distance [m]
             */
             virtual float localization_distance(const Point& p) const;
             virtual StructureFunction* clone() const = 0;
@@ -1382,23 +1841,24 @@ namespace gridpp {
             /** Barnes correlation function
               * @param dist Distance between points. Same units as 'length'
               * @param length Length scale
+              * @returns Barnes rho
             */
             float barnes_rho(float dist, float length) const;
 
             /** Cressman correlation function
               * @param dist Distance between points. Same units as 'length'
               * @param length Length scale
+              * @returns Cressman rho
             */
             float cressman_rho(float dist, float length) const;
             float m_localization_distance;
     };
     class MultipleStructure: public StructureFunction {
         public:
-            /** Exponential structure function
-              * @param h: Horizontal decorrelation length >=0 [m]
-              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
-              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
-              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            /** Different structure functions for horizontal, vertical, and land/sea
+              * @param structure_h: Horizontal structure function
+              * @param structure_v: Vertical structure function
+              * @param structure_w: Land/sea structure function
             */
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
             float corr(const Point& p1, const Point& p2) const;
@@ -1419,12 +1879,13 @@ namespace gridpp {
               * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
             */
             BarnesStructure(float h, float v=0, float w=0, float hmax=MV);
+
             /** Barnes structure function where decorrelation varyies spatially
               * @param grid: Grid of decorrelation field
-              * @param h: Horizontal decorrelation length field >=0, same size as grid [m]
-              * @param v: Vertical decorrelation length field >=0 [m]. Set all to 0 to disable decorrelation.
-              * @param w: Land/sea decorrelation length field >=0 [1]. Set all to 0 to disable decorrelation.
-              * @param min_rho: Truncate horizontal correlation when rho less than this value [m].
+              * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
             */
             BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
@@ -1454,8 +1915,7 @@ namespace gridpp {
     class CrossValidation: public StructureFunction {
         public:
             /** Structure function for performing cross validation experiments
-              * @param dist: Force background-to-obs correlation to 0 for points within
-              *   this distance [m]. If MV, disable this.
+              * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]. If MV, disable this.
             */
             CrossValidation(StructureFunction& structure, float dist=MV);
             float corr(const Point& p1, const Point& p2) const;
@@ -1475,13 +1935,43 @@ namespace gridpp {
             virtual float forward(float value) const;
             virtual float backward(float value) const;
 
+            /** Forward transform a 1D vector
+             *  @param input 1D vector
+             *  @returns 1D vector of transformed values
+            */
             vec forward(const vec& input) const;
+
+            /** Backward transform a 1D vector
+             *  @param input 1D vector of transformed values
+             *  @returns 1D vector of original values
+            */
             vec backward(const vec& input) const;
+
+            /** Forward transform a 2D vector
+             *  @param input 2D vector
+             *  @returns 2D vector of transformed values
+            */
             vec2 forward(const vec2& input) const;
+
+            /** Backward transform a 2D vector
+             *  @param input 2D vector of transformed values
+             *  @returns 2D vector of original values
+            */
             vec2 backward(const vec2& input) const;
+
+            /** Forward transform a 3D vector
+             *  @param input 3D vector
+             *  @returns 3D vector of transformed values
+            */
             vec3 forward(const vec3& input) const;
+
+            /** Backward transform a 3D vector
+             *  @param input 3D vector of transformed values
+             *  @returns 3D vector of original values
+            */
             vec3 backward(const vec3& input) const;
     };
+    /** Identity transform, i.e. where forward and backward functinos to not modify values */
     class Identity : public Transform {
         public:
             // SWIG requires these "using" statements to enable the vectorized versions in the
@@ -1491,6 +1981,7 @@ namespace gridpp {
             float forward(float value) const;
             float backward(float value) const;
     };
+    /** Log transformation: output = log(input) */
     class Log : public Transform {
         public:
             using Transform::forward;
@@ -1498,8 +1989,12 @@ namespace gridpp {
             float forward(float value) const;
             float backward(float value) const;
     };
+    /** Box-Cox transformation */
     class BoxCox : public Transform {
         public:
+            /** Initialize Box-Cox transform
+             *  @param threshold Box-Cox parameter
+            */
             BoxCox(float threshold);
             using Transform::forward;
             using Transform::backward;
@@ -1508,11 +2003,16 @@ namespace gridpp {
         private:
             float mThreshold;
     };
+    /** Gamma transformation. Transforms values to cdf from a gamma distribution and subsequantly
+     *  extracts the cdf from a standard normal distribution. */
     class Gamma : public Transform {
-        /** Transforms values to cdf from a gamma distribution and subsequantly extracts the
-         *  cdf from a standard normal distribution.
-        */
         public:
+            /** Initialize Gamma transform
+             *  @param shape Shape parameter
+             *  @param scale Scale parameter
+             *  @param tolerance Computation tolerance
+             *
+            */
             Gamma(float shape, float scale, float tolerance=0.01);
             using Transform::forward;
             using Transform::backward;

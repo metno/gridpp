@@ -238,4 +238,7 @@ float gridpp::calc_score(float a, float b, float c, float d, gridpp::Metric metr
             return gridpp::MV;
         return 2.0 * (a * d - b * c) / denom;
     }
+    else {
+        throw std::invalid_argument("Unknown metric");
+    }
 }

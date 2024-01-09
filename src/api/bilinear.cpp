@@ -319,10 +319,10 @@ namespace {
 
     // Pass in input lats and lons, because otherwise we lose a lot of speed
     float calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec2& ivalues, float lat, float lon) {
-        int I1 = gridpp::MV;
-        int I2 = gridpp::MV;
-        int J1 = gridpp::MV;
-        int J2 = gridpp::MV;
+        int I1 = -1;
+        int I2 = -1;
+        int J1 = -1;
+        int J2 = -1;
         float output = gridpp::MV;
         bool inside = grid.get_box(lat, lon, I1, J1, I2, J2);
         // std::cout << "Coords: " << I1 << " " << J1 << " " << I2 << " " << J2 << " " << inside << std::endl;
@@ -358,10 +358,10 @@ namespace {
         return output;
     }
     vec calc(const Grid& grid, const vec2& iInputLats, const vec2& iInputLons, const vec3& ivalues, float lat, float lon) {
-        int I1 = gridpp::MV;
-        int I2 = gridpp::MV;
-        int J1 = gridpp::MV;
-        int J2 = gridpp::MV;
+        int I1 = -1;
+        int I2 = -1;
+        int J1 = -1;
+        int J2 = -1;
         int T = ivalues.size();
         vec output(T, gridpp::MV);
         bool inside = grid.get_box(lat, lon, I1, J1, I2, J2);

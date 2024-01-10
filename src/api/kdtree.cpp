@@ -177,6 +177,8 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         double lon1r = deg2rad(lon1);
         double lon2r = deg2rad(lon2);
         double dlon = fmod(fabs(lon1r - lon2r), 2 * M_PI);
+        if(dlon > M_PI)
+            dlon = 2 * M_PI - dlon;
         double mean_lat = (lat1r + lat2r) / 2;
         float dx2 = pow(cos(mean_lat), 2) * dlon * dlon;
         float dy2 = (lat1r - lat2r) * (lat1r - lat2r);

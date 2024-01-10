@@ -176,13 +176,19 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         double lat2r = deg2rad(lat2);
         double lon1r = deg2rad(lon1);
         double lon2r = deg2rad(lon2);
-        float dx2 = pow(cos((lat1r+lat2r)/2),2)*(lon1r-lon2r)*(lon1r-lon2r);
-        float dy2 = (lat1r-lat2r)*(lat1r-lat2r);
-        return gridpp::radius_earth*sqrt(dx2+dy2);
+        double dlon = fmod(fabs(lon1r - lon2r), 2 * M_PI);
+        double mean_lat = (lat1r + lat2r) / 2;
+        float dx2 = pow(cos(mean_lat), 2) * dlon * dlon;
+        float dy2 = (lat1r - lat2r) * (lat1r - lat2r);
+        return gridpp::radius_earth * sqrt(dx2 + dy2);
     }
     else {
         throw std::runtime_error("Unknown coordinate type");
     }
+}
+float gridpp::KDTree::calc_distance(const Point& p1, const Point& p2) {
+    assert(p1.type == p2.type);
+    return calc_distance(p1.lat, p1.lon, p2.lat, p2.lon, p1.type);
 }
 float gridpp::KDTree::calc_distance_fast(const Point& p1, const Point& p2) {
     assert(p1.type == p2.type);

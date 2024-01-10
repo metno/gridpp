@@ -58,18 +58,70 @@ class KDTreeTest(unittest.TestCase):
         self.assertAlmostEqual(gridpp.KDTree_rad2deg(0), 0, 5)
 
     def test_calc_distance(self):
-        self.assertAlmostEqual(0, gridpp.KDTree_calc_distance(60,10,60,10));
-        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance(90,10,-90,10));
-        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance(0,0,0,180));
-        self.assertAlmostEqual(16879114, gridpp.KDTree_calc_distance(60.5,5.25,-84.75,-101.75));
-        self.assertAlmostEqual(124080.79, gridpp.KDTree_calc_distance(60,10,61,11), delta=0.1);
+        config = list()
+        # lat0, lon0, lat1, lon1, delta, expected
+        config += [[60,10,61,11,0.1,124080.79]]
+        config += [[60, 10, 60, 10, 0, 0]]
+        config += [[90, 10, -90, 10, 0, 20037508]]
+        config += [[0, 0, 0, 180, 0, 20037508]]
+        config += [[60.5, 5.25, -84.75, -101.75, 0, 16879114]]
+        config += [[60, 10, 61, 11, 0.1, 124080.79]]
+
+        for c in config:
+            self.assertEqual(len(c), 6)
+            p0 = gridpp.Point(c[0], c[1])
+            p1 = gridpp.Point(c[2], c[3])
+            delta = c[4]
+            expected = c[5]
+
+            # Point version
+            with self.subTest(config=c, type="Point"):
+                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance(p0, p1), delta=delta)
+
+            # Scalar version
+            with self.subTest(config=c, type="Scalar"):
+                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance(c[0], c[1], c[2], c[3]), delta=delta)
 
     def test_calc_distance_fast(self):
-        self.assertEqual(0, gridpp.KDTree_calc_distance_fast(60,10,60,10));
-        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance_fast(90,10,-90,10), delta=100);
-        self.assertAlmostEqual(20037508, gridpp.KDTree_calc_distance_fast(0,0,0,180), delta=100);
-        # self.assertAlmostEqual(16879114, gridpp.KDTree_calc_distance_fast(60.5,5.25,-84.75,-101.75), delta=100);
-        self.assertAlmostEqual(124080.79, gridpp.KDTree_calc_distance_fast(60,10,61,11), delta=100);
+        config = list()
+        #          lat0,lon0,lat1,lon1, delta, dist
+        config += [[60,10, 60,10,  10, 0]]
+        config += [[90,10, -90,10, 10, 20037508]]
+        config += [[0,0,   0,180,  10, 20037508]]
+        config += [[60,10, 61,11,  10, 124080.79]]
+
+        for c in config:
+            self.assertEqual(len(c), 6)
+            p0 = gridpp.Point(c[0], c[1])
+            p1 = gridpp.Point(c[2], c[3])
+            delta = c[4]
+            expected = c[5]
+
+            # Point version
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(p0, p1), delta=delta)
+
+            # Scalar version
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
+
+    def test_calc_distance_fast_across_date_line(self):
+        config = list()
+        for lat in [-90, -89, 0, 89, 90]:
+            config += [[lat, 180, lat, -180, 10, 0]]
+        for lat in [-90, -89, 0, 89]:
+            config += [[lat, 180, lat+1, -180, 10, 111319.4921875]]
+
+        for c in config:
+            self.assertEqual(len(c), 6)
+            p0 = gridpp.Point(c[0], c[1])
+            p1 = gridpp.Point(c[2], c[3])
+            delta = c[4]
+            expected = c[5]
+
+            # Point version
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(p0, p1), delta=delta)
+
+            # Scalar version
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
 
     def test_radius_match(self):
         """Check that points right on the radius edge count as a match"""

@@ -1584,6 +1584,7 @@ namespace gridpp {
             static float rad2deg(float deg);
             static float calc_distance(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
             static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
+            static float calc_distance(const Point& p1, const Point& p2);
             static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
             static float calc_distance_fast(const Point& p1, const Point& p2);
             vec get_lats() const;

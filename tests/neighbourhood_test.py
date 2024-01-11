@@ -50,12 +50,27 @@ class Test(unittest.TestCase):
         empty = np.zeros([5, 5])
         empty[0:3, 0:3] = np.nan
         for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:
-            for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance]:
+            for statistic in [gridpp.Mean, gridpp.Min, gridpp.Max, gridpp.Median, gridpp.Std, gridpp.Variance, gridpp.RandomChoice]:
                 output = func(empty, 1, statistic)
                 self.assertTrue(np.isnan(np.array(output)[0:2,0:2]).all())
 
             output = func(empty, 1, gridpp.Count)
             np.testing.assert_array_almost_equal(output, [[0, 0, 2, 4, 4], [0, 0, 3, 6, 6], [2, 3, 5, 7, 6], [4, 6, 7, 8, 6], [4, 6, 6, 6, 4]])
+
+    def test_random_choice(self):
+        values = np.reshape([0, np.nan, 2, 3], [2, 2])
+        output = gridpp.neighbourhood(values, 0, gridpp.RandomChoice)
+        np.testing.assert_array_almost_equal(output, values)
+
+        output = gridpp.neighbourhood(values, 1, gridpp.RandomChoice)
+        for i in range(values.shape[0]):
+            for j in range(values.shape[1]):
+                self.assertTrue(output[i, j] in [0, 2, 3])
+
+    def test_random_choice_only_missing(self):
+        values = np.nan * np.zeros([10, 10])
+        output = gridpp.neighbourhood(values, 3, gridpp.RandomChoice)
+        self.assertTrue(np.isnan(output).all())
 
     def test_mean(self):
         for func in [gridpp.neighbourhood, gridpp.neighbourhood_brute_force]:

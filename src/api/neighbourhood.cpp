@@ -581,38 +581,22 @@ namespace {
                 assert(curr_nY > 0);
                 assert(curr_nX > 0);
 
-                if(statistic == gridpp::RandomChoice) {
-                    int start_y = std::max(0, y-halfwidth);
-                    int start_x = std::max(0, x-halfwidth);
-
-                    int random_x = rand() % (curr_nX);
-                    int random_y = rand() % (curr_nY);
-                    assert(random_x < curr_nX);
-                    assert(random_y < curr_nY);
-                    assert(start_y + random_y >= 0);
-                    assert(start_y + random_y < nY);
-                    assert(start_x + random_x >= 0);
-                    assert(start_x + random_x < nX);
-                    output[y][x] = input[start_y + random_y][start_x + random_x];
-                }
-                else {
-                    neighbourhood.resize(curr_nY*curr_nX, gridpp::MV);
-                    int index = 0;
-                    for(int ii = std::max(0, y-halfwidth); ii <= std::min(nY-1, y+halfwidth); ii++) {
-                        for(int jj = std::max(0, x-halfwidth); jj <= std::min(nX-1, x+halfwidth); jj++) {
-                            float value = input[ii][jj];
-                            assert(index < curr_nY*curr_nX);
-                            neighbourhood[index] = value;
-                            index++;
-                        }
+                neighbourhood.resize(curr_nY*curr_nX, gridpp::MV);
+                int index = 0;
+                for(int ii = std::max(0, y-halfwidth); ii <= std::min(nY-1, y+halfwidth); ii++) {
+                    for(int jj = std::max(0, x-halfwidth); jj <= std::min(nX-1, x+halfwidth); jj++) {
+                        float value = input[ii][jj];
+                        assert(index < curr_nY*curr_nX);
+                        neighbourhood[index] = value;
+                        index++;
                     }
-                    assert(index == curr_nY*curr_nX);
-                    if(statistic == gridpp::Quantile)
-                        output[y][x] = gridpp::calc_quantile(neighbourhood, quantile);
-                    else
-                        output[y][x] = gridpp::calc_statistic(neighbourhood, statistic);
-                    count_stat += neighbourhood.size();
                 }
+                assert(index == curr_nY*curr_nX);
+                if(statistic == gridpp::Quantile)
+                    output[y][x] = gridpp::calc_quantile(neighbourhood, quantile);
+                else
+                    output[y][x] = gridpp::calc_statistic(neighbourhood, statistic);
+                count_stat += neighbourhood.size();
             }
         }
         return output;

@@ -95,7 +95,7 @@ namespace gridpp {
         Variance  = 60, /**< Population variance of values */
         Sum       = 70, /**< Sum of values */
         Count     = 80, /**< Count of values */
-        RandomChoice = 90, /**< Randomly pick a value */
+        RandomChoice = 90, /**< Randomly pick a non-nan value */
         Unknown   = -1  /**< Unknown statistic */
     };
 

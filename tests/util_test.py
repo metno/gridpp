@@ -9,6 +9,7 @@ class Test(unittest.TestCase):
         self.assertEqual(gridpp.get_statistic("mean"), gridpp.Mean)
         self.assertEqual(gridpp.get_statistic("min"), gridpp.Min)
         self.assertEqual(gridpp.get_statistic("max"), gridpp.Max)
+        self.assertEqual(gridpp.get_statistic("count"), gridpp.Count)
         self.assertEqual(gridpp.get_statistic("median"), gridpp.Median)
         self.assertEqual(gridpp.get_statistic("quantile"), gridpp.Quantile)
         self.assertEqual(gridpp.get_statistic("std"), gridpp.Std)
@@ -123,12 +124,8 @@ class Test(unittest.TestCase):
         gridpp.warning("test")
 
     def test_error(self):
-        with self.assertRaises(Exception) as e:
+        with self.assertRaises(RuntimeError) as e:
             gridpp.error("test")
-
-    def test_not_implemented_error(self):
-        with self.assertRaises(Exception) as e:
-            gridpp.not_implemented_error("test")
 
     def test_get_index(self):
         self.assertEqual(2, gridpp.get_lower_index(1, [0, 0, 1, 1]))
@@ -155,6 +152,15 @@ class Test(unittest.TestCase):
         points = gridpp.Points([0, 1, 2], [0, 1, 2])
         self.assertTrue(gridpp.compatible_size(points, np.zeros([1, 3])))
         self.assertTrue(gridpp.compatible_size(points, np.zeros([2, 3])))
+
+    def test_set_omp_threads(self):
+        num = gridpp.get_omp_threads()
+        if num == 0:
+            gridpp.set_omp_threads(3)
+            self.assertEqual(gridpp.get_omp_threads(), 0)
+        else:
+            gridpp.set_omp_threads(3)
+            self.assertEqual(gridpp.get_omp_threads(), 3)
 
 
 if __name__ == '__main__':

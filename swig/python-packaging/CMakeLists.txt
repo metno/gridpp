@@ -12,6 +12,11 @@ set(SETUP_PY_IN ${CMAKE_CURRENT_SOURCE_DIR}/setup.in.py)
 set(SETUP_PY_OUT ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
 configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT})
 
+set(CMAKE_SWIG_FLAGS "")
+if(SWIG_VERSION GREATER_EQUAL 4)
+    set(CMAKE_SWIG_FLAGS "-doxygen")
+endif()
+
 # Install target to call setup.py
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/api)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -24,7 +29,7 @@ add_custom_target(package-python
     COMMAND ${CMAKE_COMMAND} -E copy ${SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/src/api
     COMMAND ${CMAKE_COMMAND} -E copy ${CPP_INCLUDE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/include
     # COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include/dependencies ${CMAKE_CURRENT_BINARY_DIR}/include
-    COMMAND ${SWIG_EXECUTABLE} -python -outdir ${CMAKE_CURRENT_BINARY_DIR} -c++ -I./include -o ${CMAKE_CURRENT_BINARY_DIR}/gridppPYTHON_wrap.cxx ${SWIG_INTERFACE}
+    COMMAND ${SWIG_EXECUTABLE} -python ${CMAKE_SWIG_FLAGS} -outdir ${CMAKE_CURRENT_BINARY_DIR} -c++ -I./include -o ${CMAKE_CURRENT_BINARY_DIR}/gridppPYTHON_wrap.cxx ${SWIG_INTERFACE}
     # COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY_OUT} sdist --dist-dir ${CMAKE_BINARY_DIR}
     COMMAND python ${SETUP_PY_OUT} sdist --dist-dir ${CMAKE_BINARY_DIR}
     )

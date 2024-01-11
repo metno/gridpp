@@ -23,7 +23,7 @@ var searchData=
   ['get_5fneighbours_5fwith_5fdistance',['get_neighbours_with_distance',['../classgridpp_1_1KDTree.html#aa53740f54e3dee5af371ccc97aa2f575',1,'gridpp::KDTree::get_neighbours_with_distance()'],['../classgridpp_1_1Points.html#a885449e1c67d124aed1bd7aa9e5e93fb',1,'gridpp::Points::get_neighbours_with_distance()'],['../classgridpp_1_1Grid.html#a1d32290dbd6a663f7c5f2b0bfdedb2ee',1,'gridpp::Grid::get_neighbours_with_distance()']]],
   ['get_5fnum_5fneighbours',['get_num_neighbours',['../classgridpp_1_1KDTree.html#afefc9c048b2e1599e227fefbdc74308e',1,'gridpp::KDTree::get_num_neighbours()'],['../classgridpp_1_1Points.html#aa4ef853c86808476f21379dc8831aa3b',1,'gridpp::Points::get_num_neighbours()'],['../classgridpp_1_1Grid.html#a2a799e36985523d197ef3c18f9922619',1,'gridpp::Grid::get_num_neighbours()']]],
   ['get_5fomp_5fthreads',['get_omp_threads',['../namespacegridpp.html#a3d1db3ef7d351d4b0cc93f94936a1d05',1,'gridpp']]],
-  ['get_5foptimal_5fthreshold',['get_optimal_threshold',['../namespacegridpp.html#a8f025aaf4879bf72b2a204dbb66be1f0',1,'gridpp']]],
+  ['get_5foptimal_5fthreshold',['get_optimal_threshold',['../namespacegridpp.html#a127a2a1313e8af91d9c4818a1fbc3bc9',1,'gridpp']]],
   ['get_5fpoint',['get_point',['../classgridpp_1_1Points.html#aad0a0b81d2618b2904dee9f0de3cd402',1,'gridpp::Points::get_point()'],['../classgridpp_1_1Grid.html#a529efb0f234c98568a0d6874d95c5850',1,'gridpp::Grid::get_point()']]],
   ['get_5fstatistic',['get_statistic',['../namespacegridpp.html#ab51b6612520aa8c1f7329e8e7115a96f',1,'gridpp']]],
   ['get_5fupper_5findex',['get_upper_index',['../namespacegridpp.html#a4754eabf9f76fbe8fd5d745ec3500f46',1,'gridpp']]],

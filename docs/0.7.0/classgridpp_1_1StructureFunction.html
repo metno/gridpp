@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev4: gridpp::StructureFunction Class Reference</title>
+<title>Gridpp 0.7.0.dev6: gridpp::StructureFunction Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev4
+   <div id="projectname">Gridpp 0.7.0.dev6
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -105,6 +105,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae989c48dbbe59c0b49a352d3846c961b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Correlation between two points.  <a href="#ae989c48dbbe59c0b49a352d3846c961b">More...</a><br /></td></tr>
 <tr class="separator:ae989c48dbbe59c0b49a352d3846c961b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac02428930323ca1f14ce8865ce91ab7d"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ac02428930323ca1f14ce8865ce91ab7d">corr_background</a> (const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p1, const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p2) const</td></tr>
+<tr class="memdesc:ac02428930323ca1f14ce8865ce91ab7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Correlation between a background point and an observation points.  <a href="#ac02428930323ca1f14ce8865ce91ab7d">More...</a><br /></td></tr>
 <tr class="separator:ac02428930323ca1f14ce8865ce91ab7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd9865a4d15b90f5a6a6c41d5bc1af41"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#afd9865a4d15b90f5a6a6c41d5bc1af41">localization_distance</a> (const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p) const</td></tr>
 <tr class="memdesc:afd9865a4d15b90f5a6a6c41d5bc1af41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance for which an observation can have an impact (localization)  <a href="#afd9865a4d15b90f5a6a6c41d5bc1af41">More...</a><br /></td></tr>
@@ -195,6 +196,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Barnes rho </dd></dl>
 
 </div>
 </div>
@@ -260,6 +262,14 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Correlation between two points. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p1</td><td>First point </td></tr>
+    <tr><td class="paramname">p2</td><td>Other point </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Correlation between points </dd></dl>
 
 <p>Implemented in <a class="el" href="classgridpp_1_1CrossValidation.html#ad829df10eafd02cd71690e7ecfea6175">gridpp::CrossValidation</a>, <a class="el" href="classgridpp_1_1CressmanStructure.html#a123479eaa9fdf4a841d551c6ad5085f9">gridpp::CressmanStructure</a>, <a class="el" href="classgridpp_1_1BarnesStructure.html#a98c18f3afbe4ec7e442de67636253d80">gridpp::BarnesStructure</a>, and <a class="el" href="classgridpp_1_1MultipleStructure.html#ab53ed144b17707bf49208a071e6fd65b">gridpp::MultipleStructure</a>.</p>
 
@@ -298,6 +308,16 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Correlation between a background point and an observation points. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p1</td><td>Background point </td></tr>
+    <tr><td class="paramname">p2</td><td>Observation point </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Correlation between background and observation points </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classgridpp_1_1CrossValidation.html#ab3ea7cf37cc73eeb17113c32e0da28ec">gridpp::CrossValidation</a>.</p>
 
@@ -345,6 +365,7 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Cressman rho </dd></dl>
 
 </div>
 </div>
@@ -431,7 +452,7 @@ Protected Attributes</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 1 2023 23:11:38 for Gridpp 0.7.0.dev4 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

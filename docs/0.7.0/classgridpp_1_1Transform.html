@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev4: gridpp::Transform Class Reference</title>
+<title>Gridpp 0.7.0.dev6: gridpp::Transform Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev4
+   <div id="projectname">Gridpp 0.7.0.dev6
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -87,10 +87,10 @@ Inheritance diagram for gridpp::Transform:</div>
  <div class="center">
   <img src="classgridpp_1_1Transform.png" usemap="#gridpp::Transform_map" alt=""/>
   <map id="gridpp::Transform_map" name="gridpp::Transform_map">
-<area href="classgridpp_1_1BoxCox.html" alt="gridpp::BoxCox" shape="rect" coords="0,56,111,80"/>
-<area href="classgridpp_1_1Gamma.html" alt="gridpp::Gamma" shape="rect" coords="121,56,232,80"/>
-<area href="classgridpp_1_1Identity.html" alt="gridpp::Identity" shape="rect" coords="242,56,353,80"/>
-<area href="classgridpp_1_1Log.html" alt="gridpp::Log" shape="rect" coords="363,56,474,80"/>
+<area href="classgridpp_1_1BoxCox.html" title="Box-Cox transformation. " alt="gridpp::BoxCox" shape="rect" coords="0,56,111,80"/>
+<area href="classgridpp_1_1Gamma.html" title="Gamma transformation. " alt="gridpp::Gamma" shape="rect" coords="121,56,232,80"/>
+<area href="classgridpp_1_1Identity.html" title="Identity transform, i.e. " alt="gridpp::Identity" shape="rect" coords="242,56,353,80"/>
+<area href="classgridpp_1_1Log.html" title="Log transformation: output = log(input) " alt="gridpp::Log" shape="rect" coords="363,56,474,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -99,18 +99,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5ed2b24bd7b89810d86a5161d3c71a9d"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a5ed2b24bd7b89810d86a5161d3c71a9d">backward</a> (float value) const</td></tr>
 <tr class="separator:a5ed2b24bd7b89810d86a5161d3c71a9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a38ff7f10bf141b38a25625dddcfce0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a0a38ff7f10bf141b38a25625dddcfce0">backward</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;input) const</td></tr>
+<tr class="memdesc:a0a38ff7f10bf141b38a25625dddcfce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backward transform a 1D vector.  <a href="#a0a38ff7f10bf141b38a25625dddcfce0">More...</a><br /></td></tr>
 <tr class="separator:a0a38ff7f10bf141b38a25625dddcfce0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9ce2cbfe4e11ec5ea0f9969aa5dd03c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#ad9ce2cbfe4e11ec5ea0f9969aa5dd03c">backward</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;input) const</td></tr>
+<tr class="memdesc:ad9ce2cbfe4e11ec5ea0f9969aa5dd03c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backward transform a 2D vector.  <a href="#ad9ce2cbfe4e11ec5ea0f9969aa5dd03c">More...</a><br /></td></tr>
 <tr class="separator:ad9ce2cbfe4e11ec5ea0f9969aa5dd03c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a502d4c80b55fa211e29c68d5bd40704f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a502d4c80b55fa211e29c68d5bd40704f">backward</a> (const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;input) const</td></tr>
+<tr class="memdesc:a502d4c80b55fa211e29c68d5bd40704f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backward transform a 3D vector.  <a href="#a502d4c80b55fa211e29c68d5bd40704f">More...</a><br /></td></tr>
 <tr class="separator:a502d4c80b55fa211e29c68d5bd40704f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97ffb36b66707e159c79abd31a3c9fe9"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a97ffb36b66707e159c79abd31a3c9fe9">forward</a> (float value) const</td></tr>
 <tr class="separator:a97ffb36b66707e159c79abd31a3c9fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0072829024b3a6c0225cf39ce5745586"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a0072829024b3a6c0225cf39ce5745586">forward</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;input) const</td></tr>
+<tr class="memdesc:a0072829024b3a6c0225cf39ce5745586"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward transform a 1D vector.  <a href="#a0072829024b3a6c0225cf39ce5745586">More...</a><br /></td></tr>
 <tr class="separator:a0072829024b3a6c0225cf39ce5745586"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a093a59bc60307229e0b80941a6c8e55e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a093a59bc60307229e0b80941a6c8e55e">forward</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;input) const</td></tr>
+<tr class="memdesc:a093a59bc60307229e0b80941a6c8e55e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward transform a 2D vector.  <a href="#a093a59bc60307229e0b80941a6c8e55e">More...</a><br /></td></tr>
 <tr class="separator:a093a59bc60307229e0b80941a6c8e55e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d50ef00e3a0cc819c545bdec5e8e925"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Transform.html#a0d50ef00e3a0cc819c545bdec5e8e925">forward</a> (const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;input) const</td></tr>
+<tr class="memdesc:a0d50ef00e3a0cc819c545bdec5e8e925"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward transform a 3D vector.  <a href="#a0d50ef00e3a0cc819c545bdec5e8e925">More...</a><br /></td></tr>
 <tr class="separator:a0d50ef00e3a0cc819c545bdec5e8e925"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -158,6 +164,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Backward transform a 1D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>1D vector of transformed values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1D vector of original values </dd></dl>
+
 </div>
 </div>
 <a id="ad9ce2cbfe4e11ec5ea0f9969aa5dd03c"></a>
@@ -176,6 +191,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Backward transform a 2D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>2D vector of transformed values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>2D vector of original values </dd></dl>
+
 </div>
 </div>
 <a id="a502d4c80b55fa211e29c68d5bd40704f"></a>
@@ -193,6 +217,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Backward transform a 3D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>3D vector of transformed values </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>3D vector of original values </dd></dl>
 
 </div>
 </div>
@@ -240,6 +273,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Forward transform a 1D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>1D vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1D vector of transformed values </dd></dl>
+
 </div>
 </div>
 <a id="a093a59bc60307229e0b80941a6c8e55e"></a>
@@ -257,6 +299,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Forward transform a 2D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>2D vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>2D vector of transformed values </dd></dl>
 
 </div>
 </div>
@@ -276,6 +327,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Forward transform a 3D vector. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>3D vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>3D vector of transformed values </dd></dl>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -285,7 +345,7 @@ Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 1 2023 23:11:38 for Gridpp 0.7.0.dev4 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

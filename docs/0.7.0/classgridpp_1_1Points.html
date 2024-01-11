@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev4: gridpp::Points Class Reference</title>
+<title>Gridpp 0.7.0.dev6: gridpp::Points Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev4
+   <div id="projectname">Gridpp 0.7.0.dev6
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -91,8 +91,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c5b0e915b0d9e416676b8299c9cfac7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a3c5b0e915b0d9e416676b8299c9cfac7">get_elevs</a> () const</td></tr>
 <tr class="separator:a3c5b0e915b0d9e416676b8299c9cfac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6889862a1fb82d580f55bdecd42422ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgridpp_1_1Points.html">Points</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a6889862a1fb82d580f55bdecd42422ab">get_in_domain</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;grid) const</td></tr>
+<tr class="memdesc:a6889862a1fb82d580f55bdecd42422ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get points that are inside the envelope of a grid.  <a href="#a6889862a1fb82d580f55bdecd42422ab">More...</a><br /></td></tr>
 <tr class="separator:a6889862a1fb82d580f55bdecd42422ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c6960973ef1ee66d5adc1b30d6b7081"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a3373bbd546635b011e492214cd154c67">ivec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a7c6960973ef1ee66d5adc1b30d6b7081">get_in_domain_indices</a> (const <a class="el" href="classgridpp_1_1Grid.html">Grid</a> &amp;grid) const</td></tr>
+<tr class="memdesc:a7c6960973ef1ee66d5adc1b30d6b7081"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get point indices that are inside the envelope of a grid.  <a href="#a7c6960973ef1ee66d5adc1b30d6b7081">More...</a><br /></td></tr>
 <tr class="separator:a7c6960973ef1ee66d5adc1b30d6b7081"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0788472e6af4fdaa4c682411a53f96a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a0788472e6af4fdaa4c682411a53f96a4">get_lafs</a> () const</td></tr>
 <tr class="separator:a0788472e6af4fdaa4c682411a53f96a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,6 +126,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a633dbf0d5045d26543c825a9229e1888"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a633dbf0d5045d26543c825a9229e1888">size</a> () const</td></tr>
 <tr class="separator:a633dbf0d5045d26543c825a9229e1888"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55bcf1e9c8e5d7ffefe678131e0a978e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgridpp_1_1Points.html">Points</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1Points.html#a55bcf1e9c8e5d7ffefe678131e0a978e">subset</a> (const <a class="el" href="namespacegridpp.html#a3373bbd546635b011e492214cd154c67">ivec</a> &amp;indices) const</td></tr>
+<tr class="memdesc:a55bcf1e9c8e5d7ffefe678131e0a978e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subset the points.  <a href="#a55bcf1e9c8e5d7ffefe678131e0a978e">More...</a><br /></td></tr>
 <tr class="separator:a55bcf1e9c8e5d7ffefe678131e0a978e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -193,10 +196,10 @@ Public Member Functions</h2></td></tr>
 <p>Initialize a new grid. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">lats</td><td>vector of latitudes [degrees] </td></tr>
-    <tr><td class="paramname">lons</td><td>vector of longitudes [degrees] </td></tr>
-    <tr><td class="paramname">elevs</td><td>vector of elevations [m] </td></tr>
-    <tr><td class="paramname">lafs</td><td>vector of land area fractions [1] </td></tr>
+    <tr><td class="paramname">lats</td><td>1D vector of latitudes [degrees] </td></tr>
+    <tr><td class="paramname">lons</td><td>1D vector of longitudes [degrees] </td></tr>
+    <tr><td class="paramname">elevs</td><td>1D vector of elevations [m] </td></tr>
+    <tr><td class="paramname">lafs</td><td>1D vector of land area fractions [1] </td></tr>
     <tr><td class="paramname">type</td><td>Coordinate type </td></tr>
   </table>
   </dd>
@@ -347,6 +350,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Get points that are inside the envelope of a grid. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">grid</td><td><a class="el" href="classgridpp_1_1Grid.html" title="Represents a 2D grid of locations and their metadata. ">Grid</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new points object containing points within grid </dd></dl>
+
 </div>
 </div>
 <a id="a7c6960973ef1ee66d5adc1b30d6b7081"></a>
@@ -364,6 +376,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Get point indices that are inside the envelope of a grid. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">grid</td><td><a class="el" href="classgridpp_1_1Grid.html" title="Represents a 2D grid of locations and their metadata. ">Grid</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1D vector of indices </dd></dl>
 
 </div>
 </div>
@@ -647,6 +668,15 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Subset the points. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">indices</td><td>1D vector of point indices </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new points object containing the indexed points </dd></dl>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -656,7 +686,7 @@ Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 1 2023 23:11:38 for Gridpp 0.7.0.dev4 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

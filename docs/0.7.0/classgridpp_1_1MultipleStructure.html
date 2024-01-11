@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev4: gridpp::MultipleStructure Class Reference</title>
+<title>Gridpp 0.7.0.dev6: gridpp::MultipleStructure Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev4
+   <div id="projectname">Gridpp 0.7.0.dev6
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -102,10 +102,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aa50f60d787dfed21b0f35cc3be66bfea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance for which an observation can have an impact (localization)  <a href="#aa50f60d787dfed21b0f35cc3be66bfea">More...</a><br /></td></tr>
 <tr class="separator:aa50f60d787dfed21b0f35cc3be66bfea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cce7259f6f15eb014d6eb3277460ec5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1MultipleStructure.html#a3cce7259f6f15eb014d6eb3277460ec5">MultipleStructure</a> (const <a class="el" href="classgridpp_1_1StructureFunction.html">StructureFunction</a> &amp;structure_h, const <a class="el" href="classgridpp_1_1StructureFunction.html">StructureFunction</a> &amp;structure_v, const <a class="el" href="classgridpp_1_1StructureFunction.html">StructureFunction</a> &amp;structure_w)</td></tr>
-<tr class="memdesc:a3cce7259f6f15eb014d6eb3277460ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponential structure function.  <a href="#a3cce7259f6f15eb014d6eb3277460ec5">More...</a><br /></td></tr>
+<tr class="memdesc:a3cce7259f6f15eb014d6eb3277460ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Different structure functions for horizontal, vertical, and land/sea.  <a href="#a3cce7259f6f15eb014d6eb3277460ec5">More...</a><br /></td></tr>
 <tr class="separator:a3cce7259f6f15eb014d6eb3277460ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classgridpp_1_1StructureFunction"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classgridpp_1_1StructureFunction')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classgridpp_1_1StructureFunction.html">gridpp::StructureFunction</a></td></tr>
 <tr class="memitem:ac02428930323ca1f14ce8865ce91ab7d inherit pub_methods_classgridpp_1_1StructureFunction"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ac02428930323ca1f14ce8865ce91ab7d">corr_background</a> (const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p1, const <a class="el" href="classgridpp_1_1Point.html">Point</a> &amp;p2) const</td></tr>
+<tr class="memdesc:ac02428930323ca1f14ce8865ce91ab7d inherit pub_methods_classgridpp_1_1StructureFunction"><td class="mdescLeft">&#160;</td><td class="mdescRight">Correlation between a background point and an observation points.  <a href="classgridpp_1_1StructureFunction.html#ac02428930323ca1f14ce8865ce91ab7d">More...</a><br /></td></tr>
 <tr class="separator:ac02428930323ca1f14ce8865ce91ab7d inherit pub_methods_classgridpp_1_1StructureFunction"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6e435d924c8adb959beb70c15144b8f inherit pub_methods_classgridpp_1_1StructureFunction"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgridpp_1_1StructureFunction.html#ab6e435d924c8adb959beb70c15144b8f">StructureFunction</a> (float <a class="el" href="classgridpp_1_1StructureFunction.html#afd9865a4d15b90f5a6a6c41d5bc1af41">localization_distance</a>=0)</td></tr>
 <tr class="separator:ab6e435d924c8adb959beb70c15144b8f inherit pub_methods_classgridpp_1_1StructureFunction"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -159,13 +160,12 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Exponential structure function. </p>
+<p>Different structure functions for horizontal, vertical, and land/sea. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">h</td><td>Horizontal decorrelation length &gt;=0 [m] </td></tr>
-    <tr><td class="paramname">v</td><td>Vertical decorrelation length &gt;=0 [m]. If 0, disable decorrelation. </td></tr>
-    <tr><td class="paramname">w</td><td>Land/sea decorrelation length &gt;=0 [1]. If 0, disable decorrelation. </td></tr>
-    <tr><td class="paramname">hmax</td><td>Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h. </td></tr>
+    <tr><td class="paramname">structure_h</td><td>Horizontal structure function </td></tr>
+    <tr><td class="paramname">structure_v</td><td>Vertical structure function </td></tr>
+    <tr><td class="paramname">structure_w</td><td>Land/sea structure function </td></tr>
   </table>
   </dd>
 </dl>
@@ -235,6 +235,14 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Correlation between two points. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p1</td><td>First point </td></tr>
+    <tr><td class="paramname">p2</td><td>Other point </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Correlation between points </dd></dl>
 
 <p>Implements <a class="el" href="classgridpp_1_1StructureFunction.html#ae989c48dbbe59c0b49a352d3846c961b">gridpp::StructureFunction</a>.</p>
 
@@ -278,7 +286,7 @@ Additional Inherited Members</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 1 2023 23:11:38 for Gridpp 0.7.0.dev4 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

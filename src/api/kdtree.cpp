@@ -176,11 +176,37 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         double lat2r = deg2rad(lat2);
         double lon1r = deg2rad(lon1);
         double lon2r = deg2rad(lon2);
+
+        /*
+        // Convert to 3D coordinates and calculate distance
+        // std::cout << lon << " " << lat << std::endl;
+        double x1 = std::cos(lat1r) * std::cos(lon1r);
+        double y1 = std::cos(lat1r) * std::sin(lon1r);
+        float z1 = std::sin(lat1r);
+
+        double x2 = std::cos(lat2r) * std::cos(lon2r);
+        double y2 = std::cos(lat2r) * std::sin(lon2r);
+        float z2 = std::sin(lat2r);
+
+        float dx = x1 - x2;
+        float dy = y1 - y2;
+        float dz = z1 - z2;
+        return sqrt(dx*dx + dy*dy + dz*dz) * gridpp::radius_earth;
+        */
+
         double dlon = fmod(fabs(lon1r - lon2r), 2 * M_PI);
+        // Deal with the wrapping of the longitudes
         if(dlon > M_PI)
             dlon = 2 * M_PI - dlon;
+
         double mean_lat = (lat1r + lat2r) / 2;
-        float dx2 = pow(cos(mean_lat), 2) * dlon * dlon;
+        // Using the mean latitude to account for narrowing of longitude separation doesn't work
+        // so well near the poles. Try using the maximum absolute vaulue of the latitude.
+        double max_lat = lat1r;
+        if (fabs(lat2r) > fabs(lat1r))
+            max_lat = lat2r;
+
+        float dx2 = pow(cos(max_lat), 2) * dlon * dlon;
         float dy2 = (lat1r - lat2r) * (lat1r - lat2r);
         return gridpp::radius_earth * sqrt(dx2 + dy2);
     }

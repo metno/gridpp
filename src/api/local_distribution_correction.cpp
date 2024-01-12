@@ -75,7 +75,7 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
             // FInd all stations within the localization radius of the structure function
             float lat = blats[y][x];
             float lon = blons[y][x];
-            Point p1 = bgrid.get_point(y, x);
+            Point3D p1 = bgrid.get_point_3d(y, x);
             float localizationRadius = structure.localization_distance(p1);
 
             ivec indices = points.get_neighbours(lat, lon, localizationRadius);
@@ -92,7 +92,7 @@ vec2 gridpp::local_distribution_correction(const Grid& bgrid,
             // Put ref and background into arrays
             for(int s = 0; s < nS; s++) {
                 int index = indices[s];
-                Point p2 = points.get_point(index);
+                Point3D p2 = points.get_point_3d(index);
                 float curr_rho = structure.corr_background(p1, p2);
                 // curr_rho = 1;
                 for(int t = 0; t < nT; t++) {

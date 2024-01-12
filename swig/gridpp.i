@@ -43,6 +43,12 @@
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& count };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& y_coord };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& x_coord };
+%apply std::vector<float>& OUTPUT { std::vector<float>& x_coords };
+%apply std::vector<float>& OUTPUT { std::vector<float>& y_coords };
+%apply std::vector<float>& OUTPUT { std::vector<float>& z_coords };
+%apply float& OUTPUT { float& x_coord };
+%apply float& OUTPUT { float& y_coord };
+%apply float& OUTPUT { float& z_coord };
 %apply std::vector<float>& OUTPUT { std::vector<float>& distances };
 %apply std::vector<float>& OUTPUT { std::vector<float>& standard_error };
 %apply std::vector<float>& OUTPUT { std::vector<float>& analysis_variance };

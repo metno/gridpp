@@ -112,6 +112,26 @@ class Test(unittest.TestCase):
         np.testing.assert_array_almost_equal(points2.get_elevs(), [])
         np.testing.assert_array_almost_equal(points2.get_lafs(), [])
 
+    def test_get_point_3d(self):
+        """Check that the right values are retrieved"""
+        lats = [0, 1, 2]
+        lons = [3, 4, 5]
+        elevs = [6, 7, 8]
+        lafs = [9, 10, 11]
+
+        points = gridpp.Points(lats, lons, elevs, lafs)
+
+        p = points.get_point_3d(1)
+        self.assertEqual(p.lat, 1)
+        self.assertEqual(p.lon, 4)
+        self.assertEqual(p.elev, 7)
+        self.assertEqual(p.laf, 10)
+
+        s, x, y, z = gridpp.convert_coordinates(1, 4, gridpp.Geodetic)
+        self.assertEqual(p.x, x)
+        self.assertEqual(p.y, y)
+        self.assertEqual(p.z, z)
+
 
 if __name__ == '__main__':
     unittest.main()

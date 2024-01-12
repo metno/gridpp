@@ -7,11 +7,10 @@ gridpp::KDTree::KDTree(vec lats, vec lons, CoordinateType type) {
     mLats = lats;
     mLons = lons;
     mType = type;
-    vec x, y, z;
 
-    gridpp::KDTree::convert_coordinates(mLats, mLons, x, y, z);
+    gridpp::convert_coordinates(mLats, mLons, mX, mY, mZ, mType);
     for(int i = 0; i < mLats.size(); i++) {
-        point p(x[i], y[i], z[i]);
+        point p(mX[i], mY[i], mZ[i]);
         mTree.insert(std::make_pair(p, i));
     }
 }
@@ -23,15 +22,15 @@ int gridpp::KDTree::get_num_neighbours(float lat, float lon, float radius, bool 
 
 ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances, bool include_match) const {
     float x, y, z;
-    gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
+    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
     ivec indices = get_neighbours(lat, lon, radius, include_match);
 
     int num = indices.size();
     distances.resize(num);
     for(int i = 0; i < num; i++) {
         float x1, y1, z1;
-        gridpp::KDTree::convert_coordinates(mLats[indices[i]], mLons[indices[i]], x1, y1, z1);
-        distances[i] = gridpp::KDTree::calc_distance(x, y, z, x1, y1, z1);
+        gridpp::convert_coordinates(mLats[indices[i]], mLons[indices[i]], x1, y1, z1, mType);
+        distances[i] = gridpp::KDTree::calc_straight_distance(x, y, z, x1, y1, z1);
     }
 
     return indices;
@@ -39,7 +38,7 @@ ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float ra
 
 ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool include_match) const {
     float x, y, z;
-    gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
+    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
 
     std::vector<value> results;
 #if 1
@@ -69,8 +68,8 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool inc
     ret.reserve(num);
     for(int i = 0; i < num; i++) {
         float x1, y1, z1;
-        gridpp::KDTree::convert_coordinates(mLats[results[i].second], mLons[results[i].second], x1, y1, z1);
-        float dist = gridpp::KDTree::calc_distance(x, y, z, x1, y1, z1);
+        gridpp::convert_coordinates(mLats[results[i].second], mLons[results[i].second], x1, y1, z1, mType);
+        float dist = gridpp::KDTree::calc_straight_distance(x, y, z, x1, y1, z1);
         if(dist <= radius) {
             if(include_match || dist != 0)
                 ret.push_back(results[i].second);
@@ -82,7 +81,7 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool inc
 
 ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num, bool include_match) const {
     float x, y, z;
-    gridpp::KDTree::convert_coordinates(lat, lon, x, y, z);
+    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
     point p(x, y, z);
 
     std::vector<value> results;
@@ -104,39 +103,6 @@ ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num, bool 
 }
 int gridpp::KDTree::get_nearest_neighbour(float lat, float lon, bool include_match) const {
     return get_closest_neighbours(lat, lon, 1, include_match)[0];
-}
-bool gridpp::KDTree::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) const {
-    int N = lats.size();
-    x_coords.resize(N);
-    y_coords.resize(N);
-    z_coords.resize(N);
-    for(int i = 0; i < N; i++) {
-        convert_coordinates(lats[i], lons[i], x_coords[i], y_coords[i], z_coords[i]);
-    }
-
-    return true;
-}
-
-bool gridpp::KDTree::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const {
-    if(!check_lat(lat) || !check_lon(lon)) {
-        std::stringstream ss;
-        ss << "Invalid coords: " << lat << "," << lon << std::endl;
-        throw std::invalid_argument(ss.str());
-    }
-    if(mType == gridpp::Cartesian) {
-        x_coord = lon;
-        y_coord = lat;
-        z_coord = 0;
-    }
-    else {
-        double lonr = M_PI / 180 * lon;
-        double latr = M_PI / 180 * lat;
-        // std::cout << lon << " " << lat << std::endl;
-        x_coord = std::cos(latr) * std::cos(lonr) * gridpp::radius_earth;
-        y_coord = std::cos(latr) * std::sin(lonr) * gridpp::radius_earth;
-        z_coord = std::sin(latr) * gridpp::radius_earth;
-    }
-    return true;
 }
 float gridpp::KDTree::calc_distance(float lat1, float lon1, float lat2, float lon2, CoordinateType type) {
     if(type == gridpp::Cartesian) {
@@ -214,15 +180,16 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         throw std::runtime_error("Unknown coordinate type");
     }
 }
-float gridpp::KDTree::calc_distance(const Point& p1, const Point& p2) {
-    assert(p1.type == p2.type);
+float gridpp::KDTree::calc_distance(const Point3D& p1, const Point3D& p2) {
+    if(p1.type != p2.type)
+        throw std::runtime_error("Coordinate types must be the same");
+
     return calc_distance(p1.lat, p1.lon, p2.lat, p2.lon, p1.type);
 }
-float gridpp::KDTree::calc_distance_fast(const Point& p1, const Point& p2) {
-    assert(p1.type == p2.type);
-    return calc_distance_fast(p1.lat, p1.lon, p2.lat, p2.lon, p1.type);
+float gridpp::KDTree::calc_straight_distance(const Point3D& p1, const Point3D& p2) {
+    return calc_straight_distance(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
 }
-float gridpp::KDTree::calc_distance(float x0, float y0, float z0, float x1, float y1, float z1) {
+float gridpp::KDTree::calc_straight_distance(float x0, float y0, float z0, float x1, float y1, float z1) {
     return sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1) + (z0 - z1)*(z0 - z1));
 }
 float gridpp::KDTree::deg2rad(float deg) {
@@ -237,6 +204,15 @@ vec gridpp::KDTree::get_lats() const {
 vec gridpp::KDTree::get_lons() const {
     return mLons;
 }
+const vec& gridpp::KDTree::get_x() const {
+    return mX;
+}
+const vec& gridpp::KDTree::get_y() const {
+    return mY;
+}
+const vec& gridpp::KDTree::get_z() const {
+    return mZ;
+}
 int gridpp::KDTree::size() const {
     return mLats.size();
 }
@@ -244,6 +220,9 @@ CoordinateType gridpp::KDTree::get_coordinate_type() const {
     return mType;
 }
 gridpp::KDTree& gridpp::KDTree::operator=(gridpp::KDTree other) {
+    std::swap(mX, other.mX);
+    std::swap(mY, other.mY);
+    std::swap(mZ, other.mZ);
     std::swap(mLats, other.mLats);
     std::swap(mLons, other.mLons);
     std::swap(mTree, other.mTree);
@@ -251,6 +230,9 @@ gridpp::KDTree& gridpp::KDTree::operator=(gridpp::KDTree other) {
     return *this;
 }
 gridpp::KDTree::KDTree(const gridpp::KDTree& other) {
+    mX = other.mX;
+    mY = other.mY;
+    mZ = other.mZ;
     mLats = other.mLats;
     mLons = other.mLons;
     mTree = other.mTree;
@@ -270,9 +252,9 @@ bool gridpp::KDTree::within_radius::operator()(value const& v) const {
     float y1 = p.get<1>();
     float z1 = p.get<2>();
     if(include_match)
-        return gridpp::KDTree::calc_distance(x0, y0, z0, x1, y1, z1) <= radius;
+        return gridpp::KDTree::calc_straight_distance(x0, y0, z0, x1, y1, z1) <= radius;
     else {
-        float dist = gridpp::KDTree::calc_distance(x0, y0, z0, x1, y1, z1);
+        float dist = gridpp::KDTree::calc_straight_distance(x0, y0, z0, x1, y1, z1);
         return dist <= radius && dist > 0;
     }
 }
@@ -285,13 +267,4 @@ bool gridpp::KDTree::is_not_equal::operator()(value const& v) const {
     float y0 = v.first.get<1>();
     float z0 = v.first.get<2>();
     return p.get<0>() != x0 || p.get<1>() != y0 || p.get<2>() != z0;
-}
-
-bool gridpp::KDTree::check_lat(float lat) const {
-    if(get_coordinate_type() == gridpp::Cartesian)
-        return gridpp::is_valid(lat);
-    return gridpp::is_valid(lat) && (lat >= -90.001) && (lat <= 90.001);
-};
-bool gridpp::KDTree::check_lon(float lon) const {
-    return gridpp::is_valid(lon);
 }

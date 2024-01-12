@@ -71,6 +71,7 @@ namespace gridpp {
     class Points;
     class Grid;
     class Point;
+    class Point3D;
     class Nearest;
     class StructureFunction;
     class Transform;
@@ -1310,6 +1311,40 @@ namespace gridpp {
     */
     vec2 calc_quantile(const vec3& array, const vec2& quantile_levels);
 
+    /** Convert lats/lons or 2D x/y coordinates to 3D cartesian coordinates with the centre of the earth as the origin
+     *  @param lats vector of latitudes [deg] or 2D y-coordinates [m]
+     *  @param lons vector of longitudes [deg] or 2D x-coordinates [m]
+     *  @param x_coords vector of x-coordinates [m]
+     *  @param y_coords vector of y-coordinates [m]
+     *  @param z_coords vector of z-coordinates [m]
+     *  @param type Coordinate type for lats and lons
+    */
+    bool convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords, CoordinateType type);
+
+    /** Convert lat/lon or 2D x/y coordinate to 3D cartesian coordinate with the centre of the earth as the origin
+     *  @param lat vector of latitudes [deg] or 2D y-coordinates [m]
+     *  @param lon vector of longitudes [deg] or 2D x-coordinates [m]
+     *  @param x_coord x-coordinate [m]
+     *  @param y_coord y-coordinate [m]
+     *  @param z_coord z-coordinate [m]
+     *  @param type Coordinate type for lat and lon
+    */
+    bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord, CoordinateType type);
+
+    /** Checks that a lat-coordinate is valid (based on the coordinate type)
+     *  @param lat latitude [deg] or y-coordinate [m]
+     *  @param type Coordinate type for lat
+     *  @returns True if lat is valid latitude or y-coordinate
+    */
+    bool is_valid_lat(float lat, CoordinateType type);
+
+    /** Checks that a lon-coordinate is valid (based on the coordinate type)
+     *  @param lat longitude [deg] or x-coordinate [m]
+     *  @param type Coordinate type for lon
+     *  @returns True if lon is valid latitude or x-coordinate
+    */
+    bool is_valid_lon(float lon, CoordinateType type);
+
     /** Count the number of missing values in a vector
       * @param array 2D vector
       * @returns Number of invalid values
@@ -1519,6 +1554,32 @@ namespace gridpp {
             CoordinateType type;
     };
 
+/** Represents a single point in some coordinate system */
+    class Point3D {
+        public:
+            /** Constructor
+              * @param lat: latitude (or y)
+              * @param lon: longitude (or x)
+              * @param x: X-coordinate
+              * @param y: Y-coordinate
+              * @param x: Z-coordinate
+              * @param elev: Elevation
+              * @param laf: Land area fraction (between 0 and 1)
+              * @param type: Coordinate type for lat and lon
+            */
+            Point3D(float x, float y, float z, float lat, float lon, float elev=MV, float laf=MV, CoordinateType type=Geodetic);
+            Point3D(float lat, float lon, float elev=MV, float laf=MV, CoordinateType type=Geodetic);
+            void set(float x, float y, float z, float lat, float lon, float elev, float laf, CoordinateType type);
+            float x;
+            float y;
+            float z;
+            float lat;
+            float lon;
+            float elev;
+            float laf;
+            CoordinateType type;
+    };
+
     /** Helper class for Grid and Points representing a tree of points */
     class KDTree {
         public:
@@ -1562,35 +1623,63 @@ namespace gridpp {
              * */
             ivec get_closest_neighbours(float lat, float lon, int num, bool include_match=true) const;
 
-
-            /** Convert lat/lons to 3D cartesian coordinates with the centre of the earth as the origin
-             *  @param lats vector of latitudes [deg]
-             *  @param lons vector of longitudes [deg]
-             *  @param x_coords vector of x-coordinates [m]
-             *  @param y_coords vector of y-coordinates [m]
-             *  @param z_coords vector of z-coordinates [m]
-             * */
-            bool convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords) const;
-
-            /** Same as above, but convert a single lat/lon to 3D cartesian coordinates
-             *  @param lat latitude [deg]
-             *  @param lon longitude [deg]
-             *  @param x_coord x-coordinate [m]
-             *  @param y_coord y-coordinate [m]
-             *  @param z_coord z-coordinate [m]
-             * */
-            bool convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord) const;
             static float deg2rad(float deg);
             static float rad2deg(float deg);
+
+            /** Calculate distance between two coordinates using Haversine function
+             *  @param lat1 Latitude [deg] or y-coordinate [m] for first point
+             *  @param lon1 Longitude [deg] or x-coordinate [m] for first point
+             *  @param lat2 Latitude [deg] or y-coordinate [m] for second point
+             *  @param lon2 Longitude [deg] or x-coordinate [m] for second point
+             *  @param type Coordinate type for both points
+             *  @returns Distance [m]
+            **/
             static float calc_distance(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
-            static float calc_distance(float x0, float y0, float z0, float x1, float y1, float z1);
-            static float calc_distance(const Point& p1, const Point& p2);
+
+            /** Calculate straight line distance between two 3D coordinates. This is much faster
+             *  than calc_distance.
+             *  @param x0 x-coordinate of first point [m]
+             *  @param y0 y-coordinate of first point [m]
+             *  @param z0 z-coordinate of first point [m]
+             *  @param x1 x-coordinate of second point [m]
+             *  @param y1 y-coordinate of second point [m]
+             *  @param z1 z-coordinate of second point [m]
+             *  @returns Distance [m]
+            **/
+            static float calc_straight_distance(float x0, float y0, float z0, float x1, float y1, float z1);
+
+            /** Calculate distance between two points using Haversine function
+             *  @param p1 First point
+             *  @param p2 Second point
+             *  @returns Distance [m]
+            **/
+            static float calc_distance(const Point3D& p1, const Point3D& p2);
+
+            /** Calculate straight line distance between two points. This is much faster than
+             *  calc_distance.
+             *  @param p1 First point
+             *  @param p2 Second point
+             *  @returns Distance [m]
+            **/
+            static float calc_straight_distance(const Point3D& p1, const Point3D& p2);
+
+            /** Calculate an approximate distance between two coordinates
+             *  @param lat1 Latitude [deg] or y-coordinate [m] for first point
+             *  @param lon1 Longitude [deg] or x-coordinate [m] for first point
+             *  @param lat2 Latitude [deg] or y-coordinate [m] for second point
+             *  @param lon2 Longitude [deg] or x-coordinate [m] for second point
+             *  @param type Coordinate type for both points
+             *  @returns Distance [m]
+            **/
             static float calc_distance_fast(float lat1, float lon1, float lat2, float lon2, CoordinateType type=Geodetic);
-            static float calc_distance_fast(const Point& p1, const Point& p2);
+
             vec get_lats() const;
             vec get_lons() const;
             int size() const;
             CoordinateType get_coordinate_type() const;
+            const vec& get_x() const;
+            const vec& get_y() const;
+            const vec& get_z() const;
         protected:
             typedef boost::geometry::model::point<float, 3, boost::geometry::cs::cartesian> point;
             typedef std::pair<point, unsigned> value;
@@ -1598,6 +1687,9 @@ namespace gridpp {
             boost::geometry::index::rtree< value, boost::geometry::index::quadratic<16> > mTree;
             vec mLats;
             vec mLons;
+            vec mX;
+            vec mY;
+            vec mZ;
             CoordinateType mType;
 
             struct within_radius {
@@ -1616,10 +1708,6 @@ namespace gridpp {
                 private:
                     point p;
             };
-            // Checks that a lat-coordinate is valid (based on the coordinate type)
-            bool check_lat(float lat) const;
-            // Checks that a lon-coordinate is valid (based on the coordinate type)
-            bool check_lon(float lon) const;
     };
 
     /** Represents a vector of locations and their metadata */
@@ -1703,6 +1791,7 @@ namespace gridpp {
             Points get_in_domain(const Grid& grid) const;
             CoordinateType get_coordinate_type() const;
             Point get_point(int index) const;
+            Point3D get_point_3d(int index) const;
 
             /** Subset the points
              *  @param indices 1D vector of point indices
@@ -1797,6 +1886,7 @@ namespace gridpp {
             ivec size() const;
             CoordinateType get_coordinate_type() const;
             Point get_point(int y_index, int x_index) const;
+            Point3D get_point_3d(int y_index, int x_index) const;
         private:
             KDTree mTree;
             int mX;
@@ -1823,19 +1913,19 @@ namespace gridpp {
              *  @param p2 Other point
              *  @returns Correlation between points
             */
-            virtual float corr(const Point& p1, const Point& p2) const = 0;
+            virtual float corr(const Point3D& p1, const Point3D& p2) const = 0;
 
             /** Correlation between a background point and an observation points
              *  @param p1 Background point
              *  @param p2 Observation point
              *  @returns Correlation between background and observation points
             */
-            virtual float corr_background(const Point& p1, const Point& p2) const;
+            virtual float corr_background(const Point3D& p1, const Point3D& p2) const;
 
             /** Maximum distance for which an observation can have an impact (localization)
               * @returns Distance [m]
             */
-            virtual float localization_distance(const Point& p) const;
+            virtual float localization_distance(const Point3D& p) const;
             virtual StructureFunction* clone() const = 0;
             static const float default_min_rho;
         protected:
@@ -1862,9 +1952,9 @@ namespace gridpp {
               * @param structure_w: Land/sea structure function
             */
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
-            float corr(const Point& p1, const Point& p2) const;
+            float corr(const Point3D& p1, const Point3D& p2) const;
             StructureFunction* clone() const;
-            float localization_distance(const Point& p) const;
+            float localization_distance(const Point3D& p) const;
         private:
             StructureFunction* m_structure_h;
             StructureFunction* m_structure_v;
@@ -1889,9 +1979,9 @@ namespace gridpp {
               * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
             */
             BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
-            float corr(const Point& p1, const Point& p2) const;
+            float corr(const Point3D& p1, const Point3D& p2) const;
             StructureFunction* clone() const;
-            float localization_distance(const Point& p) const;
+            float localization_distance(const Point3D& p) const;
         private:
             Grid m_grid;
             vec2 mH;
@@ -1905,7 +1995,7 @@ namespace gridpp {
     class CressmanStructure: public StructureFunction {
         public:
             CressmanStructure(float h, float v=0, float w=0);
-            float corr(const Point& p1, const Point& p2) const;
+            float corr(const Point3D& p1, const Point3D& p2) const;
             StructureFunction* clone() const;
         private:
             float mH;
@@ -1919,10 +2009,10 @@ namespace gridpp {
               * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]. If MV, disable this.
             */
             CrossValidation(StructureFunction& structure, float dist=MV);
-            float corr(const Point& p1, const Point& p2) const;
-            float corr_background(const Point& p1, const Point& p2) const;
+            float corr(const Point3D& p1, const Point3D& p2) const;
+            float corr_background(const Point3D& p1, const Point3D& p2) const;
             StructureFunction* clone() const;
-            float localization_distance(const Point& p) const;
+            float localization_distance(const Point3D& p) const;
         private:
             StructureFunction* m_structure;
             float m_dist;

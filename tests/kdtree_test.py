@@ -60,17 +60,16 @@ class KDTreeTest(unittest.TestCase):
     def test_calc_distance(self):
         config = list()
         # lat0, lon0, lat1, lon1, delta, expected
-        config += [[60,10,61,11,0.1,124080.79]]
+        config += [[60, 10, 61, 11, 0.1, 124080.79]]
         config += [[60, 10, 60, 10, 0, 0]]
         config += [[90, 10, -90, 10, 0, 20037508]]
         config += [[0, 0, 0, 180, 0, 20037508]]
         config += [[60.5, 5.25, -84.75, -101.75, 0, 16879114]]
-        config += [[60, 10, 61, 11, 0.1, 124080.79]]
 
         for c in config:
             self.assertEqual(len(c), 6)
-            p0 = gridpp.Point(c[0], c[1])
-            p1 = gridpp.Point(c[2], c[3])
+            p0 = gridpp.Point3D(c[0], c[1])
+            p1 = gridpp.Point3D(c[2], c[3])
             delta = c[4]
             expected = c[5]
 
@@ -82,8 +81,35 @@ class KDTreeTest(unittest.TestCase):
             with self.subTest(config=c, type="Scalar"):
                 self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance(c[0], c[1], c[2], c[3]), delta=delta)
 
+    def test_calc_straight_distance(self):
+        config = list()
+        # lat0, lon0, lat1, lon1, delta, expected
+        config += [[60, 10, 61, 11, 2, 124080.79]]
+        config += [[60, 10, 60, 10, 0, 0]]
+        config += [[90, 10, -90, 10, 0, 6.378137e6*2]]
+        config += [[0, 0, 0, 180, 10, 6.378137e6*2]]
+        config += [[60.5, 5.25, -84.75, -101.75, 0, 12367265.0]]
+
+        for c in config:
+            self.assertEqual(len(c), 6)
+            p0 = gridpp.Point3D(c[0], c[1])
+            p1 = gridpp.Point3D(c[2], c[3])
+            delta = c[4]
+            expected = c[5]
+
+            # Point version
+            with self.subTest(config=c, type="Point"):
+                self.assertAlmostEqual(expected, gridpp.KDTree.calc_straight_distance(p0, p1), delta=delta)
+
+            # Scalar version
+            with self.subTest(config=c, type="Scalar"):
+                self.assertAlmostEqual(expected, gridpp.KDTree.calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z), delta=delta)
+
     def test_calc_distance_limit(self):
+        p0 = gridpp.Point3D(0, 0)
+        p1 = gridpp.Point3D(0.001, 0.001)
         self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_distance(0,0,0.001,0.001));
+        self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z));
 
     def test_calc_distance_fast(self):
         config = list()
@@ -98,18 +124,10 @@ class KDTreeTest(unittest.TestCase):
 
         for c in config:
             self.assertEqual(len(c), 6)
-            p0 = gridpp.Point(c[0], c[1])
-            p1 = gridpp.Point(c[2], c[3])
             delta = c[4]
             expected = c[5]
 
-            # Point version
-            with self.subTest(config=c, type="Point"):
-                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(p0, p1), delta=delta)
-
-            # Scalar version
-            with self.subTest(config=c, type="Scalar"):
-                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
 
     def test_calc_distance_fast_across_date_line(self):
         config = list()
@@ -126,13 +144,7 @@ class KDTreeTest(unittest.TestCase):
             delta = c[4]
             expected = c[5]
 
-            # Point version
-            with self.subTest(config=c, type="Point"):
-                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(p0, p1), delta=delta)
-
-            # Scalar version
-            with self.subTest(config=c, type="Scalar"):
-                self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
+            self.assertAlmostEqual(expected, gridpp.KDTree.calc_distance_fast(c[0], c[1], c[2], c[3]), delta=delta)
 
     def test_radius_match(self):
         """Check that points right on the radius edge count as a match"""

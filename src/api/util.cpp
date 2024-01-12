@@ -550,3 +550,46 @@ bool gridpp::point_in_rectangle(const Point& A, const Point& B, const Point& C, 
     bool opt2 = 0 <= D1 && 0 <= D4 && 0 >= D2 && 0 <= D3;
     return opt1 || opt2;
 }
+
+bool gridpp::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords, CoordinateType type) {
+    int N = lats.size();
+    x_coords.resize(N);
+    y_coords.resize(N);
+    z_coords.resize(N);
+    for(int i = 0; i < N; i++) {
+        convert_coordinates(lats[i], lons[i], x_coords[i], y_coords[i], z_coords[i], type);
+    }
+
+    return true;
+}
+
+bool gridpp::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord, CoordinateType type) {
+    if(!gridpp::is_valid_lat(lat, type) || !gridpp::is_valid_lon(lon, type)) {
+        std::stringstream ss;
+        ss << "Invalid coords: " << lat << "," << lon << std::endl;
+        throw std::invalid_argument(ss.str());
+    }
+    if(type == gridpp::Cartesian) {
+        x_coord = lon;
+        y_coord = lat;
+        z_coord = 0;
+    }
+    else {
+        double lonr = M_PI / 180 * lon;
+        double latr = M_PI / 180 * lat;
+        // std::cout << lon << " " << lat << std::endl;
+        x_coord = std::cos(latr) * std::cos(lonr) * gridpp::radius_earth;
+        y_coord = std::cos(latr) * std::sin(lonr) * gridpp::radius_earth;
+        z_coord = std::sin(latr) * gridpp::radius_earth;
+    }
+    return true;
+}
+
+bool gridpp::is_valid_lat(float lat, CoordinateType type) {
+    if(type == gridpp::Cartesian)
+        return gridpp::is_valid(lat);
+    return gridpp::is_valid(lat) && (lat >= -90.001) && (lat <= 90.001);
+};
+bool gridpp::is_valid_lon(float lon, CoordinateType type) {
+    return gridpp::is_valid(lon);
+}

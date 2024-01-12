@@ -54,6 +54,38 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal(grid.get_lafs(), np.zeros([0, 0]))
         np.testing.assert_array_equal(grid.size(), [0, 0])
 
+    def test_empty2(self):
+        grid = gridpp.Grid(np.zeros([0, 0]), np.zeros([0, 0]))
+        np.testing.assert_array_equal(grid.get_nearest_neighbour(0, 0), [])
+        np.testing.assert_array_equal(grid.get_neighbours(0, 0, 1000), np.zeros([0, 0]))
+        self.assertEqual(grid.get_num_neighbours(0, 0, 1000), 0)
+        np.testing.assert_array_equal(grid.get_lats(), np.zeros([0, 0]))
+        np.testing.assert_array_equal(grid.get_lons(), np.zeros([0, 0]))
+        np.testing.assert_array_equal(grid.get_elevs(), np.zeros([0, 0]))
+        np.testing.assert_array_equal(grid.get_lafs(), np.zeros([0, 0]))
+        np.testing.assert_array_equal(grid.size(), [0, 0])
+
+    def test_get_point_3d(self):
+        """Check that the right values are retrieved"""
+        # 2x3 grid
+        lats = [[0, 0, 0], [1, 1, 1]]
+        lons = [[0, 1, 2], [0.25, 1.25, 2.25]]
+        elevs = [[0, 1, 2], [3, 4, 5]]
+        lafs = [[0, 1, 2], [3, 4, 5]]
+
+        grid = gridpp.Grid(lats, lons, elevs, lafs)
+
+        # Retrieve values for the second row (of 2), first column (of 3)
+        p = grid.get_point_3d(1, 0)
+        self.assertEqual(p.lat, 1)
+        self.assertEqual(p.lon, 0.25)
+        self.assertEqual(p.elev, 3)
+        self.assertEqual(p.laf, 3)
+
+        s, x, y, z = gridpp.convert_coordinates(1, 0.25, gridpp.Geodetic)
+        self.assertEqual(p.x, x)
+        self.assertEqual(p.y, y)
+        self.assertEqual(p.z, z)
 
 if __name__ == '__main__':
     unittest.main()

@@ -17,8 +17,8 @@ class Test(unittest.TestCase):
             is_cv = isinstance(structure, gridpp.CrossValidation)
             for i in range(N):
                 with self.subTest(structure=type(structure), i=i):
-                    p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
-                    p2 = gridpp.Point(x[i], 0, 0, 0, gridpp.Cartesian)
+                    p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+                    p2 = gridpp.Point3D(x[i], 0, 0, 0, gridpp.Cartesian)
                     funcs = [structure.corr, structure.corr_background]
                     if is_cv:
                         funcs = [structure.corr_background]
@@ -51,13 +51,13 @@ class Test(unittest.TestCase):
 
     def test_barnes_hmax(self):
         hmaxs = [0, 1000, 2000, 10000]
-        p0 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
+        p0 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
         dist_ans = {0:1, 1000:0.8824968934059143, 2000:0.6065306663513184, 3000:0.32465246319770813}
         for hmax in hmaxs:
             for dist, ans in dist_ans.items():
                 with self.subTest(hmax=hmax, dist=dist):
                     structure = gridpp.BarnesStructure(2000, 0, 0, hmax)
-                    corr = structure.corr(p0, gridpp.Point(dist, 0, 0, 0, gridpp.Cartesian))
+                    corr = structure.corr(p0, gridpp.Point3D(dist, 0, 0, 0, gridpp.Cartesian))
                     if dist > hmax:
                         self.assertEqual(0, corr)
                     else:
@@ -67,9 +67,9 @@ class Test(unittest.TestCase):
         """Check that point elevations are ignored if one is missing"""
         structures = [gridpp.BarnesStructure, gridpp.CressmanStructure]
         h = 2000
-        p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
-        p2 = gridpp.Point(1000, 0, 0, 0, gridpp.Cartesian)
-        p3 = gridpp.Point(1000, 0, float('nan'), 0, gridpp.Cartesian)
+        p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point3D(1000, 0, 0, 0, gridpp.Cartesian)
+        p3 = gridpp.Point3D(1000, 0, float('nan'), 0, gridpp.Cartesian)
         for structure in structures:
             with self.subTest(structure=structure):
                 s1 = structure(h, 0)
@@ -106,6 +106,35 @@ class Test(unittest.TestCase):
         for dist in [-1, np.nan]:
             with self.assertRaises(Exception) as e:
                 structure = gridpp.CrossValidation(barnes, dist)
+
+    def test_multiple_structure(self):
+        s1 = gridpp.CressmanStructure(2000, 2000, 2000)
+        s2 = gridpp.CressmanStructure(200, 200, 200)
+        s3 = gridpp.CressmanStructure(2, 2, 2)
+        structure = gridpp.MultipleStructure(s1, s2, s3)
+
+        expected = 0.6 # np.exp(-1)
+
+        p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point3D(1000, 0, 0, 0, gridpp.Cartesian)
+        corr = structure.corr(p1, p2)
+        self.assertAlmostEqual(corr, expected)
+
+        p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point3D(0, 0, 100, 0, gridpp.Cartesian)
+        corr = structure.corr(p1, p2)
+        self.assertAlmostEqual(corr, expected)
+
+        p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point3D(0, 0, 0, 1, gridpp.Cartesian)
+        corr = structure.corr(p1, p2)
+        self.assertAlmostEqual(corr, expected)
+
+        p1 = gridpp.Point3D(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point3D(1000, 0, 100, 1, gridpp.Cartesian)
+        corr = structure.corr(p1, p2)
+        self.assertAlmostEqual(corr, expected**3)
+
 
 
 if __name__ == '__main__':

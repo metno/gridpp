@@ -162,6 +162,25 @@ class Test(unittest.TestCase):
             gridpp.set_omp_threads(3)
             self.assertEqual(gridpp.get_omp_threads(), 3)
 
+    def test_is_valid_lat(self):
+        valid = [0, -90, 90]
+        invalid = [-91, 91, np.nan]
+        for v in valid:
+            with self.subTest(v=v):
+                self.assertTrue(gridpp.is_valid_lat(v, gridpp.Geodetic))
+        for v in invalid:
+            with self.subTest(v=v):
+                self.assertFalse(gridpp.is_valid_lat(v, gridpp.Geodetic))
+
+    def test_is_valid_lon(self):
+        valid = [-1000, -180, 0, 180, 1000]
+        invalid = [np.nan]
+        for v in valid:
+            with self.subTest(v=v):
+                self.assertTrue(gridpp.is_valid_lon(v, gridpp.Geodetic))
+        for v in invalid:
+            with self.subTest(v=v):
+                self.assertFalse(gridpp.is_valid_lon(v, gridpp.Geodetic))
 
 if __name__ == '__main__':
     unittest.main()

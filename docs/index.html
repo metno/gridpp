@@ -11,14 +11,22 @@
             <li>Under development</li>
             <li>New features</a>
                 <ul>
-                    <li>Fixed bug in bilinear interpolation for very specific grid configurations (thanks @trygveasp)</li>
-                    <li>Fixed bug in structure functions across dateline (thanks @joewkr)
-                    <li>Fixed for points optional_interpolation_full (thanks Christoph Herbert and Ewan Pinnington)
-                    <li>Added function to compute quantiles and downscale in one go (thanks @LonnekevB)</li>
-                    <li>Added vector version of gridpp::interpolate</li>
+                    <li>Improved computational performance of optimal interpolation function by around 10%</li>
+                    <li>Added `mask_threshold_downscale_quantile` to compute quantiles and downscale in one go (thanks @LonnekevB)</li>
                     <li>Added points-to-points gridding methods</li>
-                    <li>Added RandomChoice statistic</li>
+                    <li>Added vector version of gridpp::interpolate</li>
+                    <li>Added `RandomChoice` statistic. For functions that compute statistics on vectors, this allows you to randomly pick an element in the vector.</li>
+                    <li>Added `neighbourhood_score` function that computes a verification score for all observations in a neighbourhood</li>
+                    <li>Added `gridding` and `gridding_nearest` methods that takes points as inputs and points as output</li>
+                    <li>Better handling of repeated x-values in `apply_curve`</li>
+                    <li>Raise exception if constructing `Grid` or `Points` objects with undefined (e.g. NaN) coordinates</li>
                     <li>Pre-compiled linux packages for Python 3.7 to 3.11 available</li>
+                </ul>
+            <li>Bug fixes</li>
+                <ul>
+                    <li> Fixed `bilinear` interpolation for unusual cases (polar stereographic case covering the north pole; thanks @trygveasp)</li>
+                    <li> Fixed bug in structure functions across dateline (thanks @joewkr)</li>
+                    <li> Fixed `optional_interpolation_full` for points (thanks Christoph Herbert and Ewan Pinnington)</li>
                 </ul>
             </li>
         </ul>

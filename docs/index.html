@@ -12,21 +12,21 @@
             <li>New features</a>
                 <ul>
                     <li>Improved computational performance of optimal interpolation function by around 10%</li>
-                    <li>Added <pre>mask_threshold_downscale_quantile</pre> to compute quantiles and downscale in one go (thanks @LonnekevB)</li>
+                    <li>Added <code>mask_threshold_downscale_quantile</code> to compute quantiles and downscale in one go (thanks @LonnekevB)</li>
                     <li>Added points-to-points gridding methods</li>
                     <li>Added vector version of gridpp::interpolate</li>
-                    <li>Added <pre>RandomChoice</pre> statistic. For functions that compute statistics on vectors, this allows you to randomly pick an element in the vector.</li>
-                    <li>Added <pre>neighbourhood_score</pre> function that computes a verification score for all observations in a neighbourhood</li>
-                    <li>Added <pre>gridding</pre> and <pre>gridding_nearest</pre> methods that takes points as inputs and points as output</li>
-                    <li>Better handling of repeated x-values in <pre>apply_curve</pre></li>
-                    <li>Raise exception if constructing <pre>Grid</pre> or <pre>Points</pre> objects with undefined (e.g. NaN) coordinates</li>
+                    <li>Added <code>RandomChoice</code> statistic. For functions that compute statistics on vectors, this allows you to randomly pick an element in the vector.</li>
+                    <li>Added <code>neighbourhood_score</code> function that computes a verification score for all observations in a neighbourhood</li>
+                    <li>Added <code>gridding</code> and <code>gridding_nearest</code> methods that takes points as inputs and points as output</li>
+                    <li>Better handling of repeated x-values in <code>apply_curve</code></li>
+                    <li>Raise exception if constructing <code>Grid</code> or <code>Points</code> objects with undefined (e.g. NaN) coordinates</li>
                     <li>Pre-compiled linux packages for Python 3.7 to 3.11 available</li>
                 </ul>
             <li>Bug fixes</li>
                 <ul>
-                    <li> Fixed <pre>bilinear</pre> interpolation for unusual cases (polar stereographic case covering the north pole; thanks @trygveasp)</li>
+                    <li> Fixed <code>bilinear</code> interpolation for unusual cases (polar stereographic case covering the north pole; thanks @trygveasp)</li>
                     <li> Fixed bug in structure functions across dateline (thanks @joewkr)</li>
-                    <li> Fixed <pre>optional_interpolation_full</pre> for points (thanks Christoph Herbert and Ewan Pinnington)</li>
+                    <li> Fixed <code>optional_interpolation_full</code> for points (thanks Christoph Herbert and Ewan Pinnington)</li>
                 </ul>
             </li>
         </ul>

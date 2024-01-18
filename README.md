@@ -47,7 +47,7 @@ grid = gridpp.Grid(*np.meshgrid(np.linspace(0, 1, 200), np.linspace(0, 1, 200)))
 # Next, create some trustworthy observations
 points = gridpp.Points(np.random.rand(10), np.random.rand(10))
 obs = np.random.randn(10) / 2
-pobs = gridpp.nearest(grid, points, input)
+pobs = gridpp.nearest(grid, points, field)
 obs_to_background_variance_ratio = 0.5*np.ones(10)
 
 # Run optimal interpolation with a Barnes structure function (10km e-folding distance)

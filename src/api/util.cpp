@@ -551,19 +551,19 @@ bool gridpp::point_in_rectangle(const Point& A, const Point& B, const Point& C, 
     return opt1 || opt2;
 }
 
-bool gridpp::convert_coordinates(const vec& lats, const vec& lons, vec& x_coords, vec& y_coords, vec& z_coords, CoordinateType type) {
+bool gridpp::convert_coordinates(const vec& lats, const vec& lons, CoordinateType type, vec& x_coords, vec& y_coords, vec& z_coords) {
     int N = lats.size();
     x_coords.resize(N);
     y_coords.resize(N);
     z_coords.resize(N);
     for(int i = 0; i < N; i++) {
-        convert_coordinates(lats[i], lons[i], x_coords[i], y_coords[i], z_coords[i], type);
+        convert_coordinates(lats[i], lons[i], type, x_coords[i], y_coords[i], z_coords[i]);
     }
 
     return true;
 }
 
-bool gridpp::convert_coordinates(float lat, float lon, float& x_coord, float& y_coord, float& z_coord, CoordinateType type) {
+bool gridpp::convert_coordinates(float lat, float lon, CoordinateType type, float& x_coord, float& y_coord, float& z_coord) {
     if(!gridpp::is_valid_lat(lat, type) || !gridpp::is_valid_lon(lon, type)) {
         std::stringstream ss;
         ss << "Invalid coords: " << lat << "," << lon << std::endl;

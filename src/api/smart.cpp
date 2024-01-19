@@ -31,7 +31,7 @@ vec2 gridpp::smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, in
     // #pragma omp parallel for
     for(int i = 0; i < nLat; i++) {
         for(int j = 0; j < nLon; j++) {
-            Point3D p1 = ogrid.get_point_3d(i, j);
+            Point p1 = ogrid.get_point(i, j);
             float dist = structure.localization_distance(p1);
             ivec2 indices = igrid.get_neighbours(olats[i][j], olons[i][j], dist);
             std::vector<std::pair<float,int> > rhos;
@@ -40,7 +40,7 @@ vec2 gridpp::smart(const Grid& igrid, const Grid& ogrid, const vec2& ivalues, in
             for(int s = 0; s < indices.size(); s++) {
                 int ii = indices[s][0];
                 int jj = indices[s][1];
-                Point3D p2 = igrid.get_point_3d(ii, jj);
+                Point p2 = igrid.get_point(ii, jj);
                 float rho = structure.corr(p1, p2);
                 rhos.push_back(std::pair<float,int>(rho, s));
             }

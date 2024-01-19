@@ -230,9 +230,6 @@ bool gridpp::Grid::get_box(float lat, float lon, int& Y1, int& X1, int& Y2, int&
     return true;
 }
 gridpp::Point gridpp::Grid::get_point(int y_index, int x_index) const {
-    return Point(mLats[y_index][x_index], mLons[y_index][x_index], mElevs[y_index][x_index], mLafs[y_index][x_index], get_coordinate_type());
-}
-gridpp::Point3D gridpp::Grid::get_point_3d(int y_index, int x_index) const {
     int index = y_index * mX + x_index;
-    return Point3D(mTree.get_x()[index], mTree.get_y()[index], mTree.get_z()[index], mLats[y_index][x_index], mLons[y_index][x_index], mElevs[y_index][x_index], mLafs[y_index][x_index], get_coordinate_type());
+    return Point(mLats[y_index][x_index], mLons[y_index][x_index], mElevs[y_index][x_index], mLafs[y_index][x_index], get_coordinate_type(), mTree.get_x()[index], mTree.get_y()[index], mTree.get_z()[index]);
 }

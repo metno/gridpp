@@ -10,7 +10,7 @@ gridpp::StructureFunction::StructureFunction(float localization_distance) {
 
     m_localization_distance = localization_distance;
 }
-float gridpp::StructureFunction::corr_background(const Point3D& p1, const Point3D& p2) const {
+float gridpp::StructureFunction::corr_background(const Point& p1, const Point& p2) const {
     return corr(p1, p2);
 }
 float gridpp::StructureFunction::barnes_rho(float dist, float length) const {
@@ -32,7 +32,7 @@ float gridpp::StructureFunction::cressman_rho(float dist, float length) const {
         return 0;
     return (length * length - dist * dist) / (length * length + dist * dist);
 }
-float gridpp::StructureFunction::localization_distance(const Point3D& p) const {
+float gridpp::StructureFunction::localization_distance(const Point& p) const {
     return m_localization_distance;
 }
 gridpp::MultipleStructure::MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w) {
@@ -40,19 +40,19 @@ gridpp::MultipleStructure::MultipleStructure(const StructureFunction& structure_
     m_structure_v = structure_v.clone();
     m_structure_w = structure_w.clone();
 }
-float gridpp::MultipleStructure::localization_distance(const Point3D& p) const {
+float gridpp::MultipleStructure::localization_distance(const Point& p) const {
     return m_structure_h->localization_distance(p);
 }
-float gridpp::MultipleStructure::corr(const Point3D& p1, const Point3D& p2) const {
+float gridpp::MultipleStructure::corr(const Point& p1, const Point& p2) const {
     // Perturn coordinate only
-    Point3D p1_h(p1.x, p1.y, p1.z, p1.lat, p1.lon, p1.elev, p1.laf, p1.type);
-    Point3D p2_h(p2.x, p2.y, p2.z, p2.lat, p2.lon, p1.elev, p1.laf, p1.type);
+    Point p1_h(p1.lat, p1.lon, p1.elev, p1.laf, p1.type, p1.x, p1.y, p1.z);
+    Point p2_h(p2.lat, p2.lon, p1.elev, p1.laf, p1.type, p2.x, p2.y, p2.z);
     // Perturb elev only
-    Point3D p1_v(p1.x, p1.y, p1.z, p1.lat, p1.lon, p1.elev, p1.laf, p1.type);
-    Point3D p2_v(p1.x, p1.y, p1.z, p1.lat, p1.lon, p2.elev, p1.laf, p1.type);
+    Point p1_v(p1.lat, p1.lon, p1.elev, p1.laf, p1.type, p1.x, p1.y, p1.z);
+    Point p2_v(p1.lat, p1.lon, p2.elev, p1.laf, p1.type, p1.x, p1.y, p1.z);
     // Perturb laf only
-    Point3D p1_w(p1.x, p1.y, p1.z, p1.lat, p1.lon, p1.elev, p1.laf, p1.type);
-    Point3D p2_w(p1.x, p1.y, p1.z, p1.lat, p1.lon, p1.elev, p2.laf, p1.type);
+    Point p1_w(p1.lat, p1.lon, p1.elev, p1.laf, p1.type, p1.x, p1.y, p1.z);
+    Point p2_w(p1.lat, p1.lon, p1.elev, p2.laf, p1.type, p1.x, p1.y, p1.z);
     float corr_h = m_structure_h->corr(p1_h, p2_h);
     float corr_v = m_structure_v->corr(p1_v, p2_v);
     float corr_w = m_structure_w->corr(p1_w, p2_w);
@@ -106,7 +106,7 @@ gridpp::BarnesStructure::BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, floa
             throw std::invalid_argument("Grid size not the same as scale size");
     }
 }
-float gridpp::BarnesStructure::corr(const Point3D& p1, const Point3D& p2) const {
+float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
     if(hdist > localization_distance(p1))
         return 0;
@@ -161,23 +161,11 @@ float gridpp::BarnesStructure::corr(const Point3D& p1, const Point3D& p2) const 
     }
     return rho;
 }
-/*
-float gridpp::BarnesStructure::corr_background(const Point3D& p1, const Point3D& p2) const {
-    return corr(p1, p2);
-    float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
-    // TODO:
-    if(hdist > localization_distance(p1))
-        return 0;
-    // TODO
-    float rho = gridpp::StructureFunction::barnes_rho(hdist, 10000);
-    return rho;
-}
-*/
 gridpp::StructureFunction* gridpp::BarnesStructure::clone() const {
     gridpp::StructureFunction* val = new gridpp::BarnesStructure(m_grid, mH, mV, mW, m_min_rho);
     return val;
 }
-float gridpp::BarnesStructure::localization_distance(const Point3D& p) const {
+float gridpp::BarnesStructure::localization_distance(const Point& p) const {
     if(m_is_spatial) {
         ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
         float curr = sqrt(-2*log(m_min_rho)) * mH[I[0]][I[1]];
@@ -200,7 +188,7 @@ gridpp::CressmanStructure::CressmanStructure(float h, float v, float w) :
     mV = v;
     mW = w;
 }
-float gridpp::CressmanStructure::corr(const Point3D& p1, const Point3D& p2) const {
+float gridpp::CressmanStructure::corr(const Point& p1, const Point& p2) const {
     float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
     float rho = gridpp::StructureFunction::cressman_rho(hdist, mH);
     if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
@@ -226,10 +214,10 @@ gridpp::CrossValidation::CrossValidation(StructureFunction& structure, float dis
     m_structure = structure.clone();
     m_dist = dist;
 }
-float gridpp::CrossValidation::corr(const Point3D& p1, const Point3D& p2) const {
+float gridpp::CrossValidation::corr(const Point& p1, const Point& p2) const {
     return m_structure->corr(p1, p2);
 }
-float gridpp::CrossValidation::corr_background(const Point3D& p1, const Point3D& p2) const {
+float gridpp::CrossValidation::corr_background(const Point& p1, const Point& p2) const {
     float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
     if(gridpp::is_valid(m_dist)) {
         if(hdist <= m_dist)
@@ -241,6 +229,6 @@ gridpp::StructureFunction* gridpp::CrossValidation::clone() const {
     gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure);
     return val;
 }
-float gridpp::CrossValidation::localization_distance(const Point3D& p) const {
+float gridpp::CrossValidation::localization_distance(const Point& p) const {
     return m_structure->localization_distance(p);
 }

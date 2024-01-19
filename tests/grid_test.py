@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
         np.testing.assert_array_equal(grid.get_lafs(), np.zeros([0, 0]))
         np.testing.assert_array_equal(grid.size(), [0, 0])
 
-    def test_get_point_3d(self):
+    def test_get_point(self):
         """Check that the right values are retrieved"""
         # 2x3 grid
         lats = [[0, 0, 0], [1, 1, 1]]
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         grid = gridpp.Grid(lats, lons, elevs, lafs)
 
         # Retrieve values for the second row (of 2), first column (of 3)
-        p = grid.get_point_3d(1, 0)
+        p = grid.get_point(1, 0)
         self.assertEqual(p.lat, 1)
         self.assertEqual(p.lon, 0.25)
         self.assertEqual(p.elev, 3)

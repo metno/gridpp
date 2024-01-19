@@ -218,7 +218,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         }
         float lat = blats[y];
         float lon = blons[y];
-        Point3D p1 = bpoints.get_point_3d(y);
+        Point p1 = bpoints.get_point(y);
         float localizationRadius = structure.localization_distance(p1);
 
         // Find observations within localization radius
@@ -237,7 +237,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
             if(gridpp::is_valid(pobs[index]) && gridpp::is_valid(pbackground[index])) {
-                Point3D p2 = points.get_point_3d(index);
+                Point p2 = points.get_point(index);
                 float rho = structure.corr_background(p1, p2);
                 if(rho > 0) {
                     lRhos0.push_back(std::pair<float,int>(rho, i));
@@ -289,10 +289,10 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
             lY(i) = gY[index];
             lR(i, i) = pratios[index];
             lG(0, i) = lRhos(i);
-            Point3D p1 = points.get_point_3d(index);
+            Point p1 = points.get_point(index);
             for(int j = 0; j < lS; j++) {
                 int index_j = lLocIndices[j];
-                Point3D p2 = points.get_point_3d(index_j);
+                Point p2 = points.get_point(index_j);
                 lP(i, j) = structure.corr(p1, p2);
             }
         }

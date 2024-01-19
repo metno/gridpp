@@ -8,7 +8,7 @@ gridpp::KDTree::KDTree(vec lats, vec lons, CoordinateType type) {
     mLons = lons;
     mType = type;
 
-    gridpp::convert_coordinates(mLats, mLons, mX, mY, mZ, mType);
+    gridpp::convert_coordinates(mLats, mLons, mType, mX, mY, mZ);
     for(int i = 0; i < mLats.size(); i++) {
         point p(mX[i], mY[i], mZ[i]);
         mTree.insert(std::make_pair(p, i));
@@ -22,14 +22,14 @@ int gridpp::KDTree::get_num_neighbours(float lat, float lon, float radius, bool 
 
 ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float radius, vec& distances, bool include_match) const {
     float x, y, z;
-    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
+    gridpp::convert_coordinates(lat, lon, mType, x, y, z);
     ivec indices = get_neighbours(lat, lon, radius, include_match);
 
     int num = indices.size();
     distances.resize(num);
     for(int i = 0; i < num; i++) {
         float x1, y1, z1;
-        gridpp::convert_coordinates(mLats[indices[i]], mLons[indices[i]], x1, y1, z1, mType);
+        gridpp::convert_coordinates(mLats[indices[i]], mLons[indices[i]], mType, x1, y1, z1);
         distances[i] = gridpp::KDTree::calc_straight_distance(x, y, z, x1, y1, z1);
     }
 
@@ -38,7 +38,7 @@ ivec gridpp::KDTree::get_neighbours_with_distance(float lat, float lon, float ra
 
 ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool include_match) const {
     float x, y, z;
-    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
+    gridpp::convert_coordinates(lat, lon, mType, x, y, z);
 
     std::vector<value> results;
 #if 1
@@ -68,7 +68,7 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool inc
     ret.reserve(num);
     for(int i = 0; i < num; i++) {
         float x1, y1, z1;
-        gridpp::convert_coordinates(mLats[results[i].second], mLons[results[i].second], x1, y1, z1, mType);
+        gridpp::convert_coordinates(mLats[results[i].second], mLons[results[i].second], mType, x1, y1, z1);
         float dist = gridpp::KDTree::calc_straight_distance(x, y, z, x1, y1, z1);
         if(dist <= radius) {
             if(include_match || dist != 0)
@@ -81,7 +81,7 @@ ivec gridpp::KDTree::get_neighbours(float lat, float lon, float radius, bool inc
 
 ivec gridpp::KDTree::get_closest_neighbours(float lat, float lon, int num, bool include_match) const {
     float x, y, z;
-    gridpp::convert_coordinates(lat, lon, x, y, z, mType);
+    gridpp::convert_coordinates(lat, lon, mType, x, y, z);
     point p(x, y, z);
 
     std::vector<value> results;
@@ -180,13 +180,13 @@ float gridpp::KDTree::calc_distance_fast(float lat1, float lon1, float lat2, flo
         throw std::runtime_error("Unknown coordinate type");
     }
 }
-float gridpp::KDTree::calc_distance(const Point3D& p1, const Point3D& p2) {
+float gridpp::KDTree::calc_distance(const Point& p1, const Point& p2) {
     if(p1.type != p2.type)
         throw std::runtime_error("Coordinate types must be the same");
 
     return calc_distance(p1.lat, p1.lon, p2.lat, p2.lon, p1.type);
 }
-float gridpp::KDTree::calc_straight_distance(const Point3D& p1, const Point3D& p2) {
+float gridpp::KDTree::calc_straight_distance(const Point& p1, const Point& p2) {
     return calc_straight_distance(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
 }
 float gridpp::KDTree::calc_straight_distance(float x0, float y0, float z0, float x1, float y1, float z1) {

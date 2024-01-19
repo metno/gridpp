@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
         lon = 0
         elev = 10
         laf = 0.3
-        p = gridpp.Point3D(lat, lon, elev, laf, gridpp.Geodetic)
+        p = gridpp.Point(lat, lon, elev, laf, gridpp.Geodetic)
         self.assertAlmostEqual(p.lat, lat)
         self.assertAlmostEqual(p.lon, lon)
         self.assertAlmostEqual(p.elev, elev)
@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(p.y, y)
         self.assertAlmostEqual(p.z, z)
 
-        p = gridpp.Point3D(x, y, z, lat, lon, elev, laf, gridpp.Geodetic)
+        p = gridpp.Point(lat, lon, elev, laf, gridpp.Geodetic, x, y, z)
         self.assertAlmostEqual(p.lat, lat)
         self.assertAlmostEqual(p.lon, lon)
         self.assertAlmostEqual(p.elev, elev)
@@ -29,7 +29,6 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(p.x, x)
         self.assertAlmostEqual(p.y, y)
         self.assertAlmostEqual(p.z, z)
-
 
 
 if __name__ == '__main__':

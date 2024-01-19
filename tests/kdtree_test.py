@@ -68,8 +68,8 @@ class KDTreeTest(unittest.TestCase):
 
         for c in config:
             self.assertEqual(len(c), 6)
-            p0 = gridpp.Point3D(c[0], c[1])
-            p1 = gridpp.Point3D(c[2], c[3])
+            p0 = gridpp.Point(c[0], c[1])
+            p1 = gridpp.Point(c[2], c[3])
             delta = c[4]
             expected = c[5]
 
@@ -92,8 +92,8 @@ class KDTreeTest(unittest.TestCase):
 
         for c in config:
             self.assertEqual(len(c), 6)
-            p0 = gridpp.Point3D(c[0], c[1])
-            p1 = gridpp.Point3D(c[2], c[3])
+            p0 = gridpp.Point(c[0], c[1])
+            p1 = gridpp.Point(c[2], c[3])
             delta = c[4]
             expected = c[5]
 
@@ -106,8 +106,8 @@ class KDTreeTest(unittest.TestCase):
                 self.assertAlmostEqual(expected, gridpp.KDTree.calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z), delta=delta)
 
     def test_calc_distance_limit(self):
-        p0 = gridpp.Point3D(0, 0)
-        p1 = gridpp.Point3D(0.001, 0.001)
+        p0 = gridpp.Point(0, 0)
+        p1 = gridpp.Point(0.001, 0.001)
         self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_distance(0,0,0.001,0.001));
         self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z));
 

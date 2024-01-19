@@ -126,10 +126,7 @@ CoordinateType gridpp::Points::get_coordinate_type() const {
     return mTree.get_coordinate_type();
 }
 gridpp::Point gridpp::Points::get_point(int index) const {
-    return Point(mLats[index], mLons[index], mElevs[index], mLafs[index], get_coordinate_type());
-}
-gridpp::Point3D gridpp::Points::get_point_3d(int index) const {
-    return Point3D(mTree.get_x()[index], mTree.get_y()[index], mTree.get_z()[index], mLats[index], mLons[index], mElevs[index], mLafs[index], get_coordinate_type());
+    return Point(mLats[index], mLons[index], mElevs[index], mLafs[index], get_coordinate_type(), mTree.get_x()[index], mTree.get_y()[index], mTree.get_z()[index]);
 }
 gridpp::Points gridpp::Points::subset(const ivec& indices) const {
     int N = indices.size();

@@ -22,5 +22,8 @@ var searchData=
   ['multiplestructure',['MultipleStructure',['../classgridpp_1_1MultipleStructure.html',1,'gridpp::MultipleStructure'],['../classgridpp_1_1MultipleStructure.html#a3cce7259f6f15eb014d6eb3277460ec5',1,'gridpp::MultipleStructure::MultipleStructure()']]],
   ['multiplicative',['Multiplicative',['../namespacegridpp.html#aca92081b4647f72000e19e814b99ad10a38e5882f5462af4d7234d5976a96abb8',1,'gridpp']]],
   ['mv',['MV',['../namespacegridpp.html#a19e2d1cc4815ea77534845d6ca8297fa',1,'gridpp']]],
-  ['mv_5fcml',['MV_CML',['../namespacegridpp.html#a9eedb2e274a858f189438e48ff9a1ea5',1,'gridpp']]]
+  ['mv_5fcml',['MV_CML',['../namespacegridpp.html#a9eedb2e274a858f189438e48ff9a1ea5',1,'gridpp']]],
+  ['mx',['mX',['../classgridpp_1_1KDTree.html#a02dbf9b36bf06ffb1c10d35a8e23d2a3',1,'gridpp::KDTree']]],
+  ['my',['mY',['../classgridpp_1_1KDTree.html#a9eab7e58ece4a019a57703c88cddccb3',1,'gridpp::KDTree']]],
+  ['mz',['mZ',['../classgridpp_1_1KDTree.html#a5024306dd06a247bd02f29e6ad238a6b',1,'gridpp::KDTree']]]
 ];

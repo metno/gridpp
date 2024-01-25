@@ -9,6 +9,8 @@ var searchData=
   ['interpolate',['interpolate',['../namespacegridpp.html#acbe06743ef2211329d113ad00a034ea5',1,'gridpp::interpolate(float x, const vec &amp;iX, const vec &amp;iY)'],['../namespacegridpp.html#aa41c9f75ae0ff3a4bce57ba10657666e',1,'gridpp::interpolate(const vec &amp;x, const vec &amp;iX, const vec &amp;iY)']]],
   ['is_5fnot_5fequal',['is_not_equal',['../structgridpp_1_1KDTree_1_1is__not__equal.html',1,'gridpp::KDTree::is_not_equal'],['../structgridpp_1_1KDTree_1_1is__not__equal.html#ad7b1c4434ddfd665e2b18ec782d47700',1,'gridpp::KDTree::is_not_equal::is_not_equal()']]],
   ['is_5fvalid',['is_valid',['../namespacegridpp.html#ac536d3977e29fc255644ecdf0e68a907',1,'gridpp']]],
+  ['is_5fvalid_5flat',['is_valid_lat',['../namespacegridpp.html#a9098d9fbf89ecb55dce727575f72f2c3',1,'gridpp']]],
+  ['is_5fvalid_5flon',['is_valid_lon',['../namespacegridpp.html#ad4973aaeec19633720b2c07c8167da2a',1,'gridpp']]],
   ['ivec',['ivec',['../namespacegridpp.html#a3373bbd546635b011e492214cd154c67',1,'gridpp']]],
   ['ivec2',['ivec2',['../namespacegridpp.html#a13a02343378719c38e15d63994a59f81',1,'gridpp']]],
   ['ivec3',['ivec3',['../namespacegridpp.html#af890ab76b6c60c11cc2b67b51697894e',1,'gridpp']]]

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev6: /home/thomasn/repos/gridpp/include/gridpp.h File Reference</title>
+<title>Gridpp 0.7.0: /home/thomasn/repos/gridpp/include/gridpp.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev6
+   <div id="projectname">Gridpp 0.7.0
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -150,7 +150,7 @@ Namespaces</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a30997f7bb508f73aed90bb86c86e3a30"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#a30997f7bb508f73aed90bb86c86e3a30">__version__</a>&#160;&#160;&#160;<a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a></td></tr>
 <tr class="separator:a30997f7bb508f73aed90bb86c86e3a30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a>&#160;&#160;&#160;&quot;0.7.0.dev6&quot;</td></tr>
+<tr class="memitem:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gridpp_8h.html#ad24e4fa73b48b5f95d6b366284978e3c">GRIDPP_VERSION</a>&#160;&#160;&#160;&quot;0.7.0&quot;</td></tr>
 <tr class="separator:ad24e4fa73b48b5f95d6b366284978e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
@@ -684,6 +684,18 @@ Utilities</h2></td></tr>
 <tr class="memitem:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ac6b7c419369ea446a1ec9a33d395ce9c">gridpp::calc_quantile</a> (const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;array, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;quantile_levels)</td></tr>
 <tr class="memdesc:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute quantile with 2D varying quantile level.  <a href="namespacegridpp.html#ac6b7c419369ea446a1ec9a33d395ce9c">More...</a><br /></td></tr>
 <tr class="separator:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a5450ebc6adaa9d0e8616bc0cf28f3cab">gridpp::convert_coordinates</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;lats, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;lons, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;x_coords, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;y_coords, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;z_coords)</td></tr>
+<tr class="memdesc:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert lats/lons or 2D x/y coordinates to 3D cartesian coordinates with the centre of the earth as the origin.  <a href="namespacegridpp.html#a5450ebc6adaa9d0e8616bc0cf28f3cab">More...</a><br /></td></tr>
+<tr class="separator:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34b6d614cd0830c975048061e494e65d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a34b6d614cd0830c975048061e494e65d">gridpp::convert_coordinates</a> (float lat, float lon, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type, float &amp;x_coord, float &amp;y_coord, float &amp;z_coord)</td></tr>
+<tr class="memdesc:a34b6d614cd0830c975048061e494e65d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert lat/lon or 2D x/y coordinate to 3D cartesian coordinate with the centre of the earth as the origin.  <a href="namespacegridpp.html#a34b6d614cd0830c975048061e494e65d">More...</a><br /></td></tr>
+<tr class="separator:a34b6d614cd0830c975048061e494e65d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9098d9fbf89ecb55dce727575f72f2c3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9098d9fbf89ecb55dce727575f72f2c3">gridpp::is_valid_lat</a> (float lat, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type)</td></tr>
+<tr class="memdesc:a9098d9fbf89ecb55dce727575f72f2c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that a lat-coordinate is valid (based on the coordinate type)  <a href="namespacegridpp.html#a9098d9fbf89ecb55dce727575f72f2c3">More...</a><br /></td></tr>
+<tr class="separator:a9098d9fbf89ecb55dce727575f72f2c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4973aaeec19633720b2c07c8167da2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ad4973aaeec19633720b2c07c8167da2a">gridpp::is_valid_lon</a> (float lon, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type)</td></tr>
+<tr class="memdesc:ad4973aaeec19633720b2c07c8167da2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that a lon-coordinate is valid (based on the coordinate type)  <a href="namespacegridpp.html#ad4973aaeec19633720b2c07c8167da2a">More...</a><br /></td></tr>
+<tr class="separator:ad4973aaeec19633720b2c07c8167da2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab473e205e70327bab09edd92143da578"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab473e205e70327bab09edd92143da578">gridpp::num_missing_values</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;iArray)</td></tr>
 <tr class="memdesc:ab473e205e70327bab09edd92143da578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count the number of missing values in a vector.  <a href="namespacegridpp.html#ab473e205e70327bab09edd92143da578">More...</a><br /></td></tr>
 <tr class="separator:ab473e205e70327bab09edd92143da578"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -812,7 +824,7 @@ SWIG testing functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define GRIDPP_VERSION&#160;&#160;&#160;&quot;0.7.0.dev6&quot;</td>
+          <td class="memname">#define GRIDPP_VERSION&#160;&#160;&#160;&quot;0.7.0&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -822,7 +834,7 @@ SWIG testing functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 25 2024 10:42:03 for Gridpp 0.7.0 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

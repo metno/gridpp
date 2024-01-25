@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gridpp 0.7.0.dev6: gridpp Namespace Reference</title>
+<title>Gridpp 0.7.0: gridpp Namespace Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -24,7 +24,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Gridpp 0.7.0.dev6
+   <div id="projectname">Gridpp 0.7.0
    </div>
    <div id="projectbrief">A post-processing library for gridded weather forecasts</div>
   </td>
@@ -651,6 +651,18 @@ Utilities</h2></td></tr>
 <tr class="memitem:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ac6b7c419369ea446a1ec9a33d395ce9c">calc_quantile</a> (const <a class="el" href="namespacegridpp.html#ac38434e47860cc2855428191d742d5c9">vec3</a> &amp;array, const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;quantile_levels)</td></tr>
 <tr class="memdesc:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute quantile with 2D varying quantile level.  <a href="#ac6b7c419369ea446a1ec9a33d395ce9c">More...</a><br /></td></tr>
 <tr class="separator:ac6b7c419369ea446a1ec9a33d395ce9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a5450ebc6adaa9d0e8616bc0cf28f3cab">convert_coordinates</a> (const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;lats, const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;lons, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;x_coords, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;y_coords, <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;z_coords)</td></tr>
+<tr class="memdesc:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert lats/lons or 2D x/y coordinates to 3D cartesian coordinates with the centre of the earth as the origin.  <a href="#a5450ebc6adaa9d0e8616bc0cf28f3cab">More...</a><br /></td></tr>
+<tr class="separator:a5450ebc6adaa9d0e8616bc0cf28f3cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34b6d614cd0830c975048061e494e65d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a34b6d614cd0830c975048061e494e65d">convert_coordinates</a> (float lat, float lon, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type, float &amp;x_coord, float &amp;y_coord, float &amp;z_coord)</td></tr>
+<tr class="memdesc:a34b6d614cd0830c975048061e494e65d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert lat/lon or 2D x/y coordinate to 3D cartesian coordinate with the centre of the earth as the origin.  <a href="#a34b6d614cd0830c975048061e494e65d">More...</a><br /></td></tr>
+<tr class="separator:a34b6d614cd0830c975048061e494e65d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9098d9fbf89ecb55dce727575f72f2c3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#a9098d9fbf89ecb55dce727575f72f2c3">is_valid_lat</a> (float lat, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type)</td></tr>
+<tr class="memdesc:a9098d9fbf89ecb55dce727575f72f2c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that a lat-coordinate is valid (based on the coordinate type)  <a href="#a9098d9fbf89ecb55dce727575f72f2c3">More...</a><br /></td></tr>
+<tr class="separator:a9098d9fbf89ecb55dce727575f72f2c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4973aaeec19633720b2c07c8167da2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ad4973aaeec19633720b2c07c8167da2a">is_valid_lon</a> (float lon, <a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a> type)</td></tr>
+<tr class="memdesc:ad4973aaeec19633720b2c07c8167da2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that a lon-coordinate is valid (based on the coordinate type)  <a href="#ad4973aaeec19633720b2c07c8167da2a">More...</a><br /></td></tr>
+<tr class="separator:ad4973aaeec19633720b2c07c8167da2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab473e205e70327bab09edd92143da578"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacegridpp.html#ab473e205e70327bab09edd92143da578">num_missing_values</a> (const <a class="el" href="namespacegridpp.html#a133369f5f7865bff1f5d1bcaa86caf3d">vec2</a> &amp;iArray)</td></tr>
 <tr class="memdesc:ab473e205e70327bab09edd92143da578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count the number of missing values in a vector.  <a href="#ab473e205e70327bab09edd92143da578">More...</a><br /></td></tr>
 <tr class="separator:ab473e205e70327bab09edd92143da578"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1091,7 +1103,7 @@ SWIG testing functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea2da17e7c46f3451a798661548f8b7637"></a>Count&#160;</td><td class="fielddoc"><p>Count of values. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ead9bb4c360c2dbc92b20e2f919bad6a29"></a>RandomChoice&#160;</td><td class="fielddoc"><p>Randomly pick a value. </p>
+<tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ead9bb4c360c2dbc92b20e2f919bad6a29"></a>RandomChoice&#160;</td><td class="fielddoc"><p>Randomly pick a non-nan value. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a232191788fcb9015e7ee56848e8c6e4ea130084e69e51c026d9f47853f34835f1"></a>Unknown&#160;</td><td class="fielddoc"><p>Unknown statistic. </p>
 </td></tr>
@@ -2270,6 +2282,136 @@ SWIG testing functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if compatible </dd></dl>
+
+</div>
+</div>
+<a id="a5450ebc6adaa9d0e8616bc0cf28f3cab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5450ebc6adaa9d0e8616bc0cf28f3cab">&#9670;&nbsp;</a></span>convert_coordinates() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gridpp::convert_coordinates </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>lats</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>lons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>x_coords</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>y_coords</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a8bdda8fa26486e1ed11454128b2c2ccf">vec</a> &amp;&#160;</td>
+          <td class="paramname"><em>z_coords</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convert lats/lons or 2D x/y coordinates to 3D cartesian coordinates with the centre of the earth as the origin. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lats</td><td>vector of latitudes [deg] or 2D y-coordinates [m] </td></tr>
+    <tr><td class="paramname">lons</td><td>vector of longitudes [deg] or 2D x-coordinates [m] </td></tr>
+    <tr><td class="paramname">type</td><td>Coordinate type for lats and lons </td></tr>
+    <tr><td class="paramname">x_coords</td><td>vector of x-coordinates [m] </td></tr>
+    <tr><td class="paramname">y_coords</td><td>vector of y-coordinates [m] </td></tr>
+    <tr><td class="paramname">z_coords</td><td>vector of z-coordinates [m] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a34b6d614cd0830c975048061e494e65d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34b6d614cd0830c975048061e494e65d">&#9670;&nbsp;</a></span>convert_coordinates() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gridpp::convert_coordinates </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>lat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>lon</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float &amp;&#160;</td>
+          <td class="paramname"><em>x_coord</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float &amp;&#160;</td>
+          <td class="paramname"><em>y_coord</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float &amp;&#160;</td>
+          <td class="paramname"><em>z_coord</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convert lat/lon or 2D x/y coordinate to 3D cartesian coordinate with the centre of the earth as the origin. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lat</td><td>vector of latitudes [deg] or 2D y-coordinates [m] </td></tr>
+    <tr><td class="paramname">lon</td><td>vector of longitudes [deg] or 2D x-coordinates [m] </td></tr>
+    <tr><td class="paramname">type</td><td>Coordinate type for lat and lon </td></tr>
+    <tr><td class="paramname">x_coord</td><td>x-coordinate [m] </td></tr>
+    <tr><td class="paramname">y_coord</td><td>y-coordinate [m] </td></tr>
+    <tr><td class="paramname">z_coord</td><td>z-coordinate [m] </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -4500,6 +4642,82 @@ SWIG testing functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the value is valid, False if it is NaN, Inf, or other invalid value </dd></dl>
+
+</div>
+</div>
+<a id="a9098d9fbf89ecb55dce727575f72f2c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9098d9fbf89ecb55dce727575f72f2c3">&#9670;&nbsp;</a></span>is_valid_lat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gridpp::is_valid_lat </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>lat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks that a lat-coordinate is valid (based on the coordinate type) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lat</td><td>latitude [deg] or y-coordinate [m] </td></tr>
+    <tr><td class="paramname">type</td><td>Coordinate type for lat </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if lat is valid latitude or y-coordinate </dd></dl>
+
+</div>
+</div>
+<a id="ad4973aaeec19633720b2c07c8167da2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4973aaeec19633720b2c07c8167da2a">&#9670;&nbsp;</a></span>is_valid_lon()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gridpp::is_valid_lon </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>lon</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacegridpp.html#a2ad8e1533595470eee173fed2301446d">CoordinateType</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks that a lon-coordinate is valid (based on the coordinate type) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lat</td><td>longitude [deg] or x-coordinate [m] </td></tr>
+    <tr><td class="paramname">type</td><td>Coordinate type for lon </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if lon is valid latitude or x-coordinate </dd></dl>
 
 </div>
 </div>
@@ -8373,7 +8591,7 @@ SWIG testing functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 11 2024 09:36:52 for Gridpp 0.7.0.dev6 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 25 2024 10:42:03 for Gridpp 0.7.0 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

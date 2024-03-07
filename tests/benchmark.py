@@ -151,7 +151,15 @@ def main():
             # Compute the fraction between minimum and maximum speedup
             scaling = ((actual_speedup - minimum_speedup) / (maximum_speedup - minimum_speedup))
 
+            # A better way to compute scaling? Computed in time space, instead of in factor space
+            # Probably not a fair way, since scaling will stay fixed for higher number of cores
+            # expected_time = timings[1] / args.num_cores
+            # scaling = 1 - (timings[args.num_cores] - expected_time) / (timings[1] - expected_time)
+
             string = "%-36s %8.2f %8.2f %8.2f %%" % (name, timings[1], timings[args.num_cores], scaling * 100)
+
+            # factor = timings[1] / timings[args.num_cores]
+            # string = "%-36s %8.2f %8.2f %8.2f" % (name, timings[1], timings[args.num_cores], factor)
         print(string)
 
 

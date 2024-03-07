@@ -10,7 +10,17 @@ gridpp::StructureFunction::StructureFunction(float localization_distance) {
 
     m_localization_distance = localization_distance;
 }
+vec gridpp::StructureFunction::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    for(int i = 0; i < p2.size(); i++) {
+        output[i] = corr(p1, p2[i]);
+    }
+    return output;
+}
 float gridpp::StructureFunction::corr_background(const Point& p1, const Point& p2) const {
+    return corr(p1, p2);
+}
+vec gridpp::StructureFunction::corr_background(const Point& p1, const std::vector<Point>& p2) const {
     return corr(p1, p2);
 }
 float gridpp::StructureFunction::barnes_rho(float dist, float length) const {
@@ -108,35 +118,23 @@ gridpp::BarnesStructure::BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, floa
 }
 float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
-    if(hdist > localization_distance(p1))
-        return 0;
     float rho = 1;
     if(m_is_spatial) {
+        // This part is slower because of the nearest neighbour lookup
         ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
         if(I[0] > mH.size())
             throw std::runtime_error("Invalid I[0]");
         if(I[1] > mH[I[0]].size())
             throw std::runtime_error("Invalid I[1]");
-        float h1 = mH[I[0]][I[1]];
-        float v1 = mV[I[0]][I[1]];
-        float w1 = mW[I[0]][I[1]];
-#if 0
-        I = m_grid.get_nearest_neighbour(p2.lat, p2.lon);
-        if(I[0] > mH.size())
-            throw std::runtime_error("Invalid i[0]");
-        if(I[1] > mH[I[0]].size())
-            throw std::runtime_error("Invalid I[1]");
-        float h2 = mH[I[0]][I[1]];
-        float v2 = mV[I[0]][I[1]];
-        float w2 = mW[I[0]][I[1]];
-        float h = (h1 + h2) / 2;
-        float v = (v1 + v2) / 2;
-        float w = (w1 + w2) / 2;
-#else
-        float h = h1;
-        float v = v1;
-        float w = w1;
-#endif
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+
+        // Use h to compute this, so we don't have to get nearest neighbour twice
+        float loc_dist = localization_distance(h);
+        if(hdist > loc_dist)
+            return 0;
 
         rho = gridpp::StructureFunction::barnes_rho(hdist, h);
         if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
@@ -149,6 +147,9 @@ float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
         }
     }
     else {
+        if(hdist > localization_distance(p1))
+            return 0;
+
         rho = gridpp::StructureFunction::barnes_rho(hdist, mH[0][0]);
         if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
             float vdist = p1.elev - p2.elev;
@@ -161,6 +162,43 @@ float gridpp::BarnesStructure::corr(const Point& p1, const Point& p2) const {
     }
     return rho;
 }
+vec gridpp::BarnesStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+        float loc_dist = localization_distance(h);
+        for(int i = 0; i < p2.size(); i++) {
+            float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+            float rho = 0;
+            if(hdist <= loc_dist) {
+                rho = gridpp::StructureFunction::barnes_rho(hdist, h);
+                if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2[i].elev)) {
+                    float vdist = p1.elev - p2[i].elev;
+                    rho *= gridpp::StructureFunction::barnes_rho(vdist, v);
+                }
+                if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2[i].laf)) {
+                    float lafdist = p1.laf - p2[i].laf;
+                    rho *= gridpp::StructureFunction::barnes_rho(lafdist, w);
+                }
+            }
+            output[i] = rho;
+        }
+    }
+    else {
+        for(int i = 0; i < p2.size(); i++) {
+            output[i] = corr(p1, p2[i]);
+        }
+    }
+    return output;
+}
 gridpp::StructureFunction* gridpp::BarnesStructure::clone() const {
     gridpp::StructureFunction* val = new gridpp::BarnesStructure(m_grid, mH, mV, mW, m_min_rho);
     return val;
@@ -168,13 +206,14 @@ gridpp::StructureFunction* gridpp::BarnesStructure::clone() const {
 float gridpp::BarnesStructure::localization_distance(const Point& p) const {
     if(m_is_spatial) {
         ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
-        float curr = sqrt(-2*log(m_min_rho)) * mH[I[0]][I[1]];
-        return curr;
+        return localization_distance(mH[I[0]][I[1]]);
     }
     else {
-        float curr = sqrt(-2*log(m_min_rho)) * mH[0][0];
-        return curr;
+        return localization_distance(mH[0][0]);
     }
+}
+float gridpp::BarnesStructure::localization_distance(float h) const {
+    return sqrt(-2*log(m_min_rho)) * h;
 }
 
 /** Cressman */
@@ -224,6 +263,17 @@ float gridpp::CrossValidation::corr_background(const Point& p1, const Point& p2)
             return 0;
     }
     return m_structure->corr_background(p1, p2);
+}
+vec gridpp::CrossValidation::corr_background(const Point& p1, const std::vector<Point>& p2) const {
+    vec curr_corr = m_structure->corr_background(p1, p2);
+    for(int i = 0; i < curr_corr.size(); i++) {
+        float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+        if(gridpp::is_valid(m_dist)) {
+            if(hdist <= m_dist)
+                curr_corr[i] = 0;
+        }
+    }
+    return curr_corr;
 }
 gridpp::StructureFunction* gridpp::CrossValidation::clone() const {
     gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure);

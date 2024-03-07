@@ -215,13 +215,19 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         std::vector<std::pair<float,int> > lRhos0;
         // Calculate gridpoint to observation rhos
         lRhos0.reserve(lLocIndices0.size());
+        std::vector<Point> p2;
+        p2.reserve(lLocIndices0.size());
+        for(int i = 0; i < lLocIndices0.size(); i++) {
+            int index = lLocIndices0[i];
+            Point p = points.get_point(index);
+            p2.push_back(p);
+        }
+        vec rhos = structure.corr_background(p1, p2);
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
             if(gridpp::is_valid(pobs[index])) {
-                Point p2 = points.get_point(index);
-                float rho = structure.corr_background(p1, p2);
-                if(rho > 0) {
-                    lRhos0.push_back(std::pair<float,int>(rho, i));
+                if(rhos[i] > 0) {
+                    lRhos0.push_back(std::pair<float,int>(rhos[i], i));
                 }
             }
         }

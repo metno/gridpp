@@ -234,13 +234,19 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
 
         // Calculate gridpoint to observation rhos
         lRhos0.reserve(lLocIndices0.size());
+        std::vector<Point> p2;
+        p2.reserve(lLocIndices0.size());
+        for(int i = 0; i < lLocIndices0.size(); i++) {
+            int index = lLocIndices0[i];
+            Point p = points.get_point(index);
+            p2.push_back(p);
+        }
+        vec rhos = structure.corr_background(p1, p2);
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
             if(gridpp::is_valid(pobs[index]) && gridpp::is_valid(pbackground[index])) {
-                Point p2 = points.get_point(index);
-                float rho = structure.corr_background(p1, p2);
-                if(rho > 0) {
-                    lRhos0.push_back(std::pair<float,int>(rho, i));
+                if(rhos[i] > 0) {
+                    lRhos0.push_back(std::pair<float,int>(rhos[i], i));
                 }
             }
         }
@@ -290,10 +296,15 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
             lR(i, i) = pratios[index];
             lG(0, i) = lRhos(i);
             Point p1 = points.get_point(index);
+            std::vector<Point> p2(lS, Point(0, 0));
             for(int j = 0; j < lS; j++) {
                 int index_j = lLocIndices[j];
-                Point p2 = points.get_point(index_j);
-                lP(i, j) = structure.corr(p1, p2);
+                Point p = points.get_point(index_j);
+                p2[j] = p;
+            }
+            vec corr = structure.corr(p1, p2);
+            for(int j = 0; j < lS; j++) {
+                lP(i, j) = corr[j];
             }
         }
         mattype lGSR = lG * arma::inv(lP + lR);

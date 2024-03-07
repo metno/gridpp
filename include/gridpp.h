@@ -13,7 +13,7 @@
 #endif
 #include <exception>
 
-#define GRIDPP_VERSION "0.7.0"
+#define GRIDPP_VERSION "0.8.0.dev1"
 #define __version__ GRIDPP_VERSION
 
 namespace gridpp {
@@ -1900,6 +1900,7 @@ namespace gridpp {
              *  @returns Correlation between points
             */
             virtual float corr(const Point& p1, const Point& p2) const = 0;
+            virtual vec corr(const Point& p1, const std::vector<Point>& p2) const;
 
             /** Correlation between a background point and an observation points
              *  @param p1 Background point
@@ -1907,6 +1908,7 @@ namespace gridpp {
              *  @returns Correlation between background and observation points
             */
             virtual float corr_background(const Point& p1, const Point& p2) const;
+            virtual vec corr_background(const Point& p1, const std::vector<Point>& p2) const;
 
             /** Maximum distance for which an observation can have an impact (localization)
               * @returns Distance [m]
@@ -1966,9 +1968,11 @@ namespace gridpp {
             */
             BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunction* clone() const;
             float localization_distance(const Point& p) const;
         private:
+            float localization_distance(float h) const;
             Grid m_grid;
             vec2 mH;
             vec2 mV;
@@ -1997,6 +2001,7 @@ namespace gridpp {
             CrossValidation(StructureFunction& structure, float dist=MV);
             float corr(const Point& p1, const Point& p2) const;
             float corr_background(const Point& p1, const Point& p2) const;
+            vec corr_background(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunction* clone() const;
             float localization_distance(const Point& p) const;
         private:

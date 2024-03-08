@@ -75,6 +75,7 @@ def main():
     run[("apply_curve", "")] = {"expected": 0.06, "args": (I2000, np.random.rand(2000), np.random.rand(2000), gridpp.OneToOne, gridpp.OneToOne)}
     run[("apply_curve", "gridded")] = {"expected": 0.87, "args": (I2000, x, y, gridpp.OneToOne, gridpp.OneToOne)}
     run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([2000, 2000, 10], np.float32),)}
+    run[("init_vec3")] = {"expected": 0.8, "args": (1000, 1000, 200)}
 
     if args.num_cores is not None:
         print("Gridpp parallelization test (gridpp version %s)" % gridpp.version())

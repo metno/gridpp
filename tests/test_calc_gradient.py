@@ -63,7 +63,6 @@ class Test(unittest.TestCase):
         halfwidth = 1
         default_gradient = 1
         output = gridpp.calc_gradient(base, values, method, halfwidth, min_num, min_range, default_gradient)
-        print(output)
 
 
 if __name__ == '__main__':

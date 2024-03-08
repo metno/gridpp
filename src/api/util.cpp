@@ -387,6 +387,9 @@ float gridpp::interpolate(float x, const vec& iX, const vec& iY) {
     return y;
 }
 vec gridpp::interpolate(const vec& x, const vec& iX, const vec& iY) {
+    if(iX.size() != iY.size())
+        throw std::invalid_argument("Dimension mismatch. Cannot interpolate.");
+
     vec y(x.size());
 
     #pragma omp parallel for

@@ -68,6 +68,29 @@ float gridpp::MultipleStructure::corr(const Point& p1, const Point& p2) const {
     float corr_w = m_structure_w->corr(p1_w, p2_w);
     return corr_h * corr_v * corr_w;
 }
+vec gridpp::MultipleStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    std::vector<Point> p2_h(p2.size(), Point(0, 0));
+    std::vector<Point> p2_v(p2.size(), Point(0, 0));
+    std::vector<Point> p2_w(p2.size(), Point(0, 0));
+
+    for(int i = 0; i < p2.size(); i++) {
+        const Point p = p2[i];
+        p2_h[i] = Point(p.lat, p.lon, p1.elev, p1.laf, p1.type, p.x, p.y, p.z);
+        p2_v[i] = Point(p1.lat, p1.lon, p.elev, p1.laf, p1.type, p1.x, p1.y, p1.z);
+        p2_w[i] = Point(p1.lat, p1.lon, p1.elev, p.laf, p1.type, p1.x, p1.y, p1.z);
+    }
+
+    vec corr_h = m_structure_h->corr(p1, p2_h);
+    vec corr_v = m_structure_v->corr(p1, p2_v);
+    vec corr_w = m_structure_w->corr(p1, p2_w);
+    vec corr_total(p2.size(), 0);
+    for(int i = 0; i < p2.size(); i++) {
+        corr_total[i] = corr_h[i] * corr_v[i] * corr_w[i];
+    }
+
+    return corr_total;
+
+}
 gridpp::StructureFunction* gridpp::MultipleStructure::clone() const {
     gridpp::StructureFunction* val = new gridpp::MultipleStructure(*m_structure_h, *m_structure_v, *m_structure_w);
     return val;

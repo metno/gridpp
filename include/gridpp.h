@@ -1941,6 +1941,7 @@ namespace gridpp {
             */
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
             float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunction* clone() const;
             float localization_distance(const Point& p) const;
         private:

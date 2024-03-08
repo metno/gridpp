@@ -135,6 +135,36 @@ class Test(unittest.TestCase):
         corr = structure.corr(p1, p2)
         self.assertAlmostEqual(corr, expected**3)
 
+    def test_multiple_structure_corr_vec(self):
+        s1 = gridpp.CressmanStructure(5000, 11, 22)
+        s2 = gridpp.CressmanStructure(33, 200, 44)
+        s3 = gridpp.CressmanStructure(55, 66, 2)
+        structure = gridpp.MultipleStructure(s1, s2, s3)
+
+        p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point(0, 2500, 0, 0, gridpp.Cartesian)
+        p3 = gridpp.Point(0, 2500, 100, 1, gridpp.Cartesian)
+        corr = structure.corr(p1, p2)
+        self.assertAlmostEqual(corr, 0.6)
+        corr = structure.corr(p1, p3)
+        self.assertAlmostEqual(corr, 0.6**3)
+
+        # The only way to test the vector version of corr in python, is to go through OI. This is
+        # because std::vector<Point> isn't exposed in python.
+        N = 3
+        y = [0, 0, 0]
+        x = [0, 0, 0]
+        z = [0, 0, 100]
+        laf = [0, 0, 1]
+        grid = gridpp.Points(y, x, z, laf, gridpp.Cartesian)
+        points = gridpp.Points([0], [2500], [0], [0], gridpp.Cartesian)
+        pratios = [1]
+        pobs = [1]
+        background = np.zeros([N])
+        pbackground = [0]
+        max_points = 10
+        output = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points)
+        np.testing.assert_array_almost_equal(output, [0.3, 0.3, 0.6**3/2])
 
 
 if __name__ == '__main__':

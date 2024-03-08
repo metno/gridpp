@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
     def test_calc_quantile_invalid_argument(self):
         quantiles = [1.1, -0.1]
         for quantile in quantiles:
-            with self.assertRaises(Exception) as e:
+            with self.assertRaises(ValueError) as e:
                 gridpp.calc_quantile([0, 1, 2], quantile)
         self.assertTrue(np.isnan(gridpp.calc_quantile([0, 1, 2], np.nan)))
 

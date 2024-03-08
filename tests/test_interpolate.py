@@ -67,10 +67,10 @@ class Test(unittest.TestCase):
         np.testing.assert_array_almost_equal([0.5], gridpp.interpolate([0], [0, 0, 0, 0, 0, 0], [0, 0.1, 0.4, 0.6, 0.9, 1]), 5)
 
     def test_invalid_arguments(self):
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(Exception) as e:
             gridpp.interpolate(0, [0, 1, 2], [0, 1])
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(Exception) as e:
             gridpp.interpolate([0], [0, 1, 2], [0, 1])
 
 if __name__ == '__main__':

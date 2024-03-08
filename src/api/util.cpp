@@ -11,10 +11,6 @@
 #include <cstdio>
 #include <exception>
 
-#ifdef DEBUG
-extern "C" void __gcov_flush();
-#endif
-
 using namespace gridpp;
 
 bool gridpp::is_valid(float value) {
@@ -239,7 +235,6 @@ void gridpp::error(std::string iMessage) {
     size_t size = backtrace(array, 10);
     std::cout << "Stack trace:" << std::endl;
     backtrace_symbols_fd(array, size, 2);
-    __gcov_flush();
 #else
     std::cout << "Error: " << iMessage << std::endl;
 #endif

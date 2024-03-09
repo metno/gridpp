@@ -115,6 +115,6 @@ if (ENABLE_TESTS)
         ${CMAKE_SOURCE_DIR}/tests
         ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
-    add_custom_target(tests COMMAND ${PYTHON_EXECUTABLE} -m nose -e memory)
+    add_custom_target(tests COMMAND ${PYTHON_EXECUTABLE} -m coverage run -m unittest discover)
     add_dependencies(tests tests-data build-python)
 endif()

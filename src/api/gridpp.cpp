@@ -74,3 +74,6 @@ void gridpp::set_debug_level(int level) {
 int gridpp::get_debug_level() {
     return gridpp::_debug_level;
 }
+gridpp::not_implemented_exception::not_implemented_exception() :
+    std::logic_error("Function not yet implemented") {
+};

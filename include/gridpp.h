@@ -1887,7 +1887,7 @@ namespace gridpp {
     class not_implemented_exception: public std::logic_error
     {
         public:
-            not_implemented_exception() : std::logic_error("Function not yet implemented") { };
+            not_implemented_exception();
     };
 
     /** Covariance structure function */

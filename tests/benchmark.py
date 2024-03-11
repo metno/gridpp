@@ -25,6 +25,7 @@ def main():
 
     # Commonly used inputs
     structure = gridpp.BarnesStructure(10000)
+    structure_grid = Structure(Grid(100, args.scaling).compute(), 10000)
     radius = 7
     quantile = 0.5
     thresholds = np.linspace(0, 1, 11)
@@ -60,6 +61,9 @@ def main():
     run[("gridding", "200² 100000")] = {"expected": 0.61, "args":(Grid(200, args.scaling), Points(100000, args.scaling), np.zeros([100000]), 5000, 1, gridpp.Mean)}
     run[("gridding_nearest", "200² 100000")] = {"expected": 0.11, "args":(Grid(200, args.scaling), Points(100000, args.scaling), np.zeros([100000]), 1, gridpp.Mean)}
     run[("optimal_interpolation", "100² 1000")] = {"expected": 0.80, "args":(Grid(100, args.scaling), Input([100, 100], args.scaling), Points(1000, args.scaling), np.zeros(1000), np.ones(1000), np.ones(1000), structure, 20)}
+    if version_minor >= 8:
+        # This is slow in versions before 0.8.0
+        run[("optimal_interpolation", "var len scale")] = {"expected": 0.91, "args":(Grid(100, args.scaling), Input([100, 100], args.scaling), Points(1000, args.scaling), np.zeros(1000), np.ones(1000), np.ones(1000), structure_grid, 20)}
     run[("dewpoint", "1e7")] = {"expected": 0.53, "args":(np.zeros(10000000) + 273.15, np.zeros(10000000))}
     run[("fill", "1e5")] = {"expected": 1.96, "args":(Grid(200, args.scaling), np.zeros([200, 200]), Points(100000, args.scaling), np.ones(100000) * 5000, 1, False)}
     run[("doping_square", "1e5")] = {"expected": 0.12, "args":(Grid(200, args.scaling), np.zeros([200, 200]), Points(100000, args.scaling), np.ones(100000) * 1, np.ones(100000, 'int') * 5, False)}
@@ -272,11 +276,28 @@ class Points(Computable):
         return self.shape == other.shape and self.scaling == other.scaling
 
     def __str__(self):
-        return "Points " + f"{self.shape}"
+        return f"Points {self.shape}"
 
     def __hash__(self):
         return self.shape
 
+class Structure(Computable):
+    def __init__(self, grid, h):
+        self.grid = grid
+        self.h = h
+
+    def compute(self):
+        q = np.ones(self.grid.size())
+        return gridpp.BarnesStructure(self.grid, self.h*q, 0*q, 0*q)
+
+    def __eq__(self, other):
+        return self.h == other.h and self.grid.size() == other.grid.size()
+
+    def __str__(self):
+        return f"Grid {self.grid.size()}"
+
+    def __hash__(self):
+        return hash(str(self.grid.size()))
 
 if __name__ == "__main__":
     main()

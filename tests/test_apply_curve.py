@@ -105,11 +105,11 @@ class Test(unittest.TestCase):
 
     def test_invalid_extrapolation_policy(self):
         policy = -1
-        curve_fcst = np.random.rand(3, 2, 4)
-        curve_ref = np.random.rand(3, 2, 4)
-        field = np.random.rand(3, 2)
+        curve_fcst = [0, 1, 2]
+        curve_ref = [3, 4, 5]
+        input = 3
         with self.assertRaises(ValueError) as e:
-            gridpp.apply_curve(field, curve_ref, curve_fcst, policy, policy)
+            gridpp.apply_curve(input, curve_ref, curve_fcst, policy, policy)
 
 
 if __name__ == '__main__':

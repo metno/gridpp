@@ -3,6 +3,7 @@
 
 using namespace gridpp;
 
+// These two are included because of SWIG. See note about SWIG requirement in gridpp.h
 float gridpp::Transform::forward(float value) const {
     return -1;
 }
@@ -125,12 +126,12 @@ float gridpp::BoxCox::backward(float value) const {
 gridpp::Gamma::Gamma(float shape, float scale, float tolerance) : m_gamma_dist(1, 1), m_norm_dist(), m_tolerance(tolerance) {
     // Initialize the gamma distribution to something that works, and then overwrite it so that
     // we can check for argument errors gracefully
-    if(shape <= 0)
+    if(!gridpp::is_valid(shape) || shape <= 0)
         throw std::invalid_argument("Shape parameter must be > 0 in the gamma distribution");
-    if(scale <= 0)
+    if(!gridpp::is_valid(scale) || scale <= 0)
         throw std::invalid_argument("Scale parameter must be > 0 in the gamma distribution");
-    if(tolerance < 0)
-        throw std::invalid_argument("Tolerance must be > 0 in the gamma distribution");
+    if(!gridpp::is_valid(tolerance) || tolerance < 0)
+        throw std::invalid_argument("Tolerance must be >= 0 in the gamma distribution");
     m_gamma_dist = boost::math::gamma_distribution<> (shape, scale);
 }
 float gridpp::Gamma::forward(float value) const {

@@ -20,6 +20,7 @@ class Test(unittest.TestCase):
 
     def test_invalid_number_of_radii(self):
         values = np.zeros([3, 3])
+        value = 1
         for outside in [False, True]:
             with self.assertRaises(Exception) as e:
                 gridpp.fill(grid, values, points, [1], value, outside)

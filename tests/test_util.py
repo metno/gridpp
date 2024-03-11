@@ -182,5 +182,10 @@ class Test(unittest.TestCase):
             with self.subTest(v=v):
                 self.assertFalse(gridpp.is_valid_lon(v, gridpp.Geodetic))
 
+    def test_set_debug_level(self):
+        for level in [0, 1, 10]:
+            gridpp.set_debug_level(level)
+            self.assertEqual(level, gridpp.get_debug_level())
+
 if __name__ == '__main__':
     unittest.main()

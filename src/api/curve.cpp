@@ -4,6 +4,11 @@
 using namespace gridpp;
 
 float gridpp::apply_curve(float input, const vec& curve_ref, const vec& curve_fcst, gridpp::Extrapolation policy_below, gridpp::Extrapolation policy_above) {
+    if(curve_ref.size() != curve_fcst.size())
+        throw std::invalid_argument("curve_ref and curve_fcst must be the same size");
+    if(curve_ref.size() == 0 || curve_ref.size() == 0)
+        throw std::invalid_argument("curve_ref and curve_fcst cannot have size 0");
+
     int C = curve_fcst.size();
     float smallestObs  = curve_ref[0];
     float smallestFcst = curve_fcst[0];

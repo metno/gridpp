@@ -85,6 +85,32 @@ class Test(unittest.TestCase):
                     output = transform.backward(a)
                     np.testing.assert_almost_equal(output, i, 5)
 
+    def test_gamma_nan_value(self):
+        transform = gridpp.Gamma(1, 2, 0.01)
+        self.assertTrue(np.isnan(transform.forward(np.nan)))
+        self.assertTrue(np.isnan(transform.backward(np.nan)))
+        self.assertTrue(np.isnan(transform.forward([np.nan])).all())
+        self.assertTrue(np.isnan(transform.backward([np.nan])).all())
+
+
+    def test_gamma_tolerance0(self):
+        transform = gridpp.Gamma(1, 2, 0)
+
+    def test_gamma_invalid_arguments(self):
+        """Test exception when shape and/or scale are 0 or less"""
+        for value in [-1, 0, np.nan]:
+            with self.assertRaises(ValueError) as e:
+                transform = gridpp.Gamma(value, 2, 0.01)
+            with self.assertRaises(ValueError) as e:
+                transform = gridpp.Gamma(2, value, 0.01)
+            with self.assertRaises(ValueError) as e:
+                transform = gridpp.Gamma(value, value, 0.01)
+
+        # Tolerance must be >= 0
+        for value in [-1, np.nan]:
+            with self.assertRaises(ValueError) as e:
+                transform = gridpp.Gamma(1, 2, value)
+
     def test_zero_size(self):
         x = np.zeros([0, 1])
         transform = gridpp.Identity()

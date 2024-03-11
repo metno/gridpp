@@ -63,7 +63,7 @@ float gridpp::apply_curve(float input, const vec& curve_ref, const vec& curve_fc
                 slope = dObs / dFcst;
             }
             else {
-                throw std::runtime_error("Unknown extrapolation policy");
+                throw std::invalid_argument("Unknown extrapolation policy");
             }
             output = nearestObs + slope * (input - nearestFcst);
         }

@@ -56,10 +56,18 @@ class Test(unittest.TestCase):
 
     def test_all_extrapolation_policies(self):
         """Check that all policies work"""
+        curve_fcst = np.random.rand(3, 2, 4)
+        curve_ref = np.random.rand(3, 2, 4)
+        field = np.random.rand(3, 2)
         for policy in [gridpp.OneToOne, gridpp.Zero, gridpp.NearestSlope, gridpp.MeanSlope, gridpp.Unchanged]:
-            curve_fcst = np.random.rand(3, 2, 4)
-            curve_ref = np.random.rand(3, 2, 4)
-            field = np.random.rand(3, 2)
+            gridpp.apply_curve(field, curve_ref, curve_fcst, policy, policy)
+
+    def test_invalid_extrapolation_policy(self):
+        policy = -1
+        curve_fcst = np.random.rand(3, 2, 4)
+        curve_ref = np.random.rand(3, 2, 4)
+        field = np.random.rand(3, 2)
+        with self.assertRaises(ValueError) as e:
             gridpp.apply_curve(field, curve_ref, curve_fcst, policy, policy)
 
 

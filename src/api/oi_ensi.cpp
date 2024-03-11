@@ -176,6 +176,13 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         gYhat[i] = mean;
     }
 
+    // Create all objects of type Point (to save time on creation later)
+    std::vector<Point> point_vec;
+    point_vec.reserve(nS);
+    for(int i = 0; i < nS; i++) {
+        point_vec.push_back(points.get_point(i));
+    }
+
     // Calculate number of valid members
     int nValidEns = 0;
     ivec validEns;
@@ -219,8 +226,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         p2.reserve(lLocIndices0.size());
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            Point p = points.get_point(index);
-            p2.push_back(p);
+            p2.push_back(point_vec[index]);
         }
         vec rhos = structure.corr_background(p1, p2);
         for(int i = 0; i < lLocIndices0.size(); i++) {

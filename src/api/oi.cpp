@@ -211,6 +211,13 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
     // Compute the background value at observation points (Y)
     vec gY = pbackground;
 
+    // Create all objects of type Point (to save time on creation later)
+    std::vector<Point> point_vec;
+    point_vec.reserve(nS);
+    for(int i = 0; i < nS; i++) {
+        point_vec.push_back(points.get_point(i));
+    }
+
     #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
         if(!gridpp::is_valid(background[y])) {
@@ -238,8 +245,7 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
         p2.reserve(lLocIndices0.size());
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            Point p = points.get_point(index);
-            p2.push_back(p);
+            p2.push_back(point_vec[index]);
         }
         vec rhos = structure.corr_background(p1, p2);
         for(int i = 0; i < lLocIndices0.size(); i++) {
@@ -295,12 +301,11 @@ vec gridpp::optimal_interpolation_full(const gridpp::Points& bpoints,
             lY(i) = gY[index];
             lR(i, i) = pratios[index];
             lG(0, i) = lRhos(i);
-            Point p1 = points.get_point(index);
+            Point p1 = point_vec[index];
             std::vector<Point> p2(lS, Point(0, 0));
             for(int j = 0; j < lS; j++) {
                 int index_j = lLocIndices[j];
-                Point p = points.get_point(index_j);
-                p2[j] = p;
+                p2[j] = point_vec[index_j];
             }
             vec corr = structure.corr(p1, p2);
             for(int j = 0; j < lS; j++) {

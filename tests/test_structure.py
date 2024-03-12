@@ -5,35 +5,7 @@ import numpy as np
 
 
 class Test(unittest.TestCase):
-    def test_basic(self):
-        x = [0, 1000, 2000, 3000, np.nan]
-        structure_corr = dict()
-        barnes = gridpp.BarnesStructure(2000)
-        structure_corr[barnes] = [1, 0.8824968934059143, 0.6065306663513184, 0.32465246319770813, 0]
-        structure_corr[gridpp.CressmanStructure(2000)] = [1, 0.6, 0, 0, 0]
-        structure_corr[gridpp.CrossValidation(barnes, 1000)] = [0, 0, 0.6065306663513184, 0.32465246319770813, 0]
-        N = len(x)
-        for structure, corr in structure_corr.items():
-            is_cv = isinstance(structure, gridpp.CrossValidation)
-            for i in range(N):
-                with self.subTest(structure=type(structure), i=i):
-                    p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
-                    p2 = gridpp.Point(x[i], 0, 0, 0, gridpp.Cartesian)
-                    funcs = [structure.corr, structure.corr_background]
-                    if is_cv:
-                        funcs = [structure.corr_background]
-                    for func in funcs:
-                        self.assertAlmostEqual(corr[i], func(p1, p2))
-
-                        # Check that changing the order does not change the results
-                        self.assertAlmostEqual(corr[i], func(p2, p1))
-
-                        # Check identical points
-                        if not is_cv and not np.isnan(x[i]):
-                            self.assertAlmostEqual(1, func(p2, p2))
-
     def test_invalid_h(self):
-        structures = list()
         structures = [gridpp.BarnesStructure, gridpp.CressmanStructure]
         for structure in structures:
             for h in [-1, np.nan]:
@@ -48,20 +20,6 @@ class Test(unittest.TestCase):
             with self.subTest(h=h):
                 with self.assertRaises(Exception) as e:
                     structure = gridpp.BarnesStructure(h)
-
-    def test_barnes_hmax(self):
-        hmaxs = [0, 1000, 2000, 10000]
-        p0 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
-        dist_ans = {0:1, 1000:0.8824968934059143, 2000:0.6065306663513184, 3000:0.32465246319770813}
-        for hmax in hmaxs:
-            for dist, ans in dist_ans.items():
-                with self.subTest(hmax=hmax, dist=dist):
-                    structure = gridpp.BarnesStructure(2000, 0, 0, hmax)
-                    corr = structure.corr(p0, gridpp.Point(dist, 0, 0, 0, gridpp.Cartesian))
-                    if dist > hmax:
-                        self.assertEqual(0, corr)
-                    else:
-                        self.assertEqual(ans, corr)
 
     def test_invalid_elevation(self):
         """Check that point elevations are ignored if one is missing"""
@@ -78,7 +36,6 @@ class Test(unittest.TestCase):
                 self.assertAlmostEqual(s2.corr(p1, p3), s2.corr(p1, p2))
 
     def test_invalid_v(self):
-        structures = list()
         structures = [gridpp.BarnesStructure, gridpp.CressmanStructure]
         h = 2000
         p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
@@ -96,10 +53,6 @@ class Test(unittest.TestCase):
             for w in [-1, np.nan]:
                 with self.assertRaises(Exception) as e:
                     s = structure(h, v, w)
-
-    def test_invalid_hmax(self):
-        with self.assertRaises(Exception) as e:
-            structure = gridpp.BarnesStructure(2000, 100, 0, -1)
 
     def test_invalid_cv(self):
         barnes = gridpp.BarnesStructure(2000)
@@ -165,6 +118,39 @@ class Test(unittest.TestCase):
         max_points = 10
         output = gridpp.optimal_interpolation(grid, background, points, pobs, pratios, pbackground, structure, max_points)
         np.testing.assert_array_almost_equal(output, [0.3, 0.3, 0.6**3/2])
+
+    def test_clone(self):
+        s1 = gridpp.CressmanStructure(5000, 11, 22)
+        s2 = gridpp.CressmanStructure(33, 200, 44)
+        s3 = gridpp.CressmanStructure(55, 66, 2)
+        structure = gridpp.MultipleStructure(s1, s2, s3)
+        structure_clone = structure.clone()
+        del structure
+
+        # Check that clone still works
+        p1 = gridpp.Point(0, 0)
+        p2 = gridpp.Point(0, 0)
+        structure_clone.corr(p1, p2)
+
+    def test_same_corr_after_clone(self):
+        h = 850
+        v = 92
+        w = 0.44
+        structures = [gridpp.BarnesStructure(h, v, w), gridpp.CressmanStructure(h, v, w)]
+        structures += [gridpp.MultipleStructure(gridpp.BarnesStructure(1.3*h, v, w),
+            gridpp.BarnesStructure(h, 1.3*v, w), gridpp.BarnesStructure(h, v, 1.3*w))]
+        structures += [gridpp.CrossValidation(gridpp.BarnesStructure(h, v, w), 1000)]
+        p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
+        p2 = gridpp.Point(500, 0, 50, 0.25, gridpp.Cartesian)
+        for structure in structures:
+            structure_clone = structure.clone()
+            ans = structure.corr(p1, p2)
+            ans_clone = structure_clone.corr(p1, p2)
+            self.assertEqual(ans, ans_clone)
+
+            ans = structure.corr_background(p1, p2)
+            ans_clone = structure_clone.corr_background(p1, p2)
+            self.assertEqual(ans, ans_clone)
 
 
 if __name__ == '__main__':

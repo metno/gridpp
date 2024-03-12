@@ -13,6 +13,8 @@ class Test(unittest.TestCase):
 
     def test_invalid_values(self):
         self.assertTrue(np.isnan(gridpp.qnh([-1], [0])))
+        self.assertTrue(np.isnan(gridpp.qnh([101325], [np.nan])))
+        self.assertTrue(np.isnan(gridpp.qnh([np.nan], [0])))
 
     def test_1(self):
         p = [101325, 90000, 90000, 110000]

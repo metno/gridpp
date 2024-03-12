@@ -1940,6 +1940,7 @@ namespace gridpp {
               * @param structure_w: Land/sea structure function
             */
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
+            ~MultipleStructure();
             float corr(const Point& p1, const Point& p2) const;
             vec corr(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunction* clone() const;
@@ -1997,9 +1998,11 @@ namespace gridpp {
     class CrossValidation: public StructureFunction {
         public:
             /** Structure function for performing cross validation experiments
-              * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]. If MV, disable this.
+              * @param structure: Base structure function to use
+              * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]
             */
-            CrossValidation(StructureFunction& structure, float dist=MV);
+            CrossValidation(StructureFunction& structure, float dist);
+            ~CrossValidation();
             float corr(const Point& p1, const Point& p2) const;
             float corr_background(const Point& p1, const Point& p2) const;
             vec corr_background(const Point& p1, const std::vector<Point>& p2) const;

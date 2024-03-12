@@ -95,6 +95,11 @@ gridpp::StructureFunction* gridpp::MultipleStructure::clone() const {
     gridpp::StructureFunction* val = new gridpp::MultipleStructure(*m_structure_h, *m_structure_v, *m_structure_w);
     return val;
 }
+gridpp::MultipleStructure::~MultipleStructure() {
+    delete m_structure_h;
+    delete m_structure_v;
+    delete m_structure_w;
+}
 
 /** Barnes */
 gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) :
@@ -299,9 +304,12 @@ vec gridpp::CrossValidation::corr_background(const Point& p1, const std::vector<
     return curr_corr;
 }
 gridpp::StructureFunction* gridpp::CrossValidation::clone() const {
-    gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure);
+    gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure, m_dist);
     return val;
 }
 float gridpp::CrossValidation::localization_distance(const Point& p) const {
     return m_structure->localization_distance(p);
+}
+gridpp::CrossValidation::~CrossValidation() {
+    delete m_structure;
 }

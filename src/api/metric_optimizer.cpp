@@ -226,9 +226,9 @@ float gridpp::calc_score(float a, float b, float c, float d, gridpp::Metric metr
         return (a * d - b * c) * 1.0 / ((a + c) * (b + d));
     }
     else if(metric == gridpp::Bias) {
-        if(b + c == 0)
-            return gridpp::MV;
-        // std::cout << a << " " << b << " " << c << " " << d << std::endl;
+        if(b == c)
+            return 1;
+
         float value = 1-float(fabs(b - c))/(b + c);
         return value;
     }

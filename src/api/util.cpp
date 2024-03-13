@@ -185,7 +185,8 @@ vec gridpp::calc_quantile(const vec2& array, float quantile) {
     return output;
 }
 vec2 gridpp::calc_quantile(const vec3& array, const vec2& quantile) {
-    gridpp::compatible_size(quantile, array);
+    if(!gridpp::compatible_size(quantile, array))
+        throw std::invalid_argument("Dimension mismatch between array and quantile");
     int Y = array.size();
     if(Y == 0)
         return vec2();

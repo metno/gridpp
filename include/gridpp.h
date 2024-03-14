@@ -1890,6 +1890,7 @@ namespace gridpp {
             not_implemented_exception();
     };
 
+    typedef std::shared_ptr<gridpp::StructureFunction> StructureFunctionPtr;
     /** Covariance structure function */
     class StructureFunction {
         public:
@@ -1914,7 +1915,7 @@ namespace gridpp {
               * @returns Distance [m]
             */
             virtual float localization_distance(const Point& p) const;
-            virtual StructureFunction* clone() const = 0;
+            virtual StructureFunctionPtr clone() const = 0;
             static const float default_min_rho;
         protected:
             /** Barnes correlation function
@@ -1940,15 +1941,14 @@ namespace gridpp {
               * @param structure_w: Land/sea structure function
             */
             MultipleStructure(const StructureFunction& structure_h, const StructureFunction& structure_v, const StructureFunction& structure_w);
-            ~MultipleStructure();
             float corr(const Point& p1, const Point& p2) const;
             vec corr(const Point& p1, const std::vector<Point>& p2) const;
-            StructureFunction* clone() const;
+            StructureFunctionPtr clone() const;
             float localization_distance(const Point& p) const;
         private:
-            StructureFunction* m_structure_h;
-            StructureFunction* m_structure_v;
-            StructureFunction* m_structure_w;
+            StructureFunctionPtr m_structure_h;
+            StructureFunctionPtr m_structure_v;
+            StructureFunctionPtr m_structure_w;
     };
     /** Simple structure function based on distance, elevation, and land area fraction */
     class BarnesStructure: public StructureFunction {
@@ -1971,7 +1971,7 @@ namespace gridpp {
             BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
             vec corr(const Point& p1, const std::vector<Point>& p2) const;
-            StructureFunction* clone() const;
+            StructureFunctionPtr clone() const;
             float localization_distance(const Point& p) const;
         private:
             float localization_distance(float h) const;
@@ -1988,7 +1988,7 @@ namespace gridpp {
         public:
             CressmanStructure(float h, float v=0, float w=0);
             float corr(const Point& p1, const Point& p2) const;
-            StructureFunction* clone() const;
+            StructureFunctionPtr clone() const;
         private:
             float mH;
             float mV;
@@ -2002,14 +2002,13 @@ namespace gridpp {
               * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]
             */
             CrossValidation(StructureFunction& structure, float dist);
-            ~CrossValidation();
             float corr(const Point& p1, const Point& p2) const;
             float corr_background(const Point& p1, const Point& p2) const;
             vec corr_background(const Point& p1, const std::vector<Point>& p2) const;
-            StructureFunction* clone() const;
+            StructureFunctionPtr clone() const;
             float localization_distance(const Point& p) const;
         private:
-            StructureFunction* m_structure;
+            StructureFunctionPtr m_structure;
             float m_dist;
     };
 

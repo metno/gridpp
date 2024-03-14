@@ -38,6 +38,17 @@
         SWIG_exception(SWIG_RuntimeError, "Unknown exception");
     }
 }
+/* This is needed to make sure that functions returning smart pointers
+ * can be accessed properly in python. E.g. calling .corr on a structure function
+ * smart pointer
+*/
+%include <std_shared_ptr.i>
+%shared_ptr(gridpp::StructureFunction)
+%shared_ptr(gridpp::MultipleStructure)
+%shared_ptr(gridpp::BarnesStructure)
+%shared_ptr(gridpp::CressmanStructure)
+%shared_ptr(gridpp::CrossValidation)
+
 %include "vector.i"
 %apply std::vector<std::vector<float> >& OUTPUT { std::vector<std::vector<float> >& output };
 %apply std::vector<std::vector<int> >& OUTPUT { std::vector<std::vector<int> >& count };

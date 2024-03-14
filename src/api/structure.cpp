@@ -91,14 +91,8 @@ vec gridpp::MultipleStructure::corr(const Point& p1, const std::vector<Point>& p
     return corr_total;
 
 }
-gridpp::StructureFunction* gridpp::MultipleStructure::clone() const {
-    gridpp::StructureFunction* val = new gridpp::MultipleStructure(*m_structure_h, *m_structure_v, *m_structure_w);
-    return val;
-}
-gridpp::MultipleStructure::~MultipleStructure() {
-    delete m_structure_h;
-    delete m_structure_v;
-    delete m_structure_w;
+gridpp::StructureFunctionPtr gridpp::MultipleStructure::clone() const {
+    return std::make_shared<gridpp::MultipleStructure>(*m_structure_h, *m_structure_v, *m_structure_w);
 }
 
 /** Barnes */
@@ -227,9 +221,8 @@ vec gridpp::BarnesStructure::corr(const Point& p1, const std::vector<Point>& p2)
     }
     return output;
 }
-gridpp::StructureFunction* gridpp::BarnesStructure::clone() const {
-    gridpp::StructureFunction* val = new gridpp::BarnesStructure(m_grid, mH, mV, mW, m_min_rho);
-    return val;
+gridpp::StructureFunctionPtr gridpp::BarnesStructure::clone() const {
+    return std::make_shared<gridpp::BarnesStructure>(m_grid, mH, mV, mW, m_min_rho);
 }
 float gridpp::BarnesStructure::localization_distance(const Point& p) const {
     if(m_is_spatial) {
@@ -268,9 +261,8 @@ float gridpp::CressmanStructure::corr(const Point& p1, const Point& p2) const {
     }
     return rho;
 }
-gridpp::StructureFunction* gridpp::CressmanStructure::clone() const {
-    gridpp::StructureFunction* val = new gridpp::CressmanStructure(mH, mV, mW);
-    return val;
+gridpp::StructureFunctionPtr gridpp::CressmanStructure::clone() const {
+    return std::make_shared<gridpp::CressmanStructure>(mH, mV, mW);
 }
 
 /** CrossValidation */
@@ -303,13 +295,9 @@ vec gridpp::CrossValidation::corr_background(const Point& p1, const std::vector<
     }
     return curr_corr;
 }
-gridpp::StructureFunction* gridpp::CrossValidation::clone() const {
-    gridpp::StructureFunction* val = new gridpp::CrossValidation(*m_structure, m_dist);
-    return val;
+gridpp::StructureFunctionPtr gridpp::CrossValidation::clone() const {
+    return std::make_shared<gridpp::CrossValidation>(*m_structure, m_dist);
 }
 float gridpp::CrossValidation::localization_distance(const Point& p) const {
     return m_structure->localization_distance(p);
-}
-gridpp::CrossValidation::~CrossValidation() {
-    delete m_structure;
 }

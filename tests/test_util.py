@@ -78,11 +78,40 @@ class Test(unittest.TestCase):
         self.assertEqual(len(quantile_of_nan_list), 1)
         self.assertTrue(np.isnan(quantile_of_nan_list[0]))
 
+    def test_calc_quantile_spatially_varying(self):
+        Q = 5
+        Y = 3
+        X = 2
+        input = np.reshape(np.arange(Y * X * Q), [Y, X, Q])
+        levels = np.reshape([0.25, 0.6]*int(Y*X/2), [Y, X])
+        output = gridpp.calc_quantile(input, levels)
+        expected = np.reshape([1, 7.4, 11, 17.4, 21, 27.4], [Y, X])
+        np.testing.assert_array_almost_equal(output, expected)
+
+    def test_calc_quantile_spatially_varying_invalid_arguments(self):
+        with self.assertRaises(ValueError) as e:
+            # Dimension mismatch
+            gridpp.calc_quantile(np.zeros([2, 3, 4]), np.zeros([1,3]))
+
+    def test_calc_quantile_spatially_varying_empty(self):
+        output = gridpp.calc_quantile(np.zeros([2, 0, 3]), np.zeros([2, 0]))
+        np.testing.assert_array_almost_equal(output.shape, [0, 0])
+
+        output = gridpp.calc_quantile(np.zeros([0, 2, 3]), np.zeros([0, 2]))
+        np.testing.assert_array_almost_equal(output.shape, [0, 0])
+
+        output = gridpp.calc_quantile(np.zeros([2, 2, 0]), np.zeros([2, 2]))
+        np.testing.assert_array_almost_equal(output, np.nan*np.zeros([2, 2]))
+
     def test_calc_quantile_invalid_argument(self):
         quantiles = [1.1, -0.1]
         for quantile in quantiles:
             with self.assertRaises(ValueError) as e:
                 gridpp.calc_quantile([0, 1, 2], quantile)
+            with self.assertRaises(ValueError) as e:
+                gridpp.calc_quantile([[0, 1, 2]], quantile)
+            with self.assertRaises(ValueError) as e:
+                gridpp.calc_quantile(np.zeros([2,3,4]), quantile*np.ones([2,3]))
         self.assertTrue(np.isnan(gridpp.calc_quantile([0, 1, 2], np.nan)))
 
     def test_calc_statistic_randomchoice(self):
@@ -186,6 +215,62 @@ class Test(unittest.TestCase):
         for level in [0, 1, 10]:
             gridpp.set_debug_level(level)
             self.assertEqual(level, gridpp.get_debug_level())
+
+    def test_debug(self):
+        gridpp.debug("test")
+        gridpp.debug("")
+
+    def test_future_deprecation_warning(self):
+        gridpp.future_deprecation_warning("test")
+        gridpp.future_deprecation_warning("")
+        gridpp.future_deprecation_warning("test", "other")
+        gridpp.future_deprecation_warning("", "other")
+        gridpp.future_deprecation_warning("", "")
+
+    def test_calc_even_quantiles(self):
+        output = gridpp.calc_even_quantiles([1,2,3], 2)
+        np.testing.assert_array_almost_equal(output, [1,3])
+
+        # First and last
+        output = gridpp.calc_even_quantiles(range(10), 2)
+        np.testing.assert_array_almost_equal(output, [0,9])
+
+        # Repeated first number
+        output = gridpp.calc_even_quantiles([1,1,1,1,1,5, 10], 3)
+        np.testing.assert_array_almost_equal(output, [1, 5, 10])
+
+        output = gridpp.calc_even_quantiles([1,1,1,1,1,5, 10], 2)
+        np.testing.assert_array_almost_equal(output, [1, 10])
+
+        output = gridpp.calc_even_quantiles([1,1,1,1,4,5, 10], 3)
+        np.testing.assert_array_almost_equal(output, [1, 4, 10])
+
+        # Repeated numbers
+        for num in [1, 2, 3]:
+            with self.subTest(num=num):
+                output = gridpp.calc_even_quantiles([1,1,1], num)
+                np.testing.assert_array_almost_equal(output, [1])
+
+        # Too little data
+        output = gridpp.calc_even_quantiles([1,2,3], 3)
+        np.testing.assert_array_almost_equal(output, [1,2,3])
+
+        # Too little data with repeated
+        output = gridpp.calc_even_quantiles([1,1,3], 3)
+        np.testing.assert_array_almost_equal(output, [1,3])
+
+        output = gridpp.calc_even_quantiles([1], 2)
+        np.testing.assert_array_almost_equal(output, [1])
+
+        # Empty arrays
+        output = gridpp.calc_even_quantiles([1,2,3], 0)
+        np.testing.assert_array_almost_equal(output, [])
+
+        output = gridpp.calc_even_quantiles([], 0)
+        np.testing.assert_array_almost_equal(output, [])
+
+        output = gridpp.calc_even_quantiles([], 2)
+        np.testing.assert_array_almost_equal(output, [])
 
 if __name__ == '__main__':
     unittest.main()

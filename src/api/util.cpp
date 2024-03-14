@@ -194,8 +194,10 @@ vec2 gridpp::calc_quantile(const vec3& array, const vec2& quantile) {
     if(X == 0)
         return vec2();
     int T = array[0][0].size();
-    if(T == 0)
-        return vec2();
+    if(T == 0) {
+        vec2 output = gridpp::init_vec2(Y, X, gridpp::MV);
+        return output;
+    }
     vec2 output = gridpp::init_vec2(Y, X);
     for(int y = 0; y < Y; y++) {
         for(int x = 0; x < X; x++) {
@@ -257,48 +259,76 @@ double gridpp::clock() {
     return sec + msec/1e6;
 }
 vec gridpp::calc_even_quantiles(const vec& values, int num) {
-    if(num >= values.size())
-        return  values;
-
     vec quantiles;
-    if(num == 0)
+    int size = values.size();
+    if(num == 0 || size == 0)
         return quantiles;
 
     vec sorted = values;
     std::sort(sorted.begin(), sorted.end());
 
-    quantiles.reserve(num);
-    quantiles.push_back(sorted[0]);
+    // Asking for more quantiles than we have data points
+    if(num >= size) {
+        // Find the unique values
+        quantiles.reserve(num);
+        quantiles.push_back(sorted[0]);
+        for(int i = 1; i < size; i++) {
+            if(sorted[i] != sorted[i-1])
+                quantiles.push_back(sorted[i]);
+        }
+        return  quantiles;
+    }
+
+
+    float lowest = sorted[0];
+    float highest = sorted[size - 1];
+
+    // If there are multiple identical values at the start, pick the first value past the set of
+    // identical values
     int count_lower = 0;
     for(int i = 0; i < sorted.size(); i++) {
-        if(sorted[i] != quantiles[0])
+        if(sorted[i] != lowest)
             break;
         count_lower++;
     }
-    int size = sorted.size();
-    if(count_lower > size / num)
+    quantiles.reserve(num);
+    quantiles.push_back(lowest);
+    float last_added = lowest;
+    if(num == 2) {
+        if(lowest != highest)
+            quantiles.push_back(highest);
+        return quantiles;
+    }
+
+    // Add the first past the lowest set of repeated values
+    bool repeated_at_beginning = count_lower < size && count_lower > size / num;
+    if(repeated_at_beginning) {
+        assert(count_lower < sorted.size());
         quantiles.push_back(sorted[count_lower]);
+    }
+    last_added = quantiles[quantiles.size() - 1];
 
     // Remove duplicates
-    vec values_unique;
-    values_unique.reserve(sorted.size());
-    float last_quantile = quantiles[quantiles.size() - 1];
+    vec remaining_unique_values;
+    remaining_unique_values.reserve(sorted.size());
     for(int i = 0; i < sorted.size(); i++) {
-        if(sorted[i] > last_quantile && (values_unique.size() == 0 || sorted[i] != values_unique[values_unique.size() - 1]))
-            values_unique.push_back(sorted[i]);
+        if(sorted[i] > last_added && (remaining_unique_values.size() == 0 || sorted[i] != remaining_unique_values[remaining_unique_values.size() - 1]))
+            remaining_unique_values.push_back(sorted[i]);
     }
-    if(values_unique.size() > 0) {
+
+    if(remaining_unique_values.size() > 0) {
         int num_left = num - quantiles.size();
         for(int i = 1; i <= num_left; i++) {
             float f = float(i) / (num_left);
-            int index = values_unique.size() * f - 1;
+            int index = remaining_unique_values.size() * f - 1;
             if(index >= 0) {
-                float value = values_unique[index];
+                assert(index < remaining_unique_values.size());
+                float value = remaining_unique_values[index];
                 quantiles.push_back(value);
             }
             else {
-                std::cout << i << " " << f << " " << index << " " << num_left << " " << values_unique.size() << std::endl;
-                std::cout << count_lower << " " << sorted.size() << " " << last_quantile << std::endl;
+                std::cout << i << " " << f << " " << index << " " << num_left << " " << remaining_unique_values.size() << std::endl;
+                std::cout << count_lower << " " << sorted.size() << " " << last_added << std::endl;
                 throw std::runtime_error("Internal error in calc_even_quantiles.");
             }
         }

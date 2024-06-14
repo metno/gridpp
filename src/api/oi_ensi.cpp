@@ -112,6 +112,8 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
 }
 vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         const vec2& background,
+        const vec2& other_background,
+        const vec2& original_background,
         const gridpp::Points& points,
         const vec& pobs,  // gObs
         const vec& psigmas,   // pci
@@ -126,6 +128,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     }
     if(background.size() != bpoints.size())
         throw std::invalid_argument("Input field is not the same size as the grid");
+    // TODO: Check new backgrounds
     if(pobs.size() != points.size())
         throw std::invalid_argument("Observations and points exception mismatch");
     if(psigmas.size() != points.size())
@@ -184,6 +187,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
     }
 
     // Calculate number of valid members
+    // TODO: Check the two other backgrounds
     int nValidEns = 0;
     ivec validEns;
     for(int e = 0; e < nEns; e++) {
@@ -448,7 +452,7 @@ vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         int count = 0;
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            float value = background[y][ei];
+            float value = original_background[y][ei];
             if(gridpp::is_valid(value)) {
                 X(e) = value;
                 total += value;

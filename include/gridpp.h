@@ -293,6 +293,20 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
+    vec2 optimal_interpolation_ensi(const Points& bpoints,
+            const vec2& background,       // T
+            // const vec2& other_background, // Precip
+            const vec2& original_background, // T
+            // const vec2& other_original_background,  // Precip
+            const Points& obs_points,
+            const vec& obs,  // Precip
+            const vec& obs_standard_deviations, // Precip
+            const vec2& background_at_points, // Precip
+            const vec2& original_background_at_points, // Precip origin
+            const StructureFunction& structure,
+            int max_points,
+            bool allow_extrapolation=true);
+
     /** Correction of a gridded field ensuring the distribution of values nearby match that of
       * observations. This is an experimental method.
       * @param bgrid Grid of background field

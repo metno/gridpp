@@ -78,9 +78,11 @@ def main():
     run[("gamma_inv", "5*201*476")] = {"expected": 1.168, "args": (np.random.rand(5*201*476)*0.9 + 0.05, np.random.rand(5*201*476), np.random.rand(5*201*476))}
     run[("apply_curve", "")] = {"expected": 0.06, "args": (I2000, np.random.rand(2000), np.random.rand(2000), gridpp.OneToOne, gridpp.OneToOne)}
     run[("apply_curve", "gridded")] = {"expected": 0.87, "args": (I2000, x, y, gridpp.OneToOne, gridpp.OneToOne)}
-    run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([2000, 2000, 10], np.float32),)}
-    run[("init_vec3")] = {"expected": 0.8, "args": (1000, 1000, 200)}
+    run[("test_vec3_input")] = {"expected": 0.35, "args": (np.zeros([int(2000*args.scaling), 2000, 10], np.float32),)}
+    run[("init_vec3")] = {"expected": 0.8, "args": (int(1000*args.scaling), 1000, 200)}
+    run[("get_optimal_threshold", "1e6")] = {"expected": 0.38, "args": (np.random.randn(1000*1000), np.random.randn(1000*1000), 0, gridpp.Ets)}
 
+    # metric_optimizer_curve
     if args.num_cores is not None:
         print("Gridpp parallelization test (gridpp version %s)" % gridpp.version())
     else:
@@ -253,7 +255,8 @@ class Grid(Computable):
         self.scaling = scaling
 
     def compute(self):
-        return gridpp.Grid(*np.meshgrid(np.linspace(0, 1, self.shape), np.linspace(0, 1, int(self.shape * self.scaling))))
+        y, x = np.meshgrid(np.linspace(0, 1, self.shape), np.linspace(0, 1, int(self.shape * self.scaling)))
+        return gridpp.Grid(y, x, 0*x, 0*x)
 
     def __eq__(self, other):
         return self.shape == other.shape and self.scaling == other.scaling
@@ -294,7 +297,7 @@ class Structure(Computable):
         return self.h == other.h and self.grid.size() == other.grid.size()
 
     def __str__(self):
-        return f"Grid {self.grid.size()}"
+        return f"Structure {self.grid.size()}"
 
     def __hash__(self):
         return hash(str(self.grid.size()))

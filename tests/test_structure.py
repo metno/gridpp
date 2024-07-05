@@ -143,14 +143,15 @@ class Test(unittest.TestCase):
         p1 = gridpp.Point(0, 0, 0, 0, gridpp.Cartesian)
         p2 = gridpp.Point(500, 0, 50, 0.25, gridpp.Cartesian)
         for structure in structures:
-            structure_clone = structure.clone()
-            ans = structure.corr(p1, p2)
-            ans_clone = structure_clone.corr(p1, p2)
-            self.assertEqual(ans, ans_clone)
+            with self.subTest(structure=structure):
+                structure_clone = structure.clone()
+                ans = structure.corr(p1, p2)
+                ans_clone = structure_clone.corr(p1, p2)
+                self.assertEqual(ans, ans_clone)
 
-            ans = structure.corr_background(p1, p2)
-            ans_clone = structure_clone.corr_background(p1, p2)
-            self.assertEqual(ans, ans_clone)
+                ans = structure.corr_background(p1, p2)
+                ans_clone = structure_clone.corr_background(p1, p2)
+                self.assertEqual(ans, ans_clone)
 
 
 if __name__ == '__main__':

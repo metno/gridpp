@@ -293,17 +293,34 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    vec2 optimal_interpolation_ensi(const Points& bpoints,
-            const vec2& background,       // T
-            // const vec2& other_background, // Precip
-            const vec2& original_background, // T
-            // const vec2& other_original_background,  // Precip
+    /** Optimal interpolation for an ensemble gridded field (alternative version)
+      * Work in progress
+      * @param bgrid Grid of background field
+      * @param background 3D vector of (left) background values to update (Y, X, E)
+      * @param background 3D vector of (LEFT) background values (Y, X, E) used to compute correlations
+      * @param obs_points observation points
+      * @param obs 2D vector of perturbed observations (S, E)
+      * @param background 3D vector of (right) background values used to compute innovations (Y, X, E)
+      * @param background 3D vector of (RIGHT) background values (Y, X, E) used to compute correlations
+      * @param structure Structure function
+      * @param variance_ratio (ratio of observation to right background error variance)
+      * @param standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param weight given to the analysis increment
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 3D vector of analised values (Y, X, E)
+    */
+    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
+            const vec3& background_l,
+            const vec3& background_L,
             const Points& obs_points,
-            const vec& obs,  // Precip
-            const vec& obs_standard_deviations, // Precip
-            const vec2& background_at_points, // Precip
-            const vec2& original_background_at_points, // Precip origin
+            const vec& obs,
+            const vec2& pbackground_r,
+            const vec2& pbackground_R,
             const StructureFunction& structure,
+            float var_ratios_or,
+            float std_ratios_lr,
+            float weigth,
             int max_points,
             bool allow_extrapolation=true);
 

@@ -66,32 +66,32 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
         throw std::invalid_argument("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
     }
     // Check ensembles have consistent sizes
+    int nE = background_l[0][0].size();
     if(background_l.size() != nY || background_l[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input left field (" << background_l.size() << "," << background_l[0].size() << "," background_l[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input left field (" << background_l.size() << "," << background_l[0].size() << "," << background_l[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
-    int nE = background_l[0][0].size();
     if(background_L.size() != nY || background_L[0].size() != nX || background_L[0][0].size() != nE) {
         std::stringstream ss;
-        ss << "Input LEFT field (" << background_L.size() << "," << background_L[0].size() << "," background_L[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input LEFT field (" << background_L.size() << "," << background_L[0].size() << "," << background_L[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
     if(pbackground_r.size() != nS || pbackground_r[0].size() != nE) {
         std::stringstream ss;
-        ss << "Input right field at observation location (" << pbackground_r.size() << "," << pbackground_r[0].size() << ") and points (" << nS "," << nE << ") size mismatch";
+        ss << "Input right field at observation location (" << pbackground_r.size() << "," << pbackground_r[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
 
     if(pbackground_R.size() != nS || pbackground_R[0].size() != nE) {
         std::stringstream ss;
-        ss << "Input RIGHT field at observation location (" << pbackground_R.size() << "," << pbackground_R[0].size() << ") and points (" << nS "," << nE << ") size mismatch";
+        ss << "Input RIGHT field at observation location (" << pbackground_R.size() << "," << pbackground_R[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
     // Check observations have consistent size
     if(pobs.size() != nS || pobs[0].size() != nE) {
         std::stringstream ss;
-        ss << "Observations (" << pobs.size() << "," << pobs[0].size() << ") and points (" << nS "," << nE << ") size mismatch";
+        ss << "Observations (" << pobs.size() << "," << pobs[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
     
@@ -195,8 +195,8 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
                 numInvalid++;
         }
         for(int i = 0; i < nS; i++) {
-            float value_r = pbackground_r[y][e];
-            float value_R = pbackground_R[y][e];
+            float value_r = pbackground_r[i][e];
+            float value_R = pbackground_R[i][e];
             if(!gridpp::is_valid(value_r) || !gridpp::is_valid(value_R))
                 numInvalid++;
         }
@@ -267,9 +267,9 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         vec rhos = structure.corr_background(p1, p2);
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
-            if(gridpp::is_valid(pobs[index])) {
-                if(rhos_static_lr[i] > 0) {
-                    lRhos0.push_back(std::pair<float,int>(rhos_static_lr[i], i));
+            if(gridpp::is_valid(pobs[index][0])) {
+                if(rhos[i] > 0) {
+                    lRhos0.push_back(std::pair<float,int>(rhos[i], i));
                 }
             }
         }
@@ -322,7 +322,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         float std = gridpp::calc_statistic(backgroundValid_L, gridpp::Std);
         if(gridpp::is_valid(mean) && gridpp::is_valid(std) && std != 0) {
             for(int e = 0; e < nValidEns; e++) 
-                lX_L[0][e] = 1 / sqrt(nValidEns-1) * (backgroundValid_L[e] - mean) / std;
+                lX_L(0,e) = 1 / sqrt(nValidEns-1) * (backgroundValid_L[e] - mean) / std;
         }
         // lZ_R: used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
         mattype lZ_R(lS, nValidEns);
@@ -372,13 +372,13 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         // Anti-extrapolation filter //
         ///////////////////////////////
         if(!allow_extrapolation) {
-            vectype MaxIncEns = arma::max(lInnov);
-            vectype MinIncEns = arma::min(lInnov);
+            vectype maxIncEns = arma::max(lInnov);
+            vectype minIncEns = arma::min(lInnov);
 
             for(int e = 0; e < nValidEns; e++) {
                 float increment = dx[e];
-                float MaxInc = MaxIncEns[e];
-                float MinInc = MinIncEns[e];
+                float maxInc = maxIncEns[e];
+                float minInc = minIncEns[e];
                 if(maxInc > 0 && increment > maxInc) {
                    increment = maxInc;
                 }

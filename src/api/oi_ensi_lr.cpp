@@ -31,16 +31,16 @@ template void print_matrix< ::mattype>(::mattype matrix);
 template void print_matrix< ::cxtype>(::cxtype matrix);
 
 vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
-        const vec3& background_l, // left background: field to update
-        const vec3& background_L, // LEFT background: field used for dynamical correlations
+        const vec3& background_l, 
+        const vec3& background_L, 
         const gridpp::Points& points,
         const vec2& pobs,
-        const vec2& pbackground_r, // right background: new information at observations points
-        const vec2& pbackground_R, // RIGHT background: information at obs points for dynamical correlations
+        const vec2& pbackground_r, 
+        const vec2& pbackground_R,
         const gridpp::StructureFunction& structure,
-        float var_ratios_or, // eps2
-        float std_ratios_lr, // gamma
-        float weigth, // beta
+        float var_ratios_or, 
+        float std_ratios_lr,
+        float weigth, 
         int max_points,
         bool allow_extrapolation) {
     double s_time = gridpp::clock();
@@ -122,16 +122,16 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
     return output;
 }
 vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
-        const vec2& background_l, // left background: field to update
-        const vec2& background_L, // LEFT background: field used for dynamical correlations
+        const vec2& background_l, 
+        const vec2& background_L, 
         const gridpp::Points& points,
-        const vec& pobs,  // gObs
-        const vec2& pbackground_r, // right background: new information at observations points
-        const vec2& pbackground_R, // RIGHT background: information at obs points for dynamical correlations
+        const vec2& pobs,  
+        const vec2& pbackground_r, 
+        const vec2& pbackground_R,
         const gridpp::StructureFunction& structure,
-        float var_ratios_or, // eps2
-        float std_ratios_lr, // gamma
-        float weigth, // beta
+        float var_ratios_or,
+        float std_ratios_lr,
+        float weigth,
         int max_points,
         bool allow_extrapolation) {
     if(max_points < 0)

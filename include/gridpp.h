@@ -310,7 +310,7 @@ namespace gridpp {
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
       * @returns 3D vector of analised values (Y, X, E)
     */
-    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
+/*    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
             const vec3& background_l,
             const vec3& background_L,
             const Points& obs_points,
@@ -322,7 +322,7 @@ namespace gridpp {
             float std_ratios_lr,
             float weigth,
             int max_points,
-            bool allow_extrapolation=true);
+            bool allow_extrapolation=true); */
 
     /** Optimal interpolation for an ensemble gridded field (alternative version)
       * Work in progress
@@ -333,7 +333,9 @@ namespace gridpp {
       * @param obs 2D vector of perturbed observations (S, E)
       * @param background 3D vector of (right) background values used to compute innovations (Y, X, E)
       * @param background 3D vector of (RIGHT) background values (Y, X, E) used to compute correlations
-      * @param structure Structure function
+      * @param dh structure Structure function par 1
+      * @param dz structure Structure function par 2
+      * @param dw structure Structure function par 3
       * @param variance_ratio (ratio of observation to right background error variance)
       * @param standard deviation ratio (ratio of left to right background error standard deviation)
       * @param weight given to the analysis increment
@@ -348,7 +350,10 @@ namespace gridpp {
             const vec2& obs,
             const vec2& pbackground_r,
             const vec2& pbackground_R,
-            const StructureFunction& structure,
+/*            const StructureFunction& structure, */
+            float dh,
+            float dz,
+            float dw,
             float var_ratios_or,
             float std_ratios_lr,
             float weigth,
@@ -1591,6 +1596,8 @@ namespace gridpp {
     float test_vec2_argout(vec2& distances);
 
     void test_not_implemented_exception();
+/*    vec2 test_args_for_R(const Points& bpoints, const StructureFunction& structure, const vec2& background);*/
+    vec2 test_args_for_R(const Points& bpoints, const vec2& background);
 
     /** Default value used to fill array in SWIG testing functions. Not useful for any other purpose. */
     static const float swig_default_value = -1;

@@ -30,7 +30,7 @@ void print_matrix(Matrix matrix) {
 template void print_matrix< ::mattype>(::mattype matrix);
 template void print_matrix< ::cxtype>(::cxtype matrix);
 
-vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
+/*vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
         const vec3& background_l, 
         const vec3& background_L, 
         const gridpp::Points& points,
@@ -120,7 +120,7 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
         }
     }
     return output;
-}
+} */
 vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         const vec2& background_l, 
         const vec2& background_L, 
@@ -128,7 +128,10 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         const vec2& pobs,  
         const vec2& pbackground_r, 
         const vec2& pbackground_R,
-        const gridpp::StructureFunction& structure,
+/*        const gridpp::StructureFunction& structure, it creates problem with R bindings */
+        float dh,
+        float dz,
+        float dw,
         float var_ratios_or,
         float std_ratios_lr,
         float weigth,
@@ -150,6 +153,9 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     if(pbackground_R.size() != points.size())
         throw std::invalid_argument("Background RIGTH and points size mismatch");
 
+    float hmax = 7 * dh;
+    BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+
     int nS = points.size();
     if(nS == 0)
         return background_l;
@@ -162,7 +168,8 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
 
     // Prepare output matrix
     float missing_value = -99999.999;
-    vec2 output = gridpp::init_vec2(nY, nEns, missing_value);
+/*    vec2 output = gridpp::init_vec2(nY, nEns, missing_value); */
+    vec2 output = background_l;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -366,8 +373,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         // lK(1, lS): Kalman gain
         mattype lK = lr_lr * arma::inv(lR_rr + lR_dd);
         // dx(1, nValidEns): analysis increment 
-        vectype dx = std_ratios_lr * weigth * (lK * lInnov);
-
+        mattype dx = std_ratios_lr * weigth * (lK * lInnov);
         ///////////////////////////////
         // Anti-extrapolation filter //
         ///////////////////////////////
@@ -400,6 +406,17 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
             int ei = validEns[e];
             output[y][ei] = background_l[y][ei] + dx[e];
         }
+        // debug
+/*        for(int i = 0; i < lS; i++) {
+            // compute lZ_R and lInnov
+            int index = lLocIndices[i];
+            std::cout << i << " backg_r obs " << pbackground_r[index][0] << " " << pobs[index][0] << std::endl;
+        } // end loop over closer observations
+        for(int e = 0; e < nValidEns; e++) {
+            int ei = validEns[e];
+            std::cout << ei << " backg_l analysis " << background_l[y][ei] << " " << output[y][ei] << std::endl;
+        } */
+
     } // end loop over gridpoint 
     return output;
 }

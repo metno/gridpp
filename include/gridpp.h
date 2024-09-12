@@ -293,6 +293,36 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
+    /** Optimal interpolation for an ensemble point field (R bindings)
+      * See Lussana et al 2019 (DOI: 10.1002/qj.3646)
+      * @param bpoints Points of background field
+      * @param background 2D vector of background values (L, E)
+      * @param obs_points Observation points
+      * @param obs 1D vector of observations
+      * @param obs_standard_deviations 1D vector of observation standard deviations
+      * @param background_at_points 2D vector of background at observation points (L, E)
+      * @param which_structfun structure function to use (0=Barnes;1=MixA)
+      * @param dh length scale for the horizontal structure function
+      * @param dz length scale for the vertical structure function
+      * @param dw minimum value of the correlation coefficient for laf structure function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (L, E)
+    */
+    vec2 R_optimal_interpolation_ensi(const Points& bpoints,
+            const vec2& background,
+            const Points& obs_points,
+            const vec& obs,
+            const vec& obs_standard_deviations,
+            const vec2& background_at_points,
+/*            const StructureFunction& structure, */
+            int which_structfun,
+            float dh,
+            float dz,
+            float dw,
+            int max_points,
+            bool allow_extrapolation=true);
+
     /** Optimal interpolation for an ensemble gridded field (alternative version)
       * Work in progress
       * @param bgrid Grid of background field
@@ -324,26 +354,27 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true); */
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version)
+    /** Optimal interpolation for an ensemble gridded field (alternative version that works with R bindings)
       * Work in progress
-      * @param bgrid Grid of background field
-      * @param background 3D vector of (left) background values to update (Y, X, E)
-      * @param background 3D vector of (LEFT) background values (Y, X, E) used to compute correlations
-      * @param obs_points observation points
-      * @param obs 2D vector of perturbed observations (S, E)
-      * @param background 3D vector of (right) background values used to compute innovations (Y, X, E)
-      * @param background 3D vector of (RIGHT) background values (Y, X, E) used to compute correlations
-      * @param dh structure Structure function par 1
-      * @param dz structure Structure function par 2
-      * @param dw structure Structure function par 3
+      * @param bpoints Points of background field
+      * @param background 2D vector of (left) background values to update (M, E) M=num. grid points
+      * @param background 2D vector of (LEFT) background values (M, E) used to compute correlations
+      * @param obs_points Observation points
+      * @param obs 2D vector of perturbed observations (S, E) S=num. obs points
+      * @param background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param which_structfun structure function to use (0=Barnes;1=MixA)
+      * @param dh length scale for the horizontal structure function
+      * @param dz length scale for the vertical structure function
+      * @param dw minimum value of the correlation coefficient for laf structure function
       * @param variance_ratio (ratio of observation to right background error variance)
       * @param standard deviation ratio (ratio of left to right background error standard deviation)
       * @param weight given to the analysis increment
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
-      * @returns 3D vector of analised values (Y, X, E)
+      * @returns 2D vector of analised values (M, E)
     */
-    vec2 optimal_interpolation_ensi_lr(const Points& bpoints,
+    vec2 R_optimal_interpolation_ensi_lr(const Points& bpoints,
             const vec2& background_l,
             const vec2& background_L,
             const Points& obs_points,
@@ -351,6 +382,7 @@ namespace gridpp {
             const vec2& pbackground_r,
             const vec2& pbackground_R,
 /*            const StructureFunction& structure, */
+            int which_structfun,
             float dh,
             float dz,
             float dw,
@@ -2000,6 +2032,34 @@ namespace gridpp {
               * @returns Cressman rho
             */
             float cressman_rho(float dist, float length) const;
+
+            /** Compactly supported second-order autoregressive correlation function
+              * @param dist Distance between points. Same units as 'length'
+              * @param length Length scale
+              * @returns SOAR rho
+            */
+            float soar_rho(float dist, float length) const;
+
+            /** Compactly supported third-order autoregressive correlation function
+              * @param dist Distance between points. Same units as 'length'
+              * @param length Length scale
+              * @returns TOAR rho
+            */
+            float toar_rho(float dist, float length) const;
+
+            /** Powerlaw correlation function
+              * @param dist Distance between points. Same units as 'length'
+              * @param length Length scale
+              * @returns powerlaw rho
+            */
+            float powerlaw_rho(float dist, float length) const;
+
+            /** Linear correlation function
+              * @param normdist Normalized distance between points. Must be in the range -1 to 1.
+              * @param min Minimum allowed value for the correlation (if less than 0, the return 1)
+              * @returns linear rho
+            */
+            float linear_rho(float normdist, float min) const;
             float m_localization_distance;
     };
     class MultipleStructure: public StructureFunction {
@@ -2038,6 +2098,39 @@ namespace gridpp {
               * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
             */
             BarnesStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
+            float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
+            StructureFunctionPtr clone() const;
+            float localization_distance(const Point& p) const;
+        private:
+            float localization_distance(float h) const;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
+    };
+
+    /** Mix of structure functions based on distance(SOAR), elevation(Gauss), and land area fraction(linear) */
+    class MixAStructure: public StructureFunction {
+        public:
+            /** Structure function SOAR - Gaussian - Linear
+              * @param h: Horizontal decorrelation length >=0 [m] (SOAR)
+              * @param v: Vertical decorrelation length >=0 [m] (Gaussian). If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1] (Linear). If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            MixAStructure(float h, float v=0, float w=0, float hmax=MV);
+
+            /** MixA structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: 2D vector of horizontal decorrelation lengths >=0 (SOAR) , same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m] (Gaussian). Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1] (Linear). Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
+            */
+            MixAStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
             vec corr(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunctionPtr clone() const;

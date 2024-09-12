@@ -121,7 +121,7 @@ template void print_matrix< ::cxtype>(::cxtype matrix);
     }
     return output;
 } */
-vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
+vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         const vec2& background_l, 
         const vec2& background_L, 
         const gridpp::Points& points,
@@ -129,6 +129,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         const vec2& pbackground_r, 
         const vec2& pbackground_R,
 /*        const gridpp::StructureFunction& structure, it creates problem with R bindings */
+        int which_structfun,
         float dh,
         float dz,
         float dw,
@@ -154,7 +155,17 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         throw std::invalid_argument("Background RIGTH and points size mismatch");
 
     float hmax = 7 * dh;
-    BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*
+    BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax)t;
+    if(which_structfun == 0) {
+        BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+    }
+    else if(which_structfun == 1) {
+        MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+    } 
+    else {
+        BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+    } */
 
     int nS = points.size();
     if(nS == 0)
@@ -251,8 +262,17 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         float elev = belevs[y];
         float laf = blafs[y];
         Point p1 = bpoints.get_point(y);
-        float localizationRadius = structure.localization_distance(p1);
-
+        /* float localizationRadius = structure.localization_distance(p1); */
+        float localizationRadius = 0;
+        if(which_structfun == 0) {
+            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+            localizationRadius = structure.localization_distance(p1);
+        }
+        else if(which_structfun == 1) {
+            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+            localizationRadius = structure.localization_distance(p1);
+        }
+ 
         // Create list of locations for this gridpoint
         ivec lLocIndices0 = points.get_neighbours(lat, lon, localizationRadius);
         if(lLocIndices0.size() == 0) {
@@ -271,7 +291,16 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
             int index = lLocIndices0[i];
             p2.push_back(point_vec[index]);
         }
-        vec rhos = structure.corr_background(p1, p2);
+        vec rhos(lLocIndices0.size());
+        if(which_structfun == 0) {
+            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+            rhos = structure.corr_background(p1, p2);
+        }
+        else if(which_structfun == 1) {
+            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+            rhos = structure.corr_background(p1, p2);
+        } 
+/*        vec rhos = structure.corr_background(p1, p2); */
         for(int i = 0; i < lLocIndices0.size(); i++) {
             int index = lLocIndices0[i];
             if(gridpp::is_valid(pobs[index][0])) {
@@ -360,7 +389,16 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
                 int index_j = lLocIndices[j];
                 p2[j] = point_vec[index_j];
             }
-            vec corr = structure.corr(p1, p2);
+            vec corr(lS);
+            if(which_structfun == 0) {
+                BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+                corr = structure.corr_background(p1, p2);
+            }
+            else if(which_structfun == 1) {
+                MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+                corr = structure.corr_background(p1, p2);
+            } 
+            /* vec corr = structure.corr(p1, p2); */
             for(int j = 0; j < lS; j++) 
                 lLoc2D(i, j) = corr[j];
         } // end loop over closer observations

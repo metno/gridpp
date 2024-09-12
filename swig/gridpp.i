@@ -46,6 +46,7 @@
 %shared_ptr(gridpp::StructureFunction)
 %shared_ptr(gridpp::MultipleStructure)
 %shared_ptr(gridpp::BarnesStructure)
+%shared_ptr(gridpp::MixAStructure)
 %shared_ptr(gridpp::CressmanStructure)
 %shared_ptr(gridpp::CrossValidation)
 

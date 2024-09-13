@@ -350,25 +350,25 @@ namespace gridpp {
             const StructureFunction& structure,
             float var_ratios_or,
             float std_ratios_lr,
-            float weigth,
+            float weight,
             int max_points,
             bool allow_extrapolation=true); */
 
     /** Optimal interpolation for an ensemble gridded field (alternative version that works with R bindings)
       * Work in progress
       * @param bpoints Points of background field
-      * @param background 2D vector of (left) background values to update (M, E) M=num. grid points
-      * @param background 2D vector of (LEFT) background values (M, E) used to compute correlations
+      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
+      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
       * @param obs_points Observation points
       * @param obs 2D vector of perturbed observations (S, E) S=num. obs points
-      * @param background 2D vector of (right) background values used to compute innovations (S, E)
-      * @param background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
       * @param which_structfun structure function to use (0=Barnes;1=MixA)
       * @param dh length scale for the horizontal structure function
       * @param dz length scale for the vertical structure function
       * @param dw minimum value of the correlation coefficient for laf structure function
-      * @param variance_ratio (ratio of observation to right background error variance)
-      * @param standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
+      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
       * @param weight given to the analysis increment
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
@@ -388,7 +388,43 @@ namespace gridpp {
             float dw,
             float var_ratios_or,
             float std_ratios_lr,
-            float weigth,
+            float weight,
+            int max_points,
+            bool allow_extrapolation=true);
+
+    /** Optimal interpolation for an ensemble gridded field with static covariances
+      * Work in progress
+      * @param bpoints Points of background field
+      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
+      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
+      * @param obs_points Observation points
+      * @param obs 2D vector of perturbed observations (S, E) S=num. obs points
+      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param which_structfun structure function to use (0=Barnes;1=MixA)
+      * @param dh length scale for the horizontal structure function
+      * @param dz length scale for the vertical structure function
+      * @param dw minimum value of the correlation coefficient for laf structure function
+      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
+      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param weight given to the analysis increment
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (M, E)
+    */
+    vec2 R_optimal_interpolation_ensi_staticcorr_lr(const Points& bpoints,
+            const vec2& background_l,
+            const Points& obs_points,
+            const vec2& obs,
+            const vec2& pbackground_r,
+/*            const StructureFunction& structure, */
+            int which_structfun,
+            float dh,
+            float dz,
+            float dw,
+            float var_ratios_or,
+            float std_ratios_lr,
+            float weight,
             int max_points,
             bool allow_extrapolation=true);
 

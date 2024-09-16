@@ -157,6 +157,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         throw std::invalid_argument("Background RIGTH and points size mismatch");
 
     float hmax = 7 * dh;
+    float default_min_std = 0.0013;
 /*
     BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax)t;
     if(which_structfun == 0) {
@@ -228,7 +229,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     if(nValidEns == 0)
         return background_l;
 
-    // gZ_R(nY, nValidEns): used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observationsCompute Y
+    // gZ_R(nY, nValidEns): used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
     vec2 gZ_R = gridpp::init_vec2(nY, nValidEns); // useful to compute dynamical correlations
     for(int i = 0; i < nS; i++) {
         vec pbackgroundValid_R(nValidEns);
@@ -243,7 +244,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
                 gZ_R[i][e] = 0;
         }
         else {
-            if(std == 0) {
+            if(std <= default_min_std) {
                 for(int e = 0; e < nValidEns; e++) 
                     gZ_R[i][e] = 0;
             }
@@ -267,11 +268,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         /* float localizationRadius = structure.localization_distance(p1); */
         float localizationRadius = 0;
         if(which_structfun == 0) {
-            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);*/
+            BarnesStructure structure = BarnesStructure( dh, dz, dw);
             localizationRadius = structure.localization_distance(p1);
         }
         else if(which_structfun == 1) {
-            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*            MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+            MixAStructure structure = MixAStructure( dh, dz, dw);
             localizationRadius = structure.localization_distance(p1);
         }
  
@@ -295,11 +298,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
         vec rhos(lLocIndices0.size());
         if(which_structfun == 0) {
-            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax); */
+            BarnesStructure structure = BarnesStructure( dh, dz, dw);
             rhos = structure.corr_background(p1, p2);
         }
         else if(which_structfun == 1) {
-            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*            MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+            MixAStructure structure = MixAStructure( dh, dz, dw);
             rhos = structure.corr_background(p1, p2);
         } 
 /*        vec rhos = structure.corr_background(p1, p2); */
@@ -358,7 +363,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
         float mean = gridpp::calc_statistic(backgroundValid_L, gridpp::Mean);
         float std = gridpp::calc_statistic(backgroundValid_L, gridpp::Std);
-        if(gridpp::is_valid(mean) && gridpp::is_valid(std) && std != 0) {
+        if(gridpp::is_valid(mean) && gridpp::is_valid(std) && std > default_min_std) {
             for(int e = 0; e < nValidEns; e++) 
                 lX_L(0,e) = 1 / sqrt(nValidEns-1) * (backgroundValid_L[e] - mean) / std;
         }
@@ -393,11 +398,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
             }
             vec corr(lS);
             if(which_structfun == 0) {
-                BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*                BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax); */
+                BarnesStructure structure = BarnesStructure( dh, dz, dw);
                 corr = structure.corr_background(p1, p2);
             }
             else if(which_structfun == 1) {
-                MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*                MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+                MixAStructure structure = MixAStructure( dh, dz, dw);
                 corr = structure.corr_background(p1, p2);
             } 
             /* vec corr = structure.corr(p1, p2); */
@@ -429,13 +436,15 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
                    increment = maxInc;
                 }
                 else if(maxInc < 0 && increment > 0) {
-                   increment = maxInc;
+/*                   increment = maxInc; */
+                   increment = 0;
                 }
                 else if(minInc < 0 && increment < minInc) {
                    increment = minInc;
                 }
                 else if(minInc > 0 && increment < 0) {
-                   increment = minInc;
+/*                   increment = minInc; */
+                   increment = 0;
                 }
                 dx[e] = increment;
             }
@@ -491,6 +500,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
         throw std::invalid_argument("Background rigth and points size mismatch");
 
     float hmax = 7 * dh;
+    float default_min_std = 0.0013;
 
     int nS = points.size();
     if(nS == 0)
@@ -560,11 +570,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
         /* float localizationRadius = structure.localization_distance(p1); */
         float localizationRadius = 0;
         if(which_structfun == 0) {
-            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax); */
+            BarnesStructure structure = BarnesStructure( dh, dz, dw);
             localizationRadius = structure.localization_distance(p1);
         }
         else if(which_structfun == 1) {
-            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*            MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+            MixAStructure structure = MixAStructure( dh, dz, dw);
             localizationRadius = structure.localization_distance(p1);
         }
  
@@ -588,11 +600,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
         }
         vec rhos(lLocIndices0.size());
         if(which_structfun == 0) {
-            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*            BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax); */
+            BarnesStructure structure = BarnesStructure( dh, dz, dw);
             rhos = structure.corr_background(p1, p2);
         }
         else if(which_structfun == 1) {
-            MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*            MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+            MixAStructure structure = MixAStructure( dh, dz, dw);
             rhos = structure.corr_background(p1, p2);
         } 
         for(int i = 0; i < lLocIndices0.size(); i++) {
@@ -669,11 +683,13 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
             }
             vec corr(lS);
             if(which_structfun == 0) {
-                BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax);
+/*                BarnesStructure structure = BarnesStructure( dh, dz, dw, hmax); */
+                BarnesStructure structure = BarnesStructure( dh, dz, dw);
                 corr = structure.corr_background(p1, p2);
             }
             else if(which_structfun == 1) {
-                MixAStructure structure = MixAStructure( dh, dz, dw, hmax);
+/*                MixAStructure structure = MixAStructure( dh, dz, dw, hmax); */
+                MixAStructure structure = MixAStructure( dh, dz, dw);
                 corr = structure.corr_background(p1, p2);
             } 
             /* vec corr = structure.corr(p1, p2); */
@@ -699,13 +715,15 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
                    increment = maxInc;
                 }
                 else if(maxInc < 0 && increment > 0) {
-                   increment = maxInc;
+/*                   increment = maxInc; */
+                   increment = 0; 
                 }
                 else if(minInc < 0 && increment < minInc) {
                    increment = minInc;
                 }
                 else if(minInc > 0 && increment < 0) {
-                   increment = minInc;
+/*                   increment = minInc; */
+                   increment = 0;
                 }
                 dx[e] = increment;
             }

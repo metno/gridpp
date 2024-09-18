@@ -2286,6 +2286,20 @@ namespace gridpp {
         private:
             float mThreshold;
     };
+    /** Started Box-Cox transformation */
+    class StartedBoxCox : public Transform {
+        public:
+            /** Initialize started Box-Cox transform
+             *  @param threshold started Box-Cox parameter
+            */
+            StartedBoxCox(float threshold);
+            using Transform::forward;
+            using Transform::backward;
+            float forward(float value) const;
+            float backward(float value) const;
+        private:
+            float mThreshold;
+    };
     /** Gamma transformation. Transforms values to cdf from a gamma distribution and subsequantly
      *  extracts the cdf from a standard normal distribution. */
     class Gamma : public Transform {

@@ -123,6 +123,28 @@ float gridpp::BoxCox::backward(float value) const {
       rValue = 0;
    return rValue;
 }
+float gridpp::StartedBoxCox::forward(float value) const {
+    if(!gridpp::is_valid(value) || mThreshold <= 0)
+        return gridpp::MV;
+    if(value <= 0)
+        value = 0;
+    if(value <= 1)
+        return value;
+    else
+        return (1 + (((pow(value, mThreshold)) - 1) / mThreshold));
+}
+float gridpp::StartedBoxCox::backward(float value) const {
+    if(!gridpp::is_valid(value) || mThreshold <= 0)
+        return gridpp::MV;
+    float rValue = 0;
+    if(value <= 1)
+        rValue = value;
+    else 
+        rValue = pow( 1 + mThreshold * (value-1), 1 / mThreshold);
+    if(rValue <= 0)
+       rValue = 0;
+    return rValue;
+}
 gridpp::Gamma::Gamma(float shape, float scale, float tolerance) : m_gamma_dist(1, 1), m_norm_dist(), m_tolerance(tolerance) {
     // Initialize the gamma distribution to something that works, and then overwrite it so that
     // we can check for argument errors gracefully

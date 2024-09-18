@@ -123,6 +123,9 @@ float gridpp::BoxCox::backward(float value) const {
       rValue = 0;
    return rValue;
 }
+gridpp::StartedBoxCox::StartedBoxCox(float threshold) : mThreshold(threshold) {
+
+}
 float gridpp::StartedBoxCox::forward(float value) const {
     if(!gridpp::is_valid(value) || mThreshold <= 0)
         return gridpp::MV;

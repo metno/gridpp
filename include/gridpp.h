@@ -323,24 +323,24 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version)
-      * Work in progress
+    /** Optimal interpolation for an ensemble gridded field (alternative version). This is an experimental method.
       * @param bgrid Grid of background field
-      * @param background 3D vector of (left) background values to update (Y, X, E)
-      * @param background 3D vector of (LEFT) background values (Y, X, E) used to compute correlations
-      * @param obs_points observation points
+      * @param background_l background 3D vector of (left) background values to update (Y, X, E)
+      * @param background_L background 3D vector of (LEFT) background values (Y, X, E) used to compute correlations
+      * @param obs_points observation points. S = num. observations
       * @param obs 2D vector of perturbed observations (S, E)
-      * @param background 3D vector of (right) background values used to compute innovations (Y, X, E)
-      * @param background 3D vector of (RIGHT) background values (Y, X, E) used to compute correlations
+      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
       * @param structure Structure function
-      * @param variance_ratio (ratio of observation to right background error variance)
-      * @param standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
+      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
       * @param weight given to the analysis increment
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
+      * @param dynamic_correlations Use ensemble-based correlations. If true, the structure function is used to define localization functions. If false, the structure function is used to define the correlations.
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 3D vector of analised values (Y, X, E)
     */
-/*    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
+    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
             const vec3& background_l,
             const vec3& background_L,
             const Points& obs_points,
@@ -352,15 +352,71 @@ namespace gridpp {
             float std_ratios_lr,
             float weight,
             int max_points,
-            bool allow_extrapolation=true); */
+            bool dynamic_correlations=true, 
+            bool allow_extrapolation=true); 
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version that works with R bindings)
-      * Work in progress
+    /** Optimal interpolation for an ensemble gridded field (alternative version) with ensemble-based correlations. This is an experimental method.
       * @param bpoints Points of background field
       * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
       * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
       * @param obs_points Observation points
-      * @param obs 2D vector of perturbed observations (S, E) S=num. obs points
+      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
+      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param structure Structure function for the localization function
+      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
+      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param weight given to the analysis increment
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (M, E)
+    */
+    vec2 optimal_interpolation_ensi_lr(const Points& bpoints,
+            const vec2& background_l,
+            const vec2& background_L,
+            const Points& obs_points,
+            const vec2& obs,
+            const vec2& pbackground_r,
+            const vec2& pbackground_R,
+            const StructureFunction& structure,
+            float var_ratios_or,
+            float std_ratios_lr,
+            float weight,
+            int max_points,
+            bool allow_extrapolation=true);
+
+    /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method.
+      * @param bpoints Points of background field
+      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
+      * @param obs_points Observation points
+      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
+      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param structure Structure function for the static correlations
+      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
+      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
+      * @param weight given to the analysis increment
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (M, E)
+    */
+    vec2 optimal_interpolation_ensi_staticcorr_lr(const Points& bpoints,
+            const vec2& background_l,
+            const Points& obs_points,
+            const vec2& obs,
+            const vec2& pbackground_r,
+            const StructureFunction& structure,
+            float var_ratios_or,
+            float std_ratios_lr,
+            float weight,
+            int max_points,
+            bool allow_extrapolation=true);
+
+    /** Optimal interpolation for an ensemble gridded field (alternative version) with ensemble-based correlations. This is an experimental method. (version that works with R bindings)
+      * @param bpoints Points of background field
+      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
+      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
+      * @param obs_points Observation points
+      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
       * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
       * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
       * @param which_structfun structure function to use (0=Barnes;1=MixA)
@@ -392,8 +448,7 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation for an ensemble gridded field with static covariances
-      * Work in progress
+    /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method. (version that works with R bindings)
       * @param bpoints Points of background field
       * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
       * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations

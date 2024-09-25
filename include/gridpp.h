@@ -325,161 +325,159 @@ namespace gridpp {
 
     /** Optimal interpolation for an ensemble gridded field (alternative version). This is an experimental method.
       * @param bgrid Grid of background field
-      * @param background_l background 3D vector of (left) background values to update (Y, X, E)
-      * @param background_L background 3D vector of (LEFT) background values (Y, X, E) used to compute correlations
+      * @param bratios 2D vector (Y, X) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 3D vector (Y, X, E) representing the background values at grid points to be updated.
+      * @param background_corr 3D vector (Y, X, E) representing the background values used to compute dynamic correlations.
       * @param obs_points observation points. S = num. observations
-      * @param obs 2D vector of perturbed observations (S, E)
-      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
-      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
       * @param structure Structure function
-      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
-      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
-      * @param weight given to the analysis increment
+      * @param bweights 2D vector (Y, X) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param dynamic_correlations Use ensemble-based correlations. If true, the structure function is used to define localization functions. If false, the structure function is used to define the correlations.
+      * @param dynamic_correlations Determines whether to use flow-dependent correlations derived from the ensembles. If true, the structure function defines localization functions. If false, the structure function defines static (non-flow-dependent) correlations.
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 3D vector of analised values (Y, X, E)
     */
-    vec3 optimal_interpolation_ensi_lr(const Grid& bgrid,
-            const vec3& background_l,
-            const vec3& background_L,
+    vec3 optimal_interpolation_ensi_multi(const Grid& bgrid,
+            const vec2& bratios,
+            const vec3& background,
+            const vec3& background_corr,
             const Points& obs_points,
-            const vec2& obs,
-            const vec2& pbackground_r,
-            const vec2& pbackground_R,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const vec2& pbackground_corr,
             const StructureFunction& structure,
-            float var_ratios_or,
-            float std_ratios_lr,
-            float weight,
+            const vec2& bweights,
             int max_points,
             bool dynamic_correlations=true, 
             bool allow_extrapolation=true); 
 
     /** Optimal interpolation for an ensemble gridded field (alternative version) with ensemble-based correlations. This is an experimental method.
-      * @param bpoints Points of background field
-      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
-      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
-      * @param obs_points Observation points
-      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
-      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
-      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param bpoints Points of background field (L=num. grid points) 
+      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
+      * @param background_corr 2D vector (L, E) representing the background values used to compute dynamic correlations.
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
       * @param structure Structure function for the localization function
-      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
-      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
-      * @param weight given to the analysis increment
+      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
-      * @returns 2D vector of analised values (M, E)
+      * @returns 2D vector of analised values (L, E)
     */
-    vec2 optimal_interpolation_ensi_lr(const Points& bpoints,
-            const vec2& background_l,
-            const vec2& background_L,
+    vec2 optimal_interpolation_ensi_multi(const Points& bpoints,
+            const vec& bratios,
+            const vec2& background,
+            const vec2& background_corr,
             const Points& obs_points,
-            const vec2& obs,
-            const vec2& pbackground_r,
-            const vec2& pbackground_R,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const vec2& pbackground_corr,
             const StructureFunction& structure,
-            float var_ratios_or,
-            float std_ratios_lr,
-            float weight,
+            const vec& bweights,
             int max_points,
             bool allow_extrapolation=true);
 
     /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method.
-      * @param bpoints Points of background field
-      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
-      * @param obs_points Observation points
-      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
-      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
+      * @param bpoints Points of background field (L=num. grid points)
+      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param structure Structure function for the static correlations
-      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
-      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
-      * @param weight given to the analysis increment
-      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
+      * @param max_points Maximum number of observations to use inside the zone defined by the static correlation; Use 0 to disable
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
-      * @returns 2D vector of analised values (M, E)
+      * @returns 2D vector of analised values (L, E)
     */
-    vec2 optimal_interpolation_ensi_staticcorr_lr(const Points& bpoints,
-            const vec2& background_l,
+    vec2 optimal_interpolation_ensi_staticcorr_multi(const Points& bpoints,
+            const vec& bratios,
+            const vec2& background,
             const Points& obs_points,
-            const vec2& obs,
-            const vec2& pbackground_r,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
             const StructureFunction& structure,
-            float var_ratios_or,
-            float std_ratios_lr,
-            float weight,
+            const vec& bweights,
             int max_points,
             bool allow_extrapolation=true);
 
     /** Optimal interpolation for an ensemble gridded field (alternative version) with ensemble-based correlations. This is an experimental method. (version that works with R bindings)
-      * @param bpoints Points of background field
-      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
-      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
-      * @param obs_points Observation points
-      * @param obs 2D vector of perturbed observations (S, E) S = num. obs points
-      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
-      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param bpoints Points of background field (L=num. grid points) 
+      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
+      * @param background_corr 2D vector (L, E) representing the background values used to compute dynamic correlations.
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
       * @param which_structfun structure function to use (0=Barnes;1=MixA)
       * @param dh length scale for the horizontal structure function
       * @param dz length scale for the vertical structure function
       * @param dw minimum value of the correlation coefficient for laf structure function
-      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
-      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
-      * @param weight given to the analysis increment
+      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
-      * @returns 2D vector of analised values (M, E)
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (L, E)
     */
-    vec2 R_optimal_interpolation_ensi_lr(const Points& bpoints,
-            const vec2& background_l,
-            const vec2& background_L,
+    vec2 R_optimal_interpolation_ensi_multi(const Points& bpoints,
+            const vec& bratios,
+            const vec2& background,
+            const vec2& background_corr,
             const Points& obs_points,
-            const vec2& obs,
-            const vec2& pbackground_r,
-            const vec2& pbackground_R,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const vec2& pbackground_corr,
 /*            const StructureFunction& structure, */
             int which_structfun,
             float dh,
             float dz,
             float dw,
-            float var_ratios_or,
-            float std_ratios_lr,
-            float weight,
+            const vec& bweights,
             int max_points,
             bool allow_extrapolation=true);
 
     /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method. (version that works with R bindings)
-      * @param bpoints Points of background field
-      * @param background_l background 2D vector of (left) background values to update (M, E) M=num. grid points
-      * @param background_L background 2D vector of (LEFT) background values (M, E) used to compute correlations
-      * @param obs_points Observation points
-      * @param obs 2D vector of perturbed observations (S, E) S=num. obs points
-      * @param pbackground_r background 2D vector of (right) background values used to compute innovations (S, E)
-      * @param pbackground_R background 2D vector of (RIGHT) background values (S, E) used to compute correlations
+      * @param bpoints Points of background field (L=num. grid points)
+      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param which_structfun structure function to use (0=Barnes;1=MixA)
       * @param dh length scale for the horizontal structure function
       * @param dz length scale for the vertical structure function
       * @param dw minimum value of the correlation coefficient for laf structure function
-      * @param var_ratios_or variance_ratio (ratio of observation to right background error variance)
-      * @param std_ratios_lr standard deviation ratio (ratio of left to right background error standard deviation)
-      * @param weight given to the analysis increment
-      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param allow_extrapolation Allow OI to extrapolate increments outside increments at observations
-      * @returns 2D vector of analised values (M, E)
+      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
+      * @param max_points Maximum number of observations to use inside the zone defined by the static correlation; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (L, E)
     */
-    vec2 R_optimal_interpolation_ensi_staticcorr_lr(const Points& bpoints,
-            const vec2& background_l,
+    vec2 R_optimal_interpolation_ensi_staticcorr_multi(const Points& bpoints,
+            const vec& bratios,
+            const vec2& background,
             const Points& obs_points,
-            const vec2& obs,
-            const vec2& pbackground_r,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
 /*            const StructureFunction& structure, */
             int which_structfun,
             float dh,
             float dz,
             float dw,
-            float var_ratios_or,
-            float std_ratios_lr,
-            float weight,
+            const vec& bweights,
             int max_points,
             bool allow_extrapolation=true);
 
@@ -2150,7 +2148,7 @@ namespace gridpp {
               * @param min Minimum allowed value for the correlation (if less than 0, the return 1)
               * @returns linear rho
             */
-            float linear_rho(float normdist, float min) const;
+            float linear_rho(float dist, float length, float min) const;
             float m_localization_distance;
     };
     class MultipleStructure: public StructureFunction {
@@ -2199,6 +2197,143 @@ namespace gridpp {
             vec2 mH;
             vec2 mV;
             vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
+    };
+    /** SOAR structure function based on distance, elevation, and land area fraction */
+    class SoarStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            SoarStructure(float h, float v=0, float w=0, float hmax=MV);
+
+            /** Soar structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
+            */
+            SoarStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
+            float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
+            StructureFunctionPtr clone() const;
+            float localization_distance(const Point& p) const;
+        private:
+            float localization_distance(float h) const;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
+    };
+    /** TOAR structure function based on distance, elevation, and land area fraction */
+    class ToarStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            ToarStructure(float h, float v=0, float w=0, float hmax=MV);
+
+            /** Toar structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
+            */
+            ToarStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
+            float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
+            StructureFunctionPtr clone() const;
+            float localization_distance(const Point& p) const;
+        private:
+            float localization_distance(float h) const;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
+    };
+    /** Powerlaw structure function based on distance, elevation, and land area fraction */
+    class PowerlawStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            PowerlawStructure(float h, float v=0, float w=0, float hmax=MV);
+
+            /** Powerlaw structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
+            */
+            PowerlawStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
+            float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
+            StructureFunctionPtr clone() const;
+            float localization_distance(const Point& p) const;
+        private:
+            float localization_distance(float h) const;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            float m_min_rho;
+            bool m_is_spatial;
+    };
+    /** Linear structure function based on distance, elevation, and land area fraction */
+    class LinearStructure: public StructureFunction {
+        public:
+            /** Exponential structure function
+              * @param h: Horizontal decorrelation length >=0 [m]
+              * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmin: Horizontal decorrelation length >=0 [m]
+              * @param vmin: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
+              * @param wmin: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
+              * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
+            */
+            LinearStructure(float h, float v=0, float w=0, float hmin=0, float vmin=0, float wmin=0, float hmax=MV);
+
+            /** Linear structure function where decorrelation varyies spatially
+              * @param grid: Grid of decorrelation field
+              * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param hmin: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
+              * @param vmin: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
+              * @param wmin: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
+              * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
+            */
+            LinearStructure(Grid grid, vec2 h, vec2 v, vec2 w, vec2 hmin, vec2 vmin, vec2 wmin, float min_rho=StructureFunction::default_min_rho);
+            float corr(const Point& p1, const Point& p2) const;
+            vec corr(const Point& p1, const std::vector<Point>& p2) const;
+            StructureFunctionPtr clone() const;
+            float localization_distance(const Point& p) const;
+        private:
+            float localization_distance(float h, float hmin) const;
+            Grid m_grid;
+            vec2 mH;
+            vec2 mV;
+            vec2 mW;
+            vec2 mHmin;
+            vec2 mVmin;
+            vec2 mWmin;
             float m_min_rho;
             bool m_is_spatial;
     };

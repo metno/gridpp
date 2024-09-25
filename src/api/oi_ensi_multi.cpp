@@ -30,17 +30,17 @@ void print_matrix(Matrix matrix) {
 template void print_matrix< ::mattype>(::mattype matrix);
 template void print_matrix< ::cxtype>(::cxtype matrix);
 
-vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
-        const vec3& background_l, 
-        const vec3& background_L, 
+vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
+        const vec2& bratios,
+        const vec3& background, 
+        const vec3& background_corr, 
         const gridpp::Points& points,
         const vec2& pobs,
-        const vec2& pbackground_r, 
-        const vec2& pbackground_R,
+        const vec& pratios, 
+        const vec2& pbackground, 
+        const vec2& pbackground_corr,
         const gridpp::StructureFunction& structure,
-        float var_ratios_or, 
-        float std_ratios_lr,
-        float weight, 
+        const vec2& bweights, 
         int max_points,
         bool dynamic_correlations,
         bool allow_extrapolation) {
@@ -52,7 +52,7 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
 
     int nS = points.size();
     if(nS == 0)
-        return background_l;
+        return background;
 
     int nY = bgrid.size()[0];
     int nX = bgrid.size()[1];
@@ -67,54 +67,71 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
         throw std::invalid_argument("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
     }
     // Check ensembles have consistent sizes
-    int nE = background_l[0][0].size();
-    if(background_l.size() != nY || background_l[0].size() != nX) {
+    int nE = background[0][0].size();
+    if(background.size() != nY || background[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input left field (" << background_l.size() << "," << background_l[0].size() << "," << background_l[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input left field (" << background.size() << "," << background[0].size() << "," << background[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
-    if(background_L.size() != nY || background_L[0].size() != nX || background_L[0][0].size() != nE) {
+    if(background_corr.size() != nY || background_corr[0].size() != nX || background_corr[0][0].size() != nE) {
         std::stringstream ss;
-        ss << "Input LEFT field (" << background_L.size() << "," << background_L[0].size() << "," << background_L[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input LEFT field (" << background_corr.size() << "," << background_corr[0].size() << "," << background_corr[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
-    if(pbackground_r.size() != nS || pbackground_r[0].size() != nE) {
+    if(bratios.size() != nY || bratios[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input right field at observation location (" << pbackground_r.size() << "," << pbackground_r[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        ss << "Input bratios field (" << bratios.size() << "," << bratios[0].size() << ") is not the same size as the grid (" << nY << "," << nX << ")";
         throw std::invalid_argument(ss.str());
     }
-
-    if(pbackground_R.size() != nS || pbackground_R[0].size() != nE) {
+    if(bweights.size() != nY || bweights[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input RIGHT field at observation location (" << pbackground_R.size() << "," << pbackground_R[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        ss << "Input bweights field (" << bweights.size() << "," << bweights[0].size() << ") is not the same size as the grid (" << nY << "," << nX << ")";
         throw std::invalid_argument(ss.str());
     }
-    // Check observations have consistent size
+    if(pbackground.size() != nS || pbackground[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input right field at observation location (" << pbackground.size() << "," << pbackground[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pbackground_corr.size() != nS || pbackground_corr[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input RIGHT field at observation location (" << pbackground_corr.size() << "," << pbackground_corr[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
     if(pobs.size() != nS || pobs[0].size() != nE) {
         std::stringstream ss;
         ss << "Observations (" << pobs.size() << "," << pobs[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
-    
+    if(pratios.size() != nS) {
+        std::stringstream ss;
+        ss << "Ratios (" << pratios.size() << ") and points (" << nS << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+ 
     gridpp::Points bpoints = bgrid.to_points();
-    vec2 background_l1 = gridpp::init_vec2(nY * nX, nE);
-    vec2 background_L1 = gridpp::init_vec2(nY * nX, nE);
+    vec2 background1 = gridpp::init_vec2(nY * nX, nE);
+    vec2 background_corr1 = gridpp::init_vec2(nY * nX, nE);
+    vec bratios1(nY * nX);
+    vec bweights1(nY * nX);
     int count = 0;
     for(int y = 0; y < nY; y++) {
         for(int x = 0; x < nX; x++) {
+            bratios1[count] = bratios[y][x];
+            bweights1[count] = bweights[y][x];
             for(int e = 0; e < nE; e++) {
-                background_l1[count][e] = background_l[y][x][e];
-                background_L1[count][e] = background_L[y][x][e];
+                background1[count][e] = background[y][x][e];
+                background_corr1[count][e] = background_corr[y][x][e];
             }
             count++;
         }
     }
     vec2 output1 = gridpp::init_vec2(nY * nX, nE); 
     if(dynamic_correlations) {
-        output1 = optimal_interpolation_ensi_lr(bpoints, background_l1, background_L1, points, pobs, pbackground_r, pbackground_R, structure, var_ratios_or, std_ratios_lr, weight, max_points, allow_extrapolation);
+        output1 = optimal_interpolation_ensi_multi(bpoints, bratios1, background1, background_corr1, points, pobs, pratios, pbackground, pbackground_corr, structure, bweights1, max_points, allow_extrapolation);
     }
     else {
-        output1 = optimal_interpolation_ensi_staticcorr_lr(bpoints, background_l1, points, pobs, pbackground_r, structure, var_ratios_or, std_ratios_lr, weight, max_points, allow_extrapolation);
+        output1 = optimal_interpolation_ensi_staticcorr_multi(bpoints, bratios1, background1, points, pobs, pratios, pbackground, structure, bweights1, max_points, allow_extrapolation);
     }
     vec3 output = gridpp::init_vec3(nY, nX, nE);
     count = 0;
@@ -129,17 +146,17 @@ vec3 gridpp::optimal_interpolation_ensi_lr(const gridpp::Grid& bgrid,
     return output;
 }
 
-vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
-        const vec2& background_l, 
-        const vec2& background_L, 
+vec2 gridpp::optimal_interpolation_ensi_multi(const gridpp::Points& bpoints,
+        const vec& bratios,
+        const vec2& background, 
+        const vec2& background_corr, 
         const gridpp::Points& points,
-        const vec2& pobs,  
-        const vec2& pbackground_r, 
-        const vec2& pbackground_R,
+        const vec2& pobs,
+        const vec& pratios,
+        const vec2& pbackground, 
+        const vec2& pbackground_corr,
         const gridpp::StructureFunction& structure,
-        float var_ratios_or,
-        float std_ratios_lr,
-        float weight,
+        const vec& bweights,
         int max_points,
         bool allow_extrapolation) {
     if(max_points < 0)
@@ -147,32 +164,32 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
         throw std::invalid_argument("Both background and observations points must be of same coorindate type (lat/lon or x/y)");
     }
-    if(background_l.size() != bpoints.size())
+    if(background.size() != bpoints.size())
         throw std::invalid_argument("Input left field is not the same size as the grid");
-    if(background_L.size() != bpoints.size())
+    if(background_corr.size() != bpoints.size())
         throw std::invalid_argument("Input LEFT field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::invalid_argument("Observations and points exception mismatch");
-    if(pbackground_r.size() != points.size())
+    if(pbackground.size() != points.size())
         throw std::invalid_argument("Background rigth and points size mismatch");
-    if(pbackground_R.size() != points.size())
+    if(pbackground_corr.size() != points.size())
         throw std::invalid_argument("Background RIGTH and points size mismatch");
 
     float default_min_std = 0.0013;
     int nS = points.size();
     if(nS == 0)
-        return background_l;
+        return background;
 
     int mY = -1;  // Write debug information for this station index
     bool diagnose = false;
 
-    int nY = background_l.size();
-    int nEns = background_l[0].size();
+    int nY = background.size();
+    int nEns = background[0].size();
 
     // Prepare output matrix
     float missing_value = -99999.999;
 /*    vec2 output = gridpp::init_vec2(nY, nEns, missing_value); */
-    vec2 output = background_l;
+    vec2 output = background;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -199,14 +216,14 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     for(int e = 0; e < nEns; e++) {
         int numInvalid = 0;
         for(int y = 0; y < nY; y++) {
-            float value_l = background_l[y][e];
-            float value_L = background_L[y][e];
+            float value_l = background[y][e];
+            float value_L = background_corr[y][e];
             if(!gridpp::is_valid(value_l) || !gridpp::is_valid(value_L))
                 numInvalid++;
         }
         for(int i = 0; i < nS; i++) {
-            float value_r = pbackground_r[i][e];
-            float value_R = pbackground_R[i][e];
+            float value_r = pbackground[i][e];
+            float value_R = pbackground_corr[i][e];
             if(!gridpp::is_valid(value_r) || !gridpp::is_valid(value_R))
                 numInvalid++;
         }
@@ -216,7 +233,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
     }
     if(nValidEns == 0)
-        return background_l;
+        return background;
 
     // gZ_R(nY, nValidEns): used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
     vec2 gZ_R = gridpp::init_vec2(nY, nValidEns); // useful to compute dynamical correlations
@@ -224,7 +241,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         vec pbackgroundValid_R(nValidEns);
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            pbackgroundValid_R[e] = pbackground_R[i][ei];
+            pbackgroundValid_R[e] = pbackground_corr[i][ei];
         }
         float mean = gridpp::calc_statistic(pbackgroundValid_R, gridpp::Mean);
         float std = gridpp::calc_statistic(pbackgroundValid_R, gridpp::Std);
@@ -249,6 +266,8 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     //    but it doesnt seem to help
     // #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
+        float std_ratios_lr = bratios[y];
+        float weight = bweights[y];
         float lat = blats[y];
         float lon = blons[y];
         float elev = belevs[y];
@@ -325,7 +344,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         vec backgroundValid_L(nValidEns);
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            backgroundValid_L[e] = background_L[y][ei];
+            backgroundValid_L[e] = background_corr[y][ei];
         }
         float mean = gridpp::calc_statistic(backgroundValid_L, gridpp::Mean);
         float std = gridpp::calc_statistic(backgroundValid_L, gridpp::Std);
@@ -335,7 +354,7 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
         // lZ_R: used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
         mattype lZ_R(lS, nValidEns);
-        // Innovation: Observation - Background_r
+        // Innovation: Observation - background
         mattype lInnov(lS, nValidEns, arma::fill::zeros);
         // lR_dd: Observation error correlation matrix
         mattype lR_dd(lS, lS, arma::fill::zeros);
@@ -344,16 +363,16 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         // lLoc2D: localization for ensemble-based background correlations among observations
         mattype lLoc2D(lS, lS, arma::fill::zeros); 
         for(int i = 0; i < lS; i++) {
+            int index = lLocIndices[i];
             // lR_dd: diagonal observation error correlation matrix
-            lR_dd(i, i) = var_ratios_or;
+            lR_dd(i, i) = pratios[index];
             // lLoc1D between yth gridpoint and ith observation computed before
             lLoc1D(0, i) = lRhos(i);
             // compute lZ_R and lInnov
-            int index = lLocIndices[i];
             for(int e = 0; e < nValidEns; e++) {
                 lZ_R(i, e) = gZ_R[index][e];
                 int ei = validEns[e];
-                lInnov(i, ei) = pobs[index][ei] - pbackground_r[index][ei];
+                lInnov(i, ei) = pobs[index][ei] - pbackground[index][ei];
             }
             // compute lLoc2D
             Point p1 = point_vec[index];
@@ -405,35 +424,35 @@ vec2 gridpp::optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
             }
         }
 
-        // Compute the analysis as the updated background_l
+        // Compute the analysis as the updated background
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            output[y][ei] = background_l[y][ei] + dx[e];
+            output[y][ei] = background[y][ei] + dx[e];
         }
         // debug
 /*        for(int i = 0; i < lS; i++) {
             // compute lZ_R and lInnov
             int index = lLocIndices[i];
-            std::cout << i << " backg_r obs " << pbackground_r[index][0] << " " << pobs[index][0] << std::endl;
+            std::cout << i << " backg_r obs " << pbackground[index][0] << " " << pobs[index][0] << std::endl;
         } // end loop over closer observations
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            std::cout << ei << " backg_l analysis " << background_l[y][ei] << " " << output[y][ei] << std::endl;
+            std::cout << ei << " backg_l analysis " << background[y][ei] << " " << output[y][ei] << std::endl;
         } */
 
     } // end loop over gridpoint 
     return output;
-} // end of optimal_interpolation_ensi_lr
+} // end of optimal_interpolation_ensi_multi
 
-vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoints,
-        const vec2& background_l, 
+vec2 gridpp::optimal_interpolation_ensi_staticcorr_multi(const gridpp::Points& bpoints,
+        const vec& bratios,
+        const vec2& background, 
         const gridpp::Points& points,
         const vec2& pobs,  
-        const vec2& pbackground_r, 
+        const vec& pratios,
+        const vec2& pbackground, 
         const gridpp::StructureFunction& structure, 
-        float var_ratios_or,
-        float std_ratios_lr,
-        float weight,
+        const vec& bweights,
         int max_points,
         bool allow_extrapolation) {
     if(max_points < 0)
@@ -441,26 +460,26 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
     if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
         throw std::invalid_argument("Both background and observations points must be of same coorindate type (lat/lon or x/y)");
     }
-    if(background_l.size() != bpoints.size())
+    if(background.size() != bpoints.size())
         throw std::invalid_argument("Input left field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::invalid_argument("Observations and points exception mismatch");
-    if(pbackground_r.size() != points.size())
+    if(pbackground.size() != points.size())
         throw std::invalid_argument("Background rigth and points size mismatch");
 
     int nS = points.size();
     if(nS == 0)
-        return background_l;
+        return background;
 
     int mY = -1;  // Write debug information for this station index
     bool diagnose = false;
 
-    int nY = background_l.size();
-    int nEns = background_l[0].size();
+    int nY = background.size();
+    int nEns = background[0].size();
 
     // Prepare output matrix
     float missing_value = -99999.999;
-    vec2 output = background_l;
+    vec2 output = background;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -486,12 +505,12 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
     for(int e = 0; e < nEns; e++) {
         int numInvalid = 0;
         for(int y = 0; y < nY; y++) {
-            float value_l = background_l[y][e];
+            float value_l = background[y][e];
             if(!gridpp::is_valid(value_l))
                 numInvalid++;
         }
         for(int i = 0; i < nS; i++) {
-            float value_r = pbackground_r[i][e];
+            float value_r = pbackground[i][e];
             if(!gridpp::is_valid(value_r))
                 numInvalid++;
         }
@@ -501,13 +520,15 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
         }
     }
     if(nValidEns == 0)
-        return background_l;
+        return background;
 
     // This causes segmentation fault when building the gridpp pypi package
     // 1) Tested removing num_condition_warning and num_real_part_warning from the parallel loop
     //    but it doesnt seem to help
     // #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
+        float std_ratios_lr = bratios[y];
+        float weight = bweights[y];
         float lat = blats[y];
         float lon = blons[y];
         float elev = belevs[y];
@@ -580,7 +601,7 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
             lLafs[i] = plafs[index];
         }
 
-        // Innovation: Observation - Background_r
+        // Innovation: Observation - background
         mattype lInnov(lS, nValidEns, arma::fill::zeros);
         // lR_dd: Observation error correlation matrix
         mattype lR_dd(lS, lS, arma::fill::zeros);
@@ -589,15 +610,15 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
         // lCorr2D: background correlations among observations
         mattype lCorr2D(lS, lS, arma::fill::zeros); 
         for(int i = 0; i < lS; i++) {
+            int index = lLocIndices[i];
             // lR_dd: diagonal observation error correlation matrix
-            lR_dd(i, i) = var_ratios_or;
+            lR_dd(i, i) = pratios[index];
             // lCorr1D between yth gridpoint and ith observation computed before
             lCorr1D(0, i) = lRhos(i);
             // compute lInnov
-            int index = lLocIndices[i];
             for(int e = 0; e < nValidEns; e++) {
                 int ei = validEns[e];
-                lInnov(i, ei) = pobs[index][ei] - pbackground_r[index][ei];
+                lInnov(i, ei) = pobs[index][ei] - pbackground[index][ei];
             }
             // compute lCorr2D
             Point p1 = point_vec[index];
@@ -643,35 +664,35 @@ vec2 gridpp::optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoi
             }
         }
 
-        // Compute the analysis as the updated background_l
+        // Compute the analysis as the updated background
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            output[y][ei] = background_l[y][ei] + dx[e];
+            output[y][ei] = background[y][ei] + dx[e];
         }
     } // end loop over gridpoint 
     return output;
-} // end of R_optimal_interpolation_ensi_staticcorr_lr
+} // end of R_optimal_interpolation_ensi_staticcorr_multi
 
 //----------------------------------------------------------------------------
 // R-specifics
 //----------------------------------------------------------------------------
 /* command to fix the gridpp.R file:
 for i in {1..50}; do sed -i "s/all(sapply(argv\[\[$i\]\] , is.integer) || sapply(argv\[\[$i\]\], is.numeric))/all(sapply(argv\[\[$i\]\] , is.integer) | sapply(argv\[\[$i\]\], is.numeric))/g" gridpp.R; done */
-vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
-        const vec2& background_l, 
-        const vec2& background_L, 
+vec2 gridpp::R_optimal_interpolation_ensi_multi(const gridpp::Points& bpoints,
+        const vec& bratios,
+        const vec2& background, 
+        const vec2& background_corr, 
         const gridpp::Points& points,
         const vec2& pobs,  
-        const vec2& pbackground_r, 
-        const vec2& pbackground_R,
+        const vec& pratios,
+        const vec2& pbackground, 
+        const vec2& pbackground_corr,
 /*        const gridpp::StructureFunction& structure, it creates problem with R bindings */
         int which_structfun,
         float dh,
         float dz,
         float dw,
-        float var_ratios_or,
-        float std_ratios_lr,
-        float weight,
+        const vec& bweights,
         int max_points,
         bool allow_extrapolation) {
     if(max_points < 0)
@@ -679,15 +700,15 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
         throw std::invalid_argument("Both background and observations points must be of same coorindate type (lat/lon or x/y)");
     }
-    if(background_l.size() != bpoints.size())
+    if(background.size() != bpoints.size())
         throw std::invalid_argument("Input left field is not the same size as the grid");
-    if(background_L.size() != bpoints.size())
+    if(background_corr.size() != bpoints.size())
         throw std::invalid_argument("Input LEFT field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::invalid_argument("Observations and points exception mismatch");
-    if(pbackground_r.size() != points.size())
+    if(pbackground.size() != points.size())
         throw std::invalid_argument("Background rigth and points size mismatch");
-    if(pbackground_R.size() != points.size())
+    if(pbackground_corr.size() != points.size())
         throw std::invalid_argument("Background RIGTH and points size mismatch");
 
     float hmax = 7 * dh;
@@ -706,18 +727,18 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
 
     int nS = points.size();
     if(nS == 0)
-        return background_l;
+        return background;
 
     int mY = -1;  // Write debug information for this station index
     bool diagnose = false;
 
-    int nY = background_l.size();
-    int nEns = background_l[0].size();
+    int nY = background.size();
+    int nEns = background[0].size();
 
     // Prepare output matrix
     float missing_value = -99999.999;
 /*    vec2 output = gridpp::init_vec2(nY, nEns, missing_value); */
-    vec2 output = background_l;
+    vec2 output = background;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -744,14 +765,14 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     for(int e = 0; e < nEns; e++) {
         int numInvalid = 0;
         for(int y = 0; y < nY; y++) {
-            float value_l = background_l[y][e];
-            float value_L = background_L[y][e];
+            float value_l = background[y][e];
+            float value_L = background_corr[y][e];
             if(!gridpp::is_valid(value_l) || !gridpp::is_valid(value_L))
                 numInvalid++;
         }
         for(int i = 0; i < nS; i++) {
-            float value_r = pbackground_r[i][e];
-            float value_R = pbackground_R[i][e];
+            float value_r = pbackground[i][e];
+            float value_R = pbackground_corr[i][e];
             if(!gridpp::is_valid(value_r) || !gridpp::is_valid(value_R))
                 numInvalid++;
         }
@@ -761,7 +782,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
     }
     if(nValidEns == 0)
-        return background_l;
+        return background;
 
     // gZ_R(nY, nValidEns): used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
     vec2 gZ_R = gridpp::init_vec2(nY, nValidEns); // useful to compute dynamical correlations
@@ -769,7 +790,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         vec pbackgroundValid_R(nValidEns);
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            pbackgroundValid_R[e] = pbackground_R[i][ei];
+            pbackgroundValid_R[e] = pbackground_corr[i][ei];
         }
         float mean = gridpp::calc_statistic(pbackgroundValid_R, gridpp::Mean);
         float std = gridpp::calc_statistic(pbackgroundValid_R, gridpp::Std);
@@ -794,6 +815,8 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
     //    but it doesnt seem to help
     // #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
+        float std_ratios_lr = bratios[y];
+        float weight = bweights[y];
         float lat = blats[y];
         float lon = blons[y];
         float elev = belevs[y];
@@ -893,7 +916,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         vec backgroundValid_L(nValidEns);
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            backgroundValid_L[e] = background_L[y][ei];
+            backgroundValid_L[e] = background_corr[y][ei];
         }
         float mean = gridpp::calc_statistic(backgroundValid_L, gridpp::Mean);
         float std = gridpp::calc_statistic(backgroundValid_L, gridpp::Std);
@@ -903,7 +926,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         }
         // lZ_R: used to compute ensemble-based background correlations i) between yth gridpoint and observations ii) among observations
         mattype lZ_R(lS, nValidEns);
-        // Innovation: Observation - Background_r
+        // Innovation: Observation - background
         mattype lInnov(lS, nValidEns, arma::fill::zeros);
         // lR_dd: Observation error correlation matrix
         mattype lR_dd(lS, lS, arma::fill::zeros);
@@ -912,16 +935,16 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
         // lLoc2D: localization for ensemble-based background correlations among observations
         mattype lLoc2D(lS, lS, arma::fill::zeros); 
         for(int i = 0; i < lS; i++) {
+            int index = lLocIndices[i];
             // lR_dd: diagonal observation error correlation matrix
-            lR_dd(i, i) = var_ratios_or;
+            lR_dd(i, i) = pratios[index];
             // lLoc1D between yth gridpoint and ith observation computed before
             lLoc1D(0, i) = lRhos(i);
             // compute lZ_R and lInnov
-            int index = lLocIndices[i];
             for(int e = 0; e < nValidEns; e++) {
                 lZ_R(i, e) = gZ_R[index][e];
                 int ei = validEns[e];
-                lInnov(i, ei) = pobs[index][ei] - pbackground_r[index][ei];
+                lInnov(i, ei) = pobs[index][ei] - pbackground[index][ei];
             }
             // compute lLoc2D
             Point p1 = point_vec[index];
@@ -984,41 +1007,41 @@ vec2 gridpp::R_optimal_interpolation_ensi_lr(const gridpp::Points& bpoints,
             }
         }
 
-        // Compute the analysis as the updated background_l
+        // Compute the analysis as the updated background
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            output[y][ei] = background_l[y][ei] + dx[e];
+            output[y][ei] = background[y][ei] + dx[e];
         }
         // debug
 /*        for(int i = 0; i < lS; i++) {
             // compute lZ_R and lInnov
             int index = lLocIndices[i];
-            std::cout << i << " backg_r obs " << pbackground_r[index][0] << " " << pobs[index][0] << std::endl;
+            std::cout << i << " backg_r obs " << pbackground[index][0] << " " << pobs[index][0] << std::endl;
         } // end loop over closer observations
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            std::cout << ei << " backg_l analysis " << background_l[y][ei] << " " << output[y][ei] << std::endl;
+            std::cout << ei << " backg_l analysis " << background[y][ei] << " " << output[y][ei] << std::endl;
         } */
 
     } // end loop over gridpoint 
     return output;
-} // end of R_optimal_interpolation_ensi_lr
+} // end of R_optimal_interpolation_ensi_multi
 
 /* command to fix the gridpp.R file:
 for i in {1..50}; do sed -i "s/all(sapply(argv\[\[$i\]\] , is.integer) || sapply(argv\[\[$i\]\], is.numeric))/all(sapply(argv\[\[$i\]\] , is.integer) | sapply(argv\[\[$i\]\], is.numeric))/g" gridpp.R; done */
-vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bpoints,
-        const vec2& background_l, 
+vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_multi(const gridpp::Points& bpoints,
+        const vec& bratios,
+        const vec2& background, 
         const gridpp::Points& points,
         const vec2& pobs,  
-        const vec2& pbackground_r, 
+        const vec& pratios,
+        const vec2& pbackground, 
 /*        const gridpp::StructureFunction& structure, it creates problem with R bindings */
         int which_structfun,
         float dh,
         float dz,
         float dw,
-        float var_ratios_or,
-        float std_ratios_lr,
-        float weight,
+        const vec& bweights,
         int max_points,
         bool allow_extrapolation) {
     if(max_points < 0)
@@ -1026,11 +1049,11 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
     if(bpoints.get_coordinate_type() != points.get_coordinate_type()) {
         throw std::invalid_argument("Both background and observations points must be of same coorindate type (lat/lon or x/y)");
     }
-    if(background_l.size() != bpoints.size())
+    if(background.size() != bpoints.size())
         throw std::invalid_argument("Input left field is not the same size as the grid");
     if(pobs.size() != points.size())
         throw std::invalid_argument("Observations and points exception mismatch");
-    if(pbackground_r.size() != points.size())
+    if(pbackground.size() != points.size())
         throw std::invalid_argument("Background rigth and points size mismatch");
 
     float hmax = 7 * dh;
@@ -1038,17 +1061,17 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
 
     int nS = points.size();
     if(nS == 0)
-        return background_l;
+        return background;
 
     int mY = -1;  // Write debug information for this station index
     bool diagnose = false;
 
-    int nY = background_l.size();
-    int nEns = background_l[0].size();
+    int nY = background.size();
+    int nEns = background[0].size();
 
     // Prepare output matrix
     float missing_value = -99999.999;
-    vec2 output = background_l;
+    vec2 output = background;
 
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -1074,12 +1097,12 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
     for(int e = 0; e < nEns; e++) {
         int numInvalid = 0;
         for(int y = 0; y < nY; y++) {
-            float value_l = background_l[y][e];
+            float value_l = background[y][e];
             if(!gridpp::is_valid(value_l))
                 numInvalid++;
         }
         for(int i = 0; i < nS; i++) {
-            float value_r = pbackground_r[i][e];
+            float value_r = pbackground[i][e];
             if(!gridpp::is_valid(value_r))
                 numInvalid++;
         }
@@ -1089,13 +1112,15 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
         }
     }
     if(nValidEns == 0)
-        return background_l;
+        return background;
 
     // This causes segmentation fault when building the gridpp pypi package
     // 1) Tested removing num_condition_warning and num_real_part_warning from the parallel loop
     //    but it doesnt seem to help
     // #pragma omp parallel for
     for(int y = 0; y < nY; y++) {
+        float std_ratios_lr = bratios[y];
+        float weight = bweights[y];
         float lat = blats[y];
         float lon = blons[y];
         float elev = belevs[y];
@@ -1189,7 +1214,7 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
             lLafs[i] = plafs[index];
         }
 
-        // Innovation: Observation - Background_r
+        // Innovation: Observation - background
         mattype lInnov(lS, nValidEns, arma::fill::zeros);
         // lR_dd: Observation error correlation matrix
         mattype lR_dd(lS, lS, arma::fill::zeros);
@@ -1198,15 +1223,15 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
         // lCorr2D: background correlations among observations
         mattype lCorr2D(lS, lS, arma::fill::zeros); 
         for(int i = 0; i < lS; i++) {
+            int index = lLocIndices[i];
             // lR_dd: diagonal observation error correlation matrix
-            lR_dd(i, i) = var_ratios_or;
+            lR_dd(i, i) = pratios[index];
             // lCorr1D between yth gridpoint and ith observation computed before
             lCorr1D(0, i) = lRhos(i);
             // compute lInnov
-            int index = lLocIndices[i];
             for(int e = 0; e < nValidEns; e++) {
                 int ei = validEns[e];
-                lInnov(i, ei) = pobs[index][ei] - pbackground_r[index][ei];
+                lInnov(i, ei) = pobs[index][ei] - pbackground[index][ei];
             }
             // compute lCorr2D
             Point p1 = point_vec[index];
@@ -1263,11 +1288,11 @@ vec2 gridpp::R_optimal_interpolation_ensi_staticcorr_lr(const gridpp::Points& bp
             }
         }
 
-        // Compute the analysis as the updated background_l
+        // Compute the analysis as the updated background
         for(int e = 0; e < nValidEns; e++) {
             int ei = validEns[e];
-            output[y][ei] = background_l[y][ei] + dx[e];
+            output[y][ei] = background[y][ei] + dx[e];
         }
     } // end loop over gridpoint 
     return output;
-} // end of R_optimal_interpolation_ensi_staticcorr_lr
+} // end of R_optimal_interpolation_ensi_staticcorr_multi

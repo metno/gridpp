@@ -99,14 +99,14 @@ void gridpp::test_not_implemented_exception() {
     throw gridpp::not_implemented_exception();
 }
 vec2 gridpp::test_args_for_R(const gridpp::Points& bpoints,
-/*                             const gridpp::StructureFunction& structure,*/
+                             const gridpp::StructureFunction& structure,
                              const vec2& background) {
     int nS = bpoints.size();
     int nEns = background[0].size();
     int nY = background.size();
     float missing_value = -99999.999;
-/*    gridpp::StructureFunction structure = gridpp::BarnesStructure(10000, 0, 0, 0);*/
-    BarnesStructure structure = BarnesStructure(10000,1000000,0.5,100000);
+/*    gridpp::StructureFunction structure = gridpp::BarnesStructure(10000, 0, 0, 0);
+    BarnesStructure structure = BarnesStructure(10000,1000000,0.5,100000); */
     vec2 output = gridpp::init_vec2(nY, nEns, missing_value);
     vec blats = bpoints.get_lats();
     vec blons = bpoints.get_lons();
@@ -115,11 +115,11 @@ vec2 gridpp::test_args_for_R(const gridpp::Points& bpoints,
     Point p2 = bpoints.get_point(0);
     for(int i = 0; i < nS; i++) {
         Point p1 = bpoints.get_point(i);
-        float localizationRadius = structure.localization_distance(p1);
-        float rhos = structure.corr_background(p1, p2);
+/*        float localizationRadius = structure.localization_distance(p1);
+        float rhos = structure.corr_background(p1, p2); */
         std::cout << "----------------------------" << std::endl;
-        std::cout << i << " localizationRadius " << localizationRadius << std::endl;
-        std::cout << i << " rhos " << rhos << std::endl;
+/*        std::cout << i << " localizationRadius " << localizationRadius << std::endl;
+        std::cout << i << " rhos " << rhos << std::endl; */
         std::cout << i << " blats " << blats[i] << std::endl;
         std::cout << i << " blons " << blons[i] << std::endl;
         std::cout << i << " belevs " << belevs[i] << std::endl;
@@ -130,4 +130,10 @@ vec2 gridpp::test_args_for_R(const gridpp::Points& bpoints,
         }
     }
     return output;
+}
+
+void gridpp::test_args_for_R_1( const gridpp::StructureFunction& structure) {
+    float missing_value = -99999.999;
+/*    gridpp::StructureFunction structure = gridpp::BarnesStructure(10000, 0, 0, 0);
+    BarnesStructure structure = BarnesStructure(10000,1000000,0.5,100000); */
 }

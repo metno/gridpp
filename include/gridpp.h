@@ -1717,8 +1717,9 @@ namespace gridpp {
     float test_vec2_argout(vec2& distances);
 
     void test_not_implemented_exception();
-/*    vec2 test_args_for_R(const Points& bpoints, const StructureFunction& structure, const vec2& background);*/
-    vec2 test_args_for_R(const Points& bpoints, const vec2& background);
+    vec2 test_args_for_R(const Points& bpoints, const StructureFunction& structure, const vec2& background);
+    void test_args_for_R_1( const StructureFunction& structure);
+/*    vec2 test_args_for_R(const Points& bpoints, const vec2& background); */
 
     /** Default value used to fill array in SWIG testing functions. Not useful for any other purpose. */
     static const float swig_default_value = -1;
@@ -2145,10 +2146,10 @@ namespace gridpp {
 
             /** Linear correlation function
               * @param normdist Normalized distance between points. Must be in the range -1 to 1.
-              * @param min Minimum allowed value for the correlation (if less than 0, the return 1)
+              * @param length Minimum allowed value for the correlation (if less than 0, the return 1)
               * @returns linear rho
             */
-            float linear_rho(float dist, float length, float min) const;
+            float linear_rho(float dist, float length) const;
             float m_localization_distance;
     };
     class MultipleStructure: public StructureFunction {
@@ -2303,37 +2304,28 @@ namespace gridpp {
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
               * @param w: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
-              * @param hmin: Horizontal decorrelation length >=0 [m]
-              * @param vmin: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
-              * @param wmin: Land/sea decorrelation length >=0 [1]. If 0, disable decorrelation.
               * @param hmax: Truncate horizontal correlation beyond this length [m]. If undefined, 3.64 * h.
             */
-            LinearStructure(float h, float v=0, float w=0, float hmin=0, float vmin=0, float wmin=0, float hmax=MV);
+            LinearStructure(float h, float v=0, float w=0, float hmax=MV);
 
             /** Linear structure function where decorrelation varyies spatially
               * @param grid: Grid of decorrelation field
               * @param h: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
               * @param v: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
               * @param w: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
-              * @param hmin: 2D vector of horizontal decorrelation lengths >=0, same size as grid [m]
-              * @param vmin: 2D vector of Vertical decorrelation lengths >=0 [m]. Set all to 0 to disable decorrelation.
-              * @param wmin: 2D vector of land/sea decorrelation lengths >=0 [1]. Set all to 0 to disable decorrelation.
               * @param min_rho: Truncate horizontal correlation when rho is less than this value [m].
             */
-            LinearStructure(Grid grid, vec2 h, vec2 v, vec2 w, vec2 hmin, vec2 vmin, vec2 wmin, float min_rho=StructureFunction::default_min_rho);
+            LinearStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho);
             float corr(const Point& p1, const Point& p2) const;
             vec corr(const Point& p1, const std::vector<Point>& p2) const;
             StructureFunctionPtr clone() const;
             float localization_distance(const Point& p) const;
         private:
-            float localization_distance(float h, float hmin) const;
+            float localization_distance(float h) const;
             Grid m_grid;
             vec2 mH;
             vec2 mV;
             vec2 mW;
-            vec2 mHmin;
-            vec2 mVmin;
-            vec2 mWmin;
             float m_min_rho;
             bool m_is_spatial;
     };

@@ -50,7 +50,6 @@
 %shared_ptr(gridpp::ToarStructure)
 %shared_ptr(gridpp::PowerlawStructure)
 %shared_ptr(gridpp::LinearStructure)
-%shared_ptr(gridpp::MixAStructure)
 %shared_ptr(gridpp::CressmanStructure)
 %shared_ptr(gridpp::CrossValidation)
 

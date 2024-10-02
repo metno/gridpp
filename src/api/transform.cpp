@@ -123,28 +123,32 @@ float gridpp::BoxCox::backward(float value) const {
       rValue = 0;
    return rValue;
 }
-gridpp::StartedBoxCox::StartedBoxCox(float threshold) : mThreshold(threshold) {
-
+gridpp::StartedBoxCox::StartedBoxCox(float threshold, float scaling_factor) : mThreshold(threshold), mScaling(scaling_factor) {
+// No transformation between 0 and scaling_factor, then Box-Cox transformation with parameter equal to threshold
+    if(!gridpp::is_valid(threshold) || threshold <= 0)
+        throw std::invalid_argument("threshold parameter must be > 0 in the started Box-Cox distribution");
+    if(!gridpp::is_valid(scaling_factor) || scaling_factor <= 0)
+        throw std::invalid_argument("Scaling factor parameter must be > 0 in the started Box-Cox distribution");
 }
 float gridpp::StartedBoxCox::forward(float value) const {
     if(!gridpp::is_valid(value) || mThreshold <= 0)
         return gridpp::MV;
-    if(value <= 0)
+    if(value < 0)
         value = 0;
-    if(value <= 1)
+    if(value <= mScaling)
         return value;
     else
-        return (1 + (((pow(value, mThreshold)) - 1) / mThreshold));
+        return mScaling * (1 + (((pow(value / mScaling, mThreshold)) - 1) / mThreshold));
 }
 float gridpp::StartedBoxCox::backward(float value) const {
     if(!gridpp::is_valid(value) || mThreshold <= 0)
         return gridpp::MV;
     float rValue = 0;
-    if(value <= 1)
+    if(value <= mScaling)
         rValue = value;
     else 
-        rValue = pow( 1 + mThreshold * (value-1), 1 / mThreshold);
-    if(rValue <= 0)
+        rValue = mScaling * pow( 1 + mThreshold / mScaling * (value-mScaling), 1 / mThreshold);
+    if(rValue < 0)
        rValue = 0;
     return rValue;
 }

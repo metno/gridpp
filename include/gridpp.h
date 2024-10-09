@@ -381,6 +381,19 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
+    /** Calculate the static correlations between sets of points.
+      * @param points Set of L points
+      * @param Knots Set of K points
+      * @param structure Structure function for the static correlations
+      * @param max_points Maximum number of knots to consider within the correlation zone (0 to disable)
+      * @returns 2D vector (L,K) of static correlations, where each row gives the correlations between a point and all knots.
+    */
+
+    vec2 staticcorr_points(const Points& points,
+        const Points& knots,
+        const StructureFunction& structure,
+        int max_points);
+
     /** Correction of a gridded field ensuring the distribution of values nearby match that of
       * observations. This is an experimental method.
       * @param bgrid Grid of background field

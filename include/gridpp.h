@@ -1642,6 +1642,7 @@ namespace gridpp {
 /** Represents a single point in some coordinate system */
     class Point {
         public:
+            ~Point(){ std::cout << "\nPoint Destructor executed"; };
             /** Constructor
               * @param lat: Latitude (or y) coordinate
               * @param lon: Longitude (or x) coordinate
@@ -1675,6 +1676,7 @@ namespace gridpp {
     /** Helper class for Grid and Points representing a tree of points */
     class KDTree {
         public:
+            ~KDTree(){ std::cout << "\nKDTree Destructor executed"; };
             KDTree(vec lats, vec lons, CoordinateType type=Geodetic);
             KDTree& operator=(KDTree other);
             KDTree(const KDTree& other);
@@ -1805,6 +1807,7 @@ namespace gridpp {
     /** Represents a vector of locations and their metadata */
     class Points  {
         public:
+            ~Points(){ std::cout << "\nPoints Destructor executed"; };
             Points();
             /** Initialize a new grid
              *  @param lats: 1D vector of latitudes [degrees]
@@ -1900,6 +1903,7 @@ namespace gridpp {
     /** Represents a 2D grid of locations and their metadata */
     class Grid {
         public:
+            ~Grid(){ std::cout << "\nGrid Destructor executed"; };
             Grid();
 
             /** Initialize a new grid
@@ -1998,6 +2002,9 @@ namespace gridpp {
     /** Covariance structure function */
     class StructureFunction {
         public:
+
+            ~StructureFunction(){ std::cout << "\nStructureFunction Destructor executed"; };
+
             StructureFunction(float localization_distance=0);
             /** Correlation between two points
              *  @param p1 First point
@@ -2067,6 +2074,7 @@ namespace gridpp {
     };
     class MultipleStructure: public StructureFunction {
         public:
+            ~MultipleStructure(){ std::cout << "\nMultipleStructure Destructor executed"; };
             /** Different structure functions for horizontal, vertical, and land/sea
               * @param structure_h: Horizontal structure function
               * @param structure_v: Vertical structure function
@@ -2085,6 +2093,10 @@ namespace gridpp {
     /** Simple structure function based on distance, elevation, and land area fraction */
     class BarnesStructure: public StructureFunction {
         public:
+
+//            ~BarnesStructure();
+            ~BarnesStructure(){ std::cout << "\nBarnesStructure Destructor executed"; };
+
             /** Exponential structure function
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
@@ -2117,6 +2129,7 @@ namespace gridpp {
     /** SOAR structure function based on distance, elevation, and land area fraction */
     class SoarStructure: public StructureFunction {
         public:
+            ~SoarStructure(){ std::cout << "\nSoarStructure Destructor executed"; };
             /** Exponential structure function
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
@@ -2149,6 +2162,7 @@ namespace gridpp {
     /** TOAR structure function based on distance, elevation, and land area fraction */
     class ToarStructure: public StructureFunction {
         public:
+            ~ToarStructure(){ std::cout << "\nToarStructure Destructor executed"; };
             /** Exponential structure function
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
@@ -2181,6 +2195,7 @@ namespace gridpp {
     /** Powerlaw structure function based on distance, elevation, and land area fraction */
     class PowerlawStructure: public StructureFunction {
         public:
+            ~PowerlawStructure(){ std::cout << "\nPowerlawStructure Destructor executed"; };
             /** Exponential structure function
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
@@ -2213,6 +2228,7 @@ namespace gridpp {
     /** Linear structure function based on distance, elevation, and land area fraction */
     class LinearStructure: public StructureFunction {
         public:
+            ~LinearStructure(){ std::cout << "\nLinearStructure Destructor executed"; };
             /** Exponential structure function
               * @param h: Horizontal decorrelation length >=0 [m]
               * @param v: Vertical decorrelation length >=0 [m]. If 0, disable decorrelation.
@@ -2246,6 +2262,7 @@ namespace gridpp {
     /** Simple structure function based on distance, elevation, and land area fraction */
     class CressmanStructure: public StructureFunction {
         public:
+            ~CressmanStructure(){ std::cout << "\nCressmanStructure Destructor executed"; };
             CressmanStructure(float h, float v=0, float w=0);
             float corr(const Point& p1, const Point& p2) const;
             StructureFunctionPtr clone() const;
@@ -2257,6 +2274,7 @@ namespace gridpp {
 
     class CrossValidation: public StructureFunction {
         public:
+            ~CrossValidation(){ std::cout << "\nCrossValidation Destructor executed"; };
             /** Structure function for performing cross validation experiments
               * @param structure: Base structure function to use
               * @param dist: Force background-to-obs correlation to 0 for points within this distance [m]
@@ -2274,6 +2292,7 @@ namespace gridpp {
 
     class Transform {
         public:
+            ~Transform(){ std::cout << "\nTransform Destructor executed"; };
             // Note these cannot be pure virtual, otherwise SWIG does not expose
             // the vector functions (with the same name) in python. Therefore, make sure these
             // functions are overloaded in the subclass implementation
@@ -2319,6 +2338,7 @@ namespace gridpp {
     /** Identity transform, i.e. where forward and backward functinos to not modify values */
     class Identity : public Transform {
         public:
+            ~Identity(){ std::cout << "\nIdentity Destructor executed"; };
             // SWIG requires these "using" statements to enable the vectorized versions in the
             // subclasses
             using Transform::forward;
@@ -2329,6 +2349,7 @@ namespace gridpp {
     /** Log transformation: output = log(input) */
     class Log : public Transform {
         public:
+            ~Log(){ std::cout << "\nLog Destructor executed"; };
             using Transform::forward;
             using Transform::backward;
             float forward(float value) const;
@@ -2337,6 +2358,7 @@ namespace gridpp {
     /** Box-Cox transformation */
     class BoxCox : public Transform {
         public:
+            ~BoxCox(){ std::cout << "\nBoxCox Destructor executed"; };
             /** Initialize Box-Cox transform
              *  @param threshold Box-Cox parameter
             */
@@ -2351,6 +2373,7 @@ namespace gridpp {
     /** Started Box-Cox transformation. No transformation between 0 and scaling_factor, then Box-Cox (like) transformation with parameter equal to threshold */
     class StartedBoxCox : public Transform {
         public:
+            ~StartedBoxCox(){ std::cout << "\nStartedBoxCox Destructor executed"; };
             /** Initialize started Box-Cox transform
              *  @param threshold started Box-Cox parameter
             */
@@ -2367,6 +2390,7 @@ namespace gridpp {
      *  extracts the cdf from a standard normal distribution. */
     class Gamma : public Transform {
         public:
+            ~Gamma(){ std::cout << "\nGamma Destructor executed"; };
             /** Initialize Gamma transform
              *  @param shape Shape parameter
              *  @param scale Scale parameter

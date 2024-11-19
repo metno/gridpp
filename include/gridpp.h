@@ -320,7 +320,6 @@ namespace gridpp {
             const vec2& pbackground,
             const vec2& pbackground_corr,
             const StructureFunction& structure,
-            const vec2& bweights,
             int max_points,
             bool dynamic_correlations=true, 
             bool allow_extrapolation=true); 
@@ -341,7 +340,7 @@ namespace gridpp {
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 2D vector of analised values (L, E)
     */
-    vec2 optimal_interpolation_ensi_multi(const Points& bpoints,
+    vec2 optimal_interpolation_ensi_multi_ebe(const Points& bpoints,
             const vec& bratios,
             const vec2& background,
             const vec2& background_corr,
@@ -351,7 +350,6 @@ namespace gridpp {
             const vec2& pbackground,
             const vec2& pbackground_corr,
             const StructureFunction& structure,
-            const vec& bweights,
             int max_points,
             bool allow_extrapolation=true);
 
@@ -369,7 +367,7 @@ namespace gridpp {
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 2D vector of analised values (L, E)
     */
-    vec2 optimal_interpolation_ensi_staticcorr_multi(const Points& bpoints,
+    vec2 optimal_interpolation_ensi_multi_ebesc(const Points& bpoints,
             const vec& bratios,
             const vec2& background,
             const Points& obs_points,
@@ -377,7 +375,31 @@ namespace gridpp {
             const vec& pratios,
             const vec2& pbackground,
             const StructureFunction& structure,
-            const vec& bweights,
+            int max_points,
+            bool allow_extrapolation=true);
+
+    /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method.
+      * @param bpoints Points of background field (L=num. grid points)
+      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param structure Structure function for the static correlations
+      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
+      * @param max_points Maximum number of observations to use inside the zone defined by the static correlation; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 2D vector of analised values (L, E)
+    */
+    vec2 optimal_interpolation_ensi_multi_utem(const Points& bpoints,
+            const vec& bratios,
+            const vec2& background,
+            const Points& obs_points,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);
 

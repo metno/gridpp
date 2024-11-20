@@ -395,10 +395,12 @@ namespace gridpp {
     vec2 optimal_interpolation_ensi_multi_utem(const Points& bpoints,
             const vec& bratios,
             const vec2& background,
+            const vec2& background_corr,
             const Points& obs_points,
-            const vec2& pobs,
+            const vec& pobs,
             const vec& pratios,
             const vec2& pbackground,
+            const vec2& pbackground_corr,
             const StructureFunction& structure,
             int max_points,
             bool allow_extrapolation=true);

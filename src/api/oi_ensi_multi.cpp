@@ -677,7 +677,7 @@ vec2 gridpp::optimal_interpolation_ensi_multi_utem(const gridpp::Points& bpoints
             const vec2& background,
             const vec2& background_corr,
             const gridpp::Points& points,
-            const vec2& pobs,
+            const vec& pobs,
             const vec& pratios,
             const vec2& pbackground,
             const vec2& pbackground_corr,
@@ -795,7 +795,7 @@ vec2 gridpp::optimal_interpolation_ensi_multi_utem(const gridpp::Points& bpoints
                 gY_corr[i][e] = 0;
         }
         else {
-            if(std <= default_min_std) {
+            if(std_corr <= default_min_std) {
                 for(int e = 0; e < nValidEns; e++) 
                     gY_corr[i][e] = 0;
             }
@@ -972,6 +972,8 @@ vec2 gridpp::optimal_interpolation_ensi_multi_utem(const gridpp::Points& bpoints
         // Compute X (perturbations about model mean)
         vectype X(nValidEns);
         vectype X_corr(nValidEns);
+        vec X1(nValidEns);
+        vec X_corr1(nValidEns);
         float total = 0;
         int count = 0;
         float total_corr = 0;
@@ -981,28 +983,30 @@ vec2 gridpp::optimal_interpolation_ensi_multi_utem(const gridpp::Points& bpoints
             float value = background[y][ei];
             if(gridpp::is_valid(value)) {
                 X(e) = value;
+                X1[e] = value;
                 total += value;
                 count++;
             }
             float value_corr = background_corr[y][ei];
             if(gridpp::is_valid(value_corr)) {
                 X_corr(e) = value_corr;
+                X_corr1[e] = value_corr;
                 total_corr += value_corr;
                 count_corr++;
             }
         }
         float ensMean = total / count;
-        float ensStd = gridpp::calc_statistic(X, gridpp::Std);
+        float ensStd = gridpp::calc_statistic(X1, gridpp::Std);
         float ensMean_corr = total_corr / count_corr;
-        float ensStd_corr = gridpp::calc_statistic(X_corr, gridpp::Std);
+        float ensStd_corr = gridpp::calc_statistic(X_corr1, gridpp::Std);
         for(int e = 0; e < nValidEns; e++) {
             X(e) -= ensMean;
             float value_corr = X_corr(e);
-            if (ensStd > 0) {
-                X_corr(e) = const_fact * (value_corr - ensMean_corr) / ensStd_corr;
+            if (ensStd_corr <= default_min_std) {
+                X_corr(e) = 0;
             }
             else {
-                X_corr(e) = 0;
+                X_corr(e) = const_fact * (value_corr - ensMean_corr) / ensStd_corr;
             }
         }
 

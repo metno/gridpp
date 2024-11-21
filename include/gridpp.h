@@ -295,16 +295,15 @@ namespace gridpp {
 
     /** Optimal interpolation for an ensemble gridded field (alternative version). This is an experimental method.
       * @param bgrid Grid of background field
-      * @param bratios 2D vector (Y, X) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param bratios 2D vector (Y, X) of the ratio of background error standard deviation at grid points to that at observation points.
       * @param background 3D vector (Y, X, E) representing the background values at grid points to be updated.
       * @param background_corr 3D vector (Y, X, E) representing the background values used to compute dynamic correlations.
       * @param obs_points observation points. S = num. observations
       * @param pobs 2D vector of perturbed observations (S, E)
-      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
       * @param structure Structure function
-      * @param bweights 2D vector (Y, X) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param dynamic_correlations Determines whether to use flow-dependent correlations derived from the ensembles. If true, the structure function defines localization functions. If false, the structure function defines static (non-flow-dependent) correlations.
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
@@ -324,18 +323,17 @@ namespace gridpp {
             bool dynamic_correlations=true, 
             bool allow_extrapolation=true); 
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version) with ensemble-based correlations. This is an experimental method.
+    /** Optimal interpolation for an ensemble point field with ensemble-based correlations. The function supports iterative corrections to the analysis. Each ensemble member is adjusted iteratively or "ensemble member by ensemble member" (ebe).
       * @param bpoints Points of background field (L=num. grid points) 
-      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param bratios 1D vector (L) of ratio of background error standard deviation at grid points to that at observation points.
       * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
       * @param background_corr 2D vector (L, E) representing the background values used to compute dynamic correlations.
       * @param obs_points Observation points (S = num. observations)
       * @param pobs 2D vector of perturbed observations (S, E)
-      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
       * @param structure Structure function for the localization function
-      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 2D vector of analised values (L, E)
@@ -353,16 +351,15 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method.
+    /** Optimal interpolation for an ensemble point field with static correlations. The function supports iterative corrections to the analysis.
       * @param bpoints Points of background field (L=num. grid points)
-      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param bratios 1D vector (L) of the ratio of background error standard deviation at grid points to that at observation points.
       * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
       * @param obs_points Observation points (S = num. observations)
       * @param pobs 2D vector of perturbed observations (S, E)
-      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param structure Structure function for the static correlations
-      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside the zone defined by the static correlation; Use 0 to disable
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 2D vector of analised values (L, E)
@@ -378,16 +375,15 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version) with static correlations. This is an experimental method.
+    /** Optimal interpolation for an ensemble point field with ensemble-based correlations. The function supports iterative corrections to the analysis. First, "use (and adjust) the ensemble mean" (utem), then generate the analysis ensemble.
       * @param bpoints Points of background field (L=num. grid points)
-      * @param bratios 1D vector (L) representing the ratio of background error standard deviation at grid points to that at observation points. The background at grid points is the value being updated, while the background at station points shares the units and time of the observations, which may differ from the background at grid points. This vector contains coefficients (0-1) that adjust the analysis at grid points, accounting for differences in units and variability between the innovations (observation minus background) and the background at grid points. For example, if trusting the ensemble spread, bratios can be set as the ratio between the ensemble spread of the background to be updated and that used to compute the innovations. If the ensemble spread is not trusted at specific times or grid points, the bratios can be based on a typical expected ratio of spreads from multiple ensemble background realizations.
+      * @param bratios 1D vector (L) of the ratio of background error standard deviation at grid points to that at observation points.
       * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
       * @param obs_points Observation points (S = num. observations)
       * @param pobs 2D vector of perturbed observations (S, E)
-      * @param pratios 1D vector (S) representing the ratio of observation to background error variance. These coefficients (0-1) indicate the relative trust in observations versus the background. A value of 1 means equal trust in both, while values close to 0 indicate greater trust in the observations. For example, a value of 0.1 means the observations are trusted 10 times more than the background.
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param structure Structure function for the static correlations
-      * @param bweights 1D vector (L) representing user-defined weights at grid points. The analysis at each grid point is calculated as the background value plus the analysis increment, multiplied by the weight at that point. These weights are useful when iterating over multiple observation times, for instance, allowing the user to prioritize observations that match the time of the original background. For example, if running the function over three observation times (the same as the original background, one hour prior, and two hours prior), setting the weight for the original background time to 0.8 and 0.1 for the other two times ensures that most of the modification comes from the analysis at the original background time.
       * @param max_points Maximum number of observations to use inside the zone defined by the static correlation; Use 0 to disable
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 2D vector of analised values (L, E)

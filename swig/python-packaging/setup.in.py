@@ -108,7 +108,7 @@ setup (
     # However, since the earliest precompiled numpy versions have been used when compiling gridpp,
     # it is unlikely the user will have an older version of numpy
     # install_requires=['numpy<=1.12.1; python_version < "3"'],
-    install_requires=['numpy<2'],
+    install_requires=['numpy'],
 
     test_suite="gridpp.tests",
     ext_modules = [module],

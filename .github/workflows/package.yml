@@ -51,7 +51,7 @@ jobs:
           # Use boost 1_72, since this allows c++11. We need c++11, since manylinux2014 only has gcc 4.8
           # Can't use boost 1.53 (default on linux) because it doesn't have rtree functionality
           # CIBW_BUILD: cp36-manylinux_x86_64 cp36-win_amd64 cp36-macosx_x86_64
-          CIBW_BUILD: cp313-manylinux_x86-64 cp310-manylinux_x86_64
+          CIBW_BUILD: cp313-manylinux_x86_64 #  cp310-manylinux_x86_64
           # CIBW_BUILD: cp310-macosx_x86_64
           # PyPy compilation on MACOS doesn't work, possibly since there is no available numpy release for this
           # Armadillo isn't available for i687 on Centos 7, making compilation more complicated

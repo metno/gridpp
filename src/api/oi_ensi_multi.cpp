@@ -30,18 +30,18 @@ void print_matrix(Matrix matrix) {
 template void print_matrix< ::mattype>(::mattype matrix);
 template void print_matrix< ::cxtype>(::cxtype matrix);
 
-vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
+// ensemble member by ensemble member (ebe)
+vec3 gridpp::optimal_interpolation_ensi_multi_ebe(const gridpp::Grid& bgrid,
         const vec2& bratios,
         const vec3& background, 
         const vec3& background_corr, 
         const gridpp::Points& points,
         const vec2& pobs,
-        const vec& pratios, 
+        const vec& pratios,
         const vec2& pbackground, 
         const vec2& pbackground_corr,
         const gridpp::StructureFunction& structure,
         int max_points,
-        bool dynamic_correlations,
         bool allow_extrapolation) {
     double s_time = gridpp::clock();
 
@@ -69,12 +69,12 @@ vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
     int nE = background[0][0].size();
     if(background.size() != nY || background[0].size() != nX) {
         std::stringstream ss;
-        ss << "Input left field (" << background.size() << "," << background[0].size() << "," << background[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input background field (" << background.size() << "," << background[0].size() << "," << background[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
     if(background_corr.size() != nY || background_corr[0].size() != nX || background_corr[0][0].size() != nE) {
         std::stringstream ss;
-        ss << "Input LEFT field (" << background_corr.size() << "," << background_corr[0].size() << "," << background_corr[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        ss << "Input background_corr field (" << background_corr.size() << "," << background_corr[0].size() << "," << background_corr[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
         throw std::invalid_argument(ss.str());
     }
     if(bratios.size() != nY || bratios[0].size() != nX) {
@@ -84,12 +84,12 @@ vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
     }
     if(pbackground.size() != nS || pbackground[0].size() != nE) {
         std::stringstream ss;
-        ss << "Input right field at observation location (" << pbackground.size() << "," << pbackground[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        ss << "Input pbackground field at observation location (" << pbackground.size() << "," << pbackground[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
     if(pbackground_corr.size() != nS || pbackground_corr[0].size() != nE) {
         std::stringstream ss;
-        ss << "Input RIGHT field at observation location (" << pbackground_corr.size() << "," << pbackground_corr[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        ss << "Input pbackground_corr field at observation location (" << pbackground_corr.size() << "," << pbackground_corr[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
         throw std::invalid_argument(ss.str());
     }
     if(pobs.size() != nS || pobs[0].size() != nE) {
@@ -119,12 +119,7 @@ vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
         }
     }
     vec2 output1 = gridpp::init_vec2(nY * nX, nE); 
-    if(dynamic_correlations) {
-        output1 = optimal_interpolation_ensi_multi_ebe(bpoints, bratios1, background1, background_corr1, points, pobs, pratios, pbackground, pbackground_corr, structure, max_points, allow_extrapolation);
-    }
-    else {
-        output1 = optimal_interpolation_ensi_multi_ebesc(bpoints, bratios1, background1, points, pobs, pratios, pbackground, structure, max_points, allow_extrapolation);
-    }
+    output1 = optimal_interpolation_ensi_multi_ebe(bpoints, bratios1, background1, background_corr1, points, pobs, pratios, pbackground, pbackground_corr, structure, max_points, allow_extrapolation);
     vec3 output = gridpp::init_vec3(nY, nX, nE);
     count = 0;
     for(int y = 0; y < nY; y++) {
@@ -136,7 +131,199 @@ vec3 gridpp::optimal_interpolation_ensi_multi(const gridpp::Grid& bgrid,
         }
     }
     return output;
-}
+} // end optimal_interpolation_ensi_multi_ebe
+
+// ensemble member by ensemble member with static correlations (ebesc)
+vec3 gridpp::optimal_interpolation_ensi_multi_ebesc(const gridpp::Grid& bgrid,
+        const vec2& bratios,
+        const vec3& background, 
+        const gridpp::Points& points,
+        const vec2& pobs,
+        const vec& pratios,
+        const vec2& pbackground, 
+        const gridpp::StructureFunction& structure,
+        int max_points,
+        bool allow_extrapolation) {
+    double s_time = gridpp::clock();
+
+    // Check input data
+    if(max_points < 0)
+        throw std::invalid_argument("max_points must be >= 0");
+
+    int nS = points.size();
+    if(nS == 0)
+        return background;
+
+    int nY = bgrid.size()[0];
+    int nX = bgrid.size()[1];
+
+    if(nY == 0 || nX == 0) {
+        std::stringstream ss;
+        ss << "Grid size (" << nY << "," << nX << ") cannot be zero";
+        throw std::invalid_argument(ss.str());
+    }
+
+    if(bgrid.get_coordinate_type() != points.get_coordinate_type()) {
+        throw std::invalid_argument("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
+    }
+    // Check ensembles have consistent sizes
+    int nE = background[0][0].size();
+    if(background.size() != nY || background[0].size() != nX) {
+        std::stringstream ss;
+        ss << "Input background field (" << background.size() << "," << background[0].size() << "," << background[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        throw std::invalid_argument(ss.str());
+    }
+    if(bratios.size() != nY || bratios[0].size() != nX) {
+        std::stringstream ss;
+        ss << "Input bratios field (" << bratios.size() << "," << bratios[0].size() << ") is not the same size as the grid (" << nY << "," << nX << ")";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pbackground.size() != nS || pbackground[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input pbackground field at observation location (" << pbackground.size() << "," << pbackground[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pobs.size() != nS || pobs[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Observations (" << pobs.size() << "," << pobs[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pratios.size() != nS) {
+        std::stringstream ss;
+        ss << "Ratios (" << pratios.size() << ") and points (" << nS << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+ 
+    gridpp::Points bpoints = bgrid.to_points();
+    vec2 background1 = gridpp::init_vec2(nY * nX, nE);
+    vec bratios1(nY * nX);
+    int count = 0;
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            bratios1[count] = bratios[y][x];
+            for(int e = 0; e < nE; e++) {
+                background1[count][e] = background[y][x][e];
+            }
+            count++;
+        }
+    }
+    vec2 output1 = gridpp::init_vec2(nY * nX, nE); 
+    output1 = optimal_interpolation_ensi_multi_ebesc(bpoints, bratios1, background1, points, pobs, pratios, pbackground, structure, max_points, allow_extrapolation);
+    vec3 output = gridpp::init_vec3(nY, nX, nE);
+    count = 0;
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            for(int e = 0; e < nE; e++) {
+                output[y][x][e] = output1[count][e];
+            }
+            count++;
+        }
+    }
+    return output;
+} // end optimal_interpolation_ensi_multi_ebesc
+
+// use the ensemble mean (utem)
+vec3 gridpp::optimal_interpolation_ensi_multi_utem(const gridpp::Grid& bgrid,
+        const vec2& bratios,
+        const vec3& background, 
+        const vec3& background_corr, 
+        const gridpp::Points& points,
+        const vec& pobs,
+        const vec& pratios,
+        const vec2& pbackground, 
+        const vec2& pbackground_corr,
+        const gridpp::StructureFunction& structure,
+        int max_points,
+        bool allow_extrapolation) {
+    double s_time = gridpp::clock();
+
+    // Check input data
+    if(max_points < 0)
+        throw std::invalid_argument("max_points must be >= 0");
+
+    int nS = points.size();
+    if(nS == 0)
+        return background;
+
+    int nY = bgrid.size()[0];
+    int nX = bgrid.size()[1];
+
+    if(nY == 0 || nX == 0) {
+        std::stringstream ss;
+        ss << "Grid size (" << nY << "," << nX << ") cannot be zero";
+        throw std::invalid_argument(ss.str());
+    }
+
+    if(bgrid.get_coordinate_type() != points.get_coordinate_type()) {
+        throw std::invalid_argument("Both background grid and observations points must be of same coordinate type (lat/lon or x/y)");
+    }
+    // Check ensembles have consistent sizes
+    int nE = background[0][0].size();
+    if(background.size() != nY || background[0].size() != nX) {
+        std::stringstream ss;
+        ss << "Input background field (" << background.size() << "," << background[0].size() << "," << background[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        throw std::invalid_argument(ss.str());
+    }
+    if(background_corr.size() != nY || background_corr[0].size() != nX || background_corr[0][0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input background_corr field (" << background_corr.size() << "," << background_corr[0].size() << "," << background_corr[0][0].size() << ") is not the same size as the grid (" << nY << "," << nX << "," << nE << ")";
+        throw std::invalid_argument(ss.str());
+    }
+    if(bratios.size() != nY || bratios[0].size() != nX) {
+        std::stringstream ss;
+        ss << "Input bratios field (" << bratios.size() << "," << bratios[0].size() << ") is not the same size as the grid (" << nY << "," << nX << ")";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pbackground.size() != nS || pbackground[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input pbackground field at observation location (" << pbackground.size() << "," << pbackground[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pbackground_corr.size() != nS || pbackground_corr[0].size() != nE) {
+        std::stringstream ss;
+        ss << "Input pbackground_corr field at observation location (" << pbackground_corr.size() << "," << pbackground_corr[0].size() << ") and points (" << nS << "," << nE << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pobs.size() != nS) {
+        std::stringstream ss;
+        ss << "Observations (" << pobs.size() << ") and points (" << nS << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+    if(pratios.size() != nS) {
+        std::stringstream ss;
+        ss << "Ratios (" << pratios.size() << ") and points (" << nS << ") size mismatch";
+        throw std::invalid_argument(ss.str());
+    }
+ 
+    gridpp::Points bpoints = bgrid.to_points();
+    vec2 background1 = gridpp::init_vec2(nY * nX, nE);
+    vec2 background_corr1 = gridpp::init_vec2(nY * nX, nE);
+    vec bratios1(nY * nX);
+    int count = 0;
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            bratios1[count] = bratios[y][x];
+            for(int e = 0; e < nE; e++) {
+                background1[count][e] = background[y][x][e];
+                background_corr1[count][e] = background_corr[y][x][e];
+            }
+            count++;
+        }
+    }
+    vec2 output1 = gridpp::init_vec2(nY * nX, nE); 
+    output1 = optimal_interpolation_ensi_multi_utem(bpoints, bratios1, background1, background_corr1, points, pobs, pratios, pbackground, pbackground_corr, structure, max_points, allow_extrapolation);
+    vec3 output = gridpp::init_vec3(nY, nX, nE);
+    count = 0;
+    for(int y = 0; y < nY; y++) {
+        for(int x = 0; x < nX; x++) {
+            for(int e = 0; e < nE; e++) {
+                output[y][x][e] = output1[count][e];
+            }
+            count++;
+        }
+    }
+    return output;
+} // end optimal_interpolation_ensi_multi_utem
 
 // ensemble member by ensemble member (ebe)
 vec2 gridpp::optimal_interpolation_ensi_multi_ebe(const gridpp::Points& bpoints,

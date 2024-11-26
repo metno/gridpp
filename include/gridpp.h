@@ -293,23 +293,22 @@ namespace gridpp {
             int max_points,
             bool allow_extrapolation=true);
 
-    /** Optimal interpolation for an ensemble gridded field (alternative version). This is an experimental method.
-      * @param bgrid Grid of background field
+    /**Optimal interpolation for an ensemble gridded field with ensemble-based correlations. The function supports iterative corrections to the analysis. Each ensemble member is adjusted iteratively or "ensemble member by ensemble member" (ebe).
+      * @param bgrid Grid of background field 
       * @param bratios 2D vector (Y, X) of the ratio of background error standard deviation at grid points to that at observation points.
       * @param background 3D vector (Y, X, E) representing the background values at grid points to be updated.
       * @param background_corr 3D vector (Y, X, E) representing the background values used to compute dynamic correlations.
-      * @param obs_points observation points. S = num. observations
-      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E) 
       * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
-      * @param structure Structure function
+      * @param structure Structure function for the localization function
       * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
-      * @param dynamic_correlations Determines whether to use flow-dependent correlations derived from the ensembles. If true, the structure function defines localization functions. If false, the structure function defines static (non-flow-dependent) correlations.
       * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
       * @returns 3D vector of analised values (Y, X, E)
     */
-    vec3 optimal_interpolation_ensi_multi(const Grid& bgrid,
+    vec3 optimal_interpolation_ensi_multi_ebe(const Grid& bgrid,
             const vec2& bratios,
             const vec3& background,
             const vec3& background_corr,
@@ -320,7 +319,58 @@ namespace gridpp {
             const vec2& pbackground_corr,
             const StructureFunction& structure,
             int max_points,
-            bool dynamic_correlations=true, 
+            bool allow_extrapolation=true); 
+
+    /** Optimal interpolation for an ensemble gridded field with static correlations. The function supports iterative corrections to the analysis.
+      * @param bgrid Grid of background field 
+      * @param bratios 2D vector (Y, X) of the ratio of background error standard deviation at grid points to that at observation points.
+      * @param background 3D vector (Y, X, E) representing the background values at grid points to be updated.
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 2D vector of perturbed observations (S, E) 
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param structure Structure function for the correlation function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 3D vector of analised values (Y, X, E)
+    */
+    vec3 optimal_interpolation_ensi_multi_ebesc(const Grid& bgrid,
+            const vec2& bratios,
+            const vec3& background,
+            const Points& obs_points,
+            const vec2& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const StructureFunction& structure,
+            int max_points,
+            bool allow_extrapolation=true); 
+
+    /** Optimal interpolation for an ensemble gridded field with ensemble-based correlations. The function supports iterative corrections to the analysis. First, "use (and adjust) the ensemble mean" (utem), then generate the analysis ensemble.
+      * @param bgrid Grid of background field 
+      * @param bratios 2D vector (Y, X) of the ratio of background error standard deviation at grid points to that at observation points.
+      * @param background 3D vector (Y, X, E) representing the background values at grid points to be updated.
+      * @param background_corr 3D vector (Y, X, E) representing the background values used to compute dynamic correlations.
+      * @param obs_points Observation points (S = num. observations)
+      * @param pobs 1D vector of observations (S)
+      * @param pratios 1D vector (S) of the ratio of observation to background error variance.
+      * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
+      * @param pbackground_corr 2D vector (S, E) representing the background values at observation points used to compute dynamic correlations.
+      * @param structure Structure function for the localization function
+      * @param max_points Maximum number of observations to use inside localization zone; Use 0 to disable
+      * @param allow_extrapolation Allow EnSI to extrapolate increments outside increments at observations
+      * @returns 3D vector of analised values (Y, X, E)
+    */
+    vec3 optimal_interpolation_ensi_multi_utem(const Grid& bgrid,
+            const vec2& bratios,
+            const vec3& background,
+            const vec3& background_corr,
+            const Points& obs_points,
+            const vec& pobs,
+            const vec& pratios,
+            const vec2& pbackground,
+            const vec2& pbackground_corr,
+            const StructureFunction& structure,
+            int max_points,
             bool allow_extrapolation=true); 
 
     /** Optimal interpolation for an ensemble point field with ensemble-based correlations. The function supports iterative corrections to the analysis. Each ensemble member is adjusted iteratively or "ensemble member by ensemble member" (ebe).
@@ -380,7 +430,7 @@ namespace gridpp {
       * @param bratios 1D vector (L) of the ratio of background error standard deviation at grid points to that at observation points.
       * @param background 2D vector (L, E) representing the background values at grid points to be updated. 
       * @param obs_points Observation points (S = num. observations)
-      * @param pobs 2D vector of perturbed observations (S, E)
+      * @param pobs 1D vector of observations (S)
       * @param pratios 1D vector (S) of the ratio of observation to background error variance.
       * @param pbackground 2D vector (S, E) representing the background values at observation points used to compute innovations.
       * @param structure Structure function for the static correlations

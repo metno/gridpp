@@ -110,6 +110,7 @@ vec3 gridpp::optimal_interpolation_ensi(const gridpp::Grid& bgrid,
     }
     return output;
 }
+
 vec2 gridpp::optimal_interpolation_ensi(const gridpp::Points& bpoints,
         const vec2& background,
         const gridpp::Points& points,

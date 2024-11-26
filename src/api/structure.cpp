@@ -42,6 +42,48 @@ float gridpp::StructureFunction::cressman_rho(float dist, float length) const {
         return 0;
     return (length * length - dist * dist) / (length * length + dist * dist);
 }
+/* second order autoregressive function */
+float gridpp::StructureFunction::soar_rho(float dist, float length) const {
+    if(!gridpp::is_valid(length) || length == 0)
+        // Disabled
+        return 1;
+    if(!gridpp::is_valid(dist))
+        return 0;
+    float v = dist / length;
+    return (1 + v) * exp(-v);
+}
+/* third order autoregressive function */
+float gridpp::StructureFunction::toar_rho(float dist, float length) const {
+    if(!gridpp::is_valid(length) || length == 0)
+        // Disabled
+        return 1;
+    if(!gridpp::is_valid(dist))
+        return 0;
+    float v = dist / length;
+    return (1 + v + (v * v) / 3) * exp(-v);
+}
+/* powerlaw function */
+float gridpp::StructureFunction::powerlaw_rho(float dist, float length) const {
+    if(!gridpp::is_valid(length) || length == 0)
+        // Disabled
+        return 1;
+    if(!gridpp::is_valid(dist))
+        return 0;
+    float v = dist / length;
+    return 1 / (1 + 0.5 * v * v);
+}
+/* linear function returns correlation between min_corr and 1 */
+float gridpp::StructureFunction::linear_rho(float diff, float min_corr) const {
+    if(!gridpp::is_valid(min_corr) || min_corr < 0)
+        // Disabled
+        return 1;
+    if(!gridpp::is_valid(diff))
+        return 0;
+    float absdiff = abs(diff);
+    if(absdiff > 1)
+        absdiff = 1;
+    return (1 - (1-min_corr) * absdiff);
+}
 float gridpp::StructureFunction::localization_distance(const Point& p) const {
     return m_localization_distance;
 }
@@ -95,7 +137,9 @@ gridpp::StructureFunctionPtr gridpp::MultipleStructure::clone() const {
     return std::make_shared<gridpp::MultipleStructure>(*m_structure_h, *m_structure_v, *m_structure_w);
 }
 
+//=============================================================================
 /** Barnes */
+//=============================================================================
 gridpp::BarnesStructure::BarnesStructure(float h, float v, float w, float hmax) :
     m_is_spatial(false) {
     if(gridpp::is_valid(hmax) && hmax < 0)
@@ -237,7 +281,9 @@ float gridpp::BarnesStructure::localization_distance(float h) const {
     return sqrt(-2*log(m_min_rho)) * h;
 }
 
+//=============================================================================
 /** Cressman */
+//=============================================================================
 gridpp::CressmanStructure::CressmanStructure(float h, float v, float w) :
     gridpp::StructureFunction(h) {
     if(!gridpp::is_valid(v) || v < 0)
@@ -264,6 +310,601 @@ float gridpp::CressmanStructure::corr(const Point& p1, const Point& p2) const {
 gridpp::StructureFunctionPtr gridpp::CressmanStructure::clone() const {
     return std::make_shared<gridpp::CressmanStructure>(mH, mV, mW);
 }
+
+//=============================================================================
+/** SOAR */
+//=============================================================================
+gridpp::SoarStructure::SoarStructure(float h, float v, float w, float hmax) :
+    m_is_spatial(false) {
+    if(gridpp::is_valid(hmax) && hmax < 0)
+        throw std::invalid_argument("hmax must be >= 0");
+    if(!gridpp::is_valid(h) || h < 0)
+        throw std::invalid_argument("h must be >= 0");
+    if(!gridpp::is_valid(v) || v < 0)
+        throw std::invalid_argument("v must be >= 0");
+    if(!gridpp::is_valid(w) || w < 0)
+        throw std::invalid_argument("w must be >= 0");
+
+    if(gridpp::is_valid(hmax))
+        m_min_rho = (1 + hmax / h) * exp(-hmax / h);
+    else
+        m_min_rho = default_min_rho;
+    vec2 h2(1);
+    h2[0].push_back(h);
+    vec2 v2(1);
+    v2[0].push_back(v);
+    vec2 w2(1);
+    w2[0].push_back(w);
+    mH = h2;
+    mV = v2;
+    mW = w2;
+}
+gridpp::SoarStructure::SoarStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho) :
+        m_grid(grid),
+        m_min_rho(min_rho),
+        mH(h),
+        mV(v),
+        mW(w) {
+    if(mH.size() == 1 && mH[0].size() == 1 && mV.size() == 1 && mV[0].size() == 1 && mW.size() == 1 && mW[0].size() == 1) {
+        m_is_spatial = false;
+    }
+    else {
+        m_is_spatial = true;
+        if(grid.size()[0] != h.size() || grid.size()[0] != v.size() || grid.size()[0] != w.size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+        if(grid.size()[1] != h[0].size() || grid.size()[1] != v[0].size() || grid.size()[1] != w[0].size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+    }
+}
+float gridpp::SoarStructure::corr(const Point& p1, const Point& p2) const {
+    float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
+    float rho = 1;
+    if(m_is_spatial) {
+        // This part is slower because of the nearest neighbour lookup
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+
+        // Use h to compute this, so we don't have to get nearest neighbour twice
+        float loc_dist = localization_distance(h);
+        if(hdist > loc_dist)
+            return 0;
+
+        rho = gridpp::StructureFunction::soar_rho(hdist, h);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::soar_rho(vdist, v);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::soar_rho(lafdist, w);
+        }
+    }
+    else {
+        if(hdist > localization_distance(p1))
+            return 0;
+
+        rho = gridpp::StructureFunction::soar_rho(hdist, mH[0][0]);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::soar_rho(vdist, mV[0][0]);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::soar_rho(lafdist, mW[0][0]);
+        }
+    }
+    return rho;
+}
+vec gridpp::SoarStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+        float loc_dist = localization_distance(h);
+        for(int i = 0; i < p2.size(); i++) {
+            float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+            float rho = 0;
+            if(hdist <= loc_dist) {
+                rho = gridpp::StructureFunction::soar_rho(hdist, h);
+                if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2[i].elev)) {
+                    float vdist = p1.elev - p2[i].elev;
+                    rho *= gridpp::StructureFunction::soar_rho(vdist, v);
+                }
+                if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2[i].laf)) {
+                    float lafdist = p1.laf - p2[i].laf;
+                    rho *= gridpp::StructureFunction::soar_rho(lafdist, w);
+                }
+            }
+            output[i] = rho;
+        }
+    }
+    else {
+        for(int i = 0; i < p2.size(); i++) {
+            output[i] = corr(p1, p2[i]);
+        }
+    }
+    return output;
+}
+gridpp::StructureFunctionPtr gridpp::SoarStructure::clone() const {
+    return std::make_shared<gridpp::SoarStructure>(m_grid, mH, mV, mW, m_min_rho);
+}
+float gridpp::SoarStructure::localization_distance(const Point& p) const {
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
+        return localization_distance(mH[I[0]][I[1]]);
+    }
+    else {
+        return localization_distance(mH[0][0]);
+    }
+}
+float gridpp::SoarStructure::localization_distance(float h) const {
+// To find an approximate analytical solution for the inverse of the function y=(1+x)exp(-x) when y is between 0 and 1, we can follow a similar approach used in approximations for transcendental functions. 
+// valid when m_min_rho is close to 0, for instance for m_min_rho=0.0013 we get 8.53
+    float log_min_rho = log(m_min_rho);
+    return ( -log_min_rho + log( -log_min_rho)) * h;
+}
+//-----------------------------------------------------------------------------
+/** End SOAR */
+//-----------------------------------------------------------------------------
+
+//=============================================================================
+/** TOAR */
+//=============================================================================
+gridpp::ToarStructure::ToarStructure(float h, float v, float w, float hmax) :
+    m_is_spatial(false) {
+    if(gridpp::is_valid(hmax) && hmax < 0)
+        throw std::invalid_argument("hmax must be >= 0");
+    if(!gridpp::is_valid(h) || h < 0)
+        throw std::invalid_argument("h must be >= 0");
+    if(!gridpp::is_valid(v) || v < 0)
+        throw std::invalid_argument("v must be >= 0");
+    if(!gridpp::is_valid(w) || w < 0)
+        throw std::invalid_argument("w must be >= 0");
+
+    if(gridpp::is_valid(hmax))
+        m_min_rho = (1 + hmax / h + pow(hmax / h, 2)/3) * exp(-hmax / h);
+    else
+        m_min_rho = default_min_rho;
+    vec2 h2(1);
+    h2[0].push_back(h);
+    vec2 v2(1);
+    v2[0].push_back(v);
+    vec2 w2(1);
+    w2[0].push_back(w);
+    mH = h2;
+    mV = v2;
+    mW = w2;
+}
+gridpp::ToarStructure::ToarStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho) :
+        m_grid(grid),
+        m_min_rho(min_rho),
+        mH(h),
+        mV(v),
+        mW(w) {
+    if(mH.size() == 1 && mH[0].size() == 1 && mV.size() == 1 && mV[0].size() == 1 && mW.size() == 1 && mW[0].size() == 1) {
+        m_is_spatial = false;
+    }
+    else {
+        m_is_spatial = true;
+        if(grid.size()[0] != h.size() || grid.size()[0] != v.size() || grid.size()[0] != w.size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+        if(grid.size()[1] != h[0].size() || grid.size()[1] != v[0].size() || grid.size()[1] != w[0].size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+    }
+}
+float gridpp::ToarStructure::corr(const Point& p1, const Point& p2) const {
+    float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
+    float rho = 1;
+    if(m_is_spatial) {
+        // This part is slower because of the nearest neighbour lookup
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+
+        // Use h to compute this, so we don't have to get nearest neighbour twice
+        float loc_dist = localization_distance(h);
+        if(hdist > loc_dist)
+            return 0;
+
+        rho = gridpp::StructureFunction::toar_rho(hdist, h);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::toar_rho(vdist, v);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::toar_rho(lafdist, w);
+        }
+    }
+    else {
+        if(hdist > localization_distance(p1))
+            return 0;
+
+        rho = gridpp::StructureFunction::toar_rho(hdist, mH[0][0]);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::toar_rho(vdist, mV[0][0]);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::toar_rho(lafdist, mW[0][0]);
+        }
+    }
+    return rho;
+}
+vec gridpp::ToarStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+        float loc_dist = localization_distance(h);
+        for(int i = 0; i < p2.size(); i++) {
+            float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+            float rho = 0;
+            if(hdist <= loc_dist) {
+                rho = gridpp::StructureFunction::toar_rho(hdist, h);
+                if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2[i].elev)) {
+                    float vdist = p1.elev - p2[i].elev;
+                    rho *= gridpp::StructureFunction::toar_rho(vdist, v);
+                }
+                if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2[i].laf)) {
+                    float lafdist = p1.laf - p2[i].laf;
+                    rho *= gridpp::StructureFunction::toar_rho(lafdist, w);
+                }
+            }
+            output[i] = rho;
+        }
+    }
+    else {
+        for(int i = 0; i < p2.size(); i++) {
+            output[i] = corr(p1, p2[i]);
+        }
+    }
+    return output;
+}
+gridpp::StructureFunctionPtr gridpp::ToarStructure::clone() const {
+    return std::make_shared<gridpp::ToarStructure>(m_grid, mH, mV, mW, m_min_rho);
+}
+float gridpp::ToarStructure::localization_distance(const Point& p) const {
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
+        return localization_distance(mH[I[0]][I[1]]);
+    }
+    else {
+        return localization_distance(mH[0][0]);
+    }
+}
+float gridpp::ToarStructure::localization_distance(float h) const {
+// To find an approximate analytical solution for the inverse of the function y=(1+x+1/3*x^2)exp(-x) when y is between 0 and 1, we can follow a similar approach used in approximations for transcendental functions. 
+// valid when m_min_rho is close to 0, for instance for m_min_rho=0.0013 we get 9.487
+    float log_min_rho = log(m_min_rho);
+    float log_log_min_rho = log( -log(m_min_rho));
+    return ( -log_min_rho + log_log_min_rho + 0.5 * log_log_min_rho ) * h;
+}
+//-----------------------------------------------------------------------------
+/** End TOAR */
+//-----------------------------------------------------------------------------
+
+//=============================================================================
+/** Powerlaw */
+//=============================================================================
+gridpp::PowerlawStructure::PowerlawStructure(float h, float v, float w, float hmax) :
+    m_is_spatial(false) {
+    if(gridpp::is_valid(hmax) && hmax < 0)
+        throw std::invalid_argument("hmax must be >= 0");
+    if(!gridpp::is_valid(h) || h < 0)
+        throw std::invalid_argument("h must be >= 0");
+    if(!gridpp::is_valid(v) || v < 0)
+        throw std::invalid_argument("v must be >= 0");
+    if(!gridpp::is_valid(w) || w < 0)
+        throw std::invalid_argument("w must be >= 0");
+
+    if(gridpp::is_valid(hmax))
+        m_min_rho = 1 / (1 + 0.5 * pow(hmax / h, 2));
+    else
+        m_min_rho = default_min_rho;
+    vec2 h2(1);
+    h2[0].push_back(h);
+    vec2 v2(1);
+    v2[0].push_back(v);
+    vec2 w2(1);
+    w2[0].push_back(w);
+    mH = h2;
+    mV = v2;
+    mW = w2;
+}
+gridpp::PowerlawStructure::PowerlawStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho) :
+        m_grid(grid),
+        m_min_rho(min_rho),
+        mH(h),
+        mV(v),
+        mW(w) {
+    if(mH.size() == 1 && mH[0].size() == 1 && mV.size() == 1 && mV[0].size() == 1 && mW.size() == 1 && mW[0].size() == 1) {
+        m_is_spatial = false;
+    }
+    else {
+        m_is_spatial = true;
+        if(grid.size()[0] != h.size() || grid.size()[0] != v.size() || grid.size()[0] != w.size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+        if(grid.size()[1] != h[0].size() || grid.size()[1] != v[0].size() || grid.size()[1] != w[0].size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+    }
+}
+float gridpp::PowerlawStructure::corr(const Point& p1, const Point& p2) const {
+    float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
+    float rho = 1;
+    if(m_is_spatial) {
+        // This part is slower because of the nearest neighbour lookup
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+
+        // Use h to compute this, so we don't have to get nearest neighbour twice
+        float loc_dist = localization_distance(h);
+        if(hdist > loc_dist)
+            return 0;
+
+        rho = gridpp::StructureFunction::powerlaw_rho(hdist, h);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::powerlaw_rho(vdist, v);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::powerlaw_rho(lafdist, w);
+        }
+    }
+    else {
+        if(hdist > localization_distance(p1))
+            return 0;
+
+        rho = gridpp::StructureFunction::powerlaw_rho(hdist, mH[0][0]);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::powerlaw_rho(vdist, mV[0][0]);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::powerlaw_rho(lafdist, mW[0][0]);
+        }
+    }
+    return rho;
+}
+vec gridpp::PowerlawStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+        float loc_dist = localization_distance(h);
+        for(int i = 0; i < p2.size(); i++) {
+            float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+            float rho = 0;
+            if(hdist <= loc_dist) {
+                rho = gridpp::StructureFunction::powerlaw_rho(hdist, h);
+                if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2[i].elev)) {
+                    float vdist = p1.elev - p2[i].elev;
+                    rho *= gridpp::StructureFunction::powerlaw_rho(vdist, v);
+                }
+                if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2[i].laf)) {
+                    float lafdist = p1.laf - p2[i].laf;
+                    rho *= gridpp::StructureFunction::powerlaw_rho(lafdist, w);
+                }
+            }
+            output[i] = rho;
+        }
+    }
+    else {
+        for(int i = 0; i < p2.size(); i++) {
+            output[i] = corr(p1, p2[i]);
+        }
+    }
+    return output;
+}
+gridpp::StructureFunctionPtr gridpp::PowerlawStructure::clone() const {
+    return std::make_shared<gridpp::PowerlawStructure>(m_grid, mH, mV, mW, m_min_rho);
+}
+float gridpp::PowerlawStructure::localization_distance(const Point& p) const {
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
+        return localization_distance(mH[I[0]][I[1]]);
+    }
+    else {
+        return localization_distance(mH[0][0]);
+    }
+}
+float gridpp::PowerlawStructure::localization_distance(float h) const {
+    return sqrt( 2 * (1-m_min_rho) / m_min_rho) * h;
+}
+//-----------------------------------------------------------------------------
+/** End Powerlaw */
+//-----------------------------------------------------------------------------
+
+//=============================================================================
+/** Linear */
+//=============================================================================
+gridpp::LinearStructure::LinearStructure(float h, float v, float w, float hmax) :
+    m_is_spatial(false) {
+    if(gridpp::is_valid(hmax) && hmax < 0)
+        throw std::invalid_argument("hmax must be >= 0");
+    if(!gridpp::is_valid(h) || h < 0)
+        throw std::invalid_argument("h must be >= 0");
+    if(!gridpp::is_valid(v) || v < 0)
+        throw std::invalid_argument("v must be >= 0");
+    if(!gridpp::is_valid(w) || w < 0)
+        throw std::invalid_argument("w must be >= 0");
+
+    if(gridpp::is_valid(hmax))
+        m_min_rho = default_min_rho;
+    else
+        m_min_rho = default_min_rho;
+    vec2 h2(1);
+    h2[0].push_back(h);
+    vec2 v2(1);
+    v2[0].push_back(v);
+    vec2 w2(1);
+    w2[0].push_back(w);
+    mH = h2;
+    mV = v2;
+    mW = w2;
+}
+gridpp::LinearStructure::LinearStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho) :
+        m_grid(grid),
+        m_min_rho(min_rho),
+        mH(h),
+        mV(v),
+        mW(w) {
+    if(mH.size() == 1 && mH[0].size() == 1 && mV.size() == 1 && mV[0].size() == 1 && mW.size() == 1 && mW[0].size() == 1) {
+        m_is_spatial = false;
+    }
+    else {
+        m_is_spatial = true;
+        if(grid.size()[0] != h.size() || grid.size()[0] != v.size() || grid.size()[0] != w.size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+        if(grid.size()[1] != h[0].size() || grid.size()[1] != v[0].size() || grid.size()[1] != w[0].size())
+            throw std::invalid_argument("Grid size not the same as scale size");
+    }
+}
+float gridpp::LinearStructure::corr(const Point& p1, const Point& p2) const {
+    float hdist = gridpp::KDTree::calc_straight_distance(p1, p2);
+    float rho = 1;
+    if(m_is_spatial) {
+        // This part is slower because of the nearest neighbour lookup
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+
+        // Use h to compute this, so we don't have to get nearest neighbour twice
+        float loc_dist = localization_distance(h);
+        if(hdist > loc_dist)
+            return 0;
+
+        rho = gridpp::StructureFunction::linear_rho(hdist, h);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::linear_rho(vdist, v);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::linear_rho(lafdist, w);
+        }
+    }
+    else {
+        if(hdist > localization_distance(p1))
+            return 0;
+
+        rho = gridpp::StructureFunction::linear_rho(hdist, mH[0][0]);
+        if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2.elev)) {
+            float vdist = p1.elev - p2.elev;
+            rho *= gridpp::StructureFunction::linear_rho(vdist, mV[0][0]);
+        }
+        if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2.laf)) {
+            float lafdist = p1.laf - p2.laf;
+            rho *= gridpp::StructureFunction::linear_rho(lafdist, mW[0][0]);
+        }
+    }
+    return rho;
+}
+vec gridpp::LinearStructure::corr(const Point& p1, const std::vector<Point>& p2) const {
+    vec output(p2.size());
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p1.lat, p1.lon);
+        if(I[0] > mH.size())
+            throw std::runtime_error("Invalid I[0]");
+        if(I[1] > mH[I[0]].size())
+            throw std::runtime_error("Invalid I[1]");
+
+        float h = mH[I[0]][I[1]];
+        float v = mV[I[0]][I[1]];
+        float w = mW[I[0]][I[1]];
+        float loc_dist = localization_distance(h);
+        for(int i = 0; i < p2.size(); i++) {
+            float hdist = gridpp::KDTree::calc_straight_distance(p1, p2[i]);
+            float rho = 0;
+            if(hdist <= loc_dist) {
+                rho = gridpp::StructureFunction::linear_rho(hdist, h);
+                if(gridpp::is_valid(p1.elev) && gridpp::is_valid(p2[i].elev)) {
+                    float vdist = p1.elev - p2[i].elev;
+                    rho *= gridpp::StructureFunction::linear_rho(vdist, v);
+                }
+                if(gridpp::is_valid(p1.laf) && gridpp::is_valid(p2[i].laf)) {
+                    float lafdist = p1.laf - p2[i].laf;
+                    rho *= gridpp::StructureFunction::linear_rho(lafdist, w);
+                }
+            }
+            output[i] = rho;
+        }
+    }
+    else {
+        for(int i = 0; i < p2.size(); i++) {
+            output[i] = corr(p1, p2[i]);
+        }
+    }
+    return output;
+}
+gridpp::StructureFunctionPtr gridpp::LinearStructure::clone() const {
+    return std::make_shared<gridpp::LinearStructure>(m_grid, mH, mV, mW, m_min_rho);
+}
+float gridpp::LinearStructure::localization_distance(const Point& p) const {
+    if(m_is_spatial) {
+        ivec I = m_grid.get_nearest_neighbour(p.lat, p.lon);
+        return localization_distance(mH[I[0]][I[1]]);
+    }
+    else {
+        return localization_distance(mH[0][0]);
+    }
+}
+float gridpp::LinearStructure::localization_distance(float h) const {
+    return 0;
+}
+//-----------------------------------------------------------------------------
+/** End Linear */
+//-----------------------------------------------------------------------------
 
 /** CrossValidation */
 gridpp::CrossValidation::CrossValidation(StructureFunction& structure, float dist) :

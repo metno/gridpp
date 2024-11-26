@@ -6,6 +6,11 @@ using namespace gridpp;
 vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values, float radius, int min_num, gridpp::Statistic statistic) {
     if(!gridpp::compatible_size(points, values))
         throw std::invalid_argument("Points size is not the same as values");
+    if(!gridpp::is_valid(radius) || radius < 0)
+        throw std::invalid_argument("radius must be >= 0");
+    if(!gridpp::is_valid(min_num) || min_num < 0)
+        throw std::invalid_argument("min_num must be >= 0");
+
     int Y = grid.size()[0];
     int X = grid.size()[1];
     vec2 lats = grid.get_lats();
@@ -31,6 +36,11 @@ vec2 gridpp::gridding(const Grid& grid, const Points& points, const vec& values,
 vec gridpp::gridding(const Points& opoints, const Points& ipoints, const vec& values, float radius, int min_num, gridpp::Statistic statistic) {
     if(!gridpp::compatible_size(ipoints, values))
         throw std::invalid_argument("Points size is not the same as values");
+    if(!gridpp::is_valid(radius) || radius < 0)
+        throw std::invalid_argument("radius must be >= 0");
+    if(!gridpp::is_valid(min_num) || min_num < 0)
+        throw std::invalid_argument("min_num must be >= 0");
+
     int N = opoints.size();
     vec lats = opoints.get_lats();
     vec lons = opoints.get_lons();
@@ -53,6 +63,9 @@ vec gridpp::gridding(const Points& opoints, const Points& ipoints, const vec& va
 vec2 gridpp::gridding_nearest(const Grid& grid, const Points& ipoints, const vec& values, int min_num, gridpp::Statistic statistic) {
     if(!gridpp::compatible_size(ipoints, values))
         throw std::invalid_argument("Points size is not the same as values");
+    if(!gridpp::is_valid(min_num) || min_num < 0)
+        throw std::invalid_argument("min_num must be >= 0");
+
     int Y = grid.size()[0];
     int X = grid.size()[1];
     vec lats = ipoints.get_lats();
@@ -88,6 +101,9 @@ vec2 gridpp::gridding_nearest(const Grid& grid, const Points& ipoints, const vec
 vec gridpp::gridding_nearest(const Points& opoints, const Points& ipoints, const vec& values, int min_num, gridpp::Statistic statistic) {
     if(!gridpp::compatible_size(ipoints, values))
         throw std::invalid_argument("Points size is not the same as values");
+    if(!gridpp::is_valid(min_num) || min_num < 0)
+        throw std::invalid_argument("min_num must be >= 0");
+
     int N = opoints.size();
     vec lats = ipoints.get_lats();
     vec lons = ipoints.get_lons();

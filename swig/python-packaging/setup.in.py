@@ -34,6 +34,9 @@ args = []
 if sys.platform != "darwin":
     args = "-fopenmp -fopenmp".split()
 
+print("Numpy version", np.__version__)
+print("Numpy include path", np.get_include())
+
 # NOTE: We need c++11 because manylinux2014 has gcc 4.8, which preceedes c++14
 module = Extension('_gridpp',
         sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['gridppPYTHON_wrap.cxx'],

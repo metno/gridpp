@@ -56,7 +56,7 @@ jobs:
           # PyPy compilation on MACOS doesn't work, possibly since there is no available numpy release for this
           # Armadillo isn't available for i687 on Centos 7, making compilation more complicated
           # # Musllinux doesn't use yum as its package manager
-          CIBW_SKIP: pp*-macosx* *i686* *musllinux* *p36* *p37* *p38*
+          CIBW_SKIP: pp*-macosx* *i686* *musllinux* *p36* *p37* *p38* pp*
           CIBW_BEFORE_ALL_LINUX: |
               yum install -y lapack-devel armadillo-devel
               curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz

@@ -5,11 +5,15 @@
 #include <cmath>
 #include <math.h>
 #include <assert.h>
-#include <execinfo.h>
 #include <signal.h>
 #include <iomanip>
 #include <cstdio>
 #include <exception>
+
+#ifdef DEBUG
+// This is not portable (only available on GNU/Linux
+#include <execinfo.h>
+#endif
 
 using namespace gridpp;
 

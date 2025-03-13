@@ -11,7 +11,7 @@ on:
 jobs:
   setup:
     name: Build SWIG wrappers
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3

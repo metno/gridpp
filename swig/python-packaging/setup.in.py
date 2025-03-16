@@ -41,9 +41,9 @@ print("Numpy include path", np.get_include())
 module = Extension('_gridpp',
         sources=glob.glob('src/api/*.cpp') + glob.glob('src/api/*.c') + ['gridppPYTHON_wrap.cxx'],
         libraries=["armadillo"],
-        extra_compile_args="-O3 -fPIC -std=c++11".split() + args,
-        extra_link_args="-O3 -fPIC -std=c++11".split() + args,
-        library_dirs=["/usr/lib64", "/usr/local/lib", "/usr/local/opt/armadillo/lib"],
+        extra_compile_args="-O3 -fPIC".split() + args,
+        extra_link_args="-O3 -fPIC".split() + args,
+        library_dirs=["/usr/lib64", "/usr/local/lib", "/usr/local/opt/armadillo/lib", "/usr/lib/"],
         include_dirs=['./include', np.get_include(), '/usr/local/opt/armadillo/include',  "/usr/include", "/usr/local/include"]
 )
 

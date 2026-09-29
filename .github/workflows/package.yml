@@ -3,8 +3,8 @@ name: Packaging
 # on: [push]
 on:
   push:
-    tags:
-      - '*'
+    # tags:
+    #   - '*'
     branches:
       - package
 
@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         # os: [ubuntu-20.04, windows-2019, macos-11]
-        os: [ubuntu-20.04]
+        os: [ubuntu-24.04]
 
     steps:
       - uses: actions/checkout@v3
@@ -44,6 +44,12 @@ jobs:
       - uses: actions/download-artifact@v4.1.7
         with:
           name: my-artifact
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
@@ -57,30 +63,27 @@ jobs:
           # Armadillo isn't available for i687 on Centos 7, making compilation more complicated
           # # Musllinux doesn't use yum as its package manager
           CIBW_SKIP: pp*-macosx* *i686* *musllinux* cp36* cp37* cp38*
+          CIBW_BUILD: cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64 cp314-manylinux_x86_64
           CIBW_BEFORE_ALL_LINUX: |
-              yum install -y lapack-devel armadillo-devel
-              curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz
+              # yum install -y lapack-devel armadillo-devel
+              yum install -y libarmadillo-dev
+              # apk add armadillo-dev
+              curl -L -O https://archives.boost.io/release/1.72.0/source/boost_1_72_0.tar.gz
               tar -xf boost_1_72_0.tar.gz
               cd boost_1_72_0
               cp -r boost /usr/include
           CIBW_BEFORE_ALL_MACOS: |
               # Other than the latest version, Brew only has boost 1.76. Therefore we must install boost from source
               # brew reinstall gcc lapack gsl armadillo
-              brew reinstall lapack armadillo
-              curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz
-              tar -xf boost_1_72_0.tar.gz
-              cd boost_1_72_0
-              cp -r boost /usr/local/include
-              # Link in gcc, otherwise the default Apple compiler will be used, which doesn't support openmp by default
-              # ln -s /usr/local/bin/gcc-13 /usr/local/bin/gcc
-              # ln -s /usr/local/bin/g++-13 /usr/local/bin/g++
-          # CIBW_ENVIRONMENT_MACOS: CC='/usr/local/bin/gcc' LDSHARED='/usr/local/bin/gcc' CXX='/usr/local/bin/g++'
-          CIBW_ENVIRONMENT_MACOS: CFLAGS='-Wno-c++11-narrowing'
+
+              brew reinstall lapack armadillo boost
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=14.0 LDFLAGS='-L/opt/homebrew/lib' CPPFLAGS='-I/opt/homebrew/include -std=c++14 -Wno-c++11-narrowing'
+          CIBW_ENVIRONMENT_LINUX: CPPFLAGS='-std=c++11'
           CIBW_BEFORE_ALL_WINDOWS: choco install -y lapack-devel
           CIBW_TEST_COMMAND: >
               python {project}/tests/check_installation.py
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./wheelhouse/*.whl

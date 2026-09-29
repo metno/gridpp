@@ -1,0 +1,15 @@
+var searchData=
+[
+  ['sea_5flevel_5fpressure_480',['sea_level_pressure',['../namespacegridpp.html#a40c108f21166e34490ab79cfc6ee0d2d',1,'gridpp::sea_level_pressure(const vec &amp;ps, const vec &amp;altitude, const vec &amp;temperature, const vec &amp;rh, const vec &amp;dewpoint)'],['../namespacegridpp.html#a0082d0939646347bd20fab0281b58280',1,'gridpp::sea_level_pressure(float ps, float altitude, float temperature, float rh=gridpp::MV, float dewpoint=gridpp::MV)']]],
+  ['set_5fdebug_5flevel_481',['set_debug_level',['../namespacegridpp.html#a482fd86e9ee31e95a757ee9dd86b30fe',1,'gridpp']]],
+  ['set_5fomp_5fthreads_482',['set_omp_threads',['../namespacegridpp.html#ac0463caa59fb399f307593c1a72b382e',1,'gridpp']]],
+  ['simple_5fgradient_483',['simple_gradient',['../namespacegridpp.html#ae513756d8dd3294a5648879886b243d1',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Points &amp;opoints, const vec3 &amp;ivalues, float elev_gradient, Downscaler downscaler=Nearest)'],['../namespacegridpp.html#a547803687b79c39691e4c6d0152b75de',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Points &amp;opoints, const vec2 &amp;ivalues, float elev_gradient, Downscaler downscaler=Nearest)'],['../namespacegridpp.html#a983ea61ecefaa8fd8dd25e4a4454c352',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Grid &amp;ogrid, const vec3 &amp;ivalues, float elev_gradient, Downscaler downscaler=Nearest)'],['../namespacegridpp.html#a7dd2924fcba550ed9f51a54b087a6ed7',1,'gridpp::simple_gradient(const Grid &amp;igrid, const Grid &amp;ogrid, const vec2 &amp;ivalues, float elev_gradient, Downscaler downscaler=Nearest)']]],
+  ['size_484',['size',['../classgridpp_1_1Points.html#a633dbf0d5045d26543c825a9229e1888',1,'gridpp::Points::size()'],['../classgridpp_1_1Grid.html#ae19c95c99a431ba21d53a4e3eab96084',1,'gridpp::Grid::size()'],['../classgridpp_1_1KDTree.html#a369bbac3d408952ecabb5134c7127880',1,'gridpp::KDTree::size()']]],
+  ['smart_485',['smart',['../namespacegridpp.html#a62c326bb39e31bf6b0d2b93b6f162a09',1,'gridpp']]],
+  ['soar_5frho_486',['soar_rho',['../classgridpp_1_1StructureFunction.html#acd5be1f46849d80453db598bf1702576',1,'gridpp::StructureFunction']]],
+  ['soarstructure_487',['SoarStructure',['../classgridpp_1_1SoarStructure.html#acf519115ecec5e9cef25f3be3472130f',1,'gridpp::SoarStructure::SoarStructure(Grid grid, vec2 h, vec2 v, vec2 w, float min_rho=StructureFunction::default_min_rho)'],['../classgridpp_1_1SoarStructure.html#a492c911d58d2cbd2165d008590b5fb25',1,'gridpp::SoarStructure::SoarStructure(float h, float v=0, float w=0, float hmax=MV)']]],
+  ['startedboxcox_488',['StartedBoxCox',['../classgridpp_1_1StartedBoxCox.html#a21e30354c443f0b38da4c3653985c79a',1,'gridpp::StartedBoxCox']]],
+  ['staticcorr_5fpoints_489',['staticcorr_points',['../namespacegridpp.html#ab844f1aac5d738814132e88969870f99',1,'gridpp']]],
+  ['structurefunction_490',['StructureFunction',['../classgridpp_1_1StructureFunction.html#ab6e435d924c8adb959beb70c15144b8f',1,'gridpp::StructureFunction']]],
+  ['subset_491',['subset',['../classgridpp_1_1Points.html#a55bcf1e9c8e5d7ffefe678131e0a978e',1,'gridpp::Points']]]
+];

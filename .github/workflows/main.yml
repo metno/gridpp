@@ -9,7 +9,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
       - name: dependencies
         run: |
             sudo apt update -qq
-            sudo apt install swig libboost-dev libarmadillo9 libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip lcov
+            sudo apt install -y swig libboost-dev libarmadillo-dev cmake python3-setuptools python3-numpy python3-pip lcov
       - name: configure
         run: mkdir build && cd build && cmake -DBUILD_R=no -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_TESTS=ON ..
       - name: build

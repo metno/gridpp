@@ -32,6 +32,7 @@ class KDTreeTest(unittest.TestCase):
         self.assertEqual(len(I), 2)
         self.assertTrue(0 in I)
         self.assertTrue(1 in I)
+
     def test_pole(self):
         tree = gridpp.KDTree([89, 89, 90], [0, 180, 0])
         I, dist = tree.get_neighbours_with_distance(90, 0, 1000)
@@ -53,9 +54,9 @@ class KDTreeTest(unittest.TestCase):
         self.assertAlmostEqual(dist[1], 0)
 
     def test_rad2deg(self):
-        self.assertAlmostEqual(gridpp.KDTree_rad2deg(1), 180 / 3.14159265, 5)
-        self.assertAlmostEqual(gridpp.KDTree_rad2deg(-1), -180 / 3.14159265, 5)
-        self.assertAlmostEqual(gridpp.KDTree_rad2deg(0), 0, 5)
+        self.assertAlmostEqual(gridpp.KDTree.rad2deg(1), 180 / 3.14159265, 5)
+        self.assertAlmostEqual(gridpp.KDTree.rad2deg(-1), -180 / 3.14159265, 5)
+        self.assertAlmostEqual(gridpp.KDTree.rad2deg(0), 0, 5)
 
     def test_calc_distance(self):
         config = list()
@@ -108,8 +109,8 @@ class KDTreeTest(unittest.TestCase):
     def test_calc_distance_limit(self):
         p0 = gridpp.Point(0, 0)
         p1 = gridpp.Point(0.001, 0.001)
-        self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_distance(0,0,0.001,0.001));
-        self.assertAlmostEqual(157.42953491210938, gridpp.KDTree_calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z));
+        self.assertAlmostEqual(157.42953491210938, gridpp.KDTree.calc_distance(0,0,0.001,0.001));
+        self.assertAlmostEqual(157.42953491210938, gridpp.KDTree.calc_straight_distance(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z));
 
     def test_calc_distance_fast(self):
         config = list()
